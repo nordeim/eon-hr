@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Eon HR — Tailwind CSS 4 theme (CSS-first, no tailwind.config.js)
+   Reference: docs/Tailwind-V4-Validation-Report.md trap log.
+   All five engine traps are pinned here:
+     1. Full hsl() values (bare triplets resolve transparent under @theme inline)
+     2. v3-era hex palette pinned (v4 oklch palette drifts 1-3 sRGB units)
+     3. Gradients: sRGB-linear arbitrary forms where byte-identical output
+        matters (oklab interpolation differs)
+     4. space-y selector rewrite: no explicit margin-top or margin-bottom
+        children inside space-y containers (mobile nav CTA rule)
+     5. --shadow-sm pinned to v3 geometry (v4 shifted the scale one notch)
+   ========================================================================== */
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Palette pinned to v3-era hexes (trap 2) — background matches the
+     reference's measured #F1F7FE */
+  --color-background: #f1f7fe;
+  --color-foreground: hsl(221 39% 11%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(221 39% 11%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(221 39% 11%);
+  --color-primary: #2563eb;
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(210 40% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: #6b7280;
+  --color-accent: hsl(214 95% 93%);
+  --color-accent-foreground: #2563eb;
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: #2563eb;
+  --color-sidebar: hsl(0 0% 100%);
+  --color-sidebar-foreground: hsl(221 39% 11%);
+  --color-sidebar-accent: hsl(214 95% 93%);
+  --color-sidebar-border: hsl(214 32% 91%);
+
+  /* Radii (v3 defaults) */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Shadow scale pinned (trap 5): v4 moved shadow-sm to v3's shadow
+     geometry — pin v3's exact value so byte-identical classes render
+     byte-identical shadows. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for long lists */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+}

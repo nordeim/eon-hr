@@ -1,5 +1,5 @@
-export const DEMO_EMAIL = "demo@orbital.app";
-export const DEMO_PASSWORD = "Demo1234!";
+export const DEMO_EMAIL = "sepnetflix2023@outlook.com";
+export const DEMO_PASSWORD = "$Abcd1234";
 
 /**
  * Session note for spec authors: the main Playwright project starts every
