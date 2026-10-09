@@ -286,3 +286,24 @@ Stage Summary:
 - Parity round 3: 12 gap groups fixed, all DOM-verified; sidebar/badge/chat/login byte-exact
 - Tooling repaired: capture + smoke pipelines work end-to-end for the first time since the scaffold
 - 52 unit + 78 E2E green; ready for commit + push
+
+---
+Task ID: 16 (session 5)
+Agent: main (Super Z)
+Task: Fresh-workspace re-validation, audit, parity round 4 (shell precision + per-page header recipes), docs + push
+
+Work Log:
+- Fresh clone (workspace reset); recreated .env (DATABASE_URL file:../db/custom.db + AUTH_SECRET), install/push/seed; re-validated every gate from scratch: lint 0 errors, tsc, 52/52 unit, build, 78/78 E2E (after playwright chromium install)
+- Audit: secret scan clean; session-4 changes reviewed sound; found doc drift only (CLAUDE.md Inter claim, PAD Inter pipeline, globals.css "five traps")
+- Live dual-browser parity round 4 (default session = ref, --session loc = clone; DOM ground truth, both sides measured): extracted the ref's custom CSS (:root --primary-color #1877f2 / --accent-color #e4e6eb) from live stylesheets
+- Sidebar fixes: leaf links px-3 py-2.5 gap-3 + 16px icons + mb-1 (40px pitch — the ref distinguishes leaf vs group geometry; session 4 had unified them), hover #e4e6eb + opacity-80, group trigger hover bg-blue-50/text-blue-700, sub-list mt-1, brand row px-6 + h2 text-lg/700/slate-900 + text-xs Demo — post-fix probe byte-identical on desktop and in the drawer
+- Mobile chrome: 28×28 toggle (16px icon) + h1 EonHR 16px/700/slate-900 + p Demo text-xs (40px brand block); bottom tabs text-sm font-medium leading-normal with ACTIVE tab text-blue-600 (ref highlight — the "no highlight" pin was stale, E2E updated)
+- PageHeader: six measured layout recipes (raised-48/raised-36/flat36/flat36-sm/flat48/flat-tight), per-page iconClassName (7 module colors; teal-600+violet-600 v3 hexes pinned), badge text corrected to text-sm font-medium text-slate-700 (session-4 had measured the wrapper div), attendance leading-[2] quirk, bare pages lg/md sizes
+- Codemod sweep (apply-header-matrix.mjs) over 26 pages; its settings single-line edge case injected props outside the element — caught via live header-map probe, repaired, pinned by unit matrix
+- TDD: tests/unit/recipes.test.ts RED-first (38 specs) then GREEN; two stale E2E pins updated to fresh measurements
+- Gates: lint 0 errors, tsc, 90/90 unit, build, 78/78 E2E; 22 screenshots refreshed; DB pristine after capture
+- Docs updated: CLAUDE.md, AGENTS.md, README, PAD, eon-hr_SKILL.md (session-5 recipe layer), globals.css comment, docs/remediation-plan-session5.md, docs/session_5.md
+
+Stage Summary:
+- Parity round 4 complete: shell + header recipes measured-recipe-faithful, every fixed surface byte-identical live
+- 90 unit + 78 E2E green; ready for commit + push

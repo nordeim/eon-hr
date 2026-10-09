@@ -93,6 +93,8 @@ export default function InterviewAssistantPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI-Powered Interviews"
+        layout="flat36"
+        iconClassName="text-purple-600"
         sectionIcon={<Sparkles aria-hidden="true" />}
         title="Interview Assistant"
         subtitle="AI-powered interview preparation and analysis"

@@ -182,6 +182,8 @@ export default function OffboardingPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Offboarding Management"
+        layout="flat36"
+        iconClassName="text-blue-600"
         sectionIcon={<CircleCheckBig aria-hidden="true" />}
         title="Offboarding Journey"
         subtitle="Manage employee departures smoothly"

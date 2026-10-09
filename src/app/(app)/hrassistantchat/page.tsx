@@ -150,6 +150,8 @@ export default function HrAssistantChatPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI HR Assistant"
+        layout="flat36"
+        iconClassName="text-purple-600"
         sectionIcon={<Target aria-hidden="true" />}
         title="HR Assistant"
         subtitle="Chat with your AI-powered HR assistant"

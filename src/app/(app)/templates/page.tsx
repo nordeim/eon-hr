@@ -181,6 +181,7 @@ export default function TemplatesPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Onboarding Templates"
+        size="lg"
         subtitle="Create reusable onboarding task templates"
         actions={
           <Button onClick={() => setCreateOpen(true)}>

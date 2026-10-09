@@ -176,6 +176,8 @@ export default function LoansPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"
+        layout="raised-36"
+        iconClassName="text-blue-600"
         sectionIcon={<DollarSign aria-hidden="true" />}
         title="Employee Loans"
         subtitle="Manage and track loan requests"

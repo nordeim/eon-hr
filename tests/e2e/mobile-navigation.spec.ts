@@ -94,28 +94,38 @@ test.describe("mobile navigation", () => {
     await expect(panel).toBeHidden();
   });
 
-  test("sidebar nav items use the reference 32px rhythm (session 4)", async ({ page }) => {
-    // Reference (live-measured): top-level nav rows are h-8 (32px) with 20px
-    // icons, font-normal 400 inactive; sub-items h-8 with 12px px/gap.
+  test("sidebar nav items use the reference 32px rhythm (session 5)", async ({ page }) => {
+    // Reference (re-measured session 5): every nav row is h-8 (32px).
+    // LEAF links carry 16px icons (px-3 py-2.5 gap-3, mb-1 → 40px pitch);
+    // GROUP triggers carry 20px icons (p-2 gap-2); both font-normal 400
+    // inactive. docs/remediation-plan-session5.md §S1/S2.
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
     const panel = page.getByRole("dialog", { name: "Navigation menu" });
     await expect(panel).toBeVisible();
     const dashboard = panel.getByRole("link", { name: "Dashboard", exact: true });
     await expect(dashboard).toHaveCSS("height", "32px");
-    await expect(dashboard.locator("svg").first()).toHaveCSS("height", "20px");
+    await expect(dashboard.locator("svg").first()).toHaveCSS("height", "16px");
+    await expect(dashboard).toHaveCSS("padding-left", "12px");
+    await expect(dashboard).toHaveCSS("margin-bottom", "4px");
     const employees = panel.getByRole("button", { name: "Employees", exact: true });
     await expect(employees).toHaveCSS("height", "32px");
+    await expect(employees.locator("svg").first()).toHaveCSS("height", "20px");
     await expect(employees.locator("span").first()).toHaveCSS("font-weight", "400");
     await page.keyboard.press("Escape");
   });
 
-  test("bottom tab bar has no active highlight (reference behavior)", async ({ page }) => {
-    // The reference renders every bottom tab in slate-600 — no active state.
+  test("bottom tab bar highlights the active tab blue (session 5)", async ({ page }) => {
+    // Re-measured session 5: the reference renders the ACTIVE tab in
+    // blue-600 #2563EB (icon + label) — the session-4 "no highlight" note
+    // was stale. Home is active on /dashboard; Staff stays slate-600.
     await page.goto("/dashboard");
     const home = page.getByRole("link", { name: "Home", exact: true });
     const staff = page.getByRole("link", { name: "Staff", exact: true });
-    await expect(home).toHaveCSS("color", "rgb(71, 85, 105)");
+    await expect(home).toHaveCSS("color", "rgb(37, 99, 235)");
     await expect(staff).toHaveCSS("color", "rgb(71, 85, 105)");
+    // labels are text-sm font-medium (reference: 14px/21px, 61px items)
+    await expect(home.locator("span")).toHaveCSS("font-size", "14px");
+    await expect(home.locator("span")).toHaveCSS("font-weight", "500");
   });
 
   test("the desktop sidebar is hidden on mobile; the drawer is hidden on desktop", async ({ page }) => {

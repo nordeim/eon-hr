@@ -123,6 +123,7 @@ export default function AnnouncementsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Company Announcements"
+        size="md"
         subtitle="Stay informed with the latest updates"
         actions={
           canPost ? (

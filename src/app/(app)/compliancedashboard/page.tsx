@@ -200,6 +200,8 @@ export default function ComplianceDashboardPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Compliance Monitor"
+        layout="flat36-sm"
+        iconClassName="text-red-600"
         sectionIcon={<ShieldCheck aria-hidden="true" />}
         title="Compliance Dashboard"
         subtitle="Proactive document expiry tracking & automated notifications"

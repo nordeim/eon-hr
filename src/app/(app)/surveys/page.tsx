@@ -192,6 +192,8 @@ export default function SurveysPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Employee Engagement"
+        layout="flat48"
+        iconClassName="text-teal-600"
         sectionIcon={<MessageSquare aria-hidden="true" />}
         title="Surveys"
         subtitle="Create surveys and gather employee feedback"

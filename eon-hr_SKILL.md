@@ -201,7 +201,21 @@ on Radix parts); no bespoke keyframes.
 `bg-gradient-to-b from-[#3856E9] to-[#444DE6]` (pixel-measured endpoints) with
 white 24px stroke-2 `Briefcase` lucide icon, v3 shadow-lg — rendered in CSS in
 `SidebarHeader` (`src/components/layout/sidebar-nav.tsx`), no image asset. The
-login page uses the circular self-hosted `public/eon-logo.png`.
+login page uses the circular self-hosted `public/eon-logo.png`. Sidebar brand
+row is px-6 with h2 text-lg/700/slate-900 + text-xs "Demo" (session 5).
+
+**Sidebar nav geometry (session 5):** LEAF links = h-8 px-3 py-2.5 gap-3 with
+16px icons and mb-1 (40px list pitch, hover #e4e6eb = the reference
+:root --accent-color, plus opacity-80); GROUP triggers = h-8 p-2 gap-2 with
+20px icons, hover bg-blue-50/text-blue-700, mb-1; sub-list mt-1 (4px gap
+below the trigger); sub-items h-8 px-3 py-2 gap-3 with 16px icons. Active
+leaf = bg-primary #1877F2 + text-white + font-medium + shadow-sm.
+
+**Mobile chrome (session 5):** top bar = 73px (px-6 py-4) with a 28×28
+toggle (16px PanelLeft) + h1 "EonHR" text-base/700/slate-900 over a
+text-xs text-slate-500 "Demo" (40px brand block, items-center). Bottom
+tabs = text-sm font-medium leading-normal labels (61px items) with the
+ACTIVE tab text-blue-600; drawer unchanged (288px, no X, auto-close).
 
 **Primary CTA recipe (session 4):** Button default variant =
 bg-[linear-gradient(to_right,#2563EB,#4F46E5)] (hover #1D4ED8 -> #4338CA),
@@ -209,10 +223,18 @@ rounded-md, text-primary-foreground (#FAFAFA), v3 shadow; icons at CTA call
 sites carry mr-2 on top of the button gap-2 (reference quirk: 16px effective
 icon-to-text gap).
 
-**Section badges (session 4):** module pages render the section as a white
-pill badge above the h1 — rounded-full bg-white px-4 py-2 shadow-sm with a
-16px blue-600 module icon + 16px/400 #0A0A0A text, mb-4 mt-8 (badge y=64,
-h1 y=116).
+**Section badges (session 4, re-measured session 5):** module pages render
+the section as a white pill badge above the h1 — rounded-full bg-white px-4
+py-2 shadow-sm with a 16px module icon (PER-MODULE color, not always blue)
++ text-sm font-medium text-slate-700 (14px/500 — the session-4 "16px/400
+#0A0A0A" read the wrapper div, not the text span). Badge margin and h1 size
+vary by page: see the six PageHeader `layout` recipes (session 5,
+`docs/remediation-plan-session5.md` §3) — raised-48 (mt-8, y=64/116/48px),
+raised-36, flat36 (y=32/84/36px), flat36-sm, flat48, flat-tight (y=32/80/36
++ 16px sub). Icon map: blue taskmanager/loans/leavemanagement/settings/etc,
+green payroll, purple expenses/training/communications, indigo
+recruitment/hrletters/evaluations, red compliancedashboard, teal
+surveys/organogram, violet shiftcalendar.
 
 **Token regression pin:** `tests/unit/tokens.test.ts` reads `globals.css` and
 asserts `--primary: #1877F2`, the slate-500 muted value, the pinned v3

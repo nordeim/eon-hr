@@ -174,6 +174,9 @@ export default function StaffAttendancePage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Attendance Management"
+        layout="flat48"
+        iconClassName="text-blue-600"
+        titleClassName="leading-[2]"
         sectionIcon={<Calendar aria-hidden="true" />}
         title="Staff Attendance"
         subtitle="Track and manage employee attendance records"

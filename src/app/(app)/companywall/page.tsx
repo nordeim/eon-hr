@@ -145,6 +145,8 @@ export default function CompanyWallPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Company Wall"
+        layout="flat48"
+        iconClassName="text-blue-600"
         sectionIcon={<House aria-hidden="true" />}
         title="Company Updates"
         subtitle="Stay connected with your team"

@@ -172,7 +172,7 @@ eon-hr/
 ├── db/                          ← SQLite files (gitignored); db-path contract target
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx           ← root layout: Inter font + ToastProvider
+│   │   ├── layout.tsx           ← root layout: ToastProvider (no webfont)
 │   │   ├── page.tsx             ← auth-aware root redirect
 │   │   ├── login/page.tsx       ← social buttons + email/password (Suspense-wrapped for useSearchParams)
 │   │   ├── (app)/
@@ -310,14 +310,16 @@ erDiagram
 
 | Role | Spec |
 |---|---|
-| Page title (h1) | Inter 700, 24–32px, `tracking-tight`, `#0f1729`-ish foreground |
+| Page title (h1) | System stack 700, 24–48px per recipe, `text-slate-900` (#0f172a) |
 | Section kicker | 14px medium, `--color-muted-foreground` |
 | Card title | 16px semibold |
 | Body / table cells | 14px, 1.5 line height |
 | Empty state | 14px, muted at 70% |
-| Bottom tabs | 11px medium + 20px icon |
+| Bottom tabs | 14px medium (leading 21px) + 20px icon; active tab blue-600 |
 
-Font loading: `next/font` Inter with `display: swap`, exposed as `--font-inter` and composed into `--font-sans`.
+Font loading: none — the reference self-hosts no webfont. `--font-sans` in
+`@theme` pins Tailwind v4's default `ui-sans-serif` stack verbatim (session-4
+live measurement; Inter drifted text metrics).
 
 ### 5.2 Color Tokens (pinned, measured)
 

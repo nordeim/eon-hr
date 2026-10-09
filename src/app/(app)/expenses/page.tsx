@@ -184,6 +184,8 @@ export default function ExpensesPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
+        layout="raised-48"
+        iconClassName="text-purple-600"
         sectionIcon={<Receipt aria-hidden="true" />}
         title="Expense Claims"
         subtitle="Submit and manage expense reimbursements"

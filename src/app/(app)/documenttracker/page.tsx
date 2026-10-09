@@ -212,6 +212,8 @@ export default function DocumentTrackerPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Document Management"
+        layout="flat-tight"
+        iconClassName="text-blue-600"
         sectionIcon={<FileText aria-hidden="true" />}
         title="Document Tracker"
         subtitle="Track employee documents & automated expiry alerts"

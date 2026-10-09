@@ -139,6 +139,8 @@ export default function TrainingPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Learning Management System"
+        layout="flat48"
+        iconClassName="text-purple-600"
         sectionIcon={<Video aria-hidden="true" />}
         title="Training Center"
         subtitle="Expand your skills with our comprehensive training library"

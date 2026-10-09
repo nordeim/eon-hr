@@ -173,6 +173,8 @@ export default function ShiftCalendarPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Shift Management"
+        layout="flat-tight"
+        iconClassName="text-violet-600"
         sectionIcon={<Calendar aria-hidden="true" />}
         title="Shift Calendar"
         subtitle="Drag & drop shifts · Overlap prevention · Swap requests"

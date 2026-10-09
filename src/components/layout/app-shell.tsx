@@ -7,6 +7,7 @@ import { PanelLeft } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { SidebarNav, type ShellUser } from "./sidebar-nav";
 import { BOTTOM_NAV } from "@/lib/nav-config";
+import { cn } from "@/lib/utils";
 
 /**
  * Application shell: fixed desktop sidebar + mobile drawer + bottom tab bar.
@@ -57,8 +58,11 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar (reference: pad 16px 24px, border-b slate-200,
-            toggle button p-8 + 24px icon = 40px row → 73px total header) */}
+        {/* Mobile top bar (session-5 re-measurement): px-6 py-4 + a 40px
+            content row — 28×28 toggle with a 16px PanelLeft icon, brand
+            block = h1 "EonHR" 16px/700 slate-900 + p "Demo" text-xs
+            text-slate-500 stacked (24+16 = 40px). items-center; header =
+            16+40+16+1 = 73px. */}
         <header className="sticky top-0 z-10 border-b border-sidebar-border bg-white px-6 py-4 lg:hidden">
           <div className="flex items-center gap-4">
             <button
@@ -66,13 +70,13 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
               aria-label="Toggle Sidebar"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-slate-100"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-900 transition-colors hover:bg-slate-100"
             >
-              <PanelLeft className="h-6 w-6" aria-hidden="true" />
+              <PanelLeft className="h-4 w-4" aria-hidden="true" />
             </button>
-            <div className="flex min-w-0 flex-col">
-              <span className="text-base font-bold leading-tight text-foreground">EonHR</span>
-              <span className="text-xs leading-tight text-muted-foreground">Demo</span>
+            <div>
+              <h1 className="text-base font-bold text-slate-900">EonHR</h1>
+              <p className="text-xs text-slate-500">Demo</p>
             </div>
           </div>
         </header>
@@ -81,8 +85,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
             mobile bottom-bar clearance. */}
         <main className="flex-1 p-4 pb-20 md:p-8 md:pb-0">{children}</main>
 
-        {/* Mobile bottom tab bar (reference: no active-state highlight,
-            flex-col items with 44px min height) */}
+        {/* Mobile bottom tab bar (session-5 re-measurement): labels are
+            text-sm font-medium (14px/21px), 61px items, 78px bar — and the
+            ACTIVE tab is highlighted text-blue-600 (#2563EB, icon + label;
+            the earlier "no active highlight" note was a stale measurement). */}
         <nav
           aria-label="Bottom navigation"
           className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
@@ -90,14 +96,18 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
           <div className="flex items-center justify-around px-2 py-2">
             {BOTTOM_NAV.map((tab) => {
               const Icon = tab.icon;
+              const active = pathname === tab.href;
               return (
                 <Link
                   key={tab.label}
                   href={tab.href}
-                  className="flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 text-slate-600 transition-colors hover:text-foreground"
+                  className={cn(
+                    "flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
+                    active ? "text-blue-600" : "text-slate-600 hover:text-foreground"
+                  )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-xs">{tab.label}</span>
+                  <span className="text-sm font-medium leading-normal">{tab.label}</span>
                 </Link>
               );
             })}

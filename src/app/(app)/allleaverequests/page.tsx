@@ -148,6 +148,8 @@ export default function AllLeaveRequestsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Leave Management"
+        layout="flat36"
+        iconClassName="text-blue-600"
         sectionIcon={<Plane aria-hidden="true" />}
         title="Leave Requests"
         subtitle="Manage and approve employee leave requests"

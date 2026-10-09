@@ -303,6 +303,8 @@ export default function RecruitmentPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI-Powered Recruitment"
+        layout="flat36-sm"
+        iconClassName="text-indigo-600"
         sectionIcon={<UserPlus aria-hidden="true" />}
         title="Recruitment"
         subtitle="AI-assisted CV parsing, scoring & applicant tracking"

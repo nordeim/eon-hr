@@ -108,6 +108,7 @@ export default async function AnalyticsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Analytics Dashboard"
+        size="lg"
         subtitle="Track your onboarding performance and metrics"
       />
 

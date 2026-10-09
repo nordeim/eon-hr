@@ -115,7 +115,14 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader section="System Settings" sectionIcon={<SettingsIcon aria-hidden="true" />} title="Settings" subtitle="Configure your HR system" />
+      <PageHeader
+        section="System Settings"
+        layout="flat36"
+        iconClassName="text-blue-600"
+        sectionIcon={<SettingsIcon aria-hidden="true" />}
+        title="Settings"
+        subtitle="Configure your HR system"
+      />
 
       <Tabs defaultValue="company" className="flex flex-col gap-4">
         <TabsList className="h-auto flex-wrap justify-start">

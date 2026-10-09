@@ -131,6 +131,8 @@ export default async function OrganogramPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Organization Structure"
+        layout="flat36"
+        iconClassName="text-teal-600"
         sectionIcon={<Users aria-hidden="true" />}
         title="Organogram"
         subtitle="Visual representation of your organization structure"

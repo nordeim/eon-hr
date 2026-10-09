@@ -129,6 +129,8 @@ export default function LeaveManagementPage() {
           title + "Request time off and manage approvals" subtitle. */}
       <PageHeader
         section="Leave Management"
+        layout="raised-48"
+        iconClassName="text-blue-600"
         sectionIcon={<Plane aria-hidden="true" />}
         title="Leave Requests"
         subtitle="Request time off and manage approvals"

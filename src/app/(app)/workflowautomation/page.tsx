@@ -195,6 +195,8 @@ export default function WorkflowAutomationPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Workflow Automation"
+        layout="flat36"
+        iconClassName="text-purple-600"
         sectionIcon={<Sparkles aria-hidden="true" />}
         title="Automated Workflows"
         subtitle="Streamline HR processes with intelligent automation"

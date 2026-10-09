@@ -177,6 +177,8 @@ export default function CommunicationsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Communications"
+        layout="flat36"
+        iconClassName="text-purple-600"
         sectionIcon={<MessageCircle aria-hidden="true" />}
         title="Communications"
         subtitle="Send emails, SMS, and WhatsApp messages to your team"

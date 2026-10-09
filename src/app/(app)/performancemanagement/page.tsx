@@ -216,6 +216,8 @@ export default function PerformanceManagementPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Performance Management"
+        layout="flat36"
+        iconClassName="text-indigo-600"
         sectionIcon={<Target aria-hidden="true" />}
         title="Goals & Reviews"
         subtitle="Track performance, set goals, and conduct reviews"

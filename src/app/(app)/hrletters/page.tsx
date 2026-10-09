@@ -162,6 +162,8 @@ export default function HRLettersPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="HR Letters & Documents"
+        layout="flat48"
+        iconClassName="text-indigo-600"
         sectionIcon={<FileText aria-hidden="true" />}
         title="HR Letters"
         subtitle="Request and manage official HR documents"
