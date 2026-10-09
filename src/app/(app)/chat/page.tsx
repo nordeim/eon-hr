@@ -201,7 +201,8 @@ export default function ChatPage() {
        container, split into a w-80 conversation column (border-r) and the
        message pane. "Messages" is an h2 18px/700 inside the list header with
        a 40×32 blue + button. */
-    <div className="mx-auto flex w-full max-w-7xl flex-col">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col">
       <div className="flex h-[calc(100vh-8rem)] min-h-[560px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         {/* conversation list */}
         <div className="hidden w-80 shrink-0 flex-col border-r border-slate-200 md:flex">
@@ -367,6 +368,7 @@ export default function ChatPage() {
           )}
         </div>
       </div>
+    </div>
 
       {/* new conversation picker */}
       <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>

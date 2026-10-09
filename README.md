@@ -51,7 +51,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
 | Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens) |
-| E2E tests | Playwright | 1.63 | 78 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD + session-4 geometry pins |
+| E2E tests | Playwright | 1.63 | 84 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD + session-4/6 geometry pins |
 
 ## File Hierarchy
 
@@ -77,7 +77,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 ├── 📂 tests/
 │   ├── 📂 unit/                    # Vitest: auth, utils, design tokens
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
-│   └── 📂 e2e/                     # Playwright: 78 specs, isolated e2e.db
+│   └── 📂 e2e/                     # Playwright: 84 specs, isolated e2e.db
 ├── 📂 docs/
 │   ├── 📂 screenshots/             # 22 remediated UI captures (desktop + mobile + wizard)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
@@ -133,8 +133,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (90 specs: db-path, auth, utils, tokens, session-5 recipes)
-bun run test:e2e      # Playwright E2E (78 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (102 specs: db-path, auth, utils, tokens, session-5/6 recipes)
+bun run test:e2e      # Playwright E2E (84 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```
@@ -149,15 +149,17 @@ the live reference app** and regression-pinned by `tests/unit/tokens.test.ts`.
 
 | Token | Hex | Usage |
 |---|---|---|
-| Primary | `#1877F2` | Active nav, ring (reference-measured `custom-primary-bg`) |
+| Primary | `#1877F2` | Active nav, primary actions (reference-measured `custom-primary-bg`) |
 | Link | `#2563EB` | "View all" / "Request leave" text links (reference `text-blue-600`) |
-| Background | `#F8FAFC → #EFF6FF` | App canvas gradient (slate-50 → blue-50, sRGB-pinned) |
+| Background | `#FFFFFF` | Body base; the shell root paints the canvas gradient (slate-50 → blue-50, sRGB-pinned) |
 | Card | `#FFFFFF` | Surfaces, tables, dialogs |
-| Text primary | `hsl(221 39% 11%)` | Headings and body |
-| Text muted | `#64748B` (slate-500) | Subtitles, empty states |
-| Primary button | `#2563EB → #4F46E5` sRGB | Gradient CTA recipe (reference theme button) |
+| Text primary | `#0A0A0A` (neutral-950) | Headings and body (reference `0 0% 3.9%`, session-6) |
+| Text muted | `#64748B` (slate-500) | Subtitles, empty states (rendered-truth pin) |
+| Primary button | per-page gradients, sRGB | Blue `#2563EB→#4F46E5` default; green/cyan/red/purple/indigo/pink per module (session-6) |
 | Primary-fg | `#FAFAFA` | Gradient button text (slate-50, not pure white) |
 | Border | `#E5E5E5` (neutral-200) | Cards, inputs, tables (session-4 measurement) |
+| Secondary/Accent | `#F5F5F5` / `#171717` fg | Neutral hovers (reference `0 0% 96.1%`, session-6) |
+| Dark button | `#171717` | shadcn-default variant: toggles, empty-state CTAs |
 | Sidebar border | `#E2E8F0` (slate-200) | Sidebar + header dividers |
 
 The v3-era slate/blue/green/indigo families are hex-pinned so utilities like

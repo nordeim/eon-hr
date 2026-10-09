@@ -180,7 +180,8 @@ export default function PayrollPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Payroll Management"
         layout="raised-48"
@@ -203,7 +204,7 @@ export default function PayrollPage() {
               <FileDown aria-hidden="true" />
               Reports & Export
             </Button>
-            <Button
+            <Button variant="green"
               onClick={() => {
                 setEditing(null);
                 setDialogOpen(true);
@@ -216,11 +217,11 @@ export default function PayrollPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} />
-        <StatCard label="Employees" value={stats.people} icon={<Users aria-hidden="true" />} />
-        <StatCard label="Approved" value={stats.approved} icon={<CheckCircle2 aria-hidden="true" />} />
-        <StatCard label="Current Period" value={period} icon={<CalendarRange aria-hidden="true" />} />
+      <div className="grid gap-6 md:grid-cols-4">
+        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
+        <StatCard label="Employees" value={stats.people} icon={<Users aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
+        <StatCard label="Approved" value={stats.approved} icon={<CheckCircle2 aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
+        <StatCard label="Current Period" value={period} icon={<CalendarRange aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600" />
       </div>
 
       <div className="rounded-xl border bg-card shadow-sm">
@@ -237,7 +238,7 @@ export default function PayrollPage() {
             title="No payroll records"
             description="Add payroll for this month to get started"
             action={
-              <Button
+              <Button variant="dark"
                 onClick={() => {
                   setEditing(null);
                   setDialogOpen(true);
@@ -355,6 +356,7 @@ export default function PayrollPage() {
         }}
         onSave={onSave}
       />
+    </div>
     </div>
   );
 }
@@ -538,7 +540,7 @@ function PayrollDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button variant="green" type="submit" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
               {record ? "Save Changes" : "Add Payroll"}
             </Button>

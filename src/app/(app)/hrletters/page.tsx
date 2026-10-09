@@ -159,7 +159,8 @@ export default function HRLettersPage() {
   const pending = letters.filter((l) => l.status === "pending").length;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#faf5ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="HR Letters & Documents"
         layout="flat48"
@@ -197,7 +198,7 @@ export default function HRLettersPage() {
               title="No letter requests yet"
               description="Request your first HR letter to get started"
               action={
-                <Button onClick={() => setDialogOpen(true)}>
+                <Button variant="dark" onClick={() => setDialogOpen(true)}>
                   <Plus className="mr-2" aria-hidden="true" />
                   New Request
                 </Button>
@@ -296,6 +297,7 @@ export default function HRLettersPage() {
         onOpenChange={setDialogOpen}
         onSave={onSave}
       />
+    </div>
     </div>
   );
 }

@@ -209,7 +209,8 @@ export default function DocumentTrackerPage() {
   }, [documents, filter]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#eef2ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
         section="Document Management"
         layout="flat-tight"
@@ -258,7 +259,7 @@ export default function DocumentTrackerPage() {
             title="No documents found"
             description="Add your first employee document to start tracking expiry."
             action={
-              <Button onClick={openNewDialog}>
+              <Button variant="dark" onClick={openNewDialog}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Document
               </Button>
@@ -341,6 +342,7 @@ export default function DocumentTrackerPage() {
         }}
         onSave={saveDocument}
       />
+    </div>
     </div>
   );
 }

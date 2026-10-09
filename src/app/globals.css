@@ -27,28 +27,35 @@
      - primary #1877F2  (reference "custom-primary-bg": active nav, primary
        buttons — measured rgb(24,119,242))
      - link blue #2563EB (reference text-blue-600 for "View all" links)
-     - muted-foreground slate-500 #64748B (reference text-slate-500)
-     - the body canvas applies a slate-50 to blue-50 gradient (see the base
-       layer below; sRGB-pinned arbitrary form per trap 3) */
-  --color-background: #f8fafc;
-  --color-foreground: hsl(221 39% 11%);
+     - muted-foreground slate-500 #64748B (rendered-truth pin — see the
+       muted comment below)
+     - the body canvas gradient lives on the AppShell root div (session 6:
+       the reference paints it on its shell root, stretching with content)
+     Session 6 (parity round 5): extracted the reference's full :root
+     shadcn layer verbatim — it is a PURE-NEUTRAL palette. The
+     slate-tinted foreground/secondary/accent values below drifted every
+     neutral surface blue; they are now pinned to the reference's exact
+     rendered neutrals. The blue accents live in explicit slate/blue
+     utilities, exactly like the reference composes them. */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(221 39% 11%);
+  --color-card-foreground: #0a0a0a;
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(221 39% 11%);
+  --color-popover-foreground: #0a0a0a;
   --color-primary: #1877f2;
   --color-primary-foreground: #fafafa;
-  --color-secondary: hsl(210 40% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
+  --color-secondary: #f5f5f5;
+  --color-secondary-foreground: #171717;
   --color-muted: hsl(210 40% 96%);
   --color-muted-foreground: #64748b;
-  --color-accent: hsl(214 95% 93%);
-  --color-accent-foreground: #1877f2;
-  --color-destructive: hsl(0 84% 60%);
+  --color-accent: #f5f5f5;
+  --color-accent-foreground: #171717;
+  --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(0 0% 100%);
   --color-border: #e5e5e5;
   --color-input: #e5e5e5;
-  --color-ring: #1877f2;
+  --color-ring: #0a0a0a;
   --color-sidebar: #fafafa;
   --color-sidebar-foreground: hsl(221 39% 11%);
   --color-sidebar-accent: hsl(214 95% 93%);
@@ -78,8 +85,11 @@
 
   /* neutral family (session 4): the reference's section badges and card
      borders use the neutral scale — neutral-200 #E5E5E5 (cards/inputs) and
-     neutral-950 #0A0A0A (badge text). */
+     neutral-950 #0A0A0A (badge text). neutral-900 #171717 (session 6): the
+     reference's shadcn --primary renders on the taskmanager active toggle
+     and the empty-state CTAs (dark button variant). */
   --color-neutral-200: #e5e5e5;
+  --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
 
   --color-blue-50: #eff6ff;
@@ -94,6 +104,7 @@
   --color-blue-900: #1e3a8a;
 
   --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
   --color-green-500: #22c55e;
   --color-green-600: #16a34a;
   --color-green-700: #15803d;
@@ -150,11 +161,13 @@
     @apply border-border outline-ring/50;
   }
   body {
-    /* Reference canvas: bg-gradient-to-br from-slate-50 to-blue-50.
-       Pinned to the sRGB arbitrary form per trap 3 (v4 interpolates
-       gradient utilities in oklab and drifts from the v3 output). */
-    background-image: linear-gradient(to bottom right, #f8fafc, #eff6ff);
-    background-attachment: fixed;
+    /* Session 6: the canvas gradient (slate-50 -> blue-50, sRGB-pinned)
+      moved to the AppShell root div — the reference paints it on its
+      `min-h-screen flex w-full bg-gradient-to-br` shell root, so it
+      stretches with the content height instead of staying viewport-
+      anchored. The body keeps a plain white base (reference --background
+      0 0% 100%) for overscroll. */
+    background-color: #ffffff;
     @apply text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }

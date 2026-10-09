@@ -201,7 +201,7 @@ export default function StaffRequestsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-8">
       <PageHeader
         title="Staff Requests"
         subtitle="Submit and manage requests across departments"
@@ -269,7 +269,7 @@ export default function StaffRequestsPage() {
               title="No requests found"
               description="Submit your first request"
               action={
-                <Button onClick={() => setDialogOpen(true)}>
+                <Button variant="dark" onClick={() => setDialogOpen(true)}>
                   <Plus className="mr-2" aria-hidden="true" />
                   New Request
                 </Button>

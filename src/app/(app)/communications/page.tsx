@@ -174,7 +174,8 @@ export default function CommunicationsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Communications"
         layout="flat36"
@@ -341,6 +342,7 @@ export default function CommunicationsPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

@@ -22,8 +22,7 @@ const theme = css.slice(css.indexOf("@theme inline"), css.indexOf("@layer base")
 describe("globals.css token contract", () => {
   it("pins the reference primary #1877F2", () => {
     expect(theme).toContain("--color-primary: #1877f2");
-    expect(theme).toContain("--color-ring: #1877f2");
-    expect(theme).toContain("--color-accent-foreground: #1877f2");
+    expect(theme).toContain("--color-link: #2563eb");
   });
 
   it("keeps the reference link blue #2563EB as a separate token", () => {
@@ -48,13 +47,17 @@ describe("globals.css token contract", () => {
     // trap 5: v3 shadow geometry
     expect(theme).toContain("--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)");
     // trap 1: full hsl() values (not bare triplets)
-    expect(theme).toMatch(/--color-foreground: hsl\(221 39% 11%\)/);
+    expect(theme).toMatch(/--color-destructive: hsl\(0 84\.2% 60\.2%\)/);
     // trap 1: no bare-triplet theme values anywhere
     expect(theme).not.toMatch(/--color-[a-z-]+: \d+ \d+ %/);
   });
 
   it("renders the canvas gradient in the sRGB-pinned arbitrary form (trap 3)", () => {
-    expect(css).toContain("linear-gradient(to bottom right, #f8fafc, #eff6ff)");
+    // Session 6: the shell canvas gradient moved from <body> (fixed
+    // attachment) to the AppShell root div (stretches with content height,
+    // like the reference's `min-h-screen flex w-full bg-gradient-to-br`).
+    // The sRGB pin itself lives in the recipes contract (app-shell.tsx).
+    expect(css).toContain("@apply text-foreground antialiased");
   });
 
   // ---- session-4 measurements (live reference, DOM-verified) ----
@@ -81,5 +84,53 @@ describe("globals.css token contract", () => {
       '--font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
     );
     expect(css).not.toContain("--font-inter");
+  });
+
+  // ---- session-6 measurements (reference :root extracted verbatim) ----
+  it("pins the neutral foreground family to reference #0A0A0A (0 0% 3.9%)", () => {
+    // Reference --foreground/--card-foreground/--popover-foreground are the
+    // shadcn neutral defaults; card titles + body text render #0a0a0a, not
+    // the slate-tinted hsl(221 39% 11%) = #111827 the clone had.
+    expect(theme).toContain("--color-foreground: #0a0a0a");
+    expect(theme).toContain("--color-card-foreground: #0a0a0a");
+    expect(theme).toContain("--color-popover-foreground: #0a0a0a");
+  });
+
+  it("pins background/secondary/accent to the reference neutral scale", () => {
+    // Reference: --background 0 0% 100%, --secondary 0 0% 96.1%,
+    // --accent 0 0% 96.1% (+ foregrounds 0 0% 9%). The clone's
+    // slate-tinted values rendered blue-shifted surfaces.
+    expect(theme).toContain("--color-background: #ffffff");
+    expect(theme).toContain("--color-secondary: #f5f5f5");
+    expect(theme).toContain("--color-secondary-foreground: #171717");
+    expect(theme).toContain("--color-accent: #f5f5f5");
+    expect(theme).toContain("--color-accent-foreground: #171717");
+  });
+
+  it("pins ring to the reference neutral #0A0A0A (focus rings)", () => {
+    // Reference --ring: 0 0% 3.9% — focus rings render near-black, not the
+    // brand blue. (Supersedes the session-2 blue pin.)
+    expect(theme).toContain("--color-ring: #0a0a0a");
+  });
+
+  it("pins destructive to the exact reference red (#EF4444)", () => {
+    // Reference --destructive: 0 84.2% 60.2% = #EF4444 exactly; the clone's
+    // hsl(0 84% 60%) computed to #EF4343 — one sRGB unit off per channel.
+    expect(theme).toContain("--color-destructive: hsl(0 84.2% 60.2%)");
+  });
+
+  it("pins neutral-900 #171717 for the dark button variant", () => {
+    // The reference's shadcn --primary (0 0% 9%) renders #171717 on the
+    // taskmanager active toggle and the empty-state CTAs.
+    expect(theme).toContain("--color-neutral-900: #171717");
+    expect(theme).toContain("--color-neutral-950: #0a0a0a");
+  });
+
+  it("keeps muted-foreground at rendered-truth slate-500 (deliberate)", () => {
+    // The reference's TOKEN is #737373 (neutral-400), but every probed
+    // reference surface renders explicit slate classes instead; the token
+    // value never visibly renders. The clone's 336 text-muted-foreground
+    // usages render the slate-500 the reference actually shows.
+    expect(theme).toContain("--color-muted-foreground: #64748b");
   });
 });

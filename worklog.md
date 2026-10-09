@@ -307,3 +307,27 @@ Work Log:
 Stage Summary:
 - Parity round 4 complete: shell + header recipes measured-recipe-faithful, every fixed surface byte-identical live
 - 90 unit + 78 E2E green; ready for commit + push
+
+---
+Task ID: 17 (session 6)
+Agent: main (Super Z)
+Task: Fresh-workspace re-validation, audit, parity round 5 (content-area recipes: tokens, cards, per-page canvases, CTAs), docs + push
+
+Work Log:
+- Workspace was reset (unrelated initial commit) — added remote, fetched, merged origin/main (0297e44); .env recreated (DATABASE_URL file:../db/custom.db + AUTH_SECRET), install/generate/push/seed
+- Re-validated every gate from scratch: lint 0 errors, tsc, 90/90 unit, build, 78/78 E2E (after playwright chromium install)
+- Audit: secret scan clean on the session-5 diff; session-5 components sound; no doc drift
+- Parity round 5 (dual agent-browser, DOM ground truth, both sides measured): extracted the reference's FULL :root shadcn layer verbatim — pure-neutral palette; re-pinned foreground/card-foreground/popover-foreground #0A0A0A, background #FFFFFF, secondary/accent #F5F5F5/#171717, ring #0A0A0A, destructive #EF4444 exact, + neutral-900 #171717 (muted-foreground kept slate-500 as rendered-truth — the ref token never visibly renders)
+- Card recipe: CardTitle text-base font-semibold tracking-tight (24px lh, #0A0A0A) — fixes every card title row (cards 218→222); Card root simplified to plain border (base-layer #E5E5E5); dashboard headers re-nested (title+link row inside the column CardHeader); balance value inherits foreground; quick-actions grid gap-2
+- StatCard rewritten (48px p-3 rounded-xl tiles with 24px per-color icons, 30px/700 slate-900 values, slate-600 labels, border-slate-200) with measured per-page tile maps; EmptyState rewritten (p-12, 64px slate-300 icon, 18px/600 head, dark #171717 CTA)
+- Button gained dark (#171717 shadcn default) + green/cyan/red/purple/indigo/pink gradient variants (measured per-page CTA endpoints, sRGB); per-page call sites updated via codemods (22 empty-state CTAs dark)
+- Taskmanager: flex gap-2 toggle (dark/outline h-9 buttons), grid-cols-1 md:grid-cols-5 board, bare space-y-3 rounded-lg p-3 columns, rounded-md font-semibold slate-700 count chips, no empty-column filler
+- Page architecture: main bare (flex-1 flex flex-col pb-20 md:pb-0); shell canvas gradient moved to the AppShell root (stretches with content); 40 pages wrapped with measured per-page gradient roots (apply-page-roots.mjs codemod, 5 files manually repaired after counter trips); special wrappers set (profile 5xl, securitysettings 4xl, notificationpreferences 3xl p-6, hrreports/workflowconfig p-6, staffrequests combined); space-y-6 rhythm pages adjusted
+- Mobile dashboard kicker: sticky top-[73px] z-20 px-4 py-3 (measured x=16/y=89, title x=32/y=101 — session-3's "static" conclusion corrected); module pages verified kicker-less
+- TDD: 27 new unit contracts RED-first then GREEN (tokens + recipes); 6 new E2E pins (card recipe 222px/24px titles/#0A0A0A, shell canvas, payroll canvas+CTA+tiles+dark empty CTA, taskmanager board, sticky kicker)
+- Gates: lint 0 errors, tsc, 102/102 unit, build, 84/84 E2E; 22 screenshots refreshed; DB pristine after capture
+- Docs updated: AGENTS.md (counts + page-architecture section), CLAUDE.md, README (tokens), PAD (token table + §5.5 page canvases), eon-hr_SKILL.md (session-6 recipe layer), docs/remediation-plan-session6.md, docs/session_6.md
+
+Stage Summary:
+- Parity round 5 complete: token layer, card family, per-page canvases, CTA colors, taskmanager board, sticky kicker — every fixed surface byte-identical live
+- 102 unit + 84 E2E green; ready for commit + push

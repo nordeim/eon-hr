@@ -233,7 +233,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <PageHeader
         section="My Profile"
         layout="flat48"
@@ -568,6 +569,7 @@ export default function ProfilePage() {
         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
         Changes to your profile are audited for security.
       </p>
+    </div>
     </div>
   );
 }

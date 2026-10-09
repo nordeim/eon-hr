@@ -4,7 +4,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 # Eon HR
 
-A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 168-spec test pyramid.
+A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 186-spec test pyramid (102 unit + 84 E2E).
 
 **Tech Stack:** Next.js 16 (App Router, standalone output) · React 19 · TypeScript 5 (strict) · Tailwind CSS 4 (CSS-first) · Radix UI primitives · Prisma 6 + SQLite · Zod 4 · Recharts 2 · Vitest 5 · Playwright 1.63
 
@@ -88,11 +88,11 @@ bun run dev                 # dev server on http://localhost:3000
 
 | Layer | Framework | Files | Specs | Location |
 |---|---|---|---|---|
-| Unit (pure seams) | Vitest | 5 | 90 | `tests/unit/`, `tests/db-path.test.ts` |
-| E2E (browser) | Playwright | 5 | 78 | `tests/e2e/*.spec.ts` |
+| Unit (pure seams) | Vitest | 5 | 102 | `tests/unit/`, `tests/db-path.test.ts` |
+| E2E (browser) | Playwright | 5 | 84 | `tests/e2e/*.spec.ts` |
 
-- **Unit**: db-path resolution contract (15), auth crypto/session (14 — incl. the production secret boot guard), money & date utils (13), design-token contract (10 — reads `globals.css`, pins `#1877F2` primary, slate-500 muted, the #FAFAFA sidebar surface, the v3 palette pin and the v3 `--shadow-sm` geometry), session-5 parity recipes (38 — sidebar leaf/group geometry, mobile chrome, the six PageHeader layout recipes and the per-page icon-color matrix). Pure functions/CSS only — no Prisma, no network.
-- **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer 288px, dark overlay, no X button, bottom tabs — text-sm labels, blue active tab, 16px leaf icons / 20px group icons); dashboard parity (leave balances 21/21, 30/30, bordered quick-action chips, single-line expense total, active-nav `rgb(24,119,242)`); 4-step employee wizard CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).
+- **Unit**: db-path resolution contract (15), auth crypto/session (14 — incl. the production secret boot guard), money & date utils (13), design-token contract (session-6 re-measured: neutral foreground #0A0A0A, white background, neutral secondary/accent #F5F5F5, exact destructive #EF4444, neutral-900 #171717, the v3 palette pin and shadow geometry), session-5 parity recipes (38 — sidebar leaf/group geometry, mobile chrome, the six PageHeader layout recipes and the per-page icon-color matrix), session-6 content recipes (27 — card/StatCard/EmptyState/button variants, dashboard cards + kicker, taskmanager board, per-page gradient map, shell canvas). Pure functions/CSS only — no Prisma, no network.
+- **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer 288px, dark overlay, no X button, bottom tabs — text-sm labels, blue active tab, 16px leaf icons / 20px group icons, the sticky mobile kicker at top-[73px]); dashboard parity (leave balances 21/21, 30/30, bordered quick-action chips, single-line expense total, active-nav `rgb(24,119,242)`, the session-6 card recipe — 222px cards, 24px-title rows, #0A0A0A tokens); per-page canvas + CTA colors (payroll green gradient + dark empty-state CTA); taskmanager board recipe; 4-step employee wizard CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).
 
 ### Test Commands
 

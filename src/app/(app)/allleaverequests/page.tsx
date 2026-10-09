@@ -145,7 +145,8 @@ export default function AllLeaveRequestsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#eef2ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Leave Management"
         layout="flat36"
@@ -194,7 +195,7 @@ export default function AllLeaveRequestsPage() {
             title="No leave requests"
             description="New requests will appear here for approval."
             action={
-              <Button onClick={openNewRequest}>
+              <Button variant="dark" onClick={openNewRequest}>
                 <Plus className="mr-2" aria-hidden="true" />
                 New Leave Request
               </Button>
@@ -278,6 +279,7 @@ export default function AllLeaveRequestsPage() {
         onOpenChange={setDialogOpen}
         onSave={createRequest}
       />
+    </div>
     </div>
   );
 }

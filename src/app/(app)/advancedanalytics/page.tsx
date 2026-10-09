@@ -112,7 +112,8 @@ export default async function AdvancedAnalyticsPage() {
   const hasPayroll = payrollRecords.length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Advanced Analytics"
         sectionIcon={<TrendingUp aria-hidden="true" />}
@@ -231,6 +232,7 @@ export default async function AdvancedAnalyticsPage() {
           />
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

@@ -61,17 +61,21 @@ export default async function DashboardPage() {
   const totalExpense = expenses?._sum.amount ?? 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col space-y-8">
-      {/* Mobile page-title kicker — reference (session-3): md:hidden white
-          bar (bg-white, border-b slate-200, py-3 px-4) with a single
-          text-lg font-bold "Dashboard" h1. The reference marks it sticky
-          top-0 z-20, but it sits inside an overflow-hidden ancestor and so
-          scrolls away with the content — replicated here as a static bar.
-          As the first child it also feeds space-y-8's sibling margin, which
-          is exactly how the reference lands its welcome row at y=64. */}
-      <div className="border-b border-slate-200 bg-white py-3 md:hidden">
+    <div className="p-4 md:p-8 space-y-8">
+      {/* Mobile page-title kicker (session-6 re-measurement): the reference
+          renders `md:hidden sticky top-0 z-20 bg-white border-b
+          border-slate-200 px-4 py-3` INSIDE its p-4 page wrapper (so the
+          bar is inset 16px — NOT full-bleed — and the title lands at
+          x=32/y=101, 18px/700 slate-900, truncate). It STICKS below the
+          73px top bar while content scrolls (the session-3 "overflow-hidden
+          ancestor" conclusion was wrong — the ancestor is overflow-auto,
+          sticky works; replicated here with the explicit top-[73px] offset
+          because this app scrolls at the page level). */}
+      <div className="md:hidden sticky top-[73px] z-20 border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-3">
-          <h1 className="truncate text-lg font-bold text-slate-900">Dashboard</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg font-bold text-slate-900 truncate">Dashboard</h1>
+          </div>
         </div>
       </div>
 
@@ -90,13 +94,14 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Quick Actions — reference: bordered chips, small inline blue icons */}
+        {/* Quick Actions — reference: bordered chips, small inline blue icons;
+            grid gap-2 (session-6 measurement) */}
         <Card data-widget="quick-actions">
           <CardHeader className="pb-2">
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {QUICK_ACTIONS.map((action) => (
                 <Link
                   key={action.label}
@@ -114,13 +119,13 @@ export default async function DashboardPage() {
         {/* Leave Balances — reference: label text-slate-600, value font-medium,
             h-2 track bg-slate-200 with bg-blue-500 / bg-green-500 fills */}
         <Card data-widget="leave-balances">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <div className="space-y-0.5">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
               <CardTitle>My Leave Balances</CardTitle>
+              <Link href="/leavemanagement" className="text-xs text-blue-600 hover:underline">
+                Request leave
+              </Link>
             </div>
-            <Link href="/leavemanagement" className="text-xs text-blue-600 hover:underline">
-              Request leave
-            </Link>
           </CardHeader>
           <CardContent className="space-y-4">
             {balances.length === 0 ? (
@@ -132,7 +137,9 @@ export default async function DashboardPage() {
                   <div key={b.leaveType.name}>
                     <div className="mb-1 flex justify-between text-sm">
                       <span className="text-slate-600">{b.leaveType.name}</span>
-                      <span className="font-medium text-slate-900">
+                      {/* Session 6: value inherits --card-foreground #0A0A0A
+                          (reference measures rgb(10,10,10) — no slate-900). */}
+                      <span className="font-medium">
                         {b.entitled - b.used} / {b.entitled} days
                       </span>
                     </div>
@@ -156,11 +163,13 @@ export default async function DashboardPage() {
 
         {/* Recent Requests */}
         <Card data-widget="recent-requests">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle>My Recent Requests</CardTitle>
-            <Link href="/staffrequests" className="text-xs text-blue-600 hover:underline">
-              View all
-            </Link>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle>My Recent Requests</CardTitle>
+              <Link href="/staffrequests" className="text-xs text-blue-600 hover:underline">
+                View all
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             {recentRequests.length === 0 ? (
@@ -184,11 +193,13 @@ export default async function DashboardPage() {
             left-aligned amount, "0" text-2xl bold slate-900 with "SAR total"
             as an inline text-sm slate-500 span. */}
         <Card data-widget="expense-claims">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>My Expense Claims</CardTitle>
-            <Link href="/expenses" className="text-xs text-blue-600 hover:underline">
-              View all
-            </Link>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle>My Expense Claims</CardTitle>
+              <Link href="/expenses" className="text-xs text-blue-600 hover:underline">
+                View all
+              </Link>
+            </div>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             <p className="mb-3 text-2xl font-bold text-slate-900">

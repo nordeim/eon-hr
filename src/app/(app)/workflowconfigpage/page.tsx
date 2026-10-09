@@ -167,7 +167,7 @@ export default function WorkflowConfigPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
       <PageHeader
         title="Approval Workflow Engine"
         subtitle="Configure multi-level approval hierarchies for requests and expenses"
@@ -190,7 +190,7 @@ export default function WorkflowConfigPage() {
             title="No workflows configured yet."
             description="Create an approval chain for leave requests, expenses or staff requests."
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Create First Workflow
               </Button>

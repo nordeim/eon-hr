@@ -664,20 +664,27 @@ ported components.
 All values verified against `src/app/globals.css` `@theme inline` (and the
 live reference where noted). Token test pins the bolded ones.
 
-**Semantic:** primary **#1877F2** (ref-measured), primary-foreground
-**#FAFAFA** (session-4: slate-50, the reference button text — NOT white),
-link **#2563EB**, background #F8FAFC (canvas gradient
-slate-50→blue-50 sRGB), foreground hsl(221 39% 11%), card/popover white,
-secondary hsl(210 40% 96%), muted hsl(210 40% 96%), muted-foreground
-**#64748B**, accent hsl(214 95% 93%), accent-foreground **#1877F2**,
-destructive hsl(0 84% 60%), border/input **#E5E5E5** (session-4: neutral-200),
-ring **#1877F2**, sidebar **#FAFAFA** (session-3), sidebar-foreground
-hsl(221 39% 11%), sidebar-accent hsl(214 95% 93%), sidebar-border
-**#E2E8F0**.
+**Semantic (session-6 re-measured — reference :root extracted verbatim;
+its shadcn layer is PURE-NEUTRAL):** primary **#1877F2** (ref-measured
+custom-primary-bg), primary-foreground **#FAFAFA** (session-4: slate-50),
+link **#2563EB**, background **#FFFFFF** (the AppShell root paints the
+canvas gradient slate-50→blue-50, sRGB, stretching with content),
+foreground **#0A0A0A** (reference 0 0% 3.9% — supersedes the session-2
+slate-tinted hsl(221 39% 11%)), card/popover white, card-foreground
+**#0A0A0A**, secondary **#F5F5F5** / secondary-foreground **#171717**
+(reference 0 0% 96.1% / 0 0% 9%), muted hsl(210 40% 96%), muted-foreground
+**#64748B** (rendered-truth pin — the reference token is #737373 but never
+visibly renders; every probed surface uses explicit slate classes),
+accent **#F5F5F5** / accent-foreground **#171717**, destructive
+**hsl(0 84.2% 60.2%)** (= #EF4444 exact), border/input **#E5E5E5**
+(neutral-200), ring **#0A0A0A** (reference 0 0% 3.9%), neutral-900
+**#171717** (the reference's shadcn default button), sidebar **#FAFAFA**
+(session-3), sidebar-border **#E2E8F0**.
 
 **Pinned v3 families (byte-identical to reference rendering):**
 slate 50–950 = #F8FAFC #F1F5F9 #E2E8F0 #CBD5E1 #94A3B8 #64748B #475569
-#334155 #1E293B #0F172A #020617; neutral 200/950 = #E5E5E5 #0A0A0A (session 4);
+#334155 #1E293B #0F172A #020617; neutral 200/900/950 = #E5E5E5 #171717 #0A0A0A
+(sessions 4+6); green 100 = #DCFCE7 (session 6: stat tiles);
 blue 50–900 = #EFF6FF #DBEAFE #BFDBFE #93C5FD #60A5FA #3B82F6 #2563EB
 #1D4ED8 #1E40AF #1E3A8A; green 50/500/600/700 = #F0FDF4 #22C55E #16A34A
 #15803D; indigo 500/600/700 = #6366F1 #4F46E5 #4338CA; purple 100/600 =
@@ -770,3 +777,53 @@ reference       https://eon.base44.app  (docs/reference-page-map.md)
 session log     worklog.md + docs/session_1.md, docs/remediation-plan-session1.md
 ssh push        docs/ssh_git_wrapper_v3.py  (+ docs/how-to-git-push-using-ssh-wrapper_SKILL.md)
 ```
+
+## 21. Session-6 Recipe Layer — content areas (parity round 5)
+
+Everything below was live-measured against the reference (dual
+agent-browser; `docs/remediation-plan-session6.md`) and is regression-pinned
+by `tests/unit/recipes.test.ts` + `tests/e2e/dashboard.spec.ts` /
+`mobile-navigation.spec.ts`.
+
+**Card recipe:** root `rounded-xl border bg-card text-card-foreground shadow`
+(border color via the base layer, #E5E5E5). CardTitle =
+`text-base font-semibold tracking-tight` — 16px/600 with **24px line-height**
+(color #0A0A0A inherited; the scaffold's zero line-height shrank every
+title row 8px). Title+link cards nest a `flex items-center justify-between`
+row INSIDE the standard column CardHeader (`flex flex-col space-y-1.5 p-6
+pb-2`).
+
+**StatCard recipe:** Card `border-slate-200`; p-6 interior; 48px icon tile
+`p-3 rounded-xl bg-{color}-100` with 24px `text-{color}-600` icon; value
+`text-3xl font-bold text-slate-900 mb-1` (30px); label `text-sm
+text-slate-600`. Tile colors are per-stat (payroll: green/blue/purple/orange;
+analytics: blue/purple/green/orange); grids are `grid gap-6 md:grid-cols-4`.
+
+**EmptyState recipe:** `p-12 text-center`; icon 64px slate-300; h3
+`text-lg font-semibold text-slate-900 mb-2`; description `text-slate-500
+mb-4` (16px); action = the dark shadcn default button (#171717) — NOT the
+gradient CTA.
+
+**Button variants:** `dark` (#171717, the reference's shadcn default) +
+per-page gradient CTAs (green/cyan/red/purple/indigo/pink, sRGB endpoints —
+see §5.5 of the architecture doc). Outline = `border border-input
+bg-background shadow-sm hover:bg-accent hover:text-accent-foreground`.
+
+**Task manager board:** toggle = `div.flex gap-2` of h-9 buttons
+(active=dark, inactive=outline — no segmented pill); board
+`grid grid-cols-1 md:grid-cols-5 gap-4`; columns = bare `space-y-3
+rounded-lg p-3` (no bg/border); column h3 `font-semibold text-slate-900`
+(16px); count chip `inline-flex items-center rounded-md border px-2.5
+py-0.5 text-xs font-semibold bg-slate-100 text-slate-700`; empty columns
+render nothing below the header.
+
+**Page canvases:** shell root paints slate-50→blue-50 (sRGB, stretches with
+content — never `background-attachment: fixed` on body); each module page
+adds its measured gradient root (`min-h-screen bg-[linear-gradient(to
+right_bottom,X,Y)] p-4 md:p-8`) with the content wrapper nested inside;
+`main` is bare. See the route→gradient map in the remediation plan §S2.
+
+**Mobile page kicker (dashboard only):** `md:hidden sticky top-[73px] z-20
+bg-white border-b border-slate-200 px-4 py-3` inside the p-4 page wrapper
+(x=16, y=89; title x=32/y=101, 18px/700 slate-900, truncate) — it sticks
+below the 73px top bar on scroll. Module pages have NO kicker.

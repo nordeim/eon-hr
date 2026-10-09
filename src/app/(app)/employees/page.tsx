@@ -139,7 +139,8 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         size="lg"
         title="Employees"
@@ -222,7 +223,7 @@ export default function EmployeesPage() {
                 : "Add your first employee to get started."
             }
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Employee
               </Button>
@@ -331,6 +332,7 @@ export default function EmployeesPage() {
         }}
         onSave={onSave}
       />
+    </div>
     </div>
   );
 }

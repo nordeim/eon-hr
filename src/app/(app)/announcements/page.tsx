@@ -120,7 +120,8 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
         title="Company Announcements"
         size="md"
@@ -235,6 +236,7 @@ export default function AnnouncementsPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

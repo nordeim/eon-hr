@@ -181,7 +181,8 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#fdf2f8)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
         layout="raised-48"
@@ -219,7 +220,7 @@ export default function ExpensesPage() {
             title="No expense claims yet"
             description="Submit your first claim to get started"
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 New Expense
               </Button>
@@ -412,6 +413,7 @@ export default function ExpensesPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

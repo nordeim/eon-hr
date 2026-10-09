@@ -215,7 +215,8 @@ export default function PayrollModulePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#ecfdf5)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Payroll Module"
         subtitle="Generate & manage monthly payslips"
@@ -225,7 +226,7 @@ export default function PayrollModulePage() {
               {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 aria-hidden="true" />}
               Generate All
             </Button>
-            <Button
+            <Button variant="green"
               onClick={() => {
                 setEditing(null);
                 setDialogOpen(true);
@@ -262,7 +263,7 @@ export default function PayrollModulePage() {
             title={`No payslips for ${monthLabel(period)}`}
             description={`Click "Generate All" to create them.`}
             action={
-              <Button onClick={onGenerateAll} disabled={generating}>
+              <Button variant="dark" onClick={onGenerateAll} disabled={generating}>
                 {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 aria-hidden="true" />}
                 Generate All
               </Button>
@@ -366,6 +367,7 @@ export default function PayrollModulePage() {
         }}
         onSave={onSave}
       />
+    </div>
     </div>
   );
 }
@@ -523,7 +525,7 @@ function PayslipDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button variant="green" type="submit" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
               {record ? "Save Changes" : "Add Payslip"}
             </Button>

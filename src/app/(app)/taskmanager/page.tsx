@@ -1,20 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Plus, MoreHorizontal, Calendar, FolderKanban, Loader2, Trash2 } from "lucide-react";
+import { Plus, MoreHorizontal, Calendar, FolderKanban, Loader2, Trash2, KanbanSquare, FolderKanban as FolderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -22,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +27,14 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatDate, initials } from "@/lib/utils";
 
 interface TaskRow {
@@ -76,6 +75,7 @@ export default function TaskManagerPage() {
   const toast = useToast();
   const [tasks, setTasks] = React.useState<TaskRow[]>([]);
   const [projects, setProjects] = React.useState<ProjectRow[]>([]);
+  const [view, setView] = React.useState<"kanban" | "projects">("kanban");
   const [loading, setLoading] = React.useState(true);
 
   const [taskDialogOpen, setTaskDialogOpen] = React.useState(false);
@@ -202,7 +202,8 @@ export default function TaskManagerPage() {
   }, [projects]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Task Management"
         layout="raised-48"
@@ -224,30 +225,50 @@ export default function TaskManagerPage() {
         }
       />
 
-      <Tabs defaultValue="kanban" className="flex flex-col gap-4">
-        <TabsList>
-          <TabsTrigger value="kanban">Kanban</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-        </TabsList>
+      {/* Kanban/Projects view toggle (session-6 measurement): the reference
+          renders a plain `div.flex gap-2` holding two h-9 buttons — the
+          ACTIVE one is the shadcn default variant (bg-primary #171717 with
+          #FAFAFA text), the inactive one is outline. No segmented pill. */}
+      <div className="flex gap-2">
+        <Button
+          variant={view === "kanban" ? "dark" : "outline"}
+          onClick={() => setView("kanban")}
+          aria-pressed={view === "kanban"}
+        >
+          <KanbanSquare aria-hidden="true" />
+          Kanban
+        </Button>
+        <Button
+          variant={view === "projects" ? "dark" : "outline"}
+          onClick={() => setView("projects")}
+          aria-pressed={view === "projects"}
+        >
+          <FolderIcon aria-hidden="true" />
+          Projects
+        </Button>
+      </div>
 
-        <TabsContent value="kanban" className="mt-0">
-          {loading ? (
+      {view === "kanban" ? (
+        loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : (
-            <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {COLUMNS.map((col) => {
                 const columnTasks = tasks.filter((t) => t.status === col.id);
                 return (
-                  <div key={col.id} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-secondary/30 p-3">
-                    <div className="flex items-center justify-between px-1">
-                      <p className="text-sm font-semibold text-foreground">{col.label}</p>
-                      <Badge variant="secondary">{columnTasks.length}</Badge>
+                  <div key={col.id} className="space-y-3 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-slate-900">{col.label}</h3>
+                      {/* Reference count chip (session 6): rounded-md
+                          border px-2.5 py-0.5 text-xs font-semibold
+                          bg-slate-100 text-slate-700. */}
+                      <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700">
+                        {columnTasks.length}
+                      </span>
                     </div>
-                    {columnTasks.length === 0 ? (
-                      <p className="py-6 text-center text-sm text-muted-foreground">No tasks</p>
-                    ) : (
+                    {columnTasks.length === 0 ? null : (
                       <div className="flex flex-col gap-3">
                         {columnTasks.map((task) => (
                           <div
@@ -328,11 +349,8 @@ export default function TaskManagerPage() {
                 );
               })}
             </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="projects" className="mt-0">
-          {loading ? (
+          )
+      ) : loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
@@ -343,7 +361,7 @@ export default function TaskManagerPage() {
                 title="No projects yet"
                 description="Create your first project to organize your team's work."
                 action={
-                  <Button onClick={openProjectDialog}>
+                  <Button variant="dark" onClick={openProjectDialog}>
                     <Plus className="mr-2" aria-hidden="true" />
                     New Project
                   </Button>
@@ -380,8 +398,6 @@ export default function TaskManagerPage() {
               })}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
 
       <TaskDialog
         key={`task-${dialogSeq}`}
@@ -399,6 +415,7 @@ export default function TaskManagerPage() {
         onOpenChange={setProjectDialogOpen}
         onSave={createProject}
       />
+    </div>
     </div>
   );
 }

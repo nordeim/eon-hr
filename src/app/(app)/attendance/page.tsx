@@ -171,7 +171,8 @@ export default function StaffAttendancePage() {
   }, [stats]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Attendance Management"
         layout="flat48"
@@ -201,7 +202,7 @@ export default function StaffAttendancePage() {
               Excel
             </Button>
             {canMark ? (
-              <Button onClick={openMarkDialog}>
+              <Button variant="cyan" onClick={openMarkDialog}>
                 <CalendarCheck aria-hidden="true" />
                 Mark Attendance
               </Button>
@@ -367,7 +368,7 @@ export default function StaffAttendancePage() {
                     }
                     action={
                       canMark ? (
-                        <Button onClick={openMarkDialog}>
+                        <Button variant="dark" onClick={openMarkDialog}>
                           <CalendarCheck aria-hidden="true" />
                           Mark Attendance
                         </Button>
@@ -424,6 +425,7 @@ export default function StaffAttendancePage() {
           onSave={markAttendance}
         />
       ) : null}
+    </div>
     </div>
   );
 }

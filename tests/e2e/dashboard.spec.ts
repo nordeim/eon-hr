@@ -88,6 +88,94 @@ test.describe("dashboard", () => {
     await expect(add).toHaveCSS("border-radius", "6px");
     await expect(add).toHaveCSS("color", "rgb(250, 250, 250)");
   });
+
+  test("dashboard cards render the reference card recipe (session 6)", async ({ page }) => {
+    await page.goto("/dashboard");
+    // Reference (live-measured): CardTitle 16px/600 with 24px line-height,
+    // color #0A0A0A (the neutral foreground token); the leave-balances card
+    // lands at y=160 h=222 with its 56px header and 217px content block.
+    const title = page.getByRole("heading", { name: "My Leave Balances" });
+    await expect(title).toHaveCSS("font-size", "16px");
+    await expect(title).toHaveCSS("font-weight", "600");
+    await expect(title).toHaveCSS("line-height", "24px");
+    await expect(title).toHaveCSS("color", "rgb(10, 10, 10)");
+    const card = page.locator("[data-widget='leave-balances']");
+    const box = await card.boundingBox();
+    expect(box).not.toBeNull();
+    expect(Math.round(box!.y)).toBe(160);
+    expect(Math.round(box!.height)).toBe(222);
+    // Balance value inherits the neutral foreground (rgb(10,10,10)), NOT
+    // slate-900.
+    await expect(page.getByText("21 / 21 days")).toHaveCSS("color", "rgb(10, 10, 10)");
+    // Quick-actions grid: 8px gaps (gap-2), not 12px.
+    const grid = page.locator("[data-widget='quick-actions'] .grid");
+    await expect(grid).toHaveCSS("gap", "8px");
+    // Body text is the neutral foreground, not slate-tinted #111827.
+    await expect(page.locator("body")).toHaveCSS("color", "rgb(10, 10, 10)");
+  });
+
+  test("shell canvas gradient paints on the shell root (session 6)", async ({ page }) => {
+    await page.goto("/dashboard");
+    // Reference: the shell root div carries the slate-50 -> blue-50 canvas
+    // gradient (stretches with content, unlike a fixed body background).
+    // main's parent's parent = the shell root.
+    const shell = page.locator("main").locator("xpath=../..");
+    const img = await shell.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(img).toContain("rgb(248, 250, 252)");
+    expect(img).toContain("rgb(239, 246, 255)");
+    expect(img).not.toContain("in oklab");
+    // The body keeps a plain white base (reference --background 0 0% 100%).
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  });
+
+  test("payroll page renders the reference per-page canvas + CTA (session 6)", async ({ page }) => {
+    await page.goto("/payroll");
+    // Reference: page root paints from-green-50 to-blue-50 over the shell
+    // canvas; the header CTA is the green->emerald gradient (#16A34A ->
+    // #059669); stat tiles are 48px bg-green-100 with 24px green-600 icons
+    // and 30px/700 values; the empty-state CTA is the dark shadcn default
+    // (#171717).
+    const pageGrad = page.locator("main > div");
+    const img = await pageGrad.first().evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(img).toContain("rgb(240, 253, 244)");
+    expect(img).toContain("rgb(239, 246, 255)");
+    const cta = page.getByRole("button", { name: "Add Payroll" }).first();
+    const bg = await cta.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(bg).toContain("rgb(22, 163, 74)");
+    expect(bg).toContain("rgb(5, 150, 105)");
+    expect(bg).not.toContain("in oklab");
+    const tile = page.locator(".text-3xl").first().locator("xpath=../..").locator("div[class*='p-3']");
+    await expect(tile).toHaveCSS("background-color", "rgb(220, 252, 231)");
+    const val = page.getByText("0 SAR");
+    await expect(val).toHaveCSS("font-size", "30px");
+    await expect(val).toHaveCSS("color", "rgb(15, 23, 42)");
+    const emptyBtn = page.locator("div[class*='p-12']").getByRole("button", { name: "Add Payroll" });
+    await expect(emptyBtn).toHaveCSS("background-color", "rgb(23, 23, 23)");
+    await expect(emptyBtn).toHaveCSS("color", "rgb(250, 250, 250)");
+  });
+
+  test("task manager renders the reference board + toggle (session 6)", async ({ page }) => {
+    await page.goto("/taskmanager");
+    // Reference: plain flex gap-2 toggle — active button is the shadcn
+    // default dark (#171717), inactive is outline; board goes 5-up from md;
+    // columns are bare space-y-3 rounded-lg p-3; count chips are
+    // rounded-md font-semibold slate-700 on slate-100; empty columns
+    // render nothing below the header.
+    const kanban = page.getByRole("button", { name: "Kanban", exact: true });
+    await expect(kanban).toHaveCSS("background-color", "rgb(23, 23, 23)");
+    await expect(kanban).toHaveCSS("color", "rgb(250, 250, 250)");
+    await expect(page.getByRole("button", { name: "Projects", exact: true })).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)"
+    );
+    const board = page.locator("div.md\\:grid-cols-5").first();
+    await expect(board).toHaveCSS("grid-template-columns", /^(\d+(\.\d+)?px ){4}\d+(\.\d+)?px$/);
+    const chip = page.locator("span.text-xs.font-semibold").first();
+    await expect(chip).toHaveCSS("border-radius", "6px");
+    await expect(chip).toHaveCSS("color", "rgb(51, 65, 85)");
+    await expect(chip).toHaveCSS("background-color", "rgb(241, 245, 249)");
+    expect(await page.getByText("No tasks").count()).toBe(0);
+  });
 });
 
 // End-to-end CRUD through the real UI — the reference 4-step Add Employee

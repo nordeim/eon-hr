@@ -152,7 +152,7 @@ export default function HRReportsPage() {
   const hasRecords = (data?.records.length ?? 0) > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
       <PageHeader
         title="HR Reports & Analytics"
         subtitle="Create custom charts and export data for management reviews"

@@ -144,7 +144,8 @@ export default function PayrollEnginePage() {
   const infoMonth = monthLabel(month);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#ecfdf5,#f0fdfa)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
         section="Payroll Engine"
         sectionIcon={<Calculator aria-hidden="true" />}
@@ -335,6 +336,7 @@ export default function PayrollEnginePage() {
           />
         </div>
       )}
+    </div>
     </div>
   );
 }

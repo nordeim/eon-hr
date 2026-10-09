@@ -146,7 +146,7 @@ export default function NotificationPreferencesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
       <PageHeader
         title="Notification Settings"
         subtitle="Manage how and when you receive notifications"

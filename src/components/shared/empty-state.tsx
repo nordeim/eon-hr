@@ -2,6 +2,17 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Inbox } from "lucide-react";
 
+/**
+ * Reference empty-state recipe (session-6 live measurement, payroll
+ * "No payroll records"):
+ *
+ *   div.p-12 text-center
+ *   ├── icon 64×64 text-slate-300
+ *   ├── h3 text-lg font-semibold text-slate-900 mb-2   (18px/600)
+ *   ├── p  text-slate-500 mb-4                          (16px)
+ *   └── action — the reference uses its shadcn default (dark #171717)
+ *       button here, NOT the gradient CTA.
+ */
 export function EmptyState({
   icon,
   title,
@@ -16,13 +27,19 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-        {icon ?? <Inbox className="h-6 w-6" />}
+    <div className={cn("p-12 text-center", className)}>
+      <div className="flex justify-center">
+        {icon ? (
+          <div className="[&_svg]:h-16 [&_svg]:w-16 [&_svg]:text-slate-300">{icon}</div>
+        ) : (
+          <Inbox className="h-16 w-16 text-slate-300" aria-hidden="true" />
+        )}
       </div>
-      <p className="mt-4 text-sm font-medium text-muted-foreground">{title}</p>
-      {description ? <p className="mt-1 text-sm text-muted-foreground/70 max-w-xs">{description}</p> : null}
-      {action ? <div className="mt-4">{action}</div> : null}
+      <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+      {description ? (
+        <p className="text-slate-500 mb-4">{description}</p>
+      ) : null}
+      {action ? <div>{action}</div> : null}
     </div>
   );
 }

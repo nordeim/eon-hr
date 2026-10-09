@@ -324,25 +324,27 @@ live measurement; Inter drifted text metrics).
 ### 5.2 Color Tokens (pinned, measured)
 
 All tokens live in the `@theme inline` block of `src/app/globals.css`, values
-measured from the live reference app (session-2 dual-browser audit) and
-regression-pinned by `tests/unit/tokens.test.ts`. The v3-era
-slate/blue/green/indigo families are additionally hex-pinned so utilities
-render byte-identical to the reference under Tailwind v4 (trap 2 of the five
-v4 traps — see `docs/Tailwind-V4-Validation-Report.md`).
+measured from the live reference app (sessions 2–6 dual-browser audits) and
+regression-pinned by `tests/unit/tokens.test.ts`. The reference’s full `:root`nshadcn layer was extracted verbatim in session 6 — it is a PURE-NEUTRALnpalette; the clone’s slate-tinted foreground/secondary/accent values werenre-pinned to the reference’s rendered neutrals. The v3-era families arenadditionally hex-pinned so utilities render byte-identical under Tailwind v4
+(trap 2 — see `docs/Tailwind-V4-Validation-Report.md`).
 
 | Token | Value | Usage | Contrast (on white) |
 |---|---|---|---|
-| `--color-background` | `#F8FAFC` (canvas applies a slate-50→blue-50 sRGB-pinned gradient) | App canvas | — |
+| `--color-background` | `#FFFFFF` (the AppShell root div paints the slate-50→blue-50 canvas gradient, sRGB-pinned) | Body base | — |
 | `--color-card` | `hsl(0 0% 100%)` | Surfaces | — |
-| `--color-primary` | `#1877F2` | Actions, active nav, ring (reference `custom-primary-bg`, measured `rgb(24,119,242)`) | 3.9:1 (large/UI) |
-| `--color-primary-foreground` | `hsl(0 0% 100%)` | On-primary text | — |
+| `--color-foreground` | `#0A0A0A` (neutral-950; reference `0 0% 3.9%`) | Body + card text | 20.4:1 AAA |
+| `--color-primary-foreground` | `#FAFAFA` | On-primary text | — |
 | `--color-link` | `#2563EB` | "View all" / "Request leave" text links (reference `text-blue-600`) | 4.7:1 AA |
-| `--color-muted-foreground` | `#64748B` (slate-500) | Secondary text | 4.8:1 AA |
+| `--color-primary` | `#1877F2` | Active nav, gradient CTAs (reference `custom-primary-bg`) | 3.9:1 (large/UI) |
+| `--color-secondary` / `--color-accent` | `#F5F5F5` (+ `#171717` foregrounds) | Neutral hovers (reference `0 0% 96.1%`, session-6) | — |
+| `--color-ring` | `#0A0A0A` | Focus rings (reference `0 0% 3.9%`, session-6) | — |
+| `--color-muted-foreground` | `#64748B` (slate-500, rendered-truth pin) | Secondary text | 4.8:1 AA |
 | `--color-sidebar-border` | `#E2E8F0` (slate-200) | Sidebar/header dividers | — |
-| `--color-destructive` | `hsl(0 84% 60%)` | Delete, errors | 3.9:1 (large/UI) |
-| `--color-border` | `hsl(214 32% 91%)` | Borders, dividers | — |
+| `--color-destructive` | `hsl(0 84.2% 60.2%)` (= #EF4444 exact) | Delete, errors | 3.9:1 (large/UI) |
+| `--color-border` | `#E5E5E5` (neutral-200) | Borders, dividers | — |
 | Success | `#22C55E` (green-500, pinned) | Sick-leave bars, approved badges | decorative/data |
-| `--shadow-sm` | `0 1px 2px 0 rgb(0 0 0 / 0.05)` | Card//navbar elevation (v3 geometry pin) | — |
+| `--shadow-sm` | `0 1px 2px 0 rgb(0 0 0 / 0.05)` | Card/navbar elevation (v3 geometry pin) | — |
+| `--color-neutral-900` | `#171717` | The reference’s shadcn default button (dark toggle / empty-state CTAs) | — |
 
 ### 5.3 Component Primitives
 
@@ -528,3 +530,25 @@ Full stack verification: `curl http://localhost:3000/api/health` → `{"status":
 | `tests/e2e/mobile-navigation.spec.ts` | 90 | Mobile nav + trap-4 regression pins |
 | `tests/db-path.test.ts` | 157 | DB path contract |
 | `docs/Tailwind-V4-Validation-Report.md` | 314 | Engine trap log (authoritative) |
+
+### 5.5 Page canvas architecture (session 6)
+
+The reference paints its gradient canvases PER PAGE: the app shell root
+carries the base canvas (`min-h-screen flex w-full bg-gradient-to-br
+from-slate-50 to-blue-50`, sRGB-pinned), and each module page renders a
+root div with its own measured gradient + `p-4 md:p-8` padding over it
+(`min-h-screen bg-[linear-gradient(to_right_bottom,X,Y)] p-4 md:p-8`),
+with the content wrapper (`mx-auto max-w-7xl flex-col gap-8`, narrower on
+profile/securitysettings/notificationpreferences) nested inside. `main`
+itself is bare (`flex-1 flex flex-col pb-20 md:pb-0`). The full
+route→gradient map is pinned by `tests/unit/recipes.test.ts` and
+documented in `docs/remediation-plan-session6.md` §S2 — do not move page
+padding back onto `main` or the gradients onto `body` (both regress
+reference-measured geometry).
+
+Per-page CTA gradients (measured, sRGB): default blue #2563EB→#4F46E5;
+payroll/payrollmodule/interviewassistant green #16A34A→#059669; attendance
+cyan #2563EB→#0891B2; compliance red #DC2626→#EA580C; assistant chat purple
+#9333EA→#4F46E5; templates indigo #4F46E5→#9333EA; workflows pink
+#9333EA→#DB2777. Empty-state CTAs and the taskmanager active toggle use the
+reference's shadcn default dark (#171717).

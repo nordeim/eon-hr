@@ -237,7 +237,8 @@ export default function AssetManagementPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Asset Management"
         subtitle="Track company equipment assigned to employees"
@@ -314,7 +315,7 @@ export default function AssetManagementPage() {
                 : "Add your first company asset to get started"
             }
             action={
-              <Button
+              <Button variant="dark"
                 onClick={() => {
                   setEditing(null);
                   setDialogOpen(true);
@@ -430,6 +431,7 @@ export default function AssetManagementPage() {
           {assignTarget ? <AssignForm asset={assignTarget} employees={employees} busy={busy === assignTarget.id + "assign"} onAssign={onAssign} /> : null}
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

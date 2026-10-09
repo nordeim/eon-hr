@@ -232,8 +232,10 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           <CircleUser className="h-5 w-5 text-white" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
-          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          {/* Session 6: reference renders the user name at slate-900
+              (#0f172a — measured), not the neutral foreground token. */}
+          <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
+          <p className="truncate text-xs text-slate-500">{user.email}</p>
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

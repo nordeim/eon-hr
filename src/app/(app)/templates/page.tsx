@@ -178,13 +178,14 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Onboarding Templates"
         size="lg"
         subtitle="Create reusable onboarding task templates"
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button variant="indigo" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Create Template
           </Button>
@@ -211,7 +212,7 @@ export default function TemplatesPage() {
             title="No templates yet"
             description="Create your first onboarding template to get started"
             action={
-              <Button onClick={() => setCreateOpen(true)}>
+              <Button variant="dark" onClick={() => setCreateOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Create Template
               </Button>
@@ -379,6 +380,7 @@ export default function TemplatesPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

@@ -147,7 +147,8 @@ export default function HrAssistantChatPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI HR Assistant"
         layout="flat36"
@@ -161,7 +162,7 @@ export default function HrAssistantChatPage() {
         {/* chat list */}
         <Card className="flex h-64 flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
           <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-            <Button size="sm" className="w-full" onClick={onNewChat}>
+            <Button variant="purple" size="sm" className="w-full" onClick={onNewChat}>
               <Plus className="mr-2" aria-hidden="true" />
               New Chat
             </Button>
@@ -311,6 +312,7 @@ export default function HrAssistantChatPage() {
           )}
         </Card>
       </div>
+    </div>
     </div>
   );
 }

@@ -167,7 +167,8 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Attendance Dashboard"
         subtitle="Daily clock-in/out trends, late arrivals & department reports"
@@ -288,6 +289,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
           )}
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

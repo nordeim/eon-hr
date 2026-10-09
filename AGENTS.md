@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 90 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 78 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 102 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 84 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -57,7 +57,10 @@ six v3→v4 engine differences already fixed in `src/app/globals.css`:
 2. The v3-era palette is pinned in `@theme` (v4's oklch defaults drift
    1–3 sRGB units per channel).
 3. Parity-critical gradients use `bg-[linear-gradient(...)]` (v4 interpolates
-   `bg-gradient-to-*` in oklab).
+   `bg-gradient-to-*` in oklab) — including the shell canvas, the per-page
+   canvases, and every CTA gradient (session 6: per-page colors — payroll
+   green→emerald, attendance blue→cyan, compliance red→orange, chat purple,
+   templates indigo, workflows pink).
 4. **No `mt-*`/`mb-*` utilities on children of `space-y-*`/`space-x-*`
    containers** — v3's selector specificity overrides them, v4's `:where()`
    wrapper does not. Use flex `gap` layouts instead.
@@ -107,3 +110,31 @@ preview host.
 - Browser binaries: `bunx playwright install chromium` once.
 - Strict-mode locators: scope headings with `exact: true` when a page
   contains both a title and a "All {Title}" card heading.
+
+## Page architecture (session 6) — where padding and gradients live
+
+The reference paints its canvas per page; `main` is BARE
+(`flex-1 flex flex-col pb-20 md:pb-0` — no padding). Every page renders:
+
+```
+main
+└── page root: min-h-screen bg-[linear-gradient(to_right_bottom,X,Y)] p-4 md:p-8
+    └── content wrapper: mx-auto flex w-full max-w-7xl flex-col gap-8
+```
+
+Per-page gradient map (measured): payroll green-50→blue-50, payrollmodule
+green→emerald, payrollengine emerald→teal, training/communications/
+hrassistantchat purple→blue, expenses purple→pink, interviewassistant
+purple→indigo, recruitment indigo→blue, allleaverequests/documenttracker
+blue→indigo, attendance(+dashboard) blue→cyan, evaluations/hrletters
+indigo→purple, compliancedashboard red→orange, organogram teal→green,
+surveys teal→cyan, surveyanalytics teal→slate, shiftcalendar violet→indigo,
+performancemanagement slate→indigo, workflowautomation slate→purple; the
+rest slate→blue; employees/analytics/templates/announcements/
+recruitmentkanban/notificationpreferences/hrreports/workflowconfigpage/
+staffrequests/dashboard have NO canvas (plain roots, some with p-6 +
+narrow max-w — see `docs/remediation-plan-session6.md` §S2). The shell
+canvas gradient (slate-50→blue-50, sRGB) lives on the AppShell root div.
+
+Do NOT re-add padding to `main` or move gradients to `body` — both are
+reference-measured contracts pinned by tests.

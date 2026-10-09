@@ -173,7 +173,8 @@ export default function LoansPage() {
   })();
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"
         layout="raised-36"
@@ -204,7 +205,7 @@ export default function LoansPage() {
             title="No loans yet"
             description="Create your first loan request"
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 New Loan Request
               </Button>
@@ -390,6 +391,7 @@ export default function LoansPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

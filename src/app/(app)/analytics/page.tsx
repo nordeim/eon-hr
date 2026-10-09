@@ -105,7 +105,8 @@ export default async function AnalyticsPage() {
     .sort((a, b) => b.completion - a.completion);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Analytics Dashboard"
         size="lg"
@@ -116,7 +117,7 @@ export default async function AnalyticsPage() {
           48px colored icon tiles (rounded-xl) — blue/purple/green/orange
           100 backgrounds, 24px -600 icons, 30px values, 14px/400 labels.
           The templates count is card 1's hint in the reference. */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         <StatCard
           label="Total Employees"
           value={employeeCount}
@@ -215,6 +216,7 @@ export default async function AnalyticsPage() {
           </dl>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

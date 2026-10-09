@@ -300,7 +300,8 @@ export default function RecruitmentPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI-Powered Recruitment"
         layout="flat36-sm"
@@ -625,7 +626,7 @@ export default function RecruitmentPage() {
                 title="No job postings"
                 description="Post your first job to start collecting applicants."
                 action={
-                  <Button onClick={() => setJobDialogOpen(true)}>
+                  <Button variant="dark" onClick={() => setJobDialogOpen(true)}>
                     <Plus className="mr-2" aria-hidden="true" />
                     Post New Job
                   </Button>
@@ -778,6 +779,7 @@ export default function RecruitmentPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

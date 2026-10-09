@@ -172,7 +172,8 @@ export default function RecruitmentKanbanPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"
@@ -214,7 +215,7 @@ export default function RecruitmentKanbanPage() {
                 : "Add your first applicant to start tracking the hiring process."
             }
             action={
-              <Button onClick={() => setDialogOpen(true)} disabled={jobs.length === 0}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)} disabled={jobs.length === 0}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Applicant
               </Button>
@@ -364,6 +365,7 @@ export default function RecruitmentKanbanPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

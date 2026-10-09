@@ -142,7 +142,8 @@ export default function CompanyWallPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Company Wall"
         layout="flat48"
@@ -263,6 +264,7 @@ export default function CompanyWallPage() {
           })}
         </div>
       )}
+    </div>
     </div>
   );
 }

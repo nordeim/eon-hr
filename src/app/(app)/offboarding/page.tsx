@@ -179,7 +179,8 @@ export default function OffboardingPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Offboarding Management"
         layout="flat36"
@@ -206,7 +207,7 @@ export default function OffboardingPage() {
             title="No offboarding processes"
             description="Start an offboarding journey when needed"
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 New Offboarding
               </Button>
@@ -367,6 +368,7 @@ export default function OffboardingPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

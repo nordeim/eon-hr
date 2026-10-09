@@ -134,3 +134,38 @@ test.describe("mobile navigation", () => {
     await expect(page.getByRole("button", { name: "Toggle Sidebar" })).toBeVisible();
   });
 });
+
+test.describe("mobile page kicker (session 6)", () => {
+  test("dashboard kicker is sticky below the 73px top bar", async ({ page }) => {
+    // Reference (session-6 mobile measurement): md:hidden sticky bar with
+    // bg-white, border-b slate-200, px-4 py-3 — INSIDE the p-4 page wrapper
+    // (x=16, y=89), title "Dashboard" 18px/700 slate-900 at x=32/y=101.
+    // It sticks directly below the 73px top bar while content scrolls.
+    await page.goto("/dashboard");
+    const kicker = page.locator("div.sticky").filter({ hasText: "Dashboard" }).first();
+    await expect(kicker).toBeVisible();
+    const box = await kicker.boundingBox();
+    expect(box).not.toBeNull();
+    expect(Math.round(box!.x)).toBe(16);
+    expect(Math.round(box!.y)).toBe(89);
+    expect(Math.round(box!.height)).toBe(53);
+    const h1 = kicker.getByRole("heading", { name: "Dashboard" });
+    await expect(h1).toHaveCSS("font-size", "18px");
+    await expect(h1).toHaveCSS("font-weight", "700");
+    await expect(h1).toHaveCSS("color", "rgb(15, 23, 42)");
+    // scroll: the kicker stays pinned under the top bar
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await expect(kicker).toHaveCSS("position", "sticky");
+    const scrolled = await kicker.boundingBox();
+    expect(scrolled).not.toBeNull();
+    expect(Math.round(scrolled!.y)).toBe(73);
+  });
+
+  test("module pages render without a mobile kicker (reference)", async ({ page }) => {
+    // Only the dashboard carries a page-title kicker; module pages render
+    // their responsive headers directly (reference /taskmanager).
+    await page.goto("/taskmanager");
+    const kickers = page.locator("main div.sticky");
+    expect(await kickers.count()).toBe(0);
+  });
+});

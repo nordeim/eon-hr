@@ -90,7 +90,8 @@ export default function InterviewAssistantPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eef2ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI-Powered Interviews"
         layout="flat36"
@@ -148,7 +149,7 @@ export default function InterviewAssistantPage() {
                   />
                   <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
                 </div>
-                <Button type="submit" disabled={analyzing || !notes.trim()}>
+                <Button variant="green" type="submit" disabled={analyzing || !notes.trim()}>
                   {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
                   Analyze Interview
                 </Button>
@@ -245,6 +246,7 @@ export default function InterviewAssistantPage() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }

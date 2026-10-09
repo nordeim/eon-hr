@@ -192,7 +192,8 @@ export default function WorkflowAutomationPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#faf5ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Workflow Automation"
         layout="flat36"
@@ -201,7 +202,7 @@ export default function WorkflowAutomationPage() {
         title="Automated Workflows"
         subtitle="Streamline HR processes with intelligent automation"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button variant="pink" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Create Workflow
           </Button>
@@ -225,7 +226,7 @@ export default function WorkflowAutomationPage() {
             title="No workflows yet"
             description="Create your first workflow to automate HR processes"
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Create Workflow
               </Button>
@@ -299,6 +300,7 @@ export default function WorkflowAutomationPage() {
       )}
 
       <NewWorkflowDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreate} />
+    </div>
     </div>
   );
 }

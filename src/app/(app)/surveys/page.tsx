@@ -189,7 +189,8 @@ export default function SurveysPage() {
   }, [surveys]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdfa,#ecfeff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Employee Engagement"
         layout="flat48"
@@ -222,7 +223,7 @@ export default function SurveysPage() {
             title="No surveys yet"
             description="Create your first survey to gather employee feedback"
             action={
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2" aria-hidden="true" />
                 New Survey
               </Button>
@@ -350,6 +351,7 @@ export default function SurveysPage() {
           ) : null}
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

@@ -197,7 +197,8 @@ export default function ComplianceDashboardPage() {
   }, [filtered]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#fef2f2,#fff7ed)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Compliance Monitor"
         layout="flat36-sm"
@@ -206,7 +207,7 @@ export default function ComplianceDashboardPage() {
         title="Compliance Dashboard"
         subtitle="Proactive document expiry tracking & automated notifications"
         actions={
-          <Button onClick={runScan} disabled={scanning || loading}>
+          <Button variant="red" onClick={runScan} disabled={scanning || loading}>
             {scanning ? <Loader2 className="animate-spin" aria-hidden="true" /> : <ScanSearch aria-hidden="true" />}
             Run Compliance Scan
           </Button>
@@ -378,6 +379,7 @@ export default function ComplianceDashboardPage() {
           </Card>
         </>
       )}
+    </div>
     </div>
   );
 }

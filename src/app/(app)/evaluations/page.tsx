@@ -196,7 +196,8 @@ export default function EvaluationsPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#faf5ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Performance Management"
         layout="flat48"
@@ -245,7 +246,7 @@ export default function EvaluationsPage() {
                   title="No reviews yet. Create one to get started."
                   description="Review cycles organize appraisal and 360° feedback rounds."
                   action={
-                    <Button onClick={() => setDialogOpen(true)}>
+                    <Button variant="dark" onClick={() => setDialogOpen(true)}>
                       <Plus className="mr-2" aria-hidden="true" />
                       New Review
                     </Button>
@@ -424,6 +425,7 @@ export default function EvaluationsPage() {
       </Tabs>
 
       <NewReviewDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreateCycle} />
+    </div>
     </div>
   );
 }

@@ -18,8 +18,30 @@ const buttonVariants = cva(
         // Chromium serializes the direction keyword as the equivalent 90deg.
         default:
           "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#1D4ED8,#4338CA)] bg-[linear-gradient(to_right,#2563EB,#4F46E5)]",
+        // Session 6 — the reference's shadcn default variant (bg-primary
+        // where --primary = 0 0% 9%): renders #171717 with #FAFAFA text.
+        // Measured on the taskmanager active toggle and the empty-state
+        // CTAs (NOT the gradient recipe).
+        dark: "bg-[#171717] text-primary-foreground shadow hover:bg-[#171717]/90",
+        // Session 6 — per-page gradient CTAs (measured endpoints, sRGB;
+        // resting state byte-equal, hover shades are a superset nicety —
+        // the reference does not change its gradient on hover).
+        green:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#15803D,#047857)] bg-[linear-gradient(to_right,#16A34A,#059669)]",
+        cyan:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#1D4ED8,#0E7490)] bg-[linear-gradient(to_right,#2563EB,#0891B2)]",
+        red:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#B91C1C,#C2410C)] bg-[linear-gradient(to_right,#DC2626,#EA580C)]",
+        purple:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#7E22CE,#4338CA)] bg-[linear-gradient(to_right,#9333EA,#4F46E5)]",
+        indigo:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#4338CA,#7E22CE)] bg-[linear-gradient(to_right,#4F46E5,#9333EA)]",
+        pink:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#7E22CE,#BE185D)] bg-[linear-gradient(to_right,#9333EA,#DB2777)]",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-input bg-card shadow-sm hover:bg-secondary hover:text-secondary-foreground",
+        // Reference outline (session-6 class capture): border border-input
+        // bg-background shadow-sm hover:bg-accent hover:text-accent-foreground.
+        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-secondary hover:text-secondary-foreground",
         link: "text-primary underline-offset-4 hover:underline",

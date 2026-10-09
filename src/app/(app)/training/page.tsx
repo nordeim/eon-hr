@@ -136,7 +136,8 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Learning Management System"
         layout="flat48"
@@ -186,7 +187,7 @@ export default function TrainingPage() {
                         : `No ${c.label} platforms yet — try another category`
                     }
                     action={
-                      <Button onClick={() => setDialogOpen(true)}>
+                      <Button variant="dark" onClick={() => setDialogOpen(true)}>
                         <Plus className="mr-2" aria-hidden="true" />
                         New Platform
                       </Button>
@@ -239,6 +240,7 @@ export default function TrainingPage() {
       </Tabs>
 
       <NewPlatformDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreate} />
+    </div>
     </div>
   );
 }

@@ -33,7 +33,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <SidebarNav user={user} />
@@ -81,9 +81,11 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
           </div>
         </header>
 
-        {/* Reference content wrapper: p-4 md:p-8 with pb-20 md:pb-0 for the
-            mobile bottom-bar clearance. */}
-        <main className="flex-1 p-4 pb-20 md:p-8 md:pb-0">{children}</main>
+        {/* Reference main (session 6): bare flex column — `flex-1 flex
+            flex-col pb-20 md:pb-0`. Page padding lives on each page's own
+            root div (p-4 md:p-8, per-page gradient canvases — see the
+            codemod + docs/remediation-plan-session6.md §S2). */}
+        <main className="flex-1 flex flex-col pb-20 md:pb-0">{children}</main>
 
         {/* Mobile bottom tab bar (session-5 re-measurement): labels are
             text-sm font-medium (14px/21px), 61px items, 78px bar — and the
