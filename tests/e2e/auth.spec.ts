@@ -18,13 +18,28 @@ test.describe("logged-out surface", () => {
 
   test("login page renders the reference structure", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: "EON HR", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Welcome to Eon HR" })).toBeVisible();
+    await expect(page.getByText("Sign in to continue")).toBeVisible();
+    await expect(page.getByRole("img", { name: "Eon HR" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Continue with Microsoft" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Continue with Apple" })).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password")).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeEnabled();
+  });
+
+  test("sign-in action uses the reference dark style with gray links", async ({ page }) => {
+    await page.goto("/login");
+    // Reference: slate-900 sign-in action (not brand blue), gray link colors.
+    const signIn = page.getByRole("button", { name: "Sign in", exact: true });
+    await expect(signIn).toHaveCSS("background-color", "rgb(15, 23, 42)");
+    await expect(page.getByRole("button", { name: "Forgot password?" })).toHaveCSS(
+      "color",
+      "rgb(100, 116, 139)"
+    );
+    // Reference placeholder text
+    await expect(page.getByLabel("Email")).toHaveAttribute("placeholder", "you@example.com");
   });
 
   test("invalid credentials show an actionable error", async ({ page }) => {

@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Upload, Search, LayoutGrid, List, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Upload, Search, LayoutGrid, List, Pencil, Trash2, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -33,28 +32,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
-import { cn, formatDate, formatSar, initials } from "@/lib/utils";
+import { formatDate, initials } from "@/lib/utils";
+import { EmployeeWizard, type WizardEmployee } from "./employee-wizard";
 
-interface EmployeeRow {
+interface EmployeeRow extends WizardEmployee {
   id: string;
   employeeId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string | null;
-  jobTitle: string | null;
   employmentStatus: string;
-  employmentType: string;
-  startDate: string | null;
-  baseSalary: number;
 }
 
 const STATUS_OPTIONS = ["all", "active", "on_leave", "suspended", "terminated"];
-const TYPE_OPTIONS = ["all", "full_time", "part_time", "contract", "intern"];
 
 function labelize(v: string): string {
   return v === "all" ? "All" : v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -71,7 +61,6 @@ export default function EmployeesPage() {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<EmployeeRow | null>(null);
-  const [saving, setSaving] = React.useState(false);
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -101,12 +90,10 @@ export default function EmployeesPage() {
   const counts = React.useMemo(() => {
     return {
       total: employees.length,
-      active: employees.filter((e) => e.employmentStatus === "active").length,
     };
   }, [employees]);
 
-  async function onSave(data: Record<string, unknown>) {
-    setSaving(true);
+  async function onSave(data: Record<string, unknown>): Promise<boolean> {
     try {
       const res = await fetch(editing ? `/api/employees?id=${editing.id}` : "/api/employees", {
         method: editing ? "PATCH" : "POST",
@@ -119,8 +106,10 @@ export default function EmployeesPage() {
         return false;
       }
       toast.toast({
-        title: editing ? "Employee updated" : "Employee added",
-        description: editing ? "Changes saved." : `${data.firstName} was added to the directory.`,
+        title: editing ? "Employee updated" : "Employee created",
+        description: editing
+          ? "Changes saved."
+          : `${data.firstName} ${data.lastName} was added to the directory.`,
         variant: "success",
       });
       setDialogOpen(false);
@@ -130,8 +119,6 @@ export default function EmployeesPage() {
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
       return false;
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -154,16 +141,27 @@ export default function EmployeesPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
-        section="Employees"
+        size="lg"
         title="Employees"
         subtitle={`Manage your ${counts.total} employees`}
         actions={
           <>
-            <Button variant="outline" onClick={() => toast.toast({ title: "CSV import", description: "Drop a CSV with columns: firstName, lastName, email, jobTitle, employmentStatus", variant: "info" })}>
+            <Button
+              variant="outline"
+              className="text-blue-700"
+              onClick={() =>
+                toast.toast({
+                  title: "CSV import",
+                  description: "Drop a CSV with columns: firstName, lastName, email, jobTitle, employmentStatus",
+                  variant: "info",
+                })
+              }
+            >
               <Upload aria-hidden="true" />
               Import CSV
             </Button>
             <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700"
               onClick={() => {
                 setEditing(null);
                 setDialogOpen(true);
@@ -176,15 +174,8 @@ export default function EmployeesPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total" value={counts.total} />
-        <StatCard label="Active" value={counts.active} />
-        <StatCard label="On Leave" value={employees.filter((e) => e.employmentStatus === "on_leave").length} />
-        <StatCard label="Suspended" value={employees.filter((e) => e.employmentStatus === "suspended").length} />
-      </div>
-
       {/* Filter bar */}
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
@@ -218,11 +209,11 @@ export default function EmployeesPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
+        <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : employees.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
+        <div className="rounded-xl border bg-card shadow">
           <EmptyState
             title={search || status !== "all" ? "No employees match your filters" : "No employees yet"}
             description={
@@ -239,13 +230,13 @@ export default function EmployeesPage() {
           />
         </div>
       ) : view === "list" ? (
-        <div className="rounded-xl border bg-card shadow-sm">
+        /* Reference columns: Employee, Job Title, Status, Start Date, Actions */
+        <div className="rounded-xl border bg-card shadow">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Employee</TableHead>
                 <TableHead>Job Title</TableHead>
-                <TableHead>Employment</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Start Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -268,9 +259,6 @@ export default function EmployeesPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{emp.jobTitle ?? "—"}</TableCell>
-                  <TableCell>
-                    <StatusBadge status={emp.employmentType} />
-                  </TableCell>
                   <TableCell>
                     <StatusBadge status={emp.employmentStatus} />
                   </TableCell>
@@ -301,7 +289,7 @@ export default function EmployeesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {employees.map((emp) => (
-            <div key={emp.id} className="rounded-xl border bg-card p-4 shadow-sm">
+            <div key={emp.id} className="rounded-xl border bg-card p-4 shadow">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <Avatar>
@@ -324,12 +312,8 @@ export default function EmployeesPage() {
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Type</dt>
                   <dd className="pl-2">
-                    <StatusBadge status={emp.employmentType} />
+                    <Badge variant="outline">{labelize(emp.employmentType)}</Badge>
                   </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Salary</dt>
-                  <dd className="pl-2 text-foreground">{formatSar(emp.baseSalary)}</dd>
                 </div>
               </dl>
             </div>
@@ -337,10 +321,10 @@ export default function EmployeesPage() {
         </div>
       )}
 
-      <EmployeeDialog
+      <EmployeeWizard
         open={dialogOpen}
         employee={editing}
-        saving={saving}
+        excludeManagerId={editing?.id ?? null}
         onOpenChange={(o) => {
           setDialogOpen(o);
           if (!o) setEditing(null);
@@ -348,155 +332,5 @@ export default function EmployeesPage() {
         onSave={onSave}
       />
     </div>
-  );
-}
-
-function EmployeeDialog({
-  open,
-  employee,
-  saving,
-  onOpenChange,
-  onSave,
-}: {
-  open: boolean;
-  employee: EmployeeRow | null;
-  saving: boolean;
-  onOpenChange: (o: boolean) => void;
-  onSave: (data: Record<string, unknown>) => Promise<boolean>;
-}) {
-  const [form, setForm] = React.useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    jobTitle: "",
-    employmentStatus: "active",
-    employmentType: "full_time",
-    startDate: "",
-    salary: "0",
-  });
-
-  React.useEffect(() => {
-    if (open) {
-      setForm({
-        firstName: employee?.firstName ?? "",
-        lastName: employee?.lastName ?? "",
-        email: employee?.email ?? "",
-        phone: employee?.phone ?? "",
-        jobTitle: employee?.jobTitle ?? "",
-        employmentStatus: employee?.employmentStatus ?? "active",
-        employmentType: employee?.employmentType ?? "full_time",
-        startDate: employee?.startDate ? employee.startDate.slice(0, 10) : "",
-        salary: employee ? String(employee.baseSalary / 100) : "0",
-      });
-    }
-  }, [open, employee]);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const salaryNum = Number(form.salary);
-    if (!Number.isFinite(salaryNum) || salaryNum < 0) return;
-    const okSave = await onSave({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      phone: form.phone,
-      jobTitle: form.jobTitle,
-      employmentStatus: form.employmentStatus,
-      employmentType: form.employmentType,
-      startDate: form.startDate,
-      baseSalary: Math.round(salaryNum * 100),
-    });
-    if (okSave) onOpenChange(false);
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{employee ? "Edit Employee" : "Add Employee"}</DialogTitle>
-          <DialogDescription>
-            {employee ? "Update the employee's details." : "Create a new employee record."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-first">First Name</Label>
-              <Input id="emp-first" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-last">Last Name</Label>
-              <Input id="emp-last" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="emp-email">Email</Label>
-            <Input id="emp-email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-phone">Phone</Label>
-              <Input id="emp-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-title">Job Title</Label>
-              <Input id="emp-title" value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-status">Employment Status</Label>
-              <Select value={form.employmentStatus} onValueChange={(v) => setForm({ ...form, employmentStatus: v })}>
-                <SelectTrigger id="emp-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.filter((s) => s !== "all").map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {labelize(s)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-type">Employment Type</Label>
-              <Select value={form.employmentType} onValueChange={(v) => setForm({ ...form, employmentType: v })}>
-                <SelectTrigger id="emp-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_OPTIONS.filter((t) => t !== "all").map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {labelize(t)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-start">Start Date</Label>
-              <Input id="emp-start" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="emp-salary">Base Salary (SAR)</Label>
-              <Input id="emp-salary" type="number" min="0" step="0.01" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-              {employee ? "Save Changes" : "Add Employee"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

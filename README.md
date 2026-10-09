@@ -27,6 +27,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | 💰 **Payroll engine** | Monthly payslips, bulk generation, attendance-derived deductions (late/absent/overtime) |
 | 🎯 **Recruitment suite** | Job postings, applicant ranking with deterministic AI CV scoring, pipeline kanban, interview analyzer |
 | 📋 **Leave & attendance** | Leave requests with approval workflow and balance updates, attendance records, shift calendar |
+| 🧑‍💼 **4-step employee wizard** | Personal → Job → Contract → Documents & Attachments with Saudi-specific fields (nationality, iqama, GOSI, IBAN) — mirrors the reference flow exactly |
 | 🛡️ **Compliance monitor** | Document expiry tracking with severity-bucketed alerts and notification sweeps |
 | ⭐ **Performance** | Goals & KPIs with progress tracking, review cycles, 360° evaluations |
 | 💬 **Communications** | Company wall, real-time chat, announcements, email/SMS/WhatsApp dispatch logging |
@@ -44,13 +45,13 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Language | TypeScript | 5.x (strict) | Type safety across app and API |
 | Styling | Tailwind CSS | 4.x (CSS-first `@theme`) | Design tokens, utilities — no config file |
 | Components | Radix UI + CVA (shadcn pattern) | latest | Accessible primitives |
-| Charts | Recharts | 2.x | Analytics visualizations |
+| Charts | Recharts | 3.x | Analytics visualizations |
 | Database | SQLite via Prisma ORM | 6.x / 45 models | Zero-config persistence at `db/custom.db` |
 | Auth | Custom HMAC cookie sessions + scrypt | node:crypto | Stateless, revocation-safe |
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
-| Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils) |
-| E2E tests | Playwright | 1.63 | 68 specs across auth, nav, mobile, CRUD |
+| Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens) |
+| E2E tests | Playwright | 1.63 | 75 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD |
 
 ## File Hierarchy
 
@@ -68,19 +69,20 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 │   │   ├── 📂 (app)/               # 46 auth-guarded module routes
 │   │   └── 📂 api/                 # 49 route handlers (ActionResult envelope)
 │   ├── 📂 components/
-│   │   ├── 📂 ui/                  # 16 shadcn-style primitives
+│   │   ├── 📂 ui/                  # 15 shadcn-style primitives
 │   │   ├── 📂 layout/              # Sidebar, mobile drawer, bottom tabs
 │   │   └── 📂 shared/              # PageHeader, StatCard, EmptyState, StatusBadge
 │   ├── 📂 lib/                     # auth, api, db, db-path, validation, utils, nav
 │   └── 📂 stores/                  # Client state (Zustand)
 ├── 📂 tests/
-│   ├── 📂 unit/                    # Vitest: auth, utils
+│   ├── 📂 unit/                    # Vitest: auth, utils, design tokens
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
-│   └── 📂 e2e/                     # Playwright: 68 specs, isolated e2e.db
+│   └── 📂 e2e/                     # Playwright: 75 specs, isolated e2e.db
 ├── 📂 docs/
-│   ├── 📂 screenshots/             # Captured UI evidence
-│   └── 📄 Tailwind-V4-Validation-Report.md  # Engine trap log
-└── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md
+│   ├── 📂 screenshots/             # 22 remediated UI captures (desktop + mobile + wizard)
+│   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
+│   └── 📄 Tailwind-V4-Validation-Report.md    # Engine trap log
+└── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md • eon-hr_SKILL.md
 ```
 
 ## Quick Start
@@ -124,16 +126,15 @@ DATABASE_URL="file:../db/custom.db"     # → <repo>/db/custom.db
 # Session signing secret for HMAC cookie auth.
 # REQUIRED in production: generate with `openssl rand -hex 32`.
 AUTH_SECRET=""
-
-# Canonical public origin — metadata, sitemap, robots.
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+These are the only two variables the codebase reads — see `.env.example`.
 
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (38 specs: db-path, auth, utils)
-bun run test:e2e      # Playwright E2E (68 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (44 specs: db-path, auth, utils, tokens)
+bun run test:e2e      # Playwright E2E (75 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```
@@ -142,17 +143,46 @@ The E2E layer builds the standalone server, pushes an isolated schema to `db/e2e
 
 ## Design System
 
+All tokens live in the `@theme inline` block of `src/app/globals.css`
+(Tailwind v4 CSS-first — no config file), pinned to values **measured from
+the live reference app** and regression-pinned by `tests/unit/tokens.test.ts`.
+
 | Token | Hex | Usage |
 |---|---|---|
-| Background | `#F1F7FE` | App canvas (measured from reference) |
+| Primary | `#1877F2` | Active nav, primary buttons, ring (reference-measured `custom-primary-bg`) |
+| Link | `#2563EB` | "View all" / "Request leave" text links (reference `text-blue-600`) |
+| Background | `#F8FAFC → #EFF6FF` | App canvas gradient (slate-50 → blue-50, sRGB-pinned) |
 | Card | `#FFFFFF` | Surfaces, tables, dialogs |
-| Primary | `#2563EB` | Actions, links, active nav, avatars |
-| Success | `#10B981` | Sick-leave bars, approved badges |
 | Text primary | `hsl(221 39% 11%)` | Headings and body |
-| Text muted | `#6B7280` | Subtitles, empty states |
+| Text muted | `#64748B` (slate-500) | Subtitles, empty states |
 | Border | `hsl(214 32% 91%)` | Card and input borders |
+| Sidebar border | `#E2E8F0` (slate-200) | Sidebar + header dividers |
 
-Typography: **Inter** (via `next/font`) — 12px section kickers, 24–32px bold page titles, 14px body. Radius: `rounded-xl` cards, `rounded-lg` controls. Shadows: v3-geometry `--shadow-sm` pin (see the Tailwind trap log).
+The v3-era slate/blue/green/indigo families are hex-pinned so utilities like
+`bg-slate-600` render byte-identical to the reference (Tailwind v4's default
+oklch palette drifts 1–3 sRGB units — one of the five traps documented in
+`docs/Tailwind-V4-Validation-Report.md`). Typography: **Inter** — 12px
+sidebar/kicker labels, 30px dashboard and 48px module page titles, 14px body.
+Radius: `rounded-xl` cards, `rounded-lg` controls. Shadows: v3-geometry
+`--shadow-sm` pin.
+
+## Reference Parity & Superset
+
+The UI was audited against the live reference (`https://eon.base44.app`) with
+a dual-browser workflow (desktop 1440×900 + mobile 390×844): colors and
+geometry extracted from computed styles, screenshots diffed, every claim
+verified in the DOM. Session 2 closed the full gap inventory in
+`docs/remediation-plan-session1.md` — primary token, sidebar icons and
+gradient avatar, عربي language button, 288px mobile drawer with dark overlay,
+reference PageHeader scale, bordered quick-action chips, single-line expense
+total, dark sign-in button, gradient brand squircle, and the reference's
+4-step Add Employee wizard (Saudi-specific fields). A few deliberate
+deviations are documented there (e.g. the reference's `/Dashboard`
+case-sensitivity bug is fixed, its builder badge is not cloned).
+
+Deep engineering knowledge — the five Tailwind v4 traps, the wizard
+button-swap form-submit bug, debugging runbooks and coding patterns — is
+distilled in **`eon-hr_SKILL.md`**.
 
 ## License
 

@@ -2,11 +2,9 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Briefcase, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, Mail, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 
 function GoogleIcon() {
   return (
@@ -52,7 +50,13 @@ function AppleIcon() {
 
 export default function LoginPage() {
   return (
-    <React.Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-secondary/60"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-100">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+        </div>
+      }
+    >
       <LoginForm />
     </React.Suspense>
   );
@@ -92,67 +96,99 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/60 px-4 py-10">
+    /* Reference login shell: flat light canvas, glass card, circular logo. */
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
       <div className="w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-            <Briefcase className="h-6 w-6" aria-hidden="true" />
+        <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-card-foreground shadow-2xl backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 px-6 pt-8 sm:px-8">
+            {/* Circular brand mark — self-hosted copy of the reference logo
+                (public/eon-logo.png) in a ring-wrapped shadowed circle. */}
+            <div className="flex h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-lg ring-4 ring-white/50 transition-all duration-300 sm:h-24 sm:w-24">
+              { }
+              <img src="/eon-logo.png" alt="Eon HR" className="aspect-square h-full w-full object-cover" />
+            </div>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                Welcome to Eon HR
+              </h1>
+              <p className="mt-1 text-sm font-medium text-slate-500 sm:text-base">
+                Sign in to continue
+              </p>
+            </div>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">EON HR</h1>
-        </div>
 
-        <Card className="border-border/80 shadow-xl shadow-black/5">
-          <CardContent className="p-6 sm:p-8">
-            <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">Welcome to Eon HR</h2>
-              <p className="mt-1.5 text-sm text-muted-foreground">Sign in to continue</p>
-            </div>
+          <div className="flex flex-col gap-3 px-6 py-6 sm:px-8">
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
+              onClick={() => setError("Social sign-in is not configured on this deployment")}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
+              onClick={() => setError("Social sign-in is not configured on this deployment")}
+            >
+              <MicrosoftIcon />
+              Continue with Microsoft
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
+              onClick={() => setError("Social sign-in is not configured on this deployment")}
+            >
+              <AppleIcon />
+              Continue with Apple
+            </button>
 
-            <div className="flex flex-col gap-3">
-              <Button type="button" variant="outline" className="h-11 w-full" onClick={() => setError("Social sign-in is not configured on this deployment")}>
-                <GoogleIcon />
-                Continue with Google
-              </Button>
-              <Button type="button" variant="outline" className="h-11 w-full" onClick={() => setError("Social sign-in is not configured on this deployment")}>
-                <MicrosoftIcon />
-                Continue with Microsoft
-              </Button>
-              <Button type="button" variant="outline" className="h-11 w-full" onClick={() => setError("Social sign-in is not configured on this deployment")}>
-                <AppleIcon />
-                Continue with Apple
-              </Button>
-            </div>
-
-            <div className="my-6 flex items-center gap-3" role="separator" aria-label="or">
-              <span className="h-px flex-1 bg-border" />
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">or</span>
-              <span className="h-px flex-1 bg-border" />
+            <div className="my-3 flex items-center gap-3" role="separator" aria-label="or">
+              <span className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs font-medium uppercase tracking-wider text-slate-400">or</span>
+              <span className="h-px flex-1 bg-slate-200" />
             </div>
 
             <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@company.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                {/* Reference: envelope icon inline inside the field. */}
+                <div className="relative">
+                  <Mail
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    required
+                    className="pl-9"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                {/* Reference: lock icon inline inside the field. */}
+                <div className="relative">
+                  <Lock
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    required
+                    className="pl-9"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
               </div>
 
               {error ? (
@@ -161,22 +197,35 @@ function LoginForm() {
                 </p>
               ) : null}
 
-              <Button type="submit" className="h-11 w-full" disabled={loading}>
+              {/* Reference sign-in action: dark slate-900, not brand blue. */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Sign in
-              </Button>
+              </button>
             </form>
 
-            <div className="mt-6 flex items-center justify-between text-sm">
-              <button type="button" className="font-medium text-primary hover:underline" onClick={() => setError("Password reset is not configured on this deployment")}>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <button
+                type="button"
+                className="text-slate-500 hover:text-slate-700 hover:underline"
+                onClick={() => setError("Password reset is not configured on this deployment")}
+              >
                 Forgot password?
               </button>
-              <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => setError("Sign up is disabled on this demo deployment")}>
-                Need an account? <span className="font-medium text-primary">Sign up</span>
+              <button
+                type="button"
+                className="text-slate-500 hover:text-slate-700"
+                onClick={() => setError("Sign up is disabled on this demo deployment")}
+              >
+                Need an account? <span className="font-medium">Sign up</span>
               </button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

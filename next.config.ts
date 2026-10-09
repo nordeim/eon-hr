@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   // parent workspace that has its own lockfile.
   outputFileTracingRoot: path.join(import.meta.dirname, "."),
   reactStrictMode: false,
+  // Hide the floating Next.js dev-tools button — it is a dev-mode-only
+  // overlay that would otherwise appear in docs/screenshots/ captures and
+  // does not exist in production (visual-parity hygiene).
+  devIndicators: false,
   // Next 16's dev-origin protection silently blocks dev chunks for other
   // origins (unhydrated page, native form GET fallbacks) — allow localhost,
   // 127.0.0.1 and the sandbox preview host (docs/Tailwind-V4-Validation-

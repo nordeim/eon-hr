@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Settings2 } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -67,7 +67,7 @@ export function CustomizeButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Settings2 className="h-4 w-4" aria-hidden="true" />
+          <Settings className="h-4 w-4 mr-2" aria-hidden="true" />
           Customize
         </Button>
       </DialogTrigger>

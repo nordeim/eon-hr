@@ -78,6 +78,31 @@ test.describe("mobile navigation", () => {
     expect(box?.width).toBeLessThanOrEqual(0.85 * 390 + 1); // max-w-[85vw]
   });
 
+  test("drawer geometry and overlay match the reference", async ({ page }) => {
+    // Reference: 288px sheet, bg-black/80 overlay, NO X close button
+    // (closing happens via overlay tap / Esc / navigation).
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const panel = page.getByRole("dialog", { name: "Navigation menu" });
+    await expect(panel).toBeVisible();
+    const box = await panel.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(288);
+    await expect(page.getByRole("button", { name: "Close menu" })).toHaveCount(0);
+    // Drawer footer mirrors the reference: عربي toggle + user button
+    await expect(panel.getByRole("button", { name: "عربي", exact: true })).toBeVisible();
+    // Overlay closes the drawer on tap
+    await page.mouse.click(380, 400);
+    await expect(panel).toBeHidden();
+  });
+
+  test("bottom tab bar has no active highlight (reference behavior)", async ({ page }) => {
+    // The reference renders every bottom tab in slate-600 — no active state.
+    await page.goto("/dashboard");
+    const home = page.getByRole("link", { name: "Home", exact: true });
+    const staff = page.getByRole("link", { name: "Staff", exact: true });
+    await expect(home).toHaveCSS("color", "rgb(71, 85, 105)");
+    await expect(staff).toHaveCSS("color", "rgb(71, 85, 105)");
+  });
+
   test("the desktop sidebar is hidden on mobile; the drawer is hidden on desktop", async ({ page }) => {
     // Mobile: no persistent sidebar
     await expect(page.locator("aside")).toBeHidden();

@@ -25,6 +25,13 @@ export default function globalSetup(): void {
   } catch {
     run("npx prisma db push --skip-generate");
   }
+  // Spec leftovers (CRUD round-trips, wizard probes) persist across runs and
+  // would collide with unique keys — purge them before re-seeding.
+  try {
+    run("bun tests/e2e/purge-test-data.ts");
+  } catch {
+    // Non-fatal: fresh databases have nothing to purge.
+  }
   try {
     run("bun prisma/seed.ts");
   } catch {

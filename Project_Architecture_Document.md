@@ -184,7 +184,7 @@ eon-hr/
 │   │       ├── health/route.ts
 │   │       └── <46 resource routes> ← uniform CRUD handlers
 │   ├── components/
-│   │   ├── ui/                  ← 16 primitives (button, card, dialog, select, table, …)
+│   │   ├── ui/                  ← 15 primitives (button, card, dialog, select, table, …)
 │   │   ├── layout/              ← sidebar-nav, app-shell (mobile drawer + bottom tabs)
 │   │   └── shared/              ← page-header, stat-card, empty-state, status-badge
 │   ├── lib/                     ← the L3 seams (see 3.1)
@@ -321,21 +321,30 @@ Font loading: `next/font` Inter with `display: swap`, exposed as `--font-inter` 
 
 ### 5.2 Color Tokens (pinned, measured)
 
+All tokens live in the `@theme inline` block of `src/app/globals.css`, values
+measured from the live reference app (session-2 dual-browser audit) and
+regression-pinned by `tests/unit/tokens.test.ts`. The v3-era
+slate/blue/green/indigo families are additionally hex-pinned so utilities
+render byte-identical to the reference under Tailwind v4 (trap 2 of the five
+v4 traps — see `docs/Tailwind-V4-Validation-Report.md`).
+
 | Token | Value | Usage | Contrast (on white) |
 |---|---|---|---|
-| `--color-background` | `#F1F7FE` | App canvas (measured from reference) | — |
+| `--color-background` | `#F8FAFC` (canvas applies a slate-50→blue-50 sRGB-pinned gradient) | App canvas | — |
 | `--color-card` | `hsl(0 0% 100%)` | Surfaces | — |
-| `--color-primary` | `#2563EB` | Actions, links, active nav, avatars | 4.7:1 AA |
-| `--color-primary-foreground` | `hsl(0 0% 100%)` | On-primary text | 4.7:1 |
-| `--color-muted-foreground` | `#6B7280` | Secondary text | 4.8:1 AA |
+| `--color-primary` | `#1877F2` | Actions, active nav, ring (reference `custom-primary-bg`, measured `rgb(24,119,242)`) | 3.9:1 (large/UI) |
+| `--color-primary-foreground` | `hsl(0 0% 100%)` | On-primary text | — |
+| `--color-link` | `#2563EB` | "View all" / "Request leave" text links (reference `text-blue-600`) | 4.7:1 AA |
+| `--color-muted-foreground` | `#64748B` (slate-500) | Secondary text | 4.8:1 AA |
+| `--color-sidebar-border` | `#E2E8F0` (slate-200) | Sidebar/header dividers | — |
 | `--color-destructive` | `hsl(0 84% 60%)` | Delete, errors | 3.9:1 (large/UI) |
 | `--color-border` | `hsl(214 32% 91%)` | Borders, dividers | — |
-| Success | `#10B981` | Sick-leave bars, approved badges | decorative/data |
+| Success | `#22C55E` (green-500, pinned) | Sick-leave bars, approved badges | decorative/data |
 | `--shadow-sm` | `0 1px 2px 0 rgb(0 0 0 / 0.05)` | Card//navbar elevation (v3 geometry pin) | — |
 
 ### 5.3 Component Primitives
 
-16 primitives in `src/components/ui` (button, card, input, textarea, label, badge, avatar, dialog, select, tabs, switch, checkbox, dropdown-menu, table, progress, toast) + 4 shared furniture pieces (PageHeader, StatCard, EmptyState, StatusBadge). Status color semantics centralize in `StatusBadge`'s status→variant map.
+15 primitives in `src/components/ui` (button, card, input, label, badge, avatar, dialog, select, tabs, switch, checkbox, dropdown-menu, table, progress, toast) + 4 shared furniture pieces (PageHeader, StatCard, EmptyState, StatusBadge). Status color semantics centralize in `StatusBadge`'s status→variant map.
 
 ### 5.4 Motion
 
@@ -409,9 +418,9 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 38/38
+- [ ] `bun run test` — 44/44
 - [ ] `bun run build` succeeds
-- [ ] `bun run test:e2e` — 68/68
+- [ ] `bun run test:e2e` — 75/75
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)
 - [ ] Screenshots in `docs/screenshots/` refreshed if UI changed
 
@@ -433,8 +442,10 @@ bun run start              # NODE_ENV=production, standalone server on :3000
 |---|---|---|---|
 | `DATABASE_URL` | Yes | `file:../db/custom.db` (resolves to `<repo>/db/custom.db`); absolute `file:` or PostgreSQL URLs pass through | schema-relative rule |
 | `AUTH_SECRET` | Production | HMAC session secret, ≥16 chars (`openssl rand -hex 32`) | insecure dev constant |
-| `NEXT_PUBLIC_SITE_URL` | No | Canonical origin for metadata | `http://localhost:3000` |
 | `PORT` | No | Standalone server port | 3000 |
+
+Only `DATABASE_URL` and `AUTH_SECRET` are read by application code; `PORT` is
+the standard Next.js standalone convention. See `.env.example`.
 
 ### 8.3 Docker Configuration
 

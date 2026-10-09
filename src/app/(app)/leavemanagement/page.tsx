@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Loader2, CalendarDays, History } from "lucide-react";
+import { Plus, Loader2, CalendarDays, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -126,9 +125,12 @@ export default function LeaveManagementPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      {/* Reference header: "Leave Management" kicker + "Leave Requests"
+          title + "Request time off and manage approvals" subtitle. */}
       <PageHeader
-        title="Leave Management"
-        subtitle="Request and manage your leave"
+        section="Leave Management"
+        title="Leave Requests"
+        subtitle="Request time off and manage approvals"
         actions={
           <Button onClick={openNewRequest}>
             <Plus aria-hidden="true" />
@@ -142,54 +144,19 @@ export default function LeaveManagementPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : (
-        <>
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle>My Leave Balances</CardTitle>
-              <span className="text-xs text-muted-foreground">{new Date().getFullYear()}</span>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {balances.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">No leave balances yet</p>
-              ) : (
-                balances.map((b) => {
-                  const pct = b.entitled > 0 ? ((b.entitled - b.used) / b.entitled) * 100 : 0;
-                  return (
-                    <div key={b.leaveTypeId} className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-foreground">{b.name}</span>
-                        <span className="text-muted-foreground">
-                          {b.entitled - b.used} / {b.entitled} days
-                        </span>
-                      </div>
-                      <Progress
-                        value={pct}
-                        aria-label={`${b.name} balance`}
-                        indicatorClassName={b.name === "Sick Leave" ? "bg-emerald-500" : undefined}
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="rounded-xl border bg-card shadow-sm">
+        <Card>
+          <CardContent className="p-0">
             <div className="flex items-center justify-between gap-2 border-b px-5 py-4">
               <h2 className="text-sm font-semibold text-foreground">My Leave Requests</h2>
               <span className="text-xs text-muted-foreground">{requests.length} total</span>
             </div>
             {requests.length === 0 ? (
+              /* Reference empty state: Plane icon, "No leave requests yet",
+                 no CTA button inside the card. */
               <EmptyState
-                icon={<History className="h-6 w-6" aria-hidden="true" />}
-                title="No requests yet"
+                icon={<Plane className="h-6 w-6" aria-hidden="true" />}
+                title="No leave requests yet"
                 description="Submit your first leave request to get started."
-                action={
-                  <Button onClick={openNewRequest}>
-                    <Plus aria-hidden="true" />
-                    New Leave Request
-                  </Button>
-                }
               />
             ) : (
               <Table>
@@ -221,8 +188,8 @@ export default function LeaveManagementPage() {
                 </TableBody>
               </Table>
             )}
-          </div>
-        </>
+          </CardContent>
+        </Card>
       )}
 
       <NewLeaveRequestDialog

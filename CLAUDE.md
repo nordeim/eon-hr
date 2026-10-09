@@ -85,11 +85,11 @@ bun run dev                 # dev server on http://localhost:3000
 
 | Layer | Framework | Files | Specs | Location |
 |---|---|---|---|---|
-| Unit (pure seams) | Vitest | 3 | 38 | `tests/unit/`, `tests/db-path.test.ts` |
-| E2E (browser) | Playwright | 5 | 68 | `tests/e2e/*.spec.ts` |
+| Unit (pure seams) | Vitest | 4 | 44 | `tests/unit/`, `tests/db-path.test.ts` |
+| E2E (browser) | Playwright | 5 | 75 | `tests/e2e/*.spec.ts` |
 
-- **Unit**: db-path resolution contract (15), auth crypto/session (12), money & date utils (11). Pure functions only — no Prisma, no network.
-- **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer height, trap-4); dashboard parity (leave balances 21/21, 30/30); employees CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).
+- **Unit**: db-path resolution contract (15), auth crypto/session (10), money & date utils (13), design-token contract (6 — reads `globals.css`, pins `#1877F2` primary, slate-500 muted, the v3 palette pin and the v3 `--shadow-sm` geometry). Pure functions/CSS only — no Prisma, no network.
+- **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer 288px, dark overlay, no X button, bottom tabs); dashboard parity (leave balances 21/21, 30/30, bordered quick-action chips, single-line expense total, active-nav `rgb(24,119,242)`); 4-step employee wizard CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).
 
 ### Test Commands
 
@@ -155,7 +155,8 @@ Explain the "why" behind decisions in commit messages and ADRs. Document assumpt
 |---|---|---|
 | `DATABASE_URL` | SQLite (or PostgreSQL) connection. Relative `file:` URLs resolve against `prisma/schema.prisma` | `file:../db/custom.db` |
 | `AUTH_SECRET` | HMAC session signing secret. REQUIRED in production (≥16 chars) | `openssl rand -hex 32` |
-| `NEXT_PUBLIC_SITE_URL` | Canonical public origin for metadata | `http://localhost:3000` |
+
+Only these two variables are read by the codebase (`src/lib/db-path.ts`, `src/lib/auth.ts`) — see `.env.example`.
 
 ## Anti-Patterns to Avoid
 

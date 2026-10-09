@@ -3,12 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Bell, Moon, Sun, Globe, ChevronsUpDown, LogOut, User } from "lucide-react";
+import { ChevronRight, Bell, Moon, Sun, Languages, LogOut, User, CircleUser, Briefcase } from "lucide-react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { NAV_ITEMS, type NavItem } from "@/lib/nav-config";
-import { cn, initials } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NAV_ITEMS, type NavItem, type NavChild } from "@/lib/nav-config";
+import { cn } from "@/lib/utils";
 
 export interface ShellUser {
   id: string;
@@ -51,11 +50,11 @@ export function SidebarNav({
 function SidebarHeader() {
   return (
     <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
-          <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-          <rect width="20" height="14" x="2" y="6" rx="2" />
-        </svg>
+      {/* Brand mark — reference: 40×24 gradient squircle (measured
+          #3856E9 → #444DE6, vertical) with a white briefcase line-icon and a
+          soft shadow; rendered in CSS so parity needs no image asset. */}
+      <div className="flex h-6 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-b from-[#3856E9] to-[#444DE6] shadow-sm">
+        <Briefcase className="h-3.5 w-3.5 text-white" strokeWidth={1.75} aria-hidden="true" />
       </div>
       <div className="flex min-w-0 flex-col">
         <span className="text-base font-bold leading-tight text-foreground">EonHR</span>
@@ -82,14 +81,14 @@ function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium outline-none transition-colors",
+        "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors",
         "focus-visible:ring-2 focus-visible:ring-ring",
         active
-          ? "bg-primary text-primary-foreground"
-          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-slate-600 hover:bg-slate-100 hover:text-foreground"
       )}
     >
-      <Icon className={cn("h-4.5 w-4.5 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} aria-hidden="true" />
+      <Icon className={cn("h-4.5 w-4.5 shrink-0", active ? "text-primary-foreground" : "text-slate-600")} aria-hidden="true" />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -114,23 +113,24 @@ function CollapsibleNavItem({
     <Collapsible.Root open={open} onOpenChange={setOpen}>
       <Collapsible.Trigger
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium outline-none transition-colors",
+          "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors",
           "focus-visible:ring-2 focus-visible:ring-ring",
-          childActive ? "text-foreground" : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+          "text-slate-600 hover:bg-slate-100 hover:text-foreground"
         )}
         aria-expanded={open}
       >
-        <Icon className={cn("h-4.5 w-4.5 shrink-0", childActive ? "text-primary" : "text-muted-foreground")} aria-hidden="true" />
+        <Icon className="h-4.5 w-4.5 shrink-0 text-slate-600" aria-hidden="true" />
         <span className="flex-1 truncate text-left">{item.label}</span>
         <ChevronRight
-          className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200", open && "rotate-90")}
+          className={cn("h-4 w-4 shrink-0 text-slate-600 transition-transform duration-200", open && "rotate-90")}
           aria-hidden="true"
         />
       </Collapsible.Trigger>
       <Collapsible.Content>
         <ul className="mb-1 flex flex-col gap-0.5 pl-4">
-          {item.children?.map((child) => {
+          {item.children?.map((child: NavChild) => {
             const active = pathname === child.href;
+            const ChildIcon = child.icon;
             return (
               <li key={`${item.label}-${child.label}-${child.href}`}>
                 <Link
@@ -138,14 +138,18 @@ function CollapsibleNavItem({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm outline-none transition-colors",
+                    "flex w-full items-center gap-2 rounded-lg p-2 text-sm outline-none transition-colors",
                     "focus-visible:ring-2 focus-visible:ring-ring",
                     active
-                      ? "bg-primary/10 font-medium text-primary"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      ? "bg-primary font-medium text-primary-foreground shadow-sm"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-foreground"
                   )}
                 >
-                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-primary" : "bg-border")} aria-hidden="true" />
+                  {ChildIcon ? (
+                    <ChildIcon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-slate-600")} aria-hidden="true" />
+                  ) : (
+                    <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-primary-foreground" : "bg-border")} aria-hidden="true" />
+                  )}
                   <span className="truncate">{child.label}</span>
                 </Link>
               </li>
@@ -159,7 +163,9 @@ function CollapsibleNavItem({
 
 function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" | "mobile" }) {
   const [dark, setDark] = React.useState(false);
-  const [lang, setLang] = React.useState<"EN" | "عربي">("EN");
+  // Reference default shows the Arabic target label ("عربي"); toggling flips
+  // to "EN" — a display-only switch, exactly like the original app.
+  const [lang, setLang] = React.useState<"EN" | "عربي">("عربي");
 
   React.useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -171,7 +177,7 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
         <button
           type="button"
           aria-label="Notifications"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
         >
           <Bell className="h-4.5 w-4.5" aria-hidden="true" />
         </button>
@@ -179,17 +185,16 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
           onClick={() => setDark((d) => !d)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
         >
           {dark ? <Sun className="h-4.5 w-4.5" aria-hidden="true" /> : <Moon className="h-4.5 w-4.5" aria-hidden="true" />}
         </button>
         <button
           type="button"
-          aria-label="Toggle language"
           onClick={() => setLang((l) => (l === "EN" ? "عربي" : "EN"))}
-          className="flex h-8 items-center justify-center rounded-md px-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex h-8 items-center justify-center rounded-md px-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
         >
-          <Globe className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          <Languages className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {lang}
         </button>
       </div>
@@ -203,18 +208,18 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg p-2 text-left outline-none transition-colors",
-          "hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+          "flex w-full items-center gap-3 rounded-md p-2 text-left outline-none transition-colors",
+          "hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-ring"
         )}
       >
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>{initials(user.name)}</AvatarFallback>
-        </Avatar>
+        {/* Reference avatar: gradient circle with a white CircleUser glyph. */}
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]">
+          <CircleUser className="h-5 w-5 text-white" aria-hidden="true" />
+        </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </div>
-        <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content

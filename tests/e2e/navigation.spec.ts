@@ -37,6 +37,26 @@ test.describe("sidebar navigation", () => {
     await page.goto("/employees");
     const active = page.locator("aside nav a[aria-current='page']");
     await expect(active).toHaveAttribute("href", "/employees");
+    // Reference active treatment: solid #1877F2 with white text (also for
+    // sub-items, not a tinted pill).
+    await expect(active).toHaveCSS("background-color", "rgb(24, 119, 242)");
+    await expect(active).toHaveCSS("color", "rgb(255, 255, 255)");
+  });
+
+  test("sub-menu items carry icons (reference parity)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.getByRole("button", { name: "Employees", exact: true }).click();
+    for (const link of ["All Employees", "Tasks & Projects", "Leave Requests", "Attendance"]) {
+      const item = page.getByRole("link", { name: link, exact: true });
+      await expect(item.locator("svg").first()).toBeVisible();
+    }
+  });
+
+  test("user avatar renders the reference gradient glyph", async ({ page }) => {
+    await page.goto("/dashboard");
+    // Reference: gradient circle (blue-500 → indigo-500) with CircleUser.
+    const avatar = page.locator("aside").locator("button").filter({ hasText: "sepnetflix2023" }).first().locator("span.rounded-full");
+    await expect(avatar).toHaveCSS("background-image", /linear-gradient/);
   });
 
   test("user menu opens with My Profile and Logout", async ({ page }) => {
@@ -103,7 +123,7 @@ const ROUTES: [string, string][] = [
   ["/workflowconfigpage", "Approval Workflow Engine"],
   ["/employeeselfservice", "My Portal"],
   ["/profile", "Profile Settings"],
-  ["/leavemanagement", "Leave Management"],
+  ["/leavemanagement", "Leave Requests"],
 ];
 
 test.describe("all module routes render", () => {

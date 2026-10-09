@@ -73,6 +73,7 @@ model Employee {
   firstName        String
   lastName         String
   email            String    @unique
+  privateEmail     String?
   phone            String?
   jobTitle         String?
   departmentId     String?
@@ -86,6 +87,15 @@ model Employee {
   nationalId       String?
   dateOfBirth      DateTime?
   gender           String?
+  // Saudi-specific identity fields (reference Add Employee wizard, step 1)
+  iqamaNumber      String?
+  iqamaExpiry      DateTime?
+  // Contract fields (wizard step 3)
+  contractType     String? // indefinite | fixed_term
+  contractStart    DateTime?
+  bankName         String?
+  iban             String?
+  gosiNumber       String?
   address          String?
   avatarUrl        String?
   createdAt        DateTime  @default(now())

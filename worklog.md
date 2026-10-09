@@ -183,3 +183,27 @@ Stage Summary:
 - Eon HR clone pushed to nordeim/eon-hr@main (693be09)
 - All gates green: lint clean, typecheck clean, 38 unit + 68 e2e passing, production build succeeds
 - Dev server running on :3000 with preview host allowlisted
+
+---
+Task ID: 11 (session 2)
+Agent: main (Super Z)
+Task: Parity audit + remediation + docs + tests + push preparation
+
+Work Log:
+- Refreshed workspace (pull 693be09 → 8be5cb3), validated all gates green pre-change
+- Dual-browser audit (reference vs clone, desktop+mobile): computed styles, bounding boxes, VLM screenshot diffs (every claim DOM-verified)
+- Wrote + validated docs/remediation-plan-session1.md (gap inventory A–I with measured values)
+- Executed R1–R9: tokens (#1877F2 primary, #2563EB link, slate-500 muted, gradient canvas, v3 palette pin completion), sidebar icons/عربي/gradient avatar/solid active sub-items, mobile shell (288px drawer, black/80 overlay, no X, ref bottom tabs), PageHeader 48px scale, dashboard (bordered chips, single-line SAR total, expense card in grid col 1), login (dark button, gray links, placeholder, self-hosted logo, input icons), employees 4-step wizard (Saudi fields, schema/API/validation), leave management header/empty-state
+- Fixed the wizard premature-submit bug: footer button-type swap + Chromium click default action — all footer buttons now type="button", submit via onClick (pattern W-1, pinned by E2E)
+- Fixed employee id collisions (max-suffix EMP-XXXX + retry); added tests/e2e/purge-test-data.ts to global-setup; exact-match locators for toast-affected text
+- Session-2 additions: brand squircle logo (40×24 #3856E9→#444DE6 + Briefcase, CSS-rendered), devIndicators:false
+- Gates: lint clean, tsc clean, 44/44 unit (tokens.test.ts new), build ok, 75/75 E2E
+- Visual parity verified: dashboard PARITY, login PARITY, mobile drawer PARITY (VLM verdicts, DOM-verified)
+- 22 refreshed screenshots in docs/screenshots/ (old session-1 captures purged)
+- Created eon-hr_SKILL.md (733 lines, 20 sections + appendices, per distill skills), docs/session_2.md
+- Rewrote .env.example (Eon HR, 2 real env vars); updated README/AGENTS/CLAUDE/PAD (counts, tokens, env, parity section)
+
+Stage Summary:
+- Reference parity: dashboard/login/drawer/mobile verified; documented superset deviations
+- 44 unit + 75 E2E green; wizard round-trip E2E-pinned
+- Ready for commit + SSH-wrapper push to main
