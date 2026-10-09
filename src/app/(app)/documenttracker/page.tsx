@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, BellRing, Pencil, Trash2, Loader2, FileStack, FileCheck2, FileClock, FileX2 } from "lucide-react";
+import { BellRing, FileCheck2, FileClock, FileStack, FileText, FileX2, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -212,6 +212,7 @@ export default function DocumentTrackerPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Document Management"
+        sectionIcon={<FileText aria-hidden="true" />}
         title="Document Tracker"
         subtitle="Track employee documents & automated expiry alerts"
         actions={
@@ -221,7 +222,7 @@ export default function DocumentTrackerPage() {
               Run Alert Check
             </Button>
             <Button onClick={openNewDialog}>
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Document
             </Button>
           </>
@@ -256,7 +257,7 @@ export default function DocumentTrackerPage() {
             description="Add your first employee document to start tracking expiry."
             action={
               <Button onClick={openNewDialog}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Add Document
               </Button>
             }

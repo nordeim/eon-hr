@@ -42,6 +42,20 @@ test.describe("logged-out surface", () => {
     await expect(page.getByLabel("Email")).toHaveAttribute("placeholder", "you@example.com");
   });
 
+  test("login fields use the reference geometry (session 4)", async ({ page }) => {
+    await page.goto("/login");
+    // Reference (live-measured): h-12 inputs, rounded-xl (12px), slate-200
+    // border, slate-50/50 fill, icon inset at 40px; h-12 slate-900 action.
+    const email = page.getByLabel("Email");
+    await expect(email).toHaveCSS("height", "48px");
+    await expect(email).toHaveCSS("border-radius", "12px");
+    await expect(email).toHaveCSS("border-top-color", "rgb(226, 232, 240)");
+    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toHaveCSS(
+      "height",
+      "48px"
+    );
+  });
+
   test("invalid credentials show an actionable error", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("sepnetflix2023@outlook.com");

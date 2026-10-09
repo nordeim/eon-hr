@@ -1,102 +1,155 @@
-// Regenerate the docs/screenshots set from the DEV server (:3000).
-// Mirrors the established 16-shot catalog (01–16).
-import { chromium } from "/home/z/my-project/project-management/node_modules/@playwright/test/index.mjs";
-import { mkdirSync } from "node:fs";
+// capture-screenshots.mjs — regenerate the docs/screenshots catalog from the
+// production standalone server on :3000 (seeded db/custom.db).
+// Catalog (Eon HR, session-3/4 naming): login, dashboard ×2, employees,
+// wizard steps 1–4, ten module pages, three mobile shots.
+// Run via ./scripts/capture-all.sh (boots the server + reseeds first).
+import { chromium } from "@playwright/test";
+import { mkdirSync, rmSync } from "node:fs";
 
 const BASE = "http://localhost:3000";
-const OUT = "/home/z/my-project/project-management/docs/screenshots";
+const OUT = new URL("../docs/screenshots/", import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
+
+const desktop = { width: 1440, height: 900 };
+const mobile = { width: 390, height: 844 };
 
 const browser = await chromium.launch();
 
 // Sign in once (fresh server — the in-memory rate limiter is clear).
-// Page-based login (the APIRequestContext is flaky under bun): fill the
-// form, wait for the workspace, then read the session cookie from the
-// context.
-const loginCtx = await browser.newContext();
+const loginCtx = await browser.newContext({ viewport: desktop });
 const lp = await loginCtx.newPage();
 await lp.goto(BASE + "/login", { waitUntil: "networkidle" });
-await lp.fill('input[id="email"]', "demo@orbital.app");
-await lp.fill('input[id="password"]', "Demo1234!");
+await lp.fill('input[id="email"]', "sepnetflix2023@outlook.com");
+await lp.fill('input[id="password"]', "$Abcd1234");
 await lp.click('button[type="submit"]');
-await lp.waitForURL(BASE + "/", { timeout: 20_000 });
+await lp.waitForURL(BASE + "/dashboard", { timeout: 20_000 });
 const cookies = await loginCtx.cookies(BASE);
-const session = cookies.find((c) => c.name === "orbital_session");
-if (!session) throw new Error("no orbital_session cookie after login");
-const cookie = `orbital_session=${session.value}`;
-console.log("login: ok | cookie:", cookie.slice(0, 24) + "…");
+const session = cookies.find((c) => c.name === "eon_session");
+if (!session) throw new Error("no eon_session cookie after login");
 await loginCtx.close();
 
-async function shot(name, viewport, fn) {
-  const ctx = await browser.newContext({ viewport, deviceScaleFactor: 1 });
-  await ctx.addCookies([{ name: cookie.split("=")[0], value: cookie.split("=").slice(1).join("="), url: BASE }]);
-  const page = await ctx.newPage();
-  await page.goto(BASE + fn.path, { waitUntil: "networkidle" });
-  await page.evaluate(() => document.fonts.ready);
-  await page.waitForTimeout(1200);
-  if (fn.run) await fn.run(page);
-  await page.screenshot({ path: `${OUT}/${name}.png` });
-  console.log("captured", name);
-  await ctx.close();
+const ctx = await browser.newContext({ viewport: desktop });
+await ctx.addCookies([
+  { name: "eon_session", value: session.value, url: BASE },
+]);
+const page = await ctx.newPage();
+
+async function shot(name, path, { fullPage = false, run } = {}) {
+  if (path) await page.goto(BASE + path, { waitUntil: "networkidle" });
+  if (run) await run(page);
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}${name}.png`, fullPage });
+  console.log(`captured ${name}`);
 }
 
-const desktop = { width: 1440, height: 900 };
-const mobile = { width: 390, height: 844 };
-const tablet = { width: 768, height: 1024 };
+// 01 — login surface (fresh, logged-out context)
+{
+  const anon = await browser.newContext({ viewport: desktop });
+  const anonPage = await anon.newPage();
+  await anonPage.goto(BASE + "/login", { waitUntil: "networkidle" });
+  await anonPage.waitForTimeout(400);
+  await anonPage.screenshot({ path: `${OUT}01-login-desktop.png` });
+  console.log("captured 01-login-desktop");
+  await anon.close();
+}
 
-await shot("01-dashboard", desktop, { path: "/" });
-await shot("02-goals", desktop, { path: "/goals" });
+// 02 — dashboard (viewport crop + full page)
+await shot("02-dashboard-desktop", "/dashboard");
+await shot("02-dashboard-desktop-full", null, { fullPage: true });
 
-// goal-detail: navigate into the first seeded goal
-await shot("03-goal-detail", desktop, {
-  path: "/goals",
-  run: async (page) => {
-    await page.getByRole("link", { name: /Product Onboarding Redesign/ }).first().click();
-    await page.waitForTimeout(1200);
-  },
-});
+// 03 — employees table
+await shot("03-employees-desktop", "/employees");
 
-// the v2.10 dialog generation — add-task open
-await shot("04-task-dialog", desktop, {
-  path: "/goals",
-  run: async (page) => {
-    await page.getByRole("link", { name: /Product Onboarding Redesign/ }).first().click();
-    await page.waitForTimeout(900);
-    await page.getByRole("button", { name: "Add Task", exact: true }).first().click();
-    await page.waitForTimeout(700);
-  },
-});
+// 04–07 — the 4-step Add Employee wizard (fill but never submit; the E2E
+// suite covers the full round-trip including persistence + delete)
+await page.goto(BASE + "/employees", { waitUntil: "networkidle" });
+await page.getByRole("button", { name: "Add Employee" }).first().click();
+const dialog = page.getByRole("dialog");
+await dialog.getByRole("heading", { name: "Add New Employee" }).waitFor();
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}04-employee-wizard-step1.png` });
+console.log("captured 04-employee-wizard-step1");
 
-await shot("07-my-tasks", desktop, { path: "/my-tasks" });
-await shot("08-activity", desktop, { path: "/activity" });
-await shot("09-team", desktop, { path: "/team" });
-await shot("10-settings", desktop, { path: "/settings" });
+await dialog.getByLabel("Full Name *").fill("Capture Wizard");
+await dialog.getByLabel("Work Email *").fill("capture-wizard@eon-hr.test");
+await dialog.getByLabel("Nationality").fill("Saudi Arabia");
+await dialog.getByRole("button", { name: "Next" }).click();
+await dialog.getByText("Job Information").waitFor();
+await dialog.getByLabel("Job Title *").fill("Software Engineer");
+await dialog.getByLabel("Start Date *").fill("2026-10-01");
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}05-employee-wizard-step2.png` });
+console.log("captured 05-employee-wizard-step2");
 
-await shot("11-mobile-goals", mobile, { path: "/goals" });
+await dialog.getByRole("button", { name: "Next" }).click();
+await dialog.getByText("Contract Information").waitFor();
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}06-employee-wizard-step3.png` });
+console.log("captured 06-employee-wizard-step3");
 
-// the MORE sheet open (mobile navigation — the operator's focus)
-await shot("12-mobile-menu", mobile, {
-  path: "/",
-  run: async (page) => {
-    await page.getByRole("button", { name: "More" }).click();
-    await page.waitForTimeout(700);
-  },
-});
+await dialog.getByRole("button", { name: "Next" }).click();
+await dialog.getByText("Documents & Attachments").waitFor();
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}07-employee-wizard-step4.png` });
+console.log("captured 07-employee-wizard-step4");
+await page.keyboard.press("Escape");
+await page.waitForTimeout(400);
 
-await shot("13-mobile-dashboard", mobile, { path: "/" });
+// 09–10 — module pages
+const modules = [
+  ["09-leavemanagement-desktop", "/leavemanagement"],
+  ["10-analyticsdashboard-desktop", "/analytics"],
+  ["10-attendance-desktop", "/attendance"],
+  ["10-compliance-desktop", "/compliancedashboard"],
+  ["10-expenses-desktop", "/expenses"],
+  ["10-hrletters-desktop", "/hrletters"],
+  ["10-payroll-desktop", "/payroll"],
+  ["10-recruitment-desktop", "/recruitment"],
+  ["10-settings-desktop", "/settings"],
+  ["10-taskmanager-desktop", "/taskmanager"],
+  ["10-training-desktop", "/training"],
+];
+for (const [name, path] of modules) {
+  await shot(name, path);
+}
 
-// logged-out login (restructured: 54px inputs, footer inside the form)
-const loCtx = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
-const loPage = await loCtx.newPage();
-await loPage.goto(BASE + "/login", { waitUntil: "networkidle" });
-await loPage.evaluate(() => document.fonts.ready);
-await loPage.waitForTimeout(1000);
-await loPage.screenshot({ path: `${OUT}/14-login.png` });
-console.log("captured 14-login");
-await loCtx.close();
+await ctx.close();
 
-await shot("15-tablet-dashboard", tablet, { path: "/" });
-await shot("16-tasks", desktop, { path: "/tasks" });
+// 11–13 — mobile surface
+const mctx = await browser.newContext({ viewport: mobile });
+await mctx.addCookies([{ name: "eon_session", value: session.value, url: BASE }]);
+const mp = await mctx.newPage();
+await mp.goto(BASE + "/dashboard", { waitUntil: "networkidle" });
+await mp.waitForTimeout(600);
+await mp.screenshot({ path: `${OUT}11-mobile-dashboard.png` });
+console.log("captured 11-mobile-dashboard");
+
+await mp.getByRole("button", { name: "Toggle Sidebar" }).click();
+await mp.getByRole("dialog", { name: "Navigation menu" }).waitFor();
+await mp.waitForTimeout(600);
+await mp.screenshot({ path: `${OUT}12-mobile-drawer-open.png` });
+console.log("captured 12-mobile-drawer-open");
+
+await mp.getByRole("dialog", { name: "Navigation menu" })
+  .getByRole("button", { name: "Employees", exact: true }).click();
+await mp.getByRole("dialog", { name: "Navigation menu" })
+  .getByRole("link", { name: "All Employees", exact: true }).click();
+await mp.waitForURL("**/employees");
+await mp.waitForTimeout(600);
+await mp.screenshot({ path: `${OUT}13-mobile-after-drawer-nav.png` });
+console.log("captured 13-mobile-after-drawer-nav");
+await mctx.close();
+
+// stale scaffold-era shots (01-dashboard.png / 02-goals.png) no longer match
+// any route — remove them so the catalog stays honest.
+for (const stale of ["01-dashboard.png", "02-goals.png"]) {
+  try {
+    rmSync(`${OUT}${stale}`);
+    console.log(`removed stale ${stale}`);
+  } catch {
+    /* not present */
+  }
+}
 
 await browser.close();
-console.log("done");
+console.log("capture-screenshots: done");

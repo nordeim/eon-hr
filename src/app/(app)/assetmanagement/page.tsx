@@ -253,7 +253,7 @@ export default function AssetManagementPage() {
                 setDialogOpen(true);
               }}
             >
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Asset
             </Button>
           </>
@@ -320,7 +320,7 @@ export default function AssetManagementPage() {
                   setDialogOpen(true);
                 }}
               >
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Add Asset
               </Button>
             }

@@ -1,7 +1,7 @@
 {
-  "name": "orbital",
-  "version": "1.0.0",
-  "description": "ORBITAL — AI project management workspace (Next.js 16 + React 19 + Prisma/SQLite)",
+  "name": "eon-hr",
+  "version": "2.0.0",
+  "description": "Eon HR \u2014 modern HR management suite (Next.js 16 + React 19 + Prisma/SQLite): employees, payroll, recruitment, training, compliance, performance, analytics.",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",

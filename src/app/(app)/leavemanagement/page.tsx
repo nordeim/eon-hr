@@ -129,11 +129,12 @@ export default function LeaveManagementPage() {
           title + "Request time off and manage approvals" subtitle. */}
       <PageHeader
         section="Leave Management"
+        sectionIcon={<Plane aria-hidden="true" />}
         title="Leave Requests"
         subtitle="Request time off and manage approvals"
         actions={
           <Button onClick={openNewRequest}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Leave Request
           </Button>
         }

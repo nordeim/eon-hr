@@ -344,3 +344,29 @@ Related session-3 finding: the reference itself renders its dashboard
 `space-y-8` stack inside an `overflow-hidden` wrapper, which silently kills
 its nominally `sticky` mobile page-title kicker — replicated as a static bar
 (see docs/remediation-plan-session3.md §A4).
+
+---
+
+## Session-4 addendum — the default font stack drifts between minor versions
+
+**Finding (not an engine trap, but a parity trap):** the installed
+`tailwindcss@4.3.3` ships a DIFFERENT default `--font-sans`
+(`-apple-system, BlinkMacSystemFont, …`) than the v4.0-era default
+(`ui-sans-serif, system-ui, …`) that the reference app renders as its
+computed body font. Removing an app's `--font-sans` override therefore does
+NOT guarantee font parity across Tailwind versions — the default itself
+moved.
+
+Fix pattern: pin the reference's computed font-family VERBATIM as the
+`--font-sans` value (or a literal `font-[…]` on body) rather than relying on
+whatever default the installed Tailwind ships. Pinned in
+`src/app/globals.css` and regression-tested in `tests/unit/tokens.test.ts`
+("pins the reference font stack verbatim"). Related: `document.fonts.size ==
+0` on the reference proves it self-hosts no webfont — dropping `next/font`
+Inter restored text metrics (measured 8–13px width drift on CTA labels) and
+removed the FOUT.
+
+Also re-confirmed this session: `text-neutral-950` resolves through the v4
+default theme (oklch) even when `--color-neutral-950` is pinned in
+`@theme inline` — for single-use values prefer the arbitrary form
+(`text-[#0a0a0a]`), which cannot be outranked by a theme default.

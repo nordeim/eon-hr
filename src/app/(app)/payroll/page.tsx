@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, FileDown, Pencil, Trash2, Check, Banknote, Loader2, Wallet, Users, CalendarRange, CheckCircle2 } from "lucide-react";
+import { Banknote, CalendarRange, Check, CheckCircle2, DollarSign, FileDown, Loader2, Pencil, Plus, Trash2, Users, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -183,6 +183,7 @@ export default function PayrollPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Payroll Management"
+        sectionIcon={<DollarSign aria-hidden="true" />}
         title="Payroll"
         subtitle="Automated salary processing and management"
         actions={
@@ -206,7 +207,7 @@ export default function PayrollPage() {
                 setDialogOpen(true);
               }}
             >
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Payroll
             </Button>
           </>
@@ -240,7 +241,7 @@ export default function PayrollPage() {
                   setDialogOpen(true);
                 }}
               >
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Add Payroll
               </Button>
             }

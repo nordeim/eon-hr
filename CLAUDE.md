@@ -4,7 +4,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 # Eon HR
 
-A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 124-spec test pyramid.
+A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 130-spec test pyramid.
 
 **Tech Stack:** Next.js 16 (App Router, standalone output) · React 19 · TypeScript 5 (strict) · Tailwind CSS 4 (CSS-first) · Radix UI primitives · Prisma 6 + SQLite · Zod 4 · Recharts 2 · Vitest 5 · Playwright 1.63
 
@@ -85,8 +85,8 @@ bun run dev                 # dev server on http://localhost:3000
 
 | Layer | Framework | Files | Specs | Location |
 |---|---|---|---|---|
-| Unit (pure seams) | Vitest | 4 | 49 | `tests/unit/`, `tests/db-path.test.ts` |
-| E2E (browser) | Playwright | 5 | 75 | `tests/e2e/*.spec.ts` |
+| Unit (pure seams) | Vitest | 4 | 52 | `tests/unit/`, `tests/db-path.test.ts` |
+| E2E (browser) | Playwright | 5 | 78 | `tests/e2e/*.spec.ts` |
 
 - **Unit**: db-path resolution contract (15), auth crypto/session (14 — incl. the production secret boot guard), money & date utils (13), design-token contract (7 — reads `globals.css`, pins `#1877F2` primary, slate-500 muted, the #FAFAFA sidebar surface, the v3 palette pin and the v3 `--shadow-sm` geometry). Pure functions/CSS only — no Prisma, no network.
 - **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer 288px, dark overlay, no X button, bottom tabs); dashboard parity (leave balances 21/21, 30/30, bordered quick-action chips, single-line expense total, active-nav `rgb(24,119,242)`); 4-step employee wizard CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).

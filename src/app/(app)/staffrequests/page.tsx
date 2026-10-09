@@ -207,7 +207,7 @@ export default function StaffRequestsPage() {
         subtitle="Submit and manage requests across departments"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Request
           </Button>
         }
@@ -270,7 +270,7 @@ export default function StaffRequestsPage() {
               description="Submit your first request"
               action={
                 <Button onClick={() => setDialogOpen(true)}>
-                  <Plus aria-hidden="true" />
+                  <Plus className="mr-2" aria-hidden="true" />
                   New Request
                 </Button>
               }

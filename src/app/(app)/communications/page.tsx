@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Mail, MessageSquare, Phone, Send } from "lucide-react";
+import { Loader2, Mail, MessageCircle, MessageSquare, Phone, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -177,6 +177,7 @@ export default function CommunicationsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Communications"
+        sectionIcon={<MessageCircle aria-hidden="true" />}
         title="Communications"
         subtitle="Send emails, SMS, and WhatsApp messages to your team"
       />

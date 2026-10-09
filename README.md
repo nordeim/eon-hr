@@ -51,7 +51,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
 | Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens) |
-| E2E tests | Playwright | 1.63 | 75 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD |
+| E2E tests | Playwright | 1.63 | 78 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD + session-4 geometry pins |
 
 ## File Hierarchy
 
@@ -77,7 +77,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 ├── 📂 tests/
 │   ├── 📂 unit/                    # Vitest: auth, utils, design tokens
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
-│   └── 📂 e2e/                     # Playwright: 75 specs, isolated e2e.db
+│   └── 📂 e2e/                     # Playwright: 78 specs, isolated e2e.db
 ├── 📂 docs/
 │   ├── 📂 screenshots/             # 22 remediated UI captures (desktop + mobile + wizard)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
@@ -133,8 +133,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (49 specs: db-path, auth, utils, tokens)
-bun run test:e2e      # Playwright E2E (75 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (52 specs: db-path, auth, utils, tokens)
+bun run test:e2e      # Playwright E2E (78 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```
@@ -149,22 +149,27 @@ the live reference app** and regression-pinned by `tests/unit/tokens.test.ts`.
 
 | Token | Hex | Usage |
 |---|---|---|
-| Primary | `#1877F2` | Active nav, primary buttons, ring (reference-measured `custom-primary-bg`) |
+| Primary | `#1877F2` | Active nav, ring (reference-measured `custom-primary-bg`) |
 | Link | `#2563EB` | "View all" / "Request leave" text links (reference `text-blue-600`) |
 | Background | `#F8FAFC → #EFF6FF` | App canvas gradient (slate-50 → blue-50, sRGB-pinned) |
 | Card | `#FFFFFF` | Surfaces, tables, dialogs |
 | Text primary | `hsl(221 39% 11%)` | Headings and body |
 | Text muted | `#64748B` (slate-500) | Subtitles, empty states |
-| Border | `hsl(214 32% 91%)` | Card and input borders |
+| Primary button | `#2563EB → #4F46E5` sRGB | Gradient CTA recipe (reference theme button) |
+| Primary-fg | `#FAFAFA` | Gradient button text (slate-50, not pure white) |
+| Border | `#E5E5E5` (neutral-200) | Cards, inputs, tables (session-4 measurement) |
 | Sidebar border | `#E2E8F0` (slate-200) | Sidebar + header dividers |
 
 The v3-era slate/blue/green/indigo families are hex-pinned so utilities like
 `bg-slate-600` render byte-identical to the reference (Tailwind v4's default
 oklch palette drifts 1–3 sRGB units — one of the five traps documented in
-`docs/Tailwind-V4-Validation-Report.md`). Typography: **Inter** — 12px
-sidebar/kicker labels, 30px dashboard and 48px module page titles, 14px body.
-Radius: `rounded-xl` cards, `rounded-lg` controls. Shadows: v3-geometry
-`--shadow-sm` pin.
+`docs/Tailwind-V4-Validation-Report.md`; neutral/purple/orange added in
+session 4). Typography: the reference's own stack — Tailwind's default
+`ui-sans-serif` family pinned verbatim (no webfont; the reference self-hosts
+nothing) — 12px badge/nav labels, 30px dashboard and 48px module titles,
+14px body. Radius: `rounded-xl` cards + section badges (pill), `rounded-md`
+buttons/inputs (reference 6px), `rounded-full` login card fields. Shadows:
+v3-geometry `--shadow-sm`/`--shadow` pins.
 
 ## Reference Parity & Superset
 

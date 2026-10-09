@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, ClipboardList, ListChecks, Timer, Users } from "lucide-react";
+import { Calendar, CircleCheckBig, CircleCheckBig as CheckCircle2, Clock, ClipboardList, ListChecks, Users } from "lucide-react";
 import { DepartmentCompletionBar, type DeptCompletion, type StatusSlice, EmployeeStatusPie } from "./charts";
 import { daysBetween } from "@/lib/utils";
 
@@ -111,31 +111,42 @@ export default async function AnalyticsPage() {
         subtitle="Track your onboarding performance and metrics"
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
-        <StatCard label="Total Employees" value={employeeCount} icon={<Users aria-hidden="true" />} />
+      {/* Reference top row (session-4 live measurement): FOUR stat cards with
+          48px colored icon tiles (rounded-xl) — blue/purple/green/orange
+          100 backgrounds, 24px -600 icons, 30px values, 14px/400 labels.
+          The templates count is card 1's hint in the reference. */}
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard
-          label="Templates"
-          value={templateCount}
-          hint="templates"
-          icon={<ClipboardList aria-hidden="true" />}
+          label="Total Employees"
+          value={employeeCount}
+          hint={`${templateCount} templates`}
+          icon={<Users aria-hidden="true" />}
+          iconClassName="h-12 w-12 rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6"
+          valueClassName="text-3xl"
         />
         <StatCard
           label="Avg. Completion"
           value={avgCompletionDays}
           hint="days"
-          icon={<Timer aria-hidden="true" />}
+          icon={<Calendar aria-hidden="true" />}
+          iconClassName="h-12 w-12 rounded-xl bg-purple-100 text-purple-600 [&_svg]:h-6 [&_svg]:w-6"
+          valueClassName="text-3xl"
         />
         <StatCard
           label="Task Completion"
           value={`${taskCompletionPct}%`}
           hint={`${tasksDone} / ${tasksTotal}`}
-          icon={<CheckCircle2 aria-hidden="true" />}
+          icon={<CircleCheckBig aria-hidden="true" />}
+          iconClassName="h-12 w-12 rounded-xl bg-green-100 text-green-600 [&_svg]:h-6 [&_svg]:w-6"
+          valueClassName="text-3xl"
         />
         <StatCard
           label="Active Onboarding"
           value={activeOnboarding}
           hint="in progress"
-          icon={<Activity aria-hidden="true" />}
+          icon={<Clock aria-hidden="true" />}
+          iconClassName="h-12 w-12 rounded-xl bg-orange-100 text-orange-600 [&_svg]:h-6 [&_svg]:w-6"
+          valueClassName="text-3xl"
         />
       </div>
 

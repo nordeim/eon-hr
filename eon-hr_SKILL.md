@@ -11,7 +11,7 @@
 > specific file or command — the file paths are authoritative.
 >
 > **Version:** 2.0.0 (session-2 remediation complete) · **Last updated:**
-> 2026-10-09 · **State:** 49 unit + 75 E2E tests green, lint/typecheck/build
+> 2026-10-09 · **State:** 52 unit + 78 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -183,13 +183,13 @@ materialized as token pins:
 --color-accent-foreground: #1877f2;
 ```
 
-**Typography:** Inter (`--font-inter` via `next/font`) all roles; module page
+**Typography:** Tailwind's default ui-sans-serif stack pinned verbatim in @theme (session-4: the reference self-hosts NO webfont; Inter drifted text metrics); module page
 titles `text-4xl md:text-5xl font-bold text-slate-900`, dashboard/employees
 titles `text-3xl`, subtitles `text-lg text-slate-600`, kickers
 `text-sm font-medium text-slate-700`, sidebar group label 12px slate-500.
 
 **Radius scale:** cards `rounded-xl`, buttons/inputs `rounded-lg`, small
-chips `rounded-md`, brand squircle `rounded-md` at 40×24.
+chips `rounded-md`, brand squircle `rounded-xl` at 40×40.
 
 **Shadows:** cards default `shadow` (v3 geometry — `--shadow-*` pinned);
 brand squircle + login logo `shadow-sm/shadow-lg` per reference.
@@ -197,11 +197,22 @@ brand squircle + login logo `shadow-sm/shadow-lg` per reference.
 **Keyframes/animations:** tw-animate-css (`data-[state=open]:animate-in` etc.
 on Radix parts); no bespoke keyframes.
 
-**Brand mark:** 40×24 gradient squircle
+**Brand mark:** 40×40 gradient squircle (session-3 re-measure)
 `bg-gradient-to-b from-[#3856E9] to-[#444DE6]` (pixel-measured endpoints) with
-white `Briefcase` lucide icon — rendered in CSS in `SidebarHeader`
-(`src/components/layout/sidebar-nav.tsx`), no image asset. The login page
-uses the circular self-hosted `public/eon-logo.png`.
+white 24px stroke-2 `Briefcase` lucide icon, v3 shadow-lg — rendered in CSS in
+`SidebarHeader` (`src/components/layout/sidebar-nav.tsx`), no image asset. The
+login page uses the circular self-hosted `public/eon-logo.png`.
+
+**Primary CTA recipe (session 4):** Button default variant =
+bg-[linear-gradient(to_right,#2563EB,#4F46E5)] (hover #1D4ED8 -> #4338CA),
+rounded-md, text-primary-foreground (#FAFAFA), v3 shadow; icons at CTA call
+sites carry mr-2 on top of the button gap-2 (reference quirk: 16px effective
+icon-to-text gap).
+
+**Section badges (session 4):** module pages render the section as a white
+pill badge above the h1 — rounded-full bg-white px-4 py-2 shadow-sm with a
+16px blue-600 module icon + 16px/400 #0A0A0A text, mb-4 mt-8 (badge y=64,
+h1 y=116).
 
 **Token regression pin:** `tests/unit/tokens.test.ts` reads `globals.css` and
 asserts `--primary: #1877F2`, the slate-500 muted value, the pinned v3
@@ -404,9 +415,9 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 44/44 (db-path 15, auth 10, utils 13, tokens 6)
+bun run test          # vitest — 52/52 (db-path 15, auth 14, utils 13, tokens 10)
 bun run build         # next build + static/public copy into standalone
-bun run test:e2e      # playwright — 75/75 against the fresh standalone build
+bun run test:e2e      # playwright — 78/78 against the fresh standalone build
 ```
 
 **Before pushing (per `docs/how-to-git-push-using-ssh-wrapper_SKILL.md`):**
@@ -632,21 +643,27 @@ All values verified against `src/app/globals.css` `@theme inline` (and the
 live reference where noted). Token test pins the bolded ones.
 
 **Semantic:** primary **#1877F2** (ref-measured), primary-foreground
-hsl(0 0% 100%), link **#2563EB**, background #F8FAFC (canvas gradient
+**#FAFAFA** (session-4: slate-50, the reference button text — NOT white),
+link **#2563EB**, background #F8FAFC (canvas gradient
 slate-50→blue-50 sRGB), foreground hsl(221 39% 11%), card/popover white,
 secondary hsl(210 40% 96%), muted hsl(210 40% 96%), muted-foreground
 **#64748B**, accent hsl(214 95% 93%), accent-foreground **#1877F2**,
-destructive hsl(0 84% 60%), border/input hsl(214 32% 91%), ring **#1877F2**,
-sidebar white, sidebar-foreground hsl(221 39% 11%), sidebar-accent
-hsl(214 95% 93%), sidebar-border **#E2E8F0**.
+destructive hsl(0 84% 60%), border/input **#E5E5E5** (session-4: neutral-200),
+ring **#1877F2**, sidebar **#FAFAFA** (session-3), sidebar-foreground
+hsl(221 39% 11%), sidebar-accent hsl(214 95% 93%), sidebar-border
+**#E2E8F0**.
 
 **Pinned v3 families (byte-identical to reference rendering):**
 slate 50–950 = #F8FAFC #F1F5F9 #E2E8F0 #CBD5E1 #94A3B8 #64748B #475569
-#334155 #1E293B #0F172A #020617; blue 50–900 = #EFF6FF #DBEAFE #BFDBFE
-#93C5FD #60A5FA #3B82F6 #2563EB #1D4ED8 #1E40AF #1E3A8A; green 50/500/600 =
-#F0FDF4 #22C55E #16A34A; indigo 500/600 = #6366F1 #4F46E5.
+#334155 #1E293B #0F172A #020617; neutral 200/950 = #E5E5E5 #0A0A0A (session 4);
+blue 50–900 = #EFF6FF #DBEAFE #BFDBFE #93C5FD #60A5FA #3B82F6 #2563EB
+#1D4ED8 #1E40AF #1E3A8A; green 50/500/600/700 = #F0FDF4 #22C55E #16A34A
+#15803D; indigo 500/600/700 = #6366F1 #4F46E5 #4338CA; purple 100/600 =
+#F3E8FF #9333EA; orange 100/600 = #FFEDD5 #EA580C; red 50/500/600/700;
+amber 50/500; emerald 50/500/600; teal 50/500.
 
-**Special surfaces:** brand squircle gradient #3856E9→#444DE6 (vertical);
+**Special surfaces:** brand squircle gradient #2563EB→#4F46E5
+(to-right-bottom, sRGB); primary CTA gradient #2563EB→#4F46E5 (sRGB);
 login sign-in button slate-900 #0F172A; employees primary action
 `bg-gradient-to-r from-blue-600 to-indigo-600`; avatar
 `bg-gradient-to-br from-blue-500 to-indigo-500`; empty-state text slate-400.
@@ -719,7 +736,7 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           49 unit (4 files) + 75 e2e (4 specs, workers:1)
+tests           52 unit (4 files) + 78 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry

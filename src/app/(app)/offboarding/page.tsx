@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Trash2, Loader2, LogOut, CalendarDays, CheckCircle2, XCircle } from "lucide-react";
+import { CalendarDays, CheckCircle2, CircleCheckBig, Loader2, LogOut, Plus, Trash2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -182,11 +182,12 @@ export default function OffboardingPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Offboarding Management"
+        sectionIcon={<CircleCheckBig aria-hidden="true" />}
         title="Offboarding Journey"
         subtitle="Manage employee departures smoothly"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Offboarding
           </Button>
         }
@@ -204,7 +205,7 @@ export default function OffboardingPage() {
             description="Start an offboarding journey when needed"
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Offboarding
               </Button>
             }

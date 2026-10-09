@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, ClipboardList, Play, Square, Eye, Trash2, Loader2, X } from "lucide-react";
+import { ClipboardList, Eye, Loader2, MessageSquare, Play, Plus, Square, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -192,11 +192,12 @@ export default function SurveysPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Employee Engagement"
+        sectionIcon={<MessageSquare aria-hidden="true" />}
         title="Surveys"
         subtitle="Create surveys and gather employee feedback"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Survey
           </Button>
         }
@@ -220,7 +221,7 @@ export default function SurveysPage() {
             description="Create your first survey to gather employee feedback"
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Survey
               </Button>
             }
@@ -444,7 +445,7 @@ function NewSurveyDialog({
               disabled={questions.length >= 20}
               onClick={() => setQuestions((prev) => [...prev, ""])}
             >
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Question
             </Button>
           </div>

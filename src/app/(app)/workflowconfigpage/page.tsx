@@ -173,7 +173,7 @@ export default function WorkflowConfigPage() {
         subtitle="Configure multi-level approval hierarchies for requests and expenses"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Workflow
           </Button>
         }
@@ -191,7 +191,7 @@ export default function WorkflowConfigPage() {
             description="Create an approval chain for leave requests, expenses or staff requests."
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Create First Workflow
               </Button>
             }
@@ -369,7 +369,7 @@ export default function WorkflowConfigPage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus aria-hidden="true" />}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="mr-2" aria-hidden="true" />}
                 Create Workflow
               </Button>
             </DialogFooter>

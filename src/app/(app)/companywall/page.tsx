@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Heart, Image as ImageIcon, Loader2, Video } from "lucide-react";
+import { Heart, House, Image as ImageIcon, Loader2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,6 +145,7 @@ export default function CompanyWallPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Company Wall"
+        sectionIcon={<House aria-hidden="true" />}
         title="Company Updates"
         subtitle="Stay connected with your team"
       />

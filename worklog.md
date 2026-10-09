@@ -265,3 +265,24 @@ Work Log:
 Stage Summary:
 - Pushed to nordeim/eon-hr@main (465ae35) — session-3 audit + parity round 2 delivered
 - Production boot guard live; six Tailwind v4 traps documented; 49 unit + 75 E2E green
+
+---
+Task ID: 15 (session 4)
+Agent: main (Super Z)
+Task: Fresh-workspace re-validation, code audit, parity round 3, tooling repair, docs + push
+
+Work Log:
+- Cloned fresh from nordeim/eon-hr (c7c4b79); recreated .env (DATABASE_URL file:../db/custom.db + AUTH_SECRET), bun install, prisma generate/push/seed
+- Re-validated every gate from scratch: lint, tsc, 49/49 unit, build, 75/75 E2E (after `bunx playwright install chromium`)
+- Audit (code-review-and-audit methodology): secret scan clean; findings — package.json "orbital" branding; broken scaffold-era tooling (demo@orbital.app + orbital_session cookie in 4 scripts; capture-screenshots.mjs with hardcoded /home/z/my-project/project-management paths; capture-wizard/wizard-cleanup/check-db-state referencing non-existent goals/activity models; smoke-test.sh testing the ORBITAL API surface); 7 dead probe scripts deleted
+- Live dual-browser parity audit (agent-browser ref+loc, DOM ground truth, VLM leads DOM-verified): font stack (ref has NO webfont — dropped next/font Inter, pinned v4.0-era default verbatim), Button default variant (sRGB gradient #2563EB→#4F46E5, rounded-md, #FAFAFA text, v3 shadow, mr-2 CTA icons), tokens (--primary-foreground #FAFAFA, --border/--input #E5E5E5, neutral/purple/orange pinned, nav active text-white), Input/Select rounded-md no shadow, pl-10 icon fields, full sidebar geometry (89px header, 20px inset, h-8 Main Menu row, 32px items w/ 20px icons, gap-1 lists, h2 brand), PageHeader section → white pill badge + module icons (28 pages; 4 badge-less pages dropped), chat page restructure (single card, w-80 border-r list, h2 Messages, 40×32 blue + button), analytics 4-tile stat cards, login re-measure fixes (h-12 fields, card padding, accent bar, gradient bg)
+- Fixed the sandbox-exported absolute DATABASE_URL trap (parent-workspace db silently used all session): repo db/ restored via explicit push+seed; capture-all hardened (schema push before seed)
+- Rewrote the capture pipeline (capture-screenshots.mjs purpose-built 22-shot catalog; capture-all.sh simplified; pristine-check.mjs) and the smoke suite (9 Eon HR checks) — all passing
+- TDD: 3 new token unit pins (primary-foreground, border/input, font stack) + 3 new E2E specs (CTA gradient recipe, login field geometry, nav 32px rhythm); chat route test updated to the reference h2 structure
+- Gates final: lint 0 errors, tsc clean, 52/52 unit, build, 78/78 E2E
+- Screenshots: 22 refreshed in docs/screenshots/ (stale 01-dashboard/02-goals removed); docs updated (remediation-plan-session4, Tailwind report addendum, README/AGENTS/CLAUDE/PAD/SKILL counts + tokens + typography)
+
+Stage Summary:
+- Parity round 3: 12 gap groups fixed, all DOM-verified; sidebar/badge/chat/login byte-exact
+- Tooling repaired: capture + smoke pipelines work end-to-end for the first time since the scaffold
+- 52 unit + 78 E2E green; ready for commit + push

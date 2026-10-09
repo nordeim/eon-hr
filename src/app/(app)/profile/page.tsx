@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Camera, CheckCircle2, Globe, KeyRound, Loader2, Plug, Save } from "lucide-react";
+import { Camera, CheckCircle2, CircleUser, Globe, KeyRound, Loader2, Plug, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -236,6 +236,7 @@ export default function ProfilePage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <PageHeader
         section="My Profile"
+        sectionIcon={<CircleUser aria-hidden="true" />}
         title="Profile Settings"
         subtitle="Manage your personal information and preferences"
       />

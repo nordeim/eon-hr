@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, ExternalLink, GraduationCap, Loader2, MonitorSmartphone } from "lucide-react";
+import { ExternalLink, GraduationCap, Loader2, MonitorSmartphone, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,11 +139,12 @@ export default function TrainingPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Learning Management System"
+        sectionIcon={<Video aria-hidden="true" />}
         title="Training Center"
         subtitle="Expand your skills with our comprehensive training library"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Platform
           </Button>
         }
@@ -184,7 +185,7 @@ export default function TrainingPage() {
                     }
                     action={
                       <Button onClick={() => setDialogOpen(true)}>
-                        <Plus aria-hidden="true" />
+                        <Plus className="mr-2" aria-hidden="true" />
                         New Platform
                       </Button>
                     }

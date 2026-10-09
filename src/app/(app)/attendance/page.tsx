@@ -1,19 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Printer,
-  FileText,
-  FileSpreadsheet,
-  CalendarCheck,
-  Users,
-  UserCheck,
-  UserX,
-  Clock3,
-  Gauge,
-  Loader2,
-  ShieldAlert,
-} from "lucide-react";
+import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, Loader2, Printer, ShieldAlert, UserCheck, Users, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -186,6 +174,7 @@ export default function StaffAttendancePage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Attendance Management"
+        sectionIcon={<Calendar aria-hidden="true" />}
         title="Staff Attendance"
         subtitle="Track and manage employee attendance records"
         actions={

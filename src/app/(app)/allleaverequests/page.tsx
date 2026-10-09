@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Loader2, Check, X, CalendarDays, Clock3, ListChecks } from "lucide-react";
+import { CalendarDays, Check, Clock3, ListChecks, Loader2, Plane, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -148,11 +148,12 @@ export default function AllLeaveRequestsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Leave Management"
+        sectionIcon={<Plane aria-hidden="true" />}
         title="Leave Requests"
         subtitle="Manage and approve employee leave requests"
         actions={
           <Button onClick={openNewRequest}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Leave Request
           </Button>
         }
@@ -192,7 +193,7 @@ export default function AllLeaveRequestsPage() {
             description="New requests will appear here for approval."
             action={
               <Button onClick={openNewRequest}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Leave Request
               </Button>
             }

@@ -96,11 +96,20 @@ function LoginForm() {
   }
 
   return (
-    /* Reference login shell: flat light canvas, glass card, circular logo. */
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+    /* Reference login shell (session-4 re-measurement): slate-50 →
+       slate-100 sRGB gradient canvas, glass card (rounded-2xl, white/95,
+       p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10), top h-1 accent bar, circular
+       logo, h-12 inputs (rounded-xl, bg-slate-50/50, border-slate-200,
+       pl-10) and an h-12 sign-in action. */
+    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] px-4 py-10">
       <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-card-foreground shadow-2xl backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 px-6 pt-8 sm:px-8">
+          {/* Reference top accent bar: slate-200 → slate-300 → slate-200. */}
+          <div
+            className="absolute left-0 right-0 top-0 h-1 bg-[linear-gradient(to_right,#e2e8f0,#cbd5e1,#e2e8f0)]"
+            aria-hidden="true"
+          />
+          <div className="flex flex-col items-center gap-4 p-8 pt-8 sm:p-10 md:px-10 md:pt-12">
             {/* Circular brand mark — self-hosted copy of the reference logo
                 (public/eon-logo.png) in a ring-wrapped shadowed circle. */}
             <div className="flex h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-lg ring-4 ring-white/50 transition-all duration-300 sm:h-24 sm:w-24">
@@ -117,7 +126,7 @@ function LoginForm() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 px-6 py-6 sm:px-8">
+          <div className="flex flex-col gap-3 p-8 pb-8 sm:p-10 md:px-10 md:pb-10">
             <button
               type="button"
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
@@ -164,7 +173,7 @@ function LoginForm() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     required
-                    className="pl-9"
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -184,7 +193,7 @@ function LoginForm() {
                     autoComplete="current-password"
                     placeholder="••••••••"
                     required
-                    className="pl-9"
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -197,11 +206,11 @@ function LoginForm() {
                 </p>
               ) : null}
 
-              {/* Reference sign-in action: dark slate-900, not brand blue. */}
+              {/* Reference sign-in action: dark slate-900, h-12. */}
               <button
                 type="submit"
                 disabled={loading}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Sign in

@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Network } from "lucide-react";
+import { Network, Users } from "lucide-react";
 import { initials } from "@/lib/utils";
 
 interface EmployeeRow {
@@ -131,6 +131,7 @@ export default async function OrganogramPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Organization Structure"
+        sectionIcon={<Users aria-hidden="true" />}
         title="Organogram"
         subtitle="Visual representation of your organization structure"
       />

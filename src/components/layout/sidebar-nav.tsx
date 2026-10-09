@@ -30,11 +30,11 @@ export function SidebarNav({
   return (
     <div className="flex h-full flex-col">
       <SidebarHeader />
-      <nav className="flex-1 overflow-y-auto px-3 py-2 scrollbar-thin">
-        <p className="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <nav className="flex-1 overflow-y-auto px-5 pb-4 pt-5 scrollbar-thin">
+        <div className="flex h-8 shrink-0 items-center px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Main Menu
-        </p>
-        <ul className="flex flex-col gap-0.5">
+        </div>
+        <ul className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => (
             <li key={item.label}>
               {item.children ? <CollapsibleNavItem item={item} pathname={pathname} onNavigate={onNavigate} /> : <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />}
@@ -49,7 +49,7 @@ export function SidebarNav({
 
 function SidebarHeader() {
   return (
-    <div className="flex items-center gap-3 border-b border-sidebar-border px-4 py-4">
+    <div className="flex items-center gap-3 border-b border-sidebar-border px-4 py-6">
       {/* Brand mark — reference (live-measured session 3): 40×40 squircle,
           12px radius, gradient to-right-bottom #2563EB → #4F46E5 (sRGB —
           arbitrary value per Tailwind v4 trap 3, oklab interpolation would
@@ -59,7 +59,7 @@ function SidebarHeader() {
         <Briefcase className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
       </div>
       <div className="flex min-w-0 flex-col">
-        <span className="text-base font-bold leading-tight text-foreground">EonHR</span>
+        <h2 className="text-base font-bold leading-tight text-foreground">EonHR</h2>
         <span className="text-[11px] leading-tight text-muted-foreground">Demo</span>
       </div>
     </div>
@@ -83,14 +83,14 @@ function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors",
+        "flex h-8 items-center gap-2 rounded-lg px-2 py-2 text-sm font-normal outline-none transition-colors",
         "focus-visible:ring-2 focus-visible:ring-ring",
         active
-          ? "bg-primary text-primary-foreground shadow-sm"
+          ? "bg-primary font-medium text-white shadow-sm"
           : "text-slate-600 hover:bg-slate-100 hover:text-foreground"
       )}
     >
-      <Icon className={cn("h-4.5 w-4.5 shrink-0", active ? "text-primary-foreground" : "text-slate-600")} aria-hidden="true" />
+      <Icon className={cn("h-5 w-5 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -115,13 +115,13 @@ function CollapsibleNavItem({
     <Collapsible.Root open={open} onOpenChange={setOpen}>
       <Collapsible.Trigger
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors",
+          "flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-normal outline-none transition-colors",
           "focus-visible:ring-2 focus-visible:ring-ring",
           "text-slate-600 hover:bg-slate-100 hover:text-foreground"
         )}
         aria-expanded={open}
       >
-        <Icon className="h-4.5 w-4.5 shrink-0 text-slate-600" aria-hidden="true" />
+        <Icon className="h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
         <span className="flex-1 truncate text-left">{item.label}</span>
         <ChevronRight
           className={cn("h-4 w-4 shrink-0 text-slate-600 transition-transform duration-200", open && "rotate-90")}
@@ -129,7 +129,7 @@ function CollapsibleNavItem({
         />
       </Collapsible.Trigger>
       <Collapsible.Content>
-        <ul className="mb-1 flex flex-col gap-0.5 pl-4">
+        <ul className="mb-1 flex flex-col gap-1 pl-4">
           {item.children?.map((child: NavChild) => {
             const active = pathname === child.href;
             const ChildIcon = child.icon;
@@ -140,17 +140,17 @@ function CollapsibleNavItem({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex w-full items-center gap-2 rounded-lg p-2 text-sm outline-none transition-colors",
+                    "flex h-8 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-normal outline-none transition-colors",
                     "focus-visible:ring-2 focus-visible:ring-ring",
                     active
-                      ? "bg-primary font-medium text-primary-foreground shadow-sm"
+                      ? "bg-primary font-medium text-white shadow-sm"
                       : "text-slate-600 hover:bg-slate-100 hover:text-foreground"
                   )}
                 >
                   {ChildIcon ? (
-                    <ChildIcon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-slate-600")} aria-hidden="true" />
+                    <ChildIcon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
                   ) : (
-                    <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-primary-foreground" : "bg-border")} aria-hidden="true" />
+                    <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-white" : "bg-border")} aria-hidden="true" />
                   )}
                   <span className="truncate">{child.label}</span>
                 </Link>

@@ -1,18 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Building2,
-  Clock,
-  Loader2,
-  MessageSquare,
-  Pencil,
-  Plug,
-  Plus,
-  Shield,
-  Trash2,
-  Video,
-} from "lucide-react";
+import { Building2, Clock, Loader2, MessageSquare, Pencil, Plug, Plus, SettingsIcon, Shield, Trash2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -126,7 +115,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader section="System Settings" title="Settings" subtitle="Configure your HR system" />
+      <PageHeader section="System Settings" sectionIcon={<SettingsIcon aria-hidden="true" />} title="Settings" subtitle="Configure your HR system" />
 
       <Tabs defaultValue="company" className="flex flex-col gap-4">
         <TabsList className="h-auto flex-wrap justify-start">
@@ -610,7 +599,7 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
         </div>
         {canEdit ? (
           <Button variant="outline" size="sm" onClick={() => setAddOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             Add Department
           </Button>
         ) : null}

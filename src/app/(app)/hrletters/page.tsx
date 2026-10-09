@@ -162,6 +162,7 @@ export default function HRLettersPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="HR Letters & Documents"
+        sectionIcon={<FileText aria-hidden="true" />}
         title="HR Letters"
         subtitle="Request and manage official HR documents"
         actions={
@@ -170,7 +171,7 @@ export default function HRLettersPage() {
               setDialogOpen(true);
             }}
           >
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Request
           </Button>
         }
@@ -195,7 +196,7 @@ export default function HRLettersPage() {
               description="Request your first HR letter to get started"
               action={
                 <Button onClick={() => setDialogOpen(true)}>
-                  <Plus aria-hidden="true" />
+                  <Plus className="mr-2" aria-hidden="true" />
                   New Request
                 </Button>
               }

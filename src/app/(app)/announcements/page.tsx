@@ -127,7 +127,7 @@ export default function AnnouncementsPage() {
         actions={
           canPost ? (
             <Button onClick={() => setDialogOpen(true)}>
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               New Announcement
             </Button>
           ) : undefined

@@ -161,13 +161,13 @@ export default function EmployeesPage() {
               Import CSV
             </Button>
             <Button
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700"
+              className="shadow-lg"
               onClick={() => {
                 setEditing(null);
                 setDialogOpen(true);
               }}
             >
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Employee
             </Button>
           </>
@@ -182,7 +182,7 @@ export default function EmployeesPage() {
             placeholder="Search employees..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-10"
             aria-label="Search employees"
           />
         </div>
@@ -223,7 +223,7 @@ export default function EmployeesPage() {
             }
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Add Employee
               </Button>
             }

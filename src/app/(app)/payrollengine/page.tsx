@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarDays, Building2, Cog, Loader2, Info, Users, TrendingDown, Clock4, CheckCircle2 } from "lucide-react";
+import { Building2, Calculator, CalendarDays, CheckCircle2, Clock4, Cog, Info, Loader2, TrendingDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -147,6 +147,7 @@ export default function PayrollEnginePage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Payroll Engine"
+        sectionIcon={<Calculator aria-hidden="true" />}
         title="Payroll Calculator"
         subtitle="Auto-generate salary slips from attendance data"
         actions={

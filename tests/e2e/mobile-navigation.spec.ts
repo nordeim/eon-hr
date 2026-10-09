@@ -94,6 +94,21 @@ test.describe("mobile navigation", () => {
     await expect(panel).toBeHidden();
   });
 
+  test("sidebar nav items use the reference 32px rhythm (session 4)", async ({ page }) => {
+    // Reference (live-measured): top-level nav rows are h-8 (32px) with 20px
+    // icons, font-normal 400 inactive; sub-items h-8 with 12px px/gap.
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const panel = page.getByRole("dialog", { name: "Navigation menu" });
+    await expect(panel).toBeVisible();
+    const dashboard = panel.getByRole("link", { name: "Dashboard", exact: true });
+    await expect(dashboard).toHaveCSS("height", "32px");
+    await expect(dashboard.locator("svg").first()).toHaveCSS("height", "20px");
+    const employees = panel.getByRole("button", { name: "Employees", exact: true });
+    await expect(employees).toHaveCSS("height", "32px");
+    await expect(employees.locator("span").first()).toHaveCSS("font-weight", "400");
+    await page.keyboard.press("Escape");
+  });
+
   test("bottom tab bar has no active highlight (reference behavior)", async ({ page }) => {
     // The reference renders every bottom tab in slate-600 — no active state.
     await page.goto("/dashboard");

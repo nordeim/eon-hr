@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CalendarClock, HeartPulse, TrendingDown, Users } from "lucide-react";
+import { AlertTriangle, CalendarClock, HeartPulse, TrendingDown, TrendingUp, Users } from "lucide-react";
 import {
   DepartmentDistributionBar,
   HeadcountTrendLine,
@@ -115,6 +115,7 @@ export default async function AdvancedAnalyticsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Advanced Analytics"
+        sectionIcon={<TrendingUp aria-hidden="true" />}
         title="Analytics & Insights"
         subtitle="Comprehensive HR analytics and predictive insights"
         actions={<ScheduleReportButton />}

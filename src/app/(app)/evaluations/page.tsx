@@ -199,6 +199,7 @@ export default function EvaluationsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Performance Management"
+        sectionIcon={<ClipboardCheck aria-hidden="true" />}
         title="360° Evaluations & Appraisals"
         subtitle="Structured reviews, automated workflows & AI-generated performance reports"
       />
@@ -227,7 +228,7 @@ export default function EvaluationsPage() {
                 </CardDescription>
               </div>
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Review
               </Button>
             </CardHeader>
@@ -243,7 +244,7 @@ export default function EvaluationsPage() {
                   description="Review cycles organize appraisal and 360° feedback rounds."
                   action={
                     <Button onClick={() => setDialogOpen(true)}>
-                      <Plus aria-hidden="true" />
+                      <Plus className="mr-2" aria-hidden="true" />
                       New Review
                     </Button>
                   }

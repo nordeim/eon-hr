@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Play, Trash2, Loader2, Workflow as WorkflowIcon, Zap, ListChecks } from "lucide-react";
+import { ListChecks, Loader2, Play, Plus, Sparkles, Trash2, Workflow as WorkflowIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -195,11 +195,12 @@ export default function WorkflowAutomationPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Workflow Automation"
+        sectionIcon={<Sparkles aria-hidden="true" />}
         title="Automated Workflows"
         subtitle="Streamline HR processes with intelligent automation"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             Create Workflow
           </Button>
         }
@@ -223,7 +224,7 @@ export default function WorkflowAutomationPage() {
             description="Create your first workflow to automate HR processes"
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 Create Workflow
               </Button>
             }

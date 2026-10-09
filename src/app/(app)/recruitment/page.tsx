@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Plus, Trash2, Loader2, Briefcase, Users, Star, Sparkles, FileSearch, MapPin, Building2,
-} from "lucide-react";
+import { Briefcase, Building2, FileSearch, Loader2, MapPin, Plus, Sparkles, Star, Trash2, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -305,11 +303,12 @@ export default function RecruitmentPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI-Powered Recruitment"
+        sectionIcon={<UserPlus aria-hidden="true" />}
         title="Recruitment"
         subtitle="AI-assisted CV parsing, scoring & applicant tracking"
         actions={
           <Button onClick={() => setJobDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             Post New Job
           </Button>
         }
@@ -625,7 +624,7 @@ export default function RecruitmentPage() {
                 description="Post your first job to start collecting applicants."
                 action={
                   <Button onClick={() => setJobDialogOpen(true)}>
-                    <Plus aria-hidden="true" />
+                    <Plus className="mr-2" aria-hidden="true" />
                     Post New Job
                   </Button>
                 }

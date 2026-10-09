@@ -1,17 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  ArrowLeftRight,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  Clock3,
-  CalendarRange,
-  CalendarX2,
-  Loader2,
-  X,
-} from "lucide-react";
+import { ArrowLeftRight, Calendar, CalendarRange, CalendarX2, ChevronLeft, ChevronRight, Clock3, Loader2, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -183,6 +173,7 @@ export default function ShiftCalendarPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Shift Management"
+        sectionIcon={<Calendar aria-hidden="true" />}
         title="Shift Calendar"
         subtitle="Drag & drop shifts · Overlap prevention · Swap requests"
         actions={

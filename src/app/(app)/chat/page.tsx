@@ -5,7 +5,6 @@ import { Loader2, MessageSquarePlus, Search, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { cn, initials, timeAgo } from "@/lib/utils";
@@ -197,85 +195,91 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader title="Messages" subtitle="Chat with your team in real time" />
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[340px_1fr]">
+    /* Reference layout (session-4 live measurement): NO page header — a
+       single bordered card (rounded-xl, shadow-lg, border-slate-200,
+       overflow-hidden, h-[calc(100vh-8rem)]) inset in the standard page
+       container, split into a w-80 conversation column (border-r) and the
+       message pane. "Messages" is an h2 18px/700 inside the list header with
+       a 40×32 blue + button. */
+    <div className="mx-auto flex w-full max-w-7xl flex-col">
+      <div className="flex h-[calc(100vh-8rem)] min-h-[560px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         {/* conversation list */}
-        <Card className="flex h-80 flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
-          <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-foreground">Messages</h2>
-              <Button size="sm" onClick={() => setPickerOpen(true)}>
-                <MessageSquarePlus aria-hidden="true" />
-                New
-              </Button>
-            </div>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <Input
-                placeholder="Search conversations..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-                aria-label="Search conversations"
+        <div className="hidden w-80 shrink-0 flex-col border-r border-slate-200 md:flex">
+          <div className="flex items-center justify-between gap-2 px-4 py-4">
+            <h2 className="text-lg font-bold text-foreground">Messages</h2>
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              aria-label="New conversation"
+              className="flex h-8 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white transition-colors hover:bg-blue-700 cursor-pointer"
+            >
+              <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="relative px-4 pb-3">
+            <Search className="pointer-events-none absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              placeholder="Search conversations..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+              aria-label="Search conversations"
+            />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+            {loading ? (
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              <EmptyState
+                title="No conversations yet"
+                description="Start a new conversation to message a teammate."
+                className="py-8"
               />
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-              {loading ? (
-                <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
-                </div>
-              ) : filteredConversations.length === 0 ? (
-                <EmptyState
-                  title="No conversations yet"
-                  description="Start a new conversation to message a teammate."
-                  className="py-8"
-                />
-              ) : (
-                <div className="flex flex-col gap-1">
-                  {filteredConversations.map((c) => {
-                    const other = users.find((u) => u.id === c.otherIds[0]) ?? null;
-                    const isActive = c.id === activeId;
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setActiveId(c.id)}
-                        className={cn(
-                          "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-secondary/60 cursor-pointer",
-                          isActive && "bg-accent"
-                        )}
-                      >
-                        <Avatar className="h-9 w-9 shrink-0">
-                          {other?.avatarUrl ? <AvatarImage src={other.avatarUrl} alt={other.name} /> : null}
-                          <AvatarFallback>{initials(c.title)}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-foreground">{c.title}</p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {c.lastMessage ?? "No messages yet"}
-                          </p>
-                        </div>
-                        {c.lastMessageAt ? (
-                          <span className="shrink-0 text-[11px] text-muted-foreground">
-                            {timeAgo(c.lastMessageAt)}
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {filteredConversations.map((c) => {
+                  const other = users.find((u) => u.id === c.otherIds[0]) ?? null;
+                  const isActive = c.id === activeId;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setActiveId(c.id)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-secondary/60 cursor-pointer",
+                        isActive && "bg-accent"
+                      )}
+                    >
+                      <Avatar className="h-9 w-9 shrink-0">
+                        {other?.avatarUrl ? <AvatarImage src={other.avatarUrl} alt={other.name} /> : null}
+                        <AvatarFallback>{initials(c.title)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">{c.title}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {c.lastMessage ?? "No messages yet"}
+                        </p>
+                      </div>
+                      {c.lastMessageAt ? (
+                        <span className="shrink-0 text-[11px] text-muted-foreground">
+                          {timeAgo(c.lastMessageAt)}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* message pane */}
-        <Card className="flex h-[520px] flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
+        <div className="flex min-w-0 flex-1 flex-col">
           {active ? (
             <>
-              <div className="flex items-center gap-3 border-b p-4">
+              <div className="flex items-center gap-3 border-b border-slate-200 p-4">
                 <Avatar className="h-9 w-9">
                   {activeOther?.avatarUrl ? (
                     <AvatarImage src={activeOther.avatarUrl} alt={activeOther.name} />
@@ -327,7 +331,7 @@ export default function ChatPage() {
                 )}
               </div>
               <form
-                className="flex items-end gap-2 border-t p-4"
+                className="flex items-end gap-2 border-t border-slate-200 p-4"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void onSend();
@@ -353,15 +357,15 @@ export default function ChatPage() {
               </form>
             </>
           ) : (
-            <CardContent className="flex flex-1 items-center justify-center">
+            <div className="flex flex-1 items-center justify-center p-8">
               <EmptyState
                 icon={<MessageSquarePlus className="h-6 w-6" aria-hidden="true" />}
                 title="Select a conversation"
                 description="Choose a conversation to start messaging"
               />
-            </CardContent>
+            </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {/* new conversation picker */}
@@ -377,7 +381,7 @@ export default function ChatPage() {
               placeholder="Search people..."
               value={pickerSearch}
               onChange={(e) => setPickerSearch(e.target.value)}
-              className="pl-9"
+              className="pl-10"
               aria-label="Search people"
               autoFocus
             />

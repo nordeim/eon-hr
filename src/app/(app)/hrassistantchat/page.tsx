@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, Loader2, MessageSquare, Plus, Send, Sparkles } from "lucide-react";
+import { Bot, Loader2, MessageSquare, Plus, Send, Sparkles, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -150,6 +150,7 @@ export default function HrAssistantChatPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="AI HR Assistant"
+        sectionIcon={<Target aria-hidden="true" />}
         title="HR Assistant"
         subtitle="Chat with your AI-powered HR assistant"
       />
@@ -159,7 +160,7 @@ export default function HrAssistantChatPage() {
         <Card className="flex h-64 flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
           <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
             <Button size="sm" className="w-full" onClick={onNewChat}>
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               New Chat
             </Button>
             <p className="text-xs font-medium text-muted-foreground">Active Chats</p>

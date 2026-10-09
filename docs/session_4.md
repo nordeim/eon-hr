@@ -136,3 +136,74 @@ Session 3 complete — all work committed and pushed to `nordeim/eon-hr@main` (4
 **Gates:** lint ✓ · tsc ✓ · **49/49 unit** (+5 new) · build ✓ · **75/75 E2E** · 22 screenshots refreshed · docs updated (remediation plan, session log, worklogs, README/AGENTS/CLAUDE/PAD/SKILL).
 
 **Suggested next steps:** spot-check the repo on GitHub (`docs/remediation-plan-session3.md` is the audit record); run `bun run build && bun run test:e2e` to reproduce the baseline; a future session could extend parity to per-page content details (module-page inner layouts) and grow the E2E suite beyond the wizard/dashboard coverage.
+
+---
+
+# Session 4 continuation — audit + parity round 3 (this run)
+
+Re-cloned the workspace fresh, reproduced the full baseline (52→ gates
+re-validated from scratch: lint, tsc, 49/49 unit at start, build, 75/75 E2E
+after installing the Playwright browsers). Then ran the code audit
+(code-review-and-audit skill methodology) and a fresh dual-browser parity
+audit against the live reference.
+
+Audit findings (scaffold leftovers invisible to the gates):
+- package.json still identified as "orbital"/ORBITAL
+- capture/smoke scripts logged in as demo@orbital.app with the
+  orbital_session cookie; capture-screenshots.mjs had HARDCODED absolute
+  paths into /home/z/my-project/project-management (a different project!)
+  and a goals-era shot catalog; capture-wizard.sh, wizard-cleanup.mjs and
+  check-db-state.mjs referenced routes/models that do not exist in Eon HR;
+  smoke-test.sh tested the ORBITAL API surface (goals/tasks/agent)
+- seven dead session-1 probe scripts deleted
+
+Parity round 3 (all DOM-verified, computed styles + bounding boxes):
+- FONT: the reference self-hosts NO webfont — body font is the v4.0-era
+  default ui-sans-serif stack. Dropped next/font Inter (metric drift:
+  165 vs 157px CTA labels) and pinned the stack verbatim (the installed
+  4.3.3 default differs — see the validation-report addendum).
+- BUTTON: default variant is a sRGB gradient #2563EB→#4F46E5 (hover
+  #1D4ED8→#4338CA), rounded-md 6px, text #FAFAFA, v3 shadow — plus the
+  reference quirk of mr-2 on CTA icons over gap-2 (16px effective gap).
+  Removed the employees page's oklab utility-gradient override.
+- TOKENS: --primary-foreground #FAFAFA; --border/--input #E5E5E5
+  (neutral-200); neutral/purple/orange families pinned; sidebar active nav
+  switched to explicit text-white (the ref renders pure white there).
+- INPUT/SELECT/TEXTAREA: rounded-md (6px), no shadow (ref has none);
+  icon-search fields pl-10 (40px icon inset).
+- SIDEBAR: header py-6 (89px row), nav inset px-5 pt-5, "Main Menu" as an
+  h-8 32px row, top-level items h-8/px-2/gap-2/font-normal with 20px icons,
+  sub-items h-8/px-3/gap-3, lists gap-1, brand as h2 — the whole sidebar is
+  now byte-exact (32px rhythm, first item y=141 on desktop AND drawer).
+- SECTION HEADERS: the reference's module pages render the section as a
+  white pill badge (rounded-full, px-4 py-2, shadow-sm, 16px blue-600
+  module icon, 16px/400 #0A0A0A text, mb-4 mt-8 → badge y=64, h1 y=116).
+  PageHeader reworked; 28 pages pass their module icon; 4 badge-less pages
+  (templates, recruitmentkanban, hrreports, payrollmodule) dropped the
+  section prop (ref shows no badge there).
+- CHAT: restructured to the reference layout — no page header, one
+  rounded-xl/shadow-lg card h-[calc(100vh-8rem)] split into a w-80
+  border-r list (Messages h2 18px/700 + 40×32 blue-600 + button) and the
+  message pane. Byte-exact geometry (x=288 y=32 w=1120 h=772 r=12).
+- ANALYTICS: 4 stat cards (the ref has 4, not 5 — the templates count is
+  card 1's hint) with 48px rounded-xl colored tiles (blue/purple/green/
+  orange 100), 24px -600 icons, 30px values.
+- LOGIN (re-measured): inputs h-12/rounded-xl/bg-slate-50-50/border-
+  slate-200/pl-10, sign-in h-12, card padding p-8 sm:p-10 md:pt-12 md:pb-10
+  md:px-10, page bg slate-50→slate-100 sRGB gradient, top h-1 accent bar
+  (slate-200→300→200).
+- Verified non-gaps: ESS ref page is permanently stuck "Loading your
+  profile…" (reference bug — clone superset kept); attendance shows
+  "Access Restricted" in the ref (role) — clone superset kept; dashboard
+  content cards unchanged (VLM: PARITY).
+
+Operational: found and neutralized the sandbox-exported absolute
+DATABASE_URL (parent-workspace path) that had silently moved this session's
+db; the repo db/ is authoritative again (push+seed explicit) and
+capture-all.sh now pushes the schema before seeding. Rewrote the capture
+pipeline (purpose-built catalog, 22 shots) and the smoke suite (9 checks,
+all passing).
+
+Gates after remediation: lint 0 errors · tsc clean · 52/52 unit (+3 token
+pins) · build ✓ · 78/78 E2E (+3: CTA gradient recipe, login geometry, nav
+32px rhythm; chat test updated for the reference h2 structure).

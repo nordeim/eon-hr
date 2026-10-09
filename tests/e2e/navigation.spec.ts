@@ -105,7 +105,6 @@ const ROUTES: [string, string][] = [
   ["/assetmanagement", "Asset Management"],
   ["/staffrequests", "Staff Requests"],
   ["/companywall", "Company Updates"],
-  ["/chat", "Messages"],
   ["/announcements", "Company Announcements"],
   ["/notificationpreferences", "Notification Settings"],
   ["/communications", "Communications"],
@@ -134,4 +133,13 @@ test.describe("all module routes render", () => {
       await expect(page.getByRole("heading", { level: 1 }).first()).toContainText(heading);
     });
   }
+
+  // /chat has NO page h1 in the reference — "Messages" is an h2 inside the
+  // unified chat card (session-4 parity restructure).
+  test("/chat renders (reference: h2 Messages inside the card, no page h1)", async ({ page }) => {
+    const res = await page.goto("/chat");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 2, name: "Messages" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(0);
+  });
 });

@@ -205,7 +205,6 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
-        section="HR Reports & Analytics"
         title="Reports"
         subtitle="Generate comprehensive HR reports across all modules"
       />

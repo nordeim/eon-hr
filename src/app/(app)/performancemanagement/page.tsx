@@ -216,6 +216,7 @@ export default function PerformanceManagementPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Performance Management"
+        sectionIcon={<Target aria-hidden="true" />}
         title="Goals & Reviews"
         subtitle="Track performance, set goals, and conduct reviews"
       />
@@ -239,7 +240,7 @@ export default function PerformanceManagementPage() {
               {goals.length} goal{goals.length === 1 ? "" : "s"} across the team
             </p>
             <Button onClick={() => setDialogOpen(true)}>
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Set New Goal
             </Button>
           </div>
@@ -256,7 +257,7 @@ export default function PerformanceManagementPage() {
                 description="Set the first goal to start tracking performance"
                 action={
                   <Button onClick={() => setDialogOpen(true)}>
-                    <Plus aria-hidden="true" />
+                    <Plus className="mr-2" aria-hidden="true" />
                     Set New Goal
                   </Button>
                 }

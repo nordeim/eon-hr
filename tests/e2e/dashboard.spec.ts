@@ -71,6 +71,23 @@ test.describe("dashboard", () => {
     // Reference sidebar footer: Languages icon + "عربي" label (Arabic target).
     await expect(page.getByRole("button", { name: "عربي", exact: true })).toBeVisible();
   });
+
+  test("primary CTA buttons use the reference gradient recipe (session 4)", async ({ page }) => {
+    await page.goto("/employees");
+    // Reference: blue-600 -> indigo-600 gradient (#2563EB -> #4F46E5), sRGB
+    // interpolation (the ref's computed value is "linear-gradient(to right,
+    // rgb(37,99,235), rgb(79,70,229))"; Chromium may serialize the direction
+    // keyword as the equivalent 90deg — both render identically), radius 6px,
+    // text #FAFAFA. NOT solid #1877F2, NOT oklab interpolation.
+    const add = page.getByRole("button", { name: "Add Employee" }).first();
+    const bg = await add.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(bg).toContain("rgb(37, 99, 235)");
+    expect(bg).toContain("rgb(79, 70, 229)");
+    expect(bg).not.toContain("in oklab");
+    expect(/to right|90deg/.test(bg)).toBe(true);
+    await expect(add).toHaveCSS("border-radius", "6px");
+    await expect(add).toHaveCSS("color", "rgb(250, 250, 250)");
+  });
 });
 
 // End-to-end CRUD through the real UI — the reference 4-step Add Employee

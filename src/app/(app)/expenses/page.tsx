@@ -184,11 +184,12 @@ export default function ExpensesPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
+        sectionIcon={<Receipt aria-hidden="true" />}
         title="Expense Claims"
         subtitle="Submit and manage expense reimbursements"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Expense
           </Button>
         }
@@ -217,7 +218,7 @@ export default function ExpensesPage() {
             description="Submit your first claim to get started"
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Expense
               </Button>
             }

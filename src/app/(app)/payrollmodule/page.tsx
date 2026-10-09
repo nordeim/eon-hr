@@ -217,7 +217,6 @@ export default function PayrollModulePage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
-        section="Payroll Module"
         title="Payroll Module"
         subtitle="Generate & manage monthly payslips"
         actions={
@@ -232,7 +231,7 @@ export default function PayrollModulePage() {
                 setDialogOpen(true);
               }}
             >
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               Add Payslip
             </Button>
           </>

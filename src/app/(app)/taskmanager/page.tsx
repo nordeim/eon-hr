@@ -205,6 +205,7 @@ export default function TaskManagerPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Task Management"
+        sectionIcon={<FolderKanban aria-hidden="true" />}
         title="Tasks & Projects"
         subtitle="Manage tasks, track progress, and collaborate with your team"
         actions={
@@ -214,7 +215,7 @@ export default function TaskManagerPage() {
               New Project
             </Button>
             <Button onClick={openTaskDialog}>
-              <Plus aria-hidden="true" />
+              <Plus className="mr-2" aria-hidden="true" />
               New Task
             </Button>
           </>
@@ -341,7 +342,7 @@ export default function TaskManagerPage() {
                 description="Create your first project to organize your team's work."
                 action={
                   <Button onClick={openProjectDialog}>
-                    <Plus aria-hidden="true" />
+                    <Plus className="mr-2" aria-hidden="true" />
                     New Project
                   </Button>
                 }

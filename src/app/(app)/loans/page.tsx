@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, MoreHorizontal, Check, X, Banknote, Trash2, Loader2, Wallet, HandCoins, CircleDollarSign } from "lucide-react";
+import { Banknote, Check, CircleDollarSign, DollarSign, HandCoins, Loader2, MoreHorizontal, Plus, Trash2, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,11 +176,12 @@ export default function LoansPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"
+        sectionIcon={<DollarSign aria-hidden="true" />}
         title="Employee Loans"
         subtitle="Manage and track loan requests"
         actions={
           <Button onClick={() => setDialogOpen(true)}>
-            <Plus aria-hidden="true" />
+            <Plus className="mr-2" aria-hidden="true" />
             New Loan Request
           </Button>
         }
@@ -202,7 +203,7 @@ export default function LoansPage() {
             description="Create your first loan request"
             action={
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" />
+                <Plus className="mr-2" aria-hidden="true" />
                 New Loan Request
               </Button>
             }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ScanSearch, Bell, ShieldAlert, AlertTriangle, CheckCircle2, Activity, FileWarning, Loader2 } from "lucide-react";
+import { Activity, AlertTriangle, Bell, CheckCircle2, FileWarning, Loader2, ScanSearch, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -200,6 +200,7 @@ export default function ComplianceDashboardPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Compliance Monitor"
+        sectionIcon={<ShieldCheck aria-hidden="true" />}
         title="Compliance Dashboard"
         subtitle="Proactive document expiry tracking & automated notifications"
         actions={
