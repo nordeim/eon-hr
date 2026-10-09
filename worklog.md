@@ -207,3 +207,22 @@ Stage Summary:
 - Reference parity: dashboard/login/drawer/mobile verified; documented superset deviations
 - 44 unit + 75 E2E green; wizard round-trip E2E-pinned
 - Ready for commit + SSH-wrapper push to main
+
+---
+Task ID: 12 (session 2)
+Agent: main (Super Z)
+Task: Final commit + SSH-wrapper push
+
+Work Log:
+- Full gate green on final tree: lint clean, tsc clean, 44/44 unit, build ok, 75/75 E2E (fresh standalone build)
+- Staged 69 files (+2,547/-615): remediation source, wizard, tests, screenshots, docs, eon-hr_SKILL.md, .env.example
+- Secret scan on staged diff: clean (demo credentials only)
+- Commit 0822033 on main: "fix: session-2 parity remediation — reference-verified tokens, 4-step employee wizard, 75 E2E green"
+- Dry-run push via docs/ssh_git_wrapper_v3.py (paramiko shim at bin/ssh on PATH, key 0600 at /tmp, fingerprint SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU — first attempt used the wrapper's default task-management remote, corrected with --remote git@github.com:nordeim/eon-hr.git)
+- Real push: 8be5cb3..0822033 HEAD -> main; remote verified 0822033 == local HEAD; tracking ref synced
+- Operator key shredded (random overwrite + remove); wrapper temp key auto-shredded
+- Post-push smoke: /api/health ok + db up; working tree clean
+
+Stage Summary:
+- Pushed to nordeim/eon-hr@main (0822033) — session-2 remediation delivered
+- All deliverables committed: code, tests, screenshots, docs, SKILL, .env.example
