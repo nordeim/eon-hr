@@ -183,7 +183,7 @@ export default function StaffAttendancePage() {
   }, [stats]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Attendance Management"
         title="Staff Attendance"

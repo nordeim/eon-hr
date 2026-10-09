@@ -120,7 +120,7 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Company Announcements"
         subtitle="Stay informed with the latest updates"

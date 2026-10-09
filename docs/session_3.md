@@ -220,3 +220,63 @@ All tasks complete. Here's what I finished in this session:
 **Pushed:** `0822033` + `41b3d93` → `git@github.com:nordeim/eon-hr.git` **main** via the SSH wrapper — remote verified == local HEAD, operator key shredded.
 
 **Next steps you might consider:** (1) spot-check the repo on GitHub — `docs/screenshots/` and `eon-hr_SKILL.md` are good starting points; (2) run `bun run test:e2e` locally after `bun run build` to reproduce the 75/75 baseline; (3) future iterations can follow the session protocol in `eon-hr_SKILL.md` Appendix A.
+
+---
+
+# Session 3 — Audit + Parity Round 2 (this session)
+
+The log above is the previous conversation's record (wizard-bug fix through
+push 2fb1cdc). This session continued the workflow with fresh verification.
+
+## What was done
+
+1. **Workspace refresh & re-validation** — pulled to 2fb1cdc (clean, in sync
+   with origin/main), re-read AGENTS/CLAUDE/README/PAD/SKILL + session logs,
+   re-ran every gate from scratch: lint ✓, tsc ✓, 44/44 unit ✓, build ✓,
+   75/75 E2E ✓ (all claims of the previous push reproduced).
+2. **Code audit** (repo `skills/code-review-and-audit` methodology, native-CLI
+   fallback) — secret scan clean; deep review of the auth core, employees API
+   and validation schemas. Three findings, all fixed TDD-first:
+   - `assertProductionSecret` was dead code → strengthened + wired through
+     `src/instrumentation.ts` (live negative test: production boot refuses to
+     serve without a proper secret) — 4 new unit specs.
+   - `typescript.ignoreBuildErrors: true` (scaffold leftover) → removed; build
+     passes with full type checking.
+   - Employees PATCH relation pre-validation added (mirrors POST).
+3. **Live parity re-audit** (dual agent-browser sessions, DOM measurement as
+   ground truth, VLM leads always DOM-verified) — found and fixed 9 visual
+   gaps the previous sessions missed:
+   - sidebar surface #FAFAFA (token; TDD-pinned)
+   - brand squircle (40×40, 12px radius, sRGB gradient #2563EB→#4F46E5, 24px
+     stroke-2 briefcase, v3 shadow-lg) — session 2 had measured the wrong
+     element (40×24)
+   - dashboard kicker + space-y-8 rhythm + mt-8 (Tailwind v4 **trap 6**:
+     v4's space-y selector flip breaks hidden-first-sibling offsets —
+     appended to the validation report)
+   - Customize button geometry + #E5E5E5 border
+   - mobile app-bar 73px (40px toggle button)
+   - mobile "Dashboard" page-title kicker (reference hides the welcome row
+     at mobile — replicated)
+   - 46 page wrappers gap-6 → gap-8 (32px rhythm)
+   - Card border #E5E5E5 (reference uses neutral-200 for cards, slate-200
+     for shell chrome)
+   - dashboard grid gap-6 + lg:grid-cols-3; employees search card p-4
+4. **Verified non-gaps** — sidebar width 256px, active nav #1877F2, footer
+   email, progress fills, card shadows/radius, drawer geometry (288px/80%/no
+   X): all byte-identical or documented deviations; every contradicting VLM
+   claim was refuted by computed-style measurement.
+5. **Gates re-run after remediation** — lint ✓, tsc ✓, **49/49 unit**,
+   build ✓, **75/75 E2E**.
+6. **22 screenshots re-captured** in `docs/screenshots/` (daemon-CWD pitfall
+   found and corrected — captures land in the agent-browser daemon's working
+   directory, not the shell's).
+7. **Docs** — `docs/remediation-plan-session3.md` (full audit record),
+   Tailwind trap 6, session log (this file), worklogs, README/AGENTS/CLAUDE/
+   PAD/SKILL count updates.
+
+## Deliverables
+
+- Code: 52 files touched (1 new: `src/instrumentation.ts`)
+- Tests: 49 unit (4 new secret-guard + 1 sidebar token) + 75 E2E
+- Docs: remediation-plan-session3.md, trap 6, refreshed screenshots
+- Push: see worklog for the final commit hash

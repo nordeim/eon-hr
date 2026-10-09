@@ -124,7 +124,7 @@ export default function LeaveManagementPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       {/* Reference header: "Leave Management" kicker + "Leave Requests"
           title + "Request time off and manage approvals" subtitle. */}
       <PageHeader

@@ -201,7 +201,7 @@ export default function StaffRequestsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Staff Requests"
         subtitle="Submit and manage requests across departments"

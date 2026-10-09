@@ -79,3 +79,45 @@ describe("session token (HMAC)", () => {
     expect(auth.parseSessionToken(`${payload}.${mac}`)).toBeNull();
   });
 });
+
+describe("production secret guard (assertProductionSecret)", () => {
+  const realNodeEnv = process.env.NODE_ENV;
+  const realSecret = process.env.AUTH_SECRET;
+  // NODE_ENV is typed read-only; tests mutate it through a widened view.
+  const setEnv = (key: "NODE_ENV" | "AUTH_SECRET", value?: string) => {
+    (process.env as Record<string, string | undefined>)[key] = value;
+  };
+
+  beforeEach(() => {
+    setEnv("AUTH_SECRET", undefined);
+  });
+
+  afterEach(() => {
+    setEnv("NODE_ENV", realNodeEnv);
+    setEnv("AUTH_SECRET", realSecret);
+  });
+
+  it("throws in production when AUTH_SECRET is unset", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("AUTH_SECRET", undefined);
+    expect(() => auth.assertProductionSecret()).toThrow(/AUTH_SECRET/);
+  });
+
+  it("throws in production when AUTH_SECRET is shorter than 16 chars", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("AUTH_SECRET", "short");
+    expect(() => auth.assertProductionSecret()).toThrow(/AUTH_SECRET/);
+  });
+
+  it("passes in production with a 16+ char AUTH_SECRET", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("AUTH_SECRET", "a-valid-production-secret");
+    expect(() => auth.assertProductionSecret()).not.toThrow();
+  });
+
+  it("passes outside production even with no AUTH_SECRET (dev fallback)", () => {
+    setEnv("NODE_ENV", "development");
+    setEnv("AUTH_SECRET", undefined);
+    expect(() => auth.assertProductionSecret()).not.toThrow();
+  });
+});

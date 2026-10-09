@@ -49,12 +49,14 @@ export function SidebarNav({
 
 function SidebarHeader() {
   return (
-    <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
-      {/* Brand mark — reference: 40×24 gradient squircle (measured
-          #3856E9 → #444DE6, vertical) with a white briefcase line-icon and a
-          soft shadow; rendered in CSS so parity needs no image asset. */}
-      <div className="flex h-6 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-b from-[#3856E9] to-[#444DE6] shadow-sm">
-        <Briefcase className="h-3.5 w-3.5 text-white" strokeWidth={1.75} aria-hidden="true" />
+    <div className="flex items-center gap-3 border-b border-sidebar-border px-4 py-4">
+      {/* Brand mark — reference (live-measured session 3): 40×40 squircle,
+          12px radius, gradient to-right-bottom #2563EB → #4F46E5 (sRGB —
+          arbitrary value per Tailwind v4 trap 3, oklab interpolation would
+          shift the midpoint), v3 shadow-lg geometry, white 24px stroke-2
+          briefcase; rendered in CSS so parity needs no image asset. */}
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(to_right_bottom,#2563EB,#4F46E5)] shadow-lg">
+        <Briefcase className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
       </div>
       <div className="flex min-w-0 flex-col">
         <span className="text-base font-bold leading-tight text-foreground">EonHR</span>

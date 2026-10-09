@@ -22,9 +22,6 @@ const nextConfig: NextConfig = {
     "preview-chat-5bfe59f5-c893-4b45-a3ea-ad5caa2ef1af.space-z.ai",
     "*.space-z.ai",
   ],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

@@ -311,3 +311,36 @@ assertions must read the right property per stack. (c) Next 16's dev-origin
 protection silently blocks dev chunks for the `127.0.0.1` origin (unhydrated page,
 native form GET fallbacks) — `allowedDevOrigins: ["127.0.0.1"]` in next.config.ts
 restores both origins.
+
+## Appendix: Project Trap Log — Trap 6: The space-y Selector Flip (session 3)
+
+v3 implemented `space-y-*` as `> :not([hidden]) ~ :not([hidden]) { margin-top }`
+— "every child AFTER the first gets top margin". v4 implements it as
+`:where(& > :not(:last-child)) { margin-block-end }` — "every child EXCEPT
+the last gets bottom margin". Same visual result for fully-visible stacks, but
+the two engines diverge exactly when the FIRST sibling is `display:none`:
+
+- **v3**: a hidden first child still counts as a sibling, so the SECOND child
+  receives `margin-top` — the layout keeps a 32px offset (the reference app,
+  built on v3 semantics, lands its dashboard welcome row at y=64 this way:
+  `p-8` 32px + hidden mobile-kicker + `space-y-8`).
+- **v4**: the hidden first child itself receives the (invisible) bottom margin,
+  and the second child gets NOTHING — the same markup collapses to y=32.
+
+Symptom (live, session 3): clone dashboard header sat 32px higher than the
+reference with byte-identical class strings — invisible to class-set diffs and
+to rendered-pixel diffs of fully-visible pages.
+
+Fix pattern: when a `space-y-*` container's first child is conditionally hidden
+(md:hidden kickers are the classic case), give the second child an explicit
+`mt-*` matching the v3 sibling margin. v4's `:where()` wrapper cannot override
+an explicit margin (that is exactly trap 4's mechanism), so the two compose
+instead of fighting: `space-y-8` keeps the visible-stack spacing, `mt-8`
+restores the hidden-sibling offset. Applied in `src/app/(app)/dashboard/page.tsx`
+(welcome row) with an inline comment; kept OUT of the trap-4-forbidden pattern
+space because the margin is additive by design, not an override attempt.
+
+Related session-3 finding: the reference itself renders its dashboard
+`space-y-8` stack inside an `overflow-hidden` wrapper, which silently kills
+its nominally `sticky` mobile page-title kicker — replicated as a static bar
+(see docs/remediation-plan-session3.md §A4).

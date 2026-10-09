@@ -209,7 +209,7 @@ export default function DocumentTrackerPage() {
   }, [documents, filter]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Document Management"
         title="Document Tracker"

@@ -38,6 +38,12 @@ describe("globals.css token contract", () => {
     expect(theme).toContain("--color-sidebar-border: #e2e8f0");
   });
 
+  it("pins the sidebar surface to reference #FAFAFA (session-3 measurement)", () => {
+    // Live-measured on both the desktop aside and the mobile drawer sheet:
+    // rgb(250,250,250) — NOT white.
+    expect(theme).toContain("--color-sidebar: #fafafa");
+  });
+
   it("pins the five Tailwind v4 engine traps (validation report)", () => {
     // trap 5: v3 shadow geometry
     expect(theme).toContain("--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)");

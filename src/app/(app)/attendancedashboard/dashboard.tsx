@@ -167,7 +167,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Attendance Dashboard"
         subtitle="Daily clock-in/out trends, late arrivals & department reports"

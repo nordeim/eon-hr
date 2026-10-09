@@ -11,7 +11,7 @@
 > specific file or command — the file paths are authoritative.
 >
 > **Version:** 2.0.0 (session-2 remediation complete) · **Last updated:**
-> 2026-10-09 · **State:** 44 unit + 75 E2E tests green, lint/typecheck/build
+> 2026-10-09 · **State:** 49 unit + 75 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -154,7 +154,7 @@ converge on the same file regardless of process cwd — pinned by
 
 All tokens live in the single `@theme inline` block in
 `src/app/globals.css` (Tailwind v4 — there is NO tailwind.config file). The
-comment above the block documents the **five v4 traps**; traps 2, 3 and 5 are
+comment above the block documents the **six v4 traps**; traps 2, 3 and 5 are
 materialized as token pins:
 
 1. **Full `hsl()` values** — bare triplets (`hsl(221 39% 11%)` as a token
@@ -719,8 +719,8 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           44 unit (4 files) + 75 e2e (4 specs, workers:1)
-globals.css     @theme inline — 5 v4 traps, pinned v3 palette, token test
+tests           49 unit (4 files) + 75 e2e (4 specs, workers:1)
+globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
 envelope        { ok, data | error:{code,message} }  (src/lib/api.ts)

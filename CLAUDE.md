@@ -4,7 +4,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 # Eon HR
 
-A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 106-spec test pyramid.
+A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 46 routes, 49 API endpoints, 45 data models, HMAC cookie auth, and a 124-spec test pyramid.
 
 **Tech Stack:** Next.js 16 (App Router, standalone output) · React 19 · TypeScript 5 (strict) · Tailwind CSS 4 (CSS-first) · Radix UI primitives · Prisma 6 + SQLite · Zod 4 · Recharts 2 · Vitest 5 · Playwright 1.63
 
@@ -48,7 +48,7 @@ Key technical decisions: custom HMAC-signed cookie sessions over NextAuth (state
 - **`next/font`** loads Inter; never import fonts via `<link>`.
 - **Metadata API** for titles; root layout exports the template `"%s | Eon HR"`.
 - **Radix + CVA** (shadcn pattern) for primitives — wrap/style, never rebuild.
-- **Tailwind 4**: CSS-first `@theme` in `src/app/globals.css`; NO `tailwind.config.js`. Respect the five engine traps in `docs/Tailwind-V4-Validation-Report.md` (full hsl() values, pinned palette, sRGB gradients, no child margins under `space-y`, pinned `--shadow-sm`).
+- **Tailwind 4**: CSS-first `@theme` in `src/app/globals.css`; NO `tailwind.config.js`. Respect the six engine traps in `docs/Tailwind-V4-Validation-Report.md` (full hsl() values, pinned palette, sRGB gradients, no child margins under `space-y`, pinned `--shadow-sm`, and the space-y selector flip for hidden first siblings — trap 6 needs an explicit mt-* on the second child).
 - **Prisma**: single `schema.prisma`; `db:push` for local, migrations for production; the client is a `globalThis` singleton (`src/lib/db.ts`).
 - **API design**: `/api/{resource}/route.ts`; Zod-validated bodies; typed `ApiResult<T>` envelope; mutation endpoints take `?id=` for PATCH/DELETE.
 
@@ -85,10 +85,10 @@ bun run dev                 # dev server on http://localhost:3000
 
 | Layer | Framework | Files | Specs | Location |
 |---|---|---|---|---|
-| Unit (pure seams) | Vitest | 4 | 44 | `tests/unit/`, `tests/db-path.test.ts` |
+| Unit (pure seams) | Vitest | 4 | 49 | `tests/unit/`, `tests/db-path.test.ts` |
 | E2E (browser) | Playwright | 5 | 75 | `tests/e2e/*.spec.ts` |
 
-- **Unit**: db-path resolution contract (15), auth crypto/session (10), money & date utils (13), design-token contract (6 — reads `globals.css`, pins `#1877F2` primary, slate-500 muted, the v3 palette pin and the v3 `--shadow-sm` geometry). Pure functions/CSS only — no Prisma, no network.
+- **Unit**: db-path resolution contract (15), auth crypto/session (14 — incl. the production secret boot guard), money & date utils (13), design-token contract (7 — reads `globals.css`, pins `#1877F2` primary, slate-500 muted, the #FAFAFA sidebar surface, the v3 palette pin and the v3 `--shadow-sm` geometry). Pure functions/CSS only — no Prisma, no network.
 - **E2E**: auth logged-out surface; sidebar + all 46 routes render; mobile navigation regression pins (drawer 288px, dark overlay, no X button, bottom tabs); dashboard parity (leave balances 21/21, 30/30, bordered quick-action chips, single-line expense total, active-nav `rgb(24,119,242)`); 4-step employee wizard CRUD round-trip against an isolated `db/e2e.db` on the production standalone server (port 3100).
 
 ### Test Commands

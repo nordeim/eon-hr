@@ -208,6 +208,17 @@ export async function PATCH(req: NextRequest) {
       if (dupe) return err("CONFLICT", "Another employee already uses this email");
     }
 
+    // Same relation pre-validation as POST — a bad id should be a VALIDATION
+    // error, not a Prisma FK crash (which would surface as INTERNAL).
+    if (data.departmentId && data.departmentId !== existing.departmentId) {
+      const dept = await db.department.findUnique({ where: { id: data.departmentId } });
+      if (!dept) return err("VALIDATION", "Selected department does not exist");
+    }
+    if (data.managerId && data.managerId !== existing.managerId) {
+      const mgr = await db.employee.findUnique({ where: { id: data.managerId } });
+      if (!mgr) return err("VALIDATION", "Selected manager does not exist");
+    }
+
     await db.employee.update({
       where: { id },
       data: {

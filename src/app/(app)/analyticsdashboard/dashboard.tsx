@@ -138,7 +138,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
     months.map((m) => [m.label, ...pick(m)]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Analytics Dashboard"
         subtitle="Visual overview of key HR metrics and trends"

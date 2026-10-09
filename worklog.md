@@ -226,3 +226,23 @@ Work Log:
 Stage Summary:
 - Pushed to nordeim/eon-hr@main (0822033) — session-2 remediation delivered
 - All deliverables committed: code, tests, screenshots, docs, SKILL, .env.example
+
+---
+Task ID: 13 (session 3)
+Agent: main (Super Z)
+Task: Re-validation audit + parity round 2 + hardening + docs + push
+
+Work Log:
+- Pulled to 2fb1cdc; re-validated every gate from scratch (lint/tsc/44 unit/build/75 E2E — all green)
+- Code audit per skills/code-review-and-audit (secret scan clean; auth/employees/validation reviewed)
+- Fixed (TDD): assertProductionSecret wired via src/instrumentation.ts + 4 unit specs (live negative test: prod boot without secret fails with HTTP 500); removed scaffold typescript.ignoreBuildErrors; employees PATCH relation pre-validation
+- Live dual-browser parity re-audit (DOM ground truth, VLM leads verified): fixed sidebar #FAFAFA token (TDD-pinned), brand squircle 40×40/#2563EB→#4F46E5 sRGB/stroke-2/shadow-lg (session-2 had measured 40×24 — wrong element), dashboard kicker + space-y-8 + mt-8 (NEW Tailwind v4 trap 6: space-y selector flip breaks hidden-first-sibling offsets — appended to validation report), Customize button h-9/#E5E5E5, mobile app-bar 73px, mobile Dashboard kicker (welcome row hidden at mobile in ref), 46 page wrappers gap-6→gap-8, Card border #E5E5E5, dashboard grid gap-6/lg:cols-3, employees search card p-4
+- Verified non-gaps (refuted VLM claims via computed styles): sidebar width 256px, active nav #1877F2, footer email, progress fills, card shadow/radius, drawer 288px/80%/no-X
+- Gates after fixes: lint ✓, tsc ✓, 49/49 unit, build ✓ (full type checking), 75/75 E2E
+- Re-captured 22 screenshots in docs/screenshots/ (fixed daemon-CWD capture pitfall)
+- Wrote docs/remediation-plan-session3.md, Tailwind trap 6, session_3.md continuation section, updated README/AGENTS/CLAUDE/PAD/SKILL counts
+
+Stage Summary:
+- Production hardening: boot-time secret guard live, no disabled gates, consistent API validation
+- Parity round 2: 9 fixed gaps, all DOM-verified; dashboard/employees/mobile geometry byte-exact
+- 49 unit + 75 E2E green; ready for commit + push

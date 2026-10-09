@@ -197,7 +197,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader title="Messages" subtitle="Chat with your team in real time" />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[340px_1fr]">

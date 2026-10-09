@@ -159,7 +159,7 @@ export default function HRLettersPage() {
   const pending = letters.filter((l) => l.status === "pending").length;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="HR Letters & Documents"
         title="HR Letters"

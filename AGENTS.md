@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 44 specs) |
+| Unit tests | `bun run test` (Vitest, 49 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 75 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -39,7 +39,10 @@ is overriding `.env` — unset it first (`unset DATABASE_URL`).
 ## Environment
 
 - `.env` is gitignored; copy `.env.example`. `AUTH_SECRET` must be ≥16 chars
-  and is REQUIRED in production.
+  and is REQUIRED in production — enforced at boot by
+  `src/instrumentation.ts` (`register()` → `assertProductionSecret()`); the
+  standalone server refuses to serve (instrumentation error, HTTP 500)
+  without it. Pinned by `tests/unit/auth.test.ts`.
 - An exported `DATABASE_URL` in your shell silently overrides `.env` for the
   Prisma CLI — always `unset DATABASE_URL` before `db:push`/`db:seed` if the
   db file lands in the wrong place.
@@ -47,7 +50,7 @@ is overriding `.env` — unset it first (`unset DATABASE_URL`).
 ## Tailwind CSS 4 — read the trap log first
 
 `docs/Tailwind-V4-Validation-Report.md` (appendix "Project Trap Log") pins
-five v3→v4 engine differences already fixed in `src/app/globals.css`:
+six v3→v4 engine differences already fixed in `src/app/globals.css`:
 
 1. Theme vars must be full `hsl()`/hex values — bare triplets under
    `@theme inline` resolve to transparent.
@@ -60,6 +63,10 @@ five v3→v4 engine differences already fixed in `src/app/globals.css`:
    wrapper does not. Use flex `gap` layouts instead.
 5. `--shadow-sm` is pinned to v3 geometry; v4 shifted the whole shadow scale
    one notch.
+6. v4's `space-y-*` selector flipped (margin-block-end on `:not(:last-child)`
+   vs v3's margin-top on `* + *`) — a `display:none` FIRST sibling no longer
+   offsets the second child; restore the v3 offset with an explicit `mt-*`
+   on the second child (see the dashboard welcome row).
 
 Also: CSS comments containing `*/` sequences (e.g. `mt-*/mb-*` inside a
 comment) terminate the comment and corrupt `@theme` — write "margin-top"

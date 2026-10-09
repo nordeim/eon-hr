@@ -21,16 +21,24 @@ const SESSION_TTL_S = 60 * 60 * 24 * 7; // 7 days
 function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 16) return s;
-  // Dev-only fallback — production deployments must set AUTH_SECRET
-  // (see .env.example; next.config fails the production build without it).
+  // Dev-only fallback — production boot refuses to start without a proper
+  // AUTH_SECRET (see assertProductionSecret + src/instrumentation.ts).
   return "insecure-dev-secret-do-not-use-in-production";
 }
 
+/**
+ * Production boot guard: the session HMAC secret MUST be configured (>=16
+ * chars) when NODE_ENV=production. Called from src/instrumentation.ts so the
+ * server refuses to boot instead of silently signing sessions with the
+ * insecure dev constant. (Pinned by tests/unit/auth.test.ts.)
+ */
 export function assertProductionSecret(): void {
-  if (process.env.NODE_ENV === "production" && process.env.AUTH_SECRET) {
-    if (process.env.AUTH_SECRET.length < 16) {
-      throw new Error("AUTH_SECRET must be at least 16 characters in production");
-    }
+  if (process.env.NODE_ENV !== "production") return;
+  const s = process.env.AUTH_SECRET;
+  if (!s || s.length < 16) {
+    throw new Error(
+      "AUTH_SECRET is required in production (>= 16 characters). Set it in the environment or .env — refusing to start with the insecure dev fallback.",
+    );
   }
 }
 

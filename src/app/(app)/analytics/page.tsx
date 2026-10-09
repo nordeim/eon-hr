@@ -105,7 +105,7 @@ export default async function AnalyticsPage() {
     .sort((a, b) => b.completion - a.completion);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Analytics Dashboard"
         subtitle="Track your onboarding performance and metrics"

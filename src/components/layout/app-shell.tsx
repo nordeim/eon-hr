@@ -57,7 +57,8 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar (reference: px-6 py-4, brand + Demo subtitle) */}
+        {/* Mobile top bar (reference: pad 16px 24px, border-b slate-200,
+            toggle button p-8 + 24px icon = 40px row → 73px total header) */}
         <header className="sticky top-0 z-10 border-b border-sidebar-border bg-white px-6 py-4 lg:hidden">
           <div className="flex items-center gap-4">
             <button
@@ -65,9 +66,9 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
               aria-label="Toggle Sidebar"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-slate-100"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-slate-100"
             >
-              <PanelLeft className="h-5 w-5" aria-hidden="true" />
+              <PanelLeft className="h-6 w-6" aria-hidden="true" />
             </button>
             <div className="flex min-w-0 flex-col">
               <span className="text-base font-bold leading-tight text-foreground">EonHR</span>

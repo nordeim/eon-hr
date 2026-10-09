@@ -513,7 +513,7 @@ Full stack verification: `curl http://localhost:3000/api/health` → `{"status":
 |---|---|---|
 | `prisma/schema.prisma` | 760 | 45-model DDL source |
 | `prisma/seed.ts` | 120 | Idempotent demo seed |
-| `src/app/globals.css` | 120 | Tailwind 4 theme + all five trap pins |
+| `src/app/globals.css` | 120 | Tailwind 4 theme + all six trap pins |
 | `src/lib/db-path.ts` | 107 | Schema-relative SQLite URL resolution (the portability seam) |
 | `src/lib/auth.ts` | 150 | scrypt + HMAC sessions + cookie helpers |
 | `src/lib/api.ts` | 100 | ApiResult envelope + guards + parseBody |

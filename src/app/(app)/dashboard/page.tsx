@@ -61,9 +61,27 @@ export default async function DashboardPage() {
   const totalExpense = expenses?._sum.amount ?? 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      {/* Reference header: h1.text-3xl font-bold text-slate-900 + slate-500 subtitle */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mx-auto flex w-full max-w-7xl flex-col space-y-8">
+      {/* Mobile page-title kicker — reference (session-3): md:hidden white
+          bar (bg-white, border-b slate-200, py-3 px-4) with a single
+          text-lg font-bold "Dashboard" h1. The reference marks it sticky
+          top-0 z-20, but it sits inside an overflow-hidden ancestor and so
+          scrolls away with the content — replicated here as a static bar.
+          As the first child it also feeds space-y-8's sibling margin, which
+          is exactly how the reference lands its welcome row at y=64. */}
+      <div className="border-b border-slate-200 bg-white py-3 md:hidden">
+        <div className="flex items-center gap-3">
+          <h1 className="truncate text-lg font-bold text-slate-900">Dashboard</h1>
+        </div>
+      </div>
+
+      {/* Welcome row — reference: hidden at mobile (md:flex), justify-between
+          items-start gap-4; h1 text-3xl font-bold + slate-500 subtitle.
+          The explicit mt-8 replicates v3 space-y semantics (v4 moved the
+          sibling margin to margin-block-end on :not(:last-child), so a
+          display:none first sibling no longer offsets this row — see the
+          Tailwind v4 validation report, trap 6). */}
+      <div className="mt-8 hidden items-start justify-between gap-4 md:flex">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Welcome back, {user.name}!</h1>
           <p className="mt-1 text-slate-500">Your personal employee portal.</p>
@@ -71,10 +89,10 @@ export default async function DashboardPage() {
         <CustomizeButton />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Quick Actions — reference: bordered chips, small inline blue icons */}
         <Card data-widget="quick-actions">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>

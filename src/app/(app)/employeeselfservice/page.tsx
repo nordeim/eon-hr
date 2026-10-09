@@ -329,7 +329,7 @@ async function SelfServiceContent() {
 
 export default function EmployeeSelfServicePage() {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader title="My Portal" subtitle="Your employee self-service portal" />
       <React.Suspense fallback={<LoadingCard />}>
         <SelfServiceContent />

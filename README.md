@@ -133,7 +133,7 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (44 specs: db-path, auth, utils, tokens)
+bun run test          # Vitest unit layer (49 specs: db-path, auth, utils, tokens)
 bun run test:e2e      # Playwright E2E (75 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
@@ -171,16 +171,24 @@ Radius: `rounded-xl` cards, `rounded-lg` controls. Shadows: v3-geometry
 The UI was audited against the live reference (`https://eon.base44.app`) with
 a dual-browser workflow (desktop 1440×900 + mobile 390×844): colors and
 geometry extracted from computed styles, screenshots diffed, every claim
-verified in the DOM. Session 2 closed the full gap inventory in
+verified in the DOM. Session 2 closed the gap inventory in
 `docs/remediation-plan-session1.md` — primary token, sidebar icons and
 gradient avatar, عربي language button, 288px mobile drawer with dark overlay,
 reference PageHeader scale, bordered quick-action chips, single-line expense
 total, dark sign-in button, gradient brand squircle, and the reference's
-4-step Add Employee wizard (Saudi-specific fields). A few deliberate
-deviations are documented there (e.g. the reference's `/Dashboard`
-case-sensitivity bug is fixed, its builder badge is not cloned).
+4-step Add Employee wizard (Saudi-specific fields).
 
-Deep engineering knowledge — the five Tailwind v4 traps, the wizard
+Session 3 (`docs/remediation-plan-session3.md`) re-audited with fresh
+measurements and closed a second round: the true sidebar surface (#FAFAFA,
+not white), the real brand squircle (40×40, sRGB gradient #2563EB→#4F46E5 —
+session 2 had measured the wrong element), the dashboard mobile page-title
+kicker + 32px section rhythm (Tailwind v4 trap 6: the `space-y` selector
+flip), neutral-200 card borders, the 73px mobile app bar, and the page
+wrapper spacing across all 46 module pages. A few deliberate deviations
+remain documented (e.g. the reference's `/Dashboard` case-sensitivity bug is
+fixed, its builder badge is not cloned).
+
+Deep engineering knowledge — the six Tailwind v4 traps, the wizard
 button-swap form-submit bug, debugging runbooks and coding patterns — is
 distilled in **`eon-hr_SKILL.md`**.
 

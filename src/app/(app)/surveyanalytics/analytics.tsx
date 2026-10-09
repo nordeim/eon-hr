@@ -200,7 +200,7 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
   const latest = [...responses].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)).slice(0, 1)[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Survey Analytics"
         subtitle="AI-powered employee engagement insights"
