@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Eon HR — Tailwind CSS 4 theme (CSS-first, no tailwind.config.js)
+   Reference: docs/Tailwind-V4-Validation-Report.md trap log.
+   All six engine traps are pinned here:
+     1. Full hsl() values (bare triplets resolve transparent under @theme inline)
+     2. v3-era hex palette pinned (v4 oklch palette drifts 1-3 sRGB units)
+     3. Gradients: sRGB-linear arbitrary forms where byte-identical output
+        matters (oklab interpolation differs)
+     4. space-y selector rewrite: no explicit margin-top or margin-bottom
+        children inside space-y containers (mobile nav CTA rule)
+     5. --shadow-sm pinned to v3 geometry (v4 shifted the scale one notch)
+   ========================================================================== */
+
+@theme inline {
+  /* Font stack pinned to the reference app's computed body font (session-4
+     live measurement): the v4.0-era default ui-sans-serif stack — the
+     reference self-hosts NO webfont. (The installed Tailwind 4.3.3 default
+     drifted to -apple-system…, so pin it explicitly. Self-hosted Inter
+     drifted text metrics — e.g. CTA button widths — off the reference.) */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Palette pinned to v3-era hexes (trap 2).
+     Values re-measured against the live reference app (session 2 audit):
+     - primary #1877F2  (reference "custom-primary-bg": active nav, primary
+       buttons — measured rgb(24,119,242))
+     - link blue #2563EB (reference text-blue-600 for "View all" links)
+     - muted-foreground slate-500 #64748B (reference text-slate-500)
+     - the body canvas applies a slate-50 to blue-50 gradient (see the base
+       layer below; sRGB-pinned arbitrary form per trap 3) */
+  --color-background: #f8fafc;
+  --color-foreground: hsl(221 39% 11%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(221 39% 11%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(221 39% 11%);
+  --color-primary: #1877f2;
+  --color-primary-foreground: #fafafa;
+  --color-secondary: hsl(210 40% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: #64748b;
+  --color-accent: hsl(214 95% 93%);
+  --color-accent-foreground: #1877f2;
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: #e5e5e5;
+  --color-input: #e5e5e5;
+  --color-ring: #1877f2;
+  --color-sidebar: #fafafa;
+  --color-sidebar-foreground: hsl(221 39% 11%);
+  --color-sidebar-accent: hsl(214 95% 93%);
+  --color-sidebar-border: #e2e8f0;
+
+  /* Reference text-link blue (text-blue-600 "View all" / "Request leave")
+     kept as a named token so link affordances survive a primary change. */
+  --color-link: #2563eb;
+
+  /* ---- v3 palette pin (trap 2, completed in the session-2 audit) --------
+     Tailwind v4's default palette is oklch-based and drifts 1-3 sRGB units
+     per channel from the v3 hexes the reference app renders. Every family
+     the UI uses is pinned here to the exact v3 hex so `bg-slate-900`,
+     `border-slate-200`, `text-slate-600` etc. render byte-identical to the
+     reference (and computed styles serialize as rgb(), not lab()). */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* neutral family (session 4): the reference's section badges and card
+     borders use the neutral scale — neutral-200 #E5E5E5 (cards/inputs) and
+     neutral-950 #0A0A0A (badge text). */
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-950: #0a0a0a;
+
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+
+  --color-green-50: #f0fdf4;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+
+  --color-indigo-50: #eef2ff;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+
+  /* purple + orange (session 4): analytics stat-card tiles/icons */
+  --color-purple-100: #f3e8ff;
+  --color-purple-600: #9333ea;
+  --color-orange-100: #ffedd5;
+  --color-orange-600: #ea580c;
+
+  --color-red-50: #fef2f2;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+
+  --color-amber-50: #fffbeb;
+  --color-amber-500: #f59e0b;
+
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+
+  --color-teal-50: #f0fdfa;
+  --color-teal-500: #14b8a6;
+  /* teal-600 + violet-600 (session 5): badge icon colors on
+     surveys/organogram (#0d9488) and shiftcalendar (#7c3aed). */
+  --color-teal-600: #0d9488;
+  --color-violet-600: #7c3aed;
+
+  /* Radii (v3 defaults) */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Shadow scale pinned (trap 5): v4 moved shadow-sm to v3's shadow
+     geometry — pin v3's exact value so byte-identical classes render
+     byte-identical shadows. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    /* Reference canvas: bg-gradient-to-br from-slate-50 to-blue-50.
+       Pinned to the sRGB arbitrary form per trap 3 (v4 interpolates
+       gradient utilities in oklab and drifts from the v3 output). */
+    background-image: linear-gradient(to bottom right, #f8fafc, #eff6ff);
+    background-attachment: fixed;
+    @apply text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for long lists */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+}
