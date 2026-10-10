@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, ArrowLeft, User, UserPlus, Briefcase, FileText, Paperclip, Upload } from "lucide-react";
+import { Loader2, ArrowLeft, ArrowRight, User, UserPlus, Briefcase, FileText, Paperclip, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -288,7 +288,7 @@ export function EmployeeWizard({
           bg-card border-slate-200, p-8 interior; a gradient card header
           (blue-50→indigo-50, border-b) carries the UserPlus title row). */}
       <div className="mx-auto w-full max-w-4xl rounded-xl border border-slate-200 bg-card text-card-foreground shadow">
-        <div className="flex flex-col space-y-1.5 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+        <div className="flex flex-col space-y-1.5 border-b border-slate-200 bg-[linear-gradient(to_right,#eff6ff,#eef2ff)] p-6">
           <div className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-card-foreground">
             <UserPlus className="h-6 w-6 text-blue-600" aria-hidden="true" />
             {employee ? "Edit Employee" : "Add New Employee"}
@@ -548,6 +548,10 @@ export function EmployeeWizard({
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : null}
                 {step < STEPS.length - 1 ? "Next" : employee ? "Save Changes" : "Create Employee"}
+                {/* Reference (session 8, R7-B): the advancing CTA carries a
+                    trailing arrow-right (w-4 h-4 ml-2) — 97px Next vs 65px
+                    without it. */}
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </form>
@@ -570,12 +574,13 @@ function Field({
   className?: string;
   children: React.ReactNode;
 }) {
-  // Reference wizard field (measured): label (14px/500 #0A0A0A) with a 12px
-  // gap to the 36px input — gap-3, kept as flex-gap (trap 4: never mt/mb
-  // inside space-y containers).
+  // Reference wizard field (measured, session 8 R7-C): wrapper 68px = 4px
+  // top slack (pt-1) + 16px label box (leading-4) + 12px gap (gap-3, kept
+  // as flex-gap — trap 4: never mt/mb inside space-y containers) + 36px
+  // input → 84px row pitch under gap-4 grids, card 872px like the ref.
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
-      <Label htmlFor={id}>
+    <div className={cn("flex flex-col gap-3 pt-1", className)}>
+      <Label htmlFor={id} className="leading-4">
         {label}
         {required ? " *" : ""}
       </Label>

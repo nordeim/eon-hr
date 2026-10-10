@@ -353,3 +353,26 @@ Work Log:
 Stage Summary:
 - Parity round 6 complete: responsive boundary, category-A mobile kickers, inline wizard — every fixed surface verified live against the reference
 - 142 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 19 (session 8)
+Agent: main (Super Z)
+Task: Fresh-workspace re-validation, audit, parity round 7 (wizard interior precision + mobile-nav audit closure), docs + push
+
+Work Log:
+- Fresh clone of nordeim/eon-hr (57139ee); .env recreated (DATABASE_URL file:../db/custom.db + AUTH_SECRET), install/generate/push/seed — db lands at <repo>/db/custom.db; re-validated every gate from scratch: lint 0/0, tsc, 142/142 unit, build, 86/86 E2E (after bunx playwright install chromium — sandbox cache had v1243, Playwright 1.63 wants v1248; first E2E failure was the missing binary, not code)
+- Audit per repo skills (skills-catalog → code-review-and-audit methodology, nextjs16-tailwind4 §9 mobile-nav failure taxonomy + §10 visual-debugging playbook, tdd-workflow): secret scan clean on the session-7 diff; wizard/PageHeader/app-shell sources reviewed sound
+- Mobile navigation (user priority) audited end-to-end on BOTH apps at 390×844 + the 800px band, dual agent-browser: top bar 73px sticky, 5 bottom tabs, drawer 288×844 on #FAFAFA with rgba(0,0,0,0.8) overlay, ref's Close button invisible (0×0, opacity .7), submenu expansion + navigation + auto-close functional, category-A /employees kicker byte-identical (y=89/x=16/w=358/h=53 18px/700), category-B /training 36px header identical, 800px boundary identical (sidebar 256 visible, chrome hidden), dashboard mobile cards byte-identical — NO Tailwind v4 bug present; all six documented traps remain pinned
+- R7-A: wizard card header gradient was the LAST unpinned bg-gradient-to-* in src/ (v4 oklab vs ref sRGB) → bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]
+- R7-B: reference's advancing CTA carries trailing arrow-right (w-4 h-4 ml-2 — 97px Next vs our 65px) → ArrowRight added to Next/Save/Create
+- R7-C: session-7's ~6px/row residual root-caused — the ref's shadcn Label renders display:inline (16px font-metric box) + 4px strut slack: field 68 = 4+16+12+36, pitch 84, card 872. Reproduced deterministically: Field pt-1 + Label leading-4 (global Label untouched)
+- Verified non-gaps documented: ref mobile /training overflows horizontally (scrollWidth 600>390 — clone wraps correctly, deliberate deviation); ref Customize + New Leave Request are dead controls (our working dialogs = superset); ref date fields are custom spinbutton pickers vs our native type=date in the same 407×36 box; ref React state refuses synthetic input events (Base44 flake)
+- TDD: 3 RED pins in shell-recipes.test.ts (sRGB gradient, ArrowRight ml-2, 68px field recipe) → GREEN after the one-file wizard edit; E2E arrow-icon pin added to the wizard CRUD spec
+- Gates: lint 0/0, tsc, 144/144 unit, build (unset DATABASE_URL — the exported-env trap printed prisma errors on the first build leg), 86/86 E2E
+- Live dual-browser re-verify: wizard card 896×872 @ (400,128), pitch 84, Next 97×36 with arrow, header gradient serializes linear-gradient(to right, rgb(239,246,255), rgb(238,242,255)) — byte-identical to the reference; mobile nav re-checked unchanged
+- 24 screenshots refreshed via capture-all (production standalone) + wizard step-1 re-captured from the dev server running the remediated code; DB pristine (users=1, employees=1, leaveBalances=2)
+- Docs updated: AGENTS.md (144 specs + session-8 wizard recipe), CLAUDE.md (counts + unit description), README (counts), PAD (test matrix), eon-hr_SKILL.md (W-1 pattern + counts), docs/remediation-plan-session8.md (+ completion record), docs/session_8.md, worklog.md
+
+Stage Summary:
+- Parity round 7 complete: wizard interior byte-identical (gradient sRGB, arrow CTA, 872px card); mobile navigation verified end-to-end with zero gaps
+- 144 unit + 86 E2E green; ready for commit + push

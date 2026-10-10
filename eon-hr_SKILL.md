@@ -437,7 +437,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 142/142 (db-path 15, auth 14, utils 13, tokens 16, recipes 84)
+bun run test          # vitest — 144/144 (db-path 15, auth 14, utils 13, tokens 16, recipes 86)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -538,10 +538,10 @@ overlay, no X button).
 
 ## 15. Coding Patterns
 
-**W-1 — Wizard footer (AP-5-proof; session 7: the wizard is an INLINE view, not a Dialog — back button + h1 + max-w-4xl card):**
+**W-1 — Wizard footer (AP-5-proof; session 7: the wizard is an INLINE view, not a Dialog — back button + h1 + max-w-4xl card; session 8: the advancing CTA carries a trailing `<ArrowRight className="ml-2 h-4 w-4">` like the reference's 97px Next):**
 
 ```tsx
-<DialogFooter>
+<div className="mt-8 flex justify-between border-t border-slate-200 pt-6">
   <Button type="button" variant="outline" onClick={backOrCancel}>…</Button>
   <Button
     type="button"
@@ -552,10 +552,14 @@ overlay, no X button).
     }}
   >
     {step < STEPS.length - 1 ? "Next" : "Create Employee"}
+    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
   </Button>
-</DialogFooter>
+</div>
 // <form onSubmit={submit}> stays wired for Enter-key, guarded by
 // `if (saving || step < STEPS.length - 1) return;` inside submit.
+// Field rows (session 8 R7-C): wrapper `flex flex-col gap-3 pt-1` +
+// `<Label className="leading-4">` → 68px field, 84px pitch, 872px card —
+// reproduces the reference's inline-label box + strut slack deterministically.
 ```
 
 **A-1 — API route skeleton:**

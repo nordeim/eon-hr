@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 142 specs) |
+| Unit tests | `bun run test` (Vitest, 144 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -165,4 +165,8 @@ blue-50→indigo-50 header with UserPlus, p-8 interior, 48px icon-circle step
 rail with green passed-connectors, 96px photo-upload circle on step 1,
 border-t footer). The employees page swaps `list | wizard` views; ALL
 footer buttons stay `type="button"` (AP-5). Never wrap it in a Dialog
-again.
+again. Session 8 closed the interior residuals: the card header gradient
+is sRGB-pinned `bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]` (trap 3 —
+the last unpinned gradient), the advancing CTA carries a trailing
+ArrowRight (w-4 h-4 ml-2 — 97px Next), and field rows use the 68px wrapper
+recipe (`pt-1` + `leading-4` label → 84px pitch, 872px step-1 card).

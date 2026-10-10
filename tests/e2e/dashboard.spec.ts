@@ -205,6 +205,9 @@ test.describe("employees CRUD (4-step wizard)", () => {
     // Step 1 — Personal Information (Next disabled until required fields)
     const next = wizard.getByRole("button", { name: "Next" });
     await expect(next).toBeDisabled();
+    // Session 8 (R7-B): the advancing CTA carries the reference's trailing
+    // arrow-right icon (w-4 h-4 ml-2 — 97px button).
+    await expect(next.locator("svg.lucide-arrow-right")).toHaveCSS("width", "16px");
     await wizard.getByLabel("Full Name *").fill("E2E Temperson");
     await wizard.getByLabel("Work Email *").fill("e2e-temp@eon-hr.test");
     await wizard.getByLabel("Nationality").fill("Saudi Arabia");

@@ -113,8 +113,12 @@ describe("inline Add-Employee wizard (session 7, R6-C)", () => {
     expect(wizard).toMatch(/p-8[^0-9]/);
   });
 
-  it("card header: gradient blue-50→indigo-50, border-b, UserPlus + 24px/600 title", () => {
-    expect(wizard).toContain("bg-gradient-to-r from-blue-50 to-indigo-50");
+  it("card header: sRGB blue-50→indigo-50 gradient, border-b, UserPlus + 24px/600 title", () => {
+    // Session 8 (R7-A): the reference computes an sRGB interpolation — v4's
+    // bg-gradient-to-r blends in oklab (trap 3). Pinned to the arbitrary
+    // form like every other parity gradient.
+    expect(wizard).toContain("bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]");
+    expect(wizard).not.toContain("bg-gradient-to-r");
     expect(wizard).toContain("border-b border-slate-200");
     expect(wizard).toContain("UserPlus");
     expect(wizard).toContain("text-2xl");
@@ -169,5 +173,29 @@ describe("employees page view state (session 7, R6-C)", () => {
     // reference behavior: the page content area becomes the wizard.
     expect(employeesPage).toMatch(/"list"\s*\|\s*"wizard"|view === "wizard"/);
     expect(employeesPage).not.toMatch(/dialogOpen|setDialogOpen/);
+  });
+});
+
+describe("wizard interior precision (session 8, parity round 7)", () => {
+  // Reference measurements (docs/remediation-plan-session8.md):
+  //   Next button 97×36 = label + gap-2 (8) + 16px arrow-right + ml-2 (8)
+  //   field wrapper 68px = 4 slack + 16 label + 12 gap + 36 input
+  //   row pitch 84px = 68 + gap-4 (16); step-1 card 872px
+
+  it("R7-B: the advancing CTA carries the trailing ArrowRight icon", () => {
+    // Reference footer Next: "Next" + lucide arrow-right (w-4 h-4 ml-2) —
+    // 97px wide vs our 65px without it. Applies to Next AND the final
+    // Create Employee button (the same advancing CTA).
+    expect(wizard).toContain("ArrowRight");
+    expect(wizard).toMatch(/ArrowRight[^/]*className="ml-2 h-4 w-4"/);
+  });
+
+  it("R7-C: field rows use the 68px wrapper recipe (pt-1 + leading-4)", () => {
+    // Reference field wrapper = 4px top slack + 16px label box + 12px gap
+    // + 36px input (68px, 84px pitch). The reference's extra height comes
+    // from its inline-display label (16px font-metric box) + line-strut
+    // slack; reproduced deterministically with pt-1 + leading-4.
+    expect(wizard).toContain("flex flex-col gap-3 pt-1");
+    expect(wizard).toMatch(/<Label[^>]*className="leading-4"/);
   });
 });

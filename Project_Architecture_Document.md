@@ -407,7 +407,7 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
 | Design tokens | 1 | 16 | `tests/unit/tokens.test.ts` | Vitest |
 | Parity recipes (s5/s6) | 1 | 59 | `tests/unit/recipes.test.ts` | Vitest |
-| Shell recipes (s7: boundary/kickers/wizard) | 1 | 25 | `tests/unit/shell-recipes.test.ts` | Vitest |
+| Shell recipes (s7/s8: boundary/kickers/wizard) | 1 | 27 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
 | E2E mobile navigation + boundary | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
