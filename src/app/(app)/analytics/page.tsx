@@ -118,7 +118,7 @@ export default async function AnalyticsPage() {
           100 backgrounds, 24px -600 icons, 30px values, 14px/400 labels.
           The templates count is card 1's hint in the reference. */}
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard
+        <StatCard variant="tile-right"
           label="Total Employees"
           value={employeeCount}
           hint={`${templateCount} templates`}
@@ -126,7 +126,7 @@ export default async function AnalyticsPage() {
           iconClassName="h-12 w-12 rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard
+        <StatCard variant="tile-right"
           label="Avg. Completion"
           value={avgCompletionDays}
           hint="days"
@@ -134,7 +134,7 @@ export default async function AnalyticsPage() {
           iconClassName="h-12 w-12 rounded-xl bg-purple-100 text-purple-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard
+        <StatCard variant="tile-right"
           label="Task Completion"
           value={`${taskCompletionPct}%`}
           hint={`${tasksDone} / ${tasksTotal}`}
@@ -142,7 +142,7 @@ export default async function AnalyticsPage() {
           iconClassName="h-12 w-12 rounded-xl bg-green-100 text-green-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard
+        <StatCard variant="tile-right"
           label="Active Onboarding"
           value={activeOnboarding}
           hint="in progress"

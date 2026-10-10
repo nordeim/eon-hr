@@ -195,11 +195,11 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Present Days" value={presentDays} />
-        <StatCard label="Absent Days" value={absentDays} />
-        <StatCard label="Late Arrivals" value={lateArrivals} />
-        <StatCard label="Attendance Rate" value={`${attendanceRate}%`} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact" label="Present Days" value={presentDays} />
+        <StatCard variant="compact" label="Absent Days" value={absentDays} />
+        <StatCard variant="compact" label="Late Arrivals" value={lateArrivals} />
+        <StatCard variant="compact" label="Attendance Rate" value={`${attendanceRate}%`} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

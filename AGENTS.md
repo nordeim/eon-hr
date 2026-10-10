@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 164 specs) |
+| Unit tests | `bun run test` (Vitest, 194 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -133,7 +133,7 @@ reference's `sticky top-0` sits inside a non-scrolling wrapper stack, so
 the bar scrolls away with the content (only the 73px top bar stays
 pinned). Do not re-add `sticky top-[73px]`.
 
-## PageHeader contract (sessions 5–9)
+## PageHeader contract (sessions 5–10)
 
 Six badge recipes (raised-48/raised-36/flat36/flat36-sm/flat48/flat-tight)
 pin badge/h1/subtitle positions; **the raised mt-8 offset lives on the ROW**
@@ -141,10 +141,49 @@ pin badge/h1/subtitle positions; **the raised mt-8 offset lives on the ROW**
 cluster on the h1 row like the reference (taskmanager y=116, employees
 y=46 — never `items-start`). Actions cluster is `gap-3`. Four pages
 (training, evaluations, companywall, organogram) pass `centered` for the
-reference's text-center headers; five small pages
+reference's text-center headers — **session 10 (R9-A): `centered` also adds
+`flex-1`** so the title block fills the row and the text centers at the
+content center (848 at 1440); a shrink-to-fit flex child centers at its
+own content width instead (off by 152–327px). Five small pages
 (recruitmentkanban, hrreports, staffrequests, notificationpreferences,
 workflowconfigpage) use `size="md"` (24px h1). The per-page matrix is
 pinned by `tests/unit/recipes.test.ts`.
+
+## StatCard variant map (session 10, R9-D)
+
+The reference renders EIGHT per-page stat-card variants — the session-6
+"one recipe" was a 2-page generalization. `StatCard` takes `variant=`:
+
+| Variant | Geometry | Pages |
+|---|---|---|
+| standard (default) | p-6, 48px tile, 30px value, 170h, `gap-6 md:grid-cols-4` | payroll, advancedanalytics, expenses, surveys |
+| compact | p-5, 40px tile, 24px value, 146h, `grid-cols-2 md:4 gap-4` | recruitment, compliancedashboard, assetmanagement, attendancedashboard, surveyanalytics, analyticsdashboard (+hint) |
+| compact-s | compact with 20px value, 142h | payrollmodule |
+| mini | p-4, no tile, 24px value, 82h | shiftcalendar |
+| mini-centered | p-4 text-center, no tile, 30px value, 86-90h | hrreports, notificationpreferences (3-col + Mark All Read card) |
+| horizontal | p-4 flex gap-3, 44px tile left, 24px value, 80h | documenttracker |
+| no-tile | p-6, 30px value, 110h | performancemanagement (md:4), workflowautomation (md:3) |
+| tile-right | p-6, 48px tile right-aligned, 30px value, 138h | analytics |
+
+/templates and /evaluations render NO stat row (the reference has none).
+Button icons in parity contexts carry `mr-2` on top of the button's
+gap-2 (the reference's 16px effective icon-text gap — measured again on
+the attendance cluster).
+
+## Attendance header + toolbar (session 10, R9-E)
+
+Seven header buttons in the reference's exact sizes: Print/PDF/Excel at
+h-8/12px outline; Devices (teal-700 text), Settings, Dashboard
+(blue-700 text) at h-9/14px outline; Import Attendance as the cyan
+gradient CTA. The reference squeezes its title to a 312px two-line wrap
+and lets the PAGE overflow (docW 1558 at 1440 — its own bug); the clone
+keeps the title on one line and wraps the cluster to a second row
+(`sm:flex-wrap`) — the documented fitting superset, same category as the
+stat-row fitting. A Report Type toolbar card (label + three-option
+select: All Staff Report / Individual Employee / Department Report)
+sits between the header and the stats and drives the stat row's scope.
+The session-5 `leading-[2]` title quirk is GONE from the redeployed
+reference — never re-add it.
 
 ## Page architecture (session 6) — where padding and gradients live
 

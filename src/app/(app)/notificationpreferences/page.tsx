@@ -151,17 +151,22 @@ export default function NotificationPreferencesPage() {
         size="md"
         title="Notification Settings"
         subtitle="Manage how and when you receive notifications"
-        actions={
-          <Button variant="outline" onClick={onMarkAllRead} disabled={marking || unread === 0}>
-            {marking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CheckCheck aria-hidden="true" />}
-            Mark All Read
-          </Button>
-        }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Unread" value={unread} icon={<Megaphone className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard label="Total" value={total} icon={<Info className="h-4 w-4" aria-hidden="true" />} />
+      {/* Session 10 (R9-D): the reference renders a 3-col mini-centered
+          stat row — Unread / Total / a centered Mark All Read button card
+          (the header carries no actions there). */}
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard variant="mini-centered" label="Unread" value={unread} />
+        <StatCard variant="mini-centered" label="Total" value={total} />
+        <Card className="flex items-center justify-center">
+          <CardContent className="p-4 text-center">
+            <Button variant="outline" onClick={onMarkAllRead} disabled={marking || unread === 0}>
+              {marking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CheckCheck aria-hidden="true" />}
+              Mark All Read
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>

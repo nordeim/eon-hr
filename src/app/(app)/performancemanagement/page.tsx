@@ -224,11 +224,11 @@ export default function PerformanceManagementPage() {
         subtitle="Track performance, set goals, and conduct reviews"
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label="Completed" value={stats.completed} icon={<Target className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard label="At Risk" value={stats.atRisk} icon={<Target className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
-        <StatCard label="Reviews" value={stats.reviews} icon={<Star className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+      <div className="grid gap-6 md:grid-cols-4">
+        <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
+        <StatCard variant="no-tile" label="Completed" value={stats.completed} icon={<Target className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
+        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} icon={<Target className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} icon={<Star className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
       </div>
 
       <Tabs defaultValue="goals">

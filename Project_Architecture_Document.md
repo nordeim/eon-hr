@@ -428,7 +428,7 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 164/164
+- [ ] `bun run test` — 194/194
 - [ ] `bun run build` succeeds
 - [ ] `bun run test:e2e` — 86/86
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)

@@ -239,11 +239,11 @@ export default function PayrollModulePage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Payroll" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} />
-        <StatCard label="Basic Salaries" value={formatSar(stats.basic)} icon={<Coins aria-hidden="true" />} />
-        <StatCard label="Paid" value={stats.paid} icon={<CheckCircle2 aria-hidden="true" />} />
-        <StatCard label="Draft" value={stats.draft} icon={<FileEdit aria-hidden="true" />} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact-s" label="Total Payroll" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} />
+        <StatCard variant="compact-s" label="Basic Salaries" value={formatSar(stats.basic)} icon={<Coins aria-hidden="true" />} />
+        <StatCard variant="compact-s" label="Paid" value={stats.paid} icon={<CheckCircle2 aria-hidden="true" />} />
+        <StatCard variant="compact-s" label="Draft" value={stats.draft} icon={<FileEdit aria-hidden="true" />} />
       </div>
 
       <div className="rounded-xl border bg-card shadow-sm">

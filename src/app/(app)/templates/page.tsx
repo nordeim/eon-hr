@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
@@ -192,14 +191,8 @@ export default function TemplatesPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard
-          label="Templates Available"
-          value={templates.length}
-          hint={`${templates.length} template${templates.length === 1 ? "" : "s"} available`}
-          icon={<ListChecks aria-hidden="true" />}
-        />
-      </div>
+      {/* Session 10 (R9-D): the reference renders NO stat row on
+          /templates — the live count lives in the page subtitle. */}
 
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">

@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.2.0 (session-9 remediation complete) · **Last updated:**
-> 2026-10-10 · **State:** 164 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 2.3.0 (session-10 remediation complete) · **Last updated:**
+> 2026-10-10 · **State:** 194 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -437,7 +437,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 164/164 (db-path 15, auth 14, utils 13, tokens 16, recipes 69, shell-recipes 37)
+bun run test          # vitest — 194/194 (db-path 15, auth 14, utils 13, tokens 16, recipes 89, shell-recipes 47)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -769,7 +769,7 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           164 unit (6 files) + 86 e2e (5 specs, workers:1)
+tests           194 unit (6 files) + 86 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
@@ -903,3 +903,48 @@ filter row (parity round 8):**
   open); the clone's employees EmptyState card (the reference renders
   nothing at 0 rows); the reference's /employeeselfservice is stuck
   loading and its /hrreports renders blank at mobile.
+
+## 22. Session-10 Recipe Layer — parity round 9
+
+**Centered headers fill the row (R9-A):** `centered` adds `flex-1` to the
+PageHeader title block — the reference's centered pages wrap the header in
+a FULL-WIDTH text-center block (badge/h1 center at 848 at 1440); a
+shrink-to-fit flex child centers at its own content width (off by
+152–327px on training/evaluations/companywall/organogram).
+
+**Companywall is a narrow feed (R9-B):** wrapper `max-w-3xl space-y-6`
+(768px); composer = 40px initials avatar + label-less textarea (placeholder
+"Share an update with your team…", 78px) + "Who can see this post?" label
+over a FULL-WIDTH select + Photo/Video (h-8 12px) + Post (h-9, Send icon);
+rows 2-3 indent to the textarea column (pl-14).
+
+**Training restructure (R9-C):** no header actions; category tabs are bare
+dark/outline buttons (`flex gap-2 overflow-x-auto pb-2`, active
+`#171717`/white 12px, h-8 px-3 — the taskmanager family, NOT the shadcn
+segmented TabsList); section furniture = bare `h2.text-2xl font-bold` in a
+`flex items-center justify-between mb-6` row (the New Platform dialog
+rides the empty right slot — superset) over a BARE card (p-0 interior);
+the empty state is the SIMPLE variant (p-12 + 64px icon + ONE 16px
+slate-500 line — no h3/description/CTA; the payroll-style full variant is
+a different page's recipe).
+
+**StatCard variant map (R9-D):** eight variants (standard / compact /
+compact-s / mini / mini-centered / horizontal / no-tile / tile-right) —
+see the AGENTS.md table. /templates and /evaluations render no stat row.
+Button icons in parity contexts carry `mr-2` (16px effective icon-text
+gap). hrreports' builder is a compact 106px filter card (p-5, five 169px
+label+control columns; our Status Filter rides as the sixth).
+
+**Attendance (R9-E):** seven buttons (Print/PDF/Excel sm outline;
+Devices teal-700 / Settings / Dashboard blue-700 at h-9; Import
+Attendance cyan gradient — every icon mr-2); the reference squeezes its
+title to a 312px two-line wrap and overflows the page (docW 1558 at 1440
+— its own bug) — the clone keeps the title on one line and wraps the
+cluster (`sm:flex-wrap`); Report Type toolbar card between header and
+stats drives the stat row's scope (All Staff / Individual Employee /
+Department Report). The session-5 `leading-[2]` title quirk is GONE.
+
+**Session-aware 404 (R9-F):** `src/app/not-found.tsx` renders h1 "404"
+text-7xl font-light + h2 "Page Not Found" text-2xl font-medium, centered
+in the content area — inside the AppShell when authenticated, on the
+canvas gradient when not.

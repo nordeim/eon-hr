@@ -397,3 +397,24 @@ Work Log:
 Stage Summary:
 - Parity round 8 complete: header recipes, actions centering, centered headers, analyticsdashboard root, employees filter row, templates count, static kicker — every fixed surface verified live against the redeployed reference
 - 164 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 21 (session 10 / parity round 9)
+Agent: main (Super Z)
+Task: Workspace re-validation, audit, parity round 9 (centered headers, companywall feed, training restructure, StatCard variant map, attendance toolbar, 404 page), docs + push
+
+Work Log:
+- git pull (4b6ed98 — brought in docs/session_11.md, the prior conversation's transcript); workspace intact (.env + db/ + node_modules); re-validated every gate from scratch: lint 0/0, tsc, 164/164 unit, build, 86/86 E2E — the session-9 push state exactly
+- Audit per repo skills (code-review-and-audit methodology, agent-browser dual-session, tdd-workflow, avant-garde mobile-nav taxonomy A–H): static scan clean on the session-9 diff; mobile nav (user priority) re-verified byte-identical end-to-end (top bar, tabs, drawer, submenu, kicker geometry + rendered scroll behavior, md boundary, dashboard cards); no Tailwind v4 bug — all six traps still pinned
+- Deeper content-area sweep (46-route header sweep + per-page stat-row probes, both sides measured) found 6 gap groups: R9-A centered headers center at their own content width (152-327px off 848 — a session-9 blind spot); R9-B companywall is a narrow max-w-3xl feed with a different composer; R9-C training header button + shadcn tabs + CardHeader + full empty state (reference: no button, bare dark/outline tabs, bare 24px H2 row, simple empty state); R9-D the reference renders EIGHT per-page StatCard variants (session-6's recipe was a 2-page generalization — 14 pages wrong); R9-E attendance seven-button cluster (mixed sizes/colors, every icon mr-2), Report Type toolbar, leading-[2] gone; R9-F styled in-shell 404 (72px/300 + 24px/500)
+- Documented reference bugs kept as fitting superset: attendance page overflows horizontally at 1440 (docW 1558); its stat row/toolbar are 1238px wide
+- Wrote + codebase-validated docs/remediation-plan-session10.md, then executed TDD: 30 RED pins (session-10 blocks; 1 stale session-5 pin inverted) → GREEN (page-header centered flex-1; stat-card eight-variant map; 20 page files; companywall/training/attendance/hrreports restructures; notificationpreferences 3-col + Mark All Read; templates/evaluations stat-row removals; new src/app/not-found.tsx)
+- Live-verify corrections: no tile on mini/mini-centered/no-tile variants; compact drops mb-1 (recruitment 146 byte-exact); training card p-0; companywall pl-14 + Send icon; attendance icons mr-2 (proven via canvas text-metrics after computed styles matched); recruitment hint dropped; hrreports compact 106px filter row; attendance fitting layout via sm:flex-wrap (titleNoShrink floor reproduced the overflow — removed)
+- Gates: lint 0/0, tsc, 194/194 unit (was 164), build (unset DATABASE_URL), 86/86 E2E
+- Live dual-browser re-verify: centered headers at 848 ×4; companywall 768 wrapper + composer; training tabs byte-identical + empty text y=461 exact; stat variants (recruitment exact, rest 4-12px); attendance 7 buttons every width exact (86/81/90/121/123/142/195, cluster 911) + toolbar y=281 + docW 1440; 404 with sidebar + centered 72px/300
+- 24 screenshots refreshed via capture-all (production standalone); DB pristine (users=1, employees=1, leaveBalances=2)
+- Docs updated: AGENTS.md (194 specs + PageHeader centered contract + StatCard variant map + attendance recipe), CLAUDE.md (counts + unit description), README.md (counts), PAD (checklist), eon-hr_SKILL.md (v2.3.0 + §22 session-10 layer), docs/remediation-plan-session10.md (+ completion record), docs/session_12.md, worklog.md
+
+Stage Summary:
+- Parity round 9 complete: centered headers, companywall feed, training restructure, the eight-variant StatCard map, attendance cluster/toolbar, session-aware 404 — every fixed surface verified live against the reference
+- 194 unit + 86 E2E green; ready for commit + push

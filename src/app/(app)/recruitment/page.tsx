@@ -317,16 +317,11 @@ export default function RecruitmentPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} />
-        <StatCard label="Total Applicants" value={stats.totalApplicants} icon={<Users aria-hidden="true" />} />
-        <StatCard label="Shortlisted" value={stats.shortlisted} icon={<Star aria-hidden="true" />} />
-        <StatCard
-          label="Avg AI Score"
-          value={stats.avgScore === null ? "—" : `${stats.avgScore}`}
-          hint={stats.avgScore === null ? "No scored CVs yet" : "out of 100"}
-          icon={<Sparkles aria-hidden="true" />}
-        />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact" label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} />
+        <StatCard variant="compact" label="Total Applicants" value={stats.totalApplicants} icon={<Users aria-hidden="true" />} />
+        <StatCard variant="compact" label="Shortlisted" value={stats.shortlisted} icon={<Star aria-hidden="true" />} />
+        <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<Sparkles aria-hidden="true" />} />
       </div>
 
       <Tabs defaultValue="applicants">

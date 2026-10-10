@@ -171,14 +171,17 @@ export default function HRReportsPage() {
         }
       />
 
+      {/* Session 10 (R9-D): the reference's report builder is a compact
+          filter row — a bare card (no title/description) with a p-5
+          interior of 169px label+control columns (Data Source / From /
+          To / Group By / Chart Type, all 36px controls with 12px labels;
+          card 106px tall). Our Status Filter rides as the sixth column —
+          a documented superset that fills the row without growing the
+          card. */}
       <Card>
-        <CardHeader>
-          <CardTitle>Report Builder</CardTitle>
-          <CardDescription>Filter and group employee data, then chart and export it</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
+        <CardContent className="p-5">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-source">Data Source</Label>
               <Select value={source} onValueChange={setSource}>
                 <SelectTrigger id="hr-source" className="w-full">
@@ -189,15 +192,15 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-from">From Date</Label>
               <Input id="hr-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-to">To Date</Label>
               <Input id="hr-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-group">Group By</Label>
               <Select value={groupBy} onValueChange={setGroupBy}>
                 <SelectTrigger id="hr-group" className="w-full">
@@ -212,7 +215,7 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-chart">Chart Type</Label>
               <Select value={chartType} onValueChange={(v) => setChartType(v as ReportChartType)}>
                 <SelectTrigger id="hr-chart" className="w-full">
@@ -227,7 +230,7 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
               <Label htmlFor="hr-status">Status Filter</Label>
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger id="hr-status" className="w-full">
@@ -246,10 +249,10 @@ export default function HRReportsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-        <StatCard label="Total Records" value={loading ? "…" : stats.totalRecords} />
-        <StatCard label="Unique Groups" value={loading ? "…" : stats.uniqueGroups} />
-        <StatCard label="Active/Approved" value={loading ? "…" : stats.activeCount} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="mini-centered" label="Total Records" value={loading ? "…" : stats.totalRecords} />
+        <StatCard variant="mini-centered" label="Unique Groups" value={loading ? "…" : stats.uniqueGroups} />
+        <StatCard variant="mini-centered" label="Active/Approved" value={loading ? "…" : stats.activeCount} />
       </div>
 
       <Card>

@@ -22,10 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { initials } from "@/lib/utils";
 
@@ -146,99 +144,103 @@ export default function TrainingPage() {
         sectionIcon={<Video aria-hidden="true" />}
         title="Training Center"
         subtitle="Expand your skills with our comprehensive training library"
-        actions={
+      />
+
+      {/* Session 10 (R9-C): the reference renders its category tabs as
+          bare dark/outline buttons (the taskmanager-toggle family) in a
+          flex gap-2 overflow-x-auto pb-2 list — active bg-[#171717] with
+          12px/500 white text, inactive white with the neutral border —
+          NOT the shadcn segmented tab strip. */}
+      <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Training categories">
+        {CATEGORIES.map((c) => (
+          <Button
+            key={c.value}
+            variant={category === c.value ? "dark" : "outline"}
+            size="sm"
+            className="shrink-0"
+            aria-pressed={category === c.value}
+            onClick={() => setCategory(c.value)}
+          >
+            {c.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Session 10 (R9-C): the reference's section furniture — a bare
+          text-2xl/700 H2 in a flex items-center justify-between mb-6 row
+          (the reference leaves the right slot empty; our working New
+          Platform dialog rides it — the documented superset pattern), then
+          a BARE card holding the grid or the simple empty state (no
+          title block, no count description). */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">Training Platforms</h2>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Platform
           </Button>
-        }
-      />
-
-      <Tabs value={category} onValueChange={setCategory}>
-        <TabsList className="flex-wrap">
-          {CATEGORIES.map((c) => (
-            <TabsTrigger key={c.value} value={c.value}>
-              {c.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {CATEGORIES.map((c) => (
-          <TabsContent key={c.value} value={c.value} className="flex flex-col gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Training Platforms</CardTitle>
-                <CardDescription>
-                  {filtered.length} platform{filtered.length === 1 ? "" : "s"}
-                  {c.value !== "all" ? ` in ${c.label}` : ""} · {filtered.reduce((n, p) => n + p.coursesCount, 0)} courses
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-                  </div>
-                ) : filtered.length === 0 ? (
-                  <EmptyState
-                    icon={<GraduationCap className="h-6 w-6" />}
-                    title="No training platforms available"
-                    description={
-                      c.value === "all"
-                        ? "Add a platform to start building your training library"
-                        : `No ${c.label} platforms yet — try another category`
-                    }
-                    action={
-                      <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                        <Plus className="mr-2" aria-hidden="true" />
-                        New Platform
-                      </Button>
-                    }
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {filtered.map((platform) => (
-                      <div key={platform.id} className="flex flex-col gap-4 rounded-xl border bg-secondary/30 p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-white"
-                              style={{ backgroundColor: platform.logoColor }}
-                            >
-                              {initials(platform.name)}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-foreground">{platform.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {platform.coursesCount.toLocaleString()} course{platform.coursesCount === 1 ? "" : "s"}
-                              </p>
-                            </div>
-                          </div>
-                          <Badge variant={categoryVariant(platform.category)}>{categoryLabel(platform.category)}</Badge>
+        </div>
+        <Card>
+          {/* p-0: the reference's empty state (p-12) renders directly in
+              the card — no interior padding layer. */}
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+              </div>
+            ) : filtered.length === 0 ? (
+              /* Reference simple empty state: p-12 text-center + 64px icon +
+                 ONE 16px slate-500 line — no h3, no description, no CTA
+                 (the create affordance lives in the H2 row above). */
+              <div className="p-12 text-center">
+                <div className="flex justify-center">
+                  <GraduationCap className="h-16 w-16 text-slate-300" aria-hidden="true" />
+                </div>
+                <p className="mt-3 text-slate-500">No training platforms available</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.map((platform) => (
+                  <div key={platform.id} className="flex flex-col gap-4 rounded-xl border bg-secondary/30 p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-white"
+                          style={{ backgroundColor: platform.logoColor }}
+                        >
+                          {initials(platform.name)}
                         </div>
-                        {platform.description ? (
-                          <p className="line-clamp-2 text-sm text-muted-foreground">{platform.description}</p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No description provided.</p>
-                        )}
-                        <div className="flex items-center justify-between gap-2 border-t pt-3">
-                          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <MonitorSmartphone className="h-4 w-4" aria-hidden="true" />
-                            {categoryLabel(platform.category)}
-                          </span>
-                          <Button size="sm" variant="outline" onClick={() => onVisit(platform)}>
-                            <ExternalLink aria-hidden="true" />
-                            Visit Platform
-                          </Button>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">{platform.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {platform.coursesCount.toLocaleString()} course{platform.coursesCount === 1 ? "" : "s"}
+                          </p>
                         </div>
                       </div>
-                    ))}
+                      <Badge variant={categoryVariant(platform.category)}>{categoryLabel(platform.category)}</Badge>
+                    </div>
+                    {platform.description ? (
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{platform.description}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No description provided.</p>
+                    )}
+                    <div className="flex items-center justify-between gap-2 border-t pt-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MonitorSmartphone className="h-4 w-4" aria-hidden="true" />
+                        {categoryLabel(platform.category)}
+                      </span>
+                      <Button size="sm" variant="outline" onClick={() => onVisit(platform)}>
+                        <ExternalLink aria-hidden="true" />
+                        Visit Platform
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <NewPlatformDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreate} />
     </div>

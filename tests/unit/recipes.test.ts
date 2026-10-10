@@ -167,9 +167,13 @@ describe("per-page header matrix (session 5)", () => {
     });
   }
 
-  it("attendance replicates the reference's tall-title quirk", () => {
+  it("attendance title uses the natural line-height (session-10 re-pin)", () => {
+    // Sessions 2–9 pinned the reference's double-line-height title quirk
+    // (leading-[2]). Session 10 re-measured: the reference now wraps its
+    // 312px-squeezed h1 to two lines at the NATURAL 48px line-height —
+    // the quirk is gone from the redeployed reference.
     const page = read("src", "app", "(app)", "attendance", "page.tsx");
-    expect(page).toContain('titleClassName="leading-[2]"');
+    expect(page).not.toContain("leading-[2]");
   });
 });
 
@@ -367,5 +371,115 @@ describe("sidebar user name color (session 6)", () => {
   it("UserMenu name renders slate-900 like the reference", () => {
     expect(sidebarNav).toContain("text-sm font-medium text-slate-900");
     expect(sidebarNav).not.toContain("text-sm font-medium text-foreground");
+  });
+});
+
+// ===== Session 10 — parity round 9: the StatCard variant map =====
+// A fresh sweep of every stat row on the reference found per-page
+// variants; the clone rendered the session-6 standard recipe everywhere.
+// All values measured live (docs/remediation-plan-session10.md §R9-D).
+
+describe("stat-card variant prop (session 10, R9-D)", () => {
+  it("declares the eight measured variants", () => {
+    expect(statCard).toContain("variant?:");
+    for (const v of ["standard", "compact", "compact-s", "mini", "mini-centered", "horizontal", "no-tile", "tile-right"]) {
+      expect(statCard).toContain(`"${v}"`);
+    }
+  });
+
+  it("compact renders p-5 / 40px tile / 20px icons / text-2xl value", () => {
+    // Reference compact (recruitment/compliance/assets/attendance-dash/
+    // survey-analytics): 268×146, p-5, 40×40 tile, 24px value.
+    expect(statCard).toContain("p-5");
+    expect(statCard).toContain("[&_svg]:h-5 [&_svg]:w-5");
+  });
+
+  it("horizontal renders p-4 flex items-center gap-3 with the 44px tile left", () => {
+    // Reference documenttracker: 268×80, tile 44×44 beside value+label.
+    expect(statCard).toContain("p-4 flex items-center gap-3");
+  });
+
+  it("mini-centered renders p-4 text-center without a tile", () => {
+    // Reference hrreports (272×90) + notificationpreferences (229×86).
+    expect(statCard).toContain("p-4 text-center");
+  });
+});
+
+describe("per-page stat variant matrix (session 10, R9-D)", () => {
+  const page = (...p: string[]) => read("src", "app", "(app)", ...p);
+
+  it("standard pages keep the 262px gap-6 grid", () => {
+    for (const route of ["expenses", "surveys"]) {
+      const src = page(route, "page.tsx");
+      expect(src).toContain("grid gap-6 md:grid-cols-4");
+      expect(src).not.toContain("xl:grid-cols-4");
+    }
+    const adv = page("advancedanalytics", "page.tsx");
+    expect(adv).toContain("grid gap-6 md:grid-cols-4");
+  });
+
+  it("allleaverequests renders the 3-col gap-6 grid", () => {
+    const src = page("allleaverequests", "page.tsx");
+    expect(src).toContain("gap-6 md:grid-cols-3");
+    expect(src).not.toContain("xl:grid-cols-3");
+  });
+
+  const COMPACT_PAGES: Array<[string, string]> = [
+    ["recruitment", "page.tsx"],
+    ["compliancedashboard", "page.tsx"],
+    ["assetmanagement", "page.tsx"],
+    ["attendancedashboard", "dashboard.tsx"],
+    ["surveyanalytics", "analytics.tsx"],
+    ["analyticsdashboard", "dashboard.tsx"],
+  ];
+  for (const [route, file] of COMPACT_PAGES) {
+    it(`${route}: compact variant + grid-cols-2 md:grid-cols-4 gap-4`, () => {
+      const src = page(route, file);
+      expect(src).toMatch(/variant="compact"/);
+      expect(src).toContain("md:grid-cols-4 gap-4");
+      expect(src).not.toContain("gap-6 md:grid-cols-4");
+    });
+  }
+
+  it("payrollmodule: compact-s variant (20px values, 142px cards)", () => {
+    const src = page("payrollmodule", "page.tsx");
+    expect(src).toMatch(/variant="compact-s"/);
+    expect(src).toContain("md:grid-cols-4 gap-4");
+  });
+
+  it("documenttracker: horizontal variant", () => {
+    const src = page("documenttracker", "page.tsx");
+    expect(src).toMatch(/variant="horizontal"/);
+  });
+
+  it("shiftcalendar: mini variant (no tile, 82px)", () => {
+    const src = page("shiftcalendar", "page.tsx");
+    expect(src).toMatch(/variant="mini"/);
+  });
+
+  it("performancemanagement + workflowautomation: no-tile variant", () => {
+    expect(page("performancemanagement", "page.tsx")).toMatch(/variant="no-tile"/);
+    expect(page("workflowautomation", "page.tsx")).toMatch(/variant="no-tile"/);
+  });
+
+  it("hrreports: mini-centered variant + 4-col grid", () => {
+    const src = page("hrreports", "page.tsx");
+    expect(src).toMatch(/variant="mini-centered"/);
+    expect(src).toContain("md:grid-cols-4 gap-4");
+  });
+
+  it("analytics: tile-right variant", () => {
+    expect(page("analytics", "page.tsx")).toMatch(/variant="tile-right"/);
+  });
+
+  it("templates + evaluations render NO stat row (reference has none)", () => {
+    expect(page("templates", "page.tsx")).not.toContain("StatCard");
+    expect(page("evaluations", "page.tsx")).not.toContain("StatCard");
+  });
+
+  it("notificationpreferences: mini-centered 3-col grid with the Mark All Read card", () => {
+    const src = page("notificationpreferences", "page.tsx");
+    expect(src).toContain("grid-cols-3 gap-4");
+    expect(src).toContain("Mark All Read");
   });
 });

@@ -149,7 +149,12 @@ export function PageHeader({
           className
         )}
       >
-      <div className={cn("min-w-0", centered && "text-center")}>
+      {/* Session 10 (R9-A): centered headers must fill the row — the
+          reference's centered pages wrap the header in a FULL-WIDTH
+          text-center block directly under the content wrapper, so the
+          badge/h1 center at the content center (848 at 1440). A
+          shrink-to-fit flex child centered the text at 521-696 instead. */}
+      <div className={cn("min-w-0", centered && "flex-1 text-center")}>
         {hasBadge ? (
           <div
             className={cn(

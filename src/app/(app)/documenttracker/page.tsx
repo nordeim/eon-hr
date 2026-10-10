@@ -232,11 +232,11 @@ export default function DocumentTrackerPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Documents" value={stats.total} icon={<FileStack className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard label="Valid" value={stats.valid} icon={<FileCheck2 className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard label="Expiring ≤30 days" value={stats.expiring} icon={<FileClock className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard label="Expired" value={stats.expired} icon={<FileX2 className="h-4 w-4" aria-hidden="true" />} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="horizontal" label="Total Documents" value={stats.total} icon={<FileStack className="h-4 w-4" aria-hidden="true" />} />
+        <StatCard variant="horizontal" label="Valid" value={stats.valid} icon={<FileCheck2 className="h-4 w-4" aria-hidden="true" />} />
+        <StatCard variant="horizontal" label="Expiring ≤30 days" value={stats.expiring} icon={<FileClock className="h-4 w-4" aria-hidden="true" />} />
+        <StatCard variant="horizontal" label="Expired" value={stats.expired} icon={<FileX2 className="h-4 w-4" aria-hidden="true" />} />
       </div>
 
       <Tabs value={filter} onValueChange={setFilter}>

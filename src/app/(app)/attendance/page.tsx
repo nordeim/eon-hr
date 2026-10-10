@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, Loader2, Printer, ShieldAlert, UserCheck, Users, UserX } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, UserCheck, Users, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,7 +84,16 @@ const ATTENDANCE_STATUSES = [
   { value: "leave", label: "Leave" },
 ];
 
+/** Session 10 (R9-E): the reference's Report Type toolbar — a card between
+ *  the header and the stats with a three-option select. */
+const REPORT_TYPES = [
+  { value: "all", label: "All Staff Report" },
+  { value: "individual", label: "Individual Employee" },
+  { value: "department", label: "Department Report" },
+] as const;
+
 export default function StaffAttendancePage() {
+  const router = useRouter();
   const toast = useToast();
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [records, setRecords] = React.useState<AttendanceRecordRow[]>([]);
@@ -103,6 +113,7 @@ export default function StaffAttendancePage() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [dialogSeq, setDialogSeq] = React.useState(0);
   const [saving, setSaving] = React.useState(false);
+  const [reportType, setReportType] = React.useState<(typeof REPORT_TYPES)[number]["value"]>("all");
 
   function openMarkDialog() {
     setDialogSeq((s) => s + 1);
@@ -170,6 +181,49 @@ export default function StaffAttendancePage() {
     };
   }, [stats]);
 
+  /** Session 10 (R9-E): the Report Type drives the stat row's scope —
+   *  "all" keeps the server stats; the other modes derive per-employee /
+   *  per-department aggregates from the loaded records and summary rows
+   *  (the reference renders the select but wires nothing — ours works). */
+  const reportStats = React.useMemo(() => {
+    if (reportType === "individual") {
+      const withRecords = new Set(records.map((r) => r.employeeId));
+      const present = records.filter((r) => r.status === "present").length;
+      const absent = records.filter((r) => r.status === "absent").length;
+      const late = records.filter((r) => r.status === "late").length;
+      const marked = present + absent + late;
+      return {
+        first: { label: "Employees with Records", value: withRecords.size },
+        second: { label: "Present Records", value: present },
+        third: { label: "Absent Records", value: absent },
+        fourth: { label: "Late Records", value: late },
+        fifth: { label: "Record Rate", value: `${marked > 0 ? Math.round(((present + late) / marked) * 100) : 0}%` },
+      };
+    }
+    if (reportType === "department") {
+      // The attendance payload carries no department field (per-employee
+      // summary only) — the department report aggregates across the
+      // tracked employee rows, the honest scope available client-side.
+      const days = summary.reduce((n, s) => n + s.days, 0);
+      const present = summary.reduce((n, s) => n + s.present, 0);
+      const late = summary.reduce((n, s) => n + s.late, 0);
+      return {
+        first: { label: "Employees Tracked", value: summary.length },
+        second: { label: "Tracked Days", value: days },
+        third: { label: "Present Entries", value: present },
+        fourth: { label: "Late Entries", value: late },
+        fifth: { label: "Avg Rate", value: `${summary.length > 0 ? Math.round(summary.reduce((n, s) => n + s.rate, 0) / summary.length) : 0}%` },
+      };
+    }
+    return {
+      first: { label: "Total Employees", value: stats.totalEmployees },
+      second: { label: "Present Today", value: stats.presentToday },
+      third: { label: "Absent Today", value: stats.absentToday },
+      fourth: { label: "Late Arrivals", value: stats.lateArrivals },
+      fifth: { label: "Attendance Rate", value: `${stats.attendanceRate}%` },
+    };
+  }, [reportType, records, summary, employees, stats]);
+
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
@@ -177,39 +231,96 @@ export default function StaffAttendancePage() {
         section="Attendance Management"
         layout="flat48"
         iconClassName="text-blue-600"
-        titleClassName="leading-[2]"
+        className="sm:flex-wrap"
         sectionIcon={<Calendar aria-hidden="true" />}
         title="Staff Attendance"
         subtitle="Track and manage employee attendance records"
         actions={
+          /* Session 10 (R9-E): the reference's seven-button cluster —
+             Print/PDF/Excel at h-8/12px outline, Devices (teal-700 text),
+             Settings, Dashboard (blue-700 text) at h-9/14px outline, and
+             the cyan-gradient Import Attendance CTA; every icon carries
+             the reference's mr-2 (16px effective icon-text gap). The
+             reference squeezes its title to a 312px two-line wrap and
+             lets the PAGE overflow horizontally (docW 1558 at 1440 — its
+             own bug); our fitting page keeps the title on one line and
+             wraps the cluster to a second row instead (sm:flex-wrap).
+             Dashboard navigates to /attendancedashboard (the reference's
+             one live control); Devices/Settings toast (the reference
+             leaves both dead). */
           <>
-            <Button variant="outline" onClick={() => window.print()}>
-              <Printer aria-hidden="true" />
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="mr-2" aria-hidden="true" />
               Print
             </Button>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => toast.toast({ title: "Export queued", description: "Your PDF report is being generated.", variant: "info" })}
             >
-              <FileText aria-hidden="true" />
+              <FileText className="mr-2" aria-hidden="true" />
               PDF
             </Button>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => toast.toast({ title: "Export queued", description: "Your Excel export is being generated.", variant: "info" })}
             >
-              <FileSpreadsheet aria-hidden="true" />
+              <FileSpreadsheet className="mr-2" aria-hidden="true" />
               Excel
+            </Button>
+            <Button
+              variant="outline"
+              className="text-teal-700"
+              onClick={() => toast.toast({ title: "Devices", description: "Kiosk and biometric device sync is managed by your administrator.", variant: "info" })}
+            >
+              <MonitorSmartphone className="mr-2" aria-hidden="true" />
+              Devices
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => toast.toast({ title: "Attendance settings", description: "Grace period, overtime and shift rules are configured by your administrator.", variant: "info" })}
+            >
+              <Settings className="mr-2" aria-hidden="true" />
+              Settings
+            </Button>
+            <Button variant="outline" className="text-blue-700" onClick={() => router.push("/attendancedashboard")}>
+              <LayoutDashboard className="mr-2" aria-hidden="true" />
+              Dashboard
             </Button>
             {canMark ? (
               <Button variant="cyan" onClick={openMarkDialog}>
-                <CalendarCheck aria-hidden="true" />
-                Mark Attendance
+                <CalendarCheck className="mr-2" aria-hidden="true" />
+                Import Attendance
               </Button>
             ) : null}
           </>
         }
       />
+
+      {/* Session 10 (R9-E): the reference's Report Type toolbar — a card
+          between the header and the stats (measured (288,280) 70px tall)
+          with the "Report Type:" label and a three-option select. The
+          reference's own page overflows its content area (1238px wide);
+          the clone keeps the fitting 1120px — the documented
+          fix-the-broken superset. */}
+      <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm">
+        <Label htmlFor="attendance-report-type" className="shrink-0 text-sm font-medium text-foreground">
+          Report Type:
+        </Label>
+        <Select value={reportType} onValueChange={(v) => setReportType(v as (typeof REPORT_TYPES)[number]["value"])}>
+          <SelectTrigger id="attendance-report-type" className="w-full max-w-sm" aria-label="Report type">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {REPORT_TYPES.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
@@ -230,19 +341,11 @@ export default function StaffAttendancePage() {
           ) : null}
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-            <StatCard label="Total Employees" value={stats.totalEmployees} icon={<Users className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard
-              label="Present Today"
-              value={stats.presentToday}
-              icon={<UserCheck className="h-4 w-4" aria-hidden="true" />}
-            />
-            <StatCard label="Absent Today" value={stats.absentToday} icon={<UserX className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard label="Late Arrivals" value={stats.lateArrivals} icon={<Clock3 className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard
-              label="Attendance Rate"
-              value={`${stats.attendanceRate}%`}
-              icon={<Gauge className="h-4 w-4" aria-hidden="true" />}
-            />
+            <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="h-4 w-4" aria-hidden="true" />} />
+            <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<UserCheck className="h-4 w-4" aria-hidden="true" />} />
+            <StatCard label={reportStats.third.label} value={reportStats.third.value} icon={<UserX className="h-4 w-4" aria-hidden="true" />} />
+            <StatCard label={reportStats.fourth.label} value={reportStats.fourth.value} icon={<Clock3 className="h-4 w-4" aria-hidden="true" />} />
+            <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<Gauge className="h-4 w-4" aria-hidden="true" />} />
           </div>
 
           <Tabs defaultValue="dashboard" className="flex flex-col gap-4">

@@ -193,23 +193,23 @@ export default function ShiftCalendarPage() {
         </div>
       ) : data ? (
         <>
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            <StatCard
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard variant="mini"
               label="Total Employees"
               value={data.stats.totalEmployees}
               icon={<Users className="h-4 w-4" aria-hidden="true" />}
             />
-            <StatCard
+            <StatCard variant="mini"
               label="Shifts Defined"
               value={data.stats.shiftsDefined}
               icon={<Clock3 className="h-4 w-4" aria-hidden="true" />}
             />
-            <StatCard
+            <StatCard variant="mini"
               label="Assignments This Month"
               value={data.stats.assignmentsThisMonth}
               icon={<CalendarRange className="h-4 w-4" aria-hidden="true" />}
             />
-            <StatCard
+            <StatCard variant="mini"
               label="Unassigned Days"
               value={data.stats.unassignedDays}
               icon={<CalendarX2 className="h-4 w-4" aria-hidden="true" />}

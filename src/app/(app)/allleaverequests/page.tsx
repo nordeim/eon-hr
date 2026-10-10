@@ -162,7 +162,7 @@ export default function AllLeaveRequestsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         <StatCard
           label="Pending Approvals"
           value={stats.pending}

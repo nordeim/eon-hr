@@ -261,11 +261,11 @@ export default function AssetManagementPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Assets" value={stats.total} icon={<Package className="h-4 w-4" />} />
-        <StatCard label="Assigned" value={stats.assigned} icon={<Package className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Available" value={stats.available} icon={<Package className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard label="In Repair" value={stats.repair} icon={<Package className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact" label="Total Assets" value={stats.total} icon={<Package className="h-4 w-4" />} />
+        <StatCard variant="compact" label="Assigned" value={stats.assigned} icon={<Package className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="compact" label="Available" value={stats.available} icon={<Package className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
+        <StatCard variant="compact" label="In Repair" value={stats.repair} icon={<Package className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
       </div>
 
       <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center">

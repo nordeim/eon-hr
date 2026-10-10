@@ -172,25 +172,25 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact"
           label="Active Employees"
           value={stats.activeEmployees}
           hint={`${stats.totalEmployees} total`}
           icon={<Users aria-hidden="true" />}
         />
-        <StatCard
+        <StatCard variant="compact"
           label="Total Payroll"
           value={formatSar(stats.payrollTotal)}
           hint={`${stats.payrollRecords} records`}
           icon={<FileText aria-hidden="true" />}
         />
-        <StatCard
+        <StatCard variant="compact"
           label="Leave Requests"
           value={stats.leaveRequests}
           hint={`${stats.pendingRequests} pending`}
         />
-        <StatCard
+        <StatCard variant="compact"
           label="Total Expenses"
           value={formatSar(stats.expensesTotal)}
           hint={`${stats.expensesApproved} approved`}

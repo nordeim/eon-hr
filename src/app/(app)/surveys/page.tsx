@@ -206,7 +206,7 @@ export default function SurveysPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Total Surveys" value={stats.total} icon={<ClipboardList className="h-4 w-4" />} />
         <StatCard label="Active Surveys" value={stats.active} icon={<Play className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
         <StatCard label="Total Responses" value={stats.totalResponses} icon={<Eye className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />

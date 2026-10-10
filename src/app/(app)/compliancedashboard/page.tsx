@@ -214,11 +214,11 @@ export default function ComplianceDashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Critical Alerts" value={stats.critical} icon={<ShieldAlert className="h-4 w-4" />} iconClassName="bg-red-100 text-red-600" />
-        <StatCard label="High Priority" value={stats.high} icon={<AlertTriangle className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
-        <StatCard label="Resolved" value={stats.resolved} icon={<CheckCircle2 className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard label="Active Alerts" value={stats.active} icon={<Activity className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact" label="Critical Alerts" value={stats.critical} icon={<ShieldAlert className="h-4 w-4" />} iconClassName="bg-red-100 text-red-600" />
+        <StatCard variant="compact" label="High Priority" value={stats.high} icon={<AlertTriangle className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard variant="compact" label="Resolved" value={stats.resolved} icon={<CheckCircle2 className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
+        <StatCard variant="compact" label="Active Alerts" value={stats.active} icon={<Activity className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
       </div>
 
       {loading ? (

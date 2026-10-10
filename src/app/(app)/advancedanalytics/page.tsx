@@ -124,7 +124,7 @@ export default async function AdvancedAnalyticsPage() {
         actions={<ScheduleReportButton />}
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Total Headcount" value={total} icon={<Users aria-hidden="true" />} />
         <StatCard
           label="Turnover Rate"

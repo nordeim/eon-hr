@@ -26,7 +26,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
@@ -208,12 +207,8 @@ export default function EvaluationsPage() {
         subtitle="Structured reviews, automated workflows & AI-generated performance reports"
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Reviews" value={stats.total} icon={<ClipboardCheck className="h-4 w-4" />} />
-        <StatCard label="Completed" value={stats.completed} icon={<ClipboardCheck className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard label="In Progress" value={stats.inProgress} icon={<ClipboardCheck className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Not Started" value={stats.notStarted} icon={<ClipboardCheck className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
-      </div>
+      {/* Session 10 (R9-D): the reference renders NO stat row on
+          /evaluations — the header flows straight into the tabs. */}
 
       <Tabs defaultValue="workflows">
         <TabsList>

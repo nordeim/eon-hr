@@ -236,14 +236,14 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Total Responses" value={responses.length} />
-        <StatCard
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard variant="compact" label="Total Responses" value={responses.length} />
+        <StatCard variant="compact"
           label="Avg Sentiment"
           value={avgSentiment === null ? "0%" : `${avgSentiment > 0 ? "+" : ""}${avgSentiment}%`}
         />
-        <StatCard label="Active Surveys" value={activeSurveys} />
-        <StatCard label="Positive Rate" value={`${positiveRate}%`} />
+        <StatCard variant="compact" label="Active Surveys" value={activeSurveys} />
+        <StatCard variant="compact" label="Positive Rate" value={`${positiveRate}%`} />
       </div>
 
       {insights ? (

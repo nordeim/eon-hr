@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Heart, House, Image as ImageIcon, Loader2, Video } from "lucide-react";
+import { Heart, House, Image as ImageIcon, Loader2, Send, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +56,25 @@ export default function CompanyWallPage() {
   const [audience, setAudience] = React.useState("all");
   const [posting, setPosting] = React.useState(false);
   const [likedIds, setLikedIds] = React.useState<Set<string>>(new Set());
+  // Session 10 (R9-B): the reference's composer renders the author's 40px
+  // initials avatar beside the textarea.
+  const [userName, setUserName] = React.useState("");
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const json = await res.json();
+        if (!cancelled && json.ok) setUserName(json.data?.user?.name ?? "");
+      } catch {
+        /* the avatar falls back to the E mark */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const load = React.useCallback(async () => {
     try {
@@ -143,7 +162,10 @@ export default function CompanyWallPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      {/* Session 10 (R9-B): the reference renders a narrow centered feed —
+          max-w-3xl (768px) with space-y-6 rhythm, not the full-width
+          1120px gap-8 layout. */}
+      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-6">
       <PageHeader
         section="Company Wall"
         layout="flat48"
@@ -154,25 +176,35 @@ export default function CompanyWallPage() {
         subtitle="Stay connected with your team"
       />
 
-      {/* composer */}
+      {/* composer — session 10 (R9-B): reference structure. Row 1 = the
+          40px initials avatar beside a label-less textarea (placeholder
+          "Share an update with your team…", 78px tall); row 2 = the
+          "Who can see this post?" label over a FULL-WIDTH select; row 3 =
+          Photo/Video (h-8, 12px) left, Post (h-9 gradient) right. */}
       <Card>
         <CardContent className="flex flex-col gap-4 p-5">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="post-content">Share an update</Label>
+          <div className="flex gap-4">
+            <div className="flex h-10 w-10 rounded-full shrink-0 items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-semibold text-white" aria-hidden="true">
+              {(userName || "E").trim().charAt(0).toUpperCase()}
+            </div>
             <Textarea
-              id="post-content"
-              placeholder="What's happening in your team?"
+              aria-label="Share an update"
+              placeholder="Share an update with your team..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               maxLength={2000}
-              className="min-h-[88px]"
+              className="min-h-[78px]"
             />
           </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          {/* Rows 2-3 indent to the textarea column (avatar 40 + gap 16 =
+              56px, pl-14) — the reference aligns the label, select,
+              Photo/Video and Post at the textarea's left edge, not the
+              card padding. */}
+          <div className="flex flex-col gap-4 pl-14">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="post-audience">Who can see this post?</Label>
               <Select value={audience} onValueChange={setAudience}>
-                <SelectTrigger id="post-audience" className="w-full sm:w-52" aria-label="Audience">
+                <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -184,25 +216,27 @@ export default function CompanyWallPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.toast({ title: "Attach coming soon", description: "Photo uploads land in a future update.", variant: "info" })}
-              >
-                <ImageIcon aria-hidden="true" />
-                Photo
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.toast({ title: "Attach coming soon", description: "Video uploads land in a future update.", variant: "info" })}
-              >
-                <Video aria-hidden="true" />
-                Video
-              </Button>
-              <Button size="sm" onClick={onPost} disabled={posting}>
-                {posting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.toast({ title: "Attach coming soon", description: "Photo uploads land in a future update.", variant: "info" })}
+                >
+                  <ImageIcon aria-hidden="true" />
+                  Photo
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.toast({ title: "Attach coming soon", description: "Video uploads land in a future update.", variant: "info" })}
+                >
+                  <Video aria-hidden="true" />
+                  Video
+                </Button>
+              </div>
+              <Button onClick={onPost} disabled={posting}>
+                {posting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
                 Post
               </Button>
             </div>

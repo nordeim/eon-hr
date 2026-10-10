@@ -275,3 +275,115 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
     expect(src).toMatch(/\$\{templates\.length\} template\$\{templates\.length === 1 \? "" : "s"\} available/);
   });
 });
+
+describe("session-10 parity round 9 — centered headers, companywall, training, attendance, 404", () => {
+  // All values measured live against the reference
+  // (docs/remediation-plan-session10.md).
+
+  it("R9-A: centered title block fills the row (flex-1) so text centers at the content center", () => {
+    // Reference centered pages wrap the header in a FULL-WIDTH text-center
+    // block directly under the content wrapper — badge + h1 center at 848
+    // (content center at 1440). The clone's shrink-to-fit flex child
+    // centered the text at 521-696 instead. flex-1 on the title block
+    // restores the reference geometry.
+    expect(pageHeader).toMatch(/centered && "flex-1/);
+    expect(pageHeader).toMatch(/min-w-0[^)]*centered && "flex-1 text-center"/);
+  });
+
+  it("R9-B: companywall renders the narrow centered feed (max-w-3xl, space-y-6)", () => {
+    // Reference: max-w-3xl mx-auto space-y-6 → 768px wide at x=464; the
+    // clone's max-w-7xl gap-8 rendered 1120px.
+    const src = read("src", "app", "(app)", "companywall", "page.tsx");
+    expect(src).toContain("max-w-3xl");
+    expect(src).not.toContain("max-w-7xl");
+    expect(src).toMatch(/space-y-6/);
+  });
+
+  it("R9-B: companywall composer matches the reference (avatar + label-less textarea + full-width select)", () => {
+    const src = read("src", "app", "(app)", "companywall", "page.tsx");
+    // avatar: 40px initials circle next to the textarea
+    expect(src).toMatch(/h-10 w-10 rounded-full/);
+    // no visible "Share an update" form label — the reference starts at the
+    // avatar row (an aria-label on the textarea is fine; it renders nothing)
+    expect(src).not.toContain('htmlFor="post-content"');
+    expect(src).not.toContain("<Label htmlFor=\"post-content\">");
+    // reference placeholder, verbatim
+    expect(src).toContain("Share an update with your team");
+    // audience select is full width (reference trigger 662×36)
+    expect(src).not.toContain("sm:w-52");
+  });
+
+  it("R9-C: training header carries no actions (reference has none)", () => {
+    const src = read("src", "app", "(app)", "training", "page.tsx");
+    expect(src).not.toMatch(/actions=\{/);
+  });
+
+  it("R9-C: training renders the bare H2 section row + bare card (reference recipe)", () => {
+    // Reference: h2.text-2xl font-bold text-slate-900 "Training Platforms"
+    // inside flex items-center justify-between mb-6, then a bare Card with
+    // NO CardHeader — the grid or empty state renders directly inside.
+    const src = read("src", "app", "(app)", "training", "page.tsx");
+    expect(src).toMatch(/text-2xl font-bold text-slate-900/);
+    expect(src).toMatch(/flex items-center justify-between mb-6/);
+    expect(src).not.toContain("CardTitle");
+    expect(src).not.toContain("CardDescription");
+    expect(src).not.toContain("CardHeader");
+  });
+
+  it("R9-C: training category tabs are bare dark/outline buttons (taskmanager family)", () => {
+    // Reference: flex gap-2 overflow-x-auto pb-2 list; active =
+    // bg-[#171717] white 12px/500 h-8 px-3 rounded-md; inactive = outline.
+    // NOT the shadcn segmented TabsList.
+    const src = read("src", "app", "(app)", "training", "page.tsx");
+    expect(src).toContain("overflow-x-auto pb-2");
+    expect(src).not.toContain("TabsList");
+    expect(src).not.toContain("TabsTrigger");
+    expect(src).toMatch(/variant=\{.*"dark".*"outline"|category === c.value \? "dark" : "outline"/);
+  });
+
+  it("R9-C: training empty state is the simple variant (icon + one 16px slate-500 line)", () => {
+    // Reference: p-12 text-center + 64px icon + single p.text-slate-500
+    // 16px line "No training platforms available" — no h3, no description,
+    // no CTA (card 202px tall). The full EmptyState variant stays for
+    // payroll-style pages.
+    const src = read("src", "app", "(app)", "training", "page.tsx");
+    expect(src).toContain("No training platforms available");
+    expect(src).not.toContain("Add a platform to start building your training library");
+    expect(src).not.toContain("try another category");
+  });
+
+  it("R9-E: attendance header renders the reference's seven buttons without leading-[2]", () => {
+    // Reference cluster (911px): Print/PDF/Excel/Devices/Settings/Dashboard
+    // at h-8 12px outline + Import Attendance (cyan gradient, h-9). The
+    // title block squeezes to 312px and the h1 wraps naturally — the
+    // session-5 leading-[2] pin is stale on the redeployed reference.
+    const src = read("src", "app", "(app)", "attendance", "page.tsx");
+    expect(src).not.toContain("leading-[2]");
+    for (const label of ["Print", "PDF", "Excel", "Devices", "Settings", "Dashboard", "Import Attendance"]) {
+      expect(src).toContain(label);
+    }
+    expect(src).not.toContain('"Mark Attendance"');
+  });
+
+  it("R9-E: attendance renders the Report Type toolbar card with the three-option select", () => {
+    // Reference: card (288,280) 70px tall between header and stats —
+    // "Report Type:" + Radix select (All Staff Report / Individual
+    // Employee / Department Report).
+    const src = read("src", "app", "(app)", "attendance", "page.tsx");
+    expect(src).toContain("Report Type");
+    expect(src).toContain("All Staff Report");
+    expect(src).toContain("Individual Employee");
+    expect(src).toContain("Department Report");
+  });
+
+  it("R9-F: root not-found renders the reference's 72px 404 inside the shell", () => {
+    // Reference: h1 "404" text-7xl font-light + h2 "Page Not Found"
+    // text-2xl font-medium, centered in the content area; the sidebar
+    // renders for authenticated sessions.
+    const src = read("src", "app", "not-found.tsx");
+    expect(src).toContain("text-7xl font-light");
+    expect(src).toContain("Page Not Found");
+    expect(src).toContain("text-2xl font-medium");
+    expect(src).toContain("AppShell");
+  });
+});

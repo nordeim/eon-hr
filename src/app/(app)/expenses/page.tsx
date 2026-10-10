@@ -200,7 +200,7 @@ export default function ExpensesPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Pending" value={formatSar(stats.pending)} icon={<Clock aria-hidden="true" />} />
         <StatCard label="Approved" value={formatSar(stats.approved)} icon={<CheckCircle2 aria-hidden="true" />} />
         <StatCard label="Reimbursed" value={formatSar(stats.reimbursed)} icon={<Banknote aria-hidden="true" />} />
