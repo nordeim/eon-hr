@@ -332,10 +332,14 @@ export default function RecruitmentPage() {
         </TabsList>
 
         {/* ---------------- Applicants & Ranking ---------------- */}
-        <TabsContent value="applicants" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center">
+        {/* Session 12 (R11-K): the reference's toolbar — flex flex-wrap
+            gap-3 items-center bg-white p-4 rounded-xl border — with a 16px
+            Users icon, w-48/w-40/w-40 selects and the ml-auto count. */}
+        <TabsContent value="applicants" className="mt-6 flex flex-col gap-4">
+          <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200">
+            <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger className="w-full sm:w-56" aria-label="Filter by job">
+              <SelectTrigger className="w-48" aria-label="Filter by job">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -348,7 +352,7 @@ export default function RecruitmentPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-44" aria-label="Filter by status">
+              <SelectTrigger className="w-40" aria-label="Filter by status">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -361,44 +365,57 @@ export default function RecruitmentPage() {
               </SelectContent>
             </Select>
             <Select value={scoreSort} onValueChange={setScoreSort}>
-              <SelectTrigger className="w-full sm:w-48" aria-label="Sort by AI score">
+              <SelectTrigger className="w-40" aria-label="Sort by AI score">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">AI Score: Default</SelectItem>
+                <SelectItem value="default">AI Score</SelectItem>
                 <SelectItem value="aiScore">AI Score: High to Low</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-muted-foreground sm:ml-auto">
+            <span className="text-sm text-slate-500 ml-auto">
               {visibleCandidates.length} candidate{visibleCandidates.length === 1 ? "" : "s"}
             </span>
           </div>
 
-          <div className="rounded-xl border bg-card shadow-sm">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : visibleCandidates.length === 0 ? (
-              <EmptyState
-                icon={<Users className="h-6 w-6" aria-hidden="true" />}
-                title="No applicants found"
-                description={
-                  jobFilter !== "all" || statusFilter !== "all"
-                    ? "Try adjusting the job or status filters."
-                    : "Upload a CV or add applicants to the pipeline."
-                }
-              />
+              /* Session 12 (R11-K): the reference's in-table empty row
+                 (text-center py-10 text-slate-400, 101px) under the
+                 bg-slate-50 bordered thead. */
+              <Table>
+                <TableHeader className="bg-slate-50 border-b border-slate-200">
+                  <TableRow>
+                    <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Job</TableHead>
+                    <TableHead className="font-semibold text-slate-600">AI Score</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Skills Match</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <td colSpan={6} className="text-center py-10 text-slate-400">
+                      No applicants found
+                    </td>
+                  </TableRow>
+                </TableBody>
+              </Table>
             ) : (
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-slate-50 border-b border-slate-200">
                   <TableRow>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>Job</TableHead>
-                    <TableHead>AI Score</TableHead>
-                    <TableHead>Skills Match</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Job</TableHead>
+                    <TableHead className="font-semibold text-slate-600">AI Score</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Skills Match</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -485,7 +502,7 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- AI CV Upload ---------------- */}
-        <TabsContent value="cvupload" className="flex flex-col gap-4">
+        <TabsContent value="cvupload" className="mt-6 flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-xl border bg-card p-5 shadow-sm">
               <div className="flex flex-col gap-1 pb-4">
@@ -609,7 +626,7 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- Job Postings ---------------- */}
-        <TabsContent value="jobs" className="flex flex-col gap-4">
+        <TabsContent value="jobs" className="mt-6 flex flex-col gap-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

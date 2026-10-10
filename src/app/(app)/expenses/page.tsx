@@ -4,6 +4,7 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus, Check, X, Trash2, Banknote, Loader2, Clock, CheckCircle2, Receipt, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/input";
@@ -207,27 +208,28 @@ export default function ExpensesPage() {
         <StatCard label="Total Claims" value={stats.total} icon={<Receipt aria-hidden="true" />} />
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-1 p-5 pb-0">
-          <h2 className="text-base font-semibold text-foreground">Claims</h2>
-          <p className="text-sm text-muted-foreground">Submitted reimbursements and their approval status.</p>
+      {/* Session 12 (R11-E): the reference renders a border-b CardHeader
+          (flex flex-col space-y-1.5 p-6) with a DIV title — font-semibold
+          leading-none tracking-tight "Expense Claims" (65px header) — over a
+          p-0 content area. No card-level CTA: the page-header button is the
+          only affordance (the reference's empty state has no action, so its
+          description P carries no mb-4). */}
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Expense Claims</div>
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : claims.length === 0 ? (
-          <EmptyState
-            icon={<Receipt className="h-6 w-6" aria-hidden="true" />}
-            title="No expense claims yet"
-            description="Submit your first claim to get started"
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Expense
-              </Button>
-            }
-          />
+          <div className="p-0">
+            <EmptyState
+              icon={<Receipt aria-hidden="true" />}
+              title="No expense claims yet"
+              description="Submit your first claim to get started"
+            />
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -318,7 +320,7 @@ export default function ExpensesPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">

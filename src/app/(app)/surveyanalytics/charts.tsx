@@ -33,7 +33,7 @@ export interface SurveyPoint {
 
 export function SentimentDistributionBar({ data }: { data: SentimentSlice[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -51,7 +51,7 @@ export function SentimentDistributionBar({ data }: { data: SentimentSlice[] }) {
 
 export function SentimentTrendLine({ data }: { data: TrendPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="month" tick={{ fontSize: 11 }} />
@@ -73,7 +73,7 @@ export function SentimentTrendLine({ data }: { data: TrendPoint[] }) {
 
 export function SurveyComparisonBar({ data }: { data: SurveyPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />

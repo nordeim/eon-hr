@@ -186,30 +186,37 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  // Session 12 (R11-A) — reference footer recipe (live-measured):
+  //   div.flex.flex-col.gap-2.border-t.border-slate-200.dark:border-slate-800.p-4
+  //     div.flex.items-center.gap-2.mb-2      (left-aligned cluster, NOT
+  //     justify-between) with 36×36 ghost icon buttons (h-9 w-9) and the
+  //     outlined h-8 عربي button (80×32, min-w-[64px]), then the 223×36
+  //     user trigger below (gap-2 + mb-2 stack = 16px between rows).
   return (
-    <div className="border-t border-sidebar-border p-3">
-      <div className="flex items-center justify-between gap-1 px-1 pb-2">
+    <div className="flex flex-col gap-2 border-t border-slate-200 dark:border-slate-800 p-4">
+      <div className="flex items-center gap-2 mb-2">
         <button
           type="button"
           aria-label="Notifications"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
         >
-          <Bell className="h-4.5 w-4.5" aria-hidden="true" />
+          <Bell className="h-4 w-4" aria-hidden="true" />
         </button>
         <button
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
           onClick={() => setDark((d) => !d)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
         >
-          {dark ? <Sun className="h-4.5 w-4.5" aria-hidden="true" /> : <Moon className="h-4.5 w-4.5" aria-hidden="true" />}
+          {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>
         <button
           type="button"
           onClick={() => setLang((l) => (l === "EN" ? "عربي" : "EN"))}
-          className="flex h-8 items-center justify-center rounded-md px-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+          title={lang === "عربي" ? "Switch to Arabic" : "Switch to English"}
+          className="flex h-8 min-w-[64px] items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-background px-3 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 hover:text-accent-foreground"
         >
-          <Languages className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          <Languages className="h-4 w-4" aria-hidden="true" />
           {lang}
         </button>
       </div>
@@ -223,15 +230,20 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
         className={cn(
-          "flex w-full items-center gap-3 rounded-md p-2 text-left outline-none transition-colors",
-          "hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-ring"
+          // Session 12 (R11-A): the reference renders the user trigger as a
+          // full-width h-9 ghost button (223×36) — px-4 py-2, justify-start,
+          // gap-3 — with a 36px gradient circle avatar (16px CircleUser) and
+          // a flex-1 min-w-0 text-left column (name 20px, email 16px).
+          "inline-flex items-center h-9 px-4 py-2 w-full justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-colors",
+          "hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         )}
       >
-        {/* Reference avatar: gradient circle with a white CircleUser glyph. */}
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]">
-          <CircleUser className="h-5 w-5 text-white" aria-hidden="true" />
+        {/* Reference avatar: gradient circle with a white CircleUser glyph
+            (blue-500 -> indigo-500 endpoints, sRGB-pinned per trap 3). */}
+        <span className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]">
+          <CircleUser className="h-4 w-4 text-white" aria-hidden="true" />
         </span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 text-left">
           {/* Session 6: reference renders the user name at slate-900
               (#0f172a — measured), not the neutral foreground token. */}
           <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>

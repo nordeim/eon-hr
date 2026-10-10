@@ -4,8 +4,8 @@ import * as React from "react";
 import { AlertTriangle, CheckCircle2, Loader2, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PageHeader } from "@/components/shared/page-header";
 import { useToast } from "@/components/ui/toast";
 
@@ -26,6 +26,8 @@ const FEATURE_ROWS: { key: keyof SecuritySettings; label: string }[] = [
 ];
 
 const RECOMMENDATIONS = [
+  // Session 12 (R11-S): the reference's compact recommendation lines —
+  // "Title: description" with a <strong> title prefix, 20px check icon.
   {
     title: "Two-Factor Authentication",
     text: "Two-Factor Authentication: Adds an extra layer of security for user logins.",
@@ -113,75 +115,92 @@ export default function SecuritySettingsPage() {
       ) : (
         <>
           {bannerVisible ? (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-semibold text-amber-900">Security Configuration Required</p>
-                <p className="text-sm text-amber-800">
-                  Please enable all required security features to publish your app.
-                </p>
+            /* Session 12 (R11-S): the reference's alert — border-2
+               border-orange-500 bg-orange-50, p-6, flex items-center gap-4
+               with a 48px bare orange icon (no tile). */
+            <div className="rounded-xl text-card-foreground shadow border-2 border-orange-500 bg-orange-50">
+              <div className="p-6">
+                <div className="flex items-center gap-4">
+                  <AlertTriangle className="h-12 w-12 shrink-0 text-orange-500" aria-hidden="true" />
+                  <div>
+                    <p className="font-semibold text-orange-700">Security Configuration Required</p>
+                    <p className="text-sm text-orange-600">
+                      Please enable all required security features to publish your app.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           ) : null}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Features</CardTitle>
-              <CardDescription>Toggle the platform's security capabilities.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-1">
+          <Card className="border-slate-200">
+            {/* Session 12 (R11-S): border-b DIV-title CardHeader
+                ("Security Features", 65px); rows are p-4 bg-slate-50
+                rounded-lg with a checkbox + text-base font-medium label
+                (56px) and the Enabled/Disabled badge; footer is the
+                border-t justify-end row with the h-9 save button. */}
+            <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+              <div className="font-semibold leading-none tracking-tight">Security Features</div>
+            </div>
+            <CardContent className="p-6">
               {settings === null ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : (
-                FEATURE_ROWS.map((row) => (
-                  <div
-                    key={row.key}
-                    className="flex items-center justify-between gap-4 rounded-lg px-3 py-3 hover:bg-secondary/40"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-                        <Shield className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                      <p className="text-sm font-medium text-foreground">{row.label}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
+                <div className="space-y-6">
+                  {FEATURE_ROWS.map((row) => (
+                    <div
+                      key={row.key}
+                      className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={settings[row.key]}
+                          onCheckedChange={(v) => setSettings({ ...settings, [row.key]: v === true })}
+                          id={`sec-${row.key}`}
+                        />
+                        <label
+                          htmlFor={`sec-${row.key}`}
+                          className="text-base font-medium cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {row.label}
+                        </label>
+                      </div>
                       <Badge variant={settings[row.key] ? "success" : "secondary"}>
                         {settings[row.key] ? "Enabled" : "Disabled"}
                       </Badge>
-                      <Switch
-                        checked={settings[row.key]}
-                        onCheckedChange={(v) => setSettings({ ...settings, [row.key]: v })}
-                        aria-label={row.label}
-                      />
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
+              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-200">
+                <Button onClick={onSave} disabled={saving || settings === null}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ShieldCheck aria-hidden="true" />}
+                  Save Security Settings
+                </Button>
+              </div>
             </CardContent>
-            <CardFooter className="justify-end">
-              <Button onClick={onSave} disabled={saving || settings === null}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ShieldCheck aria-hidden="true" />}
-                Save Security Settings
-              </Button>
-            </CardFooter>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Recommendations</CardTitle>
-              <CardDescription>What each feature does for your workspace.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {RECOMMENDATIONS.map((r) => (
-                <div key={r.title} className="flex items-start gap-3 rounded-lg border p-4">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
-                  <p className="text-sm text-foreground">{r.text}</p>
-                </div>
-              ))}
+          <Card className="border-slate-200">
+            <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+              <div className="font-semibold leading-none tracking-tight">Security Recommendations</div>
+            </div>
+            <CardContent className="p-6">
+              {/* Session 12 (R11-S): the compact space-y-3 text-sm
+                  slate-600 list — 20px check icon + <strong>-prefixed
+                  line, one line each. */}
+              <div className="space-y-3 text-sm text-slate-600">
+                {RECOMMENDATIONS.map((r) => (
+                  <div key={r.title} className="flex gap-3">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+                    <p>
+                      <strong>{r.title}:</strong> {r.text.slice(r.title.length + 2)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </>

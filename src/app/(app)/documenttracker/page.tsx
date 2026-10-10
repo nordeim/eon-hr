@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { BellRing, FileCheck2, FileClock, FileStack, FileText, FileX2, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { BellRing, FileCheck2, FileClock, FileStack, FileText, FileX2, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -32,10 +32,9 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 interface DocumentRow {
   id: string;
@@ -69,11 +68,13 @@ const DOC_TYPES = [
 ];
 
 const FILTERS = [
+  // Session 12 (R11-D): the reference's chips render lowercase source text
+  // with the `capitalize` utility ("valid", "expiring soon", …).
   { value: "all", label: "All" },
-  { value: "valid", label: "Valid" },
-  { value: "expiring", label: "Expiring Soon" },
-  { value: "expired", label: "Expired" },
-  { value: "pending_upload", label: "Pending Upload" },
+  { value: "valid", label: "valid" },
+  { value: "expiring", label: "expiring soon" },
+  { value: "expired", label: "expired" },
+  { value: "pending_upload", label: "pending upload" },
 ];
 
 function typeLabel(v: string): string {
@@ -87,6 +88,7 @@ export default function DocumentTrackerPage() {
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState("all");
+  const [search, setSearch] = React.useState("");
   const [checking, setChecking] = React.useState(false);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -204,9 +206,18 @@ export default function DocumentTrackerPage() {
   }, [documents]);
 
   const filtered = React.useMemo(() => {
-    if (filter === "all") return documents;
-    return documents.filter((d) => d.status === filter);
-  }, [documents, filter]);
+    const q = search.trim().toLowerCase();
+    let list = documents;
+    if (filter !== "all") list = list.filter((d) => d.status === filter);
+    if (q !== "")
+      list = list.filter(
+        (d) =>
+          d.employeeName.toLowerCase().includes(q) ||
+          d.name.toLowerCase().includes(q) ||
+          (d.employeeCode ?? "").toLowerCase().includes(q)
+      );
+    return list;
+  }, [documents, filter, search]);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#eef2ff)] p-4 md:p-8">
@@ -233,40 +244,63 @@ export default function DocumentTrackerPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="horizontal" label="Total Documents" value={stats.total} icon={<FileStack className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard variant="horizontal" label="Valid" value={stats.valid} icon={<FileCheck2 className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard variant="horizontal" label="Expiring ≤30 days" value={stats.expiring} icon={<FileClock className="h-4 w-4" aria-hidden="true" />} />
-        <StatCard variant="horizontal" label="Expired" value={stats.expired} icon={<FileX2 className="h-4 w-4" aria-hidden="true" />} />
+        <StatCard variant="horizontal" label="Total Documents" value={stats.total} icon={<FileStack className="h-4 w-4 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="horizontal" label="Valid" value={stats.valid} icon={<FileCheck2 className="h-4 w-4 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="horizontal" label="Expiring ≤30 days" value={stats.expiring} icon={<FileClock className="h-4 w-4 text-amber-600" aria-hidden="true" />} tileClassName="bg-amber-100" />
+        <StatCard variant="horizontal" label="Expired" value={stats.expired} icon={<FileX2 className="h-4 w-4 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
       </div>
 
-      <Tabs value={filter} onValueChange={setFilter}>
-        <TabsList>
+      {/* Session 12 (R11-D): the reference's filter row — flex flex-wrap
+          gap-3 items-center with a relative flex-1 min-w-64 search ("Search
+          by employee or document number...") and the white bordered chip
+          group (flex bg-white border border-slate-200 rounded-lg p-1 gap-1;
+          chips px-3 py-1.5 capitalize, active bg-blue-600 text-white). */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Input
+            type="text"
+            placeholder="Search by employee or document number..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search documents"
+          />
+        </div>
+        <div className="flex bg-white border border-slate-200 rounded-lg p-1 gap-1">
           {FILTERS.map((f) => (
-            <TabsTrigger key={f.value} value={f.value}>
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setFilter(f.value)}
+              className={cn(
+                "px-3 py-1.5 rounded text-xs font-medium transition-all capitalize",
+                filter === f.value ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-50"
+              )}
+            >
               {f.label}
-            </TabsTrigger>
+            </button>
           ))}
-        </TabsList>
-      </Tabs>
+        </div>
+      </div>
 
-      <div className="rounded-xl border bg-card shadow-sm">
+      <Card>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : documents.length === 0 ? (
-          <EmptyState
-            title="No documents found"
-            description="Add your first employee document to start tracking expiry."
-            action={
-              <Button variant="dark" onClick={openNewDialog}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Add Document
-              </Button>
-            }
-          />
+          /* Session 12 (R11-D): the reference's bare empty — p-6 py-16
+             text-center, a 48px slate-300 icon (mb-3) and a single P, no h3,
+             no action (the page-header buttons are the affordances). */
+          <div className="p-6 py-16 text-center">
+            <FileText className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
+            <p className="text-slate-500">No documents found</p>
+          </div>
         ) : filtered.length === 0 ? (
-          <EmptyState title="No documents found" description="No documents match this filter." />
+          <div className="p-6 py-16 text-center">
+            <FileText className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
+            <p className="text-slate-500">No documents found</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -328,7 +362,7 @@ export default function DocumentTrackerPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <DocumentDialog
         key={`doc-${dialogSeq}-${editing?.id ?? "new"}`}

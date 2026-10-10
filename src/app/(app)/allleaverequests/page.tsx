@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { CalendarDays, Check, Clock3, ListChecks, Loader2, Plane, Plus, X } from "lucide-react";
+import { Check, Clock3, ListChecks, Loader2, Plane, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, initials } from "@/lib/utils";
@@ -181,27 +181,25 @@ export default function AllLeaveRequestsPage() {
         />
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="flex items-center justify-between gap-2 border-b px-5 py-4">
-          <h2 className="text-sm font-semibold text-foreground">All Leave Requests</h2>
-          <span className="text-xs text-muted-foreground">{stats.total} total</span>
+      {/* Session 12 (R11-G): border-b DIV-title CardHeader ("All Leave
+          Requests", 65px) + CardContent p-6 with the reference's
+          text-center py-12 single-P empty (64px Plane icon, no h3, no
+          action, no count badge). */}
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">All Leave Requests</div>
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : requests.length === 0 ? (
-          <EmptyState
-            icon={<CalendarDays className="h-6 w-6" aria-hidden="true" />}
-            title="No leave requests"
-            description="New requests will appear here for approval."
-            action={
-              <Button variant="dark" onClick={openNewRequest}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Leave Request
-              </Button>
-            }
-          />
+          <div className="p-6">
+            <div className="text-center py-12">
+              <Plane className="mx-auto mb-4 h-16 w-16 text-slate-300" aria-hidden="true" />
+              <p className="text-slate-500">No leave requests</p>
+            </div>
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -270,7 +268,7 @@ export default function AllLeaveRequestsPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <LeaveRequestDialog
         key={`leave-${dialogSeq}`}

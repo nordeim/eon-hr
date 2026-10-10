@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.4.0 (session-11 remediation complete) · **Last updated:**
-> 2026-10-10 · **State:** 194 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 2.5.0 (session-12 remediation complete) · **Last updated:**
+> 2026-10-11 · **State:** 265 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -1006,3 +1006,66 @@ pattern). Pass `className="leading-none"` at border-b call sites.
 **Palette addendum:** `--color-cyan-700: #0e7490` pinned (the attendance
 Devices button is cyan-700, not teal-700 — wrong family AND unpinned
 oklch drift).
+
+## 24. Session-12 Recipe Layer — parity round 11
+
+**Sidebar footer (R11-A):** `p-4 gap-2 border-t border-slate-200
+dark:border-slate-800` container (255×121) — a left-aligned cluster, never
+justify-between. Row 1 (`gap-2 mb-2`): Bell + Moon ghost h-9 w-9 (36×36,
+16px svg) + عربي outline h-8 px-3 text-xs font-semibold min-w-[64px]
+(80×32). Row 2: ghost h-9 px-4 py-2 w-full justify-start gap-3 user
+button — 36px sRGB-gradient circle avatar (16px CircleUser icon) +
+`flex-1 min-w-0 text-left` name (text-sm font-medium) / email (text-xs
+slate-500) column. The mobile drawer footer is the SAME recipe
+(255×36@792, 1px documented rounding).
+
+**EmptyState two refinements (R11-B/C):** the description P carries mb-4
+ONLY when an action follows (call sites pass `descriptionClassName`);
+the new `iconChip` variant renders a 64px bg-slate-100 rounded-full circle
+with a 32px slate-400 icon (templates) instead of the bare 64px icon.
+Companywall's feed stack is space-y-6.
+
+**Systemic table recipe (R11-V):** th `text-left py-3 px-4 font-medium
+text-slate-500` (45px @ 20px text — the old h-10 px-3 was 40px); empty-row
+td `py-12 text-center text-slate-400` colSpan (117px). Both live in
+`ui/table.tsx` — every data table inherited them.
+
+**documenttracker (R11-D):** 80px horizontal stat tiles (`p-4 flex
+items-center gap-3`, 44px colored chip, text-2xl value + text-xs label,
+`border-0 shadow-sm`); filter row = search input + 5 lowercase
+`capitalize` chips (Tabs removed); bare empty = p-6 py-16 + 48px icon
+mb-3 + single P (no h3).
+
+**DIV-title border-b headers (R11-E/F/G/H/I):** expenses, leavemanagement,
+allleaverequests, payroll and payrollmodule render `p-6 border-b` card
+headers with a plain DIV title (not CardTitle); payroll/payrollmodule get
+standalone `border-0 shadow-sm` search-toolbar cards. Leavemanagement /
+allleaverequests empties: `p-6` content + `py-12` inner + 64px icon
+mx-auto mb-4 + single P. Payroll's empty KEEPS its CTA (re-measured).
+
+**evaluations (R11-N):** tablist `w-full max-w-lg mx-auto grid
+grid-cols-3` (167px equal triggers — grid-cols, not flex); the stat row
+renders INSIDE the active tab below the tablist; tiles are value-in-tile
+(74px, text-2xl over text-xs); empty `py-10 text-center text-slate-400`.
+
+**employees zero-render (R11-O):** at 0 employees the reference renders
+NOTHING below the filter row — no table, no empty state (the Add Employee
+affordance stays in the page header + the wizard).
+
+**communications (R11-P):** channel cards centered p-8, 64px icon + h3 +
+P, NO button; grid `gap-6 md:grid-cols-3`.
+
+**analyticsdashboard (R11-R):** content sits DIRECTLY in the canvas (no
+max-w-7xl wrapper); full-width vertical stack: 166px stat row → full-width
+area chart (260px) → 2-col bar/line (240px) → 3-col pies (220px) →
+full-width line; chart-card titles are text-base (24px); all 5 status
+chips render at zero counts; charts render UNCONDITIONALLY.
+
+**Chart-page heights (R11-U):** hrreports 320px chart + a data-table
+card; attendancedashboard 260px; advancedanalytics 300px; surveyanalytics
+rows separated by a 24px gap. R11-page cards carry `border-slate-200` +
+`shadow`. No EmptyState gating on any chart page.
+
+**securitysettings (R11-S):** plain `p-4 bg-slate-50 rounded-lg` rows
+(switch + label + description inline, no Card furniture) + compact
+recommendation rows; the danger-zone alert keeps its p-6 wrapper.

@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Wand2, Pencil, Trash2, Banknote, Loader2, Wallet, Coins, CheckCircle2, FileEdit } from "lucide-react";
+import { Plus, Wand2, Pencil, Trash2, Banknote, Loader2, Search, Wallet, Coins, CheckCircle2, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatSar, initials, currentPeriod } from "@/lib/utils";
@@ -70,11 +70,15 @@ function toMinor(value: string): number | null {
 
 export default function PayrollModulePage() {
   const toast = useToast();
-  const period = currentPeriod();
+  // Session 12 (R11-I): the period is state — the reference's header month
+  // input (160px, type="month") drives the whole page.
+  const [period, setPeriod] = React.useState(currentPeriod());
   const [records, setRecords] = React.useState<PayslipRow[]>([]);
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [generating, setGenerating] = React.useState(false);
+  // Session 12 (R11-I): the standalone max-w-sm employee search.
+  const [search, setSearch] = React.useState("");
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<PayslipRow | null>(null);
@@ -109,6 +113,16 @@ export default function PayrollModulePage() {
     const draft = records.filter((r) => r.status === "draft").length;
     return { total, basic, paid, draft };
   }, [records]);
+
+  // Session 12 (R11-I): the standalone search filters the table.
+  const visibleRecords = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (q === "") return records;
+    return records.filter((r) => {
+      const name = `${r.employee?.firstName ?? ""} ${r.employee?.lastName ?? ""}`.trim().toLowerCase();
+      return name.includes(q) || r.employeeId.toLowerCase().includes(q);
+    });
+  }, [records, search]);
 
   async function onGenerateAll() {
     setGenerating(true);
@@ -222,6 +236,14 @@ export default function PayrollModulePage() {
         subtitle="Generate & manage monthly payslips"
         actions={
           <>
+            {/* Session 12 (R11-I): the reference's header month input (160px). */}
+            <Input
+              type="month"
+              value={period}
+              onChange={(e) => setPeriod(e.target.value || currentPeriod())}
+              className="w-40"
+              aria-label="Payslip period"
+            />
             <Button variant="outline" onClick={onGenerateAll} disabled={generating || loading}>
               {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 aria-hidden="true" />}
               Generate All
@@ -246,29 +268,31 @@ export default function PayrollModulePage() {
         <StatCard variant="compact-s" label="Draft" value={stats.draft} icon={<FileEdit aria-hidden="true" />} />
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-1 p-5 pb-0">
-          <h2 className="text-base font-semibold text-foreground">Payslips — {monthLabel(period)}</h2>
-          <p className="text-sm text-muted-foreground">
-            Salary slips for the current period. Generate All creates a draft payslip from each employee&apos;s base
-            salary.
-          </p>
+      {/* Session 12 (R11-I): the reference's standalone search — a relative
+          max-w-sm (384px) wrapper with a 16px Search icon and an h-9 input
+          ("Search employees...") between the stats and the table card. */}
+      <div className="relative max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Input
+          type="text"
+          placeholder="Search employees..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search employees"
+        />
+      </div>
+
+      {/* Session 12 (R11-I): border-b DIV-title CardHeader ("Payslips —
+          {month}", 65px) over a p-0 table area; the empty state is the
+          systemic in-table row (py-12 text-center text-slate-400, 117px). */}
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Payslips — {monthLabel(period)}</div>
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
-        ) : records.length === 0 ? (
-          <EmptyState
-            title={`No payslips for ${monthLabel(period)}`}
-            description={`Click "Generate All" to create them.`}
-            action={
-              <Button variant="dark" onClick={onGenerateAll} disabled={generating}>
-                {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 aria-hidden="true" />}
-                Generate All
-              </Button>
-            }
-          />
         ) : (
           <Table>
             <TableHeader>
@@ -284,7 +308,14 @@ export default function PayrollModulePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {records.map((record) => {
+              {visibleRecords.length === 0 ? (
+                <TableRow>
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                    No payslips for {monthLabel(period)}.
+                  </td>
+                </TableRow>
+              ) : (
+                visibleRecords.map((record) => {
                 const name = `${record.employee?.firstName ?? ""} ${record.employee?.lastName ?? ""}`.trim() || "—";
                 return (
                   <TableRow key={record.id}>
@@ -348,11 +379,12 @@ export default function PayrollModulePage() {
                     </TableCell>
                   </TableRow>
                 );
-              })}
+                })
+              )}
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <PayslipDialog
         key={editing ? editing.id : "new"}

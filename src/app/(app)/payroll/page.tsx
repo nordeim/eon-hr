@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, CalendarRange, Check, CheckCircle2, DollarSign, FileDown, Loader2, Pencil, Plus, Trash2, Users, Wallet } from "lucide-react";
+import { Banknote, CalendarRange, Check, CheckCircle2, DollarSign, FileDown, Loader2, Pencil, Plus, Search, Trash2, Users, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -75,6 +76,10 @@ export default function PayrollPage() {
   const [editing, setEditing] = React.useState<PayrollRow | null>(null);
   const [saving, setSaving] = React.useState(false);
 
+  // Session 12 (R11-H): toolbar-card filters — employee text search + month.
+  const [search, setSearch] = React.useState("");
+  const [monthFilter, setMonthFilter] = React.useState("");
+
   const period = currentPeriod();
 
   const load = React.useCallback(async () => {
@@ -103,6 +108,17 @@ export default function PayrollPage() {
     const approved = monthRecords.filter((r) => r.status === "approved").length;
     return { total, people, approved };
   }, [records, period]);
+
+  // Session 12 (R11-H): the toolbar card's search + month drive the table.
+  const visibleRecords = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return records.filter((r) => {
+      const name = `${r.employee?.firstName ?? ""} ${r.employee?.lastName ?? ""}`.trim().toLowerCase();
+      const matchesQ = q === "" || name.includes(q) || r.employeeId.toLowerCase().includes(q);
+      const matchesMonth = monthFilter === "" || r.period.startsWith(monthFilter);
+      return matchesQ && matchesMonth;
+    });
+  }, [records, search, monthFilter]);
 
   async function onSave(data: {
     employeeId: string;
@@ -226,31 +242,66 @@ export default function PayrollPage() {
         <StatCard label="Current Period" value={period} icon={<CalendarRange aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600" />
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-1 p-5 pb-0">
-          <h2 className="text-base font-semibold text-foreground">Payroll Records</h2>
-          <p className="text-sm text-muted-foreground">All salary records across periods.</p>
+      {/* Session 12 (R11-H): the reference renders a standalone p-6 toolbar
+          card between the stats and the records card — flex gap-4 with a
+          relative flex-1 employee search (862px) and a w-48 month input
+          (192px) — then the records card with the border-b DIV-title header
+          ("Payroll Records") and the p-12 empty state WITHOUT an action. */}
+      <Card className="border-slate-200">
+        <div className="p-6">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                type="text"
+                placeholder="Search employee..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search employee"
+              />
+            </div>
+            <Input
+              type="month"
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+              className="w-48"
+              aria-label="Filter by month"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Payroll Records</div>
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
-        ) : records.length === 0 ? (
-          <EmptyState
-            title="No payroll records"
-            description="Add payroll for this month to get started"
-            action={
-              <Button variant="dark"
-                onClick={() => {
-                  setEditing(null);
-                  setDialogOpen(true);
-                }}
-              >
-                <Plus className="mr-2" aria-hidden="true" />
-                Add Payroll
-              </Button>
-            }
-          />
+        ) : visibleRecords.length === 0 ? (
+          <div className="p-0">
+            {records.length === 0 ? (
+              <EmptyState
+                title="No payroll records"
+                description="Add payroll for this month to get started"
+                action={
+                  <Button variant="dark"
+                    onClick={() => {
+                      setEditing(null);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="mr-2" aria-hidden="true" />
+                    Add Payroll
+                  </Button>
+                }
+              />
+            ) : (
+              /* Filtered-to-zero: the systemic empty row (R11-V). */
+              <div className="py-12 text-center text-slate-400">No payroll records match the current filters.</div>
+            )}
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -265,7 +316,7 @@ export default function PayrollPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {records.map((record) => {
+              {visibleRecords.map((record) => {
                 const name = `${record.employee?.firstName ?? ""} ${record.employee?.lastName ?? ""}`.trim() || "—";
                 return (
                   <TableRow key={record.id}>
@@ -343,7 +394,7 @@ export default function PayrollPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <PayrollDialog
         key={editing ? editing.id : "new"}

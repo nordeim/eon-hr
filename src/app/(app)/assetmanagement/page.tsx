@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Download, Pencil, Trash2, UserPlus, UserMinus, Loader2, Package } from "lucide-react";
+import { Plus, Download, Pencil, Trash2, UserPlus, UserMinus, Loader2, Search, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, formatSar } from "@/lib/utils";
@@ -77,6 +77,8 @@ export default function AssetManagementPage() {
   const [loading, setLoading] = React.useState(true);
   const [status, setStatus] = React.useState("all");
   const [type, setType] = React.useState("all");
+  // Session 12 (R11-J): the reference's client-side asset search.
+  const [search, setSearch] = React.useState("");
   const [busy, setBusy] = React.useState<string | null>(null);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -112,6 +114,18 @@ export default function AssetManagementPage() {
   React.useEffect(() => {
     void load();
   }, [load]);
+
+  // Session 12 (R11-J): the flex-1 search filters the loaded page client-side.
+  const visibleAssets = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (q === "") return assets;
+    return assets.filter(
+      (a) =>
+        a.name.toLowerCase().includes(q) ||
+        (a.serialNumber ?? "").toLowerCase().includes(q) ||
+        (a.assignedToName ?? "").toLowerCase().includes(q)
+    );
+  }, [assets, search]);
 
   async function onSave(data: Record<string, unknown>) {
     setSaving(true);
@@ -268,67 +282,55 @@ export default function AssetManagementPage() {
         <StatCard variant="compact" label="In Repair" value={stats.repair} icon={<Package className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center">
-        <p className="text-sm font-medium text-foreground sm:min-w-24">
-          {assets.length} asset{assets.length === 1 ? "" : "s"}
-        </p>
-        <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Filter by status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s === "all" ? "All Statuses" : labelize(s)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Filter by type">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {TYPE_OPTIONS.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t === "all" ? "All Types" : labelize(t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-        </div>
-      ) : assets.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<Package className="h-6 w-6" />}
-            title="No assets found"
-            description={
-              status !== "all" || type !== "all"
-                ? "Try clearing the status or type filters."
-                : "Add your first company asset to get started"
-            }
-            action={
-              <Button variant="dark"
-                onClick={() => {
-                  setEditing(null);
-                  setDialogOpen(true);
-                }}
-              >
-                <Plus className="mr-2" aria-hidden="true" />
-                Add Asset
-              </Button>
-            }
+      {/* Session 12 (R11-J): the reference's filter row — flex flex-wrap
+          gap-3 items-center (NOT a card) with a relative flex-1
+          min-w-[200px] search ("Search assets..."), a w-44 All Statuses
+          select (176px) and a w-40 All Types select (160px). */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Input
+            type="text"
+            placeholder="Search assets..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search assets"
           />
         </div>
-      ) : (
-        <div className="rounded-xl border bg-card shadow-sm">
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="w-44" aria-label="Filter by status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s === "all" ? "All Statuses" : labelize(s)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={type} onValueChange={setType}>
+          <SelectTrigger className="w-40" aria-label="Filter by type">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TYPE_OPTIONS.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t === "all" ? "All Types" : labelize(t)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Session 12 (R11-J): header-less table card; the empty state is the
+          systemic in-table row (py-12 text-center text-slate-400, 117px). */}
+      <Card className="border-slate-200">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+          </div>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -342,7 +344,14 @@ export default function AssetManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assets.map((asset) => (
+              {visibleAssets.length === 0 ? (
+                <TableRow>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    No assets found
+                  </td>
+                </TableRow>
+              ) : (
+                visibleAssets.map((asset) => (
                 <TableRow key={asset.id}>
                   <TableCell>
                     <p className="font-medium text-foreground">{asset.name}</p>
@@ -404,11 +413,12 @@ export default function AssetManagementPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                ))
+              )}
             </TableBody>
           </Table>
-        </div>
-      )}
+        )}
+      </Card>
 
       <AssetDialog
         open={dialogOpen}

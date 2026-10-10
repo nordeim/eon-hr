@@ -246,10 +246,11 @@ describe("empty-state recipe (session 6)", () => {
   it("renders the measured payroll empty state", () => {
     // Reference: div.p-12 text-center > icon 64px slate-300,
     // h3 text-lg font-semibold text-slate-900 mb-2,
-    // p text-slate-500 mb-4, dark #171717 CTA (not gradient).
+    // p text-slate-500 (+ mb-4 when an action follows — session 12 R11-B),
+    // dark #171717 CTA (not gradient).
     expect(emptyState).toContain("p-12 text-center");
     expect(emptyState).toContain("text-lg font-semibold text-slate-900 mb-2");
-    expect(emptyState).toContain("text-slate-500 mb-4");
+    expect(emptyState).toContain('action ? "mb-4"');
     expect(emptyState).toContain("h-16 w-16");
     expect(emptyState).toContain("text-slate-300");
   });
@@ -472,14 +473,364 @@ describe("per-page stat variant matrix (session 10, R9-D)", () => {
     expect(page("analytics", "page.tsx")).toMatch(/variant="tile-right"/);
   });
 
-  it("templates + evaluations render NO stat row (reference has none)", () => {
+  it("templates renders NO stat row (reference has none); evaluations gained one (R11-N)", () => {
     expect(page("templates", "page.tsx")).not.toContain("StatCard");
-    expect(page("evaluations", "page.tsx")).not.toContain("StatCard");
+    // Session 12 (R11-N): the reference now renders a 4× 74px value-in-tile
+    // stat row on /evaluations (live-measured this session).
+    expect(page("evaluations", "page.tsx")).toContain("StatCard");
   });
 
   it("notificationpreferences: mini-centered 3-col grid with the Mark All Read card", () => {
     const src = page("notificationpreferences", "page.tsx");
     expect(src).toContain("grid-cols-3 gap-4");
     expect(src).toContain("Mark All Read");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 12 — parity round 11 (R11). All recipes live-measured against
+// https://eon.base44.app this session (dual agent-browser sessions; see
+// docs/remediation-plan-session12.md).
+// ---------------------------------------------------------------------------
+
+describe("sidebar footer cluster (session 12, R11-A)", () => {
+  it("renders the left-aligned gap-2 cluster in a p-4 border-t footer", () => {
+    expect(sidebarNav).toContain("flex flex-col gap-2 border-t border-slate-200 dark:border-slate-800 p-4");
+    expect(sidebarNav).toContain("flex items-center gap-2 mb-2");
+  });
+
+  it("icon buttons are 36×36 ghost (h-9 w-9), not 32px justify-between", () => {
+    expect(sidebarNav).not.toContain("justify-between gap-1 px-1 pb-2");
+    expect(sidebarNav.match(/h-9 w-9/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+  });
+
+  it("language button is the outlined h-8 min-w-[64px] عربي recipe", () => {
+    expect(sidebarNav).toContain("min-w-[64px]");
+    expect(sidebarNav).toContain("عربي");
+  });
+
+  it("user trigger is the h-9 px-4 py-2 w-full justify-start gap-3 recipe", () => {
+    expect(sidebarNav).toContain("h-9 px-4 py-2 w-full justify-start gap-3");
+  });
+
+  it("user avatar is 36px (w-9 h-9) inside the trigger, not a p-2 wrapper", () => {
+    expect(sidebarNav).not.toContain("rounded-md p-2 text-left");
+    expect(sidebarNav).toContain("w-9 h-9");
+  });
+});
+
+describe("EmptyState conditional margin + iconChip (session 12, R11-B/C)", () => {
+  const emptyState = read("src", "components", "shared", "empty-state.tsx");
+
+  it("description carries mb-4 only when an action follows", () => {
+    expect(emptyState).toContain("action ?");
+    expect(emptyState).toMatch(/action \? "([^"]*)mb-4/);
+  });
+
+  it("iconChip variant renders the slate-100 circle with a 32px icon", () => {
+    expect(emptyState).toContain("iconChip");
+    expect(emptyState).toContain("bg-slate-100 rounded-full");
+    expect(emptyState).toContain("[&_svg]:h-8 [&_svg]:w-8");
+  });
+});
+
+describe("systemic table recipe (session 12, R11-V)", () => {
+  const table = read("src", "components", "ui", "table.tsx");
+
+  it("th is py-3 px-4 font-medium text-slate-500 (45px)", () => {
+    expect(table).toContain("py-3 px-4");
+    expect(table).toContain("text-slate-500");
+    expect(table).not.toContain("h-10 px-3 text-left");
+  });
+
+  it("data pages render the py-12 text-center text-slate-400 empty row", () => {
+    for (const route of ["payrollmodule", "assetmanagement", "payroll"]) {
+      const src = read("src", "app", "(app)", route, "page.tsx");
+      expect(src).toContain("py-12 text-center text-slate-400");
+    }
+  });
+});
+
+describe("border-b DIV-title card headers (session 12, R11-E/F/G/H/I)", () => {
+  const page = (...p: string[]) => read("src", "app", "(app)", ...p);
+
+  it("shared recipe: flex flex-col space-y-1.5 p-6 border-b + DIV font-semibold leading-none", () => {
+    for (const [route, file] of [
+      ["expenses", "page.tsx"],
+      ["leavemanagement", "page.tsx"],
+      ["allleaverequests", "page.tsx"],
+      ["payroll", "page.tsx"],
+      ["payrollmodule", "page.tsx"],
+    ] as const) {
+      const src = page(route, file);
+      expect(src).toContain("flex flex-col space-y-1.5 p-6 border-b border-slate-200");
+      expect(src).toContain("font-semibold leading-none tracking-tight");
+    }
+  });
+
+  it("expenses: DIV title 'Expense Claims', CardContent p-0, no card-level CTA", () => {
+    const src = page("expenses", "page.tsx");
+    expect(src).toContain("Expense Claims");
+    expect(src).not.toMatch(/EmptyState[\s\S]{0,400}action=/);
+  });
+
+  it("leavemanagement: CardContent p-6 with the py-12 single-P empty (no h3)", () => {
+    const src = page("leavemanagement", "page.tsx");
+    expect(src).toContain('CardContent className="p-6"');
+    expect(src).toContain("text-center py-12");
+    expect(src).not.toContain("No leave requests yet\" description");
+  });
+
+  it("allleaverequests: p-6 content with the py-12 single-P empty", () => {
+    const src = page("allleaverequests", "page.tsx");
+    expect(src).toContain("text-center py-12");
+  });
+
+  it("payroll: p-6 toolbar card (search flex-1 + month input) above the records card", () => {
+    const src = page("payroll", "page.tsx");
+    expect(src).toContain("relative flex-1");
+    expect(src).toMatch(/type="month"/);
+    // The empty state KEEPS its dark Add Payroll CTA (live-verified:
+    // 142x36 at y=826 with the description mb-4 ahead of it).
+    expect(src).toMatch(/EmptyState[\s\S]{0,300}action=/);
+    expect(src).toContain("Add Payroll");
+  });
+
+  it("payrollmodule: standalone max-w-sm search + month input in the header", () => {
+    const src = page("payrollmodule", "page.tsx");
+    expect(src).toContain("relative max-w-sm");
+    expect(src).toMatch(/type="month"/);
+    expect(src).toContain("Payslips —");
+  });
+});
+
+describe("documenttracker filter row + bare empty (session 12, R11-D)", () => {
+  const src = read("src", "app", "(app)", "documenttracker", "page.tsx");
+
+  it("filter row: search relative flex-1 min-w-64 + white chip group", () => {
+    expect(src).toContain("flex flex-wrap gap-3 items-center");
+    expect(src).toContain("relative flex-1 min-w-64");
+    expect(src).toContain("flex bg-white border border-slate-200 rounded-lg p-1 gap-1");
+  });
+
+  it("chips: px-3 py-1.5 capitalize with the blue-600 active state", () => {
+    expect(src).toContain("px-3 py-1.5 rounded text-xs font-medium transition-all capitalize");
+    expect(src).toContain("bg-blue-600 text-white");
+    expect(src).toContain("text-slate-600 hover:bg-slate-50");
+    expect(src).toContain("pending upload");
+  });
+
+  it("empty card is p-6 py-16 text-center with a 48px icon and a single P", () => {
+    expect(src).toContain("p-6 py-16 text-center");
+    expect(src).toMatch(/h-12 w-12/);
+    expect(src).not.toContain('title="No documents found"');
+  });
+
+  it("the Tabs filter is gone", () => {
+    expect(src).not.toContain("<TabsList>");
+  });
+});
+
+describe("assetmanagement filter row + table (session 12, R11-J)", () => {
+  const src = read("src", "app", "(app)", "assetmanagement", "page.tsx");
+
+  it("search wrapper is relative flex-1 min-w-[200px]", () => {
+    expect(src).toContain("relative flex-1 min-w-[200px]");
+  });
+
+  it("status/type selects with All Statuses / All Types", () => {
+    expect(src).toContain("All Statuses");
+    expect(src).toContain("All Types");
+  });
+});
+
+describe("recruitment toolbar + table (session 12, R11-K)", () => {
+  const src = read("src", "app", "(app)", "recruitment", "page.tsx");
+
+  it("toolbar card is p-4 with the ml-auto candidates count", () => {
+    expect(src).toContain("bg-white p-4 rounded-xl border border-slate-200");
+    expect(src).toContain("text-sm text-slate-500 ml-auto");
+  });
+
+  it("candidates table renders the py-10 empty row", () => {
+    expect(src).toContain("text-center py-10 text-slate-400");
+  });
+});
+
+describe("evaluations tab pill + value-in-tile stats (session 12, R11-N)", () => {
+  const src = read("src", "app", "(app)", "evaluations", "page.tsx");
+
+  it("tablist is the centered equal-width max-w-lg grid", () => {
+    expect(src).toContain("max-w-lg mx-auto");
+    expect(src).toContain("grid-cols-3");
+  });
+
+  it("stat row: value-in-tile cards with the slate-100 40px tile", () => {
+    expect(src).toContain("Total Reviews");
+    expect(src).toContain("Not Started");
+  });
+
+  it("row header: h3 font-semibold text-slate-800 + h-8 New Review button", () => {
+    expect(src).toContain("font-semibold text-slate-800");
+    expect(src).toContain("Review Cycles");
+    expect(src).toContain("New Review");
+  });
+
+  it("empty state is the py-10 slate-400 one-liner", () => {
+    expect(src).toContain("text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200");
+    expect(src).toContain("No reviews yet. Create one to get started.");
+  });
+});
+
+describe("employees zero-render (session 12, R11-O)", () => {
+  const src = read("src", "app", "(app)", "employees", "page.tsx");
+
+  it("renders nothing below the filter row when there are no employees", () => {
+    expect(src).not.toContain('title="No employees yet"');
+    expect(src).not.toContain("No employees match your filters");
+    expect(src).toMatch(/=== 0\s*\?\s*null/);
+  });
+});
+
+describe("communications channel cards (session 12, R11-P)", () => {
+  const src = read("src", "app", "(app)", "communications", "page.tsx");
+
+  it("cards are p-8 text-center with the 64px colored circle chip", () => {
+    expect(src).toContain("p-8 text-center");
+    expect(src).toContain("rounded-full flex items-center justify-center mx-auto mb-4");
+  });
+
+  it("no per-card full-width Send button (the whole card is the affordance)", () => {
+    expect(src).not.toContain('<Button className="w-full" onClick={() => openDialog(c.key)}>');
+  });
+
+  it("channel icons: Mail blue, MessageSquare green, MessageCircle emerald", () => {
+    expect(src).toContain("bg-blue-100");
+    expect(src).toContain("bg-green-100");
+    expect(src).toContain("bg-emerald-100");
+  });
+});
+
+describe("analyticsdashboard stacked layout (session 12, R11-R)", () => {
+  const dash = read("src", "app", "(app)", "analyticsdashboard", "dashboard.tsx");
+  const charts = read("src", "app", "(app)", "analyticsdashboard", "charts.tsx");
+
+  it("chart stack is space-y-6: full-width → 2-col → 3-col → full-width", () => {
+    expect(dash).toContain("space-y-6");
+    expect(dash).toContain("grid md:grid-cols-2 gap-6");
+    expect(dash).toContain("grid md:grid-cols-3 gap-6");
+  });
+
+  it("card titles match the reference strings", () => {
+    expect(dash).toContain("Hiring Trend — New Employees per Month");
+    expect(dash).toContain("Attendance vs Leave Trend");
+    expect(dash).toContain("Monthly Expense Trend (SAR)");
+    expect(dash).toContain("Employees by Department");
+    expect(dash).toContain("Employment Types");
+    expect(dash).toContain("Leave Types Distribution");
+    expect(dash).toContain("Employee Status Breakdown");
+  });
+
+  it("status breakdown renders the flex flex-wrap gap-3 chips, not a pie", () => {
+    expect(dash).toContain("flex flex-wrap gap-3");
+    // the 4th REF pie was replaced by the chips card: exactly 3 DistributionPie uses remain
+    expect(dash.match(/<DistributionPie/g)?.length ?? 0).toBe(3);
+  });
+
+  it("chart types/heights: area 260, bar 240, line 240, pies 220", () => {
+    expect(charts).toMatch(/HiringTrendArea/);
+    expect(charts).toMatch(/height=\{260\}/);
+    expect(charts.match(/height=\{240\}/g)?.length ?? 0).toBe(2);
+    expect(charts).toMatch(/height = 220/);
+  });
+});
+
+describe("securitysettings recipes (session 12, R11-S)", () => {
+  const src = read("src", "app", "(app)", "securitysettings", "page.tsx");
+
+  it("alert is border-2 orange on bg-orange-50 with the p-6 gap-4 row", () => {
+    expect(src).toContain("border-2 border-orange-500 bg-orange-50");
+    expect(src).toContain("flex items-center gap-4");
+  });
+
+  it("feature rows are p-4 bg-slate-50 rounded-lg with checkbox + badge", () => {
+    expect(src).toContain("flex items-center justify-between p-4 bg-slate-50 rounded-lg");
+  });
+
+  it("recommendations are the compact space-y-3 text-sm slate-600 list", () => {
+    expect(src).toContain("space-y-3 text-sm text-slate-600");
+  });
+});
+
+describe("chart-page heights + iconed stat rows (session 12, R11-T/U)", () => {
+  it("hrreports chart is 320px", () => {
+    expect(read("src", "app", "(app)", "hrreports", "charts.tsx")).toContain("height={320}");
+  });
+
+  it("attendancedashboard charts are 260px", () => {
+    const src = read("src", "app", "(app)", "attendancedashboard", "charts.tsx");
+    expect(src.match(/height=\{260\}/g)?.length ?? 0).toBe(2);
+  });
+
+  it("advancedanalytics charts are 300px", () => {
+    const src = read("src", "app", "(app)", "advancedanalytics", "charts.tsx");
+    expect(src.match(/height=\{300\}/g)?.length ?? 0).toBe(3);
+  });
+
+  it("advancedanalytics keeps the '(Last 6 Months)' payroll title", () => {
+    expect(read("src", "app", "(app)", "advancedanalytics", "page.tsx")).toContain("Payroll Trend (Last 6 Months)");
+  });
+
+  it("surveyanalytics charts are 240/240/260", () => {
+    const src = read("src", "app", "(app)", "surveyanalytics", "charts.tsx");
+    expect(src.match(/height=\{240\}/g)?.length ?? 0).toBe(2);
+    expect(src.match(/height=\{260\}/g)?.length ?? 0).toBe(1);
+  });
+
+  it("surveyanalytics + attendancedashboard stat rows carry icons + tiles (146px)", () => {
+    const sa = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
+    const ad = read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx");
+    for (const src of [sa, ad]) {
+      const iconed = src.match(/icon=\{</g)?.length ?? 0;
+      expect(iconed).toBeGreaterThanOrEqual(4);
+      expect(src.match(/tileClassName="bg-/g)?.length ?? 0).toBeGreaterThanOrEqual(4);
+    }
+  });
+});
+
+describe("companywall feed rhythm (session 12, R11-B companion)", () => {
+  const src = read("src", "app", "(app)", "companywall", "page.tsx");
+
+  it("feed stack is space-y-6", () => {
+    expect(src).toContain("flex flex-col space-y-6");
+  });
+});
+
+describe("templates iconChip empty (session 12, R11-C)", () => {
+  const src = read("src", "app", "(app)", "templates", "page.tsx");
+
+  it("empty state uses the iconChip variant with the FileText icon", () => {
+    expect(src).toContain("iconChip");
+    expect(src).toContain("<FileText");
+  });
+});
+
+describe("horizontal StatCard precision (session 12, R11-D)", () => {
+  const statCard = read("src", "components", "shared", "stat-card.tsx");
+
+  it("tile is 44px w-11 h-11 with a 20px icon", () => {
+    expect(statCard).toContain("[&_svg]:h-5 [&_svg]:w-5");
+  });
+
+  it("label is text-xs text-slate-500 (12px, 80px card)", () => {
+    expect(statCard).toContain("text-xs text-slate-500");
+  });
+
+  it("documenttracker stat call sites carry per-color tiles", () => {
+    const src = read("src", "app", "(app)", "documenttracker", "page.tsx");
+    expect(src).toContain("bg-blue-100");
+    expect(src).toContain("bg-green-100");
+    expect(src).toContain("bg-amber-100");
+    expect(src).toContain("bg-red-100");
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2, Download } from "lucide-react";
+import { AlertTriangle, Building2, CheckCircle2, Clock, Download, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -196,38 +196,35 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Present Days" value={presentDays} />
-        <StatCard variant="compact" label="Absent Days" value={absentDays} />
-        <StatCard variant="compact" label="Late Arrivals" value={lateArrivals} />
-        <StatCard variant="compact" label="Attendance Rate" value={`${attendanceRate}%`} />
+        {/* Session 12 (R11-T): the reference's 146px compact cards WITH 40px
+            icon tiles — CheckCircle2 green, AlertTriangle red, Clock
+            yellow, Users blue (live-measured). */}
+        <StatCard variant="compact" label="Present Days" value={presentDays} icon={<CheckCircle2 className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
+        <StatCard variant="compact" label="Absent Days" value={absentDays} icon={<AlertTriangle className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-red-100 text-red-600" />
+        <StatCard variant="compact" label="Late Arrivals" value={lateArrivals} icon={<Clock className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-yellow-100 text-yellow-600" />
+        <StatCard variant="compact" label="Attendance Rate" value={`${attendanceRate}%`} icon={<Users className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Attendance Trend — {data.monthTitle}</CardTitle>
-            <CardDescription>Present, late and absent counts per day</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {records.length === 0 ? (
-              <EmptyState title="No data yet" description="Attendance records for this month will plot here." />
-            ) : (
-              <DailyAttendanceTrend data={daily} />
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-U): title-only header (72px) — no
+              description on the reference. */}
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold tracking-tight text-base">Daily Attendance Trend — {data.monthTitle}</div>
+          </div>
+          <CardContent className="p-6 pt-0">
+            {/* Session 12 (R11-U): the reference renders the chart (empty
+                axes) even with no records — no EmptyState fallback. */}
+            <DailyAttendanceTrend data={daily} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Clock-In Time Distribution</CardTitle>
-            <CardDescription>Check-ins grouped by hour of day</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {clockInBuckets.length === 0 ? (
-              <EmptyState title="No data yet" description="Clock-in times feed this chart." />
-            ) : (
-              <ClockInDistribution data={clockInBuckets} />
-            )}
+        <Card className="border-slate-200">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold tracking-tight text-base">Clock-In Time Distribution</div>
+          </div>
+          <CardContent className="p-6 pt-0">
+            <ClockInDistribution data={clockInBuckets} />
           </CardContent>
         </Card>
       </div>

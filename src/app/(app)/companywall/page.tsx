@@ -186,7 +186,7 @@ export default function CompanyWallPage() {
           carries the reference's mr-2 (16px effective icon-text gap);
           Photo/Video = h-8 px-3 text-xs outline; Post = flat primary h-9
           with the leading Send icon. */}
-      <Card>
+      <Card className="border-slate-200">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)] text-base font-semibold text-white" aria-hidden="true">
@@ -259,11 +259,13 @@ export default function CompanyWallPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        /* Session 12 (R11-B): the reference's feed stack — space-y-6
+           (24px rhythm between post cards), live-measured. */
+        <div className="flex flex-col space-y-6">
           {posts.map((post) => {
             const liked = likedIds.has(post.id);
             return (
-              <Card key={post.id}>
+              <Card key={post.id} className="border-slate-200">
                 <CardContent className="flex flex-col gap-3 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">

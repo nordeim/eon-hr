@@ -27,7 +27,7 @@ export interface HourBucket {
 
 export function DailyAttendanceTrend({ data }: { data: DayPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={260}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={0} />
@@ -44,7 +44,7 @@ export function DailyAttendanceTrend({ data }: { data: DayPoint[] }) {
 
 export function ClockInDistribution({ data }: { data: HourBucket[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="hour" tick={{ fontSize: 11 }} interval={0} />

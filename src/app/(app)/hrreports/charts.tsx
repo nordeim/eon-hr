@@ -28,7 +28,7 @@ export type ReportChartType = "bar" | "pie" | "line";
 export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportChartType }) {
   if (type === "pie") {
     return (
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={320}>
         <PieChart>
           <Pie
             data={data}
@@ -54,7 +54,7 @@ export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportCh
 
   if (type === "line") {
     return (
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
@@ -67,7 +67,7 @@ export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportCh
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={320}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />

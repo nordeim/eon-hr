@@ -3,7 +3,7 @@
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Document:** README.md (user-facing), CLAUDE.md (agent constitution), AGENTS.md (operating notes)
-**Last Updated:** 2026-10-09
+**Last Updated:** 2026-10-11
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
@@ -11,6 +11,7 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S12]` | session 12 | Parity round 11: sidebar footer rebuild (left-aligned 36×36 cluster), EmptyState conditional mb-4 + iconChip variant, systemic table th/empty-row recipe, documenttracker stats+chips+bare empty, DIV-title border-b headers (expenses/leavemanagement/allleaverequests/payroll/payrollmodule), evaluations equal-width tab pill + value-in-tile stats, employees zero-render, communications centered channel cards, analyticsdashboard full-width chart stack, chart-page heights (hrreports/attendancedashboard/advancedanalytics/surveyanalytics) with unconditional rendering, securitysettings plain rows. 351-spec pyramid (265 unit + 86 E2E). |
 | `[S11]` | session 11 | Parity round 10: two-pattern header action alignment (actionsStart), four action-free headers, toast viewport geometry, companywall composer precision, shiftcalendar toolbar + table calendar, kanban board restructure, reports icon chips, profile identity card, the systemic EmptyState mb-4 fix, cyan-700 palette pin. 302-spec pyramid (216 unit + 86 E2E). |
 
 

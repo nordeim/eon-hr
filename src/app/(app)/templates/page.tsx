@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Trash2, Loader2, ListChecks, Rocket } from "lucide-react";
+import { FileText, ListChecks, Loader2, Plus, Rocket, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -200,8 +200,12 @@ export default function TemplatesPage() {
         </div>
       ) : templates.length === 0 ? (
         <div className="rounded-xl border bg-card shadow-sm">
+          {/* Session 12 (R11-C): the reference's iconChip empty — a 64px
+              slate-100 circle with a 32px slate-400 FileText icon
+              (live-measured), the h3 + P, then the CTA superset. */}
           <EmptyState
-            icon={<ListChecks className="h-6 w-6" aria-hidden="true" />}
+            iconChip
+            icon={<FileText aria-hidden="true" />}
             title="No templates yet"
             description="Create your first onboarding template to get started"
             action={

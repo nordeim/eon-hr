@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 216 specs) |
+| Unit tests | `bun run test` (Vitest, 265 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -245,6 +245,64 @@ reference — never re-add it.
   measured y's + the loans-recipe CTA superset; announcements bare
   `py-16 text-slate-400` line + small CTA; payrollengine border-0 toolbar
   card + p-6 py-20 rest card with the 56px icon).
+
+## Session-12 recipe layer (parity round 11)
+
+- **Sidebar footer (R11-A)**: `div.flex.flex-col.gap-2.border-t.border-slate-200
+  .dark:border-slate-800.p-4` (255×121) — a LEFT-ALIGNED cluster, never
+  justify-between. Row 1 `div.flex.items-center.gap-2.mb-2`: Bell + Moon
+  ghost `h-9 w-9` (36×36, 16px svg) + عربي outline `h-8 px-3 text-xs
+  font-semibold text-slate-700 border-slate-300 min-w-[64px]` (80×32).
+  Row 2: user button ghost `h-9 px-4 py-2 w-full justify-start gap-3
+  hover:bg-slate-100` with a 36px sRGB-gradient circle avatar (16px
+  CircleUser) + `flex-1 min-w-0 text-left` name/email column. Mobile
+  drawer footer 255×36@792 (same recipe, documented 1px rounding).
+- **EmptyState conditional margin (R11-B)**: the description P carries
+  `mb-4` ONLY when an action follows it (expenses: no mb-4; templates:
+  mb-4 because its superset CTA follows). The component takes
+  `descriptionClassName` per call site; companywall's feed stack is
+  `space-y-6`.
+- **EmptyState iconChip variant (R11-C)**: templates renders a 64px
+  `bg-slate-100 rounded-full` circle with a 32px slate-400 icon inside
+  (`iconChip` prop) instead of the bare 64px icon.
+- **Systemic table recipe (R11-V)**: reference th = `text-left py-3 px-4
+  font-medium text-slate-500` (45px @ 20px text); empty-row td = `py-12
+  text-center text-slate-400` colSpan (117px). Lives in `ui/table.tsx`.
+- **documenttracker (R11-D)**: horizontal stat row (`grid grid-cols-2
+  md:grid-cols-4 gap-4`, tiles `p-4 flex items-center gap-3` + 44px chip
+  + `text-2xl` value + `text-xs` label, cards `border-0 shadow-sm`, 80px);
+  filter row = search input + 5 lowercase `capitalize` chips (no Tabs);
+  bare empty = `p-6 py-16` + 48px icon mb-3 + single P (no h3).
+- **expenses/leavemanagement/allleaverequests (R11-E/F/G)**: DIV-title
+  `p-6 border-b` card headers (not CardTitle); leavemanagement/allleaverequests
+  empties are `p-6` content + `py-12` inner + 64px icon `mx-auto mb-4` +
+  single P (no h3, no mb-4).
+- **payroll/payrollmodule (R11-H/I)**: standalone search-toolbar card
+  (`border-0 shadow-sm` p-4 with a max-w-sm input) + DIV-title records
+  header; payrollmodule's empty row uses the systemic table pattern.
+  Payroll's empty KEEPS its CTA (re-measured).
+- **evaluations (R11-N)**: tablist = `w-full max-w-lg mx-auto grid
+  grid-cols-3` (167px equal triggers); the stat row renders INSIDE the
+  active tab below the tablist, tiles are value-in-tile (`p-4 text-center`,
+  `text-2xl` value over `text-xs` label, 74px); empty = `py-10 text-center
+  text-slate-400`.
+- **employees zero-render (R11-O)**: at 0 employees the reference renders
+  NOTHING below the filter row — no table, no empty state.
+- **communications (R11-P)**: channel cards are centered `p-8` with a 64px
+  icon + h3 + P and NO button (`gap-6 md:grid-cols-3` grid).
+- **analyticsdashboard (R11-R)**: content sits directly in the canvas (NO
+  max-w-7xl wrapper); full-width stack = 166px stat row → full-width area
+  (260px) → 2-col bar/line (240px) → 3-col pies (220px) → full-width line;
+  chart-card titles are `text-base` (24px); all 5 status chips render even
+  at zero counts.
+- **Chart pages (R11-U)**: hrreports (320px chart + data table card),
+  attendancedashboard (260px), advancedanalytics (300px), surveyanalytics
+  (24px gap between chart rows) — charts render UNCONDITIONALLY (no data
+  gating, no EmptyState fallback); R11-page cards carry
+  `border-slate-200` + `shadow`.
+- **securitysettings (R11-S)**: plain `p-4 bg-slate-50 rounded-lg` rows
+  (switch + label + description inline) + compact recommendation rows;
+  the danger-zone alert keeps its p-6 wrapper.
 
 ## Page architecture (session 6) — where padding and gradients live
 

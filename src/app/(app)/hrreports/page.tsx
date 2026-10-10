@@ -255,35 +255,30 @@ export default function HRReportsPage() {
         <StatCard variant="mini-centered" label="Active/Approved" value={loading ? "…" : stats.activeCount} />
       </div>
 
+      {/* Session 12 (R11-U): the reference's chart card — title-only
+          header (DIV font-semibold tracking-tight text-base, 72px — no
+          description) and the chart renders unconditionally (320px). */}
       <Card>
-        <CardHeader>
-          <CardTitle>{`Employees by ${groupLabel.toLowerCase()}`}</CardTitle>
-          <CardDescription>Distribution of records grouped by {groupLabel.toLowerCase()}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-            </div>
-          ) : !data || data.groups.length === 0 ? (
-            <EmptyState title="No data yet" description="No records match the current filters." />
-          ) : (
-            <ReportChart data={data.groups} type={chartType} />
-          )}
+        <div className="flex flex-col space-y-1.5 p-6">
+          <div className="font-semibold tracking-tight text-base">{`Employees by ${groupLabel.toLowerCase()}`}</div>
+        </div>
+        <CardContent className="p-6 pt-0">
+          <ReportChart data={data?.groups ?? []} type={chartType} />
         </CardContent>
       </Card>
 
+      {/* Session 12 (R11-U): the data-table card — flex row header (80px)
+          with the title and the h-8 Export button, no description. */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
-          <div className="space-y-1.5">
-            <CardTitle>{`Data Table (${data?.records.length ?? 0} records)`}</CardTitle>
-            <CardDescription>Employee records matching the report filters</CardDescription>
+        <div className="flex flex-col space-y-1.5 p-6">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold tracking-tight text-base">{`Data Table (${data?.records.length ?? 0} records)`}</div>
+            <Button variant="outline" size="sm" onClick={exportCsv}>
+              <Download className="mr-1" aria-hidden="true" />
+              Export
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={exportCsv}>
-            <Download aria-hidden="true" />
-            Export
-          </Button>
-        </CardHeader>
+        </div>
         <CardContent className="px-0 pb-0">
           {loading ? (
             <div className="flex items-center justify-center py-16">

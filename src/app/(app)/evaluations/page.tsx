@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, ClipboardCheck, Play, CheckCircle2, Sparkles, GraduationCap, Loader2, Users } from "lucide-react";
+import { ChartColumn, CheckCircle2, ClipboardCheck, GraduationCap, Loader2, Play, Plus, Sparkles, Target, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
+import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
@@ -207,48 +208,65 @@ export default function EvaluationsPage() {
         subtitle="Structured reviews, automated workflows & AI-generated performance reports"
       />
 
-      {/* Session 10 (R9-D): the reference renders NO stat row on
-          /evaluations — the header flows straight into the tabs. */}
-
       <Tabs defaultValue="workflows">
-        <TabsList>
-          <TabsTrigger value="workflows">Appraisal Workflows</TabsTrigger>
-          <TabsTrigger value="eval360">360° Evaluations</TabsTrigger>
-          <TabsTrigger value="training">Training Needs</TabsTrigger>
+        {/* Session 12 (R11-N): the centered equal-width tablist — grid
+            w-full max-w-lg mx-auto grid-cols-3 (512×36; triggers 167px
+            each) on the white bordered pill. */}
+        <TabsList className="bg-white border border-slate-200 grid w-full max-w-lg mx-auto grid-cols-3">
+          {/* Session 12 (R11-N): reference triggers — text-xs (12px/16px,
+              24px tall) with 12px leading icons (ChartColumn,
+              ClipboardCheck, Target). */}
+          <TabsTrigger value="workflows" className="text-xs gap-1">
+            <ChartColumn className="h-3 w-3" aria-hidden="true" />
+            Appraisal Workflows
+          </TabsTrigger>
+          <TabsTrigger value="eval360" className="text-xs gap-1">
+            <ClipboardCheck className="h-3 w-3" aria-hidden="true" />
+            360° Evaluations
+          </TabsTrigger>
+          <TabsTrigger value="training" className="text-xs gap-1">
+            <Target className="h-3 w-3" aria-hidden="true" />
+            Training Needs
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="workflows" className="flex flex-col gap-4">
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
-              <div className="flex flex-col gap-1.5">
-                <CardTitle>Review Cycles</CardTitle>
-                <CardDescription>
-                  {cycles.length} cycle{cycles.length === 1 ? "" : "s"} · {stats.total} review{stats.total === 1 ? "" : "s"} tracked
-                </CardDescription>
-              </div>
-              <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Review
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-                </div>
-              ) : cycles.length === 0 ? (
-                <EmptyState
-                  icon={<ClipboardCheck className="h-6 w-6" />}
-                  title="No reviews yet. Create one to get started."
-                  description="Review cycles organize appraisal and 360° feedback rounds."
-                  action={
-                    <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                      <Plus className="mr-2" aria-hidden="true" />
-                      New Review
-                    </Button>
-                  }
-                />
-              ) : (
+        {/* Session 12 (R11-N): the reference's workflows tab — space-y-6
+            (24px rhythm; the base mt-2 is overridden to mt-6 per trap 4)
+            containing the 4× 74px value-in-tile stat row, the row header
+            and the empty one-liner / cycle list. Stats live INSIDE the
+            tab on the reference (below the pill, y=264). */}
+        <TabsContent value="workflows" className="mt-6 space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard variant="value-in-tile" label="Total Reviews" value={stats.total} />
+            <StatCard variant="value-in-tile" label="Completed" value={stats.completed} />
+            <StatCard variant="value-in-tile" label="In Progress" value={stats.inProgress} />
+            <StatCard variant="value-in-tile" label="Not Started" value={stats.notStarted} />
+          </div>
+
+          {/* The row header — flex justify-between items-center with h3
+              font-semibold text-slate-800 flex items-center gap-2 and the
+              h-8 New Review button (125×32). */}
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold text-slate-800 flex items-center gap-2"><Users className="h-4 w-4" aria-hidden="true" />Review Cycles</h3>
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-1 h-3 w-3" aria-hidden="true" />
+              New Review
+            </Button>
+          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            </div>
+          ) : cycles.length === 0 ? (
+            /* The reference's one-liner empty — text-center py-10
+               text-slate-400 bg-white rounded-xl border border-slate-200
+               (1120×106), unwrapped (no Card around it). */
+            <div className="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">
+              No reviews yet. Create one to get started.
+            </div>
+          ) : (
+            <Card className="border-slate-200">
+              <CardContent>
                 <div className="flex flex-col gap-3">
                   {cycles.map((cycle) => {
                     const completed = cycle.reviews.filter((r) => r.status === "completed").length;
@@ -315,12 +333,12 @@ export default function EvaluationsPage() {
                     );
                   })}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
-        <TabsContent value="eval360" className="flex flex-col gap-4">
+        <TabsContent value="eval360" className="mt-6 flex flex-col gap-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -378,7 +396,7 @@ export default function EvaluationsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="training" className="flex flex-col gap-4">
+        <TabsContent value="training" className="mt-6 flex flex-col gap-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

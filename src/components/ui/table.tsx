@@ -3,8 +3,10 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="relative w-full overflow-x-auto scrollbar-thin">
-      <table className={cn("w-full caption-bottom text-sm", className)} {...props} />
+    // Session 12 (R11-V): reference table wrapper — a bare overflow-x-auto
+    // div (no relative/scrollbar-thin) around table.w-full.text-sm.
+    <div className="w-full overflow-x-auto">
+      <table className={cn("w-full text-sm", className)} {...props} />
     </div>
   );
 }
@@ -34,7 +36,11 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       className={cn(
-        "h-10 px-3 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+        // Session 12 (R11-V): reference table header cell — live-measured on
+        // payrollmodule + assetmanagement ("Payslips" / "Asset" columns):
+        // text-left py-3 px-4 font-medium text-slate-500 → 45px row at 20px
+        // text (the old shadcn h-10 px-3 text-muted-foreground was 40px).
+        "text-left py-3 px-4 font-medium text-slate-500 align-middle [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

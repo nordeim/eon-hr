@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Mail, MessageCircle, MessageSquare, Phone, Send } from "lucide-react";
+import { Loader2, Mail, MessageCircle, MessageSquare, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,25 +54,29 @@ const CHANNELS: {
   key: Channel;
   title: string;
   description: string;
+  chipClassName: string;
   icon: React.ReactNode;
 }[] = [
   {
     key: "email",
     title: "Send Email",
     description: "Send emails to employees",
-    icon: <Mail className="h-5 w-5" aria-hidden="true" />,
+    chipClassName: "bg-blue-100",
+    icon: <Mail className="h-8 w-8 text-blue-600" aria-hidden="true" />,
   },
   {
     key: "sms",
     title: "Send SMS",
     description: "Send text messages",
-    icon: <MessageSquare className="h-5 w-5" aria-hidden="true" />,
+    chipClassName: "bg-green-100",
+    icon: <MessageSquare className="h-8 w-8 text-green-600" aria-hidden="true" />,
   },
   {
     key: "whatsapp",
     title: "Send WhatsApp",
     description: "Send WhatsApp messages",
-    icon: <Phone className="h-5 w-5" aria-hidden="true" />,
+    chipClassName: "bg-emerald-100",
+    icon: <MessageCircle className="h-8 w-8 text-emerald-600" aria-hidden="true" />,
   },
 ];
 
@@ -185,38 +189,47 @@ export default function CommunicationsPage() {
         subtitle="Send emails, SMS, and WhatsApp messages to your team"
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Session 12 (R11-P): the reference's channel cards — p-8
+          text-center with a 64px colored circle chip (32px icon), h3
+          font-semibold text-slate-900 mb-2 (24px, not text-lg) and a
+          text-sm slate-600 description. NO per-card button: the whole
+          card is the click affordance (hover:shadow-lg). */}
+      <div className="grid md:grid-cols-3 gap-6">
         {CHANNELS.map((c) => (
-          <Card key={c.key}>
-            <CardContent className="flex flex-col gap-3 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+          <Card
+            key={c.key}
+            className="border-slate-200 hover:shadow-lg transition-all cursor-pointer"
+            onClick={() => openDialog(c.key)}
+          >
+            <CardContent className="p-8 text-center">
+              <div className={`w-16 h-16 ${c.chipClassName} rounded-full flex items-center justify-center mx-auto mb-4`}>
                 {c.icon}
               </div>
-              <div>
-                <p className="font-medium text-foreground">{c.title}</p>
-                <p className="text-sm text-muted-foreground">{c.description}</p>
-              </div>
-              <Button className="w-full" onClick={() => openDialog(c.key)}>
-                <Send aria-hidden="true" />
-                {c.title}
-              </Button>
+              <h3 className="font-semibold text-slate-900 mb-2">{c.title}</h3>
+              <p className="text-sm text-slate-600">{c.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Communication History</CardTitle>
-          <CardDescription>Everything you've sent recently.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
+      {/* Session 12 (R11-P): the reference's history card — border-b
+          DIV-title CardHeader (65px) + CardContent p-6 wrapping the
+          text-center py-12 single-P empty (64px MessageCircle icon,
+          no h3). */}
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Communication History</div>
+        </div>
+        <CardContent className="p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : logs.length === 0 ? (
-            <EmptyState title="No communications yet" description="Send your first message to see it here." />
+            <div className="text-center py-12">
+              <MessageCircle className="mx-auto mb-4 h-16 w-16 text-slate-300" aria-hidden="true" />
+              <p className="text-slate-500">No communications yet</p>
+            </div>
           ) : (
             <Table>
               <TableHeader>

@@ -17,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, initials } from "@/lib/utils";
@@ -224,28 +223,14 @@ export default function EmployeesPage() {
         </div>
       </div>
 
+      {/* Session 12 (R11-O): at 0 employees the reference renders NOTHING
+          below the filter row (no table, no empty state — live-measured);
+          the Add Employee affordance stays in the page header + the wizard. */}
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
-      ) : employees.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow">
-          <EmptyState
-            title={search || status !== "all" ? "No employees match your filters" : "No employees yet"}
-            description={
-              search || status !== "all"
-                ? "Try adjusting the search or status filter."
-                : "Add your first employee to get started."
-            }
-            action={
-              <Button variant="dark" onClick={() => setMode("wizard")}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Add Employee
-              </Button>
-            }
-          />
-        </div>
-      ) : view === "list" ? (
+      ) : employees.length === 0 ? null : view === "list" ? (
         /* Reference columns: Employee, Job Title, Status, Start Date, Actions */
         <div className="rounded-xl border bg-card shadow">
           <Table>

@@ -42,46 +42,54 @@ export const PIE_COLORS = [
   "#64748b",
 ];
 
-export function HiringTrendBar({ data }: { data: MonthPoint[] }) {
+/**
+ * Session 12 (R11-R) — chart types and heights live-measured on the
+ * reference's stacked layout:
+ *   full-width "Hiring Trend"      → AREA  260
+ *   2-col  "Attendance vs Leave"   → BAR   240 (two series)
+ *   2-col  "Monthly Expense Trend" → LINE  240
+ *   3-col  distribution pies       → PIE   220
+ */
+export function HiringTrendArea({ data }: { data: MonthPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
+      <AreaChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+        <YAxis allowDecimals={false} width={36} />
+        <Tooltip />
+        <Area type="monotone" dataKey="hires" name="New employees" stroke="#2563eb" fill="#dbeafe" strokeWidth={2} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function AttendanceVsLeaveBar({ data }: { data: MonthPoint[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
-        <Bar dataKey="hires" name="New employees" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
+        <Legend />
+        <Bar dataKey="attendance" name="Attendance" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={24} />
+        <Bar dataKey="leave" name="Leave" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={24} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-export function AttendanceVsLeaveLine({ data }: { data: MonthPoint[] }) {
+export function ExpenseTrendLine({ data }: { data: MonthPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-        <YAxis allowDecimals={false} width={36} />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="attendance" name="Attendance" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
-        <Line type="monotone" dataKey="leave" name="Leave" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-}
-
-export function ExpenseTrendArea({ data }: { data: MonthPoint[] }) {
-  return (
-    <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height={240}>
+      <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis width={72} tickFormatter={(v: number) => (v >= 100000 ? `${Math.round(v / 100000)}k` : `${Math.round(v / 100)}`)} />
         <Tooltip formatter={(value) => [formatSar(Number(value)), "Expenses"]} />
-        <Area type="monotone" dataKey="expenses" name="Expenses (SAR)" stroke="#8b5cf6" fill="#ede9fe" strokeWidth={2} />
-      </AreaChart>
+        <Line type="monotone" dataKey="expenses" name="Expenses (SAR)" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
+      </LineChart>
     </ResponsiveContainer>
   );
 }
@@ -89,7 +97,7 @@ export function ExpenseTrendArea({ data }: { data: MonthPoint[] }) {
 export function DistributionPie({
   data,
   name,
-  height = 260,
+  height = 220,
 }: {
   data: Slice[];
   name: string;
@@ -105,7 +113,7 @@ export function DistributionPie({
           cx="50%"
           cy="50%"
           innerRadius={50}
-          outerRadius={85}
+          outerRadius={75}
           paddingAngle={2}
           label={({ name: label, value }) => `${label}: ${value}`}
         >

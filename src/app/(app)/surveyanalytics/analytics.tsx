@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, Loader2, Sparkles } from "lucide-react";
+import { Download, Loader2, MessageSquare, Minus, Sparkles, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -237,13 +237,18 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Total Responses" value={responses.length} />
+        {/* Session 12 (R11-T): the reference's 146px compact cards WITH 40px
+            icon tiles — MessageSquare blue, Minus yellow, Users purple,
+            TrendingUp green (live-measured). */}
+        <StatCard variant="compact" label="Total Responses" value={responses.length} icon={<MessageSquare className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
         <StatCard variant="compact"
           label="Avg Sentiment"
           value={avgSentiment === null ? "0%" : `${avgSentiment > 0 ? "+" : ""}${avgSentiment}%`}
+          icon={<Minus className="h-4 w-4" aria-hidden="true" />}
+          tileClassName="bg-yellow-100 text-yellow-600"
         />
-        <StatCard variant="compact" label="Active Surveys" value={activeSurveys} />
-        <StatCard variant="compact" label="Positive Rate" value={`${positiveRate}%`} />
+        <StatCard variant="compact" label="Active Surveys" value={activeSurveys} icon={<Users className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
+        <StatCard variant="compact" label="Positive Rate" value={`${positiveRate}%`} icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
       </div>
 
       {insights ? (
@@ -270,60 +275,48 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
         </Card>
       ) : null}
 
-      {data.surveys.length === 0 ? (
-        <Card>
-          <CardContent>
-            <EmptyState
-              title="No surveys yet"
-              description="Create a survey and collect responses to unlock sentiment analytics."
-            />
-          </CardContent>
-        </Card>
-      ) : (
+      {/* Session 12 (R11-T): the reference renders the chart cards even
+          with zero surveys (empty axes) — no "No surveys yet" gate. */}
+      {(
         <>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sentiment Distribution</CardTitle>
-                <CardDescription>Positive, neutral and negative response counts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {responses.length === 0 ? (
-                  <EmptyState title="No data yet" description="No responses match the selected survey." />
-                ) : (
-                  <SentimentDistributionBar data={distribution} />
-                )}
+          {/* Session 12 (R11-T): the chart grid and the full-width
+              response card share a 24px rhythm (space-y-6) on the
+              reference. */}
+          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-slate-200">
+              {/* Session 12 (R11-T): title-only header (72px, DIV
+                  font-semibold tracking-tight text-base) — the reference
+                  carries no description and no header border. */}
+              <div className="flex flex-col space-y-1.5 p-6">
+                <div className="font-semibold tracking-tight text-base">Sentiment Distribution</div>
+              </div>
+              <CardContent className="p-6 pt-0">
+                {/* Session 12 (R11-T): the reference renders the chart
+                    (empty axes) even with no responses. */}
+                <SentimentDistributionBar data={distribution} />
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Sentiment Trend Over Time</CardTitle>
-                <CardDescription>Average sentiment per month (-100 to 100)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {responses.length === 0 ? (
-                  <EmptyState title="No data yet" description="Responses will plot the trend here." />
-                ) : (
-                  <SentimentTrendLine data={trend} />
-                )}
+            <Card className="border-slate-200">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <div className="font-semibold tracking-tight text-base">Sentiment Trend Over Time</div>
+              </div>
+              <CardContent className="p-6 pt-0">
+                <SentimentTrendLine data={trend} />
               </CardContent>
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Response Count &amp; Avg Sentiment by Survey</CardTitle>
-              <CardDescription>Participation and sentiment side by side</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {bySurvey.every((s) => s.responses === 0) ? (
-                <EmptyState title="No data yet" description="Surveys without responses appear once feedback arrives." />
-              ) : (
-                <SurveyComparisonBar data={bySurvey} />
-              )}
+          <Card className="border-slate-200">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Response Count &amp; Avg Sentiment by Survey</div>
+            </div>
+            <CardContent className="p-6 pt-0">
+              <SurveyComparisonBar data={bySurvey} />
             </CardContent>
           </Card>
+          </div>
         </>
       )}
     </div>

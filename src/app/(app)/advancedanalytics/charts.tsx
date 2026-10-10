@@ -43,7 +43,7 @@ const DEPT_COLORS = [
 
 export function HeadcountTrendLine({ data }: { data: HeadcountPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -57,7 +57,7 @@ export function HeadcountTrendLine({ data }: { data: HeadcountPoint[] }) {
 
 export function DepartmentDistributionBar({ data }: { data: DeptCount[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
@@ -75,7 +75,7 @@ export function DepartmentDistributionBar({ data }: { data: DeptCount[] }) {
 
 export function PayrollTrendLine({ data }: { data: PayrollPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />

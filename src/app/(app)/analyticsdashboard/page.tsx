@@ -97,6 +97,17 @@ export default async function AnalyticsDashboardPage() {
     leaveTypeGroups.set(name, (leaveTypeGroups.get(name) ?? 0) + 1);
   }
 
+  // Session 12 (R11-R): the reference's status chips render ALL five
+  // statuses (lowercase labels + the capitalize class) even at zero —
+  // active / on leave / suspended / terminated / resigned.
+  const STATUS_ORDER = ["active", "on leave", "suspended", "terminated", "resigned"] as const;
+  const statusCounts = new Map<string, number>(STATUS_ORDER.map((s) => [s, 0]));
+  for (const e of employees) {
+    const key = e.employmentStatus === "on_leave" ? "on leave" : e.employmentStatus;
+    if (statusCounts.has(key)) statusCounts.set(key, (statusCounts.get(key) ?? 0) + 1);
+  }
+  const statusSlicesAll: Slice[] = STATUS_ORDER.map((name) => ({ name, value: statusCounts.get(name) ?? 0 }));
+
   const employeeRows: EmployeeCsvRow[] = employees.map((e) => ({
     employeeId: e.employeeId,
     firstName: e.firstName,
@@ -128,7 +139,7 @@ export default async function AnalyticsDashboardPage() {
     departmentSlices: toSlices(departmentGroups),
     employmentTypeSlices: toSlices(typeGroups),
     leaveTypeSlices: toSlices(leaveTypeGroups),
-    statusSlices: toSlices(statusGroups),
+    statusSlices: statusSlicesAll,
   };
 
   return <AnalyticsDashboard data={data} />;

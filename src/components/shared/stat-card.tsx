@@ -19,6 +19,9 @@ import { Card, CardContent } from "@/components/ui/card";
  *     p-4 text-center, no tile, text-3xl value — 86-90px card
  *   horizontal (documenttracker):
  *     p-4 flex items-center gap-3, 44×44 tile left — 80px card
+ *   value-in-tile (evaluations — session 12, R11-N):
+ *     p-4 flex items-center gap-3, the VALUE inside a 40px slate-100
+ *     tile (SPAN text-lg font-bold text-slate-700), label right — 74px
  *   no-tile (performancemanagement, workflowautomation):
  *     p-6, text-3xl value, no tile — 110px card
  *   tile-right (analytics): p-6, 48px tile right-aligned — 138px card
@@ -30,6 +33,7 @@ type StatCardVariant =
   | "mini"
   | "mini-centered"
   | "horizontal"
+  | "value-in-tile"
   | "no-tile"
   | "tile-right";
 
@@ -56,7 +60,10 @@ const VARIANT_CONTENT: Record<StatCardVariant, string> = {
   "compact-s": "p-5",
   mini: "p-4",
   "mini-centered": "p-4 text-center",
+  // Session 12 (R11-D): the reference's horizontal card is border-0 with
+  // shadow-sm (documenttracker, 80px) — live-measured.
   horizontal: "p-4 flex items-center gap-3",
+  "value-in-tile": "p-4 flex items-center gap-3",
   "no-tile": "p-6",
   "tile-right": "p-6",
 };
@@ -71,15 +78,20 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   mini: "text-2xl font-bold",
   "mini-centered": "text-3xl font-bold text-slate-900",
   horizontal: "text-2xl font-bold text-slate-900",
+  "value-in-tile": "text-lg font-bold text-slate-700",
   "no-tile": "text-3xl font-bold text-slate-900",
   "tile-right": "text-3xl font-bold text-slate-900",
 };
 
 /** Session 11 (R10-J): the reference's mini label is text-xs slate-500
  *  with mt-0.5 (measured on shiftcalendar — 16px line, 82px card), not
- *  the standard text-sm slate-600. */
+ *  the standard text-sm slate-600.
+ *  Session 12 (R11-D): the horizontal label is ALSO text-xs slate-500
+ *  (measured on documenttracker — 16px line, 80px card; the 24px label
+ *  made the card 86px). */
 const VARIANT_LABEL: Partial<Record<StatCardVariant, string>> = {
   mini: "text-xs text-slate-500 mt-0.5",
+  horizontal: "text-xs text-slate-500",
 };
 
 /** Variants that render the icon tile (the reference's mini, mini-centered
@@ -108,12 +120,14 @@ export function StatCard({
 
   // Tile geometry per variant: standard/tile-right = 48×48 (p-3 + 24px
   // icon), compact/compact-s = 40×40 (w-10 h-10 + 20px icon),
-  // horizontal = 44×44 (w-11 h-11 + 24px icon).
+  // horizontal = 44×44 (w-11 h-11 + 20px icon — session 12 R11-D: the
+  // icon is 20px w-5 h-5 with a per-color text class from the call site,
+  // not 24px).
   const tileClasses =
     variant === "compact" || variant === "compact-s"
       ? "flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
       : variant === "horizontal"
-        ? "flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6"
+        ? "flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
         : "p-3 rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6";
 
   const tileElement = tiled ? (
@@ -128,9 +142,26 @@ export function StatCard({
   );
 
   return (
-    <Card className={cn("border-slate-200", className)}>
+    <Card
+      className={cn(
+        // Session 12 (R11-D): the horizontal variant renders border-0 with
+        // shadow-sm on the reference (documenttracker 80px cards).
+        variant === "horizontal" ? "border-0 shadow-sm" : "border-slate-200",
+        className
+      )}
+    >
       <CardContent className={VARIANT_CONTENT[variant]}>
-        {tileElement == null ? (
+        {variant === "value-in-tile" ? (
+          /* Session 12 (R11-N): the reference's evaluations stat card —
+             the VALUE sits inside the 40px slate-100 tile (SPAN text-lg
+             font-bold text-slate-700), the label to its right. 74px card. */
+          <>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+              <span className="text-lg font-bold text-slate-700">{value}</span>
+            </div>
+            <span className="text-sm text-slate-600">{label}</span>
+          </>
+        ) : tileElement == null ? (
           textBlock
         ) : variant === "horizontal" ? (
           <>

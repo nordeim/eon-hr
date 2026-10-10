@@ -1,9 +1,8 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CalendarClock, HeartPulse, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, CalendarClock, TrendingDown, TrendingUp, Users } from "lucide-react";
 import {
   DepartmentDistributionBar,
   HeadcountTrendLine,
@@ -132,107 +131,90 @@ export default async function AdvancedAnalyticsPage() {
           value={`${turnoverRate}%`}
           icon={<TrendingDown aria-hidden="true" />}
         />
-        <StatCard
-          label="Avg Tenure"
-          value={avgTenure}
-          hint="months"
-          icon={<CalendarClock aria-hidden="true" />}
-        />
-        <StatCard
-          label="At Risk"
-          value={atRisk}
-          hint="AI Prediction"
-          icon={<AlertTriangle aria-hidden="true" />}
-        />
+        <StatCard label="Avg Tenure" value={avgTenure} icon={<CalendarClock aria-hidden="true" />} />
+        <StatCard label="At Risk" value={atRisk} icon={<AlertTriangle aria-hidden="true" />} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Headcount Trend</CardTitle>
-            <CardDescription>Cumulative headcount over the last 6 months</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {total === 0 ? (
-              <EmptyState title="No data yet" description="Add employees to see the headcount trend." />
-            ) : (
-              <HeadcountTrendLine data={headcountTrend} />
-            )}
+      {/* Session 12 (R11-U): the reference's 2×2 chart grid — charts
+          render unconditionally (empty axes at zero data), and the
+          Payroll Trend shares its row with Employee Engagement Insights. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-U): leading-none DIV title (65px) with a
+              full p-6 content pad on this page. */}
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold leading-none tracking-tight">Headcount Trend</div>
+          </div>
+          <CardContent className="p-6">
+            <HeadcountTrendLine data={headcountTrend} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Department Distribution</CardTitle>
-            <CardDescription>Employees per department</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {deptCounts.length === 0 ? (
-              <EmptyState title="No data yet" description="Assign departments to employees." />
-            ) : (
-              <DepartmentDistributionBar data={deptCounts} />
-            )}
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-U): leading-none DIV title (65px) with a
+              full p-6 content pad on this page. */}
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold leading-none tracking-tight">Department Distribution</div>
+          </div>
+          <CardContent className="p-6">
+            <DepartmentDistributionBar data={deptCounts} />
           </CardContent>
         </Card>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payroll Trend</CardTitle>
-          <CardDescription>Net payroll totals over the last 6 months</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {hasPayroll ? (
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-U): leading-none DIV title (65px) with a
+              full p-6 content pad on this page. */}
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold leading-none tracking-tight">Payroll Trend (Last 6 Months)</div>
+          </div>
+          <CardContent className="p-6">
             <PayrollTrendLine data={payrollTrend} />
-          ) : (
-            <EmptyState title="No data yet" description="Add payroll records to see the payroll trend." />
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Employee Engagement Insights</CardTitle>
-          <CardDescription>Attrition signals and leave behaviour across the workforce</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">At Risk of Leaving (AI)</dt>
-                <dd className="text-xl font-semibold text-foreground">{atRisk}</dd>
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-U): the reference's engagement card — border-b
+              DIV-title header + p-6 > space-y-4: the orange At-Risk banner
+              (p-4 bg-orange-50 rounded-lg border border-orange-200, P
+              text-sm slate-600 mb-2 + P text-3xl orange-700) over the
+              grid-cols-2 pair (p-3 blue-50 / green-50 tiles with text-xs
+              labels + text-2xl colored values). */}
+          <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+            <div className="font-semibold leading-none tracking-tight">Employee Engagement Insights</div>
+          </div>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <p className="text-sm text-slate-600 mb-2">At Risk of Leaving (AI)</p>
+                <p className="text-3xl font-bold text-orange-700">{atRisk}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-slate-600">Active Employees</p>
+                  <p className="text-2xl font-bold text-blue-700">{active}</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-slate-600">Avg Leave Usage</p>
+                  <p className="text-2xl font-bold text-green-700">{avgLeaveUsage}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <Users className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">Active Employees</dt>
-                <dd className="text-xl font-semibold text-foreground">{active}</dd>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <HeartPulse className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">Avg Leave Usage</dt>
-                <dd className="text-xl font-semibold text-foreground">{avgLeaveUsage}</dd>
-              </div>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Scheduled Reports</CardTitle>
-          <CardDescription>Automated report deliveries</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EmptyState
-            icon={<CalendarClock className="h-6 w-6" aria-hidden="true" />}
-            title="No scheduled reports"
-            description="Schedule a recurring report to keep stakeholders in the loop."
-          />
+      {/* Session 12 (R11-U): the reference's scheduled-reports card —
+          border-b DIV-title header + p-6 > text-center py-8 with a 48px
+          icon and a single P. */}
+      <Card className="border-slate-200">
+        <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Scheduled Reports</div>
+        </div>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <CalendarClock className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
+            <p className="text-slate-500">No scheduled reports</p>
+          </div>
         </CardContent>
       </Card>
     </div>

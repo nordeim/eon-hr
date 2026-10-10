@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
@@ -150,20 +149,23 @@ export default function LeaveManagementPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between gap-2 border-b px-5 py-4">
-              <h2 className="text-sm font-semibold text-foreground">My Leave Requests</h2>
-              <span className="text-xs text-muted-foreground">{requests.length} total</span>
-            </div>
+        <Card className="border-slate-200">
+          {/* Session 12 (R11-F): border-b DIV-title CardHeader ("My Leave
+              Requests", 65px) + CardContent p-6 wrapping the reference's
+              text-center py-12 single-P empty (64px Plane icon + one line,
+              no h3, no action, no count badge). */}
+          <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+            <div className="font-semibold leading-none tracking-tight">My Leave Requests</div>
+          </div>
+          <CardContent className="p-6">
             {requests.length === 0 ? (
-              /* Reference empty state: Plane icon, "No leave requests yet",
-                 no CTA button inside the card. */
-              <EmptyState
-                icon={<Plane className="h-6 w-6" aria-hidden="true" />}
-                title="No leave requests yet"
-                description="Submit your first leave request to get started."
-              />
+              <div className="text-center py-12">
+                {/* Reference empty state: Plane icon (w-16 h-16 mx-auto
+                    mb-4 text-slate-300 as a DIRECT child) + one line, no
+                    CTA button inside the card. */}
+                <Plane className="mx-auto mb-4 h-16 w-16 text-slate-300" aria-hidden="true" />
+                <p className="text-slate-500">No leave requests yet</p>
+              </div>
             ) : (
               <Table>
                 <TableHeader>

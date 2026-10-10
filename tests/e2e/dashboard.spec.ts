@@ -149,9 +149,19 @@ test.describe("dashboard", () => {
     const val = page.getByText("0 SAR");
     await expect(val).toHaveCSS("font-size", "30px");
     await expect(val).toHaveCSS("color", "rgb(15, 23, 42)");
+    // Session 12 (R11-H): the empty-state CTA remains the dark shadcn
+    // default (#171717) — re-verified live — and the reference's new
+    // toolbar card (search + month input) sits between the stats and the
+    // records card, whose header is the leading-none DIV title.
     const emptyBtn = page.locator("div[class*='p-12']").getByRole("button", { name: "Add Payroll" });
     await expect(emptyBtn).toHaveCSS("background-color", "rgb(23, 23, 23)");
     await expect(emptyBtn).toHaveCSS("color", "rgb(250, 250, 250)");
+    const search = page.getByPlaceholder("Search employee...");
+    await expect(search).toBeVisible();
+    await expect(page.locator("input[type='month']")).toBeVisible();
+    const recordsTitle = page.getByText("Payroll Records", { exact: true });
+    await expect(recordsTitle).toBeVisible();
+    await expect(recordsTitle).toHaveCSS("line-height", "16px");
   });
 
   test("task manager renders the reference board + toggle (session 6)", async ({ page }) => {

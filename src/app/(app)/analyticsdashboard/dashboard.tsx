@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Download, FileText, Printer, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -13,14 +13,13 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { formatSar } from "@/lib/utils";
 import {
-  AttendanceVsLeaveLine,
+  AttendanceVsLeaveBar,
   DistributionPie,
-  ExpenseTrendArea,
-  HiringTrendBar,
+  ExpenseTrendLine,
+  HiringTrendArea,
   type MonthPoint,
   type Slice,
 } from "./charts";
@@ -80,31 +79,6 @@ function downloadCsv(filename: string, rows: (string | number | null)[][]): void
   URL.revokeObjectURL(url);
 }
 
-/** Small export button pinned to a chart card header. */
-function ChartExportButton({
-  filename,
-  rows,
-  toast,
-}: {
-  filename: string;
-  rows: (string | number | null)[][];
-  toast: ReturnType<typeof useToast>["toast"];
-}) {
-  return (
-    <Button
-      variant="outline"
-      size="iconSm"
-      aria-label={`Export ${filename}`}
-      onClick={() => {
-        downloadCsv(filename, rows);
-        toast({ title: "Chart exported", description: `${filename} downloaded.`, variant: "success" });
-      }}
-    >
-      <Download aria-hidden="true" />
-    </Button>
-  );
-}
-
 export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
   const toast = useToast();
   const [range, setRange] = React.useState(6);
@@ -134,8 +108,27 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
     });
   }
 
-  const trendRows = (headers: string[], pick: (m: MonthPoint) => (string | number)[]) =>
-    months.map((m) => [m.label, ...pick(m)]);
+  function exportStatusCsv() {
+    const rows: (string | number | null)[][] = [
+      ["Status", "Employees"],
+      ...data.statusSlices.map((s) => [s.name, s.value]),
+    ];
+    downloadCsv("employee-status.csv", rows);
+    toast.toast({
+      title: "Chart exported",
+      description: "employee-status.csv downloaded.",
+      variant: "success",
+    });
+  }
+
+  const statusChipClassName = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes("active")) return "bg-green-100 text-green-700";
+    if (n.includes("leave")) return "bg-yellow-100 text-yellow-700";
+    if (n.includes("suspend")) return "bg-orange-100 text-orange-700";
+    if (n.includes("terminat")) return "bg-red-100 text-red-700";
+    return "bg-slate-100 text-slate-700";
+  };
 
   return (
     // Session 9 (R8-D): the page root this route was missing (session-6 S2
@@ -197,159 +190,93 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* Session 12 (R11-R): the reference's stacked chart layout —
+          space-y-6: full-width area → grid md:grid-cols-2 gap-6 (bar +
+          line) → grid md:grid-cols-3 gap-6 (pies) → the full-width
+          Employee Status Breakdown chips card. Card headers are
+          title-only (72px, flex flex-col space-y-1.5 p-6) with content
+          p-6 pt-0. */}
+      <div className="space-y-6">
         <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Hiring Trend</CardTitle>
-              <CardDescription>New employees per month</CardDescription>
-            </div>
-            <ChartExportButton
-              filename="hiring-trend.csv"
-              toast={toast.toast}
-              rows={[["Month", "New Employees"], ...trendRows(["New Employees"], (m) => [m.hires])]}
-            />
-          </CardHeader>
-          <CardContent>
-            {stats.totalEmployees === 0 ? (
-              <EmptyState title="No data yet" description="Hires appear once employees have start dates." />
-            ) : (
-              <HiringTrendBar data={months} />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Attendance vs Leave Trend</CardTitle>
-              <CardDescription>Monthly attendance and leave days</CardDescription>
-            </div>
-            <ChartExportButton
-              filename="attendance-leave-trend.csv"
-              toast={toast.toast}
-              rows={[
-                ["Month", "Attendance", "Leave"],
-                ...trendRows(["Attendance", "Leave"], (m) => [m.attendance, m.leave]),
-              ]}
-            />
-          </CardHeader>
-          <CardContent>
-            {data.hasAttendance ? (
-              <AttendanceVsLeaveLine data={months} />
-            ) : (
-              <EmptyState title="No data yet" description="Attendance records feed this chart." />
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
-          <div className="space-y-1.5">
-            <CardTitle>Monthly Expense Trend</CardTitle>
-            <CardDescription>Approved expense claims per month (SAR)</CardDescription>
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="font-semibold tracking-tight text-base">Hiring Trend — New Employees per Month</div>
           </div>
-          <ChartExportButton
-            filename="monthly-expenses.csv"
-            toast={toast.toast}
-            rows={[
-              ["Month", "Expenses (SAR)"],
-              ...trendRows(["Expenses (SAR)"], (m) => [(m.expenses / 100).toFixed(2)]),
-            ]}
-          />
-        </CardHeader>
-        <CardContent>
-          {data.hasExpenses ? (
-            <ExpenseTrendArea data={months} />
-          ) : (
-            <EmptyState title="No data yet" description="Approved expense claims feed this chart." />
-          )}
-        </CardContent>
-      </Card>
+          <CardContent className="p-6 pt-0">
+            <HiringTrendArea data={months} />
+          </CardContent>
+        </Card>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Employees by Department</CardTitle>
-              <CardDescription>Headcount per department</CardDescription>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Attendance vs Leave Trend</div>
             </div>
-            <ChartExportButton
-              filename="employees-by-department.csv"
-              toast={toast.toast}
-              rows={[["Department", "Employees"], ...data.departmentSlices.map((s) => [s.name, s.value])]}
-            />
-          </CardHeader>
-          <CardContent>
-            {data.departmentSlices.length === 0 ? (
-              <EmptyState title="No data yet" description="Assign employees to departments." />
-            ) : (
+            <CardContent className="p-6 pt-0">
+              <AttendanceVsLeaveBar data={months} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Monthly Expense Trend (SAR)</div>
+            </div>
+            <CardContent className="p-6 pt-0">
+              <ExpenseTrendLine data={months} />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Employees by Department</div>
+            </div>
+            <CardContent className="p-6 pt-0">
               <DistributionPie data={data.departmentSlices} name="Employees" />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Employment Types</CardTitle>
-              <CardDescription>Full-time, part-time, contract and interns</CardDescription>
+          <Card>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Employment Types</div>
             </div>
-            <ChartExportButton
-              filename="employment-types.csv"
-              toast={toast.toast}
-              rows={[["Employment Type", "Employees"], ...data.employmentTypeSlices.map((s) => [s.name, s.value])]}
-            />
-          </CardHeader>
-          <CardContent>
-            {data.employmentTypeSlices.length === 0 ? (
-              <EmptyState title="No data yet" description="Employment types appear with employee records." />
-            ) : (
+            <CardContent className="p-6 pt-0">
               <DistributionPie data={data.employmentTypeSlices} name="Employees" />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Leave Types Distribution</CardTitle>
-              <CardDescription>Leave requests by leave type</CardDescription>
+          <Card>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="font-semibold tracking-tight text-base">Leave Types Distribution</div>
             </div>
-            <ChartExportButton
-              filename="leave-types.csv"
-              toast={toast.toast}
-              rows={[["Leave Type", "Requests"], ...data.leaveTypeSlices.map((s) => [s.name, s.value])]}
-            />
-          </CardHeader>
-          <CardContent>
-            {data.leaveTypeSlices.length === 0 ? (
-              <EmptyState title="No data yet" description="Leave requests feed this chart." />
-            ) : (
+            <CardContent className="p-6 pt-0">
               <DistributionPie data={data.leaveTypeSlices} name="Requests" />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1.5">
-              <CardTitle>Employee Status Breakdown</CardTitle>
-              <CardDescription>Active, on leave, suspended and terminated</CardDescription>
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="flex items-center justify-between">
+              <div className="font-semibold tracking-tight text-base">Employee Status Breakdown</div>
+              <Button variant="outline" size="sm" onClick={exportStatusCsv}>
+                <Download className="mr-1" aria-hidden="true" />
+                Export
+              </Button>
             </div>
-            <ChartExportButton
-              filename="employee-status.csv"
-              toast={toast.toast}
-              rows={[["Status", "Employees"], ...data.statusSlices.map((s) => [s.name, s.value])]}
-            />
-          </CardHeader>
-          <CardContent>
-            {data.statusSlices.length === 0 ? (
-              <EmptyState title="No data yet" description="Employee statuses feed this chart." />
-            ) : (
-              <DistributionPie data={data.statusSlices} name="Employees" />
-            )}
+          </div>
+          <CardContent className="p-6 pt-0">
+            {/* Reference chips: px-4 py-3 rounded-xl bg-{c}-100
+                text-{c}-700 text-center min-w-[100px] with a text-2xl
+                bold value and a text-xs capitalize label. */}
+            <div className="flex flex-wrap gap-3">
+              {data.statusSlices.map((s) => (
+                <div key={s.name} className={`px-4 py-3 rounded-xl text-center min-w-[100px] ${statusChipClassName(s.name)}`}>
+                  <p className="text-2xl font-bold">{s.value}</p>
+                  <p className="text-xs capitalize">{s.name}</p>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
