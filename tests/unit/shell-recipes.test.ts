@@ -212,10 +212,12 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
   it("R8-A: header row centers actions in the header block (items-center)", () => {
     // Reference header rows are `justify-between items-center` — the
     // actions cluster centers vertically (taskmanager y=116 on the h1 row,
-    // employees y=46 in the 64px block). The clone's sm:items-start put
-    // every action button at y=32.
+    // employees y=46 in the 64px block). Session 11 (R10-E) refined this:
+    // items-center stays the DEFAULT, and six badge-row pages opt into
+    // items-start via the actionsStart prop (offboarding/compliance/
+    // allleaverequests/workflowautomation/loans/advancedanalytics).
     expect(pageHeader).toContain("sm:items-center");
-    expect(pageHeader).not.toContain("sm:items-start");
+    expect(pageHeader).toMatch(/actionsStart \? "sm:items-start" : "sm:items-center"/);
     // The raised mt-8 offset applies to BADGE pages only — bare-page rows
     // (employees, analytics, templates) start at y=32 like the reference.
     expect(pageHeader).toContain("hasBadge && recipe.row");
@@ -301,8 +303,9 @@ describe("session-10 parity round 9 — centered headers, companywall, training,
 
   it("R9-B: companywall composer matches the reference (avatar + label-less textarea + full-width select)", () => {
     const src = read("src", "app", "(app)", "companywall", "page.tsx");
-    // avatar: 40px initials circle next to the textarea
-    expect(src).toMatch(/h-10 w-10 rounded-full/);
+    // avatar: 40px initials circle next to the textarea (session-11
+    // restructure reordered the classes — h-10 w-10 … rounded-full)
+    expect(src).toMatch(/h-10 w-10[^"]*rounded-full/);
     // no visible "Share an update" form label — the reference starts at the
     // avatar row (an aria-label on the textarea is fine; it renders nothing)
     expect(src).not.toContain('htmlFor="post-content"');
@@ -385,5 +388,203 @@ describe("session-10 parity round 9 — centered headers, companywall, training,
     expect(src).toContain("Page Not Found");
     expect(src).toContain("text-2xl font-medium");
     expect(src).toContain("AppShell");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 11 — parity round 10 (docs/remediation-plan-session11.md)
+// Header action alignment taxonomy, read-only reference headers, page
+// restructures (shiftcalendar toolbar, kanban board, reports icon chips,
+// profile card, composer precision). Every pin measured live against
+// https://eon.base44.app at 1440x900.
+// ---------------------------------------------------------------------------
+
+describe("session-11 parity round 10 — attendance & composer residuals", () => {
+  it("R10-A: attendance Devices button uses pinned cyan-700 (not unpinned teal-700)", () => {
+    // Reference: rgb(14, 116, 144) = v3 cyan-700 #0E7490. teal-700 is both
+    // the wrong family and unpinned in @theme (oklch fallback drift).
+    const attendance = read("src", "app", "(app)", "attendance", "page.tsx");
+    expect(attendance).toContain("text-cyan-700");
+    expect(attendance).not.toContain("text-teal-700");
+    const css = read("src", "app", "globals.css");
+    expect(css).toContain("--color-cyan-700: #0e7490");
+  });
+
+  it("R10-B: attendance Report Type select is w-48 (192px), not full-width", () => {
+    const attendance = read("src", "app", "(app)", "attendance", "page.tsx");
+    expect(attendance).toContain('id="attendance-report-type" className="w-48"');
+  });
+
+  it("R10-C: companywall composer matches the reference recipe", () => {
+    // CardContent p-6; avatar = sRGB-pinned gradient (trap 3) with 16px
+    // initials; flex items-start gap-4 row + flex-1 space-y-4 column;
+    // textarea min-h-[60px]; Photo/Video/Post icons carry mr-2 (the
+    // reference's 16px effective icon-text gap); Post = flat primary h-9.
+    const src = read("src", "app", "(app)", "companywall", "page.tsx");
+    expect(src).toContain("bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]");
+    expect(src).not.toContain("bg-gradient-to-br from-blue-500 to-indigo-500");
+    expect(src).toContain("items-start gap-4");
+    expect(src).toContain("space-y-4");
+    expect(src).toContain("min-h-[60px]");
+    expect(src).toMatch(/className="mr-2"/);
+    // the old composer interior (gap-4 p-5) is gone — the FEED cards keep
+    // their own measured p-5
+    expect(src).not.toMatch(/gap-4 p-5/);
+  });
+
+  it("R10-D: toast viewport uses the reference geometry (420px, p-4, flex-col-reverse)", () => {
+    const toast = read("src", "components", "ui", "toast.tsx");
+    expect(toast).toContain("flex-col-reverse");
+    expect(toast).toContain("sm:bottom-0 sm:right-0 sm:top-auto");
+    expect(toast).toContain("sm:max-w-[420px]");
+    expect(toast).not.toContain("bottom-4 right-4");
+  });
+});
+
+describe("session-11 parity round 10 — header actions alignment taxonomy (R10-E)", () => {
+  it("PageHeader supports actionsStart (items-start = badge-row actions)", () => {
+    // The reference has TWO action patterns: items-center (h1 row —
+    // taskmanager/payroll/expenses/leavemanagement/employees) and
+    // items-start (badge row — offboarding/compliancedashboard/
+    // allleaverequests/workflowautomation/loans/advancedanalytics).
+    expect(pageHeader).toContain("actionsStart");
+    expect(pageHeader).toMatch(/actionsStart\s*\?[^:]*items-start|actionsStart[^?]*\?\s*"sm:items-start"/);
+  });
+
+  it("the six badge-row pages opt into actionsStart", () => {
+    const pages = [
+      ["offboarding", "New Offboarding"],
+      ["compliancedashboard", "Run Compliance Scan"],
+      ["allleaverequests", "New Leave Request"],
+      ["workflowautomation", "Create Workflow"],
+      ["loans", "New Loan Request"],
+      ["advancedanalytics", "ScheduleReportButton"],
+    ] as const;
+    for (const [page, cta] of pages) {
+      const src = read("src", "app", "(app)", page, "page.tsx");
+      expect(src).toContain("actionsStart");
+      expect(src).toContain(cta);
+    }
+  });
+
+  it("the items-center pages do NOT opt in (regression guard)", () => {
+    for (const page of ["taskmanager", "payroll", "expenses", "employees"]) {
+      const src = read("src", "app", "(app)", page, "page.tsx");
+      expect(src).not.toContain("actionsStart");
+    }
+  });
+});
+
+describe("session-11 parity round 10 — read-only reference headers (R10-F..I)", () => {
+  it("R10-F: hrletters has no header action, no count description, REF empty state + CTA", () => {
+    const src = read("src", "app", "(app)", "hrletters", "page.tsx");
+    expect(src).not.toMatch(/actions=\{/);
+    expect(src).not.toMatch(/\} request\{|CardDescription/);
+    expect(src).toContain("No letter requests yet");
+    expect(src).toContain("Request your first HR letter to get started");
+  });
+
+  it("R10-G: surveys has no header action; empty state rides the grid", () => {
+    const src = read("src", "app", "(app)", "surveys", "page.tsx");
+    expect(src).not.toMatch(/actions=\{/);
+    expect(src).toContain("md:grid-cols-2");
+  });
+
+  it("R10-H: announcements has no header action; bare-text empty state", () => {
+    const src = read("src", "app", "(app)", "announcements", "page.tsx");
+    expect(src).not.toMatch(/actions=\{/);
+    expect(src).toMatch(/py-16[^"]*text-slate-400|text-slate-400[^"]*py-16/);
+  });
+
+  it("R10-I: payrollengine has no header action; toolbar card carries Generate Payroll", () => {
+    const src = read("src", "app", "(app)", "payrollengine", "page.tsx");
+    expect(src).not.toMatch(/actions=\{/);
+    expect(src).toContain("Generate Payroll");
+    expect(src).toMatch(/items-end gap-4/);
+  });
+});
+
+describe("session-11 parity round 10 — page restructures (R10-J..R)", () => {
+  it("R10-J: shiftcalendar renders the standalone month toolbar + department select", () => {
+    const src = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
+    expect(src).toMatch(/flex-wrap items-center gap-4/);
+    expect(src).toContain("min-w-36");
+    expect(src).toContain("All Departments");
+    expect(src).not.toContain('"Today"');
+  });
+
+  it("R10-J: shiftcalendar mini stats are border-0 shadow-sm with colored values + xs labels", () => {
+    const src = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
+    expect(src).toMatch(/variant="mini" className="border-0 shadow-sm"/);
+    for (const color of ["text-blue-600", "text-violet-600", "text-emerald-600", "text-amber-600"]) {
+      expect(src).toContain(color);
+    }
+    const card = read("src", "components", "shared", "stat-card.tsx");
+    expect(card).toContain("text-xs text-slate-500 mt-0.5");
+  });
+
+  it("R10-J: shiftcalendar Shift Swaps icon carries mr-2", () => {
+    const src = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
+    expect(src).toMatch(/<ArrowLeftRight className="mr-2"/);
+  });
+
+  it("R10-K: recruitmentkanban is a full-width board page with the 5 columns", () => {
+    const src = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+    expect(src).not.toContain("max-w-7xl");
+    expect(src).toMatch(/overflow-x-auto pb-4/);
+    for (const col of ["Applied", "Interviewing", "Offer", "Hired", "Rejected"]) {
+      expect(src).toContain(`"${col}"`);
+    }
+    expect(src).toMatch(/w-64/);
+    expect(src).toContain("border-2");
+  });
+
+  it("R10-L: reports category selector is the white bordered wrapping pill with icon chips", () => {
+    const src = read("src", "app", "(app)", "reports", "reports-browser.tsx");
+    expect(src).toMatch(/border border-slate-200 bg-white/);
+    expect(src).not.toMatch(/bg-secondary/);
+  });
+
+  it("R10-M: profile avatar card matches the reference recipe", () => {
+    const src = read("src", "app", "(app)", "profile", "page.tsx");
+    expect(src).toContain("w-24 h-24");
+    expect(src).toContain("bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]");
+    expect(src).toMatch(/CircleUser|circle-user/);
+    expect(src).toContain("Change Photo");
+  });
+
+  it("R10-N: hrassistantchat grid + sidebar geometry", () => {
+    const src = read("src", "app", "(app)", "hrassistantchat", "page.tsx");
+    expect(src).toContain("lg:grid-cols-4");
+    expect(src).toContain("h-[calc(100vh-250px)]");
+    expect(src).not.toContain("lg:grid-cols-[300px_1fr]");
+  });
+
+  it("R10-O: loans empty state is the bare p-12 card inside the 2-col grid", () => {
+    const src = read("src", "app", "(app)", "loans", "page.tsx");
+    expect(src).toMatch(/md:grid-cols-1 lg:grid-cols-2|lg:grid-cols-2/);
+    expect(src).toContain("No loans yet");
+    expect(src).toContain("Create your first loan request");
+  });
+
+  it("R10-P: staffrequests renders the bare filter row + segmented toggle + card", () => {
+    const src = read("src", "app", "(app)", "staffrequests", "page.tsx");
+    expect(src).toMatch(/flex flex-wrap gap-3/);
+    expect(src).toContain("All Categories");
+    expect(src).toContain("All Status");
+    expect(src).toMatch(/bg-muted p-1/);
+  });
+
+  it("R10-Q: workflowconfigpage empty state carries the Create First Workflow CTA", () => {
+    const src = read("src", "app", "(app)", "workflowconfigpage", "page.tsx");
+    expect(src).toContain("Create First Workflow");
+    expect(src).toMatch(/h-12 w-12|w-12 h-12/);
+    expect(src).toContain("text-center py-16");
+  });
+
+  it("R10-R: notificationpreferences Mark All Read card is top-aligned, sm outline", () => {
+    const src = read("src", "app", "(app)", "notificationpreferences", "page.tsx");
+    expect(src).toMatch(/variant="outline" size="sm"|size="sm" variant="outline"/);
+    expect(src).not.toMatch(/className="flex items-center justify-center">\s*<CardContent/);
   });
 });

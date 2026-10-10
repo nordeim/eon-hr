@@ -84,6 +84,7 @@ export function PageHeader({
   mobileKickerTitle,
   mobileHeader = "visible",
   centered = false,
+  actionsStart = false,
 }: {
   section?: string;
   sectionIcon?: React.ReactNode;
@@ -116,6 +117,13 @@ export function PageHeader({
    *  wrap their header block in `text-center` on the reference — the
    *  badge (inline-flex), h1 and subtitle all center. */
   centered?: boolean;
+  /** Session 11 (R10-E): the reference has TWO action-alignment patterns —
+   *  items-center (actions land on the h1 row: taskmanager y=116,
+   *  employees y=46) and items-start (actions ride the BADGE row: y=32
+   *  flat recipes, y=64 raised — offboarding, compliancedashboard,
+   *  allleaverequests, workflowautomation, loans, advancedanalytics).
+   *  Measured row classes: `flex justify-between items-start`. */
+  actionsStart?: boolean;
 }) {
   const hasBadge = Boolean(section);
   const recipe = HEADER_LAYOUTS[layout];
@@ -141,7 +149,11 @@ export function PageHeader({
           // lands on the h1 row (y=116), employees' at y=46. Not items-start.
           // The raised recipes offset the ROW (recipe.row) so the centered
           // block is the reference's 140px header, not 172px.
-          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+          // Session 11 (R10-E): items-start pages ride the badge row instead
+          // (offboarding/compliance/allleaverequests/workflowautomation/
+          // loans/advancedanalytics — measured `justify-between items-start`).
+          "flex flex-col gap-4 sm:flex-row sm:justify-between",
+          actionsStart ? "sm:items-start" : "sm:items-center",
           // The raised offset belongs to BADGE pages only — the reference's
           // bare-page rows (employees, analytics, templates…) start at y=32.
           hasBadge && recipe.row,

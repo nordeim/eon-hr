@@ -148,8 +148,9 @@ export default function HrAssistantChatPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col">
       <PageHeader
+        className="mb-6"
         section="AI HR Assistant"
         layout="flat36"
         iconClassName="text-purple-600"
@@ -158,53 +159,61 @@ export default function HrAssistantChatPage() {
         subtitle="Chat with your AI-powered HR assistant"
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr]">
+      {/* Session 11 (R10-N): the reference's chat layout — `grid
+          lg:grid-cols-4 gap-6 h-[calc(100vh-250px)]`; the sidebar column
+          (`lg:col-span-1 space-y-4`, 262px) carries the New Chat button
+          (purple gradient, h-9, full column width) DIRECTLY — not inside a
+          card — with the conversations card below (y=240 on the
+          reference); the chat area spans the remaining 3 columns. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:h-[calc(100vh-250px)]">
         {/* chat list */}
-        <Card className="flex h-64 flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
-          <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-            <Button variant="purple" size="sm" className="w-full" onClick={onNewChat}>
-              <Plus className="mr-2" aria-hidden="true" />
-              New Chat
-            </Button>
-            <p className="text-xs font-medium text-muted-foreground">Active Chats</p>
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-              {loading ? (
-                <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
-                </div>
-              ) : chats.length === 0 ? (
-                <EmptyState title="No chats" description="Start a new chat to ask a question." className="py-6" />
-              ) : (
-                <div className="flex flex-col gap-1">
-                  {chats.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setActiveId(c.id)}
-                      className={cn(
-                        "flex w-full items-start gap-3 rounded-lg p-2 text-left transition-colors hover:bg-secondary/60 cursor-pointer",
-                        c.id === activeId && "bg-accent"
-                      )}
-                    >
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-                        <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-foreground">{c.title}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {c.messageCount} messages · {timeAgo(c.createdAt)}
+        <div className="flex flex-col space-y-4 lg:col-span-1">
+          <Button variant="purple" className="w-full" onClick={onNewChat}>
+            <Plus className="mr-2" aria-hidden="true" />
+            New Chat
+          </Button>
+          <Card className="flex min-h-0 flex-1 flex-col">
+            <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
+              <p className="text-xs font-medium text-muted-foreground">Active Chats</p>
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                {loading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                  </div>
+                ) : chats.length === 0 ? (
+                  <EmptyState title="No chats" description="Start a new chat to ask a question." className="py-6" />
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    {chats.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setActiveId(c.id)}
+                        className={cn(
+                          "flex w-full items-start gap-3 rounded-lg p-2 text-left transition-colors hover:bg-secondary/60 cursor-pointer",
+                          c.id === activeId && "bg-accent"
+                        )}
+                      >
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                          <MessageSquare className="h-4 w-4" aria-hidden="true" />
                         </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-foreground">{c.title}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {c.messageCount} messages · {timeAgo(c.createdAt)}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* chat pane */}
-        <Card className="flex h-[520px] flex-col lg:h-[calc(100vh-14rem)] lg:min-h-[560px]">
+        <Card className="flex h-[520px] flex-col lg:col-span-3 lg:h-auto lg:min-h-0">
           {active ? (
             <>
               <div className="flex items-center gap-3 border-b p-4">

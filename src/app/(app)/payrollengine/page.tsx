@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2, Calculator, CalendarDays, CheckCircle2, Clock4, Cog, Info, Loader2, TrendingDown, Users } from "lucide-react";
+import { Calculator, CalendarDays, CheckCircle2, Clock4, Cog, Loader2, TrendingDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { currentPeriod, formatSar } from "@/lib/utils";
@@ -153,35 +152,32 @@ export default function PayrollEnginePage() {
         sectionIcon={<Calculator aria-hidden="true" />}
         title="Payroll Calculator"
         subtitle="Auto-generate salary slips from attendance data"
-        actions={
-          <Button onClick={onGenerate} disabled={generating}>
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Cog aria-hidden="true" />}
-            Generate Payroll
-          </Button>
-        }
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="p-5 pb-0">
-            <CardTitle>Calculation Inputs</CardTitle>
-            <CardDescription>Choose the payroll month and scope.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4 p-5">
-            <div className="flex flex-col gap-1.5">
+      {/* Session 11 (R10-I): the reference's toolbar card — a flat white
+          border-0 card (p-5) with a `flex flex-wrap items-end gap-4` row:
+          Payroll Month field (space-y-1, 176px input) + Department field
+          (space-y-1, 192px select) + the flat emerald-600 Generate Payroll
+          button (180x36, icon mr-2 — measured rgb(5,150,105)); hint line
+          text-xs text-slate-500 mt-3 below. The clone's working engine
+          state rides the reference's own furniture. */}
+      <Card className="border-0">
+        <CardContent className="p-5">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="space-y-1">
               <Label htmlFor="pe-month">Payroll Month</Label>
               <Input
                 id="pe-month"
                 type="month"
                 value={month}
                 onChange={(e) => onMonthChange(e.target.value)}
-                className="w-full"
+                className="w-44"
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="space-y-1">
               <Label htmlFor="pe-department">Department</Label>
               <Select value={departmentId} onValueChange={(v) => setDepartmentId(v)}>
-                <SelectTrigger id="pe-department" className="w-full">
+                <SelectTrigger id="pe-department" className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,51 +190,20 @@ export default function PayrollEnginePage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={onGenerate} disabled={generating} className="w-full">
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Cog aria-hidden="true" />}
+            <Button
+              onClick={onGenerate}
+              disabled={generating}
+              className="bg-emerald-600 text-primary-foreground shadow hover:bg-[#047857]"
+            >
+              {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Cog className="mr-2" aria-hidden="true" />}
               Generate Payroll
             </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader className="p-5 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Info className="h-5 w-5 text-primary" aria-hidden="true" />
-              How the engine calculates
-            </CardTitle>
-            <CardDescription>
-              Late deductions, absent deductions &amp; overtime are automatically calculated from attendance records for{" "}
-              {infoMonth}.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border bg-secondary/30 p-3">
-                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                  <TrendingDown className="h-4 w-4 text-amber-600" aria-hidden="true" />
-                  Late deduction
-                </p>
-                <p className="text-xs text-muted-foreground">0.50 SAR per late minute, capped at 10% of basic salary.</p>
-              </div>
-              <div className="rounded-lg border bg-secondary/30 p-3">
-                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                  <CalendarDays className="h-4 w-4 text-red-600" aria-hidden="true" />
-                  Absent deduction
-                </p>
-                <p className="text-xs text-muted-foreground">Each absent day deducts one daily salary (basic ÷ 30).</p>
-              </div>
-              <div className="rounded-lg border bg-secondary/30 p-3">
-                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                  <Clock4 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-                  Overtime pay
-                </p>
-                <p className="text-xs text-muted-foreground">1.5× the hourly rate (basic ÷ 240 hours) per OT minute.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">
+            Late deductions, absent deductions &amp; overtime are automatically calculated from attendance records for {infoMonth}.
+          </p>
+        </CardContent>
+      </Card>
 
       {generating ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
@@ -330,13 +295,17 @@ export default function PayrollEnginePage() {
           </Table>
         </div>
       ) : (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<Building2 className="h-6 w-6" aria-hidden="true" />}
-            title={`Select a month and click "Generate Payroll"`}
-            description="Attendance data will be used to compute deductions and overtime automatically"
-          />
-        </div>
+        /* Session 11 (R10-I): the reference's rest state — a flat border-0
+           card, p-6 py-20 text-center, with the 56px slate-200 Calculator
+           icon, an 18px/500 slate-500 line and a 14px slate-400 line
+           (measured y=408/480/512). */
+        <Card className="border-0">
+          <CardContent className="p-6 py-20 text-center">
+            <Calculator className="mx-auto mb-4 h-14 w-14 text-slate-200" aria-hidden="true" />
+            <p className="text-lg font-medium text-slate-500">Select a month and click &quot;Generate Payroll&quot;</p>
+            <p className="mt-1 text-sm text-slate-400">Attendance data will be used to compute deductions and overtime automatically</p>
+          </CardContent>
+        </Card>
       )}
     </div>
     </div>

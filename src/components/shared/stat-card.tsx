@@ -65,11 +65,21 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   standard: "text-3xl font-bold text-slate-900 mb-1",
   compact: "text-2xl font-bold text-slate-900",
   "compact-s": "text-xl font-bold text-slate-900",
-  mini: "text-2xl font-bold text-slate-900",
+  // Session 11 (R10-J): the mini value carries no color — shiftcalendar
+  // colors its four values per card (blue/violet/emerald/amber-600) via
+  // valueClassName (twMerge lets the call site win).
+  mini: "text-2xl font-bold",
   "mini-centered": "text-3xl font-bold text-slate-900",
   horizontal: "text-2xl font-bold text-slate-900",
   "no-tile": "text-3xl font-bold text-slate-900",
   "tile-right": "text-3xl font-bold text-slate-900",
+};
+
+/** Session 11 (R10-J): the reference's mini label is text-xs slate-500
+ *  with mt-0.5 (measured on shiftcalendar — 16px line, 82px card), not
+ *  the standard text-sm slate-600. */
+const VARIANT_LABEL: Partial<Record<StatCardVariant, string>> = {
+  mini: "text-xs text-slate-500 mt-0.5",
 };
 
 /** Variants that render the icon tile (the reference's mini, mini-centered
@@ -113,7 +123,7 @@ export function StatCard({
   const textBlock = (
     <>
       <p className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</p>
-      <div className="text-sm text-slate-600">{label}</div>
+      <div className={cn("text-sm text-slate-600", VARIANT_LABEL[variant])}>{label}</div>
     </>
   );
 

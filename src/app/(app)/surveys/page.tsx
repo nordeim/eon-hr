@@ -198,40 +198,43 @@ export default function SurveysPage() {
         sectionIcon={<MessageSquare aria-hidden="true" />}
         title="Surveys"
         subtitle="Create surveys and gather employee feedback"
-        actions={
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
-            New Survey
-          </Button>
-        }
       />
 
       <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Total Surveys" value={stats.total} icon={<ClipboardList className="h-4 w-4" />} />
         <StatCard label="Active Surveys" value={stats.active} icon={<Play className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
         <StatCard label="Total Responses" value={stats.totalResponses} icon={<Eye className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Avg Sentiment" value={`${stats.avg}%`} icon={<ClipboardList className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard label="Avg Sentiment" value={stats.total ? `${stats.avg}%` : "%"} icon={<ClipboardList className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
       </div>
 
+      {/* Session 11 (R10-G): the reference renders a `grid md:grid-cols-2
+          gap-6` container below the stats (empty at 0 surveys — no
+          header action on the reference either). The working New Survey
+          dialog keeps ONE entry: the empty state riding the reference's
+          own grid container (col-span-full) — the reference's subtitle
+          says "Create surveys…", and content-furniture supersets are the
+          established pattern (hrreports' sixth filter column). */}
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : surveys.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            title="No surveys yet"
-            description="Create your first survey to gather employee feedback"
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Survey
-              </Button>
-            }
-          />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border bg-card shadow-sm md:col-span-2">
+            <EmptyState
+              title="No surveys yet"
+              description="Create your first survey to gather employee feedback"
+              action={
+                <Button variant="dark" onClick={() => setDialogOpen(true)}>
+                  <Plus className="mr-2" aria-hidden="true" />
+                  New Survey
+                </Button>
+              }
+            />
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {surveys.map((survey) => {
             const sentiment = avgSentiment(survey.responses);
             return (

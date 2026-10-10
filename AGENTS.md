@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 194 specs) |
+| Unit tests | `bun run test` (Vitest, 216 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -133,13 +133,18 @@ reference's `sticky top-0` sits inside a non-scrolling wrapper stack, so
 the bar scrolls away with the content (only the 73px top bar stays
 pinned). Do not re-add `sticky top-[73px]`.
 
-## PageHeader contract (sessions 5–10)
+## PageHeader contract (sessions 5–11)
 
 Six badge recipes (raised-48/raised-36/flat36/flat36-sm/flat48/flat-tight)
 pin badge/h1/subtitle positions; **the raised mt-8 offset lives on the ROW**
 (`recipe.row`), badge pages only, so `sm:items-center` lands the actions
 cluster on the h1 row like the reference (taskmanager y=116, employees
-y=46 — never `items-start`). Actions cluster is `gap-3`. Four pages
+y=46). **Session 11 (R10-E): the reference has TWO action-alignment
+patterns** — items-center (h1 row: taskmanager, payroll, expenses,
+leavemanagement, employees) and **items-start (badge row)** for
+offboarding, compliancedashboard, allleaverequests, workflowautomation
+(y=32), loans (y=64, raised), advancedanalytics (y=32); those six pages
+pass `actionsStart`. Actions cluster is `gap-3`. Four pages
 (training, evaluations, companywall, organogram) pass `centered` for the
 reference's text-center headers — **session 10 (R9-A): `centered` also adds
 `flex-1`** so the title block fills the row and the text centers at the
@@ -148,6 +153,13 @@ own content width instead (off by 152–327px). Five small pages
 (recruitmentkanban, hrreports, staffrequests, notificationpreferences,
 workflowconfigpage) use `size="md"` (24px h1). The per-page matrix is
 pinned by `tests/unit/recipes.test.ts`.
+
+**Session 11 (R10-F..I): four headers are action-free on the reference** —
+hrletters, surveys, announcements and payrollengine render NO header
+button; their create/generate affordances live in content furniture (the
+loans-recipe empty-state CTA, the grid's empty-state cell, a CTA below
+the bare slate-400 line, and payrollengine's toolbar card with Month +
+Department + the flat emerald-600 Generate Payroll button).
 
 ## StatCard variant map (session 10, R9-D)
 
@@ -159,7 +171,7 @@ The reference renders EIGHT per-page stat-card variants — the session-6
 | standard (default) | p-6, 48px tile, 30px value, 170h, `gap-6 md:grid-cols-4` | payroll, advancedanalytics, expenses, surveys |
 | compact | p-5, 40px tile, 24px value, 146h, `grid-cols-2 md:4 gap-4` | recruitment, compliancedashboard, assetmanagement, attendancedashboard, surveyanalytics, analyticsdashboard (+hint) |
 | compact-s | compact with 20px value, 142h | payrollmodule |
-| mini | p-4, no tile, 24px value, 82h | shiftcalendar |
+| mini | p-4, no tile, 24px value, 82h, **border-0 + shadow-sm, xs slate-500 label, per-card colored value** (session 11) | shiftcalendar |
 | mini-centered | p-4 text-center, no tile, 30px value, 86-90h | hrreports, notificationpreferences (3-col + Mark All Read card) |
 | horizontal | p-4 flex gap-3, 44px tile left, 24px value, 80h | documenttracker |
 | no-tile | p-6, 30px value, 110h | performancemanagement (md:4), workflowautomation (md:3) |
@@ -184,6 +196,55 @@ select: All Staff Report / Individual Employee / Department Report)
 sits between the header and the stats and drives the stat row's scope.
 The session-5 `leading-[2]` title quirk is GONE from the redeployed
 reference — never re-add it.
+
+## Session-11 recipe layer (parity round 10)
+
+- **Toast viewport (R10-D)**: `fixed top-0 z-[100] flex max-h-screen w-full
+  flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto` + 420px max
+  width — the reference renders it even when empty; the toast CARD
+  interior is unmeasurable (the reference never fires one).
+- **Companywall composer (R10-C)**: CardContent p-6 > `flex items-start
+  gap-4` row (40px sRGB-gradient avatar, 16px initials) + `flex-1
+  space-y-4` column (textarea rows=3, `space-y-3` label group with a
+  `block leading-5` label, justify-between action row). Photo/Video are
+  GHOST buttons (borderless, 90px); every icon carries mr-2.
+- **Shiftcalendar (R10-J)**: standalone `flex flex-wrap items-center gap-4`
+  toolbar (36px chevrons + `font-semibold text-slate-800 min-w-36
+  text-center` month label + All Departments w-48 select) between the
+  header and stats; the calendar is a `w-full border-collapse text-xs`
+  TABLE (th py-3 px-2; cells `border border-slate-100 align-top p-1
+  min-h-[80px]` with the day number `text-slate-400 mb-1` and the
+  slate-300 `assign` affordance); the summary card header is
+  `border-slate-100`.
+- **Recruitmentkanban (R10-K)**: full-width page (`p-4 md:p-8`, no
+  max-w) — header (Add Applicant only) > `flex flex-col sm:flex-row
+  gap-3` filter row (search flex-1 + All Jobs w-48) > board `flex gap-4
+  overflow-x-auto pb-4` with five `w-64 shrink-0` columns
+  (`rounded-lg border-2 bg-slate-100 border-slate-300` p-3.5, h3
+  text-sm slate-700 + count badge, `min-h-32` drop zone). The reference's
+  own page overflows horizontally (docW 1664 at 1440) — the clone keeps
+  the fitting internal scroll (documented superset, attendance category).
+- **Reports selector (R10-L)**: a WHITE bordered wrapping pill
+  (`inline-flex items-center justify-center rounded-lg p-1 bg-white
+  border border-slate-200 flex-wrap h-auto`), rows centered with no row
+  gap; every chip carries a 16px icon (gap-2).
+- **Profile identity card (R10-M)**: `flex items-center gap-6` — 96px
+  sRGB-gradient circle with the 64px circle-user icon (NOT initials), h2
+  text-2xl name, email mb-3, the Change Photo button below the email,
+  role badge (blue-50/700) pinned right.
+- **EmptyState icon mb-4 (R10 follow-up)**: the reference's empty-state
+  icons carry mb-4 (icon bottom → h3 = 16px, re-measured on payroll AND
+  loans) — the component's icon wrapper gained it (every empty state had
+  been 16px short).
+- **CardTitle two recipes**: border-b CardHeader titles render
+  `leading-none` (16px box — hrletters/leavemanagement/expenses pattern);
+  regular in-card titles (dashboard) keep `text-base` (24px). Clone call
+  sites in border-b headers pass `className="leading-none"`.
+- **hrletters/surveys/announcements/payrollengine (R10-F..I)**: headers
+  action-free; empty states per the reference (hrletters icon/h3/p at the
+  measured y's + the loans-recipe CTA superset; announcements bare
+  `py-16 text-slate-400` line + small CTA; payrollengine border-0 toolbar
+  card + p-6 py-20 rest card with the 56px icon).
 
 ## Page architecture (session 6) — where padding and gradients live
 

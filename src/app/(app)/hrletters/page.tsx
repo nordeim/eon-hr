@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -156,8 +156,6 @@ export default function HRLettersPage() {
     }
   }
 
-  const pending = letters.filter((l) => l.status === "pending").length;
-
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#faf5ff)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
@@ -168,26 +166,21 @@ export default function HRLettersPage() {
         sectionIcon={<FileText aria-hidden="true" />}
         title="HR Letters"
         subtitle="Request and manage official HR documents"
-        actions={
-          <Button
-            onClick={() => {
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="mr-2" aria-hidden="true" />
-            New Request
-          </Button>
-        }
       />
 
+      {/* Session 11 (R10-F): the reference's card — CardHeader = title only
+          with border-b (no count description), CardContent p-0 wrapping the
+          p-12 empty state (64px icon + h3 + slate-500 line, measured
+          y=318/398/434). The working New Request dialog keeps ONE entry —
+          the empty-state CTA (the loans-page recipe, 194x36) — the
+          reference's own copy invites the action ("Request your first HR
+          letter to get started"); the header stays action-free like the
+          reference. */}
       <Card>
-        <CardHeader>
-          <CardTitle>Letter Requests</CardTitle>
-          <CardDescription>
-            {letters.length} request{letters.length === 1 ? "" : "s"} · {pending} pending review
-          </CardDescription>
+        <CardHeader className="border-b border-slate-200">
+          <CardTitle className="leading-none">Letter Requests</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

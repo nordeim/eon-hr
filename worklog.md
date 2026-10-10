@@ -418,3 +418,25 @@ Work Log:
 Stage Summary:
 - Parity round 9 complete: centered headers, companywall feed, training restructure, the eight-variant StatCard map, attendance cluster/toolbar, session-aware 404 — every fixed surface verified live against the reference
 - 194 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 22 (session 11 / parity round 10)
+Agent: main (Super Z)
+Task: Workspace re-validation, audit, parity round 10 (header action taxonomy, read-only headers, page restructures), docs + push
+
+Work Log:
+- git pull (819dc03 — brought in docs/session_13.md, the prior conversation's transcript); workspace intact (.env + db/ + node_modules); re-validated every gate from scratch: lint 0/0, tsc, 194/194 unit, build, 86/86 E2E — the session-10 push state exactly
+- Audit per repo skills (code-review-and-audit methodology, agent-browser dual-session, tdd-workflow, clone-app-pat-pro, avant-garde mobile-nav taxonomy A–H): static scan clean except the companywall avatar's unpinned gradient; mobile nav (user priority) re-verified byte-identical end-to-end (top bar, tabs, drawer, submenu, kicker geometry + scroll behavior, md boundary); no Tailwind v4 bug
+- Coarse 46-route sweep passed; deeper second-tier sweep (button-y taxonomy, DOM dumps, text-node diffs, composer internals) found 18 gap groups R10-A…R10-R: two-pattern header action alignment (6 badge-row pages), 4 action-free reference headers, attendance cyan-700 + 192px select, composer precision (p-6/sRGB avatar/mr-2 icons), toast viewport geometry, shiftcalendar toolbar + table calendar + colored mini stats, full-width kanban board, reports white icon-chip pill, profile identity card restructure, hrassistantchat grid, loans/staffrequests/workflowconfigpage/notificationpreferences empty states
+- Systemic finds: EVERY EmptyState was 16px short (reference icons carry mb-4 — re-measured on payroll AND loans); border-b CardHeader titles are leading-none (16px) vs regular text-base (24px)
+- Documented reference bugs kept as fitting superset: kanban page overflows (docW 1664) — clone keeps the fitting internal scroll
+- Wrote + codebase-validated docs/remediation-plan-session11.md, then executed TDD: 22 RED pins (1 stale R8-A pin refined) → GREEN (page-header actionsStart; toast viewport; stat-card mini label; empty-state mb-4; cyan-700 pin; 18 page files)
+- Live-verify corrections: composer label group space-y-3 + block leading-5 label; Photo/Video ghost; staffrequests dark no-icon CTA + mt-2 card; hrassistantchat mb-6 stack; hrletters CardTitle leading-none; surveys "%" quirk; workflowconfigpage trailing period + py-16 on the card
+- Gates: lint 0/0, tsc, 216/216 unit (was 194), build (unset DATABASE_URL), 86/86 E2E
+- Live dual-browser re-verify: six actionsStart pages exact (32/64), attendance Devices rgb(14,116,144) + select 192, composer 264/90/93 byte-exact, shiftcalendar toolbar 172 + 82px stats + table, kanban 5×256, reports 94px pill + 170px chips, profile 154 + y=297, New Chat 188, loans CTA 433/194, staffrequests CTA 207, hrletters 204/65/318/398, announcements 112/152, payrollengine + staffrequests content diffs at ZERO
+- 47-route sweep re-run post-fix: all OK; mobile-nav regression unchanged; 24 screenshots refreshed (production standalone); DB pristine (users=1, employees=1, leaveBalances=2)
+- Docs updated: AGENTS.md (216 specs + two-pattern taxonomy + session-11 recipe layer), CLAUDE.md (counts), README.md (counts), PAD (S11 row), eon-hr_SKILL.md (v2.4.0 + §23), docs/remediation-plan-session11.md (+ completion record), docs/session_14.md, worklog.md
+
+Stage Summary:
+- Parity round 10 complete: 18 gap groups fixed (header action taxonomy, read-only headers, composer/attendance residuals, shiftcalendar/kanban/reports/profile restructures, two systemic component fixes) — every fixed surface verified live against the reference
+- 216 unit + 86 E2E green; ready for commit + push

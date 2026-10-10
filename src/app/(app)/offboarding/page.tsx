@@ -184,6 +184,7 @@ export default function OffboardingPage() {
       <PageHeader
         section="Offboarding Management"
         layout="flat36"
+        actionsStart
         iconClassName="text-blue-600"
         sectionIcon={<CircleCheckBig aria-hidden="true" />}
         title="Offboarding Journey"

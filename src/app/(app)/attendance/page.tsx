@@ -237,7 +237,8 @@ export default function StaffAttendancePage() {
         subtitle="Track and manage employee attendance records"
         actions={
           /* Session 10 (R9-E): the reference's seven-button cluster —
-             Print/PDF/Excel at h-8/12px outline, Devices (teal-700 text),
+             Print/PDF/Excel at h-8/12px outline, Devices (cyan-700 text —
+             rgb(14,116,144) = pinned v3 cyan-700, session 11 R10-A),
              Settings, Dashboard (blue-700 text) at h-9/14px outline, and
              the cyan-gradient Import Attendance CTA; every icon carries
              the reference's mr-2 (16px effective icon-text gap). The
@@ -271,7 +272,7 @@ export default function StaffAttendancePage() {
             </Button>
             <Button
               variant="outline"
-              className="text-teal-700"
+              className="text-cyan-700"
               onClick={() => toast.toast({ title: "Devices", description: "Kiosk and biometric device sync is managed by your administrator.", variant: "info" })}
             >
               <MonitorSmartphone className="mr-2" aria-hidden="true" />
@@ -309,7 +310,7 @@ export default function StaffAttendancePage() {
           Report Type:
         </Label>
         <Select value={reportType} onValueChange={(v) => setReportType(v as (typeof REPORT_TYPES)[number]["value"])}>
-          <SelectTrigger id="attendance-report-type" className="w-full max-w-sm" aria-label="Report type">
+          <SelectTrigger id="attendance-report-type" className="w-48" aria-label="Report type">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

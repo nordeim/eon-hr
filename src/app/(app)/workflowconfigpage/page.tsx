@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GitBranch, Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatSar } from "@/lib/utils";
@@ -185,18 +184,20 @@ export default function WorkflowConfigPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : workflows.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<GitBranch className="h-6 w-6" aria-hidden="true" />}
-            title="No workflows configured yet."
-            description="Create an approval chain for leave requests, expenses or staff requests."
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Create First Workflow
-              </Button>
-            }
-          />
+        /* Session 11 (R10-Q): the reference's empty state — the py-16 sits
+           on the CARD itself (measured classes "rounded-xl border bg-card
+           shadow text-center py-16", 976x266) with the 48px Settings2 icon
+           (mb-3), ONE slate-500 line, and the 213x36 flat blue-600 CTA as
+           direct children (y=169/229/269). */
+        <div className="rounded-xl border bg-card text-center shadow py-16">
+          <Settings2 className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
+          <p className="text-slate-500">No workflows configured yet.</p>
+          <div className="mt-4">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2" aria-hidden="true" />
+              Create First Workflow
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

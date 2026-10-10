@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.3.0 (session-10 remediation complete) · **Last updated:**
+> **Version:** 2.4.0 (session-11 remediation complete) · **Last updated:**
 > 2026-10-10 · **State:** 194 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
@@ -948,3 +948,61 @@ Department Report). The session-5 `leading-[2]` title quirk is GONE.
 text-7xl font-light + h2 "Page Not Found" text-2xl font-medium, centered
 in the content area — inside the AppShell when authenticated, on the
 canvas gradient when not.
+
+## 23. Session-11 Recipe Layer — parity round 10
+
+**Two header-action patterns (R10-E):** the reference centers actions on
+the h1 row for taskmanager/payroll/expenses/leavemanagement/employees
+(items-center) but rides them on the BADGE row for offboarding,
+compliancedashboard, allleaverequests, workflowautomation (y=32), loans
+(y=64 raised) and advancedanalytics (y=32) — measured
+`flex justify-between items-start`. PageHeader's `actionsStart` prop
+switches the row to `sm:items-start`.
+
+**Action-free reference headers (R10-F..I):** hrletters, surveys,
+announcements and payrollengine render no header button; their working
+affordances live in content furniture (empty-state CTAs, the grid cell,
+the toolbar card). Never add header actions to those four.
+
+**Toast viewport (R10-D):** `fixed top-0 z-[100] flex max-h-screen w-full
+flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto` + max-w 420 —
+rendered even when empty on the reference; the card interior is the
+clone's design (the reference never fires a toast).
+
+**Composer precision (R10-C):** p-6 interior, one `flex items-start gap-4`
+row (avatar + `flex-1 space-y-4` column), sRGB-pinned avatar gradient
+(`bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]`, 16px initials),
+textarea rows=3, `space-y-3` label group with `block leading-5` label,
+GHOST Photo/Video (borderless 90px), Post = flat primary h-9 with Send
+mr-2. Every icon mr-2 (16px effective gap — now on ALL parity buttons).
+
+**Shiftcalendar (R10-J):** standalone month toolbar (chevrons 36px +
+min-w-36 month label + All Departments select) between header and stats;
+mini stats are border-0 + shadow-sm with per-card colored values
+(blue/violet/emerald/amber-600) and text-xs slate-500 labels; the
+calendar is a border-collapse text-xs TABLE; the summary card header is
+border-slate-100.
+
+**Kanban board (R10-K):** full-width page, filter row (search + All Jobs),
+five w-64 border-2 bg-slate-100 columns with count badges and min-h-32
+drop zones. The reference's page overflows (docW 1664) — the clone keeps
+the fitting internal scroll.
+
+**Reports chips (R10-L):** white bordered wrapping pill (bg-white border
+border-slate-200 flex-wrap h-auto), centered rows, no row gap, 16px icons
+with gap-2 per category.
+
+**Profile identity card (R10-M):** 96px gradient circle + 64px
+circle-user ICON (not initials), h2 text-2xl, email mb-3, Change Photo
+below the email, role badge pinned right (vertically centered).
+
+**EmptyState mb-4 (systemic):** the icon wrapper carries mb-4 — every
+empty state had been 16px short (re-measured on payroll AND loans).
+
+**CardTitle recipes:** border-b CardHeader titles are `leading-none`
+(16px); regular in-card titles keep text-base (24px — the dashboard
+pattern). Pass `className="leading-none"` at border-b call sites.
+
+**Palette addendum:** `--color-cyan-700: #0e7490` pinned (the attendance
+Devices button is cyan-700, not teal-700 — wrong family AND unpinned
+oklch drift).

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, ChevronDown, Trash2, Loader2, Users } from "lucide-react";
+import { Plus, ChevronDown, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { initials } from "@/lib/utils";
 
@@ -67,6 +66,7 @@ export default function RecruitmentKanbanPage() {
   const [candidates, setCandidates] = React.useState<CandidateRow[]>([]);
   const [jobs, setJobs] = React.useState<JobRow[]>([]);
   const [jobFilter, setJobFilter] = React.useState("all");
+  const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(true);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -92,10 +92,18 @@ export default function RecruitmentKanbanPage() {
     void load();
   }, [load]);
 
-  const visible = React.useMemo(
-    () => candidates.filter((c) => jobFilter === "all" || c.jobPostingId === jobFilter),
-    [candidates, jobFilter]
-  );
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return candidates.filter((c) => {
+      if (jobFilter !== "all" && c.jobPostingId !== jobFilter) return false;
+      if (!q) return true;
+      return (
+        c.name.toLowerCase().includes(q) ||
+        (c.email ?? "").toLowerCase().includes(q) ||
+        (c.jobPosting?.title ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [candidates, jobFilter, query]);
 
   async function onAddApplicant(e: React.FormEvent) {
     e.preventDefault();
@@ -173,121 +181,119 @@ export default function RecruitmentKanbanPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      {/* Session 11 (R10-K): the reference renders this page FULL-WIDTH —
+          no max-w container (content spans 1344px at 1440). Header carries
+          only the Add Applicant CTA; below it a `flex flex-col sm:flex-row
+          gap-3` filter row (search input flex-1 with the 16px icon at
+          left-3 top-2.5 + the All Jobs select w-48), then the board:
+          `flex gap-4 overflow-x-auto pb-4` with five w-64 columns —
+          `rounded-lg border-2 bg-slate-100 border-slate-300` p-3.5, the
+          column header (`flex items-center justify-between mb-3`: h3
+          `font-semibold text-slate-700 text-sm` + the count badge
+          `inline-flex items-center rounded-md border px-2.5` 30x22) over a
+          `min-h-32 rounded-md` drop zone. The clone's working
+          search/filter/move/delete flow rides the reference's furniture. */}
+      <div className="flex flex-col space-y-6">
       <PageHeader
         size="md"
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"
         actions={
-          <>
-            <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger className="w-44" aria-label="Filter by job">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Jobs</SelectItem>
-                {jobs.map((job) => (
-                  <SelectItem key={job.id} value={job.id}>
-                    {job.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2" aria-hidden="true" />
-              Add Applicant
-            </Button>
-          </>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2" aria-hidden="true" />
+            Add Applicant
+          </Button>
         }
       />
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Input
+            aria-label="Search candidates"
+            placeholder="Search candidates, jobs or emails…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={jobFilter} onValueChange={setJobFilter}>
+          <SelectTrigger className="w-48" aria-label="Filter by job">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Jobs</SelectItem>
+            {jobs.map((job) => (
+              <SelectItem key={job.id} value={job.id}>
+                {job.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
-      ) : candidates.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<Users className="h-6 w-6" aria-hidden="true" />}
-            title="No candidates in the pipeline"
-            description={
-              jobs.length === 0
-                ? "Post a job first, then add applicants to the pipeline."
-                : "Add your first applicant to start tracking the hiring process."
-            }
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)} disabled={jobs.length === 0}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Add Applicant
-              </Button>
-            }
-          />
-        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
+        <div className="flex gap-4 overflow-x-auto pb-4">
           {COLUMNS.map((col) => {
             const colCandidates = visible.filter((c) => c.stage === col.stage);
             return (
-              <div key={col.stage} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-secondary/30 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <span className={`h-2 w-2 rounded-full ${col.dot}`} aria-hidden="true" />
-                    {col.label}
-                  </p>
-                  <Badge variant="secondary">{colCandidates.length}</Badge>
+              <div key={col.stage} className="w-64 shrink-0 rounded-lg border-2 border-slate-300 bg-slate-100 p-3.5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
+                  <span className="inline-flex h-[22px] items-center rounded-md border px-2.5 text-xs font-semibold text-muted-foreground">
+                    {colCandidates.length}
+                  </span>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {colCandidates.length === 0 ? (
-                    <p className="rounded-lg border border-dashed p-3 text-center text-xs text-muted-foreground">
-                      No candidates
-                    </p>
-                  ) : (
-                    colCandidates.map((candidate) => (
-                      <div
-                        key={candidate.id}
-                        className="flex flex-col gap-2 rounded-lg border bg-card p-3 shadow-sm"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-foreground">{candidate.name}</p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {candidate.jobPosting?.title ?? "—"}
-                            </p>
-                          </div>
-                          {candidate.aiScore !== null ? (
-                            <Badge variant={candidate.aiScore >= 75 ? "success" : candidate.aiScore >= 50 ? "warning" : "destructive"}>
-                              AI {candidate.aiScore}
-                            </Badge>
-                          ) : null}
+                <div className="flex min-h-32 flex-col gap-2 rounded-md transition-colors">
+                  {colCandidates.map((candidate) => (
+                    <div
+                      key={candidate.id}
+                      className="flex flex-col gap-2 rounded-md border bg-card p-3 text-left shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-foreground">{candidate.name}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {candidate.jobPosting?.title ?? "—"}
+                          </p>
                         </div>
-                        <div className="flex items-center justify-between border-t pt-2">
-                          <span className="text-xs text-muted-foreground">
-                            {initials(candidate.name)} · {labelize(candidate.stage)}
-                          </span>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" aria-label={`Move ${candidate.name}`}>
-                                Move to
-                                <ChevronDown aria-hidden="true" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Move to</DropdownMenuLabel>
-                              {COLUMNS.filter((c) => c.stage !== candidate.stage).map((c) => (
-                                <DropdownMenuItem key={c.stage} onClick={() => onMove(candidate, c.stage)}>
-                                  {c.label}
-                                </DropdownMenuItem>
-                              ))}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600" onClick={() => onDelete(candidate)}>
-                                <Trash2 aria-hidden="true" /> Remove
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        {candidate.aiScore !== null ? (
+                          <Badge variant={candidate.aiScore >= 75 ? "success" : candidate.aiScore >= 50 ? "warning" : "destructive"}>
+                            AI {candidate.aiScore}
+                          </Badge>
+                        ) : null}
                       </div>
-                    ))
-                  )}
+                      <div className="flex items-center justify-between border-t pt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {initials(candidate.name)} · {labelize(candidate.stage)}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" aria-label={`Move ${candidate.name}`}>
+                              Move to
+                              <ChevronDown aria-hidden="true" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Move to</DropdownMenuLabel>
+                            {COLUMNS.filter((c) => c.stage !== candidate.stage).map((c) => (
+                              <DropdownMenuItem key={c.stage} onClick={() => onMove(candidate, c.stage)}>
+                                {c.label}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600" onClick={() => onDelete(candidate)}>
+                              <Trash2 aria-hidden="true" /> Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             );

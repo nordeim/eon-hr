@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarRange, Download, FileText, Printer } from "lucide-react";
+import { Banknote, BarChart3, Building2, CalendarDays, CalendarRange, Clock, Download, FileText, GraduationCap, HeartHandshake, LogOut, Printer, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,9 @@ interface ReportDef {
 interface Category {
   id: string;
   label: string;
+  /** Session 11 (R10-L): every reference chip carries a 16px icon
+   *  (gap-2) — the per-category lucide set. */
+  icon: React.ReactNode;
   reports: ReportDef[];
 }
 
@@ -38,6 +41,7 @@ const CATEGORIES: Category[] = [
   {
     id: "employee-master",
     label: "Employee Master",
+    icon: <Users className="h-4 w-4" aria-hidden="true" />,
     reports: [
       {
         title: "Employee List (Active/Inactive/Terminated)",
@@ -74,6 +78,7 @@ const CATEGORIES: Category[] = [
   {
     id: "attendance-time",
     label: "Attendance & Time",
+    icon: <Clock className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Daily Attendance Report", description: "Present, absent and late records per day", type: "attendance" },
       { title: "Late Arrivals Report", description: "Late check-ins with minutes late", type: "late-arrivals" },
@@ -83,6 +88,7 @@ const CATEGORIES: Category[] = [
   {
     id: "leave-absence",
     label: "Leave & Absence",
+    icon: <CalendarDays className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Leave Requests Report", description: "All leave requests with status and days", type: "leave" },
       { title: "Leave Balances Report", description: "Entitled vs used days per leave type", type: "leave-balances" },
@@ -92,6 +98,7 @@ const CATEGORIES: Category[] = [
   {
     id: "payroll-compensation",
     label: "Payroll & Compensation",
+    icon: <Banknote className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Payroll Register", description: "Full payroll breakdown per period", type: "payroll" },
       { title: "Salary Disbursement Report", description: "Paid payslips only", type: "payroll-disbursement" },
@@ -101,6 +108,7 @@ const CATEGORIES: Category[] = [
   {
     id: "performance-appraisal",
     label: "Performance & Appraisal",
+    icon: <TrendingUp className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Goals & KPI Report", description: "Goal progress and status per employee", type: "performance-goals" },
       { title: "Performance Reviews Report", description: "Review ratings and completion", type: "performance-reviews" },
@@ -110,6 +118,7 @@ const CATEGORIES: Category[] = [
   {
     id: "training-development",
     label: "Training & Development",
+    icon: <GraduationCap className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Training Platforms Report", description: "Connected learning platforms", type: "training" },
       { title: "Course Catalog Report", description: "Available courses per platform", type: "training-courses" },
@@ -118,6 +127,7 @@ const CATEGORIES: Category[] = [
   {
     id: "employee-relations",
     label: "Employee Relations",
+    icon: <HeartHandshake className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Staff Requests Report", description: "Requests across categories and priorities", type: "employee-relations" },
       { title: "Survey Responses Report", description: "Engagement survey responses with sentiment", type: "survey-responses" },
@@ -127,6 +137,7 @@ const CATEGORIES: Category[] = [
   {
     id: "contracts-compliance",
     label: "Contracts & Compliance",
+    icon: <FileText className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Document Register", description: "All tracked employee documents", type: "contracts" },
       { title: "Document Expiry Report", description: "Documents sorted by expiry date", type: "document-expiry" },
@@ -136,6 +147,7 @@ const CATEGORIES: Category[] = [
   {
     id: "exit-separation",
     label: "Exit & Separation",
+    icon: <LogOut className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Offboarding Report", description: "Departures with reasons and status", type: "exit" },
       { title: "Exit Checklists Report", description: "Checklist completion status per departure", type: "exit-checklists" },
@@ -144,6 +156,7 @@ const CATEGORIES: Category[] = [
   {
     id: "organizational",
     label: "Organizational",
+    icon: <Building2 className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Headcount by Department", description: "Employees and active counts per department", type: "organizational" },
       { title: "Reporting Structure Report", description: "Manager and direct-report mapping", type: "org-structure" },
@@ -152,6 +165,7 @@ const CATEGORIES: Category[] = [
   {
     id: "analytics-decision",
     label: "Analytics & Decision",
+    icon: <BarChart3 className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Workforce Analytics Summary", description: "Key HR metrics in one table", type: "analytics" },
       { title: "Turnover Analysis", description: "Terminated employees and turnover rate", type: "turnover" },
@@ -215,9 +229,15 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
       />
 
       <Tabs defaultValue="employee-master" className="flex flex-col gap-6">
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-1">
+        {/* Session 11 (R10-L): the reference's category selector — a WHITE
+            bordered wrapping pill (`bg-white border border-slate-200
+            flex-wrap h-auto`), rows centered with NO row gap (28px pitch),
+            each chip carrying a 16px icon with gap-2 (measured chips
+            170-222px wide vs our icon-less 126-198). */}
+        <TabsList className="h-auto w-full flex-wrap justify-center border border-slate-200 bg-white text-muted-foreground">
           {CATEGORIES.map((c) => (
-            <TabsTrigger key={c.id} value={c.id}>
+            <TabsTrigger key={c.id} value={c.id} className="gap-2">
+              {c.icon}
               {c.label}
             </TabsTrigger>
           ))}

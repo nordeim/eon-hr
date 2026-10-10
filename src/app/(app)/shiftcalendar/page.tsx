@@ -29,6 +29,7 @@ interface ShiftOption {
   name: string;
   startTime: string;
   endTime: string;
+  department?: string | null;
   active: boolean;
 }
 
@@ -159,15 +160,62 @@ export default function ShiftCalendarPage() {
     return list;
   }, [data]);
 
+  /** Session 11 (R10-J): the calendar renders as the reference's
+   *  border-collapse table — cells chunked into Mon-first week rows. */
+  const weeks = React.useMemo(() => {
+    const rows: { day: number | null; dateKey: string | null }[][] = [];
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
+    return rows;
+  }, [cells]);
+
+  /** Session 11 (R10-J): the All Departments toolbar select — filters the
+   *  visible assignments by the assigned shift's department (superset: the
+   *  reference renders the select but wires nothing). */
+  const [departmentFilter, setDepartmentFilter] = React.useState("all");
+  const departmentNames = React.useMemo(() => {
+    const names = new Set<string>();
+    data?.shifts.forEach((s) => {
+      if (s.department) names.add(s.department);
+    });
+    return [...names].sort();
+  }, [data]);
+
+  const shiftById = React.useMemo(() => {
+    const map = new Map<string, ShiftOption>();
+    data?.shifts.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [data]);
+
   const assignmentsByDate = React.useMemo(() => {
     const map = new Map<string, AssignmentRow[]>();
     data?.assignments.forEach((a) => {
+      if (departmentFilter !== "all") {
+        const shift = shiftById.get(a.shiftId);
+        if (!shift || shift.department !== departmentFilter) return;
+      }
       const list = map.get(a.dateKey) ?? [];
       list.push(a);
       map.set(a.dateKey, list);
     });
     return map;
-  }, [data]);
+  }, [data, departmentFilter, shiftById]);
+
+  /** Session 11 (R10-J): the summary card body — per-shift assignment
+   *  counts (the reference's card renders empty at 0 assignments; ours
+   *  rides the same furniture with the live breakdown). */
+  const summaryRows = React.useMemo(() => {
+    const counts = new Map<string, { shiftId: string; shiftName: string; time: string; count: number }>();
+    data?.assignments.forEach((a) => {
+      if (departmentFilter !== "all") {
+        const shift = shiftById.get(a.shiftId);
+        if (!shift || shift.department !== departmentFilter) return;
+      }
+      const row = counts.get(a.shiftId) ?? { shiftId: a.shiftId, shiftName: a.shiftName, time: a.shiftTime, count: 0 };
+      row.count += 1;
+      counts.set(a.shiftId, row);
+    });
+    return [...counts.values()].sort((x, y) => y.count - x.count);
+  }, [data, departmentFilter, shiftById]);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f5f3ff,#eef2ff)] p-4 md:p-8">
@@ -181,7 +229,7 @@ export default function ShiftCalendarPage() {
         subtitle="Drag & drop shifts · Overlap prevention · Swap requests"
         actions={
           <Button variant="outline" onClick={() => setSwapsOpen(true)}>
-            <ArrowLeftRight aria-hidden="true" />
+            <ArrowLeftRight className="mr-2" aria-hidden="true" />
             Shift Swaps
           </Button>
         }
@@ -193,131 +241,190 @@ export default function ShiftCalendarPage() {
         </div>
       ) : data ? (
         <>
+          {/* Session 11 (R10-J): the reference's standalone month toolbar —
+              `flex flex-wrap items-center gap-4` between the header and the
+              stats: prev/next 36x36 outline chevrons + the month label
+              (`font-semibold text-slate-800 min-w-36 text-center`) + the All
+              Departments select (w-48). No Today button on the reference.
+              The clone's working month/department state rides this row; the
+              department select filters assignments client-side (superset —
+              the reference renders the select but wires nothing). */}
+          <div className="flex flex-wrap items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Previous month"
+              onClick={() => {
+                setLoading(true);
+                load(shiftMonth(data.month, -1));
+              }}
+            >
+              <ChevronLeft aria-hidden="true" />
+            </Button>
+            <span className="min-w-36 text-center font-semibold text-slate-800">{monthLabel(data.month)}</span>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Next month"
+              onClick={() => {
+                setLoading(true);
+                load(shiftMonth(data.month, 1));
+              }}
+            >
+              <ChevronRight aria-hidden="true" />
+            </Button>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger aria-label="Department filter" className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departmentNames.map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {d}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Session 11 (R10-J): the reference's mini stat cards are
+              border-0 + shadow-sm with per-card colored values
+              (blue/violet/emerald/amber-600) and text-xs slate-500 labels. */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard variant="mini"
+            <StatCard variant="mini" className="border-0 shadow-sm"
               label="Total Employees"
               value={data.stats.totalEmployees}
-              icon={<Users className="h-4 w-4" aria-hidden="true" />}
+              valueClassName="text-blue-600"
             />
-            <StatCard variant="mini"
+            <StatCard variant="mini" className="border-0 shadow-sm"
               label="Shifts Defined"
               value={data.stats.shiftsDefined}
-              icon={<Clock3 className="h-4 w-4" aria-hidden="true" />}
+              valueClassName="text-violet-600"
             />
-            <StatCard variant="mini"
+            <StatCard variant="mini" className="border-0 shadow-sm"
               label="Assignments This Month"
               value={data.stats.assignmentsThisMonth}
-              icon={<CalendarRange className="h-4 w-4" aria-hidden="true" />}
+              valueClassName="text-emerald-600"
             />
-            <StatCard variant="mini"
+            <StatCard variant="mini" className="border-0 shadow-sm"
               label="Unassigned Days"
               value={data.stats.unassignedDays}
-              icon={<CalendarX2 className="h-4 w-4" aria-hidden="true" />}
+              valueClassName="text-amber-600"
             />
           </div>
 
-          <div className="rounded-xl border bg-card shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
-              <h2 className="text-sm font-semibold text-foreground">{monthLabel(data.month)}</h2>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="iconSm"
-                  aria-label="Previous month"
-                  onClick={() => {
-                    setLoading(true);
-                    load(shiftMonth(data.month, -1));
-                  }}
-                >
-                  <ChevronLeft aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setLoading(true);
-                    load(null);
-                  }}
-                >
-                  Today
-                </Button>
-                <Button
-                  variant="outline"
-                  size="iconSm"
-                  aria-label="Next month"
-                  onClick={() => {
-                    setLoading(true);
-                    load(shiftMonth(data.month, 1));
-                  }}
-                >
-                  <ChevronRight aria-hidden="true" />
-                </Button>
+          {/* Session 11 (R10-J): the reference's calendar card — p-0 with an
+              overflow-x-auto wrapper around a `w-full border-collapse
+              text-xs` TABLE: th `py-3 px-2 text-center font-semibold
+              text-slate-600`; day cells `border border-slate-100 align-top
+              p-1 min-h-[80px] transition-colors bg-white` containing the
+              day number (text-xs text-slate-400 mb-1) over a space-y-0.5
+              stack; empty cells `border-slate-50 bg-slate-50/50`; the
+              "assign" affordance = `text-xs text-slate-300
+              hover:text-blue-500`. The clone's working assign/remove flow
+              rides the reference's furniture. */}
+          <div className="rounded-xl bg-card shadow-sm">
+            <div className="overflow-x-auto p-0">
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr>
+                    {WEEKDAYS.map((d) => (
+                      <th key={d} className="px-2 py-3 text-center font-semibold text-slate-600">
+                        {d}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeks.map((week, wi) => (
+                    <tr key={`week-${wi}`}>
+                      {week.map((cell, ci) => {
+                        if (!cell.day || !cell.dateKey) {
+                          return <td key={`blank-${wi}-${ci}`} className="min-h-[80px] border border-slate-50 bg-slate-50/50" />;
+                        }
+                        const dayAssignments = assignmentsByDate.get(cell.dateKey) ?? [];
+                        return (
+                          <td key={cell.dateKey} className="min-h-[80px] border border-slate-100 bg-white p-1 align-top transition-colors">
+                            <div className="mb-1 text-xs text-slate-400">{cell.day}</div>
+                            <div className="space-y-0.5">
+                              {dayAssignments.length === 0 ? (
+                                <button
+                                  type="button"
+                                  className="flex items-center text-xs text-slate-300 hover:text-blue-500"
+                                  onClick={() => setAssignDate(cell.dateKey)}
+                                >
+                                  assign
+                                </button>
+                              ) : (
+                                <>
+                                  {dayAssignments.slice(0, 2).map((a) => (
+                                    <span
+                                      key={a.id}
+                                      className="flex items-center justify-between gap-1 rounded border border-primary/25 bg-accent px-1.5 py-1 text-left text-xs"
+                                    >
+                                      <span className="min-w-0 flex-1">
+                                        <span className="block truncate font-medium text-foreground">{a.employeeName}</span>
+                                        <span className="block truncate text-muted-foreground">
+                                          {a.shiftName} {a.shiftTime}
+                                        </span>
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="shrink-0 rounded p-0.5 text-muted-foreground hover:bg-secondary hover:text-red-600"
+                                        aria-label={`Remove ${a.employeeName} shift on ${cell.dateKey}`}
+                                        onClick={() => removeAssignment(a)}
+                                      >
+                                        <X className="h-3 w-3" aria-hidden="true" />
+                                      </button>
+                                    </span>
+                                  ))}
+                                  {dayAssignments.length > 2 ? (
+                                    <button
+                                      type="button"
+                                      className="flex items-center text-xs text-slate-300 hover:text-blue-500"
+                                      onClick={() => setAssignDate(cell.dateKey)}
+                                    >
+                                      +{dayAssignments.length - 2} more
+                                    </button>
+                                  ) : null}
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Session 11 (R10-J): the reference's summary card — CardHeader
+              with border-b border-slate-100 ("Employee Schedule Summary —
+              {Month} {Year}") + p-0 content (empty on the reference at 0
+              assignments; the clone's per-department breakdown rides it as
+              the superset). */}
+          <div className="rounded-xl bg-card shadow-sm">
+            <div className="flex flex-col space-y-1.5 border-b border-slate-100 p-6">
+              <div className="font-semibold leading-none tracking-tight">
+                Employee Schedule Summary — {monthLabel(data.month)}
               </div>
             </div>
-            <div className="p-4">
-              <div className="grid grid-cols-7 gap-1.5 pb-1.5 text-center text-xs font-medium text-muted-foreground">
-                {WEEKDAYS.map((d) => (
-                  <span key={d}>{d}</span>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1.5">
-                {cells.map((cell, i) => {
-                  if (!cell.day || !cell.dateKey) {
-                    return <div key={`blank-${i}`} className="min-h-24 rounded-lg border bg-secondary/20" />;
-                  }
-                  const dayAssignments = assignmentsByDate.get(cell.dateKey) ?? [];
-                  return (
-                    <div
-                      key={cell.dateKey}
-                      className="flex min-h-24 flex-col gap-1 rounded-lg border bg-card p-1.5"
-                    >
-                      <span className="px-0.5 text-xs font-medium text-muted-foreground">{cell.day}</span>
-                      {dayAssignments.length === 0 ? (
-                        <button
-                          type="button"
-                          className="self-start rounded px-1 py-0.5 text-xs font-medium text-primary hover:bg-accent"
-                          onClick={() => setAssignDate(cell.dateKey)}
-                        >
-                          assign
-                        </button>
-                      ) : (
-                        <div className="flex flex-col gap-1">
-                          {dayAssignments.slice(0, 2).map((a) => (
-                            <span
-                              key={a.id}
-                              className="flex items-center justify-between gap-1 rounded border border-primary/25 bg-accent px-1.5 py-1 text-left text-xs"
-                            >
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate font-medium text-foreground">{a.employeeName}</span>
-                                <span className="block truncate text-muted-foreground">
-                                  {a.shiftName} {a.shiftTime}
-                                </span>
-                              </span>
-                              <button
-                                type="button"
-                                className="shrink-0 rounded p-0.5 text-muted-foreground hover:bg-secondary hover:text-red-600"
-                                aria-label={`Remove ${a.employeeName} shift on ${cell.dateKey}`}
-                                onClick={() => removeAssignment(a)}
-                              >
-                                <X className="h-3 w-3" aria-hidden="true" />
-                              </button>
-                            </span>
-                          ))}
-                          {dayAssignments.length > 2 ? (
-                            <button
-                              type="button"
-                              className="self-start rounded px-1 text-xs font-medium text-primary hover:bg-accent"
-                              onClick={() => setAssignDate(cell.dateKey)}
-                            >
-                              +{dayAssignments.length - 2} more
-                            </button>
-                          ) : null}
-                        </div>
-                      )}
+            <div className="p-0">
+              {summaryRows.length > 0 ? (
+                <div className="flex flex-col divide-y divide-slate-100">
+                  {summaryRows.map((row) => (
+                    <div key={row.shiftId} className="flex items-center justify-between px-6 py-3 text-sm">
+                      <span className="font-medium text-foreground">{row.shiftName}</span>
+                      <span className="text-muted-foreground">
+                        {row.count} assignment{row.count === 1 ? "" : "s"} · {row.time}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </>

@@ -202,6 +202,7 @@ export default function ComplianceDashboardPage() {
       <PageHeader
         section="Compliance Monitor"
         layout="flat36-sm"
+        actionsStart
         iconClassName="text-red-600"
         sectionIcon={<ShieldCheck aria-hidden="true" />}
         title="Compliance Dashboard"

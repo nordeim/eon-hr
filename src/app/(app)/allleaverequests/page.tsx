@@ -150,6 +150,7 @@ export default function AllLeaveRequestsPage() {
       <PageHeader
         section="Leave Management"
         layout="flat36"
+        actionsStart
         iconClassName="text-blue-600"
         sectionIcon={<Plane aria-hidden="true" />}
         title="Leave Requests"

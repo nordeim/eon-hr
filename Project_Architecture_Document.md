@@ -11,6 +11,11 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S11]` | session 11 | Parity round 10: two-pattern header action alignment (actionsStart), four action-free headers, toast viewport geometry, companywall composer precision, shiftcalendar toolbar + table calendar, kanban board restructure, reports icon chips, profile identity card, the systemic EmptyState mb-4 fix, cyan-700 palette pin. 302-spec pyramid (216 unit + 86 E2E). |
+
+
+| Tag | Source | Change |
+|---|---|---|
 | `[SYN]` | codebase | v1.0.0 initial document synthesized from the shipped codebase (46 routes, 49 API handlers, 45 models, 106 specs). |
 | `[S7]` | session 7 | Responsive boundary re-measured to md (768px); category-A mobile kickers; Add-Employee wizard converted to the reference's inline page view. |
 | `[CA]` | critical analysis | ADR set derived from actual tradeoffs: session strategy, ORM/database, mutation seam, Tailwind v4 engine traps, standalone deployment. |

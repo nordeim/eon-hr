@@ -28,7 +28,10 @@ export function EmptyState({
 }) {
   return (
     <div className={cn("p-12 text-center", className)}>
-      <div className="flex justify-center">
+      {/* Session 11 (R10 follow-up): the reference's icon carries mb-4 —
+          re-measured on BOTH payroll and loans (icon bottom → h3 = 16px);
+          the wrapper had no margin, shortening every empty state by 16px. */}
+      <div className="mb-4 flex justify-center">
         {icon ? (
           <div className="[&_svg]:h-16 [&_svg]:w-16 [&_svg]:text-slate-300">{icon}</div>
         ) : (

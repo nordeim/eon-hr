@@ -139,6 +139,11 @@
   --color-teal-600: #0d9488;
   --color-violet-600: #7c3aed;
 
+  /* cyan-700 (session 11, R10-A): the reference's attendance Devices
+     button text renders rgb(14,116,144) = v3 cyan-700 — the family was
+     entirely unpinned and teal-700 was the wrong shade (oklch drift). */
+  --color-cyan-700: #0e7490;
+
   /* Radii (v3 defaults) */
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, MessageSquarePlus, Play, CheckCircle2, X, Loader2, Reply } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Play, Plus, Reply, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,12 +31,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
-import { timeAgo } from "@/lib/utils";
+import { cn, timeAgo } from "@/lib/utils";
 
 interface StaffRequest {
   id: string;
@@ -88,6 +87,9 @@ export default function StaffRequestsPage() {
   const [busy, setBusy] = React.useState<string | null>(null);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  /** Session 11 (R10-P): the reference's search input (flex-1, 16px icon
+   *  at left-3 top-2.5) — ours filters the loaded list client-side. */
+  const [query, setQuery] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const [responding, setResponding] = React.useState<StaffRequest | null>(null);
 
@@ -120,6 +122,17 @@ export default function StaffRequestsPage() {
   React.useEffect(() => {
     if (params.get("new") === "1") setDialogOpen(true);
   }, [params]);
+
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return requests;
+    return requests.filter(
+      (r) =>
+        r.title.toLowerCase().includes(q) ||
+        (r.description ?? "").toLowerCase().includes(q) ||
+        r.requesterName.toLowerCase().includes(q)
+    );
+  }, [requests, query]);
 
   async function onSubmitRequest(data: Record<string, unknown>) {
     setSaving(true);
@@ -214,68 +227,83 @@ export default function StaffRequestsPage() {
         }
       />
 
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:flex-wrap">
-        <Button
-          variant={scope === "mine" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setScope(scope === "mine" ? "all" : "mine")}
-          aria-pressed={scope === "mine"}
-        >
-          My Requests ({mineCount})
-        </Button>
-        <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Filter by category">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Filter by status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Session 11 (R10-P): the reference's filter furniture — a BARE
+          `flex flex-wrap gap-3` row (search input flex-1 min-w-[200px]
+          with the 16px icon at left-3 top-2.5 + All Categories 160px +
+          All Status 144px at y=112), then the segmented `My Requests (N)`
+          toggle (`inline-flex h-9 items-center justify-center rounded-lg
+          bg-muted p-1`, trigger h-7 137px), then the card (mt-2) with the
+          py-16 empty state (48px FileText icon + one slate-500 line + the
+          207x36 CTA — measured y=280/340/380). */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Input
+            aria-label="Search requests"
+            placeholder="Search requests…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger className="w-40" aria-label="Filter by category">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="w-36" aria-label="Filter by status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Requests</CardTitle>
-          <CardDescription>
-            {requests.length} request{requests.length === 1 ? "" : "s"}
-            {scope === "mine" ? " submitted by you" : " across all departments"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="flex flex-col">
+      <div className="inline-flex h-9 self-start items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+        <button
+          type="button"
+          aria-pressed={scope === "mine"}
+          onClick={() => setScope(scope === "mine" ? "all" : "mine")}
+          className={cn(
+            "inline-flex h-7 items-center justify-center whitespace-nowrap rounded-md px-4 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            scope === "mine" ? "bg-background text-foreground shadow" : "hover:text-foreground"
+          )}
+        >
+          My Requests ({mineCount})
+        </button>
+      </div>
+
+      <Card className="mt-2">
+        <CardContent className="p-0">
+          {/* the card rides mt-2 under the toggle (8px, measured 208→216) */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
-          ) : requests.length === 0 ? (
-            <EmptyState
-              icon={<MessageSquarePlus className="h-6 w-6" />}
-              title="No requests found"
-              description="Submit your first request"
-              action={
+          ) : visible.length === 0 ? (
+            <div className="py-16 text-center">
+              <FileText className="mx-auto mb-3 h-12 w-12 text-slate-400" aria-hidden="true" />
+              <p className="text-slate-500">No requests found</p>
+              <div className="mt-4">
                 <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                  <Plus className="mr-2" aria-hidden="true" />
-                  New Request
+                  Submit your first request
                 </Button>
-              }
-            />
+              </div>
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -289,7 +317,7 @@ export default function StaffRequestsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {requests.map((request) => (
+                {visible.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="max-w-[320px]">
                       <div className="flex flex-col gap-1">
@@ -378,6 +406,7 @@ export default function StaffRequestsPage() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       <NewRequestDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onSubmitRequest} />
 

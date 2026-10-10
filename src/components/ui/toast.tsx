@@ -54,10 +54,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
+      {/* Session 11 (R10-D): the reference's Toaster viewport (measured
+          420px wide, bottom-right on sm+, z-100, flex-col-reverse —
+          newest toast nearest the bottom edge) renders even when empty.
+          The toast card interior is unmeasurable on the reference (every
+          action that would fire one is a dead control there), so the
+          clone's card design stays; only the viewport geometry matches. */}
       <div
         aria-live="polite"
         role="status"
-        className="pointer-events-none fixed bottom-4 right-4 z-[100] flex w-full max-w-sm flex-col gap-2"
+        className="pointer-events-none fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse gap-2 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:max-w-[420px]"
       >
         {items.map((t) => (
           <div

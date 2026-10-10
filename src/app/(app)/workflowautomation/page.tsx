@@ -197,6 +197,7 @@ export default function WorkflowAutomationPage() {
       <PageHeader
         section="Workflow Automation"
         layout="flat36"
+        actionsStart
         iconClassName="text-purple-600"
         sectionIcon={<Sparkles aria-hidden="true" />}
         title="Automated Workflows"

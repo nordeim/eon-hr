@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, Check, CircleDollarSign, DollarSign, HandCoins, Loader2, MoreHorizontal, Plus, Trash2, Wallet, X } from "lucide-react";
+import { Banknote, Check, CircleDollarSign, DollarSign, Loader2, MoreHorizontal, Plus, Trash2, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -180,6 +180,7 @@ export default function LoansPage() {
         mobileKicker
         mobileHeader="hidden"
         layout="raised-36"
+        actionsStart
         iconClassName="text-blue-600"
         sectionIcon={<DollarSign aria-hidden="true" />}
         title="Employee Loans"
@@ -192,28 +193,41 @@ export default function LoansPage() {
         }
       />
 
+      {/* Session 11 (R10-O): the reference's empty state — a
+          `md:grid-cols-1 lg:grid-cols-2 gap-6` wrapper carrying ONE bare
+          card (p-12 text-center): the 64px DollarSign icon, "No loans yet"
+          h3, the slate-500 line (mb-4) and the flat-primary CTA 194x36
+          (icon mr-2). The with-data table stays the clone's superset (the
+          reference's populated layout is unmeasurable — it renders no
+          loans). */}
+      {loading ? (
+        <div className="rounded-xl border bg-card shadow-sm">
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+          </div>
+        </div>
+      ) : loans.length === 0 ? (
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+          <div className="rounded-xl border bg-card shadow-sm lg:col-span-2">
+            <EmptyState
+              icon={<DollarSign className="h-6 w-6" aria-hidden="true" />}
+              title="No loans yet"
+              description="Create your first loan request"
+              action={
+                <Button onClick={() => setDialogOpen(true)}>
+                  <Plus className="mr-2" aria-hidden="true" />
+                  New Loan Request
+                </Button>
+              }
+            />
+          </div>
+        </div>
+      ) : (
       <div className="rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-1 p-5 pb-0">
           <h2 className="text-base font-semibold text-foreground">Loan Requests</h2>
           <p className="text-sm text-muted-foreground">Requests, approvals and repayment progress.</p>
         </div>
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-          </div>
-        ) : loans.length === 0 ? (
-          <EmptyState
-            icon={<HandCoins className="h-6 w-6" aria-hidden="true" />}
-            title="No loans yet"
-            description="Create your first loan request"
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Loan Request
-              </Button>
-            }
-          />
-        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -313,8 +327,8 @@ export default function LoansPage() {
               })}
             </TableBody>
           </Table>
-        )}
       </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">

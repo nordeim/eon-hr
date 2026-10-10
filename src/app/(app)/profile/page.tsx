@@ -246,43 +246,55 @@ export default function ProfilePage() {
         subtitle="Manage your personal information and preferences"
       />
 
-      {/* identity header */}
+      {/* identity header — Session 11 (R10-M): the reference's recipe —
+          CardContent p-6 > `flex items-center gap-6`: the 96px gradient
+          circle (sRGB-pinned — the reference's bg-gradient-to-br renders
+          sRGB in its v3 engine) carrying the 64px white circle-user ICON
+          (not initials), the flex-1 column (h2 text-2xl name, email
+          text-slate-600 mb-3, the Change Photo button 164x36 BELOW the
+          email), and the "User" role badge pinned right (blue-50 text
+          blue-700 border-blue-200, 53x22, vertically centered). */}
       <Card>
-        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <CardContent className="p-6">
           {loading || !profile ? (
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            <div className="flex items-center gap-6">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <div className="h-5 w-40 animate-pulse rounded bg-secondary" />
-                <div className="h-3.5 w-56 animate-pulse rounded bg-secondary" />
+                <div className="h-6 w-40 animate-pulse rounded bg-secondary" />
+                <div className="h-4 w-56 animate-pulse rounded bg-secondary" />
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                {profile.avatarUrl ? <AvatarImage src={profile.avatarUrl} alt={profile.name} /> : null}
-                <AvatarFallback className="text-lg">{initials(profile.name)}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="truncate text-lg font-semibold text-foreground">{profile.name}</p>
-                <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
-                {profile.jobTitle ? (
-                  <p className="truncate text-xs text-muted-foreground">{profile.jobTitle}</p>
-                ) : null}
+            <div className="flex items-center gap-6">
+              <div className="flex w-24 h-24 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)]">
+                {profile.avatarUrl ? (
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={profile.avatarUrl} alt={profile.name} />
+                  </Avatar>
+                ) : (
+                  <CircleUser className="h-16 w-16 text-white" aria-hidden="true" />
+                )}
               </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate text-2xl font-bold text-slate-900">{profile.name}</h2>
+                <p className="mb-3 truncate text-slate-600">{profile.email}</p>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    toast.toast({ title: "Change Photo", description: "Photo uploads are coming soon.", variant: "info" })
+                  }
+                >
+                  <Camera className="mr-2" aria-hidden="true" />
+                  Change Photo
+                </Button>
+              </div>
+              <span className="inline-flex shrink-0 items-center rounded-md border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                {profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "User"}
+              </span>
             </div>
           )}
-          <Button
-            variant="outline"
-            onClick={() =>
-              toast.toast({ title: "Change Photo", description: "Photo uploads are coming soon.", variant: "info" })
-            }
-          >
-            <Camera aria-hidden="true" />
-            Change Photo
-          </Button>
         </CardContent>
       </Card>
 

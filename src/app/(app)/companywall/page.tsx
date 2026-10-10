@@ -176,69 +176,71 @@ export default function CompanyWallPage() {
         subtitle="Stay connected with your team"
       />
 
-      {/* composer — session 10 (R9-B): reference structure. Row 1 = the
-          40px initials avatar beside a label-less textarea (placeholder
-          "Share an update with your team…", 78px tall); row 2 = the
-          "Who can see this post?" label over a FULL-WIDTH select; row 3 =
-          Photo/Video (h-8, 12px) left, Post (h-9 gradient) right. */}
+      {/* composer — session 11 (R10-C) rebuilt to the measured reference
+          recipe: CardContent p-6 > one `flex items-start gap-4` row
+          wrapping the 40px initials avatar (sRGB-pinned gradient — trap 3;
+          the reference's own bg-gradient-to-br renders sRGB in its v3
+          engine, 16px/600 initials) beside a `flex-1 space-y-4` column
+          (textarea min-h-[60px] rows=3 → 78px; space-y-2 label+select
+          group; flex items-center justify-between action row). Every icon
+          carries the reference's mr-2 (16px effective icon-text gap);
+          Photo/Video = h-8 px-3 text-xs outline; Post = flat primary h-9
+          with the leading Send icon. */}
       <Card>
-        <CardContent className="flex flex-col gap-4 p-5">
-          <div className="flex gap-4">
-            <div className="flex h-10 w-10 rounded-full shrink-0 items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-semibold text-white" aria-hidden="true">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,#3b82f6,#6366f1)] text-base font-semibold text-white" aria-hidden="true">
               {(userName || "E").trim().charAt(0).toUpperCase()}
             </div>
-            <Textarea
-              aria-label="Share an update"
-              placeholder="Share an update with your team..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              maxLength={2000}
-              className="min-h-[78px]"
-            />
-          </div>
-          {/* Rows 2-3 indent to the textarea column (avatar 40 + gap 16 =
-              56px, pl-14) — the reference aligns the label, select,
-              Photo/Video and Post at the textarea's left edge, not the
-              card padding. */}
-          <div className="flex flex-col gap-4 pl-14">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="post-audience">Who can see this post?</Label>
-              <Select value={audience} onValueChange={setAudience}>
-                <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AUDIENCE_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toast.toast({ title: "Attach coming soon", description: "Photo uploads land in a future update.", variant: "info" })}
-                >
-                  <ImageIcon aria-hidden="true" />
-                  Photo
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toast.toast({ title: "Attach coming soon", description: "Video uploads land in a future update.", variant: "info" })}
-                >
-                  <Video aria-hidden="true" />
-                  Video
+            <div className="flex-1 space-y-4">
+              <Textarea
+                aria-label="Share an update"
+                placeholder="Share an update with your team..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                maxLength={2000}
+                rows={3}
+                className="min-h-[60px]"
+              />
+              <div className="space-y-3">
+                <Label className="block leading-5" htmlFor="post-audience">Who can see this post?</Label>
+                <Select value={audience} onValueChange={setAudience}>
+                  <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AUDIENCE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toast.toast({ title: "Attach coming soon", description: "Photo uploads land in a future update.", variant: "info" })}
+                  >
+                    <ImageIcon className="mr-2" aria-hidden="true" />
+                    Photo
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toast.toast({ title: "Attach coming soon", description: "Video uploads land in a future update.", variant: "info" })}
+                  >
+                    <Video className="mr-2" aria-hidden="true" />
+                    Video
+                  </Button>
+                </div>
+                <Button onClick={onPost} disabled={posting}>
+                  {posting ? <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" /> : <Send className="mr-2" aria-hidden="true" />}
+                  Post
                 </Button>
               </div>
-              <Button onClick={onPost} disabled={posting}>
-                {posting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
-                Post
-              </Button>
             </div>
           </div>
         </CardContent>

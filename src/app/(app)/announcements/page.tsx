@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Megaphone, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { initials, timeAgo } from "@/lib/utils";
@@ -126,14 +125,6 @@ export default function AnnouncementsPage() {
         title="Company Announcements"
         size="md"
         subtitle="Stay informed with the latest updates"
-        actions={
-          canPost ? (
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2" aria-hidden="true" />
-              New Announcement
-            </Button>
-          ) : undefined
-        }
       />
 
       {loading ? (
@@ -141,12 +132,22 @@ export default function AnnouncementsPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : announcements.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<Megaphone className="h-6 w-6" aria-hidden="true" />}
-            title="No announcements at this time"
-            description="Company-wide announcements will appear here."
-          />
+        /* Session 11 (R10-H): the reference's bare empty state — a plain
+           centered `py-16 text-slate-400` line inside a space-y-3 wrapper,
+           NO card, no icon (measured 1120x152). The working New
+           Announcement dialog keeps ONE entry for posting roles: a small
+           centered CTA below the reference's own text (the training-slot
+           pattern — a superset button riding the reference's furniture). */
+        <div className="space-y-3">
+          <p className="py-16 text-center text-slate-400">No announcements at this time</p>
+          {canPost ? (
+            <div className="flex justify-center pb-4">
+              <Button variant="outline" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-2" aria-hidden="true" />
+                New Announcement
+              </Button>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

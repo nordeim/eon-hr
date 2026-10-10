@@ -117,6 +117,7 @@ export default async function AdvancedAnalyticsPage() {
       <PageHeader
         section="Advanced Analytics"
         layout="flat36"
+        actionsStart
         iconClassName="text-blue-600"
         sectionIcon={<TrendingUp aria-hidden="true" />}
         title="Analytics & Insights"

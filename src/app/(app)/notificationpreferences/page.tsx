@@ -154,15 +154,19 @@ export default function NotificationPreferencesPage() {
       />
 
       {/* Session 10 (R9-D): the reference renders a 3-col mini-centered
-          stat row — Unread / Total / a centered Mark All Read button card
-          (the header carries no actions there). */}
+          stat row — Unread / Total / a Mark All Read button card
+          (the header carries no actions there). Session 11 (R10-R): the
+          button card's interior is `p-4 flex items-center justify-center`
+          (content-height, TOP-aligned in the stretched 86px cell — the
+          button sits at y=121, not vertically centered) with an
+          h-8 outline button (12px, CheckCheck mr-1). */}
       <div className="grid grid-cols-3 gap-4">
         <StatCard variant="mini-centered" label="Unread" value={unread} />
         <StatCard variant="mini-centered" label="Total" value={total} />
-        <Card className="flex items-center justify-center">
-          <CardContent className="p-4 text-center">
-            <Button variant="outline" onClick={onMarkAllRead} disabled={marking || unread === 0}>
-              {marking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CheckCheck aria-hidden="true" />}
+        <Card>
+          <CardContent className="flex items-center justify-center p-4">
+            <Button variant="outline" size="sm" onClick={onMarkAllRead} disabled={marking || unread === 0}>
+              <CheckCheck className="mr-1" aria-hidden="true" />
               Mark All Read
             </Button>
           </CardContent>
