@@ -92,4 +92,6 @@ Project_Architecture_Document.md (test matrix), eon-hr_SKILL.md (W-1
 pattern + counts), docs/remediation-plan-session8.md (+ completion
 record), this session log, worklog.md.
 
-Pushed as `<commit>` to `main` via the SSH wrapper.
+Pushed as `c6d2965` to `main` via the SSH wrapper (fingerprint-verified
+`SHA256:3ddaNlFh…`, key shredded, remote ref re-verified, post-push smoke
+green: /api/health ok+db up, /login 200).
