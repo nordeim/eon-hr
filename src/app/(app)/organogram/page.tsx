@@ -133,6 +133,7 @@ export default async function OrganogramPage() {
       <PageHeader
         section="Organization Structure"
         layout="flat36"
+        centered
         iconClassName="text-teal-600"
         sectionIcon={<Users aria-hidden="true" />}
         title="Organogram"

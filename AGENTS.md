@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 144 specs) |
+| Unit tests | `bun run test` (Vitest, 164 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -119,15 +119,32 @@ sweep at 700/767/768/800/900/1024 on both apps. The shell classes are
 `hidden md:flex` (sidebar) and `md:hidden` (all mobile chrome); never
 re-introduce `lg:` chrome classes.
 
-## Mobile page kickers (session 7)
+## Mobile page kickers (session 7; re-pinned session 9)
 
 Seven "category A" routes render the reference's mobile kicker (`md:hidden
-sticky top-[73px] z-20 bg-white border-b border-slate-200 px-4 py-3`, h1
-18px/700) and hide their desktop PageHeader below md via `mobileKicker` +
+bg-white border-b border-slate-200 px-4 py-3`, h1 18px/700) and hide
+their desktop PageHeader below md via `mobileKicker` +
 `mobileHeader="hidden"` props: employees, payroll, taskmanager,
 leavemanagement, expenses, loans (+ profile: kicker only, header stays).
 The other ~35 routes render their full header at mobile (reference
 behavior). Pinned by `tests/unit/shell-recipes.test.ts` + E2E.
+**Session 9 (R8-G): the kicker is a STATIC bar** — the redeployed
+reference's `sticky top-0` sits inside a non-scrolling wrapper stack, so
+the bar scrolls away with the content (only the 73px top bar stays
+pinned). Do not re-add `sticky top-[73px]`.
+
+## PageHeader contract (sessions 5–9)
+
+Six badge recipes (raised-48/raised-36/flat36/flat36-sm/flat48/flat-tight)
+pin badge/h1/subtitle positions; **the raised mt-8 offset lives on the ROW**
+(`recipe.row`), badge pages only, so `sm:items-center` lands the actions
+cluster on the h1 row like the reference (taskmanager y=116, employees
+y=46 — never `items-start`). Actions cluster is `gap-3`. Four pages
+(training, evaluations, companywall, organogram) pass `centered` for the
+reference's text-center headers; five small pages
+(recruitmentkanban, hrreports, staffrequests, notificationpreferences,
+workflowconfigpage) use `size="md"` (24px h1). The per-page matrix is
+pinned by `tests/unit/recipes.test.ts`.
 
 ## Page architecture (session 6) — where padding and gradients live
 

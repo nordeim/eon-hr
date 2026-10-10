@@ -99,7 +99,9 @@ export default function SecuritySettingsPage() {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
       <PageHeader
         section="Security Configuration"
-        sectionIcon={<ShieldCheck aria-hidden="true" />}
+        layout="flat36"
+        iconClassName="text-blue-600"
+        sectionIcon={<Shield aria-hidden="true" />}
         title="Security Settings"
         subtitle="Configure security settings for your HR system"
       />

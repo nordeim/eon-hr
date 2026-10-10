@@ -154,6 +154,7 @@ export default function HRReportsPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
       <PageHeader
+        size="md"
         title="HR Reports & Analytics"
         subtitle="Create custom charts and export data for management reviews"
         actions={

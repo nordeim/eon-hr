@@ -62,16 +62,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
-      {/* Mobile page-title kicker (session-6 re-measurement): the reference
-          renders `md:hidden sticky top-0 z-20 bg-white border-b
+      {/* Mobile page-title kicker (session-6 re-measurement; session 9
+          R8-G re-pin): the reference renders `md:hidden … bg-white border-b
           border-slate-200 px-4 py-3` INSIDE its p-4 page wrapper (so the
           bar is inset 16px — NOT full-bleed — and the title lands at
-          x=32/y=101, 18px/700 slate-900, truncate). It STICKS below the
-          73px top bar while content scrolls (the session-3 "overflow-hidden
-          ancestor" conclusion was wrong — the ancestor is overflow-auto,
-          sticky works; replicated here with the explicit top-[73px] offset
-          because this app scrolls at the page level). */}
-      <div className="md:hidden sticky top-[73px] z-20 border-b border-slate-200 bg-white px-4 py-3">
+          x=32/y=101, 18px/700 slate-900, truncate). After the reference's
+          redeploy its `sticky top-0` became inert (non-scrolling wrapper
+          stack; measured: the kicker scrolls away, window scrolls) — the
+          clone matches the rendered truth with a static bar. */}
+      <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-bold text-slate-900 truncate">Dashboard</h1>

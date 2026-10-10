@@ -141,6 +141,7 @@ export default function TrainingPage() {
       <PageHeader
         section="Learning Management System"
         layout="flat48"
+        centered
         iconClassName="text-purple-600"
         sectionIcon={<Video aria-hidden="true" />}
         title="Training Center"

@@ -201,6 +201,7 @@ export default function EvaluationsPage() {
       <PageHeader
         section="Performance Management"
         layout="flat48"
+        centered
         iconClassName="text-indigo-600"
         sectionIcon={<ClipboardCheck aria-hidden="true" />}
         title="360° Evaluations & Appraisals"

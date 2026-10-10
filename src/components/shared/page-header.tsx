@@ -24,32 +24,43 @@ import { cn } from "@/lib/utils";
  * announcements uses `size="md"` (24px h1, 14px sub).
  */
 const HEADER_LAYOUTS = {
+  // Session 9 (R8-A companion): the raised recipes carry their 32px offset
+  // on the ROW (`row: "mt-8"`), not on the badge — the reference's header
+  // row starts at y=64 (140px tall) so its items-center lands the actions
+  // on the h1 row (y=116). With mt-8 on the badge the clone's row grew to
+  // 172px and centered the actions at y=100.
   "raised-48": {
-    badge: "mb-4 mt-8",
+    row: "mt-8",
+    badge: "mb-4",
     h1: "text-4xl md:text-5xl mb-3",
     sub: "text-lg text-slate-600",
   },
   "raised-36": {
-    badge: "mb-4 mt-8",
+    row: "mt-8",
+    badge: "mb-4",
     h1: "text-4xl mb-3",
     sub: "text-lg text-slate-600",
   },
   "flat36": {
+    row: "",
     badge: "mb-4",
     h1: "text-4xl mb-3",
     sub: "text-lg text-slate-600",
   },
   "flat36-sm": {
+    row: "",
     badge: "mb-4",
     h1: "text-4xl mb-2",
     sub: "text-slate-600",
   },
   "flat48": {
+    row: "",
     badge: "mb-4",
     h1: "text-4xl md:text-5xl mb-3",
     sub: "text-lg text-slate-600",
   },
   "flat-tight": {
+    row: "",
     badge: "mb-3",
     h1: "text-4xl",
     sub: "text-slate-600 mt-1",
@@ -72,6 +83,7 @@ export function PageHeader({
   mobileKicker = false,
   mobileKickerTitle,
   mobileHeader = "visible",
+  centered = false,
 }: {
   section?: string;
   sectionIcon?: React.ReactNode;
@@ -100,13 +112,21 @@ export function PageHeader({
    *  reference wraps its desktop header in a hidden md:flex div on the
    *  category-A routes (page actions are desktop-only there). */
   mobileHeader?: "visible" | "hidden";
+  /** Session 9 (R8-B): training / evaluations / companywall / organogram
+   *  wrap their header block in `text-center` on the reference — the
+   *  badge (inline-flex), h1 and subtitle all center. */
+  centered?: boolean;
 }) {
   const hasBadge = Boolean(section);
   const recipe = HEADER_LAYOUTS[layout];
   return (
     <>
       {mobileKicker ? (
-        <div className="md:hidden sticky top-[73px] z-20 border-b border-slate-200 bg-white px-4 py-3">
+        // Session 9 (R8-G): the redeployed reference's kicker is no longer
+        // effectively sticky — its `sticky top-0` sits inside a non-scrolling
+        // wrapper stack (measured: window scrolls, kicker scrolls away,
+        // y=-89 at scrollY=178). Static bar matches the rendered truth.
+        <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <h1 className="text-lg font-bold text-slate-900 truncate">{mobileKickerTitle ?? title}</h1>
@@ -116,12 +136,20 @@ export function PageHeader({
       ) : null}
       <div
         className={cn(
-          "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+          // Session 9 (R8-A): the reference centers the actions cluster in
+          // the whole header block (items-center) — taskmanager's button
+          // lands on the h1 row (y=116), employees' at y=46. Not items-start.
+          // The raised recipes offset the ROW (recipe.row) so the centered
+          // block is the reference's 140px header, not 172px.
+          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+          // The raised offset belongs to BADGE pages only — the reference's
+          // bare-page rows (employees, analytics, templates…) start at y=32.
+          hasBadge && recipe.row,
           mobileHeader === "hidden" && "hidden md:flex",
           className
         )}
       >
-      <div className="min-w-0">
+      <div className={cn("min-w-0", centered && "text-center")}>
         {hasBadge ? (
           <div
             className={cn(
@@ -160,7 +188,7 @@ export function PageHeader({
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center gap-3 shrink-0">{actions}</div> : null}
       </div>
     </>
   );

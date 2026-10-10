@@ -206,6 +206,10 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
+        section="HR Reports & Analytics"
+        layout="flat36"
+        iconClassName="text-blue-600"
+        sectionIcon={<FileText aria-hidden="true" />}
         title="Reports"
         subtitle="Generate comprehensive HR reports across all modules"
       />

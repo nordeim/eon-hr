@@ -376,3 +376,24 @@ Work Log:
 Stage Summary:
 - Parity round 7 complete: wizard interior byte-identical (gradient sRGB, arrow CTA, 872px card); mobile navigation verified end-to-end with zero gaps
 - 144 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 20 (session 9 / parity round 8)
+Agent: main (Super Z)
+Task: Workspace re-validation, audit vs the redeployed reference, parity round 8 (header recipes, actions alignment, employees filter row, page-root repair), docs + push
+
+Work Log:
+- git pull (6787f8e — brought in docs/session_9.md, the prior conversation's transcript); workspace intact (.env + db/ + node_modules from the prior session); re-validated every gate from scratch: lint 0/0, tsc, 144/144 unit, build, 86/86 E2E — the session-8 push state exactly
+- Audit per repo skills (code-review-and-audit methodology, agent-browser dual-session, tdd-workflow, avant-garde mobile-nav taxonomy A–H): secret scan clean on the session-8 diff; no any/empty-catch/eval/dangerouslySetInnerHTML/@ts-ignore in src/; process.env confined to server seams; mobile-nav failure classes A–H all absent
+- Dual-browser parity audit (reference eon.base44.app + clone localhost:3000, DOM ground truth): discovered the REFERENCE WAS REDEPLOYED since session 8. Mobile nav (user priority) verified still byte-identical: top bar 73px, 5 bottom tabs, drawer 288×844 #FAFAFA + rgba(0,0,0,0.8) overlay, submenu expansion + navigation, kicker geometry y=89/h=53, 800px boundary, sidebar 256px, wizard 896×872 @ (400,128) with 97×36 Next + sRGB gradient, login 448/slate-900/48px, dashboard cards 160/222 + 406/162
+- Full 46-route header sweep (both sides, long-wait verified) + targeted probes found 7 gaps: R8-A actions top-aligned (ref centers in the header block, items-center + gap-3, raised offset on the ROW); R8-B centered headers on training/evaluations/companywall/organogram; R8-C wrong recipes on 9 pages (payrollengine flat-tight + emerald-600 Calculator, advancedanalytics + securitysettings flat36, securitysettings Shield-not-ShieldCheck, reports' missing "HR Reports & Analytics" FileText badge, 5 small pages at 24px size="md"); R8-D /analyticsdashboard missing its page root entirely (h1 y=0, no canvas — session-6 S2 codemod miss); R8-E employees filter row (native 125×36 select + 256px search + Grid3x3 toggles + 32/24 rhythm vs our full-width Radix stack); R8-F templates subtitle is a live count; R8-G the mobile kicker is now static on the reference (its sticky top-0 sits in a non-scrolling wrapper stack; measured y=-89 at scrollY=178)
+- Documented reference regressions (clone keeps the superset): drawer no longer auto-closes on the ref (3/3 trials); ref /employeeselfservice stuck "Loading your profile…"; ref /hrreports blank at mobile; ref renders nothing at 0 employees (our EmptyState stays); ref advancedanalytics badge wraps to 56px at mobile
+- Wrote + codebase-validated docs/remediation-plan-session9.md, then executed TDD: 20 RED pins (session-9 blocks in shell-recipes + recipes tests; 2 stale sticky pins inverted) → GREEN (page-header.tsx recipe.row structure + items-center + gap-3 + centered prop + static kicker; 9 page files; analyticsdashboard root; employees filter restructure with native select; dashboard kicker; templates count). Live verify caught one follow-up: the raised mt-8 must sit on the ROW (badge pages only) or items-center computes against a 172px block (button y=100, not 116) — fixed + pinned
+- Gates: lint 0/0, tsc, 164/164 unit (was 144), build (unset DATABASE_URL), 86/86 E2E (kicker specs re-pinned to static)
+- Live dual-browser re-verify: every fixed surface byte-identical (taskmanager btn y=116, employees btn y=46 + card y=128 + mobile filter 191/125@159 + toggles y=211, 9 recipes, 4 centered headers, analyticsdashboard sRGB gradient + h1 y=32, templates "0 templates available", kicker static y=89→-89@178)
+- 24 screenshots refreshed via capture-all (production standalone); DB pristine (users=1, employees=1, leaveBalances=2)
+- Docs updated: AGENTS.md (164 specs + PageHeader contract + kicker re-pin), CLAUDE.md (counts + unit description), README.md (counts), PAD (test matrix + checklist), eon-hr_SKILL.md (v2.2.0 + session-9 recipe layer + static-kicker re-pin), docs/remediation-plan-session9.md (+ completion record), docs/session_10.md, worklog.md
+
+Stage Summary:
+- Parity round 8 complete: header recipes, actions centering, centered headers, analyticsdashboard root, employees filter row, templates count, static kicker — every fixed surface verified live against the redeployed reference
+- 164 unit + 86 E2E green; ready for commit + push

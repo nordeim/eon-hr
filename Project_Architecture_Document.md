@@ -406,8 +406,8 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
 | Design tokens | 1 | 16 | `tests/unit/tokens.test.ts` | Vitest |
-| Parity recipes (s5/s6) | 1 | 59 | `tests/unit/recipes.test.ts` | Vitest |
-| Shell recipes (s7/s8: boundary/kickers/wizard) | 1 | 27 | `tests/unit/shell-recipes.test.ts` | Vitest |
+| Parity recipes (s5/s6/s9) | 1 | 69 | `tests/unit/recipes.test.ts` | Vitest |
+| Shell recipes (s7/s8/s9: boundary/kickers/wizard/header recipes) | 1 | 37 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
 | E2E mobile navigation + boundary | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
@@ -428,9 +428,9 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 52/52
+- [ ] `bun run test` — 164/164
 - [ ] `bun run build` succeeds
-- [ ] `bun run test:e2e` — 78/78
+- [ ] `bun run test:e2e` — 86/86
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)
 - [ ] Screenshots in `docs/screenshots/` refreshed if UI changed
 

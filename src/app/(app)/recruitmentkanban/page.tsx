@@ -175,6 +175,7 @@ export default function RecruitmentKanbanPage() {
     <div className="p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
+        size="md"
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"
         actions={

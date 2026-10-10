@@ -48,6 +48,13 @@ const BADGE_PAGES: Record<
   "/attendance": { layout: "flat48", icon: "text-blue-600" },
   "/shiftcalendar": { layout: "flat-tight", icon: "text-violet-600" },
   "/documenttracker": { layout: "flat-tight", icon: "text-blue-600" },
+  // Session 9 (R8-C): the redeployed reference's measured recipes for the
+  // four pages the session-5 sweep left on the raised-48 default (and the
+  // reports badge the clone never carried).
+  "/payrollengine": { layout: "flat-tight", icon: "text-emerald-600" },
+  "/advancedanalytics": { layout: "flat36", icon: "text-blue-600" },
+  "/securitysettings": { layout: "flat36", icon: "text-blue-600" },
+  "/reports": { layout: "flat36", icon: "text-blue-600" },
 };
 
 describe("sidebar-nav reference recipe (session 5)", () => {
@@ -138,8 +145,11 @@ describe("PageHeader reference recipes (session 5)", () => {
     ]) {
       expect(pageHeader).toContain(`"${layout}"`);
     }
-    // raised = mt-8 badge (y 64/116); flat = badge at y=32
-    expect(pageHeader).toContain("mb-4 mt-8");
+    // raised = row-level mt-8 (session 9: the reference offsets the whole
+    // header row — items-center then lands the actions on the h1 row,
+    // y=116); flat = badge at y=32 (no row offset)
+    expect(pageHeader).toContain('row: "mt-8"');
+    expect(pageHeader).not.toContain("mb-4 mt-8");
     // flat-tight = mb-3 badge + bare h1 + mt-1 subtitle
     expect(pageHeader).toContain("text-slate-600 mt-1");
   });
@@ -148,7 +158,10 @@ describe("PageHeader reference recipes (session 5)", () => {
 describe("per-page header matrix (session 5)", () => {
   for (const [route, spec] of Object.entries(BADGE_PAGES)) {
     it(`${route} pins layout=${spec.layout} icon=${spec.icon}`, () => {
-      const page = read("src", "app", "(app)", route.slice(1), "page.tsx");
+      // /reports is a server page delegating to the reports-browser client
+      // component — its PageHeader lives there (session 9).
+      const file = route === "/reports" ? "reports-browser.tsx" : "page.tsx";
+      const page = read("src", "app", "(app)", route.slice(1), file);
       expect(page).toContain(`layout="${spec.layout}"`);
       expect(page).toContain(`iconClassName="${spec.icon}"`);
     });
@@ -157,6 +170,31 @@ describe("per-page header matrix (session 5)", () => {
   it("attendance replicates the reference's tall-title quirk", () => {
     const page = read("src", "app", "(app)", "attendance", "page.tsx");
     expect(page).toContain('titleClassName="leading-[2]"');
+  });
+});
+
+describe("session-9 small-page headers (R8-C)", () => {
+  // Reference: bare 24px h1 (no badge) — the size="md" recipe. Measured
+  // y=32 (recruitmentkanban, staffrequests) and y=24 (hrreports,
+  // notificationpreferences, workflowconfigpage — the p-6 wrapper pages).
+  const SMALL_PAGES = [
+    "recruitmentkanban",
+    "hrreports",
+    "staffrequests",
+    "notificationpreferences",
+    "workflowconfigpage",
+  ] as const;
+
+  for (const page of SMALL_PAGES) {
+    it(`/${page} renders the 24px size="md" h1`, () => {
+      const src = read("src", "app", "(app)", page, "page.tsx");
+      expect(src).toContain('size="md"');
+    });
+  }
+
+  it("announcements keeps its existing size=\"md\" (24px) match", () => {
+    const src = read("src", "app", "(app)", "announcements", "page.tsx");
+    expect(src).toContain('size="md"');
   });
 });
 
@@ -262,13 +300,15 @@ describe("dashboard card recipes (session 6)", () => {
     expect(dashboard).not.toContain("grid grid-cols-2 gap-3");
   });
 
-  it("mobile kicker is sticky below the 73px top bar with px-4 py-3", () => {
-    // Reference: md:hidden sticky top-0 z-20 bg-white border-b
+  it("mobile kicker is the reference bar (static after the session-9 re-pin)", () => {
+    // Reference (session 6): md:hidden sticky top-0 z-20 bg-white border-b
     // border-slate-200 px-4 py-3 (inside the p-4 page wrapper, so title
     // x=32); h1 text-lg font-bold text-slate-900 truncate.
-    expect(dashboard).toContain("sticky top-[73px] z-20");
-    expect(dashboard).toContain("md:hidden");
-    expect(dashboard).toContain("px-4 py-3");
+    // Session 9 (R8-G): the redeployed reference's sticky became inert
+    // (non-scrolling wrapper stack — the kicker scrolls away); the clone
+    // matches the rendered truth with a static bar.
+    expect(dashboard).not.toContain("sticky top-[73px]");
+    expect(dashboard).toContain("md:hidden border-b border-slate-200 bg-white px-4 py-3");
     expect(dashboard).toMatch(/text-lg font-bold text-slate-900 truncate/);
   });
 

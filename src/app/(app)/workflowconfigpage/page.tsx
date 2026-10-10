@@ -169,6 +169,7 @@ export default function WorkflowConfigPage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
       <PageHeader
+        size="md"
         title="Approval Workflow Engine"
         subtitle="Configure multi-level approval hierarchies for requests and expenses"
         actions={

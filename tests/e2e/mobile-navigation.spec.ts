@@ -135,14 +135,18 @@ test.describe("mobile navigation", () => {
   });
 });
 
-test.describe("mobile page kicker (session 6)", () => {
-  test("dashboard kicker is sticky below the 73px top bar", async ({ page }) => {
-    // Reference (session-6 mobile measurement): md:hidden sticky bar with
-    // bg-white, border-b slate-200, px-4 py-3 — INSIDE the p-4 page wrapper
-    // (x=16, y=89), title "Dashboard" 18px/700 slate-900 at x=32/y=101.
-    // It sticks directly below the 73px top bar while content scrolls.
+test.describe("mobile page kicker (session 6, re-pinned session 9)", () => {
+  test("dashboard kicker renders the reference bar and scrolls away with content", async ({ page }) => {
+    // Session-6 mobile measurement: md:hidden bar with bg-white, border-b
+    // slate-200, px-4 py-3 — INSIDE the p-4 page wrapper (x=16, y=89), title
+    // "Dashboard" 18px/700 slate-900 at x=32/y=101.
+    // Session 9 (R8-G): the redeployed reference's kicker is no longer
+    // effectively sticky — its `sticky top-0` sits inside a non-scrolling
+    // wrapper stack, so it scrolls away with the content (measured live:
+    // kicker y=-89 at scrollY=178 while the 73px top bar stays). The clone
+    // pins the rendered truth: a static bar.
     await page.goto("/dashboard");
-    const kicker = page.locator("div.sticky").filter({ hasText: "Dashboard" }).first();
+    const kicker = page.locator("main div.md\\:hidden").filter({ hasText: "Dashboard" }).first();
     await expect(kicker).toBeVisible();
     const box = await kicker.boundingBox();
     expect(box).not.toBeNull();
@@ -153,23 +157,25 @@ test.describe("mobile page kicker (session 6)", () => {
     await expect(h1).toHaveCSS("font-size", "18px");
     await expect(h1).toHaveCSS("font-weight", "700");
     await expect(h1).toHaveCSS("color", "rgb(15, 23, 42)");
-    // scroll: the kicker stays pinned under the top bar
+    // scroll: the kicker scrolls away with the content (reference behavior
+    // after its redeploy — the 73px top bar is the only sticky chrome)
+    await expect(kicker).toHaveCSS("position", "static");
     await page.evaluate(() => window.scrollTo(0, 400));
-    await expect(kicker).toHaveCSS("position", "sticky");
     const scrolled = await kicker.boundingBox();
     expect(scrolled).not.toBeNull();
-    expect(Math.round(scrolled!.y)).toBe(73);
+    expect(Math.round(scrolled!.y)).toBeLessThan(89);
   });
 
   test("category-A module pages render the mobile kicker (session 7)", async ({ page }) => {
     // Session-7 390×844 sweep of ALL 46 reference routes: 7 routes render a
-    // sticky page-title kicker and hide the desktop header below md
-    // (employees, payroll, taskmanager, leavemanagement, expenses, loans,
-    // profile). The reference /taskmanager shows "Tasks & Projects" at
-    // y=89, 18px/700 — the session-6 "no kicker on modules" pin measured
-    // a dead surface.
+    // page-title kicker and hide the desktop header below md (employees,
+    // payroll, taskmanager, leavemanagement, expenses, loans, profile).
+    // The reference /taskmanager shows "Tasks & Projects" at y=89, 18px/700
+    // — the session-6 "no kicker on modules" pin measured a dead surface.
+    // Session 9 (R8-G): the kicker is a static bar (the reference's sticky
+    // became inert after its redeploy).
     await page.goto("/taskmanager");
-    const kicker = page.locator("main div.sticky").filter({ hasText: "Tasks & Projects" }).first();
+    const kicker = page.locator("main div.md\\:hidden").filter({ hasText: "Tasks & Projects" }).first();
     await expect(kicker).toBeVisible();
     const box = await kicker.boundingBox();
     expect(Math.round(box?.x ?? 0)).toBe(16);

@@ -116,6 +116,8 @@ export default async function AdvancedAnalyticsPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Advanced Analytics"
+        layout="flat36"
+        iconClassName="text-blue-600"
         sectionIcon={<TrendingUp aria-hidden="true" />}
         title="Analytics & Insights"
         subtitle="Comprehensive HR analytics and predictive insights"

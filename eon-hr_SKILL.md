@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.0.0 (session-2 remediation complete) · **Last updated:**
-> 2026-10-09 · **State:** 52 unit + 78 E2E tests green, lint/typecheck/build
+> **Version:** 2.2.0 (session-9 remediation complete) · **Last updated:**
+> 2026-10-10 · **State:** 164 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -437,7 +437,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 144/144 (db-path 15, auth 14, utils 13, tokens 16, recipes 86)
+bun run test          # vitest — 164/164 (db-path 15, auth 14, utils 13, tokens 16, recipes 69, shell-recipes 37)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -769,7 +769,7 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           52 unit (4 files) + 78 e2e (5 specs, workers:1)
+tests           164 unit (6 files) + 86 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
@@ -835,7 +835,8 @@ right_bottom,X,Y)] p-4 md:p-8`) with the content wrapper nested inside;
   `hidden md:flex`, all mobile chrome `md:hidden` — never `lg:`.
 - **Category-A mobile kickers** (employees, payroll, taskmanager,
   leavemanagement, expenses, loans + profile-kicker-only): `md:hidden
-  sticky top-[73px] z-20 bg-white border-b border-slate-200 px-4 py-3`
+  bg-white border-b border-slate-200 px-4 py-3` (session 9: STATIC —
+  the redeployed reference's sticky became inert; the bar scrolls away)
   with h1 `text-lg font-bold text-slate-900 truncate` (y=89 h=53 at
   390×844); the desktop PageHeader block gets `hidden md:flex` via the
   `mobileHeader="hidden"` prop (page actions are desktop-only there —
@@ -856,7 +857,49 @@ right_bottom,X,Y)] p-4 md:p-8`) with the content wrapper nested inside;
   v4 serializes the utility form as oklab(); the arbitrary rgba form
   matches the reference's computed string byte-for-byte.
 
-**Mobile page kicker (dashboard only):** `md:hidden sticky top-[73px] z-20
-bg-white border-b border-slate-200 px-4 py-3` inside the p-4 page wrapper
-(x=16, y=89; title x=32/y=101, 18px/700 slate-900, truncate) — it sticks
-below the 73px top bar on scroll. Module pages have NO kicker.
+**Mobile page kicker (dashboard only):** `md:hidden bg-white border-b
+border-slate-200 px-4 py-3` inside the p-4 page wrapper
+(x=16, y=89; title x=32/y=101, 18px/700 slate-900, truncate) — session 9
+re-pin: the bar is STATIC (the redeployed reference's sticky became inert
+inside a non-scrolling wrapper stack; it scrolls away with the content,
+measured y=-89 at scrollY=178). Module pages have NO kicker.
+
+**Session-9 recipe layer — header recipes, actions alignment, employees
+filter row (parity round 8):**
+
+- **PageHeader actions center in the header block** (`sm:items-center`,
+  actions cluster `flex gap-3`). The raised recipes carry their 32px offset
+  on the ROW (`recipe.row: "mt-8"`, badge pages only) — so the centered
+  block is the reference's 140px header and the buttons land on the h1 row
+  (taskmanager/payroll y=116; employees' bare 64px block centers at y=46).
+  Never `items-start`, never badge-level `mt-8`.
+- **Centered headers**: training, evaluations, companywall, organogram
+  pass `centered` → the title block gets `text-center` (badge + h1 +
+  subtitle all center, matching the reference's `div.text-center` wrap).
+- **Small pages render a 24px h1** (`size="md"`): recruitmentkanban,
+  hrreports, staffrequests, notificationpreferences, workflowconfigpage
+  (+ announcements, which already matched).
+- **Recipe corrections (reference redeploy)**: payrollengine = flat-tight
+  with an emerald-600 Calculator badge; advancedanalytics and
+  securitysettings = flat36 (Shield, not ShieldCheck); reports carries the
+  "HR Reports & Analytics" FileText badge on flat36.
+- **/analyticsdashboard paints the slate→blue page root**
+  (`min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]
+  p-4 md:p-8`) — the route the session-6 S2 codemod missed (h1 sat at
+  y=0 with no canvas).
+- **/employees filter row** (reference structure): card
+  `rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6`;
+  interior `flex flex-col gap-4 items-center justify-between md:flex-row`;
+  search `relative flex-1 md:flex-none` with the input
+  `bg-transparent pl-10 w-full md:w-64`; the status filter is a NATIVE
+  `<select>` (`h-9 px-3 py-2 border-slate-300 rounded-lg text-sm`, 125×36,
+  OS-gray bg — a Radix trigger cannot reproduce that geometry); toggles
+  are `h-8 px-3` with List + Grid3x3 icons. Page wrapper drops `gap-8`;
+  the header takes `mb-8`, the card `mb-6` (32/24 rhythm).
+- **/templates subtitle is a live count**: "{n} template(s) available".
+- **The mobile kicker is STATIC** (see the re-pin above).
+- **Documented deviations (reference regressions, kept as superset)**: the
+  drawer auto-closes on navigation (the redeployed reference's stays
+  open); the clone's employees EmptyState card (the reference renders
+  nothing at 0 rows); the reference's /employeeselfservice is stuck
+  loading and its /hrreports renders blank at mobile.

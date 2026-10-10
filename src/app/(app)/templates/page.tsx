@@ -183,7 +183,7 @@ export default function TemplatesPage() {
       <PageHeader
         title="Onboarding Templates"
         size="lg"
-        subtitle="Create reusable onboarding task templates"
+        subtitle={`${templates.length} template${templates.length === 1 ? "" : "s"} available`}
         actions={
           <Button variant="indigo" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />

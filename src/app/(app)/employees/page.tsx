@@ -2,19 +2,12 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Upload, Search, LayoutGrid, List, Pencil, Trash2, Loader2, Check } from "lucide-react";
+import { Plus, Upload, Search, Grid3x3, List, Pencil, Trash2, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -132,7 +125,7 @@ export default function EmployeesPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col">
       {mode === "wizard" ? (
         /* Session 7 (R6-C): the reference renders the Add/Edit wizard as a
            page-replacing INLINE view — back button + h1 + max-w-4xl card —
@@ -153,6 +146,7 @@ export default function EmployeesPage() {
         size="lg"
         mobileKicker
         mobileHeader="hidden"
+        className="mb-8"
         title="Employees"
         subtitle={`Manage your ${counts.total} employees`}
         actions={
@@ -185,37 +179,48 @@ export default function EmployeesPage() {
         }
       />
 
-      {/* Filter bar */}
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-          <Input
-            placeholder="Search employees..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-            aria-label="Search employees"
-          />
-        </div>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-full sm:w-40" aria-label="Filter by status">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s === "all" ? "All Status" : labelize(s)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex items-center gap-1">
-          <Button variant={view === "list" ? "default" : "outline"} size="iconSm" aria-label="List view" onClick={() => setView("list")}>
-            <List aria-hidden="true" />
-          </Button>
-          <Button variant={view === "grid" ? "default" : "outline"} size="iconSm" aria-label="Grid view" onClick={() => setView("grid")}>
-            <LayoutGrid aria-hidden="true" />
-          </Button>
+      {/* Filter bar — session 9 (R8-E): reference structure. The card is
+          bg-white with border-slate-200 + mb-6 (24px gap to content, the
+          header keeps 32 via mb-8); the interior stacks [search + native
+          status select] over the centered toggles below md and lays them
+          out in one justify-between row from md. The status filter is a
+          NATIVE <select> on the reference (125×36, OS-gray bg, rounded-lg
+          slate-300 border) — a Radix trigger cannot reproduce that
+          geometry. Toggles are h-8 px-3 with List/Grid3x3 (42/40×32). */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6">
+        <div className="flex flex-col gap-4 items-center justify-between md:flex-row">
+          <div className="flex w-full gap-2 md:w-auto">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                placeholder="Search employees..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-transparent pl-10 md:w-64"
+                aria-label="Search employees"
+              />
+            </div>
+            <select
+              className="h-9 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              aria-label="Filter by status"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s === "all" ? "All Status" : labelize(s)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button variant={view === "list" ? "default" : "outline"} className="h-8 px-3" aria-label="List view" onClick={() => setView("list")}>
+              <List aria-hidden="true" />
+            </Button>
+            <Button variant={view === "grid" ? "default" : "outline"} className="h-8 px-3" aria-label="Grid view" onClick={() => setView("grid")}>
+              <Grid3x3 aria-hidden="true" />
+            </Button>
+          </div>
         </div>
       </div>
 

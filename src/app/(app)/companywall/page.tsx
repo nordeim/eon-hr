@@ -147,6 +147,7 @@ export default function CompanyWallPage() {
       <PageHeader
         section="Company Wall"
         layout="flat48"
+        centered
         iconClassName="text-blue-600"
         sectionIcon={<House aria-hidden="true" />}
         title="Company Updates"

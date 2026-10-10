@@ -138,7 +138,11 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
     months.map((m) => [m.label, ...pick(m)]);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    // Session 9 (R8-D): the page root this route was missing (session-6 S2
+    // codemod miss) — reference: p-4 md:p-8 space-y-8 min-h-screen
+    // bg-gradient-to-br from-slate-50 to-blue-50 (sRGB, trap 3).
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         title="Analytics Dashboard"
         subtitle="Visual overview of key HR metrics and trends"
@@ -348,6 +352,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

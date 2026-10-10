@@ -62,9 +62,14 @@ describe("PageHeader mobile kicker props (session 7, R6-B)", () => {
   });
 
   it("renders the reference kicker recipe (same as the dashboard's)", () => {
-    // md:hidden sticky top-[73px] z-20 bg-white border-b slate-200
-    // px-4 py-3 + h1 text-lg font-bold text-slate-900 truncate.
-    expect(pageHeader).toContain("top-[73px] z-20");
+    // Session 9 (R8-G): the redeployed reference's kicker is `sticky top-0`
+    // inside a non-scrolling wrapper stack — it scrolls away with the
+    // content (measured: kicker y=-89 at scrollY=178, window scrolls, no
+    // scrollable ancestor). The clone matches the rendered truth: a static
+    // md:hidden bar (bg-white border-b slate-200 px-4 py-3 + h1 text-lg
+    // font-bold text-slate-900 truncate).
+    expect(pageHeader).not.toContain("sticky top-[73px]");
+    expect(pageHeader).toContain("md:hidden border-b border-slate-200 bg-white px-4 py-3");
     expect(pageHeader).toContain("text-lg font-bold text-slate-900 truncate");
   });
 
@@ -197,5 +202,76 @@ describe("wizard interior precision (session 8, parity round 7)", () => {
     // slack; reproduced deterministically with pt-1 + leading-4.
     expect(wizard).toContain("flex flex-col gap-3 pt-1");
     expect(wizard).toMatch(/<Label[^>]*className="leading-4"/);
+  });
+});
+
+describe("session-9 parity round 8 — header recipes & actions alignment", () => {
+  // All values measured live against the redeployed reference
+  // (docs/remediation-plan-session9.md).
+
+  it("R8-A: header row centers actions in the header block (items-center)", () => {
+    // Reference header rows are `justify-between items-center` — the
+    // actions cluster centers vertically (taskmanager y=116 on the h1 row,
+    // employees y=46 in the 64px block). The clone's sm:items-start put
+    // every action button at y=32.
+    expect(pageHeader).toContain("sm:items-center");
+    expect(pageHeader).not.toContain("sm:items-start");
+    // The raised mt-8 offset applies to BADGE pages only — bare-page rows
+    // (employees, analytics, templates) start at y=32 like the reference.
+    expect(pageHeader).toContain("hasBadge && recipe.row");
+  });
+
+  it("R8-A: actions cluster uses the reference's gap-3 (12px)", () => {
+    // Reference: `flex gap-3` (Import CSV 145 + 12 + Add Employee 165 = 322).
+    expect(pageHeader).toContain('className="flex flex-wrap items-center gap-3 shrink-0"');
+  });
+
+  it("R8-B: PageHeader declares the centered prop for text-center headers", () => {
+    // training / evaluations / companywall / organogram wrap their header
+    // in text-center on the reference.
+    expect(pageHeader).toContain("centered?: boolean");
+    expect(pageHeader).toContain("text-center");
+  });
+
+  const CENTERED_PAGES = ["training", "evaluations", "companywall", "organogram"] as const;
+  for (const page of CENTERED_PAGES) {
+    it(`R8-B: /${page} passes centered`, () => {
+      const src = read("src", "app", "(app)", page, "page.tsx");
+      expect(src).toContain("centered");
+    });
+  }
+
+  it("R8-D: analyticsdashboard paints the slate→blue page root (session-6 S2 miss)", () => {
+    // The route was missed by the S2 codemod — no canvas, no padding (h1
+    // at y=0). Reference root: p-4 md:p-8 space-y-8 min-h-screen
+    // bg-gradient-to-br from-slate-50 to-blue-50 (sRGB).
+    const src = read("src", "app", "(app)", "analyticsdashboard", "dashboard.tsx");
+    expect(src).toContain(
+      'min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8'
+    );
+  });
+
+  it("R8-E: employees filter card matches the reference structure", () => {
+    // Reference: card bg-white rounded-xl shadow-sm border-slate-200 p-4
+    // mb-6; interior flex-col md:flex-row gap-4 items-center justify-between;
+    // search wrapper flex-1 md:flex-none with input w-full md:w-64
+    // bg-transparent; NATIVE select (h-9 px-3 py-2 border-slate-300
+    // rounded-lg text-sm, 125×36); toggles List + Grid3x3 at h-8 px-3.
+    expect(employeesPage).toContain(
+      "rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6"
+    );
+    expect(employeesPage).toContain(
+      "flex flex-col gap-4 items-center justify-between md:flex-row"
+    );
+    expect(employeesPage).toContain("relative flex-1 md:flex-none");
+    expect(employeesPage).toMatch(/bg-transparent pl-10 md:w-64/);
+    expect(employeesPage).toMatch(/<select[^>]*className="[^"]*border-slate-300/);
+    expect(employeesPage).toContain("Grid3x3");
+    expect(employeesPage).not.toContain("LayoutGrid");
+  });
+
+  it("R8-F: templates subtitle is the live count (reference: '0 templates available')", () => {
+    const src = read("src", "app", "(app)", "templates", "page.tsx");
+    expect(src).toMatch(/\$\{templates\.length\} template\$\{templates\.length === 1 \? "" : "s"\} available/);
   });
 });
