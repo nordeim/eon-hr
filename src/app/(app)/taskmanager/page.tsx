@@ -206,6 +206,8 @@ export default function TaskManagerPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Task Management"
+        mobileKicker
+        mobileHeader="hidden"
         layout="raised-48"
         iconClassName="text-blue-600"
         sectionIcon={<FolderKanban aria-hidden="true" />}

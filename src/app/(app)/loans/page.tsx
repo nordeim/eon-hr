@@ -177,6 +177,8 @@ export default function LoansPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"
+        mobileKicker
+        mobileHeader="hidden"
         layout="raised-36"
         iconClassName="text-blue-600"
         sectionIcon={<DollarSign aria-hidden="true" />}

@@ -437,9 +437,9 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 52/52 (db-path 15, auth 14, utils 13, tokens 10)
+bun run test          # vitest — 142/142 (db-path 15, auth 14, utils 13, tokens 16, recipes 84)
 bun run build         # next build + static/public copy into standalone
-bun run test:e2e      # playwright — 78/78 against the fresh standalone build
+bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
 
 **Before pushing (per `docs/how-to-git-push-using-ssh-wrapper_SKILL.md`):**
@@ -538,7 +538,7 @@ overlay, no X button).
 
 ## 15. Coding Patterns
 
-**W-1 — Wizard footer (AP-5-proof):**
+**W-1 — Wizard footer (AP-5-proof; session 7: the wizard is an INLINE view, not a Dialog — back button + h1 + max-w-4xl card):**
 
 ```tsx
 <DialogFooter>
@@ -637,7 +637,7 @@ Tailwind default scale; the parity-critical usages:
 | `<sm` (<640px) | wizard step-rail labels hidden (numbers only); dialog footer stacks (`flex-col-reverse`); quick-action chips 1-col |
 | `sm` (≥640px) | 2-col form grids; footer row |
 | `md` (≥768px) | dashboard grid 2-col; content padding `p-8` (from `p-4`) |
-| `lg` (≥1024px) | **sidebar appears, mobile header + bottom tabs hide** (`lg:hidden`); drawer unmounts |
+| `md` (≥768px) | **sidebar appears, mobile header + bottom tabs hide** (`md:hidden` — session-7 viewport sweep: the reference switches at md, not lg); drawer unmounts |
 | `xl` (≥1280px) | dashboard grid 3-col (Quick Actions / Leave Balances / Recent Requests; Expense Claims 1-col in row 2) |
 
 Mobile shell (390×844 reference): header `px-6 py-4` + EonHR/Demo; drawer
@@ -772,7 +772,7 @@ ids             max-suffix EMP-XXXX + conflict retry
 envelope        { ok, data | error:{code,message} }  (src/lib/api.ts)
 icons           nav-config.ts — parity-pinned names
 drawer          288px / bg-black/80 / z-50 / no X / close-on-nav
-screenshots     docs/screenshots/ (22 captures, dev server, devIndicators off)
+screenshots     docs/screenshots/ (24 captures, standalone server, devIndicators off)
 reference       https://eon.base44.app  (docs/reference-page-map.md)
 session log     worklog.md + docs/session_1.md, docs/remediation-plan-session1.md
 ssh push        docs/ssh_git_wrapper_v3.py  (+ docs/how-to-git-push-using-ssh-wrapper_SKILL.md)
@@ -822,6 +822,35 @@ content — never `background-attachment: fixed` on body); each module page
 adds its measured gradient root (`min-h-screen bg-[linear-gradient(to
 right_bottom,X,Y)] p-4 md:p-8`) with the content wrapper nested inside;
 `main` is bare. See the route→gradient map in the remediation plan §S2.
+
+**Session-7 recipe layer — responsive boundary, kickers, inline wizard:**
+
+- **Responsive boundary is md (768px)**, not lg: the reference's bottom
+  nav is `md:hidden` and its sidebar mounts from md (viewport-swept at
+  700/767/768/800/900/1024 on both apps). Shell classes: sidebar
+  `hidden md:flex`, all mobile chrome `md:hidden` — never `lg:`.
+- **Category-A mobile kickers** (employees, payroll, taskmanager,
+  leavemanagement, expenses, loans + profile-kicker-only): `md:hidden
+  sticky top-[73px] z-20 bg-white border-b border-slate-200 px-4 py-3`
+  with h1 `text-lg font-bold text-slate-900 truncate` (y=89 h=53 at
+  390×844); the desktop PageHeader block gets `hidden md:flex` via the
+  `mobileHeader="hidden"` prop (page actions are desktop-only there —
+  the reference hides its Add Employee button below md).
+- **Add-Employee wizard = INLINE page view**: back button (outline
+  ArrowLeft, 36×36) + h1 30px/700 + 16px slate-500 subtitle, then a
+  `max-w-4xl mx-auto` rounded-xl card — gradient header
+  (`bg-gradient-to-r from-blue-50 to-indigo-50`, border-b, UserPlus
+  w-6 text-blue-600 + 24px/600 title), p-8 interior with a 48px
+  icon-circle step rail (active bg-blue-600, inactive bg-slate-200,
+  white 24px icons [User/Briefcase/FileText/Paperclip], 14px/500
+  labels, `h-0.5 mx-4 flex-1` connectors — green-600 once passed), a
+  96px photo-upload circle on step 1 (slate-100 bg, 48px User icon,
+  32px absolute camera button + hidden file input), `gap-3` fields on
+  `grid md:grid-cols-2 gap-4`, and a `mt-8 pt-6 border-t` footer
+  (Cancel/Back outline + Next/Create gradient).
+- **Drawer overlay** uses `bg-[rgba(0,0,0,0.8)]` (not `bg-black/80`) —
+  v4 serializes the utility form as oklab(); the arbitrary rgba form
+  matches the reference's computed string byte-for-byte.
 
 **Mobile page kicker (dashboard only):** `md:hidden sticky top-[73px] z-20
 bg-white border-b border-slate-200 px-4 py-3` inside the p-4 page wrapper

@@ -185,6 +185,8 @@ export default function ExpensesPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
+        mobileKicker
+        mobileHeader="hidden"
         layout="raised-48"
         iconClassName="text-purple-600"
         sectionIcon={<Receipt aria-hidden="true" />}

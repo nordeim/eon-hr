@@ -12,6 +12,7 @@
 | Tag | Source | Change |
 |---|---|---|
 | `[SYN]` | codebase | v1.0.0 initial document synthesized from the shipped codebase (46 routes, 49 API handlers, 45 models, 106 specs). |
+| `[S7]` | session 7 | Responsive boundary re-measured to md (768px); category-A mobile kickers; Add-Employee wizard converted to the reference's inline page view. |
 | `[CA]` | critical analysis | ADR set derived from actual tradeoffs: session strategy, ORM/database, mutation seam, Tailwind v4 engine traps, standalone deployment. |
 | `[SR]` | self-review | Design tokens and shadow geometry cross-checked against measured reference pixels (`#F1F7FE` background, v3 shadow scale). |
 | `[SAN]` | sanitization | No secrets, keys, or credentials documented; demo account password referenced only as seeded data. |
@@ -240,10 +241,12 @@ export function resolveDatabaseUrl(envUrl: string | undefined, anchors: string[]
 
 ```tsx
 // src/components/layout/app-shell.tsx (excerpt)
-<DialogPrimitive.Content className="fixed inset-y-0 left-0 z-50 flex h-full w-[280px] max-w-[85vw] flex-col bg-sidebar shadow-xl …">
+<DialogPrimitive.Content className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-xl …">
 ```
 
 *Why this pattern:* the drawer's inner nav uses flex `gap` layout — never `space-y` with explicit child margins — because v3 and v4 disagree on `space-y` selector specificity (v4's `:where()` wrapper lets child `mt-3` win, changing panel height by 8px). The E2E spec `mobile-navigation.spec.ts › drawer panel height is stable (trap-4 pin)` asserts the full-height geometry.
+
+**Responsive boundary (session 7):** all mobile chrome (`md:hidden`) and the desktop sidebar (`hidden md:flex`) switch at **md (768px)** — the reference's own boundary, verified by a dual-browser viewport sweep at 700/767/768/800/900/1024. Never re-introduce `lg:` chrome classes.
 
 #### Pattern 4 — analytics server page + client chart island
 
@@ -400,12 +403,15 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Category | Files | Specs | Location | Framework |
 |---|---|---|---|---|
 | DB path contract | 1 | 15 | `tests/db-path.test.ts` | Vitest |
-| Auth crypto/session | 1 | 12 | `tests/unit/auth.test.ts` | Vitest |
-| Money/date utils | 1 | 11 | `tests/unit/utils.test.ts` | Vitest |
+| Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
+| Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
+| Design tokens | 1 | 16 | `tests/unit/tokens.test.ts` | Vitest |
+| Parity recipes (s5/s6) | 1 | 59 | `tests/unit/recipes.test.ts` | Vitest |
+| Shell recipes (s7: boundary/kickers/wizard) | 1 | 25 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
-| E2E mobile navigation | 1 | 6 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E dashboard + CRUD | 1 | 5 | `tests/e2e/dashboard.spec.ts` | Playwright |
+| E2E mobile navigation + boundary | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| E2E dashboard + inline-wizard CRUD | 1 | 5 | `tests/e2e/dashboard.spec.ts` | Playwright |
 
 ### 7.2 Test Patterns
 

@@ -1,5 +1,7 @@
 // probe-subnav.mjs — sub-item link box model (group expanded)
-export default {
+const probe = {
   wait: 3500,
   js: `(() => { const vis=(e)=>e&&e.offsetParent!==null; const links=[...document.querySelectorAll('a')].filter(a=>vis(a)&&a.getBoundingClientRect().x>20&&a.getBoundingClientRect().x<60&&a.querySelector('svg')&&a.textContent.trim().length>0); const first=links[0]; if(!first) return {err:'no sub links',count:0}; const cs=getComputedStyle(first); const icon=first.querySelector('svg'); const ir=icon?icon.getBoundingClientRect():null; const list=first.closest('ul'); const ul=list?getComputedStyle(list):null; return {count:links.length, labels:links.slice(0,4).map(a=>a.textContent.trim().slice(0,20)), h:Math.round(first.getBoundingClientRect().height), py:cs.paddingTop, px:cs.paddingLeft, gap:cs.columnGap, fs:cs.fontSize, fw:cs.fontWeight, r:cs.borderRadius, iconRect:ir?{w:Math.round(ir.width),h:Math.round(ir.height)}:null, ulPadLeft:ul?ul.paddingLeft:null, ulGap:ul?ul.rowGap:null, x:Math.round(first.getBoundingClientRect().x)}; })()`,
 };
+
+export default probe;

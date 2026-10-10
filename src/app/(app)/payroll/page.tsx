@@ -184,6 +184,8 @@ export default function PayrollPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Payroll Management"
+        mobileKicker
+        mobileHeader="hidden"
         layout="raised-48"
         iconClassName="text-green-600"
         sectionIcon={<DollarSign aria-hidden="true" />}

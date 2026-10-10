@@ -180,42 +180,55 @@ test.describe("dashboard", () => {
 
 // End-to-end CRUD through the real UI — the reference 4-step Add Employee
 // wizard: personal → job → contract → documents, then delete (restores the
-// seeded state).
+// seeded state). Session 7 (R6-C): the wizard renders as an INLINE
+// page-replacing view (back button + h1 + max-w-4xl card) — not a modal.
 test.describe("employees CRUD (4-step wizard)", () => {
   test("create → list → search → delete round-trip", async ({ page }) => {
     await page.goto("/employees");
     await expect(page.getByRole("heading", { name: "Employees", exact: true })).toBeVisible();
 
-    // Open the wizard
+    // Open the wizard — the list view is replaced by the inline wizard
     await page.getByRole("button", { name: "Add Employee" }).first().click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("heading", { name: "Add New Employee" })).toBeVisible();
+    const wizard = page.locator("main");
+    await expect(wizard.getByRole("heading", { name: "Add New Employee" })).toBeVisible();
+    await expect(wizard.getByRole("button", { name: "Back to employees" })).toBeVisible();
+
+    // Inline card recipe (reference: max-w-4xl mx-auto, p-8 interior) and
+    // step rail (48px icon circles, active blue-600).
+    const card = wizard.locator("div.max-w-4xl");
+    await expect(card).toBeVisible();
+    await expect(card).toHaveCSS("border-radius", "12px");
+    const activeCircle = card.locator("div.h-12").first();
+    await expect(activeCircle).toHaveCSS("background-color", "rgb(37, 99, 235)");
+    await expect(activeCircle.locator("svg")).toHaveCSS("height", "24px");
 
     // Step 1 — Personal Information (Next disabled until required fields)
-    const next = dialog.getByRole("button", { name: "Next" });
+    const next = wizard.getByRole("button", { name: "Next" });
     await expect(next).toBeDisabled();
-    await dialog.getByLabel("Full Name *").fill("E2E Temperson");
-    await dialog.getByLabel("Work Email *").fill("e2e-temp@eon-hr.test");
-    await dialog.getByLabel("Nationality").fill("Saudi Arabia");
+    await wizard.getByLabel("Full Name *").fill("E2E Temperson");
+    await wizard.getByLabel("Work Email *").fill("e2e-temp@eon-hr.test");
+    await wizard.getByLabel("Nationality").fill("Saudi Arabia");
     await expect(next).toBeEnabled();
     await next.click();
 
     // Step 2 — Job Information
-    await expect(dialog.getByText("Job Information")).toBeVisible();
+    await expect(wizard.getByText("Job Information")).toBeVisible();
     await expect(next).toBeDisabled();
-    await dialog.getByLabel("Job Title *").fill("QA Probe");
-    await dialog.getByLabel("Start Date *").fill("2026-10-01");
+    await wizard.getByLabel("Job Title *").fill("QA Probe");
+    await wizard.getByLabel("Start Date *").fill("2026-10-01");
     await expect(next).toBeEnabled();
     await next.click();
 
     // Step 3 — Contract Information (all optional, defaults visible)
-    await expect(dialog.getByText("Contract Information")).toBeVisible();
+    await expect(wizard.getByText("Contract Information")).toBeVisible();
     await next.click();
 
-    // Step 4 — Documents & Attachments → Create
-    await expect(dialog.getByText("Documents & Attachments")).toBeVisible();
-    await dialog.getByRole("button", { name: "Create Employee" }).click();
-    await expect(dialog).toBeHidden();
+    // Step 4 — Documents & Attachments → Create; the wizard unmounts and
+    // the list view returns.
+    await expect(wizard.getByText("Documents & Attachments")).toBeVisible();
+    await wizard.getByRole("button", { name: "Create Employee" }).click();
+    await expect(wizard.getByRole("heading", { name: "Add New Employee" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Employees", exact: true })).toBeVisible();
 
     // Appears in the directory (reference columns: Employee, Job Title,
     // Status, Start Date, Actions — no Employment column).

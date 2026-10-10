@@ -331,3 +331,25 @@ Work Log:
 Stage Summary:
 - Parity round 5 complete: token layer, card family, per-page canvases, CTA colors, taskmanager board, sticky kicker — every fixed surface byte-identical live
 - 102 unit + 84 E2E green; ready for commit + push
+
+---
+Task ID: 18 (session 7)
+Agent: main (Super Z)
+Task: Fresh-workspace re-validation, audit, parity round 6 (responsive boundary, mobile kickers, inline wizard), docs + push
+
+Work Log:
+- Fresh clone (workspace reset) of nordeim/eon-hr (3f30e17); .env recreated (DATABASE_URL file:../db/custom.db + AUTH_SECRET), install/generate/push/seed; first dev boot had db:down from the shell's exported absolute DATABASE_URL — restarted with env -u DATABASE_URL (the AGENTS.md trap, hit live)
+- Re-validated every gate from scratch: lint 0 errors, tsc, 117/117 unit (docs said 102 — count drift logged), build, 84/84 E2E (after playwright chromium install)
+- Audit: secret scan clean on the session-6 diff; session-6 components sound; targeted the never-measured surfaces: the 768–1023px tablet band, module-page mobile headers, and the wizard's presentation (dual agent-browser, DOM ground truth)
+- R6-A: viewport sweeps on both apps proved the reference switches chrome at md (768px), not lg — the clone's entire tablet band showed mobile UI. Fixed app-shell (5 classes lg→md) + E2E boundary pin (767 mobile / 800 desktop)
+- R6-B: 390×844 sweep of ALL 46 reference routes classified mobile headers — 7 category-A routes (employees, payroll, taskmanager, leavemanagement, expenses, loans, profile) render a sticky z-20 page-title kicker and hide the desktop header below md (page actions desktop-only); ~35 routes render full headers. Session-6's "no kicker on modules" was a measurement miss — its E2E pin inverted. PageHeader gained mobileKicker/mobileKickerTitle/mobileHeader props; 7 call sites; live-verified byte-identical (y=89, x=16, w=358, h=53, 18px/700)
+- R6-C: the reference's Add Employee wizard is an INLINE page view (back button + 30px h1 + max-w-4xl card: gradient header, 48px icon-circle rail with green passed connectors, 96px photo-upload circle with hidden file input, gap-3 fields md:grid-cols-2, border-t footer) — not a modal. EmployeeWizard rewritten inline (step/validation/submit logic preserved; AP-5 type=button rule kept); employees page list|wizard view state; E2E CRUD spec re-aimed + card/circle pins; live geometry byte-close (card 896×842 vs ref 872 — documented ~6px/row label-box residual)
+- R6-D: drawer overlay bg-[rgba(0,0,0,0.8)] (computed-string parity with the reference; bg-black/80 serializes as oklab)
+- R6-E: 12 probe scripts de-anonymized (lint now 0 errors 0 warnings); doc counts corrected (142 unit + 86 E2E) across AGENTS/CLAUDE/README/PAD/SKILL
+- TDD: tests/unit/shell-recipes.test.ts written RED-first (19 failing) then GREEN (25 specs); mobile-navigation spec: inverted taskmanager-kicker pin + category-B pin + boundary pin; dashboard spec: inline-wizard locators + card recipe pins
+- Gates: lint 0/0, tsc, 142/142 unit, build, 86/86 E2E; 24 screenshots refreshed via capture-all (added 14-mobile-kicker, 15-tablet-800px); DB pristine after capture
+- Docs updated: AGENTS.md (md boundary, kickers, inline-wizard sections), CLAUDE.md (counts + test descriptions), README (counts + session-7 narrative), PAD (test matrix, boundary note, S7 revision), eon-hr_SKILL.md (session-7 recipe layer, §17 lg→md, W-1 note, counts), docs/remediation-plan-session7.md (+ completion record), docs/session_7.md
+
+Stage Summary:
+- Parity round 6 complete: responsive boundary, category-A mobile kickers, inline wizard — every fixed surface verified live against the reference
+- 142 unit + 86 E2E green; ready for commit + push

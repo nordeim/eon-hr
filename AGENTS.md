@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 102 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 84 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 142 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -111,6 +111,24 @@ preview host.
 - Strict-mode locators: scope headings with `exact: true` when a page
   contains both a title and a "All {Title}" card heading.
 
+## Responsive boundary — md (768px), not lg (session 7)
+
+The reference switches between mobile chrome (top bar + drawer + bottom
+tabs) and the desktop sidebar at **md (768px)** — verified by viewport
+sweep at 700/767/768/800/900/1024 on both apps. The shell classes are
+`hidden md:flex` (sidebar) and `md:hidden` (all mobile chrome); never
+re-introduce `lg:` chrome classes.
+
+## Mobile page kickers (session 7)
+
+Seven "category A" routes render the reference's mobile kicker (`md:hidden
+sticky top-[73px] z-20 bg-white border-b border-slate-200 px-4 py-3`, h1
+18px/700) and hide their desktop PageHeader below md via `mobileKicker` +
+`mobileHeader="hidden"` props: employees, payroll, taskmanager,
+leavemanagement, expenses, loans (+ profile: kicker only, header stays).
+The other ~35 routes render their full header at mobile (reference
+behavior). Pinned by `tests/unit/shell-recipes.test.ts` + E2E.
+
 ## Page architecture (session 6) — where padding and gradients live
 
 The reference paints its canvas per page; `main` is BARE
@@ -138,3 +156,13 @@ canvas gradient (slate-50→blue-50, sRGB) lives on the AppShell root div.
 
 Do NOT re-add padding to `main` or move gradients to `body` — both are
 reference-measured contracts pinned by tests.
+
+## Add-Employee wizard — an INLINE view, not a modal (session 7)
+
+The reference renders its 4-step wizard as a page-replacing view: back
+button (outline ArrowLeft 36×36) + 30px/700 h1 + max-w-4xl card (gradient
+blue-50→indigo-50 header with UserPlus, p-8 interior, 48px icon-circle step
+rail with green passed-connectors, 96px photo-upload circle on step 1,
+border-t footer). The employees page swaps `list | wizard` views; ALL
+footer buttons stay `type="button"` (AP-5). Never wrap it in a Dialog
+again.

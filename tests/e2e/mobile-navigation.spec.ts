@@ -161,11 +161,54 @@ test.describe("mobile page kicker (session 6)", () => {
     expect(Math.round(scrolled!.y)).toBe(73);
   });
 
-  test("module pages render without a mobile kicker (reference)", async ({ page }) => {
-    // Only the dashboard carries a page-title kicker; module pages render
-    // their responsive headers directly (reference /taskmanager).
+  test("category-A module pages render the mobile kicker (session 7)", async ({ page }) => {
+    // Session-7 390×844 sweep of ALL 46 reference routes: 7 routes render a
+    // sticky page-title kicker and hide the desktop header below md
+    // (employees, payroll, taskmanager, leavemanagement, expenses, loans,
+    // profile). The reference /taskmanager shows "Tasks & Projects" at
+    // y=89, 18px/700 — the session-6 "no kicker on modules" pin measured
+    // a dead surface.
     await page.goto("/taskmanager");
+    const kicker = page.locator("main div.sticky").filter({ hasText: "Tasks & Projects" }).first();
+    await expect(kicker).toBeVisible();
+    const box = await kicker.boundingBox();
+    expect(Math.round(box?.x ?? 0)).toBe(16);
+    expect(Math.round(box?.y ?? 0)).toBe(89);
+    const h1 = kicker.getByRole("heading", { name: "Tasks & Projects" });
+    await expect(h1).toHaveCSS("font-size", "18px");
+    await expect(h1).toHaveCSS("font-weight", "700");
+    // the desktop header block is hidden below md (reference wraps it in
+    // hidden md:flex — page actions are desktop-only there). The header's
+    // h1 stays in the DOM but must not render.
+    const desktopH1 = page.locator("main h1").filter({ hasText: "Tasks & Projects" }).and(page.locator("div.hidden.md\\:flex h1"));
+    await expect(desktopH1).toHaveCount(1);
+    await expect(desktopH1).toBeHidden();
+  });
+
+  test("category-B module pages keep their full header at mobile (session 7)", async ({ page }) => {
+    // The reference renders training's full desktop header at 390px.
+    await page.goto("/training");
+    const h1 = page.getByRole("heading", { name: "Training Center" });
+    await expect(h1).toBeVisible();
+    await expect(h1).toHaveCSS("font-size", "36px");
     const kickers = page.locator("main div.sticky");
     expect(await kickers.count()).toBe(0);
+  });
+
+  test("responsive boundary is md (768px), not lg (session 7, R6-A)", async ({ page }) => {
+    // Viewport sweep on the reference: 767px = mobile chrome, 768px+ =
+    // desktop sidebar + no top bar + no bottom tabs. The clone must switch
+    // at the same boundary.
+    await page.goto("/dashboard");
+    await page.setViewportSize({ width: 767, height: 900 });
+    await expect(page.getByRole("button", { name: "Toggle Sidebar" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Bottom navigation" })).toBeVisible();
+    await page.setViewportSize({ width: 800, height: 900 });
+    // 800px: desktop chrome — sidebar visible, mobile chrome gone.
+    await expect(page.getByRole("button", { name: "Toggle Sidebar" })).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Bottom navigation" })).toHaveCount(0);
+    const sidebar = page.locator("aside");
+    await expect(sidebar).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Dashboard" })).toBeVisible();
   });
 });

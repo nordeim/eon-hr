@@ -1,7 +1,8 @@
 // capture-screenshots.mjs — regenerate the docs/screenshots catalog from the
 // production standalone server on :3000 (seeded db/custom.db).
-// Catalog (Eon HR, session-3/4 naming): login, dashboard ×2, employees,
-// wizard steps 1–4, ten module pages, three mobile shots.
+// Catalog (Eon HR, session-3/4/7 naming): login, dashboard ×2, employees,
+// wizard steps 1–4 (session 7: INLINE view), ten module pages, mobile
+// shots + the session-7 kicker and tablet-boundary surfaces.
 // Run via ./scripts/capture-all.sh (boots the server + reseeds first).
 import { chromium } from "@playwright/test";
 import { mkdirSync, rmSync } from "node:fs";
@@ -60,39 +61,45 @@ await shot("02-dashboard-desktop-full", null, { fullPage: true });
 // 03 — employees table
 await shot("03-employees-desktop", "/employees");
 
-// 04–07 — the 4-step Add Employee wizard (fill but never submit; the E2E
-// suite covers the full round-trip including persistence + delete)
+// 04–07 — the 4-step Add Employee wizard (session 7: INLINE view — back
+// button + h1 + max-w-4xl card; fill but never submit; the E2E suite
+// covers the full round-trip including persistence + delete)
 await page.goto(BASE + "/employees", { waitUntil: "networkidle" });
 await page.getByRole("button", { name: "Add Employee" }).first().click();
-const dialog = page.getByRole("dialog");
-await dialog.getByRole("heading", { name: "Add New Employee" }).waitFor();
+const wizard = page.locator("main");
+await wizard.getByRole("heading", { name: "Add New Employee" }).waitFor();
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}04-employee-wizard-step1.png` });
 console.log("captured 04-employee-wizard-step1");
 
-await dialog.getByLabel("Full Name *").fill("Capture Wizard");
-await dialog.getByLabel("Work Email *").fill("capture-wizard@eon-hr.test");
-await dialog.getByLabel("Nationality").fill("Saudi Arabia");
-await dialog.getByRole("button", { name: "Next" }).click();
-await dialog.getByText("Job Information").waitFor();
-await dialog.getByLabel("Job Title *").fill("Software Engineer");
-await dialog.getByLabel("Start Date *").fill("2026-10-01");
+await wizard.getByLabel("Full Name *").fill("Capture Wizard");
+await wizard.getByLabel("Work Email *").fill("capture-wizard@eon-hr.test");
+await wizard.getByLabel("Nationality").fill("Saudi Arabia");
+await wizard.getByRole("button", { name: "Next" }).click();
+await wizard.getByText("Job Information").waitFor();
+await wizard.getByLabel("Job Title *").fill("Software Engineer");
+await wizard.getByLabel("Start Date *").fill("2026-10-01");
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}05-employee-wizard-step2.png` });
 console.log("captured 05-employee-wizard-step2");
 
-await dialog.getByRole("button", { name: "Next" }).click();
-await dialog.getByText("Contract Information").waitFor();
+await wizard.getByRole("button", { name: "Next" }).click();
+await wizard.getByText("Contract Information").waitFor();
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}06-employee-wizard-step3.png` });
 console.log("captured 06-employee-wizard-step3");
 
-await dialog.getByRole("button", { name: "Next" }).click();
-await dialog.getByText("Documents & Attachments").waitFor();
+await wizard.getByRole("button", { name: "Next" }).click();
+await wizard.getByText("Documents & Attachments").waitFor();
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}07-employee-wizard-step4.png` });
 console.log("captured 07-employee-wizard-step4");
-await page.keyboard.press("Escape");
+// Back out of the wizard (session 7: inline view has no Esc-close)
+for (let i = 0; i < 3; i++) {
+  await wizard.getByRole("button", { name: "Back", exact: true }).click();
+}
+await wizard.getByRole("button", { name: "Cancel" }).click();
+await wizard.getByRole("heading", { name: "Employees", exact: true }).waitFor();
 await page.waitForTimeout(400);
 
 // 09–10 — module pages
@@ -138,6 +145,21 @@ await mp.waitForURL("**/employees");
 await mp.waitForTimeout(600);
 await mp.screenshot({ path: `${OUT}13-mobile-after-drawer-nav.png` });
 console.log("captured 13-mobile-after-drawer-nav");
+
+// 14 — session-7 mobile kicker (category-A pages: sticky page-title bar
+// replaces the desktop header below md)
+await mp.goto(BASE + "/taskmanager", { waitUntil: "networkidle" });
+await mp.waitForTimeout(600);
+await mp.screenshot({ path: `${OUT}14-mobile-kicker-taskmanager.png` });
+console.log("captured 14-mobile-kicker-taskmanager");
+
+// 15 — session-7 tablet boundary (800px: desktop chrome per the reference's
+// md switch — sidebar visible, no mobile top bar / bottom tabs)
+await mp.setViewportSize({ width: 800, height: 900 });
+await mp.goto(BASE + "/dashboard", { waitUntil: "networkidle" });
+await mp.waitForTimeout(600);
+await mp.screenshot({ path: `${OUT}15-tablet-800px-desktop-chrome.png` });
+console.log("captured 15-tablet-800px-desktop-chrome");
 await mctx.close();
 
 // stale scaffold-era shots (01-dashboard.png / 02-goals.png) no longer match

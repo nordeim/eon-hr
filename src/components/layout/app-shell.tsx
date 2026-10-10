@@ -13,10 +13,15 @@ import { cn } from "@/lib/utils";
  * Application shell: fixed desktop sidebar + mobile drawer + bottom tab bar.
  *
  * Geometry measured from the reference app (session-2 audit):
- *   - mobile drawer sheet: 288px wide, full height, overlay bg-black/80
+ *   - mobile drawer sheet: 288px wide, full height, 80% black overlay
  *   - mobile top bar: px-6 py-4 with brand + "Demo" subtitle
  *   - bottom tabs: flex-col items, 44px min height, no active highlight
  *     (the reference does not highlight the active bottom tab)
+ *
+ * Responsive boundary (session 7, R6-A): the reference switches between
+ * mobile chrome and the desktop sidebar at md (768px) — its bottom bar
+ * is md:hidden and its sidebar mounts from md up. Verified by viewport
+ * sweep at 700/767/768/800/900/1024 on both apps.
  *
  * Trap 4 note (docs/Tailwind-V4-Validation-Report.md): the mobile drawer
  * content uses flex gap layout — no mt-* / mb-* children inside space-y
@@ -35,7 +40,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   return (
     <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col">
         <SidebarNav user={user} />
       </aside>
 
@@ -43,11 +48,11 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
       <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay
-            className="fixed inset-0 z-50 bg-black/80 transition-opacity duration-300 data-[state=closed]:opacity-0 data-[state=open]:opacity-100 lg:hidden"
+            className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.8)] transition-opacity duration-300 data-[state=closed]:opacity-0 data-[state=open]:opacity-100 md:hidden"
             aria-hidden="true"
           />
           <DialogPrimitive.Content
-            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none transition-transform duration-300 data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none transition-transform duration-300 data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 md:hidden"
           >
             <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>
@@ -63,7 +68,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
             block = h1 "EonHR" 16px/700 slate-900 + p "Demo" text-xs
             text-slate-500 stacked (24+16 = 40px). items-center; header =
             16+40+16+1 = 73px. */}
-        <header className="sticky top-0 z-10 border-b border-sidebar-border bg-white px-6 py-4 lg:hidden">
+        <header className="sticky top-0 z-10 border-b border-sidebar-border bg-white px-6 py-4 md:hidden">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -93,7 +98,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
             the earlier "no active highlight" note was a stale measurement). */}
         <nav
           aria-label="Bottom navigation"
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
         >
           <div className="flex items-center justify-around px-2 py-2">
             {BOTTOM_NAV.map((tab) => {

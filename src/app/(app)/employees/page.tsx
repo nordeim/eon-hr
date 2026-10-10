@@ -9,14 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -59,7 +51,7 @@ export default function EmployeesPage() {
   const [status, setStatus] = React.useState("all");
   const [view, setView] = React.useState<"list" | "grid">("list");
 
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [mode, setMode] = React.useState<"list" | "wizard">("list");
   const [editing, setEditing] = React.useState<EmployeeRow | null>(null);
 
   const load = React.useCallback(async () => {
@@ -84,7 +76,7 @@ export default function EmployeesPage() {
   }, [load, search]);
 
   React.useEffect(() => {
-    if (params.get("new") === "1") setDialogOpen(true);
+    if (params.get("new") === "1") setMode("wizard");
   }, [params]);
 
   const counts = React.useMemo(() => {
@@ -112,7 +104,7 @@ export default function EmployeesPage() {
           : `${data.firstName} ${data.lastName} was added to the directory.`,
         variant: "success",
       });
-      setDialogOpen(false);
+      setMode("list");
       setEditing(null);
       await load();
       return true;
@@ -141,8 +133,26 @@ export default function EmployeesPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader
+      {mode === "wizard" ? (
+        /* Session 7 (R6-C): the reference renders the Add/Edit wizard as a
+           page-replacing INLINE view — back button + h1 + max-w-4xl card —
+           not a modal. The list (header + filters + table) unmounts. */
+        <EmployeeWizard
+          key={editing?.id ?? "new"}
+          employee={editing}
+          excludeManagerId={editing?.id ?? null}
+          onClose={() => {
+            setMode("list");
+            setEditing(null);
+          }}
+          onSave={onSave}
+        />
+      ) : (
+        <>
+          <PageHeader
         size="lg"
+        mobileKicker
+        mobileHeader="hidden"
         title="Employees"
         subtitle={`Manage your ${counts.total} employees`}
         actions={
@@ -165,7 +175,7 @@ export default function EmployeesPage() {
               className="shadow-lg"
               onClick={() => {
                 setEditing(null);
-                setDialogOpen(true);
+                setMode("wizard");
               }}
             >
               <Plus className="mr-2" aria-hidden="true" />
@@ -223,7 +233,7 @@ export default function EmployeesPage() {
                 : "Add your first employee to get started."
             }
             action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
+              <Button variant="dark" onClick={() => setMode("wizard")}>
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Employee
               </Button>
@@ -272,7 +282,7 @@ export default function EmployeesPage() {
                         aria-label={`Edit ${emp.firstName}`}
                         onClick={() => {
                           setEditing(emp);
-                          setDialogOpen(true);
+                          setMode("wizard");
                         }}
                       >
                         <Pencil aria-hidden="true" />
@@ -321,17 +331,8 @@ export default function EmployeesPage() {
           ))}
         </div>
       )}
-
-      <EmployeeWizard
-        open={dialogOpen}
-        employee={editing}
-        excludeManagerId={editing?.id ?? null}
-        onOpenChange={(o) => {
-          setDialogOpen(o);
-          if (!o) setEditing(null);
-        }}
-        onSave={onSave}
-      />
+        </>
+      )}
     </div>
     </div>
   );

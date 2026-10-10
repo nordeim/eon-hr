@@ -130,6 +130,8 @@ export default function LeaveManagementPage() {
           title + "Request time off and manage approvals" subtitle. */}
       <PageHeader
         section="Leave Management"
+        mobileKicker
+        mobileHeader="hidden"
         layout="raised-48"
         iconClassName="text-blue-600"
         sectionIcon={<Plane aria-hidden="true" />}

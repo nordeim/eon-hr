@@ -69,6 +69,9 @@ export function PageHeader({
   layout = "raised-48",
   titleClassName,
   className,
+  mobileKicker = false,
+  mobileKickerTitle,
+  mobileHeader = "visible",
 }: {
   section?: string;
   sectionIcon?: React.ReactNode;
@@ -85,11 +88,39 @@ export function PageHeader({
   /** Per-page h1 override (e.g. attendance's reference `leading-[2]` quirk). */
   titleClassName?: string;
   className?: string;
+  /** Session 7 (R6-B): category-A routes render a mobile page-title kicker
+   *  (the reference's `md:hidden sticky top-0 z-20 bg-white border-b
+   *  border-slate-200 px-4 py-3` bar with an 18px/700 h1 — measured
+   *  x=16/y=89/h=53 at 390×844) instead of the desktop header below md. */
+  mobileKicker?: boolean;
+  /** Kicker text override — /profile's kicker reads "Profile" while its
+   *  desktop h1 is "Profile Settings" (reference measurement). */
+  mobileKickerTitle?: string;
+  /** "hidden" adds `hidden md:flex` to the desktop header block — the
+   *  reference wraps its desktop header in a hidden md:flex div on the
+   *  category-A routes (page actions are desktop-only there). */
+  mobileHeader?: "visible" | "hidden";
 }) {
   const hasBadge = Boolean(section);
   const recipe = HEADER_LAYOUTS[layout];
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between", className)}>
+    <>
+      {mobileKicker ? (
+        <div className="md:hidden sticky top-[73px] z-20 border-b border-slate-200 bg-white px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg font-bold text-slate-900 truncate">{mobileKickerTitle ?? title}</h1>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      <div
+        className={cn(
+          "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+          mobileHeader === "hidden" && "hidden md:flex",
+          className
+        )}
+      >
       <div className="min-w-0">
         {hasBadge ? (
           <div
@@ -130,6 +161,7 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div> : null}
-    </div>
+      </div>
+    </>
   );
 }

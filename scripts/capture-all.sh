@@ -57,4 +57,4 @@ DATABASE_URL="$DB_URL" bun scripts/pristine-check.mjs
 kill $SRV 2>/dev/null || true
 trap - EXIT
 
-echo "capture pass complete: $OUT (22 shots expected)"
+echo "capture pass complete: $OUT (24 shots expected)"

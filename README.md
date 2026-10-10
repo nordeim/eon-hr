@@ -50,8 +50,8 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Auth | Custom HMAC cookie sessions + scrypt | node:crypto | Stateless, revocation-safe |
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
-| Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens) |
-| E2E tests | Playwright | 1.63 | 84 specs across auth, nav, mobile, dashboard, 4-step wizard CRUD + session-4/6 geometry pins |
+| Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens, shell recipes) |
+| E2E tests | Playwright | 1.63 | 86 specs across auth, nav, mobile, dashboard, inline 4-step wizard CRUD + session-4/6/7 geometry pins |
 
 ## File Hierarchy
 
@@ -77,9 +77,9 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 ├── 📂 tests/
 │   ├── 📂 unit/                    # Vitest: auth, utils, design tokens
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
-│   └── 📂 e2e/                     # Playwright: 84 specs, isolated e2e.db
+│   └── 📂 e2e/                     # Playwright: 86 specs, isolated e2e.db
 ├── 📂 docs/
-│   ├── 📂 screenshots/             # 22 remediated UI captures (desktop + mobile + wizard)
+│   ├── 📂 screenshots/             # 24 remediated UI captures (desktop + mobile + tablet + wizard)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
 │   └── 📄 Tailwind-V4-Validation-Report.md    # Engine trap log
 └── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md • eon-hr_SKILL.md
@@ -133,8 +133,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (102 specs: db-path, auth, utils, tokens, session-5/6 recipes)
-bun run test:e2e      # Playwright E2E (84 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (142 specs: db-path, auth, utils, tokens, session-5/6/7 recipes)
+bun run test:e2e      # Playwright E2E (86 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```
@@ -198,6 +198,15 @@ fixed, its builder badge is not cloned).
 Deep engineering knowledge — the six Tailwind v4 traps, the wizard
 button-swap form-submit bug, debugging runbooks and coding patterns — is
 distilled in **`eon-hr_SKILL.md`**.
+
+Session 7 (`docs/remediation-plan-session7.md`) closed parity round 6: the
+true responsive boundary (**md 768px** — the reference's tablet band shows
+the desktop sidebar, verified by dual-browser viewport sweep), the mobile
+**page-title kickers** on the seven category-A routes (sticky z-20 bars
+replacing the desktop headers below md), and the reference's **inline
+Add-Employee wizard** (a page-replacing max-w-4xl card with a gradient
+header, 48px icon-circle step rail, photo-upload circle and border-t
+footer — not a modal dialog).
 
 ## License
 

@@ -237,6 +237,8 @@ export default function ProfilePage() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <PageHeader
         section="My Profile"
+        mobileKicker
+        mobileKickerTitle="Profile"
         layout="flat48"
         iconClassName="text-blue-600"
         sectionIcon={<CircleUser aria-hidden="true" />}

@@ -1,5 +1,7 @@
 // probe-navcontainer.mjs — nav container padding + button x offsets + section label
-export default {
+const probe = {
   wait: 3000,
   js: `(() => { const vis=(e)=>e&&e.offsetParent!==null; const navs=[...document.querySelectorAll('nav, [class*="overflow-y"]')].filter(vis); const nav=navs[0]; const cs=nav?getComputedStyle(nav):null; const trig=[...document.querySelectorAll('button')].filter(b=>vis(b)&&b.textContent.trim().startsWith('Employees'))[0]; const tr=trig?trig.getBoundingClientRect():null; const home=[...document.querySelectorAll('a,button')].find(e=>vis(e)&&e.textContent.trim().startsWith('Dashboard')&&e.getBoundingClientRect().width<230); const hr=home?home.getBoundingClientRect():null; const labelP=[...document.querySelectorAll('p')].filter(vis&& (p=>p)).filter(p=>p.textContent.trim().length<20&&p.textContent.trim().length>2&&p.getBoundingClientRect().x<40&&p.getBoundingClientRect().y<200).map(p=>({t:p.textContent.trim().slice(0,18),fs:getComputedStyle(p).fontSize,ls:getComputedStyle(p).letterSpacing})); return {navPad:cs?{pl:cs.paddingLeft,pt:cs.paddingTop,py:cs.paddingTop}:null, trigX:tr?Math.round(tr.x):-1, trigW:tr?Math.round(tr.width):-1, homeX:hr?Math.round(hr.x):-1, homeH:hr?Math.round(hr.height):-1, labels:labelP.slice(0,3)}; })()`,
 };
+
+export default probe;
