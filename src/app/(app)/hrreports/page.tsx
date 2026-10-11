@@ -99,7 +99,9 @@ export default function HRReportsPage() {
   const [source, setSource] = React.useState("employees");
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
-  const [groupBy, setGroupBy] = React.useState<string>("status");
+  // Session 14 (R13-L): the reference's Group By trigger renders EMPTY
+  // until a grouping is chosen (measured "" in the 169px trigger).
+  const [groupBy, setGroupBy] = React.useState<string>("");
   const [chartType, setChartType] = React.useState<ReportChartType>("bar");
   const [status, setStatus] = React.useState<string>("all");
 
@@ -206,7 +208,7 @@ export default function HRReportsPage() {
               <label htmlFor="hr-group" className="text-xs text-slate-500 font-medium">Group By</label>
               <Select value={groupBy} onValueChange={setGroupBy}>
                 <SelectTrigger id="hr-group" className="mt-1 w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
                   {GROUP_OPTIONS.map((g) => (

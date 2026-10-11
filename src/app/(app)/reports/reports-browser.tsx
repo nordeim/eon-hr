@@ -178,12 +178,16 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
   const [department, setDepartment] = React.useState("all");
+  const [status, setStatus] = React.useState("all");
+
+const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
 
   async function exportCsv(report: ReportDef) {
     const qs = new URLSearchParams({ type: report.type });
     if (from) qs.set("from", from);
     if (to) qs.set("to", to);
     if (department !== "all") qs.set("department", department);
+    if (status !== "all") qs.set("status", status);
     try {
       const res = await fetch(`/api/reports/export?${qs}`);
       if (!res.ok) {
@@ -243,57 +247,69 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
           ))}
         </TabsList>
 
+        {/* Session 14 (R13-F): the reference's active tab — ONE card per
+            category: a border-b CardHeader with a 20px-iconed
+            `font-semibold leading-none tracking-tight` title, then p-6
+            content wrapping `grid md:grid-cols-2 lg:grid-cols-3` of
+            346x126 tiles (p-4: two-line H3 mb-3 + flex gap-2 of two
+            equal-width iconed 152px buttons). */}
         {CATEGORIES.map((c) => (
           <TabsContent key={c.id} value={c.id} className="mt-0">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {c.reports.map((r) => (
-                <Card key={r.type} className="flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="flex items-start gap-2 text-base">
-                      <FileText className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-                      {r.title}
-                    </CardTitle>
-                    <CardDescription>{r.description}</CardDescription>
-                  </CardHeader>
-                  <CardFooter className="mt-auto gap-2">
-                    <Button variant="outline" size="sm" onClick={() => exportCsv(r)}>
-                      <Download aria-hidden="true" />
-                      CSV
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => window.print()}>
-                      <Printer aria-hidden="true" />
-                      PDF
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+            <Card>
+              <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
+                <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
+                  <span className="flex h-5 w-5 items-center justify-center text-blue-600">{c.icon}</span>
+                  {c.label} Reports
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {c.reports.map((r) => (
+                    <div key={r.type} className="rounded-xl border bg-card p-4">
+                      <h3 className="font-semibold text-slate-900 mb-3">{r.title}</h3>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => exportCsv(r)}>
+                          <Download className="mr-2" aria-hidden="true" />
+                          CSV
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => window.print()}>
+                          <Printer className="mr-2" aria-hidden="true" />
+                          PDF
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         ))}
       </Tabs>
 
+      {/* Session 14 (R13-F): the reference's Report Filters card —
+          title-only header + `grid md:grid-cols-4` of Date From / Date To /
+          Department / Status. */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
+          <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
             <CalendarRange className="h-5 w-5 text-blue-600" aria-hidden="true" />
             Report Filters
-          </CardTitle>
-          <CardDescription>Applied to CSV exports where the report supports them</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
+        <CardContent className="p-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="space-y-2">
               <Label htmlFor="rf-from">Date From</Label>
-              <Input id="rf-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              <Input className="mt-2" id="rf-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="space-y-2">
               <Label htmlFor="rf-to">Date To</Label>
-              <Input id="rf-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              <Input className="mt-2" id="rf-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="space-y-2">
               <Label htmlFor="rf-department">Department</Label>
               <Select value={department} onValueChange={setDepartment}>
-                <SelectTrigger id="rf-department" className="w-full">
+                <SelectTrigger id="rf-department" className="mt-2 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -301,6 +317,21 @@ export function ReportsBrowser({ departments }: { departments: DepartmentOption[
                   {departments.map((d) => (
                     <SelectItem key={d.id} value={d.id}>
                       {d.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rf-status">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger id="rf-status" className="mt-2 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((st) => (
+                    <SelectItem key={st} value={st}>
+                      {st === "all" ? "All Status" : st.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase())}
                     </SelectItem>
                   ))}
                 </SelectContent>

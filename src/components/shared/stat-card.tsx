@@ -23,7 +23,8 @@ import { Card, CardContent } from "@/components/ui/card";
  *     p-4 flex items-center gap-3, the VALUE inside a 40px slate-100
  *     tile (SPAN text-lg font-bold text-slate-700), label right — 74px
  *   no-tile (performancemanagement, workflowautomation):
- *     p-6, text-3xl value, no tile — 110px card
+ *     p-6, flex row — text-3xl value + text-sm label LEFT, 40×40 icon
+ *     RIGHT — 108px card (session 14, R13-I live measurement)
  *   tile-right (analytics): p-6, 48px tile right-aligned — 138px card
  */
 type StatCardVariant =
@@ -82,7 +83,9 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   "mini-centered": "text-3xl font-bold text-slate-900",
   horizontal: "text-2xl font-bold text-slate-900",
   "value-in-tile": "text-lg font-bold text-slate-700",
-  "no-tile": "text-3xl font-bold text-slate-900",
+  // Session 14 (R13-I): no-tile value carries mb-1 — the reference's
+  // text stack is 60px (36 + 4 + 20).
+  "no-tile": "text-3xl font-bold text-slate-900 mb-1",
   // Session 13 (R12-E): the stacked tile-right value carries mt-2 (the
   // label sits above it — measured on /analytics, 138px tiles).
   "tile-right": "text-3xl font-bold text-slate-900 mt-2",
@@ -171,7 +174,22 @@ export function StatCard({
             <span className="text-sm text-slate-600">{label}</span>
           </>
         ) : tileElement == null ? (
-          textBlock
+          variant === "no-tile" ? (
+            /* Session 14 (R13-I): the reference's no-tile stat card is a
+               flex row — the text stack (text-3xl value, text-sm label)
+               on the LEFT, a bare 40×40 icon on the RIGHT. 108px card,
+               measured on /performancemanagement and /workflowautomation. */
+            <div className="flex items-center justify-between">
+              <div>{textBlock}</div>
+              {icon != null ? (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center [&_svg]:h-10 [&_svg]:w-10">
+                  {icon}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            textBlock
+          )
         ) : variant === "horizontal" ? (
           <>
             {tileElement}

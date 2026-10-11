@@ -208,7 +208,7 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
         actions={
           <>
             <Select value={selected} onValueChange={setSelected}>
-              <SelectTrigger className="w-[200px]" aria-label="Filter by survey">
+              <SelectTrigger className="w-48" aria-label="Filter by survey">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -220,15 +220,15 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={exportResponses}>
-              <Download aria-hidden="true" />
+            <Button variant="outline" size="sm" onClick={exportResponses}>
+              <Download className="mr-2" aria-hidden="true" />
               Export
             </Button>
             <Button onClick={runAnalysis} disabled={analyzing}>
               {analyzing ? (
                 <Loader2 className="animate-spin" aria-hidden="true" />
               ) : (
-                <Sparkles aria-hidden="true" />
+                <Sparkles className="mr-2" aria-hidden="true" />
               )}
               Run AI Analysis
             </Button>

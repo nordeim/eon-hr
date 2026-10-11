@@ -180,7 +180,10 @@ test.describe("dashboard", () => {
     );
     const board = page.locator("div.md\\:grid-cols-5").first();
     await expect(board).toHaveCSS("grid-template-columns", /^(\d+(\.\d+)?px ){4}\d+(\.\d+)?px$/);
-    const chip = page.locator("span.text-xs.font-semibold").first();
+    // Session 14 (R13-J): the reference renders the count badge as a DIV
+    // (scoped to the board — the sidebar's "Main Menu" label matches the
+    // generic class chain).
+    const chip = board.locator("div.inline-flex.rounded-md.border").first();
     await expect(chip).toHaveCSS("border-radius", "6px");
     await expect(chip).toHaveCSS("color", "rgb(51, 65, 85)");
     await expect(chip).toHaveCSS("background-color", "rgb(241, 245, 249)");

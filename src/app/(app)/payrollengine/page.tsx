@@ -156,28 +156,28 @@ export default function PayrollEnginePage() {
 
       {/* Session 11 (R10-I): the reference's toolbar card — a flat white
           border-0 card (p-5) with a `flex flex-wrap items-end gap-4` row:
-          Payroll Month field (space-y-1, 176px input) + Department field
-          (space-y-1, 192px select) + the flat emerald-600 Generate Payroll
+          Payroll Month field (space-y-2, 176px input) + Department field
+          (space-y-2, 192px select) + the flat emerald-600 Generate Payroll
           button (180x36, icon mr-2 — measured rgb(5,150,105)); hint line
           text-xs text-slate-500 mt-3 below. The clone's working engine
           state rides the reference's own furniture. */}
       <Card className="border-0">
         <CardContent className="p-5">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1">
+            <div className="space-y-2 leading-5">
               <Label htmlFor="pe-month">Payroll Month</Label>
               <Input
+                className="mt-2 w-44"
                 id="pe-month"
                 type="month"
                 value={month}
                 onChange={(e) => onMonthChange(e.target.value)}
-                className="w-44"
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2 leading-5">
               <Label htmlFor="pe-department">Department</Label>
               <Select value={departmentId} onValueChange={(v) => setDepartmentId(v)}>
-                <SelectTrigger id="pe-department" className="w-48">
+                <SelectTrigger id="pe-department" className="mt-2 w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

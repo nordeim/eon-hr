@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, UserCheck, Users, UserX } from "lucide-react";
+import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, UserCheck, Users, UserX, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -329,18 +329,6 @@ export default function StaffAttendancePage() {
         </div>
       ) : (
         <>
-          {!canMark ? (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-900 shadow-sm">
-              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
-              <div>
-                <p className="text-sm font-semibold">Access Restricted</p>
-                <p className="mt-0.5 text-sm text-amber-800">
-                  Only Admin or Security role users can mark attendance. Please contact your administrator.
-                </p>
-              </div>
-            </div>
-          ) : null}
-
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
             <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="h-4 w-4" aria-hidden="true" />} />
             <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<UserCheck className="h-4 w-4" aria-hidden="true" />} />
@@ -349,14 +337,31 @@ export default function StaffAttendancePage() {
             <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<Gauge className="h-4 w-4" aria-hidden="true" />} />
           </div>
 
-          <Tabs defaultValue="dashboard" className="flex flex-col gap-4">
-            <TabsList>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="summary">Employee Summary</TabsTrigger>
-              <TabsTrigger value="records">Records</TabsTrigger>
+          {/* Session 14 (R13-D): the reference's stat-tab block — the
+              DEFAULT shrink-wrapped TabsList (471px) with bg-white +
+              border, iconed triggers (flex + gap-2, 16px
+              svg, no icon margin). The first tab is Mark
+              Attendance: non-admins get the centered access-restricted
+              recipe; admins keep the clone's overview superset. */}
+          <Tabs defaultValue="mark" className="space-y-6">
+            <TabsList className="bg-white border border-slate-200">
+              <TabsTrigger value="mark" className="gap-2"><Workflow className="h-4 w-4" aria-hidden="true" /> Mark Attendance</TabsTrigger>
+              <TabsTrigger value="summary" className="gap-2"><Users className="h-4 w-4" aria-hidden="true" /> Employee Summary</TabsTrigger>
+              <TabsTrigger value="records" className="gap-2"><Calendar className="h-4 w-4" aria-hidden="true" /> Records</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="dashboard" className="mt-0">
+            <TabsContent value="mark" className="mt-0">
+              {!canMark ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center bg-red-100 rounded-full">
+                  <ShieldAlert className="h-8 w-8 text-red-600" aria-hidden="true" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-900">Access Restricted</h3>
+                <p className="text-slate-500 max-w-sm">
+                  Only Admin or Security role users can mark attendance. Please contact your administrator.
+                </p>
+              </div>
+              ) : (
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="rounded-xl border bg-card p-5 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -412,6 +417,7 @@ export default function StaffAttendancePage() {
                   )}
                 </div>
               </div>
+              )}
             </TabsContent>
 
             <TabsContent value="summary" className="mt-0">

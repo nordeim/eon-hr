@@ -216,7 +216,7 @@ export default function TaskManagerPage() {
         actions={
           <>
             <Button variant="outline" onClick={openProjectDialog}>
-              <FolderKanban aria-hidden="true" />
+              <FolderKanban className="mr-2" aria-hidden="true" />
               New Project
             </Button>
             <Button onClick={openTaskDialog}>
@@ -237,7 +237,7 @@ export default function TaskManagerPage() {
           onClick={() => setView("kanban")}
           aria-pressed={view === "kanban"}
         >
-          <KanbanSquare aria-hidden="true" />
+          <KanbanSquare className="mr-2" aria-hidden="true" />
           Kanban
         </Button>
         <Button
@@ -245,7 +245,7 @@ export default function TaskManagerPage() {
           onClick={() => setView("projects")}
           aria-pressed={view === "projects"}
         >
-          <FolderIcon aria-hidden="true" />
+          <FolderIcon className="mr-2" aria-hidden="true" />
           Projects
         </Button>
       </div>
@@ -266,13 +266,15 @@ export default function TaskManagerPage() {
                       {/* Reference count chip (session 6): rounded-md
                           border px-2.5 py-0.5 text-xs font-semibold
                           bg-slate-100 text-slate-700. */}
-                      <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700">
+                      <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700">
                         {columnTasks.length}
-                      </span>
+                      </div>
                     </div>
-                    {columnTasks.length === 0 ? null : (
-                      <div className="flex flex-col gap-3">
-                        {columnTasks.map((task) => (
+                    {/* Session 14 (R13-J): the reference keeps the (empty)
+                        task-list container in every column — the space-y-3
+                        gap makes empty columns 60px, not 48px. */}
+                    <div className="space-y-2">
+                      {columnTasks.map((task) => (
                           <div
                             key={task.id}
                             className="group cursor-grab rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
@@ -346,7 +348,6 @@ export default function TaskManagerPage() {
                           </div>
                         ))}
                       </div>
-                    )}
                   </div>
                 );
               })}

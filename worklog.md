@@ -488,3 +488,27 @@ Work Log:
 Stage Summary:
 - Parity round 12 complete: 6 gap groups fixed with 20 new TDD pins — notificationpreferences, hrreports, analytics rebuilt per REF recipes; staffrequests trigger; component prop additions keep all other pages' defaults intact — every fixed surface live-verified byte-exact
 - 285 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 26 (session 14 / parity round 13)
+Agent: main (Super Z)
+Task: Full parity cycle — fresh-clone workspace setup, audit (redeploy check + mobile nav + 46-route sweep + iconed-button enumeration + per-page DOM dumps), TDD remediation of 12 gap groups, docs, commit + push
+
+Work Log:
+- Workspace reset discovered; fresh clone at e0b7ea6 (R12 push + session-log commit); setup: .env (file:../db/custom.db + fresh AUTH_SECRET), bun install, db:push + db:seed (pristine: users=1, employees=1, leaveBalances=2); Playwright browsers cached; scripts/ensure-server.sh guard recreated (sandbox reaps background servers)
+- Baseline gates from scratch: lint 0/0, tsc, 285/285 unit, build, 86/86 E2E — the e0b7ea6 push state exactly; static audit of the R12 diff clean
+- agent-browser dual sessions (loc/ref) authenticated; probe-tooling fix discovered: agent-browser eval does NOT un-escape JSON string args — flatten probes to one line first (all r13 scripts)
+- Redeploy check: visible-h1 text/font/position byte-identical on 11 routes — REF unchanged since R12 (a transient 61px mobile top-bar reading was a mid-hydration artifact)
+- Mobile navigation audit (user priority): top bar 73, bottom tabs 78@766 (x 10/79/139/204/313), drawer 288×844 + footer 121@723, submenu, kicker 53@89 + scroll-away −64, md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug
+- 46-route sweep + iconed-button enumeration + per-page DOM dumps: 12 gap groups (R13-A…L) — the systemic find: REF iconed buttons carry svg mr-2/mr-1 on top of gap-2 (10 LOC call sites missing it); settings/profile/attendance/compliance tab pills are the DEFAULT shrink-wrapped white-bordered TabsList; settings Company card, profile General form, attendance Mark Attendance tabs + access-restricted recipe, compliance tab restructure, reports category cards + 346×126 tile grid, offboarding col-span-full empty, surveys zero-render, no-tile StatCard flex row, taskmanager empty column + DIV badge, payrollengine 64px fields, shiftcalendar gap-2 chevron cluster + anchor CTA, hrreports empty Group By default
+- docs/remediation-plan-session14.md written (12 groups + non-goals) + codebase-validated
+- TDD: 39 new pins (37 RED + 2 refined) → GREEN; engineering finds: lucide icons default 24px (tab icons need h-4 w-4), space-y-6 tab roots need mt-0 contents (inline-flex margins don't collapse), the line-box field recipe (inline label + mt-2 control — R12-B lesson generalized), REF's Schedule Report is the default gradient variant
+- Gates: lint 0/0, tsc, 324/324 unit (+39), build, 86/86 E2E (badge selector span→div scoped to the board)
+- Live verification: 34/37 byte-exact + 3 documented (profile h2 Category-A, attendance +24 REF header bug, compliance 1px sub-pixel); full-route sweep clean of non-documented diffs; mobile regression clean (settings pill 971@16 even at 390px)
+- 19 screenshots captured/refreshed (7 rebuilt pages + 9 standards + mobile set) → 48 total in docs/screenshots/
+- Docs: AGENTS.md session-14 layer + 324 specs; SKILL v2.7.0 + §26; PAD [S14] + Last Updated; CLAUDE.md 410-spec pyramid + session-14 pins; README 324 specs + 48 captures; docs/session_20.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 13 complete: 12 gap groups fixed with 39 new TDD pins — the systemic iconed-button margin matrix, white tab pills on four pages, line-box field recipe, and five page rebuilds — every fixed surface live-verified byte-exact against the reference
+- 324 unit + 86 E2E green; ready for commit + push

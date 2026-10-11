@@ -219,7 +219,7 @@ export default function PayrollPage() {
                 })
               }
             >
-              <FileDown aria-hidden="true" />
+              <FileDown className="mr-2" aria-hidden="true" />
               Reports & Export
             </Button>
             <Button variant="green"

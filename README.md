@@ -79,7 +79,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
 │   └── 📂 e2e/                     # Playwright: 86 specs, isolated e2e.db
 ├── 📂 docs/
-│   ├── 📂 screenshots/             # 24 remediated UI captures (desktop + mobile + tablet + wizard)
+│   ├── 📂 screenshots/             # 48 remediated UI captures (desktop + mobile + tablet + wizard)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
 │   └── 📄 Tailwind-V4-Validation-Report.md    # Engine trap log
 └── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md • eon-hr_SKILL.md
@@ -133,7 +133,7 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (285 specs: db-path, auth, utils, tokens, session-5/6/7/8/9/10/11/12/13 recipes)
+bun run test          # Vitest unit layer (324 specs: db-path, auth, utils, tokens, session-5..14 recipes)
 bun run test:e2e      # Playwright E2E (86 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit

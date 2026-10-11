@@ -219,20 +219,11 @@ export default function SurveysPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : surveys.length === 0 ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl border bg-card shadow-sm md:col-span-2">
-            <EmptyState
-              title="No surveys yet"
-              description="Create your first survey to gather employee feedback"
-              action={
-                <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                  <Plus className="mr-2" aria-hidden="true" />
-                  New Survey
-                </Button>
-              }
-            />
-          </div>
-        </div>
+        /* Session 14 (R13): at 0 surveys the reference renders NOTHING
+            below the stat row (the employees zero-render pattern) — the
+            New Survey CTA stays in the empty state's place only when the
+            reference has one; here it does not. */
+        null
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {surveys.map((survey) => {

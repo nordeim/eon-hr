@@ -51,8 +51,10 @@ export function ScheduleReportButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <CalendarClock aria-hidden="true" />
+        {/* Session 14 (R13-A): the reference renders this as the default blue
+              gradient CTA (179px, iconed mr-2) — not outline. */}
+        <Button>
+          <CalendarClock className="mr-2" aria-hidden="true" />
           Schedule Report
         </Button>
       </DialogTrigger>

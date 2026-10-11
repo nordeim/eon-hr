@@ -232,7 +232,7 @@ export default function DocumentTrackerPage() {
         actions={
           <>
             <Button variant="outline" disabled={checking} onClick={runAlertCheck}>
-              {checking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <BellRing aria-hidden="true" />}
+              {checking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <BellRing className="mr-2" aria-hidden="true" />}
               Run Alert Check
             </Button>
             <Button onClick={openNewDialog}>

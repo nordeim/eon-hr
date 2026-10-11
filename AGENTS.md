@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 285 specs) |
+| Unit tests | `bun run test` (Vitest, 324 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -350,6 +350,96 @@ reference — never re-add it.
 - **StatCard prop additions (R12-A/G/E)**: `labelClassName` (per-page
   label size/color override); `tile-right` now renders the stacked
   recipe and its own hint (the generic hint is skipped for tile-right).
+
+## Session-14 recipe layer (parity round 13)
+
+- **Iconed-button margins (R13-A, systemic)**: the reference's iconed
+  buttons carry `mr-2` on the svg ON TOP of the button's `gap-2` (16px
+  effective icon-text gap) — or `mr-1` (4px) on some in-card buttons.
+  Pinned call sites: employees Import CSV (145), payroll Reports & Export
+  (185), payrollmodule Generate All (153), taskmanager New Project/Kanban/
+  Projects (149/117/121), attendancedashboard Export Report (163) +
+  in-card Export (93, mr-1), documenttracker Run Alert Check (178),
+  surveyanalytics Run AI Analysis (171), analyticsdashboard Export CSV/PDF
+  (145/144), advancedanalytics Schedule Report (179 — the DEFAULT gradient
+  variant, not outline), compliancedashboard Notify All x3 (166/173/173,
+  mr-1). The attendance cluster (R9) and hrreports exports (R12) already
+  carried it.
+- **Tab pills — two recipes**: `bg-muted` (staffrequests, the shadcn
+  default) vs `bg-white border border-slate-200` (evaluations since R11;
+  NOW ALSO settings 971px, profile 507px, attendance 471px,
+  compliancedashboard 331px). The white pills are the DEFAULT
+  shrink-wrapped TabsList (never stretch full-width). Tab roots use
+  `space-y-6` with every TabsContent `mt-0` — the default `mt-2` STACKS
+  with the pill's 24px margin (inline-flex margins don't collapse).
+- **Tab trigger icon recipes (measured)**: settings/profile triggers =
+  16px svg with `mr-2` (h-4 w-4 mr-2, no gap); attendance = `gap-2`
+  trigger class, 16px svg, no margin; compliancedashboard = `gap-1`,
+  12px svg (h-3 w-3). Lucide icons default to 24px — every tab icon needs
+  an explicit size class.
+- **Field recipes (line-box stacking — the R12-B lesson generalized)**:
+  the reference's form fields are BARE divs (`space-y-2`) with an INLINE
+  label (text-sm leading-none) + the control carrying `mt-2` (profile 68px
+  fields, payrollengine 64px with `leading-5` on the wrapper, reports
+  filters 68px). Do NOT wrap fields in flex or use pt-*/space-y-3 — the
+  inline label's line box provides the top offset.
+- **settings (R13-B)**: 7 iconed tabs (Building2/Workflow/Clock/Users/
+  Plug/Palette/FileText); Company card = border-b CardHeader
+  (`flex flex-col space-y-1.5`, title-only `font-semibold leading-none`)
+  with the iconed h-9 Edit in a `flex justify-between` row + `p-6`
+  content > space-y-6 > `grid md:grid-cols-2 gap-6` of read-only p-4
+  tiles (label `text-sm text-slate-500 mb-1` + value `font-medium`);
+  631px card.
+- **profile (R13-C)**: exactly 4 iconed tabs (User/Lock/Globe/
+  SlidersHorizontal, default "general" — no User tab); General tab =
+  border-b DIV-title header + p-6 form (space-y-6: `grid md:grid-cols-2
+  gap-6` of 68px fields + `flex justify-end` Save Changes iconed 164x36
+  INSIDE the form — no CardFooter); identity h2 keeps no truncate.
+- **attendance stat tabs (R13-D)**: Mark Attendance / Employee Summary /
+  Records (the first tab is NOT Dashboard); non-admins render the
+  access-restricted recipe (`flex flex-col items-center justify-center
+  py-16`, 64px `bg-red-100 rounded-full` chip + 32px icon,
+  `H3.text-lg font-semibold mb-2`, `P.text-slate-500 max-w-sm`); the
+  admin form stays the superset.
+- **compliancedashboard (R13-E)**: header Run Compliance Scan is
+  TEXT-ONLY (184px); the tab content stack = mini-centered 90px stat row
+  (Expiring <=7/15/30 + Expired) + notify row (`flex flex-wrap gap-2`,
+  mr-1 icons) + toolbar (`flex flex-wrap gap-3 p-4`: bare 16px search
+  svg + w-48 input + two w-36 selects + `ml-auto` "N at-risk documents")
+  + table card (title-only p-3 header + `p-0` content + the systemic
+  180px py-12 empty).
+- **reports (R13-F)**: each category tab = ONE card: border-b CardHeader
+  with a 20px-iconed `font-semibold leading-none` title + p-6 content
+  wrapping `grid md:grid-cols-2 lg:grid-cols-3 gap-4` of 346x126 tiles
+  (p-4, two-line H3 `text-slate-900 mb-3`, `flex gap-2` of two flex-1
+  iconed 152x32 CSV/PDF buttons); Report Filters card below (title-only
+  header + `grid md:grid-cols-4` of Date From/To/Department/Status).
+- **offboarding (R13-G)**: content in `grid md:grid-cols-2
+  lg:grid-cols-3`; the empty state is ONE `col-span-full` card (238px,
+  icon + h3 + P — NO CTA; the affordance is the header button).
+- **surveys zero-render (R13)**: at 0 surveys the reference renders
+  NOTHING below the stat row (the employees zero-render pattern) — the
+  empty card + New Survey CTA were removed.
+- **Selects (R13-H)**: surveyanalytics All Surveys w-48 (192) + Export
+  `size="sm"` h-8 (97x32, iconed mr-2); analyticsdashboard range w-36
+  (144); attendancedashboard department w-44 (176).
+- **StatCard no-tile variant (R13-I)**: `flex items-center justify-between`
+  row — text stack left (value `text-3xl font-bold mb-1`) + bare 40x40
+  icon right (per-page blue/green/orange/purple-500 text colors);
+  108px cards (performancemanagement md:4, workflowautomation md:3).
+- **taskmanager (R13-J)**: every board column renders its (possibly
+  empty) `space-y-2` list container (empty columns 60px, not 48px); the
+  count badge is a DIV.
+- **payrollengine (R13-K)**: toolbar field wrappers `space-y-2 leading-5`
+  + `mt-2` controls (64px fields, 132px card).
+- **shiftcalendar (R13-L)**: the chevrons + month label ride their own
+  `gap-2` cluster (232px) inside the gap-4 toolbar; Shift Swaps renders
+  as an ANCHOR (`asChild` + href="/ShiftSwap" — the reference's casing
+  quirk) opening the clone's superset dialog; employees view toggles
+  render Grid first (42px), List second (40px, active).
+- **hrreports (R13-L)**: the Group By select defaults to an EMPTY
+  trigger (`useState("")` + `SelectValue placeholder=""`); Status Filter
+  shows "All".
 
 ## Page architecture (session 6) — where padding and gradients live
 

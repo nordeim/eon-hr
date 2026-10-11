@@ -161,7 +161,7 @@ export default function EmployeesPage() {
                 })
               }
             >
-              <Upload aria-hidden="true" />
+              <Upload className="mr-2" aria-hidden="true" />
               Import CSV
             </Button>
             <Button
@@ -213,11 +213,13 @@ export default function EmployeesPage() {
             </select>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant={view === "list" ? "default" : "outline"} className="h-8 px-3" aria-label="List view" onClick={() => setView("list")}>
-              <List aria-hidden="true" />
-            </Button>
+            {/* Session 14 (R13): the reference renders Grid first (42px),
+                List second (40px, active) — order measured live. */}
             <Button variant={view === "grid" ? "default" : "outline"} className="h-8 px-3" aria-label="Grid view" onClick={() => setView("grid")}>
               <Grid3x3 aria-hidden="true" />
+            </Button>
+            <Button variant={view === "list" ? "default" : "outline"} className="h-8 px-3" aria-label="List view" onClick={() => setView("list")}>
+              <List aria-hidden="true" />
             </Button>
           </div>
         </div>

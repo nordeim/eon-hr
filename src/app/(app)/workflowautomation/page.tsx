@@ -211,9 +211,9 @@ export default function WorkflowAutomationPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-3">
-        <StatCard variant="no-tile" label="Total Workflows" value={stats.total} icon={<WorkflowIcon className="h-4 w-4" />} />
-        <StatCard variant="no-tile" label="Active" value={stats.active} icon={<Zap className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard variant="no-tile" label="Total Executions" value={stats.executions} icon={<ListChecks className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="no-tile" label="Total Workflows" value={stats.total} icon={<WorkflowIcon className="h-4 w-4 text-purple-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Active" value={stats.active} icon={<Zap className="h-4 w-4 text-green-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Total Executions" value={stats.executions} icon={<ListChecks className="h-4 w-4 text-blue-500" aria-hidden="true" />} />
       </div>
 
       {loading ? (

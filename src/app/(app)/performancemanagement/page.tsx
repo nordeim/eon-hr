@@ -225,10 +225,10 @@ export default function PerformanceManagementPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard variant="no-tile" label="Completed" value={stats.completed} icon={<Target className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} icon={<Target className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
-        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} icon={<Star className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="h-4 w-4 text-blue-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Completed" value={stats.completed} icon={<Target className="h-4 w-4 text-green-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} icon={<Target className="h-4 w-4 text-orange-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} icon={<Star className="h-4 w-4 text-purple-500" aria-hidden="true" />} />
       </div>
 
       <Tabs defaultValue="goals">

@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.6.0 (session-13 remediation complete) · **Last updated:**
+> **Version:** 2.7.0 (session-14 remediation complete) · **Last updated:**
 > 2026-10-11 · **State:** 285 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
@@ -1111,3 +1111,75 @@ slate-900/green-600/indigo-600); charts render UNCONDITIONALLY.
 **Component prop additions:** PageHeader `subtitleClassName` +
 `actionsClassName` (defaults unchanged); StatCard `labelClassName`
 (tile-right renders its own hint — the generic one is skipped for it).
+
+## 26. Session-14 Recipe Layer — parity round 13
+
+**Iconed-button margins (R13-A, the round's core find):** the reference's
+iconed buttons carry `mr-2` on the svg on top of the button's `gap-2`
+(16px effective icon-text gap; `mr-1` = 4px on some in-card buttons).
+Ten call sites were missing it (employees Import CSV, payroll Reports &
+Export, payrollmodule Generate All, taskmanager New Project/Kanban/
+Projects, documenttracker Run Alert Check, surveyanalytics Run AI
+Analysis, analyticsdashboard Export CSV/PDF, attendancedashboard Export
+Report + in-card Export, advancedanalytics Schedule Report — which is
+the DEFAULT gradient variant, not outline).
+
+**Tab pills:** two recipes — `bg-muted` (staffrequests) vs `bg-white
+border border-slate-200` (settings 971px / profile 507px / attendance
+471px / compliance 331px — the default SHRINK-WRAPPED TabsList). Tab
+roots are `space-y-6` with every TabsContent `mt-0`: the default `mt-2`
+STACKS with the pill's 24px margin-block-end (inline-flex margins don't
+collapse — the trap behind several 8px tab-content offsets).
+
+**Tab trigger icons:** settings/profile = `h-4 w-4 mr-2` (no gap);
+attendance = trigger `gap-2`, 16px svg, no margin; compliance = trigger
+`gap-1`, 12px svg. Lucide icons default to 24px — always size them.
+
+**Field line-box stacking (generalized R12-B lesson):** bare
+`div.space-y-2` (payrollengine adds `leading-5`) > INLINE label
+(text-sm leading-none) + control with `mt-2`. The inline label's line
+box provides the 4px top offset; margins on the inline label are
+ignored. Profile fields 68px, payrollengine 64px, reports filters 68px.
+
+**settings:** 7 iconed tabs; Company card = border-b title-only header +
+iconed h-9 Edit + `grid md:grid-cols-2 gap-6` of p-4 read-only tiles
+(label `text-sm text-slate-500 mb-1` + value `font-medium`); 631px.
+
+**profile:** exactly 4 iconed tabs (no User tab, default general);
+General tab = border-b DIV-title + p-6 form (`grid md:grid-cols-2 gap-6`
+68px fields + `flex justify-end` iconed Save INSIDE the form — no
+CardFooter).
+
+**attendance stat tabs:** Mark Attendance / Employee Summary / Records;
+non-admins get the access-restricted recipe (64px `bg-red-100
+rounded-full` chip, `py-16` centering, `max-w-sm` copy).
+
+**compliancedashboard:** text-only header CTA; tab content = 90px
+mini-centered stat row + `flex flex-wrap gap-2` notify row (mr-1) +
+`flex flex-wrap gap-3 p-4` toolbar (bare search svg, w-48 input, two
+w-36 selects, ml-auto counter) + title-only p-3-header table card with
+the 180px systemic empty.
+
+**reports:** one card per category (border-b header with a 20px-iconed
+leading-none title) wrapping `grid md:grid-cols-2 lg:grid-cols-3 gap-4`
+of 346x126 p-4 tiles (two-line H3 mb-3 + two flex-1 iconed 152x32
+buttons); Report Filters card = `grid md:grid-cols-4`.
+
+**offboarding:** `grid md:grid-cols-2 lg:grid-cols-3` with the empty
+state as ONE `col-span-full` 238px card (no CTA — the affordance is the
+header button). **surveys:** zero-render — nothing below the stat row at
+0 surveys.
+
+**StatCard no-tile variant:** `flex items-center justify-between` —
+text stack (value `text-3xl font-bold mb-1`) left + bare 40x40 icon
+right (per-page blue/green/orange/purple-500); 108px.
+
+**taskmanager:** columns always render their empty `space-y-2` list
+container (60px empty columns); count badge is a DIV.
+
+**shiftcalendar:** chevrons + month label in their own `gap-2` cluster
+inside the gap-4 toolbar; Shift Swaps is an ANCHOR (asChild,
+href="/ShiftSwap") opening the superset dialog.
+
+**hrreports:** Group By select defaults EMPTY (useState("") +
+placeholder=""); Status Filter shows All.

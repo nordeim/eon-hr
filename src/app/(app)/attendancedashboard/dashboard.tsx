@@ -175,7 +175,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
         actions={
           <>
             <Select value={department} onValueChange={setDepartment}>
-              <SelectTrigger className="w-[190px]" aria-label="Filter by department">
+              <SelectTrigger className="w-44" aria-label="Filter by department">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -188,7 +188,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={exportReport}>
-              <Download aria-hidden="true" />
+              <Download className="mr-2" aria-hidden="true" />
               Export Report
             </Button>
           </>
@@ -238,7 +238,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={exportReport}>
-            <Download aria-hidden="true" />
+            <Download className="mr-1" aria-hidden="true" />
             Export
           </Button>
         </CardHeader>

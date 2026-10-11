@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Camera, CheckCircle2, CircleUser, Globe, KeyRound, Loader2, Plug, Save } from "lucide-react";
+import { Camera, CheckCircle2, CircleUser, Globe, KeyRound, Loader2, Lock, Plug, Save, SlidersHorizontal, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -278,7 +278,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-2xl font-bold text-slate-900">{profile.name}</h2>
+                <h2 className="text-2xl font-bold text-slate-900">{profile.name}</h2>
                 <p className="mb-3 truncate text-slate-600">{profile.email}</p>
                 <Button
                   variant="outline"
@@ -298,44 +298,51 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="user" className="flex flex-col gap-4">
-        <TabsList className="h-auto flex-wrap justify-start">
-          <TabsTrigger value="user">User</TabsTrigger>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="social">Social Accounts</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+      {/* Session 14 (R13-C): the reference's profile tabs — exactly four
+          (General/Security/Social Accounts/Preferences), iconed (16px svg,
+          mr-2), in the DEFAULT shrink-wrapped TabsList with bg-white +
+          border (507px). The General tab carries the Personal Information
+          form: border-b DIV-title header + p-6 form (space-y-6 > grid
+          md:grid-cols-2 gap-6 of space-y-2 fields) + the Save Changes
+          button INSIDE the form (flex justify-end, iconed). */}
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="bg-white border border-slate-200">
+          <TabsTrigger value="general"><User className="h-4 w-4 mr-2" aria-hidden="true" />General</TabsTrigger>
+          <TabsTrigger value="security"><Lock className="h-4 w-4 mr-2" aria-hidden="true" />Security</TabsTrigger>
+          <TabsTrigger value="social"><Globe className="h-4 w-4 mr-2" aria-hidden="true" />Social Accounts</TabsTrigger>
+          <TabsTrigger value="preferences"><SlidersHorizontal className="h-4 w-4 mr-2" aria-hidden="true" />Preferences</TabsTrigger>
         </TabsList>
 
-        {/* User tab */}
-        <TabsContent value="user">
+        {/* General tab — Personal Information form (reference recipe) */}
+        <TabsContent value="general" className="mt-0">
           <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update the details shown on your profile.</CardDescription>
+            <CardHeader className="border-b border-slate-200 p-6">
+              <div className="font-semibold leading-none tracking-tight">Personal Information</div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <form
                 id="profile-form"
-                className="flex flex-col gap-4"
+                className="space-y-6"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void onSaveProfile();
                 }}
               >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
                     <Label htmlFor="pf-name">Full Name</Label>
                     <Input
+                      className="mt-2"
                       id="pf-name"
                       required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="space-y-2">
                     <Label htmlFor="pf-email">Email</Label>
                     <Input
+                      className="mt-2"
                       id="pf-email"
                       type="email"
                       required
@@ -343,18 +350,20 @@ export default function ProfilePage() {
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="space-y-2">
                     <Label htmlFor="pf-phone">Phone</Label>
                     <Input
+                      className="mt-2"
                       id="pf-phone"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="+65 87651230"
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="space-y-2">
                     <Label htmlFor="pf-title">Job Title</Label>
                     <Input
+                      className="mt-2"
                       id="pf-title"
                       value={form.jobTitle}
                       onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
@@ -362,19 +371,19 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+                <div className="flex justify-end">
+                  <Button type="submit" form="profile-form" disabled={savingProfile || loading}>
+                    {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
+                    Save Changes
+                  </Button>
+                </div>
               </form>
             </CardContent>
-            <CardFooter className="justify-end">
-              <Button type="submit" form="profile-form" disabled={savingProfile || loading}>
-                {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save aria-hidden="true" />}
-                Save Changes
-              </Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
         {/* General tab */}
-        <TabsContent value="general">
+        <TabsContent value="general" className="mt-0">
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
@@ -418,17 +427,19 @@ export default function ProfilePage() {
                 Saved to your account and this browser.
               </p>
             </CardContent>
-            <CardFooter className="justify-end">
-              <Button onClick={onSavePreferences} disabled={savingPrefs}>
-                {savingPrefs ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save aria-hidden="true" />}
-                Save General Settings
-              </Button>
-            </CardFooter>
+            <CardContent className="p-6 pt-0">
+              <div className="flex justify-end">
+                <Button onClick={onSavePreferences} disabled={savingPrefs}>
+                  {savingPrefs ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
+                  Save General Settings
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
 
         {/* Security tab */}
-        <TabsContent value="security">
+        <TabsContent value="security" className="mt-0">
           <Card>
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
@@ -482,17 +493,19 @@ export default function ProfilePage() {
                 </div>
               </form>
             </CardContent>
-            <CardFooter className="justify-end">
-              <Button type="submit" form="password-form" disabled={savingPw}>
-                {savingPw ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <KeyRound aria-hidden="true" />}
-                Update Password
-              </Button>
-            </CardFooter>
+            <CardContent className="p-6 pt-0">
+              <div className="flex justify-end">
+                <Button type="submit" form="password-form" disabled={savingPw}>
+                  {savingPw ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <KeyRound className="mr-2" aria-hidden="true" />}
+                  Update Password
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
 
         {/* Social accounts tab */}
-        <TabsContent value="social">
+        <TabsContent value="social" className="mt-0">
           <Card>
             <CardHeader>
               <CardTitle>Social Accounts</CardTitle>
@@ -537,7 +550,7 @@ export default function ProfilePage() {
         </TabsContent>
 
         {/* Preferences tab */}
-        <TabsContent value="preferences">
+        <TabsContent value="preferences" className="mt-0">
           <Card>
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>

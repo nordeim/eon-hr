@@ -142,7 +142,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
         actions={
           <>
             <Select value={String(range)} onValueChange={(v) => setRange(Number(v))}>
-              <SelectTrigger className="w-[150px]" aria-label="Time range">
+              <SelectTrigger className="w-36" aria-label="Time range">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -154,11 +154,11 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={exportEmployeesCsv}>
-              <Download aria-hidden="true" />
+              <Download className="mr-2" aria-hidden="true" />
               Export CSV
             </Button>
             <Button variant="outline" onClick={() => window.print()}>
-              <Printer aria-hidden="true" />
+              <Printer className="mr-2" aria-hidden="true" />
               Export PDF
             </Button>
           </>

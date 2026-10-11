@@ -245,7 +245,7 @@ export default function PayrollModulePage() {
               aria-label="Payslip period"
             />
             <Button variant="outline" onClick={onGenerateAll} disabled={generating || loading}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 aria-hidden="true" />}
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 className="mr-2" aria-hidden="true" />}
               Generate All
             </Button>
             <Button variant="green"

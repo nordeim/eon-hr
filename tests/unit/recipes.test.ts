@@ -953,3 +953,258 @@ describe("staffrequests trigger (session 13, R12-F)", () => {
     expect(page).not.toContain("self-start");
   });
 });
+
+describe("iconed button margins (session 14, R13-A)", () => {
+  it("employees Import CSV icon carries mr-2 (145px button)", () => {
+    const page = read("src", "app", "(app)", "employees", "page.tsx");
+    expect(page).toMatch(/<Upload className="mr-2"/);
+  });
+
+  it("payroll Reports & Export icon carries mr-2 (185px button)", () => {
+    const page = read("src", "app", "(app)", "payroll", "page.tsx");
+    expect(page).toMatch(/<FileDown className="mr-2"/);
+  });
+
+  it("payrollmodule Generate All icon carries mr-2 (153px button)", () => {
+    const page = read("src", "app", "(app)", "payrollmodule", "page.tsx");
+    expect(page).toMatch(/<Wand2 className="mr-2"/);
+  });
+
+  it("taskmanager New Project / Kanban / Projects icons carry mr-2", () => {
+    const page = read("src", "app", "(app)", "taskmanager", "page.tsx");
+    expect(page).toMatch(/<FolderKanban className="mr-2"/);
+    expect(page).toMatch(/<KanbanSquare className="mr-2"/);
+    expect(page).toMatch(/<FolderIcon className="mr-2"/);
+  });
+
+  it("documenttracker Run Alert Check icon carries mr-2 (178px button)", () => {
+    const page = read("src", "app", "(app)", "documenttracker", "page.tsx");
+    expect(page).toMatch(/<BellRing className="mr-2"/);
+  });
+
+  it("surveyanalytics Run AI Analysis icon carries mr-2 (171px button)", () => {
+    const page = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
+    expect(page).toMatch(/<Sparkles className="mr-2"/);
+  });
+
+  it("analyticsdashboard Export CSV/PDF icons carry mr-2 (145/144px)", () => {
+    const page = read("src", "app", "(app)", "analyticsdashboard", "dashboard.tsx");
+    expect(page).toMatch(/<Download className="mr-2"/);
+  });
+
+  it("attendancedashboard Export Report icon mr-2 + in-card Export mr-1", () => {
+    const page = read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx");
+    expect(page).toMatch(/<Download className="mr-2"/);
+    expect(page).toMatch(/mr-1"/);
+  });
+
+  it("advancedanalytics Schedule Report icon carries mr-2 (179px button)", () => {
+    const page = read("src", "app", "(app)", "advancedanalytics", "schedule-report-button.tsx");
+    expect(page).toMatch(/<CalendarClock className="mr-2"/);
+  });
+});
+
+describe("settings pill + company card (session 14, R13-B)", () => {
+  const page = read("src", "app", "(app)", "settings", "page.tsx");
+
+  it("tab pill is the default shrink-wrap + bg-white border (971px, not full-width bg-secondary)", () => {
+    expect(page).not.toContain('TabsList className="h-auto flex-wrap justify-start"');
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  });
+
+  it("the seven tab triggers are iconed", () => {
+    expect(page).toMatch(/<Building2 className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Workflow className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Clock className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Users className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Plug className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Palette className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<FileText className="h-4 w-4 mr-2"/);
+  });
+
+  it("company card header is title-only with the iconed h-9 Edit button", () => {
+    expect(page).not.toContain("<CardDescription>Public details");
+    expect(page).toMatch(/font-semibold leading-none/);
+    expect(page).toMatch(/<Pencil className="mr-2"/);
+  });
+
+  it("company fields render as the reference read-only tile grid (p-4, mb-1 label)", () => {
+    expect(page).toContain("md:grid-cols-2 gap-6");
+    expect(page).toMatch(/text-sm text-slate-500 mb-1/);
+    expect(page).not.toContain('className="grid grid-cols-1 gap-x-8 gap-y-4');
+  });
+});
+
+describe("profile tabs + general form (session 14, R13-C)", () => {
+  const page = read("src", "app", "(app)", "profile", "page.tsx");
+
+  it("has exactly the four reference tabs, iconed, default general (no User tab)", () => {
+    expect(page).not.toContain('<TabsTrigger value="user">');
+    expect(page).toMatch(/defaultValue="general"/);
+    expect(page).toMatch(/<User className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Lock className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Globe className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<SlidersHorizontal className="h-4 w-4 mr-2"/);
+  });
+
+  it("tab pill is the shrink-wrap + bg-white border recipe", () => {
+    expect(page).not.toContain('TabsList className="h-auto flex-wrap justify-start"');
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  });
+
+  it("the personal-information card uses the border-b DIV-title header (no CardDescription)", () => {
+    expect(page).not.toContain("Update the details shown on your profile.");
+    expect(page).toMatch(/font-semibold leading-none/);
+  });
+
+  it("the form is the reference recipe (space-y-6 + grid md:grid-cols-2 gap-6 + space-y-2 fields)", () => {
+    expect(page).toMatch(/space-y-6/);
+    expect(page).toContain("md:grid-cols-2 gap-6");
+    expect(page).toMatch(/space-y-2/);
+  });
+
+  it("Save Changes rides inside the form (flex justify-end), iconed mr-2 — no CardFooter", () => {
+    expect(page).not.toContain("<CardFooter");
+    expect(page).toContain("flex justify-end");
+    expect(page).toMatch(/<Save className="mr-2"/);
+  });
+
+  it("identity-card h2 drops truncate (777px reference width)", () => {
+    expect(page).not.toContain('className="truncate text-2xl font-bold text-slate-900"');
+  });
+});
+
+describe("attendance stat tabs (session 14, R13-D)", () => {
+  const page = read("src", "app", "(app)", "attendance", "page.tsx");
+
+  it("first tab is Mark Attendance (not Dashboard), tab set is the reference trio", () => {
+    expect(page).toMatch(/value="mark"/);
+    expect(page).toMatch(/Mark Attendance/);
+    expect(page).not.toContain('<TabsTrigger value="dashboard">');
+  });
+
+  it("tab pill is the default shrink-wrap + bg-white border", () => {
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  });
+
+  it("non-admins get the access-restricted recipe (red chip + max-w-sm copy)", () => {
+    expect(page).toMatch(/bg-red-100 rounded-full/);
+    expect(page).toMatch(/text-slate-500 max-w-sm/);
+  });
+});
+
+describe("compliance structure (session 14, R13-E)", () => {
+  const page = read("src", "app", "(app)", "compliancedashboard", "page.tsx");
+
+  it("header Run Compliance Scan button is text-only (184px)", () => {
+    expect(page).not.toContain("<ScanSearch");
+    expect(page).not.toMatch(/import[^\n]*ScanSearch/);
+  });
+
+  it("stat-tab pill: shrink-wrap + bg-white border with two iconed triggers", () => {
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+    expect(page).toMatch(/Document Expiry Monitor/);
+    expect(page).toMatch(/All Alerts/);
+  });
+
+  it("notify row is flex flex-wrap gap-2 with mr-1 icons", () => {
+    expect(page).toContain("flex flex-wrap gap-2");
+    expect(page).toMatch(/mr-1"/);
+  });
+
+  it("toolbar is flex flex-wrap gap-3 with the ml-auto at-risk counter", () => {
+    expect(page).toContain("flex flex-wrap gap-3");
+    expect(page).toMatch(/ml-auto/);
+    expect(page).toMatch(/at-risk document/);
+  });
+});
+
+describe("reports tab tiles + filters (session 14, R13-F)", () => {
+  const browser = read("src", "app", "(app)", "reports", "reports-browser.tsx");
+
+  it("active tab renders ONE card with the 20px-iconed leading-none title", () => {
+    expect(browser).toMatch(/font-semibold leading-none/);
+    expect(browser).toMatch(/h-5 w-5/);
+  });
+
+  it("report tiles are the p-4 recipe with two iconed 152px buttons", () => {
+    expect(browser).toContain("grid md:grid-cols-2 lg:grid-cols-3");
+    expect(browser).toMatch(/text-slate-900 mb-3/);
+    expect(browser).toMatch(/flex gap-2/);
+  });
+
+  it("Report Filters card renders the md:grid-cols-4 date/department/status row", () => {
+    expect(browser).toContain("Report Filters");
+    expect(browser).toContain("md:grid-cols-4");
+  });
+});
+
+describe("offboarding empty (session 14, R13-G)", () => {
+  const page = read("src", "app", "(app)", "offboarding", "page.tsx");
+
+  it("content sits in the grid md:grid-cols-2 lg:grid-cols-3 wrapper", () => {
+    expect(page).toContain("md:grid-cols-2 lg:grid-cols-3");
+  });
+
+  it("empty state has NO CTA (the affordance is the header button)", () => {
+    expect(page).not.toMatch(/EmptyState[\s\S]{0,300}action=/);
+  });
+});
+
+describe("select widths + export variant (session 14, R13-H)", () => {
+  it("surveyanalytics: All Surveys select w-48; Export is the h-8 sm variant iconed mr-2", () => {
+    const page = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
+    expect(page).toMatch(/w-48/);
+    expect(page).toMatch(/size="sm"/);
+  });
+
+  it("analyticsdashboard range select is w-36 (144px)", () => {
+    const page = read("src", "app", "(app)", "analyticsdashboard", "dashboard.tsx");
+    expect(page).toMatch(/w-36/);
+  });
+
+  it("attendancedashboard department select is w-44 (176px)", () => {
+    const page = read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx");
+    expect(page).toMatch(/w-44/);
+  });
+});
+
+describe("StatCard no-tile variant (session 14, R13-I)", () => {
+  const statCard = read("src", "components", "shared", "stat-card.tsx");
+
+  it("no-tile renders a flex row with the text stack left + 40px icon right (108px)", () => {
+    expect(statCard).toMatch(/variant === "no-tile"/);
+    expect(statCard).toMatch(/h-10 w-10/);
+  });
+});
+
+describe("taskmanager column + badge (session 14, R13-J)", () => {
+  const page = read("src", "app", "(app)", "taskmanager", "page.tsx");
+
+  it("empty columns keep their space-y-2 list container (60px, REF)", () => {
+    expect(page).toMatch(/space-y-2/);
+  });
+});
+
+describe("payrollengine fields (session 14, R13-K)", () => {
+  const page = read("src", "app", "(app)", "payrollengine", "page.tsx");
+
+  it("toolbar field wrappers use space-y-2 (64px fields, 132px card)", () => {
+    expect(page).toMatch(/space-y-2/);
+    expect(page).not.toMatch(/space-y-1"/);
+  });
+});
+
+describe("small pins: hrreports status + shiftcalendar (session 14, R13-L)", () => {
+  it("hrreports Group By select defaults to an empty trigger (Status Filter shows All)", () => {
+    const page = read("src", "app", "(app)", "hrreports", "page.tsx");
+    expect(page).toMatch(/Group By[\s\S]{0,300}SelectValue placeholder=""/);
+    expect(page).toMatch(/groupBy, setGroupBy\] = React\.useState<string>\(""\)/);
+  });
+
+  it("shiftcalendar: Shift Swaps affordance is a Link (anchor)", () => {
+    const page = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
+    expect(page).toMatch(/asChild/);
+    expect(page).toMatch(/href="\/ShiftSwap"/);
+  });
+});

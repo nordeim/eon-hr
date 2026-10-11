@@ -202,18 +202,18 @@ export default function OffboardingPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : processes.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<LogOut className="h-6 w-6" aria-hidden="true" />}
-            title="No offboarding processes"
-            description="Start an offboarding journey when needed"
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Offboarding
-              </Button>
-            }
-          />
+        /* Session 14 (R13-G): the reference wraps its content in `grid
+            md:grid-cols-2 lg:grid-cols-3`; the empty state is ONE
+            full-width card (238px) — icon + h3 + P only, NO CTA (the
+            affordance is the header button). */
+        <div className="grid md:grid-cols-2 lg:grid-cols-3">
+          <div className="col-span-full rounded-xl border bg-card shadow-sm">
+            <EmptyState
+              icon={<LogOut className="h-6 w-6" aria-hidden="true" />}
+              title="No offboarding processes"
+              description="Start an offboarding journey when needed"
+            />
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

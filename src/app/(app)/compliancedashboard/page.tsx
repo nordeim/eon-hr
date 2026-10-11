@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Activity, AlertTriangle, Bell, CheckCircle2, FileWarning, Loader2, ScanSearch, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Activity, AlertTriangle, Bell, CheckCircle2, FileText, FileWarning, Loader2, Search, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
@@ -90,6 +92,7 @@ export default function ComplianceDashboardPage() {
   const [notifying, setNotifying] = React.useState<number | null>(null);
   const [filter, setFilter] = React.useState<string>("all");
   const [type, setType] = React.useState("all");
+  const [query, setQuery] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -167,8 +170,16 @@ export default function ComplianceDashboardPage() {
   const stats = data?.stats ?? { critical: 0, high: 0, resolved: 0, active: 0 };
 
   const filtered = React.useMemo(
-    () => documents.filter((d) => (type === "all" || d.type === type) && inFilter(d, filter)),
-    [documents, filter, type]
+    () =>
+      documents.filter(
+        (d) =>
+          (type === "all" || d.type === type) &&
+          inFilter(d, filter) &&
+          (query.trim() === "" ||
+            d.name.toLowerCase().includes(query.trim().toLowerCase()) ||
+            d.employeeName.toLowerCase().includes(query.trim().toLowerCase()))
+      ),
+    [documents, filter, type, query]
   );
 
   const chipCounts = React.useMemo(() => {
@@ -208,9 +219,10 @@ export default function ComplianceDashboardPage() {
         title="Compliance Dashboard"
         subtitle="Proactive document expiry tracking & automated notifications"
         actions={
+          /* Session 14 (R13-E): the reference's header button is TEXT-ONLY
+             (184px — no icon). */
           <Button variant="red" onClick={runScan} disabled={scanning || loading}>
-            {scanning ? <Loader2 className="animate-spin" aria-hidden="true" /> : <ScanSearch aria-hidden="true" />}
-            Run Compliance Scan
+            {scanning ? "Scanning…" : "Run Compliance Scan"}
           </Button>
         }
       />
@@ -228,27 +240,54 @@ export default function ComplianceDashboardPage() {
         </div>
       ) : (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Expiry Monitor</CardTitle>
-              <CardDescription>Track documents approaching expiry and notify their owners.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                {FILTERS.map((f) => (
-                  <Button
-                    key={f.key}
-                    size="sm"
-                    variant={filter === f.key ? "default" : "outline"}
-                    onClick={() => setFilter(f.key)}
-                    aria-pressed={filter === f.key}
-                  >
-                    {f.label} ({chipCounts[f.key] ?? 0})
-                  </Button>
-                ))}
-                <div className="flex flex-1 justify-end">
+          {/* Session 14 (R13-E): the reference's stat-tab block — a
+              space-y-6 Tabs with the DEFAULT shrink-wrapped pill (331px,
+              bg-white + border) carrying two 12px-iconed triggers. The
+              active tab renders the second stat row (mini-centered 90px
+              tiles), the notify row (flex flex-wrap gap-2, mr-1 icons),
+              the toolbar (flex flex-wrap gap-3: bare search svg + w-48
+              input + two w-36 selects + ml-auto counter) and the table
+              card (title-only p-3 header + p-0 systemic empty). */}
+          <Tabs defaultValue="monitor" className="space-y-6">
+            <TabsList className="bg-white border border-slate-200">
+              <TabsTrigger value="monitor" className="gap-1"><FileText className="h-3 w-3" aria-hidden="true" /> Document Expiry Monitor</TabsTrigger>
+              <TabsTrigger value="alerts" className="gap-1"><AlertTriangle className="h-3 w-3" aria-hidden="true" /> All Alerts</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="monitor" className="mt-0">
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <StatCard variant="mini-centered" label="Expiring ≤ 7 days" value={chipCounts.d7 ?? 0} />
+                  <StatCard variant="mini-centered" label="Expiring ≤ 15 days" value={chipCounts.d15 ?? 0} />
+                  <StatCard variant="mini-centered" label="Expiring ≤ 30 days" value={chipCounts.d30 ?? 0} />
+                  <StatCard variant="mini-centered" label="Expired" value={chipCounts.expired ?? 0} />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {([7, 15, 30] as const).map((w) => (
+                    <Button
+                      key={w}
+                      variant="outline"
+                      onClick={() => notifyWindow(w)}
+                      disabled={notifying !== null}
+                    >
+                      {notifying === w ? <Loader2 className="mr-1 animate-spin" aria-hidden="true" /> : <Bell className="mr-1" aria-hidden="true" />}
+                      Notify All ≤ {w} days
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-3 p-4">
+                  <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search documents"
+                    className="w-48"
+                    aria-label="Search documents"
+                  />
                   <Select value={type} onValueChange={setType}>
-                    <SelectTrigger className="w-full sm:w-40" aria-label="Filter by document type">
+                    <SelectTrigger className="w-36" aria-label="Filter by document type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -259,35 +298,33 @@ export default function ComplianceDashboardPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select value={filter} onValueChange={(v) => setFilter(v as (typeof FILTERS)[number]["key"])}>
+                    <SelectTrigger className="w-36" aria-label="Filter by window">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FILTERS.map((f) => (
+                        <SelectItem key={f.key} value={f.key}>
+                          {f.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="ml-auto text-sm text-slate-500">
+                    {filtered.length} at-risk document{filtered.length === 1 ? "" : "s"}
+                  </span>
                 </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground">Notify:</span>
-                {([7, 15, 30] as const).map((w) => (
-                  <Button
-                    key={w}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => notifyWindow(w)}
-                    disabled={notifying !== null}
-                  >
-                    {notifying === w ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Bell aria-hidden="true" />}
-                    Notify All ≤ {w} days
-                  </Button>
-                ))}
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {filtered.length} at-risk document{filtered.length === 1 ? "" : "s"}
-              </p>
-
+                <Card>
+                  <CardHeader className="p-3">
+                    <div className="text-sm font-semibold tracking-tight">Document Expiry Monitor</div>
+                  </CardHeader>
+                  <CardContent className="p-0">
               {filtered.length === 0 ? (
-                <EmptyState
-                  icon={<FileWarning className="h-6 w-6" />}
-                  title="No documents at risk in this filter"
-                  description="All tracked documents are valid beyond the selected window."
-                />
+                <div className="py-12 text-center text-slate-400">
+                  <FileWarning className="mx-auto h-16 w-16" aria-hidden="true" />
+                  <p className="text-sm">No documents at risk in this filter</p>
+                </div>
               ) : (
                 <div className="divide-y">
                   {filtered.map((doc) => (
@@ -324,10 +361,13 @@ export default function ComplianceDashboardPage() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+                </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
-          <Card>
+            <TabsContent value="alerts" className="mt-0">
+              <Card>
             <CardHeader>
               <CardTitle>At-Risk Employees</CardTitle>
               <CardDescription>Employees with documents requiring renewal action.</CardDescription>
@@ -376,8 +416,10 @@ export default function ComplianceDashboardPage() {
                   })}
                 </div>
               )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </div>

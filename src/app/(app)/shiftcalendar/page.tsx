@@ -228,9 +228,21 @@ export default function ShiftCalendarPage() {
         title="Shift Calendar"
         subtitle="Drag & drop shifts · Overlap prevention · Swap requests"
         actions={
-          <Button variant="outline" onClick={() => setSwapsOpen(true)}>
-            <ArrowLeftRight className="mr-2" aria-hidden="true" />
-            Shift Swaps
+          /* Session 14 (R13-L): the reference renders Shift Swaps as an
+             ANCHOR (href="/ShiftSwap" — its own casing quirk) with the
+             outline-button classes; the clone keeps its superset dialog
+             via preventDefault. */
+          <Button variant="outline" asChild>
+            <a
+              href="/ShiftSwap"
+              onClick={(e) => {
+                e.preventDefault();
+                setSwapsOpen(true);
+              }}
+            >
+              <ArrowLeftRight className="mr-2" aria-hidden="true" />
+              Shift Swaps
+            </a>
           </Button>
         }
       />
@@ -250,6 +262,10 @@ export default function ShiftCalendarPage() {
               department select filters assignments client-side (superset —
               the reference renders the select but wires nothing). */}
           <div className="flex flex-wrap items-center gap-4">
+            {/* Session 14 (R13-L): the chevrons + month label ride their own
+                gap-2 cluster (232px) inside the gap-4 toolbar — measured on
+                the reference (chev2 @484). */}
+            <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -273,6 +289,7 @@ export default function ShiftCalendarPage() {
             >
               <ChevronRight aria-hidden="true" />
             </Button>
+            </div>
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
               <SelectTrigger aria-label="Department filter" className="w-48">
                 <SelectValue />

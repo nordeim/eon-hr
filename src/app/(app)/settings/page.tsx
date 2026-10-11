@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2, Clock, Loader2, MessageSquare, Pencil, Plug, Plus, SettingsIcon, Shield, Trash2, Video } from "lucide-react";
+import { Building2, Clock, FileText, Loader2, MessageSquare, Palette, Pencil, Plug, Plus, SettingsIcon, Shield, Trash2, Users, Video, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,36 +125,39 @@ export default function SettingsPage() {
         subtitle="Configure your HR system"
       />
 
-      <Tabs defaultValue="company" className="flex flex-col gap-4">
-        <TabsList className="h-auto flex-wrap justify-start">
-          <TabsTrigger value="company">Company</TabsTrigger>
-          <TabsTrigger value="workflows">Approval Workflows</TabsTrigger>
-          <TabsTrigger value="shifts">Shifts</TabsTrigger>
-          <TabsTrigger value="departments">Departments</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
-          <TabsTrigger value="theme">Theme &amp; Layout</TabsTrigger>
-          <TabsTrigger value="logs">System Logs</TabsTrigger>
+      {/* Session 14 (R13-B): the reference's settings tabs — the DEFAULT
+          shrink-wrapped TabsList with bg-white + border (971px, not the
+          full-width muted pill) and iconed triggers (16px svg, mr-2). */}
+      <Tabs defaultValue="company" className="space-y-6">
+        <TabsList className="bg-white border border-slate-200">
+          <TabsTrigger value="company"><Building2 className="h-4 w-4 mr-2" aria-hidden="true" />Company</TabsTrigger>
+          <TabsTrigger value="workflows"><Workflow className="h-4 w-4 mr-2" aria-hidden="true" />Approval Workflows</TabsTrigger>
+          <TabsTrigger value="shifts"><Clock className="h-4 w-4 mr-2" aria-hidden="true" />Shifts</TabsTrigger>
+          <TabsTrigger value="departments"><Users className="h-4 w-4 mr-2" aria-hidden="true" />Departments</TabsTrigger>
+          <TabsTrigger value="integrations"><Plug className="h-4 w-4 mr-2" aria-hidden="true" />Integrations</TabsTrigger>
+          <TabsTrigger value="theme"><Palette className="h-4 w-4 mr-2" aria-hidden="true" />Theme &amp; Layout</TabsTrigger>
+          <TabsTrigger value="logs"><FileText className="h-4 w-4 mr-2" aria-hidden="true" />System Logs</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="company">
+        <TabsContent value="company" className="mt-0">
           <CompanyTab canEdit={canEdit} toast={toast} />
         </TabsContent>
-        <TabsContent value="workflows">
+        <TabsContent value="workflows" className="mt-0">
           <WorkflowsTab />
         </TabsContent>
-        <TabsContent value="shifts">
+        <TabsContent value="shifts" className="mt-0">
           <ShiftsTab />
         </TabsContent>
-        <TabsContent value="departments">
+        <TabsContent value="departments" className="mt-0">
           <DepartmentsTab canEdit={canEdit} toast={toast} />
         </TabsContent>
-        <TabsContent value="integrations">
+        <TabsContent value="integrations" className="mt-0">
           <IntegrationsTab toast={toast} />
         </TabsContent>
-        <TabsContent value="theme">
+        <TabsContent value="theme" className="mt-0">
           <ThemeTab toast={toast} />
         </TabsContent>
-        <TabsContent value="logs">
+        <TabsContent value="logs" className="mt-0">
           <LogsTab />
         </TabsContent>
       </Tabs>
@@ -259,30 +262,38 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
   }
 
   return (
+    /* Session 14 (R13-B): reference recipe — CardHeader is a
+       `flex flex-col space-y-1.5` stack whose inner row is
+       `flex justify-between items-center` (title-only DIV
+       `font-semibold leading-none tracking-tight` + the iconed h-9
+       Edit); the content is `p-6` > `space-y-6` > `grid
+       md:grid-cols-2 gap-6` of read-only p-4 tiles (label
+       text-sm slate-500 mb-1 + value font-medium). 631px card. */
     <Card>
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <div className="min-w-0">
-          <CardTitle>Company Information</CardTitle>
-          <CardDescription>Public details about your organization.</CardDescription>
+      <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
+        <div className="flex items-center justify-between">
+          <div className="font-semibold leading-none tracking-tight">Company Information</div>
+          {canEdit ? (
+            <Button variant="outline" onClick={() => setEditOpen(true)}>
+              <Pencil className="mr-2" aria-hidden="true" />
+              Edit
+            </Button>
+          ) : null}
         </div>
-        {canEdit ? (
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            <Pencil aria-hidden="true" />
-            Edit
-          </Button>
-        ) : null}
       </CardHeader>
-      <CardContent>
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
-          {COMPANY_FIELDS.map((f) => (
-            <div key={f.key} className="flex flex-col gap-0.5 border-b pb-3 sm:border-0 sm:pb-0">
-              <dt className="text-sm text-muted-foreground">{f.label}</dt>
-              <dd className="text-sm font-medium text-foreground">
-                {company ? company[f.key] || "Not set" : "Not set"}
-              </dd>
-            </div>
-          ))}
-        </dl>
+      <CardContent className="p-6">
+        <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {COMPANY_FIELDS.map((f) => (
+              <div key={f.key} className="p-4">
+                <p className="text-sm text-slate-500 mb-1">{f.label}</p>
+                <p className="font-medium text-slate-900">
+                  {company ? company[f.key] || "Not set" : "Not set"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </CardContent>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
