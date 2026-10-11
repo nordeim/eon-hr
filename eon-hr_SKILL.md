@@ -10,10 +10,11 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.0.0 (session-17 remediation complete) · **Last updated:**
-> 2026-10-18 · **State:** 356 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.1.0 (session-18 remediation complete) · **Last updated:**
+> 2026-10-25 · **State:** 363 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit
-> (desktop 1440 + mobile 390 + the first tablet-band sweep 768/900/1024).
+> (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the first
+> 640–767 band sweep + a print-stylesheet audit).
 
 ---
 
@@ -438,7 +439,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 356/356 (db-path 15, auth 14, utils 13, tokens 18, recipes 227, shell-recipes 69)
+bun run test          # vitest — 363/363 (db-path 15, auth 14, utils 13, tokens 18, recipes 227, shell-recipes 76)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -770,14 +771,14 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           356 unit (6 files) + 86 e2e (5 specs, workers:1)
+tests           363 unit (6 files) + 86 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
 envelope        { ok, data | error:{code,message} }  (src/lib/api.ts)
 icons           nav-config.ts — parity-pinned names
 drawer          288px / bg-black/80 / z-50 / no X / close-on-nav
-screenshots     docs/screenshots/ (24 captures, standalone server, devIndicators off)
+screenshots     docs/screenshots/ (65 captures, standalone server, devIndicators off)
 reference       https://eon.base44.app  (docs/reference-page-map.md)
 session log     worklog.md + docs/session_1.md, docs/remediation-plan-session1.md
 ssh push        docs/ssh_git_wrapper_v3.py  (+ docs/how-to-git-push-using-ssh-wrapper_SKILL.md)
@@ -1307,3 +1308,63 @@ The hrreports 900–1024 band is REF's 1px knife-edge (title + cluster
 fill the row exactly, no gap) where the clone's wrapped cluster +
 gap-4 row shifts the h1 4px — documented fitting-superset, 1440
 byte-identical.
+
+---
+
+## 30. Session-18 Recipe Layer — parity round 17
+
+Everything below was live-measured against the reference (settled dual
+agent-browser probes; `docs/remediation-plan-session18.md`) and is
+regression-pinned by `tests/unit/shell-recipes.test.ts`.
+
+**Header row breakpoint (R17-A — the per-page taxonomy):** REF's
+default-family header rows switch `flex-col → flex-row` at **md (768)**
+(`flex flex-col md:flex-row justify-between items-start md:items-center
+gap-4`); the clone's PageHeader row switched at sm (640) — a never-audited
+640–767 band diff (the band fell between the 390 mobile audits and the 768+
+tablet sweeps). Nine pages render REF=column (title full-width, actions
+BELOW) vs LOC=row in that band — payrollmodule, documenttracker,
+recruitmentkanban, assetmanagement, attendance, recruitment, shiftcalendar,
+staffrequests, attendancedashboard — they pass `rowBreakpoint="md"` (the
+prop; default `"sm"` renders the previous byte-identical classes). REF is
+per-page inconsistent: templates + workflowconfigpage are UNPREFIXED
+always-rows (`flex items-center justify-between mb-8|mb-6`) and the
+actionsStart family is always-row (`flex justify-between items-start`) —
+those KEEP the sm default (row at 640–767; column below = the fitting
+superset where REF overflows: docW 422–456 at 390). attendance's R9-E
+fitting wrap follows the row: `md:flex-wrap`.
+
+**Profile kicker back button (R17-B — the always-pin-X lesson):** REF's
+/profile kicker is a distinct variant: a leading **36×36 ghost ArrowLeft**
+(`h-9 w-9`; the svg carries `w-5 h-5` classes but renders 16px — the
+button base's `[&_svg]:size-4` descendant selector wins on BOTH apps) at
+(32,105) navigating to /Dashboard, + a `text-xs text-slate-500 truncate`
+subtitle "Manage your account" — row 44px, kicker **69px** (vs the
+standard 53px h1-only recipe). The other seven kickers carry neither the
+button nor the subtitle (byte-identical sweep). The clone renders
+`mobileKickerBack` (a ghost Button asChild wrapping a Link to the
+casing-fixed `/dashboard` — documented deviation) + `mobileKickerSubtitle`.
+The h1's Y had been pinned since session 5; its X (32 vs 80) never was —
+a missing ELEMENT hid behind an unmeasured axis.
+
+**640–767 band audit lessons:**
+
+- Settle ≥2.2s before reading REF mobile geometry — the 61px top-bar
+  mid-hydration artifact also produces 12px h1 y-deltas and phantom h=80
+  "wraps" (settled re-probes match byte-for-byte).
+- REF's hrreports renders **BLANK below ~768** (only the Base44 badge at
+  390 and 700; works at 900+) — its own dead-mobile bug; the clone's
+  working page is the superset (the /employeeselfservice family).
+- **Print stylesheets:** ZERO `@media print` rules on either side — the
+  new parity dimension (session_26's suggestion) audited clean.
+- The documenttracker @390 cluster is a **0.23px knife-edge**: buttons
+  byte-identical (Run Alert Check 178.14 + gap 12 + Add Document 168.09);
+  REF's row is 358.23 (invisible overflow — its own bug) so both buttons
+  fit one line; the clone's exact 358.00 wraps Add Document. Same family
+  as the r16 hrreports 1px knife-edge.
+- REF's tablet overflow family extends: analyticsdashboard 975@768,
+  assetmanagement 879, attendancedashboard 832, documenttracker 901,
+  organogram 1135–1167, payrollmodule 744@390 / 1032@768+,
+  recruitmentkanban 1376@700 / 1664@768, shiftcalendar 988–1020,
+  attendance 943–1199, chat 741, compliancedashboard 707 — the clone fits
+  (fitting superset).

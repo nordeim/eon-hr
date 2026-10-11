@@ -228,10 +228,11 @@ export default function StaffAttendancePage() {
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
+        rowBreakpoint="md"
         section="Attendance Management"
         layout="flat48"
         iconClassName="text-blue-600"
-        className="sm:flex-wrap"
+        className="md:flex-wrap"
         sectionIcon={<Calendar aria-hidden="true" />}
         title="Staff Attendance"
         subtitle="Track and manage employee attendance records"

@@ -592,3 +592,31 @@ Work Log:
 Stage Summary:
 - Parity round 16 complete: 5 gap groups fixed with 7 new TDD pins — the systemic flex-centered StatCard tile (the computed-padding lesson: identical 48×48 geometry hid a different shrink story), the workflowautomation zero-render, both chat zero-state recipes, the surveys zero value, the employees filter-row fitting — every fixed surface live-verified byte-exact against the reference, plus the project's first tablet-band audit
 - 356 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 30 (session 18 / parity round 17)
+Agent: main (Super Z)
+Task: Full parity cycle — fresh-clone workspace setup, skills-assisted audit (redeploy check + mobile nav + 46-route sweep + tablet completion + FIRST 640–767 band sweep + print-stylesheet audit), TDD remediation of 2 gap groups, docs, commit + push
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at a977ef0; .env recreated (file:../db/custom.db + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); the shell DATABASE_URL trap re-confirmed (sandbox pre-exports an absolute wrong-path URL) — env -u DATABASE_URL on every DB/build command; scripts/check-db-pristine.ts added (queries via the app's own db-path resolution)
+- Baseline gates: lint 0/0, tsc, 356/356 unit, build, 86/86 E2E — the a977ef0 state exactly; static audit of the R16 diff clean (0 any, no debug/secrets)
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions (loc/ref) authenticated (REF password fill needed the documented retry); probe-flattening rule re-confirmed (// comments and literal \n breaks one-lined evals — flatten first)
+- Redeploy check: 12 routes byte-identical — REF unchanged since R16
+- Mobile navigation audit (user priority): top bar 390×73, bottom tabs (x 10/79/139/204/313, active rgb(37,99,235)), drawer 288×844 #FAFAFA z-50 + links 141/301/421/461/581 + footer 121@723 + overlay, hamburger 28×28@24,22, kicker 53@89, md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug; two probe artifacts documented (REF sidebar = DIV md:block; REF hamburger has no aria-label)
+- 46-route desktop sweep at 1440: 46/46 OK
+- NEW: tablet sweep completed (remaining 28 routes @768/900/1024) + FIRST 640–767 band sweep (all 46 @700, settled) + print-stylesheet audit (zero @media print rules both sides — clean): 2 gap groups (R17-A/B) + documented families (REF overflow extension: analyticsdashboard 975/assetmanagement 879/attendancedashboard 832/documenttracker 901/organogram 1135–1167/payrollmodule 744–1032/recruitmentkanban 1376–1664/shiftcalendar 988–1020/attendance 943–1199/chat 741/compliance 707; the 61px mid-hydration artifact's 12px y-deltas + phantom h=80 wraps; REF hrreports BLANK below ~768 — its own dead-mobile bug; the documenttracker @390 0.23px knife-edge)
+- R17-A: REF's default-family header rows switch flex-col→flex-row at md (768), the clone's at sm (640) — nine pages diff in the 640–767 band (payrollmodule, documenttracker, recruitmentkanban, assetmanagement, attendance, recruitment, shiftcalendar, staffrequests, attendancedashboard; attendancedashboard/documenttracker titles wrapped, staffrequests block shrank 668→351). REF per-page inconsistent (templates/workflowconfigpage + actionsStart = always-row) → per-page rowBreakpoint prop (default sm, byte-identical), nine pages pass md; attendance sm:flex-wrap→md:flex-wrap
+- R17-B: REF's /profile kicker = distinct variant: leading 36×36 ghost ArrowLeft (h-9 w-9; svg w-5 h-5 classes but 16px rendered — [&_svg]:size-4 wins on BOTH) at (32,105) → /Dashboard + text-xs slate-500 subtitle "Manage your account"; row 44, kicker 69 (vs standard 53). Other 7 kickers carry neither (byte-identical sweep). The h1 Y was pinned since session 5; its X (32 vs 80) never was — the missing element hid behind an unmeasured axis. Clone: mobileKickerBack (ghost Button asChild Link → casing-fixed /dashboard + aria-label) + mobileKickerSubtitle
+- docs/remediation-plan-session18.md written (2 groups + non-goals + band lessons) + codebase-validated
+- TDD: 7 new pins (all RED) → GREEN; 2 stale pins updated (R8-A row pin + R10-E actionsStart pin → the rowBreakpoint template form)
+- Gates: lint 0/0, tsc, 363/363 unit (+7), build, 86/86 E2E
+- Live verification: the nine @700 = column/column, full-width single-line titles (h/y byte-identical; staffrequests 668=668); nine @1440 = 9/9 canonical sweep OK; 46-route re-run 46/46 OK; tablet bands = documented families only; mobile regression clean (7 standard kickers 53px + drawer/tabs/top bar byte-identical); profile kicker byte-exact (btn 36@32,105 as an <a> with identical geometry — the DIV-vs-P internal-DOM family; h1 @80,101; sub @80,129; kicker 69)
+- 11 screenshots captured/refreshed (6 new: 53/54/55/56 band-700 + 57/58 kicker-mobile; 5 standards) → 65 total; VLM spot-checks confirmed both fixed surfaces
+- Docs: AGENTS session-18 layer + 363 specs; SKILL v3.1.0 + §30; PAD [S18] + Last Updated + test table; CLAUDE 449-spec pyramid + session-18 pins; README 363 specs + 65 captures; docs/session_28.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 17 complete: 2 gap groups fixed with 7 new TDD pins — the per-page header rowBreakpoint taxonomy (the never-swept 640–767 band; nine pages now render REF's column headers) and the profile kicker back-button + subtitle variant — every fixed surface live-verified byte-exact against the reference; the viewport matrix is now fully swept (390 through 1440) plus the first print-stylesheet audit
+- 363 unit + 86 E2E green; ready for commit + push

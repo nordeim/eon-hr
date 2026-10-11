@@ -1,5 +1,8 @@
 import * as React from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /**
  * Page header block: section badge + title + subtitle on the left, actions
@@ -84,9 +87,12 @@ export function PageHeader({
   className,
   mobileKicker = false,
   mobileKickerTitle,
+  mobileKickerBack = false,
+  mobileKickerSubtitle,
   mobileHeader = "visible",
   centered = false,
   actionsStart = false,
+  rowBreakpoint = "sm",
 }: {
   section?: string;
   sectionIcon?: React.ReactNode;
@@ -118,6 +124,24 @@ export function PageHeader({
   /** Kicker text override — /profile's kicker reads "Profile" while its
    *  desktop h1 is "Profile Settings" (reference measurement). */
   mobileKickerTitle?: string;
+  /** Session 18 (R17-B): REF's /profile kicker is a distinct variant — a
+   *  leading 36×36 ghost ArrowLeft (w-5 h-5) at (32,105) navigating back
+   *  to the dashboard + a text-xs slate-500 subtitle line (row 44px,
+   *  kicker 69px, vs the standard 53px h1-only recipe the other seven
+   *  kickers use). Measured at 390×844; the other kickers carry neither
+   *  the button nor the subtitle (byte-identical sweep, this round). */
+  mobileKickerBack?: boolean;
+  mobileKickerSubtitle?: string;
+  /** Session 18 (R17-A): REF's default-family header rows switch
+   *  flex-col → flex-row at md (768) — `flex flex-col md:flex-row
+   *  justify-between items-start md:items-center gap-4` (measured on
+   *  payrollmodule, documenttracker, recruitmentkanban, assetmanagement,
+   *  attendance, recruitment, shiftcalendar, staffrequests,
+   *  attendancedashboard in the first 640–767 band sweep). REF is
+   *  per-page inconsistent: templates/workflowconfigpage and the
+   *  actionsStart family are UNPREFIXED always-rows — those keep the sm
+   *  default (row at 640–767, column below = the fitting superset). */
+  rowBreakpoint?: "sm" | "md";
   /** "hidden" adds `hidden md:flex` to the desktop header block — the
    *  reference wraps its desktop header in a hidden md:flex div on the
    *  category-A routes (page actions are desktop-only there). */
@@ -145,8 +169,21 @@ export function PageHeader({
         // y=-89 at scrollY=178). Static bar matches the rendered truth.
         <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
+            {mobileKickerBack ? (
+              // Session 18 (R17-B): REF's back button — ghost h-9 w-9 with
+              // the 20px ArrowLeft (w-5 h-5, NOT the 16px default). REF
+              // navigates to /Dashboard (its casing quirk); the clone links
+              // to the casing-fixed /dashboard (documented deviation) and
+              // carries an aria-label REF lacks (a11y superset).
+              <Button variant="ghost" className="h-9 w-9" asChild>
+                <Link href="/dashboard" aria-label="Back to dashboard">
+                  <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+                </Link>
+              </Button>
+            ) : null}
             <div className="min-w-0 flex-1">
               <h1 className="text-lg font-bold text-slate-900 truncate">{mobileKickerTitle ?? title}</h1>
+              {mobileKickerSubtitle ? <p className="text-xs text-slate-500 truncate">{mobileKickerSubtitle}</p> : null}
             </div>
           </div>
         </div>
@@ -161,8 +198,13 @@ export function PageHeader({
           // Session 11 (R10-E): items-start pages ride the badge row instead
           // (offboarding/compliance/allleaverequests/workflowautomation/
           // loans/advancedanalytics — measured `justify-between items-start`).
-          "flex flex-col gap-4 sm:flex-row sm:justify-between",
-          actionsStart ? "sm:items-start" : "sm:items-center",
+          // Session 18 (R17-A): the row breakpoint is templated — REF's
+          // default family switches at md, the always-row pages keep sm.
+          "flex flex-col gap-4",
+          `${rowBreakpoint}:flex-row ${rowBreakpoint}:justify-between`,
+          actionsStart
+            ? `${rowBreakpoint}:items-start`
+            : `${rowBreakpoint}:items-center`,
           // The raised offset belongs to BADGE pages only — the reference's
           // bare-page rows (employees, analytics, templates…) start at y=32.
           hasBadge && recipe.row,

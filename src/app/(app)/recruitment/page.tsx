@@ -303,6 +303,7 @@ export default function RecruitmentPage() {
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#eff6ff)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
+        rowBreakpoint="md"
         section="AI-Powered Recruitment"
         layout="flat36-sm"
         iconClassName="text-indigo-600"

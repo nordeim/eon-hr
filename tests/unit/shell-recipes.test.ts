@@ -216,8 +216,11 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
     // items-center stays the DEFAULT, and six badge-row pages opt into
     // items-start via the actionsStart prop (offboarding/compliance/
     // allleaverequests/workflowautomation/loans/advancedanalytics).
-    expect(pageHeader).toContain("sm:items-center");
-    expect(pageHeader).toMatch(/actionsStart \? "sm:items-start" : "sm:items-center"/);
+    // Session 18 (R17-A): the row breakpoint is templated (rowBreakpoint,
+    // default sm) — the default renders byte-identical sm: classes.
+    expect(pageHeader).toContain('rowBreakpoint = "sm"');
+    expect(pageHeader).toContain("`${rowBreakpoint}:flex-row ${rowBreakpoint}:justify-between`");
+    expect(pageHeader).toMatch(/actionsStart\s*\?\s*`\$\{rowBreakpoint\}:items-start`\s*:\s*`\$\{rowBreakpoint\}:items-center`/);
     // The raised mt-8 offset applies to BADGE pages only — bare-page rows
     // (employees, analytics, templates) start at y=32 like the reference.
     expect(pageHeader).toContain("hasBadge && recipe.row");
@@ -451,8 +454,10 @@ describe("session-11 parity round 10 — header actions alignment taxonomy (R10-
     // taskmanager/payroll/expenses/leavemanagement/employees) and
     // items-start (badge row — offboarding/compliancedashboard/
     // allleaverequests/workflowautomation/loans/advancedanalytics).
+    // Session 18 (R17-A): the classes are templated on rowBreakpoint
+    // (default sm — byte-identical to the previous sm: literals).
     expect(pageHeader).toContain("actionsStart");
-    expect(pageHeader).toMatch(/actionsStart\s*\?[^:]*items-start|actionsStart[^?]*\?\s*"sm:items-start"/);
+    expect(pageHeader).toMatch(/actionsStart\s*\?\s*`\$\{rowBreakpoint\}:items-start`\s*:\s*`\$\{rowBreakpoint\}:items-center`/);
   });
 
   it("the six badge-row pages opt into actionsStart", () => {
@@ -591,5 +596,87 @@ describe("session-11 parity round 10 — page restructures (R10-J..R)", () => {
     const src = read("src", "app", "(app)", "notificationpreferences", "page.tsx");
     expect(src).toMatch(/variant="outline" size="sm"|size="sm" variant="outline"/);
     expect(src).not.toMatch(/className="flex items-center justify-center">\s*<CardContent/);
+  });
+});
+
+describe("session-18 parity round 17 — header row breakpoint + profile kicker", () => {
+  // All values measured live against the reference (settled @700 probes —
+  // the first sweep of the never-audited 640–767 band; see
+  // docs/remediation-plan-session18.md).
+
+  it("R17-A: PageHeader declares rowBreakpoint (sm default, md variant)", () => {
+    // REF's default-family header rows switch flex-col → flex-row at md
+    // (768): `flex flex-col md:flex-row justify-between items-start
+    // md:items-center gap-4` (verified on payrollmodule, documenttracker,
+    // recruitmentkanban, assetmanagement, attendance, recruitment,
+    // shiftcalendar, staffrequests, attendancedashboard). The clone's row
+    // previously switched at sm — the 640–767 band rendered REF=column
+    // vs LOC=row (squeezed titles, actions beside instead of below).
+    // REF is per-page inconsistent: templates/workflowconfigpage and the
+    // actionsStart family are UNPREFIXED always-rows — those keep sm.
+    expect(pageHeader).toContain('rowBreakpoint?: "sm" | "md"');
+    expect(pageHeader).toContain('rowBreakpoint = "sm"');
+  });
+
+  it("R17-A: the nine REF-md pages pass rowBreakpoint=\"md\"", () => {
+    const pages = [
+      "payrollmodule", "documenttracker", "recruitmentkanban",
+      "assetmanagement", "attendance", "recruitment", "shiftcalendar",
+      "staffrequests",
+    ] as const;
+    for (const p of pages) {
+      expect(read("src", "app", "(app)", p, "page.tsx"), p).toContain('rowBreakpoint="md"');
+    }
+    // attendancedashboard's header lives in its client island
+    expect(read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx")).toContain('rowBreakpoint="md"');
+  });
+
+  it("R17-A: attendance's fitting wrap engages at md (row mode only)", () => {
+    // The R9-E sm:flex-wrap rode the sm:row — with the md breakpoint the
+    // wrap must follow the row (md:flex-wrap).
+    const src = read("src", "app", "(app)", "attendance", "page.tsx");
+    expect(src).toContain('className="md:flex-wrap"');
+    expect(src).not.toContain('className="sm:flex-wrap"');
+  });
+
+  it("R17-A: the always-row pages keep the sm default (no rowBreakpoint)", () => {
+    // templates + workflowconfigpage (REF `flex items-center justify-between
+    // mb-8|mb-6`) and the actionsStart family (REF `flex justify-between
+    // items-start`) render row at 640–767 on REF — the sm default matches;
+    // none of them opt into the md variant.
+    for (const p of ["templates", "workflowconfigpage", "allleaverequests", "offboarding"] as const) {
+      const src = read("src", "app", "(app)", p, "page.tsx");
+      expect(src, p).not.toContain('rowBreakpoint="md"');
+    }
+  });
+
+  it("R17-B: PageHeader declares the kicker back-button + subtitle props", () => {
+    // REF's /profile kicker is a distinct variant: a leading 36×36 ghost
+    // ArrowLeft (w-5 h-5) at (32,105) navigating to /Dashboard + a
+    // text-xs slate-500 subtitle line — row 44px, kicker 69px (vs the
+    // standard 53px recipe the other seven kickers use).
+    expect(pageHeader).toContain("mobileKickerBack");
+    expect(pageHeader).toContain("mobileKickerSubtitle");
+  });
+
+  it("R17-B: the kicker back variant renders the measured recipe", () => {
+    // ghost h-9 w-9 button, ArrowLeft at w-5 h-5 (20px — NOT the 16px
+    // default), linking to /dashboard (the clone's casing-fix deviation;
+    // REF navigates to /Dashboard), with an aria-label (a11y superset —
+    // REF's button has none).
+    expect(pageHeader).toContain("mobileKickerBack ?");
+    expect(pageHeader).toMatch(/ArrowLeft/);
+    expect(pageHeader).toMatch(/h-5 w-5/);
+    expect(pageHeader).toMatch(/href="\/dashboard"/);
+    expect(pageHeader).toMatch(/aria-label="Back to dashboard"/);
+    expect(pageHeader).toMatch(/variant="ghost"/);
+    // the subtitle line: text-xs slate-500 truncate inside flex-1 min-w-0
+    expect(pageHeader).toMatch(/mobileKickerSubtitle \? <p className="text-xs text-slate-500 truncate">/);
+  });
+
+  it("R17-B: the profile page opts into the back kicker", () => {
+    const src = read("src", "app", "(app)", "profile", "page.tsx");
+    expect(src).toContain("mobileKickerBack");
+    expect(src).toContain('mobileKickerSubtitle="Manage your account"');
   });
 });

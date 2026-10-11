@@ -195,6 +195,7 @@ export default function RecruitmentKanbanPage() {
           search/filter/move/delete flow rides the reference's furniture. */}
       <div className="flex flex-col space-y-6">
       <PageHeader
+        rowBreakpoint="md"
         size="md"
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"

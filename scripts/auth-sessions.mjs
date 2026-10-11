@@ -17,7 +17,6 @@ function run(cmd) {
 
 function findButtonRef(session, label) {
   const snap = run(`agent-browser --session ${session} snapshot -i -c`);
-  // lines look like: - button "Sign in" [ref=e25]
   const re = new RegExp(`- button "[^"]*${label}[^"]*" \\[ref=(\\w+)\\]`, "i");
   const m = snap.match(re);
   return m ? m[1] : null;
@@ -42,5 +41,8 @@ async function auth(session, base) {
 }
 
 const refUrl = await auth("ref", "https://eon.base44.app");
-console.log(`ref=${refUrl}`);
-console.log(!refUrl.includes("login") ? "AUTH-OK" : "AUTH-FAIL");
+const locUrl = await auth("loc", "http://127.0.0.1:3200");
+console.log(`ref=${refUrl} loc=${locUrl}`);
+console.log(
+  !refUrl.includes("login") && !locUrl.includes("login") ? "AUTH-OK" : "AUTH-FAIL"
+);

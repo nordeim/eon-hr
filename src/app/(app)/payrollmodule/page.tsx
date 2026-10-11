@@ -232,6 +232,7 @@ export default function PayrollModulePage() {
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#ecfdf5)] p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
+        rowBreakpoint="md"
         title="Payroll Module"
         subtitle="Generate & manage monthly payslips"
         actions={

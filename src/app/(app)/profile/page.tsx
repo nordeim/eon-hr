@@ -239,6 +239,8 @@ export default function ProfilePage() {
         section="My Profile"
         mobileKicker
         mobileKickerTitle="Profile"
+        mobileKickerBack
+        mobileKickerSubtitle="Manage your account"
         layout="flat48"
         iconClassName="text-blue-600"
         sectionIcon={<CircleUser aria-hidden="true" />}

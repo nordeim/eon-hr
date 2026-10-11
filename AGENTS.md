@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 356 specs) |
+| Unit tests | `bun run test` (Vitest, 363 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -538,6 +538,43 @@ reference — never re-add it.
   the hrreports 900–1024 band is a 1px knife-edge on REF (its title+cluster
   fill the row exactly) where the clone's wrapped cluster shifts the h1
   4px — the documented fitting-superset family.
+
+## Session-18 recipe layer (parity round 17)
+
+- **Header row breakpoint (R17-A, per-page)**: REF's default-family
+  header rows switch flex-col → flex-row at **md (768)** (`flex flex-col
+  md:flex-row justify-between items-start md:items-center gap-4` — the
+  never-swept 640–767 band, first audited this round); the clone's
+  PageHeader row switched at sm (640). Nine pages render REF=column
+  (title full-width, actions below) vs LOC=row in that band: payrollmodule,
+  documenttracker, recruitmentkanban, assetmanagement, attendance,
+  recruitment, shiftcalendar, staffrequests, attendancedashboard — they
+  pass `rowBreakpoint="md"`. REF is per-page inconsistent:
+  templates/workflowconfigpage are UNPREFIXED always-rows (`flex
+  items-center justify-between mb-8|mb-6`) and the actionsStart family is
+  always-row — those keep the sm default (row at 640–767; column below =
+  the fitting superset). attendance's fitting wrap is `md:flex-wrap`
+  (follows the row).
+- **Profile kicker back button (R17-B)**: REF's /profile kicker is a
+  distinct variant — a leading **36×36 ghost ArrowLeft** (`h-9 w-9`, svg
+  `w-5 h-5` classes but 16px rendered — the button base's
+  `[&_svg]:size-4` wins on BOTH apps) at (32,105) navigating to
+  /Dashboard, + a `text-xs text-slate-500 truncate` subtitle
+  "Manage your account" (row 44px, kicker 69px vs the standard 53px).
+  The other seven kickers carry neither (byte-identical sweep). The
+  clone links to the casing-fixed `/dashboard` (documented deviation) and
+  adds an aria-label REF lacks (a11y superset). **Lesson: always pin X —
+  the h1 y was pinned but its x (32 vs 80) never was.**
+- **640–767 band audit lessons**: settle ≥2.2s before reading REF mobile
+  geometry (the 61px top-bar mid-hydration artifact also produces 12px
+  h1 y-deltas and phantom h=80 "wraps"); REF's hrreports renders BLANK
+  below ~768 (only the Base44 badge — its own dead-mobile bug; the
+  working clone page is the superset, /employeeselfservice family);
+  print stylesheets: ZERO `@media print` rules on either side (the new
+  parity dimension audited clean); the documenttracker @390 cluster is a
+  0.23px knife-edge (buttons byte-identical at 178.14/168.09; REF's row
+  358.23 overflows invisibly and fits one line, the clone's 358.00 wraps
+  Add Document — the hrreports knife-edge family).
 
 ## Page architecture (session 6) — where padding and gradients live
 

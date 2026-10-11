@@ -254,6 +254,7 @@ export default function AssetManagementPage() {
     <div className="p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
+        rowBreakpoint="md"
         title="Asset Management"
         subtitle="Track company equipment assigned to employees"
         actions={
