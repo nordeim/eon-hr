@@ -232,7 +232,10 @@ export default function PerformanceManagementPage() {
       </div>
 
       <Tabs defaultValue="goals">
-        <TabsList>
+        {/* Session 15 (R14-C): the reference pill is the default
+            shrink-wrapped TabsList + bg-white border border-slate-200
+            (296×36 live-measured) — the R13 white-pill recipe. */}
+        <TabsList className="bg-white border border-slate-200">
           <TabsTrigger value="goals">Goals & KPIs</TabsTrigger>
           <TabsTrigger value="reviews">Performance Reviews</TabsTrigger>
         </TabsList>

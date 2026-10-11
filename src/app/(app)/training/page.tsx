@@ -150,8 +150,11 @@ export default function TrainingPage() {
           bare dark/outline buttons (the taskmanager-toggle family) in a
           flex gap-2 overflow-x-auto pb-2 list — active bg-[#171717] with
           12px/500 white text, inactive white with the neutral border —
-          NOT the shadcn segmented tab strip. */}
-      <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Training categories">
+          NOT the shadcn segmented tab strip.
+          Session 15 (R14-B): role downgraded tablist→group — the reference
+          renders a plain div, and a tablist whose children are aria-pressed
+          toggle buttons (not tabs) is invalid ARIA. */}
+      <div className="flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Training categories">
         {CATEGORIES.map((c) => (
           <Button
             key={c.value}
@@ -168,17 +171,12 @@ export default function TrainingPage() {
 
       {/* Session 10 (R9-C): the reference's section furniture — a bare
           text-2xl/700 H2 in a flex items-center justify-between mb-6 row
-          (the reference leaves the right slot empty; our working New
-          Platform dialog rides it — the documented superset pattern), then
-          a BARE card holding the grid or the simple empty state (no
-          title block, no count description). */}
+          with the right slot EMPTY (32px row, live-measured session 15:
+          the reference page renders NO create affordance anywhere — its
+          all-buttons inventory is the seven category chips only). */}
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-900">Training Platforms</h2>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
-            New Platform
-          </Button>
         </div>
         <Card>
           {/* p-0: the reference's empty state (p-12) renders directly in
@@ -190,13 +188,21 @@ export default function TrainingPage() {
               </div>
             ) : filtered.length === 0 ? (
               /* Reference simple empty state: p-12 text-center + 64px icon +
-                 ONE 16px slate-500 line — no h3, no description, no CTA
-                 (the create affordance lives in the H2 row above). */
+                 ONE 16px slate-500 line — no h3, no description. The create
+                 affordance is the clone's superset: a loans-recipe CTA below
+                 the line (session 15, R14-B — replaces the h2-row button,
+                 which broke the measured 32px row height). */
               <div className="p-12 text-center">
                 <div className="flex justify-center">
                   <GraduationCap className="h-16 w-16 text-slate-300" aria-hidden="true" />
                 </div>
                 <p className="mt-3 text-slate-500">No training platforms available</p>
+                <div className="mt-4">
+                  <Button onClick={() => setDialogOpen(true)}>
+                    <Plus className="mr-2" aria-hidden="true" />
+                    New Platform
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -236,6 +242,18 @@ export default function TrainingPage() {
                     </div>
                   </div>
                 ))}
+                {/* Session 15 (R14-B): the with-data create affordance — a
+                    trailing dashed add-tile in the grid (the reference
+                    renders none; this keeps the superset reachable now that
+                    the h2-row button is gone). */}
+                <button
+                  type="button"
+                  onClick={() => setDialogOpen(true)}
+                  className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-5 text-sm font-medium text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-600"
+                >
+                  <Plus className="h-6 w-6" aria-hidden="true" />
+                  Add Platform
+                </button>
               </div>
             )}
           </CardContent>

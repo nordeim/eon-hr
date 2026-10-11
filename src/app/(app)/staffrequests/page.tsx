@@ -273,7 +273,13 @@ export default function StaffRequestsPage() {
         </Select>
       </div>
 
-      <div className="flex flex-col">
+      {/* Session 15 (R14-D): a PLAIN block wrapper — the pill must NOT be a
+          direct child of a flex-col (cross-axis align-items:stretch stretches
+          the inline-flex pill to 1120px and justify-center centers the
+          trigger at x=779 instead of the reference's 145px left pill at
+          x=288 with the trigger at x=292). The reference's pill sits inside
+          the Radix Tabs root — an unclassed BLOCK div. */}
+      <div>
       <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
         <button
           type="button"

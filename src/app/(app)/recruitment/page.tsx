@@ -325,9 +325,14 @@ export default function RecruitmentPage() {
       </div>
 
       <Tabs defaultValue="applicants">
-        <TabsList>
-          <TabsTrigger value="applicants">Applicants &amp; Ranking</TabsTrigger>
-          <TabsTrigger value="cvupload">AI CV Upload</TabsTrigger>
+        {/* Session 15 (R14-A): the reference pill is the default
+            shrink-wrapped TabsList + bg-white border border-slate-200
+            (439×36); the first two triggers carry 12px lucide icons
+            (users / sparkles) with gap-1 — the compliance trigger
+            recipe (190/131/108 live-measured). */}
+        <TabsList className="bg-white border border-slate-200">
+          <TabsTrigger value="applicants" className="gap-1"><Users className="h-3 w-3" aria-hidden="true" /> Applicants &amp; Ranking</TabsTrigger>
+          <TabsTrigger value="cvupload" className="gap-1"><Sparkles className="h-3 w-3" aria-hidden="true" /> AI CV Upload</TabsTrigger>
           <TabsTrigger value="jobs">Job Postings</TabsTrigger>
         </TabsList>
 

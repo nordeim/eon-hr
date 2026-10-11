@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 324 specs) |
+| Unit tests | `bun run test` (Vitest, 337 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -440,6 +440,34 @@ reference — never re-add it.
 - **hrreports (R13-L)**: the Group By select defaults to an EMPTY
   trigger (`useState("")` + `SelectValue placeholder=""`); Status Filter
   shows "All".
+
+## Session-15 recipe layer (parity round 14)
+
+- **recruitment (R14-A)**: the tab pill is the WHITE shrink-wrap recipe
+  (`bg-white border border-slate-200`, 439px) — NOT `bg-secondary`; the
+  first two triggers carry 12px lucide icons with `gap-1` (Users on
+  Applicants & Ranking 190, Sparkles on AI CV Upload 131 — the compliance
+  trigger recipe); Job Postings stays icon-less (108).
+- **training (R14-B)**: the category chip row is `role="group"` (a
+  tablist whose children are aria-pressed toggles is invalid ARIA — REF
+  renders a plain div); the Training Platforms h2 row renders EMPTY
+  (32px — REF has NO create affordance anywhere on the page); the clone's
+  superset CTA lives BELOW the empty-state line (loans-recipe) and the
+  with-data grid carries a trailing dashed Add Platform tile.
+- **performancemanagement (R14-C)**: the tab pill is the white recipe
+  (296px).
+- **staffrequests (R14-D)**: the My Requests pill sits in a PLAIN BLOCK
+  wrapper — NEVER a `flex flex-col` child (cross-axis stretch blows the
+  inline-flex pill to 1120px and centers the trigger at x=779; REF: pill
+  145px@288, trigger 137px@292). Prior rounds compared w×h only — always
+  pin X too.
+- **profile (R14-E)**: the Language/Timezone card renders under
+  `TabsContent value="preferences"` (a copy-paste value="general" stacked
+  it under the General form and left the preferences tab empty); General
+  keeps exactly the 4 reference fields; Change Photo carries
+  `type="button"` (no implicit submit).
+- **compliancedashboard (R14-F)**: the three Notify All buttons render at
+  `size="sm"` (h-8, 32px, text-xs) — 166/173/173 with mr-1 icons.
 
 ## Page architecture (session 6) — where padding and gradients live
 

@@ -281,6 +281,7 @@ export default function ProfilePage() {
                 <h2 className="text-2xl font-bold text-slate-900">{profile.name}</h2>
                 <p className="mb-3 truncate text-slate-600">{profile.email}</p>
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() =>
                     toast.toast({ title: "Change Photo", description: "Photo uploads are coming soon.", variant: "info" })
@@ -382,8 +383,11 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
 
-        {/* General tab */}
-        <TabsContent value="general" className="mt-0">
+        {/* Preferences tab (session 15, R14-E): this card was mistakenly
+            mounted under value="general" — a copy-paste bug from the R13-C
+            rebuild that stacked it below the personal-information form and
+            left the real "preferences" tab empty. */}
+        <TabsContent value="preferences" className="mt-0">
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>

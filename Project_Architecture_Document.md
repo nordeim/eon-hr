@@ -3,7 +3,7 @@
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Document:** README.md (user-facing), CLAUDE.md (agent constitution), AGENTS.md (operating notes)
-**Last Updated:** 2026-10-13
+**Last Updated:** 2026-10-15
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
@@ -11,6 +11,7 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S15]` | session 15 | Parity round 14: recruitment white tab pill + 12px gap-1 trigger icons (439px), performancemanagement white pill (296px), training role=group chip row + empty 32px h2 row + empty-state CTA superset + dashed add-tile, staffrequests plain-block pill wrapper (fixes the 491px flex-col cross-axis stretch — pill 145@288), profile preferences TabsContent value fix (Language/Timezone card moved off the General tab; 4-field General restored) + type=button Change Photo, compliance size=sm notify buttons (166/173/173). 423-spec pyramid (337 unit + 86 E2E). |
 | `[S14]` | session 14 | Parity round 13: systemic iconed-button mr-2/mr-1 margins (10 call sites), the white shrink-wrapped tab-pill recipe (settings/profile/attendance/compliance) with space-y-6 roots + mt-0 contents, iconed tab triggers (three gap recipes), the generalized line-box field recipe (inline label + mt-2 control), settings Company card rebuild, profile 4-tab + General form rebuild, attendance Mark Attendance tabs + access-restricted recipe, compliancedashboard tab restructure (90px stat row + notify row + p-4 toolbar + table card), reports category-card + tile grid + Report Filters rebuild, offboarding col-span-full empty, surveys zero-render, no-tile StatCard flex row, taskmanager empty column + DIV badge, payrollengine 64px fields, shiftcalendar gap-2 chevron cluster + Link CTA, hrreports empty Group By default. 410-spec pyramid (324 unit + 86 E2E). |
 | `[S13]` | session 13 | Parity round 12: notificationpreferences rebuild (86px stat tiles with per-tile value colors, title-only headers, border-b preference rows with 32px icon chips, pt-2 save row, simple py-8 empty), hrreports toolbar grid with bare 64px fields + flush subtitle + gap-2 actions + per-tile stat colors + padded table container, analytics stacked-tile/chart-card/summary rebuild with unconditional charts, staffrequests px-3 py-1 trigger; PageHeader subtitleClassName/actionsClassName + StatCard labelClassName prop additions. 371-spec pyramid (285 unit + 86 E2E). |
 | `[S12]` | session 12 | Parity round 11: sidebar footer rebuild (left-aligned 36×36 cluster), EmptyState conditional mb-4 + iconChip variant, systemic table th/empty-row recipe, documenttracker stats+chips+bare empty, DIV-title border-b headers (expenses/leavemanagement/allleaverequests/payroll/payrollmodule), evaluations equal-width tab pill + value-in-tile stats, employees zero-render, communications centered channel cards, analyticsdashboard full-width chart stack, chart-page heights (hrreports/attendancedashboard/advancedanalytics/surveyanalytics) with unconditional rendering, securitysettings plain rows. 351-spec pyramid (265 unit + 86 E2E). |
@@ -414,8 +415,8 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
 | Design tokens | 1 | 16 | `tests/unit/tokens.test.ts` | Vitest |
-| Parity recipes (s5/s6/s9) | 1 | 69 | `tests/unit/recipes.test.ts` | Vitest |
-| Shell recipes (s7/s8/s9: boundary/kickers/wizard/header recipes) | 1 | 37 | `tests/unit/shell-recipes.test.ts` | Vitest |
+| Parity recipes (s5–s15) | 1 | 210 | `tests/unit/recipes.test.ts` | Vitest |
+| Shell recipes (s7–s9: boundary/kickers/wizard/header recipes) | 1 | 69 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
 | E2E mobile navigation + boundary | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |

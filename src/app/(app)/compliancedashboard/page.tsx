@@ -265,9 +265,13 @@ export default function ComplianceDashboardPage() {
 
                 <div className="flex flex-wrap gap-2">
                   {([7, 15, 30] as const).map((w) => (
+                    /* Session 15 (R14-F): the reference renders the notify
+                       buttons at the h-8 size (32px, px-3, text-xs — the
+                       size="sm" variant) with 16px mr-1 icons: 166/173/173. */
                     <Button
                       key={w}
                       variant="outline"
+                      size="sm"
                       onClick={() => notifyWindow(w)}
                       disabled={notifying !== null}
                     >

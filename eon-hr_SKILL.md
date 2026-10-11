@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.7.0 (session-14 remediation complete) · **Last updated:**
-> 2026-10-11 · **State:** 285 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 2.8.0 (session-15 remediation complete) · **Last updated:**
+> 2026-10-15 · **State:** 337 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -1183,3 +1183,36 @@ href="/ShiftSwap") opening the superset dialog.
 
 **hrreports:** Group By select defaults EMPTY (useState("") +
 placeholder=""); Status Filter shows All.
+
+## 27. Session-15 Recipe Layer — parity round 14
+
+**recruitment:** the tab pill is the WHITE shrink-wrap recipe
+(`bg-white border border-slate-200`, 439px) — not `bg-secondary`; the
+first two triggers carry 12px lucide icons with `gap-1` (Users 190,
+Sparkles 131 — the compliance trigger recipe); Job Postings icon-less
+(108).
+
+**training:** the category chip row is `role="group"` — a tablist whose
+children are aria-pressed toggle buttons is INVALID ARIA (REF renders a
+plain div). The Training Platforms h2 row renders EMPTY (32px — REF has
+no create affordance anywhere on the page); the superset CTA lives below
+the empty-state line (loans-recipe) and the with-data grid carries a
+trailing dashed Add Platform tile.
+
+**performancemanagement:** white pill (296px).
+
+**staffrequests:** the My Requests pill sits in a PLAIN BLOCK wrapper —
+NEVER a `flex flex-col` child. Cross-axis `align-items: stretch` blows
+the inline-flex pill to 1120px and `justify-center` centers the trigger
+at x=779; REF renders pill 145px@288 with the trigger at x=292 inside
+the Radix Tabs root (an unclassed BLOCK div). **Lesson: prior rounds
+compared w×h only — always pin X positions too.**
+
+**profile:** the Language/Timezone card belongs to
+`TabsContent value="preferences"` — a copy-paste value="general" stacked
+it under the General form (6 fields) and left the preferences tab empty.
+General keeps exactly the 4 reference fields (Full Name/Email/Phone/Job
+Title, 68px line-box); Change Photo carries `type="button"`.
+
+**compliancedashboard:** the three Notify All buttons render at
+`size="sm"` (h-8, 32px, px-3, text-xs) with mr-1 icons — 166/173/173.

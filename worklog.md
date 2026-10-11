@@ -512,3 +512,29 @@ Work Log:
 Stage Summary:
 - Parity round 13 complete: 12 gap groups fixed with 39 new TDD pins — the systemic iconed-button margin matrix, white tab pills on four pages, line-box field recipe, and five page rebuilds — every fixed surface live-verified byte-exact against the reference
 - 324 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 27 (session 15 / parity round 14)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, skills-assisted audit (redeploy check + mobile nav + 46-route sweep with tab-pill layer + data-bearing frontier), TDD remediation of 6 gap groups, docs, commit + push
+
+Work Log:
+- Workspace survived at 6110587 (R13 + session-log); integrity verified (.env file:../db/custom.db, db/ at root, pristine seed users=1/employees=1/leaveBalances=2); shell DATABASE_URL trap guarded (env -u DATABASE_URL) on every DB/build command; prisma client regenerated after a bun global-cache resolution hiccup
+- Baseline gates: lint 0/0, tsc, 324/324 unit, build, 86/86 E2E — the 6110587 state exactly; static audit of the R13 diff clean (no any/secrets/debug patterns)
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions (loc/ref) authenticated; auth-sessions.mjs hardened (has-text selectors unreliable — snapshot-ref clicking; REF password fill needed a retry)
+- Stale-server trap hit at session start (the :3200 server was serving a deleted build) — killed by PID, restarted on the fresh build; re-killed after the post-fix build
+- Redeploy check: 12 routes byte-identical — REF unchanged since R13
+- Mobile navigation audit (user priority): top bar 73, bottom tabs 78@766 (x 10/79/139/204/313), drawer 288×844 + footer 121@723, submenu, kicker 53@89 + scroll-away, md boundary 767/800 clean-state (hamburger 28@24 both) — ALL byte-identical; no Tailwind v4 bug; transient 61px REF reading = documented mid-hydration artifact
+- 46-route sweep + NEW tab-pill probe layer + per-page DOM dumps: 6 gap groups (R14-A…F) — recruitment white pill + 12px gap-1 trigger icons (439/190/131/108), training role=tablist→group + h2-row button removed (32px parity) + superset CTA relocated to the empty state + dashed with-data add-tile, performancemanagement white pill (296), staffrequests 491px pill-centering bug (flex-col cross-axis stretch; REF pill 145@288/trigger 137@292 — X was never pinned before), profile Language/Timezone card under value="general" (copy-paste bug; preferences tab was empty), compliance notify buttons default→size sm (166/173/173)
+- Data-bearing frontier: REF reports tile buttons are DEAD (no toast/toaster on click — LOC's real CSVs stand as superset); REF compliance also zero-data (identical counters); profile Save Changes byte-identical (earlier missing = hydration race)
+- docs/remediation-plan-session15.md written (6 groups + non-goals) + codebase-validated
+- TDD: 13 new pins (12 RED + 1 guard) → GREEN; 2 pins refined (regex windows: 4.5KB/2.8KB TabsContent blocks)
+- Gates: lint 0/0, tsc, 337/337 unit (+13), build, 86/86 E2E
+- Live verification: 6/6 fixed surfaces byte-exact (recruitment 439+190/131/108; perf 296; staffrequests 145@288/137@292; profile 4 fields @540/632 + save 164@724 + preferences tab renders lang/tz + toggles; compliance 166/173/173 @32px; training row 32@276 + CTA in empty state, card 250 vs 202 documented); full-route sweep re-run clean of non-documented diffs; mobile regression clean; with-data smoke (platform injected → card + dashed add-tile render → removed); DB pristine
+- 12 screenshots captured/refreshed (5 new: 40/41/42/43/44) → 53 total; VLM spot-checks on training/staffrequests/preferences confirmed the fixes visually (one capture race re-shot)
+- Docs: AGENTS session-15 layer + 337 specs; SKILL v2.8.0 + §27; PAD [S15] + Last Updated + corrected test-distribution table (recipes 210 / shell 69); CLAUDE 423-spec pyramid + session-15 pins; README 337 specs + 53 captures; docs/session_22.md; worklog.md; remediation-plan completion record
+
+Stage Summary:
+- Parity round 14 complete: 6 gap groups fixed with 13 new TDD pins — the white-pill completion (recruitment + performancemanagement), the staffrequests X-position bug (the always-pin-X lesson), the profile tab-value fix, the training affordance relocation, the compliance notify size — every fixed surface live-verified byte-exact against the reference
+- 337 unit + 86 E2E green; ready for commit + push

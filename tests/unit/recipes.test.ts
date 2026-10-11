@@ -1208,3 +1208,95 @@ describe("small pins: hrreports status + shiftcalendar (session 14, R13-L)", () 
     expect(page).toMatch(/href="\/ShiftSwap"/);
   });
 });
+
+describe("recruitment tab pill + trigger icons (session 15, R14-A)", () => {
+  const page = read("src", "app", "(app)", "recruitment", "page.tsx");
+
+  it("tab pill is the shrink-wrap + bg-white border recipe (439px)", () => {
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+    expect(page).not.toMatch(/<TabsList>\s*$/);
+  });
+
+  it("first two triggers carry 12px icons with gap-1 (190/131px)", () => {
+    expect(page).toMatch(/TabsTrigger value="applicants" className="gap-1"><Users className="h-3 w-3"/);
+    expect(page).toMatch(/TabsTrigger value="cvupload" className="gap-1"><Sparkles className="h-3 w-3"/);
+  });
+
+  it("Job Postings trigger stays icon-less (108px)", () => {
+    expect(page).toMatch(/TabsTrigger value="jobs">Job Postings/);
+  });
+});
+
+describe("training section furniture (session 15, R14-B)", () => {
+  const page = read("src", "app", "(app)", "training", "page.tsx");
+
+  it("chip-row container is role=group (no tablist — invalid ARIA)", () => {
+    expect(page).not.toContain('role="tablist"');
+    expect(page).toMatch(/role="group" aria-label="Training categories"/);
+  });
+
+  it("the h2 row renders NO button (32px row — reference-measured)", () => {
+    const h2row = page.match(/flex items-center justify-between mb-6[\s\S]{0,220}?<\/div>/)?.[0] ?? "";
+    expect(h2row).toMatch(/Training Platforms/);
+    expect(h2row).not.toMatch(/<Button/);
+    expect(page).not.toContain("New Platform\n          </Button>");
+  });
+
+  it("the create affordance lives in the empty state (loans-recipe CTA superset)", () => {
+    expect(page).toMatch(/No training platforms available[\s\S]{0,400}?<Button/);
+  });
+
+  it("the with-data grid carries a trailing dashed add-tile", () => {
+    expect(page).toMatch(/border-dashed/);
+    expect(page).toMatch(/Add Platform/);
+  });
+});
+
+describe("performancemanagement tab pill (session 15, R14-C)", () => {
+  const page = read("src", "app", "(app)", "performancemanagement", "page.tsx");
+
+  it("tab pill is the shrink-wrap + bg-white border recipe (296px)", () => {
+    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  });
+});
+
+describe("staffrequests pill wrapper (session 15, R14-D)", () => {
+  const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
+
+  it("the pill sits in a plain block wrapper (no flex-col stretch — 145px left pill)", () => {
+    expect(page).not.toMatch(/<div className="flex flex-col">\s*<div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted/);
+    expect(page).toMatch(/<div>\s*<div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted/);
+  });
+});
+
+describe("profile preferences tab content (session 15, R14-E)", () => {
+  const page = read("src", "app", "(app)", "profile", "page.tsx");
+
+  it("the language/timezone card renders under the preferences tab (not general)", () => {
+    expect(page).not.toMatch(/TabsContent value="general"[\s\S]{0,80}General Settings/);
+    expect(page).toMatch(/TabsContent value="preferences"/);
+    const prefBlock = page.match(/TabsContent value="preferences"[\s\S]{0,5000}?<\/TabsContent>/)?.[0] ?? "";
+    expect(prefBlock).toMatch(/pf-language/);
+    expect(prefBlock).toMatch(/pf-timezone/);
+  });
+
+  it("the general tab keeps exactly the four reference fields", () => {
+    const generalBlock = page.match(/TabsContent value="general"[\s\S]{0,4000}?<\/TabsContent>/)?.[0] ?? "";
+    expect(generalBlock).toMatch(/Full Name/);
+    expect(generalBlock).toMatch(/Job Title/);
+    expect(generalBlock).not.toMatch(/Language/);
+    expect(generalBlock).not.toMatch(/Timezone/);
+  });
+
+  it("Change Photo is type=button (no implicit submit)", () => {
+    expect(page).toMatch(/<Button\s+type="button"\s+variant="outline"/);
+  });
+});
+
+describe("compliance notify buttons (session 15, R14-F)", () => {
+  const page = read("src", "app", "(app)", "compliancedashboard", "page.tsx");
+
+  it("notify buttons render at the h-8 size (sm — 32px, 166/173/173)", () => {
+    expect(page).toMatch(/<Button\s+key=\{w\}\s+variant="outline"\s+size="sm"/);
+  });
+});
