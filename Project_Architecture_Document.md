@@ -3,7 +3,7 @@
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Document:** README.md (user-facing), CLAUDE.md (agent constitution), AGENTS.md (operating notes)
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-10-26
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
@@ -11,6 +11,7 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S19]` | session 19 | Parity round 18 — the INTERACTION dimension: the first keyboard/focus-ring audit (real Tab traversal, full computed outline + box-shadow dumps). Tab ORDER byte-identical everywhere; 7 focus-recipe gap groups fixed — the systemic Button ring-1-no-offset recipe, Input/Textarea ring-offset-2, the sidebar ring-sidebar-ring blue-500 #3B82F6 token (3 call sites + token), the mobile hamburger focus classes, the login slate-400 input pair + zinc-950 #09090B Sign in ring (REF's page-scoped --ring), the select trigger button recipe, the TabsTrigger ring-offset-2. Includes the same-variant tailwind-merge lesson (focus-visible:, not focus:, for ring-color overrides). First sub-390 band sweep (320–389): settled probes byte-identical; residual diffs = REF's own overflow family (clone fits or overflows less); settle ≥5s at odd sub-390 widths. 459-spec pyramid (373 unit + 86 E2E). |
 | `[S18]` | session 18 | Parity round 17: the per-page header rowBreakpoint taxonomy (nine REF-md pages — payrollmodule, documenttracker, recruitmentkanban, assetmanagement, attendance, recruitment, shiftcalendar, staffrequests, attendancedashboard — pass rowBreakpoint="md"; templates/workflowconfigpage and the actionsStart family are REF always-rows and keep the sm default), the profile mobile-kicker back button + subtitle recipe (36×36 ghost ArrowLeft at (32,105) + text-xs "Manage your account", 69px bar vs the standard 53px). FIRST 640–767 band sweep (the never-audited gap between the mobile and tablet audits) + the first print-stylesheet audit (zero @media print rules on both sides — parity). 449-spec pyramid (363 unit + 86 E2E). |
 | `[S17]` | session 17 | Parity round 16: the systemic StatCard flex-centered-tile rule (REF's tile computes padding 0 — flex h-12 w-12 centering; min-content = the bare svg so it shrinks 48→24 under constraint; analytics @768 byte-exact), the workflowautomation zero-render (nothing below the stat row), the chat zero-state recipes (sidebar p-8 text-center + 48px MessageCircle + one line; right pane bare-centered with an 80px MessageCircle), the surveys "0%" zero value, the employees shrinkable filter-row search (md:flex-initial + md:max-w-64 — fits the 768–815 band). First tablet-band audit (768/900/1024): REF's own overflow family documented. 442-spec pyramid (356 unit + 86 E2E). |
 | `[S16]` | session 16 | Parity round 15: the systemic tab-pill inactive-trigger color (REF's muted-foreground token #737373 — pinned as neutral-500; tabs/reports/staffrequests surfaces), the sidebar footer colors (Bell slate-600, Moon zinc-700, user name zinc-700 — pinned --color-zinc-700), the actions-cluster fitting rule (no shrink-0 — fixes the attendance mid-viewport overflow), the organogram bare-card + simple-empty + overflow-wrapper rebuild, the staffrequests bg-secondary pill + mine default scope. 435-spec pyramid (349 unit + 86 E2E). |
@@ -417,8 +418,8 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | DB path contract | 1 | 15 | `tests/db-path.test.ts` | Vitest |
 | Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
-| Design tokens | 1 | 18 | `tests/unit/tokens.test.ts` | Vitest |
-| Parity recipes (s5–s18) | 1 | 234 | `tests/unit/recipes.test.ts` | Vitest |
+| Design tokens | 1 | 19 | `tests/unit/tokens.test.ts` | Vitest |
+| Parity recipes (s5–s19) | 1 | 236 | `tests/unit/recipes.test.ts` | Vitest |
 | Shell recipes (s7–s9/s18: boundary/kickers/wizard/header recipes) | 1 | 76 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
@@ -440,7 +441,7 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 363/363
+- [ ] `bun run test` — 373/373
 - [ ] `bun run build` succeeds
 - [ ] `bun run test:e2e` — 86/86
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)

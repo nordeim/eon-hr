@@ -91,7 +91,11 @@ function NavLink({
         // p-2/gap-2 with 20px icons. Hover = custom-accent-bg (#e4e6eb,
         // the reference :root --accent-color) plus opacity-80.
         "flex h-8 items-center gap-3 rounded-lg px-3 py-2.5 text-sm mb-1 outline-none transition-all duration-200 hover:opacity-80",
-        "focus-visible:ring-2 focus-visible:ring-ring",
+        // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
+        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
+        // measured rgb(59,130,246) on leaf links AND group buttons), not
+        // the dark global ring token.
+        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         active
           ? "bg-primary font-medium text-white shadow-sm"
           : "font-normal text-slate-600 hover:bg-[#e4e6eb]"
@@ -126,7 +130,11 @@ function CollapsibleNavItem({
           // leading icon (session-5: measured distinctly from leaf links),
           // hover bg-blue-50 + text-blue-700, mb-1 for the 40px pitch.
           "flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2 text-sm mb-1 outline-none transition-colors",
-          "focus-visible:ring-2 focus-visible:ring-ring",
+          // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
+        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
+        // measured rgb(59,130,246) on leaf links AND group buttons), not
+        // the dark global ring token.
+        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
         )}
         aria-expanded={open}
@@ -154,7 +162,11 @@ function CollapsibleNavItem({
                     // re-verified session 5): h-8 px-3 py-2 gap-3, 16px
                     // icons, 36px pitch, hover accent + opacity-80.
                     "flex h-8 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:opacity-80",
-                    "focus-visible:ring-2 focus-visible:ring-ring",
+                    // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
+        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
+        // measured rgb(59,130,246) on leaf links AND group buttons), not
+        // the dark global ring token.
+        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
                     active
                       ? "bg-primary font-medium text-white shadow-sm"
                       : "font-normal text-slate-600 hover:bg-[#e4e6eb]"

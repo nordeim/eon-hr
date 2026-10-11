@@ -10,11 +10,11 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.1.0 (session-18 remediation complete) · **Last updated:**
-> 2026-10-25 · **State:** 363 unit + 86 E2E tests green, lint/typecheck/build
-> clean, visual parity with the live reference verified by dual-browser audit
-> (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the first
-> 640–767 band sweep + a print-stylesheet audit).
+> **Version:** 3.2.0 (session-19 remediation complete) · **Last updated:**
+> 2026-10-26 · **State:** 373 unit + 86 E2E tests green, lint/typecheck/build
+> clean, visual + interaction parity with the live reference verified by dual-browser audit
+> (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
+> the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy).
 
 ---
 
@@ -439,7 +439,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 363/363 (db-path 15, auth 14, utils 13, tokens 18, recipes 227, shell-recipes 76)
+bun run test          # vitest — 373/373 (db-path 15, auth 14, utils 13, tokens 19, recipes 236, shell-recipes 76)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -771,7 +771,7 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           363 unit (6 files) + 86 e2e (5 specs, workers:1)
+tests           373 unit (6 files) + 86 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
@@ -1368,3 +1368,60 @@ a missing ELEMENT hid behind an unmeasured axis.
   recruitmentkanban 1376@700 / 1664@768, shiftcalendar 988–1020,
   attendance 943–1199, chat 741, compliancedashboard 707 — the clone fits
   (fitting superset).
+
+## 31. Session-19 Recipe Layer — parity round 18 (the interaction dimension)
+
+The first keyboard/focus-ring audit: real Tab presses through both apps,
+full computed outline + box-shadow dumps at every stop. **Tab traversal
+ORDER is byte-identical** on every swept surface (/dashboard desktop 12
+stops + mobile 10, /login 8, /employees 10 — same elements, same
+sequence, same x/y). The ring RECIPES were not — seven gap groups:
+
+- **The button recipe (R18-A, systemic)**: REF's buttons (all variants —
+  hamburger, عربي, user, Import CSV, Add Employee, Edit) render
+  `focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring`
+  — a **1px #0A0A0A ring with NO offset**. The older shadcn
+  ring-2 + ring-offset-1 base rendered 3px total. The Button base and the
+  Radix select trigger both carry the recipe now (R18-F).
+- **The sidebar ring is BLUE (R18-C)**: leaf links, group buttons AND
+  sub-items focus with `focus-visible:ring-2 focus-visible:ring-sidebar-ring`
+  — REF's `--sidebar-ring` token (217.2 91.2% 59.8% = **blue-500
+  #3B82F6**, rendered rgb(59,130,246)), NOT the dark global ring. The
+  token lives in globals.css next to the sidebar family.
+- **Inputs/Textareas (R18-B)**: `ring-2 ring-ring ring-offset-2` — the
+  offset is 2 (white 2px + ring 2px), never 1.
+- **Tab triggers + switches**: `ring-2 ring-ring ring-offset-2` (4px
+  total) — TabsTrigger gained the offset (R18-G); the switch already had
+  it (measured byte-identical).
+- **The login page scope (R18-E)**: REF redefines `--ring: 240 10% 3.9%`
+  (zinc-950 #09090B) on the login page — the Sign in ring is
+  `focus-visible:ring-[#09090b]` (arbitrary value, the gradient-pin
+  pattern), and the email/password inputs carry the page pair
+  `focus:border-slate-400 focus-visible:ring-slate-400`.
+- **The same-variant tailwind-merge lesson (v4)**: a page-level
+  ring-COLOR override must use the SAME variant as the base
+  (`focus-visible:ring-slate-400`, not `focus:ring-slate-400`).
+  tailwind-merge only dedups conflicting utilities within one variant;
+  across variants both survive and the base's `focus-visible:ring-ring`
+  wins the v4 cascade (focus: is emitted before focus-visible:). The bare
+  focus: variant silently renders the wrong color.
+- **The mobile hamburger (R18-D)**: a bare button needs the recipe added
+  manually (it is not a Button component).
+- **Browser-default outlines are parity**: bottom tabs, quick-action
+  links, "View all" links and login socials carry NO custom focus classes
+  on either app — both render the browser's `auto 1px` outline. REF
+  serializes its color `rgba(10,10,10,0.5)`, the clone `lab(2.74 …/0.5)`
+  — the SAME dark-50% color in different color spaces; visually
+  identical, not fixable (Chrome derives it). The
+  browser-auto-serialization family.
+
+**Sub-390 band (320–389) — swept clean (the final unswept viewport band)**:
+settled probes byte-identical on the fitting pages (kicker h1 = vw−64
+exactly); every residual diff is REF's own overflow family extended below
+390 (attendance 943–1199, settings pill 1003–1259, shiftcalendar 732–988,
+recruitmentkanban 1376–1632, documenttracker 390–646, payroll 344@320,
+profile 539) where the clone fits or overflows less (attendance 487,
+settings 987, profile 523, documenttracker 348). **Settle lesson: REF
+needs ≥5s at odd sub-390 widths** — 2.4s captured the 61px mid-hydration
+state at 344/389 (the artifact family extends below 390; settled re-probes
+match byte-for-byte).

@@ -75,7 +75,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
               aria-label="Toggle Sidebar"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-900 transition-colors hover:bg-slate-100"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <PanelLeft className="h-4 w-4" aria-hidden="true" />
             </button>

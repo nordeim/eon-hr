@@ -1424,3 +1424,72 @@ describe("StatCard tile shrink (session 17, R16-D)", () => {
     expect(statCard).toContain("cn(tileClasses, tile)");
   });
 });
+
+describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity dimension)", () => {
+  const button = read("src", "components", "ui", "button.tsx");
+  const input = read("src", "components", "ui", "input.tsx");
+  const select = read("src", "components", "ui", "select.tsx");
+  const tabs = read("src", "components", "ui", "tabs.tsx");
+  const login = read("src", "app", "login", "page.tsx");
+  const globals = read("src", "app", "globals.css");
+
+  it("R18-A: the Button base renders REF's 1px no-offset ring — ring-1 ring-ring, NOT ring-2/ring-offset-1", () => {
+    expect(button).toContain(
+      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    );
+    expect(button).not.toContain("focus-visible:ring-2");
+    expect(button).not.toContain("focus-visible:ring-offset-1");
+  });
+
+  it("R18-B: Input and Textarea render REF's ring-offset-2 (white 2px + ring 2px), NOT offset-1", () => {
+    expect(input).toContain(
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    );
+    expect(input).not.toContain("focus-visible:ring-offset-1");
+    // both components (Input + Textarea) in one file — the recipe must appear twice
+    expect(input.match(/focus-visible:ring-offset-2/g)?.length).toBe(2);
+  });
+
+  it("R18-C: sidebar leaf links, group buttons and sub-items focus in REF's sidebar-ring blue, NOT the dark ring token", () => {
+    expect(sidebarNav).toContain("focus-visible:ring-2 focus-visible:ring-sidebar-ring");
+    expect(sidebarNav).not.toContain("focus-visible:ring-2 focus-visible:ring-ring");
+    // three call sites: leaf, group, sub-item
+    expect(sidebarNav.match(/focus-visible:ring-sidebar-ring/g)?.length).toBe(3);
+  });
+
+  it("R18-C: globals.css pins the sidebar-ring token to REF's blue-500 (#3B82F6 = 217.2 91.2% 59.8%)", () => {
+    expect(globals).toContain("--color-sidebar-ring: #3b82f6");
+  });
+
+  it("R18-D: the mobile hamburger carries REF's button focus recipe (the bare button had none)", () => {
+    const shell = appShell.slice(appShell.indexOf("Toggle Sidebar"), appShell.indexOf("Toggle Sidebar") + 700);
+    expect(shell).toContain("focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
+  });
+
+  it("R18-E: login inputs carry REF's page-level slate-400 focus pair", () => {
+    // focus-visible:ring-slate-400 (NOT focus:) — same variant as the base's
+    // ring-ring so tailwind-merge deterministically dedups the color; the
+    // bare focus: variant loses the v4 cascade battle against the base.
+    expect(login).toContain("focus:border-slate-400 focus-visible:ring-slate-400");
+    expect(login.match(/focus-visible:ring-slate-400/g)?.length).toBe(2);
+  });
+
+  it("R18-E: the login Sign in ring is REF's page-scoped zinc-950 (#09090B), NOT slate-400", () => {
+    const submit = login.slice(login.indexOf('type="submit"'), login.indexOf('type="submit"') + 700);
+    expect(submit).toContain("focus-visible:ring-[#09090b]");
+    expect(submit).not.toContain("ring-slate-400");
+  });
+
+  it("R18-F: the Select trigger uses REF's button recipe — focus-visible:ring-1, NOT focus:ring-2", () => {
+    expect(select).toContain(
+      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    );
+    expect(select).not.toContain("focus:ring-2");
+  });
+
+  it("R18-G: the TabsTrigger adds REF's ring-offset-2 (4px total ring)", () => {
+    expect(tabs).toContain(
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    );
+  });
+});

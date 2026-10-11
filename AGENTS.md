@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 363 specs) |
+| Unit tests | `bun run test` (Vitest, 373 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -575,6 +575,48 @@ reference — never re-add it.
   0.23px knife-edge (buttons byte-identical at 178.14/168.09; REF's row
   358.23 overflows invisibly and fits one line, the clone's 358.00 wraps
   Add Document — the hrreports knife-edge family).
+
+## Session-19 recipe layer (parity round 18 — the interaction dimension)
+
+The first keyboard/focus-ring audit (real Tab presses, full computed
+outline + box-shadow dumps). **Tab traversal ORDER is byte-identical** on
+all swept surfaces; the ring recipes were not. REF's focus taxonomy:
+
+- **Buttons (all variants) + Radix select triggers**: `focus-visible:ring-1
+  focus-visible:ring-ring` — a 1px #0A0A0A ring, NO offset. The Button
+  base and select.tsx carry it (R18-A/F).
+- **Sidebar leaf links + group buttons + sub-items**:
+  `focus-visible:ring-2 focus-visible:ring-sidebar-ring` — **2px blue-500
+  #3B82F6** (REF's `--sidebar-ring` token), NOT the dark global ring.
+  Token pinned in globals.css; three call sites in sidebar-nav.tsx
+  (R18-C).
+- **Tab triggers + switches**: `ring-2 ring-ring ring-offset-2` — 4px
+  total (white 2 + dark 2). TabsTrigger gained the offset (R18-G);
+  switches already had it.
+- **Inputs/Textareas**: `ring-2 ring-ring ring-offset-2` (R18-B) — the
+  base offset is 2, never 1.
+- **Login page scope** (R18-E): REF redefines `--ring: 240 10% 3.9%`
+  (zinc-950 #09090B) locally — the Sign in ring is `ring-[#09090b]`, and
+  the email/password inputs carry the page pair `focus:border-slate-400
+  focus-visible:ring-slate-400`. **v4 lesson**: the ring-color override
+  must use the SAME variant as the base (`focus-visible:`, not `focus:`)
+  — tailwind-merge only dedups within a variant, and the bare `focus:`
+  utility loses the v4 cascade battle against the base's
+  `focus-visible:ring-ring`.
+- **The mobile hamburger** (a bare button) carries the button recipe
+  (R18-D).
+- Bottom tabs / quick-action links / "View all" / login socials render
+  the BROWSER-DEFAULT `auto 1px` outline on both apps (no custom classes
+  — parity; the rgba-vs-lab serialization of the auto color is the same
+  dark 50% in different color spaces).
+
+**Sub-390 band (320–389) swept clean**: settled probes byte-identical on
+the fitting pages; every other diff is REF's own overflow family extended
+below 390 (attendance 943–1199, settings pill 1003–1259, shiftcalendar
+732–988, recruitmentkanban 1376–1632, documenttracker 390–646, payroll
+344@320, profile 539) where the clone fits or overflows less. **Settle
+lesson: REF needs ≥5s at odd sub-390 widths** (2.4s captured the 61px
+mid-hydration state at 344/389).
 
 ## Page architecture (session 6) — where padding and gradients live
 

@@ -173,7 +173,7 @@ function LoginForm() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     required
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none"
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -193,7 +193,7 @@ function LoginForm() {
                     autoComplete="current-password"
                     placeholder="••••••••"
                     required
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none"
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -210,7 +210,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Sign in

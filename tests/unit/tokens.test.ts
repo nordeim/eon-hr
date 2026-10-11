@@ -43,6 +43,12 @@ describe("globals.css token contract", () => {
     expect(theme).toContain("--color-sidebar: #fafafa");
   });
 
+  it("pins the sidebar focus ring to reference blue-500 (session 19, R18-C)", () => {
+    // REF's --sidebar-ring token (217.2 91.2% 59.8%) renders
+    // rgb(59,130,246) on focused sidebar links AND group buttons.
+    expect(theme).toContain("--color-sidebar-ring: #3b82f6");
+  });
+
   it("pins the five Tailwind v4 engine traps (validation report)", () => {
     // trap 5: v3 shadow geometry
     expect(theme).toContain("--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)");

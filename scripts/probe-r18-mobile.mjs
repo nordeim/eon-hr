@@ -1,0 +1,166 @@
+#!/usr/bin/env node
+// probe-r18-mobile.mjs — mobile navigation audit (session 19 / parity round 18).
+// User priority surface: top bar (390×73), bottom tabs (pitches, label/icon
+// sizes, active color), drawer (geometry-located panel; hamburger clicked by
+// GEOMETRY — REF's carries no aria-label, the r17 lesson), kicker (53@89),
+// md boundary (767/800). REF vs LOC @390×844.
+import { execSync } from "node:child_process";
+
+function run(cmd) {
+  try {
+    return execSync(cmd, { stdio: "pipe", timeout: 45000 }).toString();
+  } catch (e) {
+    return "ERR:" + String(e).slice(0, 140);
+  }
+}
+
+async function evalOn(session, expr, ms = 1200) {
+  await new Promise(r => setTimeout(r, ms));
+  const oneLine = expr.split("\n").join(" ");
+  const out = run(`agent-browser --session ${session} eval ${JSON.stringify(oneLine)}`);
+  try {
+    return JSON.parse(out.trim().replace(/^"|"$/g, "").replace(/\\"/g, '"').replace(/\\n/g, " "));
+  } catch {
+    return { error: out.slice(0, 120) };
+  }
+}
+
+// ---- 1. top bar + bottom tabs at 390×844 --------------------------------
+const CHROME = `(() => {
+  const out = {};
+  const bar = [...document.querySelectorAll("header,div")].find(d => {
+    if (d.tagName !== "HEADER" && !(d.getBoundingClientRect().height > 55 && d.getBoundingClientRect().height < 95)) return false;
+    const r = d.getBoundingClientRect(); const cs = getComputedStyle(d);
+    return r.y < 10 && r.width > 350 && r.width <= 400 && (d.tagName === "HEADER" || cs.position === "sticky" || cs.position === "fixed");
+  });
+  if (bar) { const r = bar.getBoundingClientRect(); const cs = getComputedStyle(bar);
+    out.topBar = { w: Math.round(r.width), h: Math.round(r.height), bg: cs.backgroundColor, pos: cs.position, bb: cs.borderBottomWidth + " " + cs.borderBottomColor }; }
+  const tabs = [...document.querySelectorAll("nav a, [role=navigation] a, a")].filter(a => {
+    const r = a.getBoundingClientRect(); return r.y > 700 && r.y < 830 && r.width > 40 && a.offsetParent !== null;
+  });
+  if (tabs.length >= 4) {
+    out.tabs = tabs.slice(0, 6).map(a => { const r = a.getBoundingClientRect();
+      const label = a.querySelector("span"); const icon = a.querySelector("svg");
+      return { t: (label?.textContent || a.textContent || "").trim().slice(0, 12), x: Math.round(r.x), y: Math.round(r.y),
+        labFs: label ? getComputedStyle(label).fontSize : null, iconW: icon ? Math.round(icon.getBoundingClientRect().width) : null, color: getComputedStyle(a).color }; });
+    const row = tabs[0].parentElement.getBoundingClientRect();
+    out.tabBar = { y: Math.round(row.y), h: Math.round(row.height) };
+  }
+  return JSON.stringify(out);
+})()`;
+
+// ---- 2. drawer (geometry-located panel + geometry-located hamburger) ------
+const DRAWER = `(() => {
+  const out = {};
+  const panel = [...document.querySelectorAll("div,aside,nav")].find(d => {
+    const cs = getComputedStyle(d);
+    if (cs.position !== "fixed" || cs.display === "none") return false;
+    const r = d.getBoundingClientRect();
+    return r.x <= 1 && r.width >= 250 && r.width <= 330 && r.height >= 600 && cs.backgroundColor !== "rgba(0, 0, 0, 0.8)";
+  });
+  if (panel) {
+    const r = panel.getBoundingClientRect(); const cs = getComputedStyle(panel);
+    out.panel = { x: Math.round(r.x), w: Math.round(r.width), h: Math.round(r.height), bg: cs.backgroundColor, z: cs.zIndex, pos: cs.position };
+    const links = [...panel.querySelectorAll("a")].filter(a => a.getBoundingClientRect().height > 20).slice(0, 10)
+      .map(a => ({ t: (a.textContent || "").trim().slice(0, 16), y: Math.round(a.getBoundingClientRect().y) }));
+    out.links = links;
+    const foot = [...panel.querySelectorAll("div")].filter(d => { const rr = d.getBoundingClientRect(); return rr.height > 100 && rr.height < 140; }).pop();
+    if (foot) out.footer = { y: Math.round(foot.getBoundingClientRect().y), h: Math.round(foot.getBoundingClientRect().height) };
+    const closeBtn = [...panel.querySelectorAll("button")].find(b => /close|x/i.test(b.getAttribute("aria-label") || "") && b.getBoundingClientRect().width < 48);
+    out.closeBtn = closeBtn ? "PRESENT" : "absent";
+  }
+  const ov = [...document.querySelectorAll("div")].find(d => { const cs = getComputedStyle(d); const r = d.getBoundingClientRect();
+    return cs.position === "fixed" && cs.backgroundColor.startsWith("rgba(0") && r.width > 300; });
+  if (ov) { const r = ov.getBoundingClientRect(); out.overlay = { w: Math.round(r.width), h: Math.round(r.height), z: getComputedStyle(ov).zIndex }; }
+  return JSON.stringify(out);
+})()`;
+
+// geometry-located hamburger click (works on both — REF has no aria-label)
+const CLICK_BURGER = `(() => {
+  const burger = [...document.querySelectorAll("button")].find(b => {
+    if (b.offsetParent === null) return false;
+    const r = b.getBoundingClientRect();
+    return r.y < 80 && r.x < 80 && r.width >= 20 && r.width <= 44;
+  });
+  if (burger) { burger.click(); return "clicked"; }
+  return "no-burger";
+})()`;
+
+// ---- 3. kicker (dashboard category-A + profile variant) -------------------
+const KICKER = `(() => {
+  const out = {};
+  const bar = [...document.querySelectorAll("div")].find(d => {
+    const cs = getComputedStyle(d); const r = d.getBoundingClientRect();
+    return cs.display !== "none" && r.y >= 80 && r.y <= 120 && r.height >= 45 && r.height <= 75 && cs.backgroundColor === "rgb(255, 255, 255)" && cs.borderBottomWidth === "1px";
+  });
+  if (bar) { const r = bar.getBoundingClientRect(); const cs = getComputedStyle(bar);
+    out.kicker = { y: Math.round(r.y), h: Math.round(r.height), bg: cs.backgroundColor, bb: cs.borderBottomColor };
+    const h1 = bar.querySelector("h1");
+    if (h1) { const hr = h1.getBoundingClientRect(); const hcs = getComputedStyle(h1);
+      out.kickerH1 = { t: h1.textContent.trim().slice(0, 20), fs: hcs.fontSize, fw: hcs.fontWeight, x: Math.round(hr.x), y: Math.round(hr.y) }; }
+    const back = [...bar.querySelectorAll("button,a")].find(b => b.getBoundingClientRect().width >= 30 && b.getBoundingClientRect().width <= 44);
+    out.backBtn = back ? { w: Math.round(back.getBoundingClientRect().width), h: Math.round(back.getBoundingClientRect().height), x: Math.round(back.getBoundingClientRect().x), y: Math.round(back.getBoundingClientRect().y) } : null;
+    const sub = bar.querySelector("p");
+    out.subtitle = sub ? { t: sub.textContent.trim().slice(0, 24), fs: getComputedStyle(sub).fontSize } : null; }
+  return JSON.stringify(out);
+})()`;
+
+async function openPage(session, base, route, vp) {
+  run(`agent-browser --session ${session} set viewport ${vp[0]} ${vp[1]}`);
+  run(`agent-browser --session ${session} open "${base}${route}"`);
+}
+
+const baseRef = "https://eon.base44.app", baseLoc = "http://127.0.0.1:3200";
+
+console.log("── 1. TOP BAR + BOTTOM TABS @390×844 (/dashboard) ──");
+await openPage("ref", baseRef, "/dashboard", [390, 844]);
+await openPage("loc", baseLoc, "/dashboard", [390, 844]);
+const refChrome = await evalOn("ref", CHROME, 2500);
+const locChrome = await evalOn("loc", CHROME, 2500);
+console.log("REF:", JSON.stringify(refChrome));
+console.log("LOC:", JSON.stringify(locChrome));
+
+console.log("\n── 2. DRAWER (geometry-located) @390×844 ──");
+await evalOn("ref", CLICK_BURGER, 300);
+await evalOn("loc", CLICK_BURGER, 300);
+const refDrawer = await evalOn("ref", DRAWER, 2000);
+const locDrawer = await evalOn("loc", DRAWER, 2000);
+console.log("REF:", JSON.stringify(refDrawer));
+console.log("LOC:", JSON.stringify(locDrawer));
+for (const s of ["ref", "loc"]) run(`agent-browser --session ${s} press Escape`);
+
+console.log("\n── 3. KICKERS @390×844 (/dashboard standard + /profile variant) ──");
+await openPage("ref", baseRef, "/dashboard", [390, 844]);
+await openPage("loc", baseLoc, "/dashboard", [390, 844]);
+const refKick = await evalOn("ref", KICKER, 2200);
+const locKick = await evalOn("loc", KICKER, 2200);
+console.log("REF dash:", JSON.stringify(refKick));
+console.log("LOC dash:", JSON.stringify(locKick));
+await openPage("ref", baseRef, "/profile", [390, 844]);
+await openPage("loc", baseLoc, "/profile", [390, 844]);
+const refKickP = await evalOn("ref", KICKER, 2200);
+const locKickP = await evalOn("loc", KICKER, 2200);
+console.log("REF profile:", JSON.stringify(refKickP));
+console.log("LOC profile:", JSON.stringify(locKickP));
+
+console.log("\n── 4. md BOUNDARY (767 = mobile chrome / 800 = desktop sidebar) ──");
+const BOUND = `(() => {
+  const out = {};
+  const header = document.querySelector("header");
+  out.headerVisible = header ? getComputedStyle(header).display !== "none" : false;
+  out.hamburger = [...document.querySelectorAll("button")].some(b => b.offsetParent !== null && b.getBoundingClientRect().y < 80 && b.getBoundingClientRect().x < 80 && b.getBoundingClientRect().width >= 20);
+  out.sidebar = [...document.querySelectorAll("div,aside,nav")].some(n => { const cs = getComputedStyle(n); const r = n.getBoundingClientRect(); return cs.display !== "none" && r.width > 200 && r.x < 30 && r.y < 130; });
+  out.docW = document.documentElement.scrollWidth;
+  return JSON.stringify(out);
+})()`;
+for (const vp of [767, 800]) {
+  await openPage("ref", baseRef, "/dashboard", [vp, 844]);
+  await openPage("loc", baseLoc, "/dashboard", [vp, 844]);
+  const r = await evalOn("ref", BOUND, 1800);
+  const l = await evalOn("loc", BOUND, 1800);
+  console.log(`@${vp}: REF ${JSON.stringify(r)} | LOC ${JSON.stringify(l)}`);
+}
+
+run(`agent-browser --session ref set viewport 1440 900`);
+run(`agent-browser --session loc set viewport 1440 900`);
+console.log("\nMOBILE-AUDIT-DONE");

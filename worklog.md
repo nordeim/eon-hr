@@ -620,3 +620,30 @@ Work Log:
 Stage Summary:
 - Parity round 17 complete: 2 gap groups fixed with 7 new TDD pins — the per-page header rowBreakpoint taxonomy (the never-swept 640–767 band; nine pages now render REF's column headers) and the profile kicker back-button + subtitle variant — every fixed surface live-verified byte-exact against the reference; the viewport matrix is now fully swept (390 through 1440) plus the first print-stylesheet audit
 - 363 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 31 (session 19 / parity round 18)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, skills-assisted audit (redeploy check + mobile nav + FIRST sub-390 band sweep + FIRST interaction-parity audit: keyboard focus rings), TDD remediation of 7 gap groups, docs, commit + push
+
+Work Log:
+- Workspace survived at 66859ec (git pull added session_29.md); .env intact (file:../db/custom.db); DB pristine (users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on DB/build commands
+- Baseline gates: lint 0/0, tsc, 363/363 unit, build, 86/86 E2E — the 66859ec state exactly; static audit of the R17 diff clean (0 any, no debug/secrets)
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions authenticated (the documented password-fill flake hit BOTH sessions this round — manual refill); probe scripts: r18 redeploy/mobile/sub390/settle/keyboard/focus2/focus3/focus4/select/verify (all persisted in scripts/)
+- Redeploy check: 12 routes byte-identical — REF unchanged since R17
+- Mobile navigation audit (user priority): improved probe — drawer opened via GEOMETRY-LOCATED hamburger click (REF's hamburger lacks aria-label; both drawers captured live). Top bar 390×73, tabs x 10/79/139/204/313 + active rgb(37,99,235), drawer 288×844 #FAFAFA z-50 (links 141/301/421/461/581, footer 121@723, no close), kickers (standard 53 + profile 69 variant with back button + subtitle), md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug
+- NEW: FIRST sub-390 band sweep (320/344/360/389 × 10 routes): settled probes byte-identical on fitting pages (kicker h1 = vw−64 both); residual diffs = REF's own overflow family below 390 (attendance 943–1199, settings pill 1003–1259, shiftcalendar 732–988, recruitmentkanban 1376–1632, documenttracker 390–646, payroll 344@320, profile 539 vs clone 487/987/523/348 — fits or overflows less). SETTLE LESSON: REF needs ≥5s at odd sub-390 widths (2.4s captured the 61px mid-hydration state at 344/389; settled re-probes STABLE and matching)
+- NEW: FIRST interaction-parity audit (real Tab presses, full computed outline + box-shadow dumps): Tab ORDER byte-identical on all swept surfaces (dashboard desktop 12 + mobile 10, login 8, employees 10); switch recipe byte-identical (ring-2 offset-2); browser-default outlines parity (auto 1px both; rgba-vs-lab serialization = same dark-50% color); 7 focus-recipe gap groups (R18-A..G) — the systemic button ring-1-no-offset recipe, Input/Textarea offset-2, the sidebar ring-sidebar-ring blue-500 #3B82F6 token, the mobile hamburger focus classes, the login slate-400 input pair + zinc-950 #09090B Sign in ring (REF's page-scoped --ring 240 10% 3.9%), the select trigger button recipe, the TabsTrigger offset-2
+- Non-gaps documented: REF's focusable settings card (extra tab stop, not cloned), checkbox recipe unaudited (no REF surface), staffrequests local tab copy + employees native select already matched
+- docs/remediation-plan-session19.md written (7 groups + taxonomy table + non-goals) + codebase-validated
+- TDD: 10 new pins (9 recipes + 1 token), all RED → GREEN; one mid-flight correction from live verification — the login input ring override must use the SAME variant as the base (focus-visible:ring-slate-400, not focus:) because tailwind-merge dedups only within a variant and the bare focus: loses the v4 cascade battle (rendered #0A0A0A); the same-variant lesson pinned in test comment + AGENTS + SKILL §31
+- Gates: lint 0/0, tsc, 373/373 unit (+10), build, 86/86 E2E
+- Live verification: every fixed surface byte-exact (sidebar leaf + group rgb(59,130,246)@2px; hamburger/Import CSV/Add Employee/chevrons/Shift-Swaps rgb(10,10,10)@1px; login input white2+slate-400@4; Sign in white2+rgb(9,9,11)@4; Company tab white2+rgb(10,10,10)@4; All Departments select rgb(10,10,10)@1px); post-fix canonical 12-route sweep 12/12 MATCH (one transient REF read re-probed identical) + mobile chrome regression clean — zero layout impact (box-shadow-only)
+- 8 screenshots (4 new focus-ring evidence: 59/60/61/62 with rings visible via real Tab focus; 4 standards refreshed) → 75 total; VLM spot-checks confirmed the blue sidebar ring + login input focus indicator
+- Docs: AGENTS session-19 layer + 373 specs; SKILL v3.2.0 + §31 + counts; PAD [S19] + Last Updated + corrected test table (recipes 236/tokens 19); CLAUDE 459-spec pyramid + session-19 pins; README 373 specs + 75 captures + focus-parity row; docs/session_30.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 18 complete: 7 focus-ring gap groups fixed with 10 new TDD pins — the interaction dimension opened and closed (Tab order byte-identical; every ring recipe now matches REF's taxonomy), plus the final unswept viewport band (sub-390) audited clean
+- 373 unit + 86 E2E green; ready for commit + push
