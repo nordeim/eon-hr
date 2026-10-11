@@ -1369,3 +1369,58 @@ describe("staffrequests pill recipe + default scope (session 16, R15-E)", () => 
     expect(page).toMatch(/useState<"all" \| "mine">\("mine"\)/);
   });
 });
+
+describe("surveys Avg Sentiment zero value (session 17, R16-A)", () => {
+  const page = read("src", "app", "(app)", "surveys", "page.tsx");
+
+  it("the Avg Sentiment tile renders \"0%\" at zero surveys (REF keeps the number)", () => {
+    expect(page).toMatch(/: "0%"/);
+    expect(page).not.toMatch(/: "%"/);
+  });
+});
+
+describe("workflowautomation zero-render (session 17, R16-B)", () => {
+  const page = read("src", "app", "(app)", "workflowautomation", "page.tsx");
+
+  it("renders NOTHING below the stat row at 0 workflows (the employees zero-render pattern)", () => {
+    expect(page).not.toContain("No workflows yet");
+    expect(page).not.toMatch(/<EmptyState/);
+  });
+
+  it("keeps the header Create Workflow CTA as the affordance (offboarding R13-G pattern)", () => {
+    expect(page).toMatch(/Create Workflow/);
+  });
+});
+
+describe("chat sidebar zero state (session 17, R16-C)", () => {
+  const page = read("src", "app", "(app)", "chat", "page.tsx");
+
+  it("renders the reference's simple p-8 text-center recipe — 48px MessageCircle + ONE text-sm line", () => {
+    expect(page).toMatch(/p-8 text-center/);
+    expect(page).toMatch(/MessageCircle/);
+    expect(page).toMatch(/mx-auto mb-3 h-12 w-12 text-slate-300/);
+    expect(page).toMatch(/text-sm text-slate-500/);
+    expect(page).toContain("No conversations yet");
+  });
+
+  it("does NOT render the h3 EmptyState in the sidebar", () => {
+    const sidebar = page.slice(page.indexOf("overflow-y-auto"), page.indexOf("flex-1 overflow-y-auto") + 3000);
+    expect(sidebar).not.toMatch(/<EmptyState/);
+    expect(sidebar).not.toContain("Start a new conversation");
+  });
+
+  it("the right pane renders the bare centered recipe — 80px MessageCircle + h3 + p, NO p-8 pane padding", () => {
+    expect(page).toMatch(/flex flex-1 items-center justify-center">\s*<div className="text-center">/);
+    expect(page).toMatch(/MessageCircle className="mx-auto mb-4 h-20 w-20 text-slate-300"/);
+    expect(page).not.toMatch(/justify-center p-8">/);
+  });
+});
+
+describe("StatCard tile shrink (session 17, R16-D)", () => {
+  const statCard = read("src", "components", "shared", "stat-card.tsx");
+
+  it("the shared tile carries NO shrink-0 — REF's tile flex-shrinks at constrained card widths (analytics @768)", () => {
+    expect(statCard).not.toContain('cn(tileClasses, "shrink-0", tile)');
+    expect(statCard).toContain("cn(tileClasses, tile)");
+  });
+});

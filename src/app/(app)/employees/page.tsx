@@ -189,13 +189,17 @@ export default function EmployeesPage() {
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6">
         <div className="flex flex-col gap-4 items-center justify-between md:flex-row">
           <div className="flex w-full gap-2 md:w-auto">
-            <div className="relative flex-1 md:flex-none">
+            {/* Session 17 (R16-E): the search shrinks under constraint —
+                md:flex-initial (no grow, natural basis, shrink allowed) +
+                md:max-w-64 keeps the 256px render at 1440 while letting the
+                row fit the 448px content band at 768–815 (docW 796 → 768). */}
+            <div className="relative flex-1 md:flex-initial">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search employees..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-transparent pl-10 md:w-64"
+                className="w-full bg-transparent pl-10 md:max-w-64"
                 aria-label="Search employees"
               />
             </div>

@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 interface Workflow {
@@ -216,23 +215,13 @@ export default function WorkflowAutomationPage() {
         <StatCard variant="no-tile" label="Total Executions" value={stats.executions} icon={<ListChecks className="h-4 w-4 text-blue-500" aria-hidden="true" />} />
       </div>
 
+      {/* Session 17 (R16-B): the reference renders NOTHING below the stat
+         * row at 0 workflows (the employees/surveys zero-render pattern) —
+         * the create affordance is the header CTA (offboarding R13-G). The
+         * loading spinner stays (transient, functional). */}
       {loading ? (
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-        </div>
-      ) : workflows.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          <EmptyState
-            icon={<WorkflowIcon className="h-6 w-6" />}
-            title="No workflows yet"
-            description="Create your first workflow to automate HR processes"
-            action={
-              <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Create Workflow
-              </Button>
-            }
-          />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

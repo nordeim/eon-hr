@@ -144,7 +144,9 @@ test.describe("dashboard", () => {
     expect(bg).toContain("rgb(22, 163, 74)");
     expect(bg).toContain("rgb(5, 150, 105)");
     expect(bg).not.toContain("in oklab");
-    const tile = page.locator(".text-3xl").first().locator("xpath=../..").locator("div[class*='p-3']");
+    // Session 17 (R16-D): the tile is flex-centered (h-12 w-12) — no p-3;
+    // still 48×48 bg-green-100 with a 24px green-600 icon.
+    const tile = page.locator(".text-3xl").first().locator("xpath=../..").locator("div[class*='h-12']");
     await expect(tile).toHaveCSS("background-color", "rgb(220, 252, 231)");
     const val = page.getByText("0 SAR");
     await expect(val).toHaveCSS("font-size", "30px");

@@ -565,3 +565,30 @@ Work Log:
 Stage Summary:
 - Parity round 15 complete: 5 gap groups fixed with 12 new TDD pins — the systemic tab-pill token color (the per-surface token lesson), three footer colors (stale measurements refreshed), the cluster fitting rule, the organogram bare-card rebuild, the staffrequests surface + default state — every fixed surface live-verified byte-exact against the reference
 - 349 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 29 (session 17 / parity round 16)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, skills-assisted audit (redeploy check + mobile nav + 46-route sweep + FIRST tablet-band sweep 768/900/1024 + zero-data content sweep), TDD remediation of 5 gap groups, docs, commit + push
+
+Work Log:
+- Workspace survived at 6389482 (R15 + session log); integrity verified (.env file:../db/custom.db, db/ at root, pristine seed users=1/employees=1/leaveBalances=2); stale :3200 server killed (documented trap)
+- Baseline gates: lint 0/0, tsc, 349/349 unit, build, 86/86 E2E — the 6389482 state exactly; static audit of the R15 diff clean (0 any, no debug/secrets)
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions (loc/ref) authenticated; REF password fill needed the documented retry (2 attempts); a geometry-located drawer probe written this round (probe-r16-drawer.mjs — finds the panel by position:fixed+width, immune to the offsetParent-null trap); probe-flattening bug hit and fixed (// comments kill one-lined evals)
+- Redeploy check: 12 routes byte-identical — REF unchanged since R15
+- Mobile navigation audit (user priority): top bar 390×73 (61px reading = documented mid-hydration artifact, settles to 73), bottom tabs 78@766 (x 10/79/139/204/313), drawer 288×844 #FAFAFA z-50 + links 141/301/421/461/581 + footer 121@723 + overlay z-50, hamburger 28×28@24,22, kicker 53@89 + scroll-away, md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug
+- 46-route sweep at 1440: 33 OK + 12 documented diffs (Category-A h1 furniture ×9, attendance fitting family, staffrequests superset toggle, REF-dead employeeselfservice)
+- NEW tablet-band sweep (768/900/1024 × 17 routes) + zero-data content sweep (18 routes): 5 gap groups (R16-A…E) — surveys "0%" vs "%", workflowautomation empty card vs REF's zero-render, chat sidebar h3-EmptyState vs REF's p-8 text-center + 48px MessageCircle recipe (right pane too: bare-centered 80px-icon recipe), the systemic StatCard p-3 tile (min-content 48 blocks shrinking — REF's tile computes padding 0, flex-centered, min-content = the bare svg; analytics @768 tile 24px@749 byte-exact after fix), employees filter-row 768–815 overflow (rigid md:w-64 search)
+- REF-overflow family documented: REF's flex-1 overflow-auto wrapper keeps its body at viewport width while content overflows internally (attendance 1558, settings 1291, employees 849, payroll 861, taskmanager 847, hrreports 893, recruitment 838, leavemanagement 789, profile 827, chat 773 at 768); pills never wrap; hrreports 900–1024 = REF's 1px knife-edge (clone's wrapped cluster shifts h1 4px — fitting-superset family)
+- docs/remediation-plan-session17.md written (5 groups + non-goals) + codebase-validated
+- TDD: 7 new pins (all RED) → GREEN; 1 stale pin updated (R8-E employees filter classes); 1 E2E locator updated (tile p-3 → h-12); 2 mid-flight corrections from live verification (surveys "0%" no space — the "0 %" reading was a text-node artifact; chat right pane needed its own rebuild beyond the sidebar)
+- Gates: lint 0/0, tsc, 356/356 unit (+7), build, 86/86 E2E
+- Live verification: surveys 4 values byte-exact (212×36@289); workflowautomation byte-exact (wrapper 306=306, 3 cards, no h3); chat sidebar + right pane byte-exact (319×144 holder + 156px@340 right pane, h3@436, p@472; 1px sidebar p-y documented); analytics tile @768 byte-exact (24px@749, pad 0, svg 24@749; docW 797→773, REF's 768 = wrapper clamp); employees @768 fits (REF 849); full-route sweep re-run = same 12 documented diffs; mobile regression clean; tablet 900/1024 re-check clean
+- 9 screenshots captured/refreshed (6 new: 38-surveys, 43-workflowautomation, 13-chat, 50-analytics-tablet-768, 51-employees-tablet-768, 52-chat-mobile) → 59 total; VLM spot-checks confirmed the fixes (L2: DOM-verified first)
+- Docs: AGENTS session-17 layer + 356 specs; SKILL v3.0.0 + §29 + stale-count fixes; PAD [S17] + Last Updated + recipes 227 + checklist 356; CLAUDE 442-spec pyramid + session-17 pins; README 356 specs; docs/session_26.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 16 complete: 5 gap groups fixed with 7 new TDD pins — the systemic flex-centered StatCard tile (the computed-padding lesson: identical 48×48 geometry hid a different shrink story), the workflowautomation zero-render, both chat zero-state recipes, the surveys zero value, the employees filter-row fitting — every fixed surface live-verified byte-exact against the reference, plus the project's first tablet-band audit
+- 356 unit + 86 E2E green; ready for commit + push

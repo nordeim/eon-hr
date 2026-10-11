@@ -204,7 +204,7 @@ export default function SurveysPage() {
         <StatCard label="Total Surveys" value={stats.total} icon={<ClipboardList className="h-4 w-4" />} />
         <StatCard label="Active Surveys" value={stats.active} icon={<Play className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
         <StatCard label="Total Responses" value={stats.totalResponses} icon={<Eye className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Avg Sentiment" value={stats.total ? `${stats.avg}%` : "%"} icon={<ClipboardList className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard label="Avg Sentiment" value={stats.total ? `${stats.avg}%` : "0%"} icon={<ClipboardList className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
       </div>
 
       {/* Session 11 (R10-G): the reference renders a `grid md:grid-cols-2

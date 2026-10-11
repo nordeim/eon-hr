@@ -3,7 +3,7 @@
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Document:** README.md (user-facing), CLAUDE.md (agent constitution), AGENTS.md (operating notes)
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-18
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
@@ -11,6 +11,7 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S17]` | session 17 | Parity round 16: the systemic StatCard flex-centered-tile rule (REF's tile computes padding 0 — flex h-12 w-12 centering; min-content = the bare svg so it shrinks 48→24 under constraint; analytics @768 byte-exact), the workflowautomation zero-render (nothing below the stat row), the chat zero-state recipes (sidebar p-8 text-center + 48px MessageCircle + one line; right pane bare-centered with an 80px MessageCircle), the surveys "0%" zero value, the employees shrinkable filter-row search (md:flex-initial + md:max-w-64 — fits the 768–815 band). First tablet-band audit (768/900/1024): REF's own overflow family documented. 442-spec pyramid (356 unit + 86 E2E). |
 | `[S16]` | session 16 | Parity round 15: the systemic tab-pill inactive-trigger color (REF's muted-foreground token #737373 — pinned as neutral-500; tabs/reports/staffrequests surfaces), the sidebar footer colors (Bell slate-600, Moon zinc-700, user name zinc-700 — pinned --color-zinc-700), the actions-cluster fitting rule (no shrink-0 — fixes the attendance mid-viewport overflow), the organogram bare-card + simple-empty + overflow-wrapper rebuild, the staffrequests bg-secondary pill + mine default scope. 435-spec pyramid (349 unit + 86 E2E). |
 | `[S15]` | session 15 | Parity round 14: recruitment white tab pill + 12px gap-1 trigger icons (439px), performancemanagement white pill (296px), training role=group chip row + empty 32px h2 row + empty-state CTA superset + dashed add-tile, staffrequests plain-block pill wrapper (fixes the 491px flex-col cross-axis stretch — pill 145@288), profile preferences TabsContent value fix (Language/Timezone card moved off the General tab; 4-field General restored) + type=button Change Photo, compliance size=sm notify buttons (166/173/173). 423-spec pyramid (337 unit + 86 E2E). |
 | `[S14]` | session 14 | Parity round 13: systemic iconed-button mr-2/mr-1 margins (10 call sites), the white shrink-wrapped tab-pill recipe (settings/profile/attendance/compliance) with space-y-6 roots + mt-0 contents, iconed tab triggers (three gap recipes), the generalized line-box field recipe (inline label + mt-2 control), settings Company card rebuild, profile 4-tab + General form rebuild, attendance Mark Attendance tabs + access-restricted recipe, compliancedashboard tab restructure (90px stat row + notify row + p-4 toolbar + table card), reports category-card + tile grid + Report Filters rebuild, offboarding col-span-full empty, surveys zero-render, no-tile StatCard flex row, taskmanager empty column + DIV badge, payrollengine 64px fields, shiftcalendar gap-2 chevron cluster + Link CTA, hrreports empty Group By default. 410-spec pyramid (324 unit + 86 E2E). |
@@ -416,7 +417,7 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
 | Design tokens | 1 | 18 | `tests/unit/tokens.test.ts` | Vitest |
-| Parity recipes (s5–s16) | 1 | 220 | `tests/unit/recipes.test.ts` | Vitest |
+| Parity recipes (s5–s17) | 1 | 227 | `tests/unit/recipes.test.ts` | Vitest |
 | Shell recipes (s7–s9: boundary/kickers/wizard/header recipes) | 1 | 69 | `tests/unit/shell-recipes.test.ts` | Vitest |
 | E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
@@ -438,7 +439,7 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 194/194
+- [ ] `bun run test` — 356/356
 - [ ] `bun run build` succeeds
 - [ ] `bun run test:e2e` — 86/86
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)

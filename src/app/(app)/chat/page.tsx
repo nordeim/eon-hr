@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, MessageSquarePlus, Search, Send } from "lucide-react";
+import { Loader2, MessageCircle, MessageSquarePlus, Search, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -217,7 +217,7 @@ export default function ChatPage() {
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <div className="relative px-4 pb-3">
+          <div className="relative px-4 pb-4">
             <Search className="pointer-events-none absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               placeholder="Search conversations..."
@@ -227,19 +227,27 @@ export default function ChatPage() {
               aria-label="Search conversations"
             />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+          {/* Session 17 (R16-C): REF's list container is a bare
+              flex-1 overflow-y-auto — the px-2/pb-4 row padding moved
+              INTO the with-data branch so the zero state renders
+              full-width like the reference (holder 319px, not 303). */}
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : filteredConversations.length === 0 ? (
-              <EmptyState
-                title="No conversations yet"
-                description="Start a new conversation to message a teammate."
-                className="py-8"
-              />
+              /* Session 17 (R16-C): the reference's simple recipe —
+               * div.p-8.text-center with a 48px MessageCircle
+               * (mx-auto mb-3 text-slate-300) + ONE text-sm slate-500
+               * line (measured 319×144, p 255×20@321,242). NOT the h3
+               * EmptyState. */
+              <div className="p-8 text-center">
+                <MessageCircle className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
+                <p className="text-sm text-slate-500">No conversations yet</p>
+              </div>
             ) : (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 px-2 pb-4">
                 {filteredConversations.map((c) => {
                   const other = users.find((u) => u.id === c.otherIds[0]) ?? null;
                   const isActive = c.id === activeId;
@@ -358,12 +366,16 @@ export default function ChatPage() {
               </form>
             </>
           ) : (
-            <div className="flex flex-1 items-center justify-center p-8">
-              <EmptyState
-                icon={<MessageSquarePlus className="h-6 w-6" aria-hidden="true" />}
-                title="Select a conversation"
-                description="Choose a conversation to start messaging"
-              />
+            /* Session 17 (R16-C): REF's recipe — the pane is a bare
+             * flex-1 items-center justify-center (NO p-8) wrapping a
+             * text-center div with a bare 80px MessageCircle
+             * (mb-4) + h3 + p (measured 156px content @340, h3 @436). */
+            <div className="flex flex-1 items-center justify-center">
+              <div className="text-center">
+                <MessageCircle className="mx-auto mb-4 h-20 w-20 text-slate-300" aria-hidden="true" />
+                <h3 className="mb-2 text-lg font-semibold text-slate-900">Select a conversation</h3>
+                <p className="text-slate-500">Choose a conversation to start messaging</p>
+              </div>
             </div>
           )}
         </div>

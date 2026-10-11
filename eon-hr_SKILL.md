@@ -10,9 +10,10 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.9.0 (session-16 remediation complete) · **Last updated:**
-> 2026-10-16 · **State:** 349 unit + 86 E2E tests green, lint/typecheck/build
-> clean, visual parity with the live reference verified by dual-browser audit.
+> **Version:** 3.0.0 (session-17 remediation complete) · **Last updated:**
+> 2026-10-18 · **State:** 356 unit + 86 E2E tests green, lint/typecheck/build
+> clean, visual parity with the live reference verified by dual-browser audit
+> (desktop 1440 + mobile 390 + the first tablet-band sweep 768/900/1024).
 
 ---
 
@@ -437,7 +438,7 @@ Run in order; all must pass:
 ```bash
 bun run lint          # eslint . — zero warnings
 bun run typecheck     # tsc --noEmit — zero errors
-bun run test          # vitest — 194/194 (db-path 15, auth 14, utils 13, tokens 16, recipes 89, shell-recipes 47)
+bun run test          # vitest — 356/356 (db-path 15, auth 14, utils 13, tokens 18, recipes 227, shell-recipes 69)
 bun run build         # next build + static/public copy into standalone
 bun run test:e2e      # playwright — 86/86 against the fresh standalone build
 ```
@@ -769,7 +770,7 @@ dev             bun run dev            → :3000  (dev.log)
 db              db/custom.db           (file:../db/custom.db — db-path.ts)
 e2e db          db/e2e.db              (purge-test-data.ts cleans @eon-hr.test)
 gates           lint → typecheck → test → build → test:e2e
-tests           194 unit (6 files) + 86 e2e (5 specs, workers:1)
+tests           356 unit (6 files) + 86 e2e (5 specs, workers:1)
 globals.css     @theme inline — 6 v4 traps, pinned v3 palette, token test
 wizard footer   ALL type="button"; submit via onClick (AP-5)
 ids             max-suffix EMP-XXXX + conflict retry
@@ -1253,3 +1254,56 @@ REF's rgb(245,245,245) surface), NOT bg-muted (slate-100); the default
 scope is `"mine"` — the trigger renders the reference's SELECTED look
 (white bg + #0A0A0A + shadow) at load. The toggle-to-all remains the
 superset.
+
+## 29. Session-17 Recipe Layer — parity round 16
+
+**StatCard tile: flex-centered, never padded (R16-D, systemic):** REF's
+48×48 tile computes `padding: 0` — `flex h-12 w-12 items-center
+justify-center rounded-xl` with the 24px svg centered by flexbox. A `p-3`
+tile's min-content is 48 (padding + svg) so it can NEVER flex-shrink; the
+flex-centered tile's min-content is the bare 24px svg and it shrinks
+48→24 (and to odd widths like 26px @1024) under constraint, exactly like
+REF. Measured byte-exact on /analytics @768: tile 24px@749, pad 0, svg
+24@749 both sides (LOC docW 797→773; REF's 768 is its overflow-auto
+wrapper clamping the body scroll). compact (h-10 w-10) and horizontal
+(h-11 w-11) tiles were already flex-centered — only standard/tile-right
+carried p-3. **Lesson: read the reference's COMPUTED padding, not just
+the box size — identical 48×48 geometry can hide a different
+shrink story.**
+
+**workflowautomation zero-render (R16-B):** at 0 workflows REF renders
+NOTHING below the stat row (content wrapper 306px = header + stat row
+only — the employees/surveys zero-render pattern). The create affordance
+is the header CTA (actionsStart — the offboarding R13-G pattern). The
+loading spinner stays (transient functional superset).
+
+**chat zero states (R16-C):** the sidebar renders `div.p-8.text-center`
+(319×144) with a 48px `MessageCircle` (`mx-auto mb-3 text-slate-300`)
++ ONE `p.text-sm.text-slate-500` line "No conversations yet" — never the
+h3 EmptyState. The right pane renders a BARE `flex flex-1 items-center
+justify-center` (NO p-8) wrapping `div.text-center` with an 80px
+`MessageCircle` (`mx-auto mb-4 text-slate-300`) + h3 + p (156px content
+@340, h3 @436). The conversation-list container is a bare `flex-1
+overflow-y-auto` — the with-data rows carry their own px-2 pb-4.
+
+**surveys Avg Sentiment (R16-A):** the 4th stat value renders "0%" at
+zero surveys — the number stays (never a bare "%").
+
+**employees filter-row fitting (R16-E):** the search shrinks under
+constraint — wrapper `relative flex-1 md:flex-initial` (no grow, natural
+basis, shrink allowed) + input `w-full md:max-w-64`. At 1440 the input
+renders the pinned 256px; in the 768–815 band it shrinks so the row
+(search + native select + view toggles) fits the 448px content area
+(docW 796 → 768). REF overflows the same row (849 — its own bug); the
+clone fits (the documented fitting-superset family).
+
+**Tablet-band audit (768/900/1024 — session_25's frontier):** REF's own
+overflow family lives in its `flex-1 overflow-auto` wrapper (attendance
+1558, settings 1291, employees 849, payroll 861, taskmanager 847,
+hrreports 893, recruitment 838, leavemanagement 789, profile 827, chat
+773 at 768) — its inner scroll keeps the BODY at viewport width. Pills
+never wrap (settings 971px / profile 507px overflow identically on REF).
+The hrreports 900–1024 band is REF's 1px knife-edge (title + cluster
+fill the row exactly, no gap) where the clone's wrapped cluster +
+gap-4 row shifts the h1 4px — documented fitting-superset, 1440
+byte-identical.

@@ -130,20 +130,27 @@ export function StatCard({
   const tile = tileClassName ?? iconClassName;
   const tiled = icon != null && TILED.includes(variant);
 
-  // Tile geometry per variant: standard/tile-right = 48×48 (p-3 + 24px
-  // icon), compact/compact-s = 40×40 (w-10 h-10 + 20px icon),
-  // horizontal = 44×44 (w-11 h-11 + 20px icon — session 12 R11-D: the
-  // icon is 20px w-5 h-5 with a per-color text class from the call site,
-  // not 24px).
+  // Tile geometry per variant: standard/tile-right = 48×48 (h-12 w-12 with
+  // a flex-CENTERED 24px icon — NOT p-3: session 17 R16-D measured REF's
+  // tile padding at 0px, so its min-content is the bare svg and it
+  // flex-shrinks 48→24 at constrained card widths), compact/compact-s =
+  // 40×40 (w-10 h-10 + 20px icon), horizontal = 44×44 (w-11 h-11 + 20px
+  // icon — session 12 R11-D: the icon is 20px w-5 h-5 with a per-color
+  // text class from the call site, not 24px).
   const tileClasses =
     variant === "compact" || variant === "compact-s"
       ? "flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
       : variant === "horizontal"
         ? "flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
-        : "p-3 rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6";
+        : "flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6";
 
   const tileElement = tiled ? (
-    <div className={cn(tileClasses, "shrink-0", tile)}>{icon}</div>
+    /* Session 17 (R16-D): NO shrink-0 — the reference's tile flex-shrinks
+     * at constrained card widths (analytics @768: 94px cards squeeze the
+     * tile to 24px); a shrink-0 tile stays 48px and overflows the page
+     * (docW 797 vs REF 768). Shrink only engages under constraint —
+     * unconstrained viewports render the pinned 48/40/44px geometry. */
+    <div className={cn(tileClasses, tile)}>{icon}</div>
   ) : null;
 
   const textBlock = (

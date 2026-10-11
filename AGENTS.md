@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 349 specs) |
+| Unit tests | `bun run test` (Vitest, 356 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -499,6 +499,45 @@ reference — never re-add it.
   REF's surface), NOT bg-muted; the default scope is `"mine"` (the
   trigger renders the reference's selected look — white bg + #0A0A0A —
   at load; the toggle-to-all remains the superset).
+
+## Session-17 recipe layer (parity round 16)
+
+- **StatCard tile is FLEX-CENTERED, never padded (R16-D, systemic)**:
+  REF's 48×48 tile computes `padding: 0` — `flex h-12 w-12
+  items-center justify-center` with the 24px svg centered by flexbox.
+  A `p-3` tile has min-content 48 (padding + svg) and CANNOT
+  flex-shrink; the flex-centered tile shrinks to the bare svg (24px) at
+  constrained card widths — measured byte-exact on /analytics @768
+  (tile 24px@749, pad 0, svg 24@749 both sides; LOC docW 797 → 773;
+  REF's 768 is its overflow-auto wrapper clamp). compact/horizontal
+  tiles were already flex-centered — only standard/tile-right carried
+  p-3.
+- **workflowautomation zero-render (R16-B)**: at 0 workflows the
+  reference renders NOTHING below the stat row (wrapper 306 = header +
+  stats only — the employees/surveys pattern); the create affordance is
+  the header CTA. The loading spinner stays (transient superset).
+- **chat zero states (R16-C)**: sidebar = `div.p-8.text-center` with a
+  48px MessageCircle (`mx-auto mb-3 text-slate-300`) + ONE
+  `p.text-sm.text-slate-500` line "No conversations yet" (319×144,
+  p 255×20); right pane = BARE `flex flex-1 items-center
+  justify-center` (NO p-8) wrapping `div.text-center` with an 80px
+  MessageCircle (`mx-auto mb-4 text-slate-300`) + h3 + p (156px
+  content @340, h3 @436). The list container is a bare `flex-1
+  overflow-y-auto` — row padding lives INSIDE the with-data branch.
+- **surveys Avg Sentiment zero value (R16-A)**: "0%" (the number stays
+  at zero surveys — never a bare "%").
+- **employees filter-row fitting (R16-E)**: the search is shrinkable
+  under constraint — wrapper `relative flex-1 md:flex-initial` + input
+  `w-full md:max-w-64` (256px at 1440, shrinks in the 768–815 band so
+  the row fits the 448px content area; docW 796 → 768). REF overflows
+  the same row (849 — its own bug); the clone fits (superset).
+- **Tablet-band audit lessons**: REF's own overflows at 768 (attendance
+  1558, settings 1291, employees 849, payroll/taskmanager/hrreports/
+  recruitment/leavemanagement/profile/chat) live in its `flex-1
+  overflow-auto` wrapper; pills never wrap (settings/profile = parity);
+  the hrreports 900–1024 band is a 1px knife-edge on REF (its title+cluster
+  fill the row exactly) where the clone's wrapped cluster shifts the h1
+  4px — the documented fitting-superset family.
 
 ## Page architecture (session 6) — where padding and gradients live
 
