@@ -726,3 +726,27 @@ Stage Summary:
 - Round 21 (the motion dimension) complete and pushed to main: the enter/exit animation family alive in v4 (dropdowns/dialogs/selects fade+zoom 150ms), the mobile drawer slides 500ms/300ms with the vaul bezier, nav transitions 200ms, chevron snaps, toasts fade+slide in
 - Gates: lint 0/0 · tsc · 398/398 unit (+7) · build · 86/86 E2E; DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), possible scroll dimension, reduced-motion (open on both apps)
+
+---
+Task ID: session-23
+Agent: main (Super Z)
+Task: Parity round 22 — the scroll dimension + the dialog surface (audit + fixes)
+
+Work Log:
+- Workspace survived at 7e45e08 (git pull added session_37.md); .env intact (file:../db/custom.db); DB pristine (users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on every DB/build command
+- Baseline gates green: lint 0/0 · tsc · 398/398 unit · build · 86/86 E2E · DB pristine
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged — after a stale-server incident: the fresh build replaced .next/standalone under the running :3200 process, every route served the not-found page until restart; the restart-after-rebuild lesson documented); mobile navigation byte-identical (no v4 bug); mobile scroll behavior verified byte-identical EMPIRICALLY (real scrollTo: pinned top bar, static kicker, same 178px scroll range); with-data re-check — REF still zero-data (blocked, documented)
+- The scroll audit (the round's core): @layer-aware CSSOM enumeration (REF authors ZERO scrollbar/scroll-behavior/snap rules; LOC carried the session-1 .scrollbar-thin 6px slate-300 class) + live DOM census (the sidebar nav SCROLLS at 872>690 with a styled scrollbar — visible divergence) + empirical scrolling + the FIRST full 46-route docH sweep (39/45 byte-identical)
+- Key discoveries: (1) the v4 trailing space-y margin — space-y-6 emits margin-block-end on :not(:last-child), so the ACTIVE TabsContent (followed only by display:none Radix siblings) kept mb-24 → 24px phantom below tab cards (/settings docH 943 vs REF 919, compliance +21 net); (2) the hrreports 0-record table renders a 284px EmptyState block while REF renders the header row only (139px card, +227 docH); (3) via the scrollbar thread — the loans dialog is the only dialog that opens on zero-data REF and is 672px (max-w-2xl, no max-height) with a richer form (Loan Type 4 options, computed Monthly Installment "SAR 0.00", Paid From, the always-rendered Requesting-for blue-50 card); (4) two per-page table recipes (hrreports 33px uppercase th; attendancedashboard 37px all-left th + the py-8 P empty state); (5) the compliance stat order is Expired-first + the At-Risk Employees title
+- docs/remediation-plan-session23.md written (6 gap groups + the scroll map + non-goals) + codebase-validated
+- TDD: 13 RED pins → GREEN (6 file edits + schema + API: globals.css scrollbar block deleted, tabs.tsx mb-0!, sidebar-nav.tsx + dialog.tsx scrollbar-thin removed, loans page/API/schema/table rebuilt to the REF recipe, compliance order + title, hrreports + attendancedashboard table recipes); six mid-flight pin corrections (comment-literal lesson ×3 rounds running, slice anchors, window sizes)
+- Gates: lint 0/0 · tsc · 411/411 unit (+13) · build · 86/86 E2E; db:push added Loan.loanType/paidFrom (additive)
+- Live verification: nav scrollbar auto (0 styled elements); /settings docH 919 = REF EXACT; /hrreports card 139 = REF EXACT + docH 949 = 949 EXACT; compliance -3 (documented knife-edge); the loans dialog 672px with all 7 REF labels + the 622×88 Requesting-for card + the 303×46 installment computing SAR 0.00 → SAR 100.00 live + Cancel/Submit Request right-aligned; the 33px/37px th recipes; the compliance order + title
+- Regressions: canonical 12-route 12/12 MATCH + mobile chrome byte-identical + the full docH sweep re-run (settings/hrreports/compliance deltas eliminated; /employees + /offboarding mid-sweep reads re-probed settled 900=900 — mid-hydration artifacts, not real deltas; one documented REF session death mid-sweep — re-authed, re-ran clean)
+- 6 screenshots (74 loans dialog, 75 installment computed, 76 hrreports header-only table, 77 attendance 37px th + 02/11 standards refreshed) → 92 total; VLM spot-checks (createVision + glm-4.6v) confirmed the dialog width/fields/installment
+- Docs updated: AGENTS session-23 layer + 411 specs; SKILL v3.6.0 + §35 + recipes 274; PAD [S23] + Last Updated; CLAUDE 497-spec pyramid + session-23 pins; README 411/92 + scroll-parity + loan-management rows; docs/session_38.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 22 (the scroll dimension + the dialog surface) complete and ready for push: browser-default scrollbars everywhere like REF, the v4 phantom margin eliminated (tab cards end where REF's do), the loans dialog rebuilt to the full REF recipe (672px, Loan Type + live installment + Paid From + Requesting-for card — schema/API backed), the compliance order + title, and two per-page table recipes
+- Gates: lint 0/0 · tsc · 411/411 unit (+13) · build · 86/86 E2E; DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), possible cursor/selection dimensions, a dialog-surface sweep of the clone's other dialogs (only loans is measurable on REF)

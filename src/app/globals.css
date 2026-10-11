@@ -197,24 +197,10 @@
   }
 }
 
-@layer utilities {
-  /* Custom scrollbar for long lists */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 3px;
-  }
-}
+/* Session 23 (R22-A): the custom thin-scrollbar block (the session-1
+   scaffold extra) was deleted — the reference authors zero scrollbar
+   rules (computed auto on every scroll container), so the clone renders
+   browser-default scrollbars everywhere too. */
 
 /* Session 22 (R21-B): the enter/exit animation family. The reference's
    dropdowns, dialogs and select content animate via the tailwindcss-animate

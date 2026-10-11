@@ -34,7 +34,8 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | 📊 **Analytics** | Seven dashboards (headcount, payroll, attendance, surveys, HR reports, organogram, visual KPIs) |
 | 🤖 **AI HR assistant** | Rule-based HR chat with persistent conversation history |
 | ⚙️ **Settings & security** | Company profile, departments, security toggles, audit log, workflow engine |
-| 📱 **Mobile-first navigation** | Hamburger drawer + bottom tab bar, pinned by E2E specs; keyboard focus rings match the reference taxonomy (blue sidebar ring, 1px button rings, offset-2 inputs/tabs); hover states match the measured reference recipes (sidebar zinc-100/#18181B, ghost accent hovers, blue-tinted Import CSV outline, no-hover bottom tabs); pressed states match too (the group button active: gray recipe, the expanded-group hover-gray, the authored leaf/sub-item active: pair, the active bottom tab blue-50 pill); motion matches (dropdowns/dialogs/selects fade+zoom in at 150ms, the mobile drawer slides 500ms/300ms with the vaul bezier, nav transitions run 200ms, the group chevron snaps) |
+| 📱 **Mobile-first navigation** | Hamburger drawer + bottom tab bar, pinned by E2E specs; keyboard focus rings match the reference taxonomy (blue sidebar ring, 1px button rings, offset-2 inputs/tabs); hover states match the measured reference recipes (sidebar zinc-100/#18181B, ghost accent hovers, blue-tinted Import CSV outline, no-hover bottom tabs); pressed states match too (the group button active: gray recipe, the expanded-group hover-gray, the authored leaf/sub-item active: pair, the active bottom tab blue-50 pill); motion matches (dropdowns/dialogs/selects fade+zoom in at 150ms, the mobile drawer slides 500ms/300ms with the vaul bezier, nav transitions run 200ms, the group chevron snaps); scroll matches (browser-default scrollbars everywhere, the v4 trailing space-y phantom margin eliminated, tab cards end where the reference's do) |
+| 🏦 **Loan management** | The reference's exact New Loan Request dialog — 672px, Loan Type (Standard/Emergency/Salary Advance/Personal), live Monthly Installment computation, Paid From, and the Requesting-for preview card — backed by a real API |
 
 ## Architecture
 
@@ -79,7 +80,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
 │   └── 📂 e2e/                     # Playwright: 86 specs, isolated e2e.db
 ├── 📂 docs/
-│   ├── 📂 screenshots/             # 88 remediated UI captures (desktop + mobile + tablet bands + wizard + focus rings + hover + pressed states + motion evidence)
+│   ├── 📂 screenshots/             # 92 remediated UI captures (desktop + mobile + tablet bands + wizard + focus rings + hover + pressed states + motion + scroll/dialog evidence)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
 │   └── 📄 Tailwind-V4-Validation-Report.md    # Engine trap log
 └── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md • eon-hr_SKILL.md
@@ -133,7 +134,7 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (398 specs: db-path, auth, utils, tokens, session-5..22 recipes)
+bun run test          # Vitest unit layer (411 specs: db-path, auth, utils, tokens, session-5..23 recipes)
 bun run test:e2e      # Playwright E2E (86 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit

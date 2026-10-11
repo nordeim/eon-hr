@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
@@ -79,6 +78,12 @@ function downloadCsv(filename: string, rows: (string | number | null)[][]): void
 }
 
 const CSV_HEADERS = ["FULL NAME", "JOB TITLE", "DEPARTMENT ID", "EMPLOYMENT STATUS", "EMPLOYMENT TYPE", "START DATE"];
+
+// Session 23 (R22-E): the table renders REF's compact recipe — lowercase DOM
+// texts uppercased by CSS (`px-3 py-2 text-left text-xs font-semibold
+// text-slate-600 uppercase`, 33px th). The CSV export keeps the uppercase
+// literals (file format).
+const TABLE_HEADERS = ["full name", "job title", "department id", "employment status", "employment type", "start date"];
 
 function recordsToCsv(records: ReportRecord[]): (string | number | null)[][] {
   return [
@@ -150,7 +155,6 @@ export default function HRReportsPage() {
 
   const stats = data?.stats ?? { totalRecords: 0, uniqueGroups: 0, activeCount: 0 };
   const groupLabel = GROUP_OPTIONS.find((g) => g.value === groupBy)?.label ?? "Status";
-  const hasRecords = (data?.records.length ?? 0) > 0;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
@@ -288,16 +292,15 @@ export default function HRReportsPage() {
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
-          ) : !hasRecords ? (
-            <div className="pb-6">
-              <EmptyState title="No records found" description="Adjust the filters to include more employees." />
-            </div>
           ) : (
+            /* Session 23 (R22-E): at 0 records REF renders the HEADER ROW
+               ONLY — no empty state, no empty row (card 139px measured).
+               The table always renders; the body is empty without records. */
             <Table>
               <TableHeader>
                 <TableRow>
-                  {CSV_HEADERS.map((header) => (
-                    <TableHead key={header} className={header === "FULL NAME" ? "" : "text-muted-foreground"}>
+                  {TABLE_HEADERS.map((header) => (
+                    <TableHead key={header} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase">
                       {header}
                     </TableHead>
                   ))}

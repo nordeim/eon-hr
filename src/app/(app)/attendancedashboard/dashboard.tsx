@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Building2, CheckCircle2, Clock, Download, Users } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Download, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -244,30 +243,27 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
           </Button>
         </CardHeader>
         <CardContent className="px-0 pb-0">
-          {summary.length === 0 ? (
-            <div className="pb-6">
-              <EmptyState
-                icon={<Building2 className="h-6 w-6" aria-hidden="true" />}
-                title="No employees found for selected filter."
-                description="Try selecting All Departments or add employees."
-              />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead className="text-right">Present</TableHead>
-                  <TableHead className="text-right">Absent</TableHead>
-                  <TableHead className="text-right">Late</TableHead>
-                  <TableHead className="text-right">Rate %</TableHead>
-                </TableRow>
-              </TableHeader>
+          {/* Session 23 (R22-F): REF renders the 37px all-left th
+              (`text-left py-2 px-3 text-slate-500 font-medium` on ALL six
+              columns — including the numeric ones) and, at 0 rows, the
+              header-only table + a bare `py-8 text-slate-400` P as the
+              table's SIBLING — NOT an EmptyState component. */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Employee</TableHead>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Department</TableHead>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Present</TableHead>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Absent</TableHead>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Late</TableHead>
+                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Rate %</TableHead>
+              </TableRow>
+            </TableHeader>
+            {summary.length > 0 ? (
               <TableBody>
                 {summary.map((s) => (
                   <TableRow key={s.employee.id}>
-                    <TableCell>
+                    <TableCell className="py-2 px-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>{initials(s.employee.name)}</AvatarFallback>
@@ -275,16 +271,19 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
                         <span className="font-medium text-foreground">{s.employee.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{s.employee.department ?? "—"}</TableCell>
-                    <TableCell className="text-right">{s.present}</TableCell>
-                    <TableCell className="text-right">{s.absent}</TableCell>
-                    <TableCell className="text-right">{s.late}</TableCell>
-                    <TableCell className="text-right font-medium">{s.rate}%</TableCell>
+                    <TableCell className="py-2 px-3 text-muted-foreground">{s.employee.department ?? "—"}</TableCell>
+                    <TableCell className="py-2 px-3">{s.present}</TableCell>
+                    <TableCell className="py-2 px-3">{s.absent}</TableCell>
+                    <TableCell className="py-2 px-3">{s.late}</TableCell>
+                    <TableCell className="py-2 px-3 font-medium">{s.rate}%</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
+            ) : null}
+          </Table>
+          {summary.length === 0 ? (
+            <p className="text-center text-slate-400 py-8">No employees found for selected filter.</p>
+          ) : null}
         </CardContent>
       </Card>
     </div>

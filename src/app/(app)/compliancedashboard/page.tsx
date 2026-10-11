@@ -257,10 +257,12 @@ export default function ComplianceDashboardPage() {
             <TabsContent value="monitor" className="mt-0">
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  {/* Session 23 (R22-D): Expired renders FIRST — the REF-measured
+                      tile order [Expired, ≤7, ≤15, ≤30]. */}
+                  <StatCard variant="mini-centered" label="Expired" value={chipCounts.expired ?? 0} />
                   <StatCard variant="mini-centered" label="Expiring ≤ 7 days" value={chipCounts.d7 ?? 0} />
                   <StatCard variant="mini-centered" label="Expiring ≤ 15 days" value={chipCounts.d15 ?? 0} />
                   <StatCard variant="mini-centered" label="Expiring ≤ 30 days" value={chipCounts.d30 ?? 0} />
-                  <StatCard variant="mini-centered" label="Expired" value={chipCounts.expired ?? 0} />
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -321,7 +323,10 @@ export default function ComplianceDashboardPage() {
 
                 <Card>
                   <CardHeader className="p-3">
-                    <div className="text-sm font-semibold tracking-tight">Document Expiry Monitor</div>
+                    {/* Session 23 (R22-D): the monitor tab's table card title
+                        is REF's "At-Risk Employees" (the clone had retitled
+                        it "Document Expiry Monitor"). */}
+                    <div className="text-sm font-semibold tracking-tight">At-Risk Employees</div>
                   </CardHeader>
                   <CardContent className="p-0">
               {filtered.length === 0 ? (

@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.5.0 (session-22 remediation complete) · **Last updated:**
-> 2026-10-11 · **State:** 398 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.6.0 (session-23 remediation complete) · **Last updated:**
+> 2026-10-12 · **State:** 411 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -1584,4 +1584,72 @@ media-wrapped (unlike v4 `hover:`), so the probe browser applies them
 natively — no polyfill needed for the motion dimension.
 
 **Spec count:** 398 unit (recipes 261, tokens 19, auth 14, utils 13,
+shell-recipes 76, db-path 15) + 86 E2E.
+
+## 35. Session-23 Recipe Layer — parity round 22 (the scroll dimension + the dialog surface)
+
+The first scroll audit. Method: static CSSOM enumeration of every
+scroll-relevant rule on both apps (the walker must recurse `@layer` blocks —
+v4 wraps everything; constructor-agnostic `.cssRules` walking, not type
+numbers) + live DOM census of elements whose computed scroll styles differ
+from defaults + empirical scrolling (real `scrollTo` + settled reads) + a
+full 46-route docH sweep.
+
+**The scrollbar contract (R22-A):** the reference authors ZERO scrollbar
+rules — every scroll container computes `scrollbar-width: auto`. The clone's
+session-1 `.scrollbar-thin` (6px slate-300 rounded thumb, both the standard
+property pair and the `::-webkit` pair) was deleted from globals.css, the
+sidebar nav, and the dialog content. Never re-introduce scrollbar styling.
+A dead `.scrollbar-thin` rule may appear in BUILT css — v4 generates core
+utilities from scanner hits on comments/test literals (registry noise, same
+family as `.scroll-mt-24`); no element carries the class.
+
+**The v4 trailing space-y margin (R22-B — trap 6's sibling):** v4's
+`space-y-*` emits `margin-block-end` on `:not(:last-child)`; the ACTIVE
+TabsContent followed only by `display:none` Radix siblings kept mb-24,
+leaving 24px dead space below tab cards (measured /settings docH 943 vs REF
+919 — the v3 `margin-top on * + *` model never trails). Fix: `mb-0!` on the
+TabsContent base (`ui/tabs.tsx`) — the important flag beats the space-y rule
+unconditionally; the pill's own mb-24 keeps the pill→card gap. Alternative
+pattern: `flex flex-col gap-6` (gap ignores display:none children —
+`reports-browser.tsx` is the in-codebase precedent).
+
+**The loans dialog recipe (R22-C):** 672px `max-w-2xl`, H2-only header (REF
+renders NO description), `space-y-2` field rows, the ALWAYS-rendered
+Requesting-for card (`p-4 bg-blue-50 rounded-lg` > `flex items-center gap-3
+mb-3` > 20px user icon + the 2-line stack: `text-sm text-slate-600` label +
+`font-semibold text-slate-900` name with the "Select employee" placeholder),
+`grid grid-cols-2 gap-4` of Loan Type / Amount (SAR) / Duration (Months) /
+the read-only Monthly Installment (`p-2.5 bg-slate-100 border
+border-slate-200 rounded-md text-center` rendering "SAR 0.00" — prefix + 2
+decimals, NOT `formatSar`'s suffix form), Reason `min-h-[60px]`, Paid From,
+`flex justify-end gap-3` actions (Cancel + Submit Request). Schema: Loan
+gained `loanType` + `paidFrom`; the API validates a 4-value enum; the table
+gained the Type column.
+
+**Two per-page table recipes (R22-E/F):** hrreports th = `px-3 py-2
+text-left text-xs font-semibold text-slate-600 uppercase` (33px) with
+LOWERCASE DOM texts uppercased by CSS; at 0 records the table renders the
+HEADER ROW ONLY (no empty state — 139px card). attendancedashboard th =
+`text-left py-2 px-3 text-slate-500 font-medium` (37px, ALL columns
+left-aligned); at 0 rows the header-only table + a bare
+`text-center text-slate-400 py-8` P "No employees found for selected
+filter." as the table's SIBLING (not a td, not the EmptyState component).
+The systemic 45px `py-3 px-4` recipe still governs the other tables —
+tables are NOT one-recipe-fits-all; measure each surface.
+
+**Compliance (R22-D):** the stat tile order is Expired, ≤7, ≤15, ≤30 and
+the monitor table card title is "At-Risk Employees".
+
+**Probe lessons:** ALWAYS restart the :3200 standalone server after a
+rebuild — the running process serves 404s (the not-found page's h1 gives it
+away) once `.next/standalone` is replaced under it. Full-sweep docH reads
+can catch mid-hydration states (REF /employees transiently read 1010,
+settled 900 — re-probe with a visible-h1 check before flagging).
+`agent-browser fill` drives React state where the native-setter +
+input-event trick does not. The sidebar brand is an `<h1>` — h1 probes must
+filter `offsetParent !== null`. VLM checks need `createVision` + a vision
+model (the plain chat endpoint rejects image content).
+
+**Spec count:** 411 unit (recipes 274, tokens 19, auth 14, utils 13,
 shell-recipes 76, db-path 15) + 86 E2E.

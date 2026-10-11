@@ -253,7 +253,9 @@ model PayrollRecord {
 model Loan {
   id                String    @id @default(cuid())
   employeeId        String
+  loanType          String    @default("standard") // standard | emergency | salary-advance | personal (session 23, R22-C — the REF field set)
   amount            Int // principal, minor units
+  paidFrom          String?
   reason            String?
   installmentMonths Int       @default(12)
   monthlyDeduction  Int       @default(0)

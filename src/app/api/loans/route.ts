@@ -7,8 +7,12 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 
 const LoanInput = z.object({
   employeeId: z.string().min(1, "Employee is required"),
+  // Session 23 (R22-C): the REF field set — the four loan-type options from
+  // the reference's New Loan Request dialog select.
+  loanType: z.enum(["standard", "emergency", "salary-advance", "personal"]).default("standard"),
   amount: z.number().int().min(1, "Loan amount must be positive").max(1_000_000_000),
   installmentMonths: z.number().int().min(1, "At least 1 installment month").max(60, "Maximum 60 installment months").default(12),
+  paidFrom: z.string().trim().max(120, "Paid From is too long").optional().or(z.literal("")),
   reason: z.string().trim().max(500, "Reason is too long").optional().or(z.literal("")),
 });
 
@@ -51,10 +55,12 @@ export async function POST(req: NextRequest) {
     const loan = await db.loan.create({
       data: {
         employeeId: data.employeeId,
+        loanType: data.loanType,
         amount: data.amount,
         installmentMonths: data.installmentMonths,
         monthlyDeduction,
         remaining: data.amount,
+        paidFrom: data.paidFrom || null,
         reason: data.reason || null,
         status: "pending",
       },

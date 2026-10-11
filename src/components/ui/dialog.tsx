@@ -33,7 +33,11 @@ function DialogContent({
         className={cn(
           "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-card p-6 shadow-lg rounded-xl",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          "max-h-[85vh] overflow-y-auto scrollbar-thin",
+          // Session 23 (R22-A): the styled-scrollbar class was removed —
+          // REF never styles scrollbars. The 85vh cap + oy-auto stay as the
+          // fitting superset (REF's un-capped dialog clips on short viewports
+          // — its own family).
+          "max-h-[85vh] overflow-y-auto",
           className
         )}
         {...props}

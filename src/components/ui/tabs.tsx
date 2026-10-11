@@ -42,7 +42,16 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
 function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
-      className={cn("mt-2 focus-visible:outline-none", className)}
+      className={cn(
+        // Session 23 (R22-B): mb-0! kills the v4 trailing space-y margin.
+        // v4's space-y-* emits margin-block-end on :not(:last-child) — the
+        // ACTIVE content followed only by display:none Radix siblings kept
+        // mb-24, leaving 24px dead space below tab cards (measured /settings
+        // docH 943 vs REF 919). REF's v3 space-y (margin-top on * + *)
+        // never trails. The pill→card gap survives via the pill's own mb-24.
+        "mt-2 mb-0! focus-visible:outline-none",
+        className
+      )}
       {...props}
     />
   );

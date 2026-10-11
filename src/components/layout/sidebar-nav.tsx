@@ -30,7 +30,10 @@ export function SidebarNav({
   return (
     <div className="flex h-full flex-col">
       <SidebarHeader />
-      <nav className="flex-1 overflow-y-auto px-5 pb-4 pt-5 scrollbar-thin">
+      {/* Session 23 (R22-A): no scrollbar styling — REF authors zero scrollbar
+          rules (computed auto everywhere); the nav scrolls 872>690 on
+          expanded-group pages with the browser-default scrollbar. */}
+      <nav className="flex-1 overflow-y-auto px-5 pb-4 pt-5">
         <div className="flex h-8 shrink-0 items-center px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Main Menu
         </div>

@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 398 specs) |
+| Unit tests | `bun run test` (Vitest, 411 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -760,6 +760,78 @@ snapshot refs need attribute-tolerant regexes (`\[[^\]]*ref=`);
 `$`-prefixed passwords must be single-quoted in shell fills ($Abcd1234
 expands to empty in double quotes); drawer-close needs Escape or a real
 pointerdown (the overlay ignores synthetic .click()).
+
+## Session-23 recipe layer (parity round 22 — the scroll dimension)
+
+The first scroll audit (static CSSOM enumeration of every scroll-relevant
+rule on both apps with @layer-aware walking + live DOM census + empirical
+scrolling + a full 46-route docH sweep).
+
+- **NO scrollbar styling ANYWHERE (R22-A, systemic)**: REF authors zero
+  scrollbar rules (computed `auto` on every scroll container — the sidebar
+  nav scrolls live at 872>690 on expanded-group pages). The clone's
+  session-1 `.scrollbar-thin` class (6px slate-300 thumb) was deleted from
+  globals.css + the sidebar nav + the dialog content. A dead
+  `.scrollbar-thin` rule may still appear in the BUILT css — v4 generates
+  core utilities from scanner hits on comments/test literals (the same
+  registry-noise family as `.scroll-mt-24`); no element carries the class.
+- **The v4 trailing space-y margin (R22-B — trap 6's sibling)**: v4's
+  `space-y-*` emits `margin-block-end` on `:not(:last-child)` — the ACTIVE
+  TabsContent followed only by display:none Radix siblings kept mb-24,
+  leaving 24px dead space below tab cards (measured /settings docH 943 vs
+  REF 919; compliance stack 572 vs 551). REF's v3 (margin-top on `* + *`)
+  never trails. Fix: `mb-0!` on the TabsContent base in `ui/tabs.tsx`
+  (the pill's own mb-24 keeps the pill→card gap). The four `space-y-6`
+  tab roots (settings, attendance, compliancedashboard, profile) are
+  covered; `reports-browser.tsx` already used `flex flex-col gap-6` (gap
+  ignores display:none children — the alternative pattern).
+- **The loans dialog — the REF recipe (R22-C)**: 672px (`max-w-2xl`),
+  H2-only header (NO description), `space-y-2` field rows, the
+  always-rendered Requesting-for card (`p-4 bg-blue-50 rounded-lg` >
+  `flex items-center gap-3 mb-3` > 20px user icon + the 2-line stack
+  text-sm slate-600 / font-semibold slate-900, "Select employee"
+  placeholder), the `grid grid-cols-2 gap-4` of Loan Type (Standard /
+  Emergency / Salary Advance / Personal) + Amount (SAR) + Duration
+  (Months) + the read-only Monthly Installment (`p-2.5 bg-slate-100
+  border border-slate-200 rounded-md text-center` — "SAR 0.00",
+  prefix + 2 decimals, NOT formatSar's suffix form), Reason
+  (`min-h-[60px]`), Paid From, and `flex justify-end gap-3` actions
+  (Cancel + Submit Request). Schema: Loan gained `loanType` + `paidFrom`;
+  the loans table gained the Type column (REF's table unmeasurable —
+  zero-data). The dialog's `max-h-[85vh]` + `oy-auto` stay as the fitting
+  superset (REF's un-capped dialog clips on short viewports — its own
+  family).
+- **Two per-page table recipes (R22-E/F)**: hrreports th = `px-3 py-2
+  text-left text-xs font-semibold text-slate-600 uppercase` (33px) with
+  LOWERCASE DOM texts uppercased by CSS; at 0 records the table renders
+  the HEADER ROW ONLY (no empty state — card 139px). attendancedashboard
+  th = `text-left py-2 px-3 text-slate-500 font-medium` (37px, ALL six
+  columns left-aligned); at 0 rows the header-only table + a bare
+  `text-center text-slate-400 py-8` P "No employees found for selected
+  filter." as the table's SIBLING. The systemic 45px `py-3 px-4` recipe
+  (R11-V) still governs the other tables.
+- **Compliance monitor tab (R22-D)**: the stat tile order is Expired,
+  ≤7, ≤15, ≤30 (Expired FIRST) and the table card title is "At-Risk
+  Employees" (not "Document Expiry Monitor").
+- **Scroll non-gaps (documented)**: mobile scroll behavior byte-identical
+  (pinned top bar, static kicker, same scroll range — empirically
+  re-verified); `overscroll-behavior: contain` on body matches (Radix
+  RemoveScroll / vaul); nothing authored scroll-behavior/snap/margin on
+  either side; zero JS scroll APIs in the clone; REF's fixed sidebar vs
+  the clone's sticky = architecture difference with zero visible
+  divergence (nav scroll containers byte-exact).
+- **docH residuals (knife-edge family)**: compliance toolbar -2 + table
+  card -1 (net -3), /advancedanalytics -2, the attendancedashboard -46
+  (the clone's seeded data row vs REF's P-empty — unmeasurable-on-REF),
+  /attendance -68 (REF's own overflow family), /employeeselfservice
+  +310 (REF's dead "Loading your profile..." page — the clone's working
+  page is the documented superset).
+- **Probe lessons**: ALWAYS restart the :3200 standalone server after a
+  rebuild (the running process serves 404s once `.next/standalone` is
+  replaced under it); full-sweep docH reads can catch mid-hydration
+  states (REF /employees transiently read 1010, settled 900 — re-probe
+  before flagging); `agent-browser fill` drives React state where the
+  native-setter + input-event trick does not.
 
 ## Page architecture (session 6) — where padding and gradients live
 

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, Check, CircleDollarSign, DollarSign, Loader2, MoreHorizontal, Plus, Trash2, Wallet, X } from "lucide-react";
+import { Banknote, Check, CircleDollarSign, DollarSign, Loader2, MoreHorizontal, Plus, Trash2, User, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -47,7 +45,9 @@ import { formatSar, formatDate, initials } from "@/lib/utils";
 interface LoanRow {
   id: string;
   employeeId: string;
+  loanType: string;
   amount: number;
+  paidFrom: string | null;
   reason: string | null;
   installmentMonths: number;
   monthlyDeduction: number;
@@ -62,6 +62,7 @@ interface EmployeeOption {
   employeeId: string;
   firstName: string;
   lastName: string;
+  email: string;
 }
 
 export default function LoansPage() {
@@ -71,7 +72,7 @@ export default function LoansPage() {
   const [loading, setLoading] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({ employeeId: "", amount: "", months: "12", reason: "" });
+  const [form, setForm] = React.useState({ employeeId: "", loanType: "standard", amount: "", months: "12", paidFrom: "", reason: "" });
 
   const load = React.useCallback(async () => {
     try {
@@ -105,8 +106,10 @@ export default function LoansPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           employeeId: form.employeeId,
+          loanType: form.loanType,
           amount: Math.round(amount * 100),
           installmentMonths: months,
+          paidFrom: form.paidFrom,
           reason: form.reason,
         }),
       });
@@ -121,7 +124,7 @@ export default function LoansPage() {
         variant: "success",
       });
       setDialogOpen(false);
-      setForm({ employeeId: "", amount: "", months: "12", reason: "" });
+      setForm({ employeeId: "", loanType: "standard", amount: "", months: "12", paidFrom: "", reason: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -171,6 +174,13 @@ export default function LoansPage() {
     if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(months) || months < 1) return null;
     return Math.round((amount * 100) / months);
   })();
+
+  // Session 23 (R22-C): the selected employee drives the Requesting-for
+  // preview card (name + email, REF-measured).
+  const selectedEmployee = employees.find((e) => e.id === form.employeeId) ?? null;
+
+  const loanTypeLabel = (t: string) =>
+    ({ standard: "Standard Loan", emergency: "Emergency Loan", "salary-advance": "Salary Advance", personal: "Personal Loan" })[t] ?? t;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
@@ -233,6 +243,10 @@ export default function LoansPage() {
               <TableRow>
                 <TableHead>Employee</TableHead>
                 <TableHead>Amount</TableHead>
+                {/* Session 23 (R22-C6): the Type column surfaces the stored
+                    loanType (REF's table is unmeasurable at zero data — the
+                    superset display). */}
+                <TableHead>Type</TableHead>
                 <TableHead>Monthly</TableHead>
                 <TableHead>Remaining</TableHead>
                 <TableHead>Status</TableHead>
@@ -265,6 +279,7 @@ export default function LoansPage() {
                         {formatSar(loan.amount)}
                       </span>
                     </TableCell>
+                    <TableCell className="text-muted-foreground">{loanTypeLabel(loan.loanType)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <CircleDollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -331,13 +346,17 @@ export default function LoansPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        {/* Session 23 (R22-C): the REF recipe — 672px (max-w-2xl), H2-only
+            header (REF renders no description), space-y-2 field rows, the
+            Requesting-for preview card, the 4-cell grid with the computed
+            Monthly Installment display, min-h-[60px] Reason, Paid From, and
+            the right-aligned justify-end gap-3 actions with Submit Request. */}
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>New Loan Request</DialogTitle>
-            <DialogDescription>Create an employee loan request with a monthly installment plan.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={onSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="loan-employee">Employee</Label>
               <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
                 <SelectTrigger id="loan-employee">
@@ -352,9 +371,39 @@ export default function LoansPage() {
                 </SelectContent>
               </Select>
             </div>
+            {/* Session 23 (R22-C3): the Requesting-for card — REF renders it
+                ALWAYS (the name line shows the "Select employee" placeholder
+                until one is picked): p-4 bg-blue-50 rounded-lg > flex
+                items-center gap-3 mb-3 > 20px user icon + the 2-line stack
+                (text-sm slate-600 label + font-semibold slate-900 name). */}
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <User className="w-5 h-5" aria-hidden="true" />
+                <div>
+                  <p className="text-sm text-slate-600">Requesting for</p>
+                  <p className="font-semibold text-slate-900">
+                    {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : "Select employee"}
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="loan-amount">Loan Amount (SAR)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="loan-type">Loan Type</Label>
+                <Select value={form.loanType} onValueChange={(v) => setForm({ ...form, loanType: v })}>
+                  <SelectTrigger id="loan-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="standard">Standard Loan</SelectItem>
+                    <SelectItem value="emergency">Emergency Loan</SelectItem>
+                    <SelectItem value="salary-advance">Salary Advance</SelectItem>
+                    <SelectItem value="personal">Personal Loan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="loan-amount">Amount (SAR)</Label>
                 <Input
                   id="loan-amount"
                   type="number"
@@ -365,8 +414,8 @@ export default function LoansPage() {
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="loan-months">Installment Months</Label>
+              <div className="space-y-2">
+                <Label htmlFor="loan-months">Duration (Months)</Label>
                 <Input
                   id="loan-months"
                   type="number"
@@ -378,32 +427,45 @@ export default function LoansPage() {
                   onChange={(e) => setForm({ ...form, months: e.target.value })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Monthly Installment</Label>
+                {/* Session 23 (R22-C2): REF's read-only display — "SAR 0.00"
+                    (prefix + 2 decimals, text-center, border-slate-200). */}
+                <div className="p-2.5 bg-slate-100 border border-slate-200 rounded-md text-center">
+                  SAR {monthlyPreview !== null ? (monthlyPreview / 100).toFixed(2) : "0.00"}
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="space-y-2">
               <Label htmlFor="loan-reason">Reason</Label>
               <Textarea
                 id="loan-reason"
                 rows={3}
+                className="min-h-[60px]"
                 placeholder="e.g. Family relocation, education, medical…"
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
               />
             </div>
-            {monthlyPreview !== null ? (
-              <div className="flex items-center justify-between rounded-lg border bg-secondary/40 px-3 py-2">
-                <span className="text-sm text-muted-foreground">Monthly deduction</span>
-                <span className="text-sm font-semibold text-foreground">{formatSar(monthlyPreview)}</span>
-              </div>
-            ) : null}
-            <DialogFooter>
+            <div className="space-y-2">
+              <Label htmlFor="loan-paid-from">Paid From</Label>
+              <Input
+                id="loan-paid-from"
+                type="text"
+                placeholder="e.g. Monthly payroll"
+                value={form.paidFrom}
+                onChange={(e) => setForm({ ...form, paidFrom: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Create Request
+                Submit Request
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

@@ -19,6 +19,14 @@ const appShell = read("src", "components", "layout", "app-shell.tsx");
 const pageHeader = read("src", "components", "shared", "page-header.tsx");
 const selectUi = read("src", "components", "ui", "select.tsx");
 const toastUi = read("src", "components", "ui", "toast.tsx");
+const dialogUi = read("src", "components", "ui", "dialog.tsx");
+const tabsUi = read("src", "components", "ui", "tabs.tsx");
+const loansPage = read("src", "app", "(app)", "loans", "page.tsx");
+const loansApi = read("src", "app", "api", "loans", "route.ts");
+const prismaSchema = read("prisma", "schema.prisma");
+const compliancePage = read("src", "app", "(app)", "compliancedashboard", "page.tsx");
+const hrreportsPage = read("src", "app", "(app)", "hrreports", "page.tsx");
+const attDashboard = read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx");
 const globalsCss = read("src", "app", "globals.css");
 
 /** Route -> (layout recipe, badge icon class) — reference-measured map. */
@@ -1740,5 +1748,142 @@ describe("session-22 transition + animation recipes (parity round 21 — the mot
     const tBlock = toastUi.slice(tIdx, tIdx + 700);
     expect(tBlock).toContain("animate-in fade-in slide-in-from-bottom-2");
     expect(tBlock).not.toContain("data-[state=open]:animate-in");
+  });
+});
+
+describe("session-23 scroll-dimension recipes (parity round 22 — the scroll dimension + the dialog surface)", () => {
+  it("R22-A1: the sidebar nav NEVER styles its scrollbar (REF authors zero scrollbar rules — computed auto everywhere; the nav scrolls live at 872>690 on expanded-group pages)", () => {
+    const navIdx = sidebarNav.indexOf('className="flex-1 overflow-y-auto');
+    expect(navIdx).toBeGreaterThan(-1);
+    const navBlock = sidebarNav.slice(navIdx, navIdx + 160);
+    expect(navBlock).toContain("overflow-y-auto");
+    expect(navBlock).not.toContain("scrollbar-thin");
+    // the whole file carries no scrollbar styling at all
+    expect(sidebarNav).not.toContain("scrollbar-thin");
+  });
+
+  it("R22-A2: the dialog content keeps the 85vh fitting cap + auto scroll but drops the styled scrollbar (REF: oy visible + no max-height — its own clip-prone family; scrollbar-thin was a clone extra)", () => {
+    const dIdx = dialogUi.indexOf("max-h-[85vh] overflow-y-auto");
+    expect(dIdx).toBeGreaterThan(-1);
+    const dBlock = dialogUi.slice(dIdx - 60, dIdx + 220);
+    expect(dBlock).toContain("max-h-[85vh] overflow-y-auto");
+    expect(dBlock).not.toContain("scrollbar-thin");
+    expect(dialogUi).not.toContain("scrollbar-thin");
+  });
+
+  it("R22-A3: globals.css no longer ships the .scrollbar-thin class (the session-1 scaffold extra — deleted, not neutralized)", () => {
+    expect(globalsCss).not.toContain(".scrollbar-thin");
+    expect(globalsCss).not.toContain("scrollbar-width: thin");
+    expect(globalsCss).not.toContain("::-webkit-scrollbar");
+  });
+
+  it("R22-B: TabsContent carries mb-0! — the v4 trailing space-y killer (v4 emits margin-block-end on :not(:last-child); the ACTIVE content followed only by display:none Radix siblings kept mb-24 → 24px phantom below tab cards; REF's v3 margin-top model never trails; measured /settings docH 943 vs 919)", () => {
+    const cIdx = tabsUi.indexOf("TabsPrimitive.Content");
+    expect(cIdx).toBeGreaterThan(-1);
+    const cBlock = tabsUi.slice(cIdx, cIdx + 400);
+    expect(cBlock).toContain("mb-0!");
+  });
+
+  it("R22-C1: the loans dialog is 672px with an H2-only header (REF max-w-2xl measured 672; the description was a clone extra)", () => {
+    const dlgIdx = loansPage.indexOf("<DialogContent");
+    expect(dlgIdx).toBeGreaterThan(-1);
+    const dlgBlock = loansPage.slice(dlgIdx, dlgIdx + 400);
+    expect(dlgBlock).toContain("max-w-2xl");
+    const hdrIdx = loansPage.indexOf("<DialogHeader>");
+    const hdrBlock = loansPage.slice(hdrIdx, hdrIdx + 260);
+    expect(hdrBlock).toContain("<DialogTitle>New Loan Request</DialogTitle>");
+    expect(hdrBlock).not.toContain("DialogDescription");
+  });
+
+  it("R22-C2: the loans form carries the REF field set — Loan Type select (4 options), Amount, Duration, the computed Monthly Installment display, Reason (min-h-[60px]), Paid From", () => {
+    expect(loansPage).toContain("Loan Type");
+    for (const opt of ["Standard Loan", "Emergency Loan", "Salary Advance", "Personal Loan"]) {
+      expect(loansPage).toContain(opt);
+    }
+    expect(loansPage).toContain("Amount (SAR)");
+    expect(loansPage).toContain("Duration (Months)");
+    expect(loansPage).toContain("Monthly Installment");
+    expect(loansPage).toContain("Paid From");
+    expect(loansPage).toContain("min-h-[60px]");
+    // the installment display recipe: p-2.5 bg-slate-100 border (read-only SAR 0.00 family)
+    expect(loansPage).toContain("p-2.5 bg-slate-100 border");
+    // the field rows use the REF space-y-2 recipe (label + control), not gap-1.5
+    expect(loansPage).not.toContain("flex flex-col gap-1.5");
+  });
+
+  it("R22-C3: the loans form renders the Requesting-for preview card when an employee is selected (p-4 bg-blue-50 rounded-lg, 20px user icon, name + email)", () => {
+    expect(loansPage).toContain("bg-blue-50");
+    const cardIdx = loansPage.indexOf("bg-blue-50");
+    const cardBlock = loansPage.slice(cardIdx - 200, cardIdx + 500);
+    expect(cardBlock).toContain("p-4");
+    expect(cardBlock).toContain("rounded-lg");
+    expect(cardBlock).toContain("Requesting for");
+  });
+
+  it("R22-C4: the loans actions row is justify-end gap-3 with the Submit Request label (REF-measured; the col-reverse Create Request was a clone extra)", () => {
+    expect(loansPage).toContain("flex justify-end gap-3");
+    expect(loansPage).toContain("Submit Request");
+    expect(loansPage).not.toContain("flex-col-reverse");
+    expect(loansPage).not.toContain("Create Request");
+  });
+
+  it("R22-C5: the Loan API accepts loanType + paidFrom and the schema stores them (the REF functional field set)", () => {
+    expect(loansApi).toContain("loanType");
+    expect(loansApi).toContain("paidFrom");
+    expect(prismaSchema).toMatch(/loanType\s+String\s+@default\("standard"\)/);
+    expect(prismaSchema).toMatch(/paidFrom\s+String\?/);
+  });
+
+  it("R22-C6: the loans table surfaces the loan type (REF's table is unmeasurable at zero data — the Type column is the superset display)", () => {
+    const theadIdx = loansPage.indexOf("<TableHead>Employee</TableHead>");
+    expect(theadIdx).toBeGreaterThan(-1);
+    const theadBlock = loansPage.slice(theadIdx, theadIdx + 420);
+    expect(theadBlock).toContain("<TableHead>Type</TableHead>");
+  });
+
+  it("R22-D: the compliance monitor tab renders Expired FIRST + the At-Risk Employees table title (REF-measured order + title; the clone had them swapped/retitled)", () => {
+    const statsIdx = compliancePage.indexOf('variant="mini-centered"');
+    expect(statsIdx).toBeGreaterThan(-1);
+    const statsBlock = compliancePage.slice(statsIdx, statsIdx + 900);
+    const expiredIdx = statsBlock.indexOf('label="Expired"');
+    const d7Idx = statsBlock.indexOf('label="Expiring ≤ 7 days"');
+    expect(expiredIdx).toBeGreaterThan(-1);
+    expect(d7Idx).toBeGreaterThan(-1);
+    expect(expiredIdx).toBeLessThan(d7Idx);
+    expect(compliancePage).toContain("At-Risk Employees");
+    // the monitor tab's table card title is At-Risk Employees, NOT Document Expiry Monitor
+    const titleIdx = compliancePage.indexOf("At-Risk Employees");
+    const titleBlock = compliancePage.slice(Math.max(0, titleIdx - 350), titleIdx + 40);
+    expect(titleBlock).not.toContain("Document Expiry Monitor");
+  });
+
+  it("R22-E: the hrreports table th is the compact uppercase recipe with lowercase DOM texts + a header-only table at 0 records (REF: 33px th, no empty state — card 139px)", () => {
+    // the lowercase DOM texts live in the TABLE_HEADERS const (the CSV export keeps the uppercase literals)
+    expect(hrreportsPage).toContain('const TABLE_HEADERS = ["full name", "job title", "department id", "employment status", "employment type", "start date"]');
+    const tableIdx = hrreportsPage.indexOf("<TableHead");
+    expect(tableIdx).toBeGreaterThan(-1);
+    const tableBlock = hrreportsPage.slice(tableIdx, tableIdx + 500);
+    expect(tableBlock).toContain("px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase");
+    // no EmptyState in the table card — 0 records renders the header row only
+    const cardIdx = hrreportsPage.indexOf("Data Table (${");
+    expect(cardIdx).toBeGreaterThan(-1);
+    const cardBlock = hrreportsPage.slice(cardIdx, cardIdx + 2200);
+    expect(cardBlock).not.toContain("EmptyState");
+    expect(cardBlock).not.toContain("No records found");
+  });
+
+  it("R22-F: the attendancedashboard summary table th is the 37px all-left recipe + the bare py-8 P empty state (REF: text-left py-2 px-3 text-slate-500 font-medium on ALL six columns; P 'No employees found for selected filter.' — not the EmptyState component)", () => {
+    const tblIdx = attDashboard.indexOf('className="text-left py-2 px-3 text-slate-500 font-medium">Employee');
+    expect(tblIdx).toBeGreaterThan(-1);
+    const tblBlock = attDashboard.slice(tblIdx - 400, tblIdx + 900);
+    expect(tblBlock).toContain("text-left py-2 px-3 text-slate-500 font-medium");
+    expect(tblBlock).not.toContain("text-right");
+    expect(attDashboard).toContain("text-center text-slate-400 py-8");
+    expect(attDashboard).toContain("No employees found for selected filter.");
+    // the P replaces the EmptyState component in the summary card
+    const sumIdx = attDashboard.indexOf("Employee Attendance Summary");
+    expect(sumIdx).toBeGreaterThan(-1);
+    const sumBlock = attDashboard.slice(sumIdx, sumIdx + 2600);
+    expect(sumBlock).not.toContain("<EmptyState");
   });
 });
