@@ -116,8 +116,13 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
                     "flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
                   /* Session 20 (R19-K): REF's bottom tabs carry NO hover
                      classes — the inactive tab stays slate-600 (the clone's
-                     old hover color flip was an unmeasured superset). */
-                    active ? "text-blue-600" : "text-slate-600"
+                     old hover color flip was an unmeasured superset).
+                     Session 21 (R20-B): the ACTIVE tab renders the
+                     bg-blue-50 pill (rgb(239,246,255), pixel-verified on
+                     REF's mobile dashboard — missed by prior rounds that
+                     compared label color/geometry but never the tab's own
+                     background). */
+                    active ? "bg-blue-50 text-blue-600" : "text-slate-600"
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />

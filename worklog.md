@@ -675,3 +675,30 @@ Work Log:
 Stage Summary:
 - Parity round 19 complete: 12 hover-dimension gap groups fixed with 13 new TDD pins — the interaction map now covers focus (R18) + hover (R19); the v4 hover-media probe trap documented and defeated probe-side
 - 386 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 33 (session 21 / parity round 20)
+Agent: main (Super Z)
+Task: Full parity cycle — fresh-clone workspace setup, skills-assisted audit (redeploy check + mobile nav + the FIRST :active pressed-state dimension), TDD remediation of 5 gap groups, docs, commit + push
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at a5fd089; .env recreated (file:../db/custom.db + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on every DB/build command (shell pre-exports a wrong-path URL — re-confirmed)
+- Baseline gates: lint 0/0, tsc, 386/386 unit, build, 86/86 E2E — the a5fd089 state exactly; static audit of the R19 diff clean
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions + mouse move/down/up = the mousedown-hold tooling), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions (loc/ref) authenticated (documented password-fill flake + the Secure-cookie logout family re-hit — auto-reauth guards added to the probes); probe scripts: r20-redeploy/activecss/active/active2/active3/active4/login/mobile + verify-r20 + capture-r20 (persisted in scripts/)
+- Redeploy check: 12 routes byte-identical (h1 text/font/x/y) — REF unchanged since R19
+- Mobile navigation audit (user priority): top bar 390×73, tabs x 10/79/139/204/313 + active rgb(37,99,235), drawer 288×844 #FAFAFA z-50 (links 141/301/421/461/581 + footer 121@723), kickers (standard 53 + profile 69), md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug
+- NEW: FIRST :active pressed-state audit (~24 surfaces, real mouse-down holds): TOOLING — agent-browser mouse down/up ARE the mousedown-hold tooling; CLICK-SAFE protocol (move away BEFORE mouse up — the first draft fired real clicks: toggled REF's عربي, expanded groups); ENGINE — v4 does NOT media-wrap active: variants (bare rules; hover:* stays wrapped); POLYFILL v2 — the r19 append-at-end polyfill moved hover rules after active: rules and broke the pressed cascade under the probe; v2 unwraps @media (hover: hover) IN PLACE (link → style at the same DOM position, order preserved); // comments break flattened evals (use /* */ in injected JS)
+- 5 gap groups (R20-A..E): group button PRESSED gray (zinc-100/#18181B — active: beats the blue hover; the clone stayed blue), EXPANDED-group hover gray (data-[state=open]:hover: — a second hover recipe the r19 audit missed by probing collapsed only), the authored leaf/sub-item active: pair (tap-press moment), the active-leaf text-only pressed flip (documented deviation: the clone's bg-primary UTILITY would lose to an active:bg variant — REF's unlayered custom class doesn't), the active bottom tab bg-blue-50 pill (rgb(239,246,255) pixel-verified — a VISIBLE mobile gap every prior round missed: mobile audits compared label color/geometry but never the tab's own background)
+- Non-gaps documented: everything else presses FLAT on both apps (bell/moon/عربي/user trigger/chips/View all/Import CSV/Add Employee [gradient serialization + invisible bg-color families]/Generate All/New Project/Kanban [rgba-lab]/Edit/My Requests/menu items incl. the red Logout flip/login surfaces/hamburger [rides hover]/inactive tabs); v4 registry noise (6 unused active: rules); with-data re-checked — REF still zero-data (frontier blocked)
+- docs/remediation-plan-session21.md written (5 groups + tooling discoveries + non-goals) + codebase-validated
+- TDD: 5 new pins (all RED → GREEN); R19-B/R19-K pins updated; mid-flight corrections (my own comments containing forbidden literals tripped negative assertions — reworded; slice window 700→900)
+- Gates: lint 0/0, tsc, 391/391 unit (+5), build, 86/86 E2E (the session-5 active-tab test extended with the pill assertions)
+- Live verification: 7/7 MATCH (group pressed, expanded-group hover+press, leaf + sub-item pressed, active leaf pressed, bell regression, bottom-tab pill); post-fix canonical 12-route 12/12 MATCH + mobile chrome regression clean — zero layout impact
+- 5 screenshots (3 new evidence: 68-group-pressed-zinc100 [real hold], 69-expanded-group-hover, 70-bottom-tab-pill; 2 standards: 02, 11) → 83 total; VLM spot-checks confirmed the gray pressed group, the expanded sub-items, the blue Home pill
+- Docs: AGENTS session-21 layer + 391 specs; SKILL v3.4.0 + §33 + counts; PAD [S21] + test table (recipes 254) + Last Updated + checklist; CLAUDE 477-spec pyramid + session-21 pins; README 391 specs + 83 captures + pressed-parity row; docs/session_34.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 20 complete: 5 pressed-dimension gap groups fixed with 5 new TDD pins — the interaction map now covers focus (R18) + hover (R19) + pressed (R20); the round's highlight: the active bottom tab blue-50 pill, a visible mobile gap every prior round missed, plus the group-button gray press and the expanded-group hover recipe
+- 391 unit + 86 E2E green; ready for commit + push

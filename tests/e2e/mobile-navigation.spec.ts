@@ -114,15 +114,20 @@ test.describe("mobile navigation", () => {
     await page.keyboard.press("Escape");
   });
 
-  test("bottom tab bar highlights the active tab blue (session 5)", async ({ page }) => {
+  test("bottom tab bar highlights the active tab blue (session 5; bg pill session 21)", async ({ page }) => {
     // Re-measured session 5: the reference renders the ACTIVE tab in
     // blue-600 #2563EB (icon + label) — the session-4 "no highlight" note
     // was stale. Home is active on /dashboard; Staff stays slate-600.
+    // Session 21 (R20-B): the active tab ALSO renders the bg-blue-50 pill
+    // (rgb(239,246,255) — pixel-verified on REF's mobile dashboard; missed
+    // by prior rounds that compared label color/geometry only).
     await page.goto("/dashboard");
     const home = page.getByRole("link", { name: "Home", exact: true });
     const staff = page.getByRole("link", { name: "Staff", exact: true });
     await expect(home).toHaveCSS("color", "rgb(37, 99, 235)");
+    await expect(home).toHaveCSS("background-color", "rgb(239, 246, 255)");
     await expect(staff).toHaveCSS("color", "rgb(71, 85, 105)");
+    await expect(staff).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     // labels are text-sm font-medium (reference: 14px/21px, 61px items)
     await expect(home.locator("span")).toHaveCSS("font-size", "14px");
     await expect(home.locator("span")).toHaveCSS("font-weight", "500");

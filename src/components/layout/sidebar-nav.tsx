@@ -98,9 +98,15 @@ function NavLink({
         // measured rgb(59,130,246) on leaf links AND group buttons), not
         // the dark global ring token.
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        /* Session 21 (R20-D): REF's active leaf carries the full pressed
+           pair, but its unlayered custom-primary-bg keeps the blue under
+           press. The clone's bg-primary is a v4 UTILITY — an active:bg
+           variant would win specificity ((0,2,0) vs (0,1,0)) and wrongly
+           gray the tile — so only the TEXT flip is mirrored (REF's
+           measured pressed text = #18181B, bg stays #1877F2). */
         active
-          ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b]"
-          : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b]"
+          ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]"
+          : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]"
       )}
     >
       <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
@@ -137,7 +143,13 @@ function CollapsibleNavItem({
         // measured rgb(59,130,246) on leaf links AND group buttons), not
         // the dark global ring token.
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-          "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+          /* Session 21 (R20-A/E): pressed = the sidebar tokens — REF's
+             pressed-pair utilities (sidebar-accent bg + foreground text)
+             beat its blue hover in v3 rule order (measured settled under
+             hold). The EXPANDED group hovers the same gray via
+             data-[state=open]:hover: (a second hover recipe the r19 audit
+             missed — it probed the group only collapsed). */
+          "text-slate-600 hover:bg-blue-50 hover:text-blue-700 active:bg-[#f4f4f5] active:text-[#18181b] data-[state=open]:hover:bg-[#f4f4f5] data-[state=open]:hover:text-[#18181b]"
         )}
         aria-expanded={open}
       >
@@ -171,8 +183,8 @@ function CollapsibleNavItem({
         // the dark global ring token.
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
                     active
-                      ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b]"
-                      : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b]"
+                      ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]"
+                      : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]"
                   )}
                 >
                   {ChildIcon ? (

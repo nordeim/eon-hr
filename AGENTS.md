@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 386 specs) |
+| Unit tests | `bun run test` (Vitest, 391 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -655,6 +655,55 @@ v3-era rules do; the asymmetry is probe-only, real desktops match).
   browser JS; snapshot regexes must allow `[expanded=false, ref=eN]` and
   never end with `\)`); measure the STYLED element (REF's quick chips
   style an inner div of a class-less anchor — the anchor shows no hover).
+
+## Session-21 recipe layer (parity round 20 — the pressed dimension)
+
+The first `:active` (pressed-state) audit (real mouse-down holds via
+agent-browser `mouse move/down/up`; the "missing mousedown-hold tooling"
+from the session-32 frontier note exists). **Click-safe protocol: move the
+pointer away BEFORE `mouse up`** — releasing over the element fires a real
+click (the first draft toggled REF's عربي to "EN" and expanded groups
+mid-probe). v4 does NOT media-wrap `active:` variants (only `hover:*` rides
+in `@media (hover: hover)`) — so active rules apply in the probe browser
+and on touch directly.
+
+- **Group button pressed (R20-A)**: REF presses GRAY — its
+  active:bg-sidebar-accent + active:text beat its hover:bg-blue-50 in v3
+  rule order. The clone's trigger carries
+  `active:bg-[#f4f4f5] active:text-[#18181b]`; v4 emits active: AFTER
+  hover: in the utilities output, so the pressed state wins on desktops.
+- **Expanded group hover (R20-E)**: REF's group button has a SECOND hover
+  recipe — `data-[state=open]:hover:bg-sidebar-accent
+  data-[state=open]:hover:text-sidebar-accent-foreground` (gray when the
+  group is open; blue when collapsed). Found only because a drawer probe
+  expanded a group mid-measurement; the r19 audit probed collapsed only.
+- **Leaf/sub-item active: pair (R20-C)**: REF authors the active: pair on
+  ALL sidebar links; the clone mirrors it on the inactive branches
+  (desktop-pressed already matched via hover — the classes restore the
+  authored recipe and the TAP-press moment, where :active fires without
+  :hover).
+- **Active leaf (R20-D — a documented deviation)**: REF's active leaf keeps
+  its blue bg under press because its custom-primary-bg is an UNLAYERED
+  custom class. The clone's `bg-primary` is a v4 utility — an active:bg
+  variant would win specificity ((0,2,0) vs (0,1,0)) and wrongly gray the
+  tile — so the clone adds ONLY `active:text-[#18181b]` (REF's measured
+  pressed text; bg stays #1877F2).
+- **Active bottom tab pill (R20-B — a visible mobile gap every prior round
+  missed)**: REF's active mobile bottom tab carries `bg-blue-50`
+  (rgb(239,246,255) — pixel-verified; the mobile audits compared label
+  color/geometry but never the tab's own background). Pinned in the E2E
+  active-tab test.
+- **Polyfill v2 (probe tooling)**: the r19 hover polyfill appended a second
+  `@layer utilities` block at the END — moving hover rules AFTER active:
+  rules and breaking the pressed-state cascade under the probe (on real
+  desktops the original order stands). v2 fetches each same-origin sheet,
+  brace-matches the `@media (hover: hover)` blocks, splices out the
+  wrappers, and REPLACES the `<link>` with a `<style>` at the same DOM
+  position — order preserved.
+- Everything else presses FLAT on both apps (no active: classes anywhere
+  else): CTAs, outline buttons, ghost buttons, menu items (the red Logout
+  turns #171717 under press via its focus recipe on both), login surfaces,
+  hamburger (rides hover), inactive bottom tabs.
 
 ## Page architecture (session 6) — where padding and gradients live
 

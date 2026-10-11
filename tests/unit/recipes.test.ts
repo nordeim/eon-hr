@@ -1513,9 +1513,9 @@ describe("session-20 hover recipes (parity round 19)", () => {
     expect(sidebarNav).toContain("hover:opacity-80");
   });
 
-  it("R19-B: the ACTIVE leaf hover flips text to #18181b (bg stays primary; REF's custom-primary-bg beats its hover:bg-sidebar-accent)", () => {
+  it("R19-B: the ACTIVE leaf hover flips text to #18181b (bg stays primary; REF's custom-primary-bg beats its hover:bg-sidebar-accent; session 21 adds the active:text twin)", () => {
     expect(sidebarNav).toMatch(
-      /"bg-primary font-medium text-white shadow-sm hover:text-\[#18181b\]"/
+      /"bg-primary font-medium text-white shadow-sm hover:text-\[#18181b\] active:text-\[#18181b\]"/
     );
   });
 
@@ -1582,12 +1582,12 @@ describe("session-20 hover recipes (parity round 19)", () => {
     );
   });
 
-  it("R19-K: mobile bottom tabs have NO hover color change (REF renders none)", () => {
+  it("R19-K: mobile bottom tabs have NO hover color change (REF renders none; session 21 re-pinned for the bg-blue-50 active pill — R20-B)", () => {
     const tabsBlock = appShell.slice(
       appShell.indexOf("min-h-[44px]"),
-      appShell.indexOf("min-h-[44px]") + 700
+      appShell.indexOf("min-h-[44px]") + 900
     );
-    expect(tabsBlock).toContain('active ? "text-blue-600" : "text-slate-600"');
+    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600" : "text-slate-600"');
     expect(tabsBlock).not.toContain("hover:text-foreground");
   });
 
@@ -1602,5 +1602,45 @@ describe("session-20 hover recipes (parity round 19)", () => {
     expect(menuBlock).not.toContain("focus:bg-secondary");
     expect(menuBlock).not.toContain("focus:bg-red-50");
     expect(menuBlock).toContain("text-red-600");
+  });
+});
+
+describe("session-21 pressed-state recipes (parity round 20 — the :active dimension)", () => {
+  it("R20-A: group button pressed = sidebar-accent zinc-100 + #18181B (active: beats the blue hover in rule order)", () => {
+    expect(sidebarNav).toMatch(
+      /text-slate-600 hover:bg-blue-50 hover:text-blue-700 active:bg-\[#f4f4f5\] active:text-\[#18181b\]/
+    );
+  });
+
+  it("R20-E: the EXPANDED group hovers GRAY — data-[state=open]:hover: sidebar tokens (NOT the blue collapsed hover)", () => {
+    expect(sidebarNav).toContain(
+      "data-[state=open]:hover:bg-[#f4f4f5] data-[state=open]:hover:text-[#18181b]"
+    );
+  });
+
+  it("R20-C: inactive leaf + sub-item carry the authored active: pair (desktop-pressed rides hover; the classes restore the recipe + the tap-press moment)", () => {
+    const inactive = 'font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]';
+    expect(sidebarNav).toContain(inactive);
+    // both branches (NavLink leaf + sub-item) — the string appears twice
+    expect(sidebarNav.split(inactive).length - 1).toBe(2);
+  });
+
+  it("R20-D: the ACTIVE leaf pressed keeps the blue bg (v4: an active:bg utility would beat bg-primary — REF's unlayered custom class doesn't) and flips text to #18181B", () => {
+    const activeBranch = 'bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]';
+    expect(sidebarNav).toContain(activeBranch);
+    expect(sidebarNav.split(activeBranch).length - 1).toBe(2);
+    // the documented deviation: active:bg appears ONLY on the 3 inactive
+    // surfaces (leaf, sub-item, group) — never on an active branch (the
+    // exact positive branch strings above cannot contain it)
+    expect(sidebarNav.split("active:bg-[").length - 1).toBe(3);
+    expect(sidebarNav).not.toContain("active:bg-sidebar-accent");
+  });
+
+  it("R20-B: the active mobile bottom tab renders the bg-blue-50 pill (REF pixel-verified rgb(239,246,255))", () => {
+    const tabsBlock = appShell.slice(
+      appShell.indexOf("min-h-[44px]"),
+      appShell.indexOf("min-h-[44px]") + 900
+    );
+    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600" : "text-slate-600"');
   });
 });

@@ -10,12 +10,12 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.3.0 (session-20 remediation complete) · **Last updated:**
-> 2026-10-26 · **State:** 386 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.4.0 (session-21 remediation complete) · **Last updated:**
+> 2026-10-11 · **State:** 391 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
-> the hover/active-state taxonomy).
+> the hover/active-state taxonomy + the pressed-state taxonomy).
 
 ---
 
@@ -1476,5 +1476,51 @@ hover change". Verify which element carries the classes before concluding.
 | Tab triggers / search inputs / staffrequests trigger / quick chips | no hover change (chips: `hover:border-blue-300 hover:bg-blue-50` on the inner div) | — |
 
 **Spec count:** 386 unit (recipes 249, tokens 19, auth 14, utils 13,
-shell-recipes 76, db-path 15) + 86 E2E. Placeholder detail: REF uses three
+shell-recipes 76, db-path 15) + 86 E2E at the time of §32; §33 raised it
+to 391 unit (recipes 254). Placeholder detail: REF uses three
 ASCII dots ("Search requests..."), never U+2026.
+
+## 33. Session-21 Recipe Layer — parity round 20 (the pressed dimension)
+
+The first `:active` (pressed-state) audit — the "missing mousedown-hold
+tooling" from the session-32 frontier note turned out to exist:
+agent-browser's `mouse move <x> <y>` / `mouse down` / `mouse up` are real
+CDP Input events, so the probe holds the true pressed state. **The
+click-safe protocol: move the pointer away BEFORE `mouse up`** — releasing
+over the element fires a real click (the first draft toggled REF's عربي to
+"EN" and expanded sidebar groups mid-probe).
+
+**Engine discovery:** Tailwind v4 does NOT media-wrap `active:` variants —
+only `hover:*` rides inside `@media (hover: hover)` (verified again in the
+built CSS: 90 wrapped hover rules, zero wrapped active rules). Active
+rules are bare on both sides, so they apply in the probe browser and on
+touch devices directly.
+
+**The pressed taxonomy (all measured settled under hold):**
+
+| Surface | REF pressed | Clone recipe |
+|---|---|---|
+| Sidebar group button (collapsed) | zinc-100 #F4F4F5 + #18181B (active: beats the blue hover in v3 rule order) | `active:bg-[#f4f4f5] active:text-[#18181b]` (v4 emits active: after hover:) |
+| Sidebar group button (EXPANDED) | hover = zinc-100 + #18181B via `data-[state=open]:hover:` — a SECOND hover recipe (r19 probed collapsed only) | `data-[state=open]:hover:bg-[#f4f4f5] data-[state=open]:hover:text-[#18181b]` |
+| Inactive leaf + sub-item | zinc-100 + #18181B + 0.8 (rides hover; the authored active: pair also present) | `active:bg-[#f4f4f5] active:text-[#18181b]` added (recipe parity + the tap-press moment) |
+| ACTIVE leaf | bg STAYS blue #1877F2 (unlayered custom-primary-bg beats utilities) + text #18181B | `active:text-[#18181b]` ONLY — a documented deviation: the clone's bg-primary is a v4 UTILITY that would LOSE to an active:bg variant ((0,2,0) vs (0,1,0)), so the bg-keeping behavior is preserved by omission |
+| Active mobile bottom tab | `bg-blue-50` pill (rgb(239,246,255), pixel-verified — a visible gap every prior round missed: the mobile audits compared label color/geometry but never the tab's own background) | `active ? "bg-blue-50 text-blue-600" : ...` |
+| Everything else (CTAs, outlines, ghosts, menu items, login, hamburger, inactive tabs) | FLAT (no active: classes on either app) | unchanged |
+
+**Polyfill v2 (probe tooling):** the r19 hover polyfill appended a second
+`@layer utilities` block at the END of `<head>` — which moved the hover
+rules AFTER the active: rules and broke the pressed-state cascade UNDER
+THE PROBE (on real desktops the original order stands and active: wins).
+v2 fetches each same-origin stylesheet, brace-matches every
+`@media (hover: hover)` block, splices out the wrappers, and REPLACES the
+`<link>` with a `<style>` at the same DOM position — rule order preserved
+exactly. Also: `//` comments inside a flattened one-line eval break it
+(the r16 lesson) — use `/* */` inside injected browser JS.
+
+**v4 registry noise:** the built CSS carries six UNUSED `active:*` utility
+rules (translate-y-0, scale-95, scale-[0.98], cursor-grabbing,
+bg-blue-800, shadow-none) generated from scanned library content — only
+`active:cursor-grabbing` is authored (taskmanager). Not gaps.
+
+**Spec count:** 391 unit (recipes 254, tokens 19, auth 14, utils 13,
+shell-recipes 76, db-path 15) + 86 E2E.
