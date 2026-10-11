@@ -225,7 +225,9 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
 
   it("R8-A: actions cluster uses the reference's gap-3 (12px)", () => {
     // Reference: `flex gap-3` (Import CSV 145 + 12 + Add Employee 165 = 322).
-    expect(pageHeader).toContain('className="flex flex-wrap items-center gap-3 shrink-0"');
+    // Session 13 (R12-D): the cluster is now parameterized — the DEFAULT
+    // stays gap-3; hrreports overrides to `flex gap-2` per REF measurement.
+    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3 shrink-0", actionsClassName');
   });
 
   it("R8-B: PageHeader declares the centered prop for text-center headers", () => {

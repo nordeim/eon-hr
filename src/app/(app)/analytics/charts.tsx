@@ -27,7 +27,7 @@ export interface DeptCompletion {
 
 export function EmployeeStatusPie({ data }: { data: StatusSlice[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
           data={data}
@@ -53,7 +53,7 @@ export function EmployeeStatusPie({ data }: { data: StatusSlice[] }) {
 
 export function DepartmentCompletionBar({ data }: { data: DeptCompletion[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />

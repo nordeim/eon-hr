@@ -1,13 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, CheckCheck, Info, Loader2, Megaphone, UserPlus, XCircle } from "lucide-react";
+import { CheckCircle2, CheckCheck, FileText, Info, Loader2, Mail, Megaphone, Save, UserPlus, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { cn, timeAgo } from "@/lib/utils";
 
@@ -29,13 +28,13 @@ interface Preferences {
   announcements: boolean;
 }
 
-const PREF_ROWS: { key: keyof Preferences; label: string; description: string }[] = [
-  { key: "emailEnabled", label: "Email Notifications", description: "Receive notifications via email" },
-  { key: "inAppEnabled", label: "In-App Notifications", description: "Show notification bell in the app" },
-  { key: "approvals", label: "Approval Decisions", description: "When your request is approved or rejected" },
-  { key: "rejections", label: "Rejection Alerts", description: "Specific alert when a request is rejected" },
-  { key: "assignments", label: "Task Assignments", description: "When a task or request is assigned to you" },
-  { key: "announcements", label: "Announcements", description: "Company-wide announcements and notices" },
+const PREF_ROWS: { key: keyof Preferences; label: string; description: string; icon: React.ReactNode }[] = [
+  { key: "emailEnabled", label: "Email Notifications", description: "Receive notifications via email", icon: <Mail className="h-4 w-4" aria-hidden="true" /> },
+  { key: "inAppEnabled", label: "In-App Notifications", description: "Show notification bell in the app", icon: <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> },
+  { key: "approvals", label: "Approval Decisions", description: "When your request is approved or rejected", icon: <UserPlus className="h-4 w-4" aria-hidden="true" /> },
+  { key: "rejections", label: "Rejection Alerts", description: "Specific alert when a request is rejected", icon: <XCircle className="h-4 w-4" aria-hidden="true" /> },
+  { key: "assignments", label: "Task Assignments", description: "When a task or request is assigned to you", icon: <Megaphone className="h-4 w-4" aria-hidden="true" /> },
+  { key: "announcements", label: "Announcements", description: "Company-wide announcements and notices", icon: <Info className="h-4 w-4" aria-hidden="true" /> },
 ];
 
 function iconForType(type: string) {
@@ -153,16 +152,12 @@ export default function NotificationPreferencesPage() {
         subtitle="Manage how and when you receive notifications"
       />
 
-      {/* Session 10 (R9-D): the reference renders a 3-col mini-centered
-          stat row — Unread / Total / a Mark All Read button card
-          (the header carries no actions there). Session 11 (R10-R): the
-          button card's interior is `p-4 flex items-center justify-center`
-          (content-height, TOP-aligned in the stretched 86px cell — the
-          button sits at y=121, not vertically centered) with an
-          h-8 outline button (12px, CheckCheck mr-1). */}
+      {/* Session 13 (R12-A): the reference's stat row — text-xs labels
+          (16px line, 86px tiles) with per-tile value colors (Unread
+          red-500, Total blue-600) + the Mark All Read button card. */}
       <div className="grid grid-cols-3 gap-4">
-        <StatCard variant="mini-centered" label="Unread" value={unread} />
-        <StatCard variant="mini-centered" label="Total" value={total} />
+        <StatCard variant="mini-centered" label="Unread" value={unread} labelClassName="text-xs text-slate-500" valueClassName="text-red-500" />
+        <StatCard variant="mini-centered" label="Total" value={total} labelClassName="text-xs text-slate-500" valueClassName="text-blue-600" />
         <Card>
           <CardContent className="flex items-center justify-center p-4">
             <Button variant="outline" size="sm" onClick={onMarkAllRead} disabled={marking || unread === 0}>
@@ -173,12 +168,15 @@ export default function NotificationPreferencesPage() {
         </Card>
       </div>
 
+      {/* Session 13 (R12-A): title-only header; preference rows carry
+          border-b + 32px icon chips (p-2 bg-slate-100 rounded-lg) with
+          gap-3 clusters; the save row is pt-2 justify-end with an iconed
+          button — REF-measured. */}
       <Card>
         <CardHeader>
           <CardTitle>Notification Preferences</CardTitle>
-          <CardDescription>Choose what you get notified about and how.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-1">
+        <CardContent className="p-6 pt-0 space-y-4">
           {prefs === null ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -187,11 +185,14 @@ export default function NotificationPreferencesPage() {
             PREF_ROWS.map((row) => (
               <div
                 key={row.key}
-                className="flex items-center justify-between gap-4 rounded-lg px-3 py-3 hover:bg-secondary/40"
+                className="flex items-center justify-between py-3 border-b last:border-0"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{row.label}</p>
-                  <p className="text-xs text-muted-foreground">{row.description}</p>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-100 rounded-lg">{row.icon}</div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{row.label}</p>
+                    <p className="text-xs text-slate-500">{row.description}</p>
+                  </div>
                 </div>
                 <Switch
                   checked={prefs[row.key]}
@@ -201,27 +202,29 @@ export default function NotificationPreferencesPage() {
               </div>
             ))
           )}
+          <div className="pt-2 flex justify-end">
+            <Button onClick={onSavePreferences} disabled={savingPrefs || prefs === null}>
+              {savingPrefs ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
+              Save Preferences
+            </Button>
+          </div>
         </CardContent>
-        <CardFooter className="justify-end">
-          <Button onClick={onSavePreferences} disabled={savingPrefs || prefs === null}>
-            {savingPrefs ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-            Save Preferences
-          </Button>
-        </CardFooter>
       </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Recent Notifications</CardTitle>
-          <CardDescription>The latest events across your HR account.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6 pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : notifications.length === 0 ? (
-            <EmptyState title="No notifications yet" description="You're all caught up." />
+            <div className="text-center py-8 text-slate-400">
+              <FileText className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
+              <p className="text-sm">No notifications yet</p>
+            </div>
           ) : (
             <div className="flex flex-col gap-1">
               {notifications.map((n) => (

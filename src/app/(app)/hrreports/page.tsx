@@ -5,7 +5,6 @@ import { Download, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -157,34 +156,37 @@ export default function HRReportsPage() {
         size="md"
         title="HR Reports & Analytics"
         subtitle="Create custom charts and export data for management reviews"
+        subtitleClassName="mt-0 text-slate-500"
+        actionsClassName="flex gap-2"
         actions={
           <>
             <Button variant="outline" onClick={exportCsv}>
-              <Download aria-hidden="true" />
+              <Download className="mr-2" aria-hidden="true" />
               Export CSV
             </Button>
             <Button variant="outline" onClick={() => window.print()}>
-              <Printer aria-hidden="true" />
+              <Printer className="mr-2" aria-hidden="true" />
               Export PDF
             </Button>
           </>
         }
       />
 
-      {/* Session 10 (R9-D): the reference's report builder is a compact
-          filter row — a bare card (no title/description) with a p-5
-          interior of 169px label+control columns (Data Source / From /
-          To / Group By / Chart Type, all 36px controls with 12px labels;
-          card 106px tall). Our Status Filter rides as the sixth column —
+      {/* Session 13 (R12-B): the reference's report builder is a GRID —
+          `grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4` of BARE
+          field divs (no flex wrapper — the inline label + newline
+          whitespace replicate the REF's 64px line-box stacking),
+          `text-xs text-slate-500 font-medium` labels, mt-1 controls.
+          Card 106px tall. Our Status Filter rides as the sixth column —
           a documented superset that fills the row without growing the
           card. */}
       <Card>
         <CardContent className="p-5">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-source">Data Source</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div>
+              <label htmlFor="hr-source" className="text-xs text-slate-500 font-medium">Data Source</label>
               <Select value={source} onValueChange={setSource}>
-                <SelectTrigger id="hr-source" className="w-full">
+                <SelectTrigger id="hr-source" className="mt-1 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -192,18 +194,18 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-from">From Date</Label>
-              <Input id="hr-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <div>
+              <label htmlFor="hr-from" className="text-xs text-slate-500 font-medium">From Date</label>
+              <Input id="hr-from" type="date" className="mt-1" value={from} onChange={(e) => setFrom(e.target.value)} />
             </div>
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-to">To Date</Label>
-              <Input id="hr-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <div>
+              <label htmlFor="hr-to" className="text-xs text-slate-500 font-medium">To Date</label>
+              <Input id="hr-to" type="date" className="mt-1" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-group">Group By</Label>
+            <div>
+              <label htmlFor="hr-group" className="text-xs text-slate-500 font-medium">Group By</label>
               <Select value={groupBy} onValueChange={setGroupBy}>
-                <SelectTrigger id="hr-group" className="w-full">
+                <SelectTrigger id="hr-group" className="mt-1 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,10 +217,10 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-chart">Chart Type</Label>
+            <div>
+              <label htmlFor="hr-chart" className="text-xs text-slate-500 font-medium">Chart Type</label>
               <Select value={chartType} onValueChange={(v) => setChartType(v as ReportChartType)}>
-                <SelectTrigger id="hr-chart" className="w-full">
+                <SelectTrigger id="hr-chart" className="mt-1 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -230,10 +232,10 @@ export default function HRReportsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-[169px] shrink-0 flex-col gap-1.5">
-              <Label htmlFor="hr-status">Status Filter</Label>
+            <div>
+              <label htmlFor="hr-status" className="text-xs text-slate-500 font-medium">Status Filter</label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger id="hr-status" className="w-full">
+                <SelectTrigger id="hr-status" className="mt-1 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -250,9 +252,9 @@ export default function HRReportsPage() {
       </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="mini-centered" label="Total Records" value={loading ? "…" : stats.totalRecords} />
-        <StatCard variant="mini-centered" label="Unique Groups" value={loading ? "…" : stats.uniqueGroups} />
-        <StatCard variant="mini-centered" label="Active/Approved" value={loading ? "…" : stats.activeCount} />
+        <StatCard variant="mini-centered" label="Total Records" value={loading ? "…" : stats.totalRecords} labelClassName="text-slate-500" valueClassName="text-blue-600" />
+        <StatCard variant="mini-centered" label="Unique Groups" value={loading ? "…" : stats.uniqueGroups} labelClassName="text-slate-500" valueClassName="text-orange-500" />
+        <StatCard variant="mini-centered" label="Active/Approved" value={loading ? "…" : stats.activeCount} labelClassName="text-slate-500" valueClassName="text-purple-600" />
       </div>
 
       {/* Session 12 (R11-U): the reference's chart card — title-only
@@ -279,7 +281,7 @@ export default function HRReportsPage() {
             </Button>
           </div>
         </div>
-        <CardContent className="px-0 pb-0">
+        <CardContent className="p-6 pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

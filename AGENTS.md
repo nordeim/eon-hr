@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 265 specs) |
+| Unit tests | `bun run test` (Vitest, 285 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -303,6 +303,53 @@ reference — never re-add it.
 - **securitysettings (R11-S)**: plain `p-4 bg-slate-50 rounded-lg` rows
   (switch + label + description inline) + compact recommendation rows;
   the danger-zone alert keeps its p-6 wrapper.
+
+## Session-13 recipe layer (parity round 12)
+
+- **notificationpreferences (R12-A)**: stat tiles are `mini-centered`
+  with `labelClassName="text-xs text-slate-500"` (16px line — 86px
+  tiles) + per-tile value colors (Unread `text-red-500`, Total
+  `text-blue-600`); both card headers are TITLE-ONLY (no CardDescription);
+  preference rows are `flex items-center justify-between py-3 border-b
+  last:border-0` (61px) with a left `flex items-center gap-3` cluster —
+  32×32 icon chip (`p-2 bg-slate-100 rounded-lg`, 16px icon) + text column
+  (`p text-sm font-medium text-slate-800` + `p text-xs text-slate-500`);
+  the save row is `pt-2 flex justify-end` (44px) with an iconed button
+  (Save mr-2, 185×36); the recent-notifications empty is the SIMPLE
+  recipe — `text-center py-8 text-slate-400` + 32px icon mb-2 + one
+  text-sm P (no EmptyState, no h3).
+- **hrreports (R12-B/C/D/G)**: the report-builder toolbar is a GRID
+  (`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4`) of BARE field
+  divs — the inline `<label class="text-xs text-slate-500 font-medium">`
+  + newline whitespace + mt-1 control replicate the reference's 64px
+  line-box stacking (do NOT wrap the field in flex — it changes the
+  height); the header subtitle is FLUSH under the h1
+  (`subtitleClassName="mt-0 text-slate-500"` — 52px title block) unlike
+  the other md-size pages; the actions cluster is `flex gap-2` with
+  mr-2 iconed buttons (145/144px); stat values carry per-tile colors
+  (blue-600 / orange-500 / purple-600) with `text-slate-500` labels; the
+  data-table container keeps the card's horizontal padding (`p-6 pt-0`,
+  no full-bleed px-0).
+- **analytics (R12-E)** — distinct from analyticsdashboard: STACKED stat
+  tiles (`tile-right` variant — label text-sm slate-500 on TOP, value
+  text-3xl bold mt-2, hint text-xs slate-500 mt-2, 48×48 tile top-right,
+  138px cards) in `grid md:grid-cols-4 gap-6`; chart cards carry
+  border-b headers (`p-6 border-b border-slate-200`, DIV title
+  `font-semibold leading-none tracking-tight`, no description) + `p-6`
+  content with 300px charts in `grid lg:grid-cols-2 gap-6` (548px
+  tiles); the Onboarding Summary is `grid md:grid-cols-3 gap-8` of plain
+  text stacks (label `text-sm text-slate-500 mb-2` + value `text-2xl
+  font-bold` in slate-900/green-600/indigo-600 — no icons, no borders);
+  charts render UNCONDITIONALLY (no EmptyState gating).
+- **staffrequests (R12-F)**: the `My Requests (N)` trigger is `px-3 py-1`
+  (137px inside the 145px pill) — NOT `h-7 px-4` (145px); the pill carries
+  no self-start.
+- **PageHeader prop additions (R12-D)**: `subtitleClassName` and
+  `actionsClassName` allow per-page overrides; the DEFAULTS are unchanged
+  (mt-1 subtitle, gap-3 cluster).
+- **StatCard prop additions (R12-A/G/E)**: `labelClassName` (per-page
+  label size/color override); `tile-right` now renders the stacked
+  recipe and its own hint (the generic hint is skipped for tile-right).
 
 ## Page architecture (session 6) — where padding and gradients live
 

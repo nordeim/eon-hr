@@ -79,6 +79,8 @@ export function PageHeader({
   size = "lg",
   layout = "raised-48",
   titleClassName,
+  subtitleClassName,
+  actionsClassName,
   className,
   mobileKicker = false,
   mobileKickerTitle,
@@ -92,7 +94,14 @@ export function PageHeader({
   iconClassName?: string;
   title: string;
   subtitle?: string;
+  /** Session 13 (R12-D): per-page subtitle override — hrreports' subtitle
+   *  sits flush under the h1 (no mt-1; 52px title block), unlike the other
+   *  md-size pages (nprefs/staffrequests/workflowconfig keep mt-1). */
+  subtitleClassName?: string;
   actions?: React.ReactNode;
+  /** Session 13 (R12-D): per-page actions-cluster override — hrreports'
+   *  cluster is `flex gap-2` (REF-measured 284px), not the default gap-3. */
+  actionsClassName?: string;
   /** Bare-page title size (no badge): "lg" = 30px h1 + 16px slate-500 sub;
    *  "md" = 24px h1 + 14px sub (announcements). */
   size?: "lg" | "md";
@@ -198,14 +207,15 @@ export function PageHeader({
           <p
             className={cn(
               hasBadge ? recipe.sub : "mt-1 text-slate-500",
-              !hasBadge && size === "md" && "text-sm"
+              !hasBadge && size === "md" && "text-sm",
+              subtitleClassName
             )}
           >
             {subtitle}
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-3 shrink-0">{actions}</div> : null}
+      {actions ? <div className={cn("flex flex-wrap items-center gap-3 shrink-0", actionsClassName)}>{actions}</div> : null}
       </div>
     </>
   );

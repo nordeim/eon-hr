@@ -1,9 +1,8 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { EmptyState } from "@/components/shared/empty-state";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CircleCheckBig, CircleCheckBig as CheckCircle2, Clock, ClipboardList, ListChecks, Users } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Calendar, CircleCheckBig, Clock, Users } from "lucide-react";
 import { DepartmentCompletionBar, type DeptCompletion, type StatusSlice, EmployeeStatusPie } from "./charts";
 import { daysBetween } from "@/lib/utils";
 
@@ -113,11 +112,10 @@ export default async function AnalyticsPage() {
         subtitle="Track your onboarding performance and metrics"
       />
 
-      {/* Reference top row (session-4 live measurement): FOUR stat cards with
-          48px colored icon tiles (rounded-xl) — blue/purple/green/orange
-          100 backgrounds, 24px -600 icons, 30px values, 14px/400 labels.
-          The templates count is card 1's hint in the reference. */}
-      <div className="grid gap-6 md:grid-cols-4">
+      {/* Session 13 (R12-E): the reference's stat row — STACKED tiles
+          (label on top, 30px value mt-2, text-xs hint mt-2, 48×48 tile
+          top-right; 138px cards), `grid md:grid-cols-4 gap-6`. */}
+      <div className="grid md:grid-cols-4 gap-6">
         <StatCard variant="tile-right"
           label="Total Employees"
           value={employeeCount}
@@ -152,68 +150,53 @@ export default async function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* Session 13 (R12-E): the reference's chart row — `grid
+          lg:grid-cols-2 gap-6` (548px tiles); cards carry border-b
+          headers with leading-none DIV titles (no descriptions) and
+          render the charts UNCONDITIONALLY (zero-data included). */}
+      <div className="grid lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Employee Status Distribution</CardTitle>
-            <CardDescription>Active vs. on-leave, suspended and terminated staff</CardDescription>
+          <CardHeader className="p-6 border-b border-slate-200">
+            <div className="font-semibold leading-none tracking-tight">Employee Status Distribution</div>
           </CardHeader>
-          <CardContent>
-            {statusSlices.length === 0 ? (
-              <EmptyState title="No data yet" description="Add employees to see the status split." />
-            ) : (
-              <EmployeeStatusPie data={statusSlices} />
-            )}
+          <CardContent className="p-6">
+            <EmployeeStatusPie data={statusSlices} />
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Department Task Completion</CardTitle>
-            <CardDescription>Onboarding task completion rate per department</CardDescription>
+          <CardHeader className="p-6 border-b border-slate-200">
+            <div className="font-semibold leading-none tracking-tight">Department Task Completion</div>
           </CardHeader>
-          <CardContent>
-            {deptCompletion.length === 0 ? (
-              <EmptyState
-                title="No data yet"
-                description="Start onboarding processes to track task completion."
-              />
-            ) : (
-              <DepartmentCompletionBar data={deptCompletion} />
-            )}
+          <CardContent className="p-6">
+            <DepartmentCompletionBar data={deptCompletion} />
           </CardContent>
         </Card>
       </div>
 
+      {/* Session 13 (R12-E): the reference's Onboarding Summary — border-b
+          header (title-only) + `grid md:grid-cols-3 gap-8` of plain text
+          stacks: text-sm slate-500 label mb-2 over a text-2xl bold value
+          (slate-900 / green-600 / indigo-600). No icons, no borders. */}
       <Card>
-        <CardHeader>
-          <CardTitle>Onboarding Summary</CardTitle>
-          <CardDescription>Overall onboarding activity across templates and processes</CardDescription>
+        <CardHeader className="p-6 border-b border-slate-200">
+          <div className="font-semibold leading-none tracking-tight">Onboarding Summary</div>
         </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <ListChecks className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">Total Tasks Created</dt>
-                <dd className="text-xl font-semibold text-foreground">{tasksTotal}</dd>
-              </div>
+        <CardContent className="p-6">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <p className="text-sm text-slate-500 mb-2">Total Tasks Created</p>
+              <p className="text-2xl font-bold text-slate-900">{tasksTotal}</p>
             </div>
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">Completed Onboardings</dt>
-                <dd className="text-xl font-semibold text-foreground">{completedOnboardings}</dd>
-              </div>
+            <div>
+              <p className="text-sm text-slate-500 mb-2">Completed Onboardings</p>
+              <p className="text-2xl font-bold text-green-600">{completedOnboardings}</p>
             </div>
-            <div className="flex items-center gap-3 rounded-lg border bg-secondary/30 p-4">
-              <ClipboardList className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-              <div>
-                <dt className="text-sm text-muted-foreground">Templates Created</dt>
-                <dd className="text-xl font-semibold text-foreground">{templateCount}</dd>
-              </div>
+            <div>
+              <p className="text-sm text-slate-500 mb-2">Templates Created</p>
+              <p className="text-2xl font-bold text-indigo-600">{templateCount}</p>
             </div>
-          </dl>
+          </div>
         </CardContent>
       </Card>
     </div>

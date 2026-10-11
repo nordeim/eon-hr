@@ -49,6 +49,9 @@ interface StatCardProps {
   /** @deprecated use tileClassName — kept for call-site compatibility. */
   iconClassName?: string;
   valueClassName?: string;
+  /** Session 13 (R12-A/G): per-page label override (text-xs slate-500 on
+   *  notificationpreferences; text-slate-500 on hrreports). */
+  labelClassName?: string;
   /** Reference variant (session-10 map) — default "standard". */
   variant?: StatCardVariant;
   className?: string;
@@ -80,7 +83,9 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   horizontal: "text-2xl font-bold text-slate-900",
   "value-in-tile": "text-lg font-bold text-slate-700",
   "no-tile": "text-3xl font-bold text-slate-900",
-  "tile-right": "text-3xl font-bold text-slate-900",
+  // Session 13 (R12-E): the stacked tile-right value carries mt-2 (the
+  // label sits above it — measured on /analytics, 138px tiles).
+  "tile-right": "text-3xl font-bold text-slate-900 mt-2",
 };
 
 /** Session 11 (R10-J): the reference's mini label is text-xs slate-500
@@ -112,6 +117,10 @@ export function StatCard({
   tileClassName,
   iconClassName,
   valueClassName,
+  /** Session 13 (R12-A/G): per-page label override — the reference's
+   *  notificationpreferences tiles use text-xs slate-500 (16px line,
+   *  86px tiles) while hrreports keeps text-sm slate-500 (20px, 90px). */
+  labelClassName,
   variant = "standard",
   className,
 }: StatCardProps) {
@@ -137,7 +146,7 @@ export function StatCard({
   const textBlock = (
     <>
       <p className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</p>
-      <div className={cn("text-sm text-slate-600", VARIANT_LABEL[variant])}>{label}</div>
+      <div className={cn("text-sm text-slate-600", VARIANT_LABEL[variant], labelClassName)}>{label}</div>
     </>
   );
 
@@ -169,19 +178,27 @@ export function StatCard({
             <div className="min-w-0">{textBlock}</div>
           </>
         ) : variant === "tile-right" ? (
-          <>
-            <div className="mb-3 flex items-center justify-between">
-              {textBlock}
-              {tileElement}
+          /* Session 13 (R12-E): the reference's stacked stat tile — label
+             (text-sm slate-500) on TOP, value (text-3xl bold mt-2) below,
+             delta (text-xs slate-500 mt-2) under it; the 48×48 tile rides
+             top-right. 138px card, measured on /analytics. */
+          <div className="flex items-start justify-between">
+            <div>
+              <div className={cn("text-sm text-slate-500", labelClassName)}>{label}</div>
+              <p className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</p>
+              {hint ? <p className="mt-2 text-xs text-slate-500">{hint}</p> : null}
             </div>
-          </>
+            {tileElement}
+          </div>
         ) : (
           <>
             <div className="mb-3 flex items-start justify-between">{tileElement}</div>
             {textBlock}
           </>
         )}
-        {hint ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
+        {/* Session 13 (R12-E): tile-right renders its own hint inside the
+            stacked branch (text-slate-500 mt-2) — skip the generic one. */}
+        {hint && variant !== "tile-right" ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
       </CardContent>
     </Card>
   );

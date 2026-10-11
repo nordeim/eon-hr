@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.5.0 (session-12 remediation complete) · **Last updated:**
-> 2026-10-11 · **State:** 265 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 2.6.0 (session-13 remediation complete) · **Last updated:**
+> 2026-10-11 · **State:** 285 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -1069,3 +1069,45 @@ rows separated by a 24px gap. R11-page cards carry `border-slate-200` +
 **securitysettings (R11-S):** plain `p-4 bg-slate-50 rounded-lg` rows
 (switch + label + description inline, no Card furniture) + compact
 recommendation rows; the danger-zone alert keeps its p-6 wrapper.
+
+## 25. Session-13 Recipe Layer — parity round 12
+
+**notificationpreferences (R12-A):** stat tiles 86px — `mini-centered`
+with `labelClassName="text-xs text-slate-500"` (16px line) + per-tile
+value colors (Unread red-500, Total blue-600). Card headers title-only.
+Preference rows `flex items-center justify-between py-3 border-b
+last:border-0` (61px) with a `flex items-center gap-3` cluster: 32×32
+icon chip (`p-2 bg-slate-100 rounded-lg`, 16px icon) + text column (p
+text-sm font-medium text-slate-800 + p text-xs text-slate-500). Save row
+`pt-2 flex justify-end` (44px) with an iconed button (Save mr-2, 185×36).
+The recent-notifications empty is the SIMPLE recipe: `text-center py-8
+text-slate-400` + 32px icon mb-2 + one text-sm P — no EmptyState, no h3.
+
+**hrreports (R12-B/C/D/G):** the toolbar is `grid grid-cols-2
+md:grid-cols-4 lg:grid-cols-6 gap-4` of BARE field divs — an inline
+`<label class="text-xs text-slate-500 font-medium">` + newline
+whitespace + mt-1 control replicate the reference's 64px line-box
+stacking (a flex wrapper changes the height — do not use one). The
+header subtitle is FLUSH under the h1 (`subtitleClassName="mt-0
+text-slate-500"`, 52px title block) — hrreports is the exception; the
+other md-size pages keep mt-1. Actions cluster `flex gap-2` with mr-2
+iconed Export buttons (145/144px). Stat values blue-600/orange-500/
+purple-600 with text-slate-500 labels. The data table keeps the card's
+horizontal padding (`p-6 pt-0` — no full-bleed px-0).
+
+**analytics (R12-E)** — distinct from analyticsdashboard: stacked stat
+tiles (the `tile-right` variant: label text-sm slate-500 on top, value
+text-3xl bold mt-2, hint text-xs slate-500 mt-2, 48×48 tile top-right;
+138px cards) in `grid md:grid-cols-4 gap-6`; chart cards with border-b
+headers (DIV `font-semibold leading-none tracking-tight`, no
+description) + p-6 content with 300px charts in `grid lg:grid-cols-2
+gap-6` (548px tiles); Onboarding Summary = `grid md:grid-cols-3 gap-8`
+plain text stacks (label text-sm slate-500 mb-2 + value text-2xl bold,
+slate-900/green-600/indigo-600); charts render UNCONDITIONALLY.
+
+**staffrequests (R12-F):** the My Requests trigger is `px-3 py-1`
+(137px in the 145px pill) — not h-7 px-4; no self-start on the pill.
+
+**Component prop additions:** PageHeader `subtitleClassName` +
+`actionsClassName` (defaults unchanged); StatCard `labelClassName`
+(tile-right renders its own hint — the generic one is skipped for it).

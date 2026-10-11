@@ -834,3 +834,122 @@ describe("horizontal StatCard precision (session 12, R11-D)", () => {
     expect(src).toContain("bg-red-100");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 13 — parity round 12 pins (R12-A…R12-G)
+// ---------------------------------------------------------------------------
+
+describe("notificationpreferences recipes (session 13, R12-A)", () => {
+  const page = read("src", "app", "(app)", "notificationpreferences", "page.tsx");
+
+  it("stat tiles use text-xs labels (16px line — 86px tiles)", () => {
+    expect(page).toContain('labelClassName="text-xs text-slate-500"');
+  });
+
+  it("stat values carry per-tile colors (unread red-500, total blue-600)", () => {
+    expect(page).toContain("text-red-500");
+    expect(page).toContain("text-blue-600");
+  });
+
+  it("card headers are title-only (no CardDescription)", () => {
+    expect(page).not.toContain("CardDescription");
+  });
+
+  it("preference rows: border-b last:border-0 + icon chip + gap-3", () => {
+    expect(page).toContain("border-b last:border-0");
+    expect(page).toContain("p-2 bg-slate-100 rounded-lg");
+    expect(page).toContain("flex items-center gap-3");
+  });
+
+  it("save row is pt-2 flex justify-end with an iconed button", () => {
+    expect(page).toContain("pt-2 flex justify-end");
+  });
+
+  it("recent-notifications empty is the simple py-8 recipe (no EmptyState)", () => {
+    expect(page).not.toContain("EmptyState");
+    expect(page).toMatch(/text-center py-8/);
+  });
+});
+
+describe("hrreports toolbar grid + table padding (session 13, R12-B/C)", () => {
+  const page = read("src", "app", "(app)", "hrreports", "page.tsx");
+
+  it("toolbar is a grid (2/4/6 cols, gap-4) of bare field divs", () => {
+    expect(page).toContain("grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4");
+  });
+
+  it("toolbar labels are text-xs text-slate-500 (not Label component text-sm)", () => {
+    expect(page).toContain("text-xs text-slate-500 font-medium");
+  });
+
+  it("table container keeps the card's horizontal padding (no full-bleed)", () => {
+    expect(page).not.toContain("px-0 pb-0");
+  });
+});
+
+describe("hrreports header + stat colors (session 13, R12-D/G)", () => {
+  const page = read("src", "app", "(app)", "hrreports", "page.tsx");
+
+  it("subtitle sits flush under the h1 (no mt-1)", () => {
+    expect(page).not.toContain("mt-1 text-slate-500");
+  });
+
+  it("header actions cluster is flex gap-2", () => {
+    expect(page).toContain("flex gap-2");
+  });
+
+  it("stat values carry per-tile colors (blue/orange/purple)", () => {
+    expect(page).toContain("text-blue-600");
+    expect(page).toContain("text-orange-500");
+    expect(page).toContain("text-purple-600");
+  });
+});
+
+describe("analytics stacked tiles + chart cards (session 13, R12-E)", () => {
+  const page = read("src", "app", "(app)", "analytics", "page.tsx");
+  const charts = read("src", "app", "(app)", "analytics", "charts.tsx");
+
+  it("stat grid is md:grid-cols-4 gap-6", () => {
+    expect(page).toContain("md:grid-cols-4 gap-6");
+  });
+
+  it("chart grid is lg:grid-cols-2 gap-6 (548px tiles)", () => {
+    expect(page).toContain("lg:grid-cols-2 gap-6");
+  });
+
+  it("chart cards use border-b headers with leading-none DIV titles", () => {
+    expect(page).toContain("border-b border-slate-200");
+    expect(page).toContain("font-semibold leading-none tracking-tight");
+  });
+
+  it("chart heights are 300px", () => {
+    expect(charts).toMatch(/height=\{300\}/);
+  });
+
+  it("onboarding summary is plain text stacks (grid md:grid-cols-3 gap-8)", () => {
+    expect(page).toContain("md:grid-cols-3 gap-8");
+    expect(page).not.toContain("<dl");
+  });
+});
+
+describe("StatCard stacked variant (session 13, R12-E)", () => {
+  const statCard = read("src", "components", "shared", "stat-card.tsx");
+
+  it("tile-right renders label-top, value mt-2, hint mt-2, icon right", () => {
+    expect(statCard).toContain("flex items-start justify-between");
+    expect(statCard).toContain("mt-2");
+  });
+});
+
+describe("staffrequests trigger (session 13, R12-F)", () => {
+  const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
+
+  it("tab trigger is px-3 py-1 (137px, not h-7 px-4)", () => {
+    expect(page).not.toContain("h-7 px-4");
+    expect(page).toMatch(/rounded-md px-3 py-1/);
+  });
+
+  it("pill drops self-start (reference parent is bare)", () => {
+    expect(page).not.toContain("self-start");
+  });
+});

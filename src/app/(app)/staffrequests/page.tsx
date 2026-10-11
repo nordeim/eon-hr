@@ -232,7 +232,8 @@ export default function StaffRequestsPage() {
           with the 16px icon at left-3 top-2.5 + All Categories 160px +
           All Status 144px at y=112), then the segmented `My Requests (N)`
           toggle (`inline-flex h-9 items-center justify-center rounded-lg
-          bg-muted p-1`, trigger h-7 137px), then the card (mt-2) with the
+          bg-muted p-1`, trigger px-3 py-1 137px — session 13 R12-F
+          re-measured), then the card (mt-2) with the
           py-16 empty state (48px FileText icon + one slate-500 line + the
           207x36 CTA — measured y=280/340/380). */}
       <div className="flex flex-wrap gap-3">
@@ -273,13 +274,13 @@ export default function StaffRequestsPage() {
       </div>
 
       <div className="flex flex-col">
-      <div className="inline-flex h-9 self-start items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
         <button
           type="button"
           aria-pressed={scope === "mine"}
           onClick={() => setScope(scope === "mine" ? "all" : "mine")}
           className={cn(
-            "inline-flex h-7 items-center justify-center whitespace-nowrap rounded-md px-4 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
             scope === "mine" ? "bg-background text-foreground shadow" : "hover:text-foreground"
           )}
         >

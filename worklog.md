@@ -463,3 +463,28 @@ Work Log:
 Stage Summary:
 - Parity round 11 complete (reconstructed): 22 gap groups fixed — sidebar footer cluster, EmptyState variants, systemic table recipe, DIV-title headers, documenttracker/evaluations/analyticsdashboard restructures, chart-page heights, employees zero-render, communications/securitysettings recipes — every fixed surface verified live against the reference
 - 265 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 25 (session 13 / parity round 12)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, audit (redeploy check + mobile nav + 46-route sweep + session-17 deep-dives), TDD remediation of 6 gap groups, docs, commit + push
+
+Work Log:
+- Workspace survived at 949fabd; git pull → edcca43 (docs/session_17.md, the round-11 transcript); integrity verified (.env file:../db/custom.db, db/ at root, pristine seed); shell DATABASE_URL trap re-armed (points at a nonexistent external path now) — all DB/build commands guarded env -u DATABASE_URL
+- Baseline gates: lint 0/0, tsc, 265/265 unit, build, 86/86 E2E — the 949fabd state exactly; static audit of the R11 diff clean (no any/secrets/dangerous patterns)
+- Sandbox reaps background servers between tool calls — built scripts/ensure-server.sh guard + named agent-browser sessions (loc/ref) for the dual-browser audit
+- Redeploy check: route h1s + sidebar footer byte-identical — REF unchanged since round 11
+- Mobile navigation audit (user priority): top bar, bottom tabs, drawer, submenu, kicker + scroll-away, md boundary — ALL byte-identical; no Tailwind v4 bug; the clone's sr-only drawer heading documented as a11y superset
+- 46-route sweep: 4 real gap groups + documented categories (h1 block-width DOM furniture on 8 pages — zero visual impact; REF's own bugs: attendance docW 1558, recruitmentkanban docW 1664, employeeselfservice stuck loading)
+- Session-17 suggested deep-dives: loans empty state byte-identical; staffrequests trigger delta found (R12-F); data-injected audit passed (dept + payroll + expense injected, tables render 61px data rows, analytics data-driven) with DB restored + verified pristine
+- docs/remediation-plan-session13.md written (R12-A…F) + codebase-validated
+- TDD: 20 new pins (19 RED + 1 refined) → GREEN: StatCard labelClassName + tile-right stacked rebuild (own hint); PageHeader subtitleClassName/actionsClassName (defaults unchanged; 1 stale session-9 pin updated); notificationpreferences full recipe (text-xs labels, red/blue value colors, title-only headers, border-b rows + 32px icon chips, pt-2 save row + iconed button, simple py-8 empty); hrreports (toolbar grid of bare 64px fields, mt-0 subtitle, gap-2 actions + mr-2 icons, blue/orange/purple stats, p-6 table container); analytics (138px stacked tiles, border-b chart cards + 300px unconditional charts, plain-text summary); staffrequests px-3 py-1 trigger
+- Gates: lint 0/0, tsc, 285/285 unit (+20), build, 86/86 E2E
+- Live verification (stale-server trap diagnosed — old next-server survived pkill, killed by PID from ss -tlnp): notificationpreferences 56/86@104/604@214/222@842 byte-exact (mb-3→mb-2 live correction); hrreports 52/106/90/418 byte-exact + stats/interiors verified (table 197 vs 139 = the seeded data row, expected); analytics 64/138@128/415@298/175@745 byte-exact (duplicate-hint bug found + fixed in verification); staffrequests trigger 137×28; mobile regression clean; full-route sweep re-run — fixed surfaces out of the diff
+- 10 screenshots captured/refreshed (30-nprefs, 26-hrreports, 31-analytics, 32-staffrequests + 6 standards + mobile set)
+- Docs: AGENTS.md session-13 layer + 285 specs; SKILL v2.6.0 + §25; PAD [S13] row + Last Updated; CLAUDE.md 371-spec pyramid + session-13 pins; README 285 specs; docs/session_18.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 12 complete: 6 gap groups fixed with 20 new TDD pins — notificationpreferences, hrreports, analytics rebuilt per REF recipes; staffrequests trigger; component prop additions keep all other pages' defaults intact — every fixed surface live-verified byte-exact
+- 285 unit + 86 E2E green; ready for commit + push
