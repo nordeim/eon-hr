@@ -88,8 +88,10 @@ function NavLink({
         // Reference leaf-link recipe (session-5 live measurement): the
         // Base44 app renders leaf links at px-3 py-2.5 gap-3 with 16px
         // icons and mb-1 (40px list pitch) — while its GROUP buttons use
-        // p-2/gap-2 with 20px icons. Hover = custom-accent-bg (#e4e6eb,
-        // the reference :root --accent-color) plus opacity-80.
+        // p-2/gap-2 with 20px icons. Session 20 (R19-A/B): hover = the
+        // sidebar tokens — bg zinc-100 #F4F4F5 + text #18181B + opacity-80
+        // (REF's hover:bg-sidebar-accent hover:text-sidebar-accent-foreground,
+        // settled-measured; the #e4e6eb pin was stale).
         "flex h-8 items-center gap-3 rounded-lg px-3 py-2.5 text-sm mb-1 outline-none transition-all duration-200 hover:opacity-80",
         // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
         // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
@@ -97,8 +99,8 @@ function NavLink({
         // the dark global ring token.
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         active
-          ? "bg-primary font-medium text-white shadow-sm"
-          : "font-normal text-slate-600 hover:bg-[#e4e6eb]"
+          ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b]"
+          : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b]"
       )}
     >
       <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
@@ -160,7 +162,8 @@ function CollapsibleNavItem({
                   className={cn(
                     // Reference sub-item recipe (byte-verified session 4,
                     // re-verified session 5): h-8 px-3 py-2 gap-3, 16px
-                    // icons, 36px pitch, hover accent + opacity-80.
+                    // icons, 36px pitch. Session 20 (R19-A/B): hover = the
+                    // sidebar tokens — zinc-100 bg + #18181B text + opacity.
                     "flex h-8 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:opacity-80",
                     // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
         // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
@@ -168,8 +171,8 @@ function CollapsibleNavItem({
         // the dark global ring token.
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
                     active
-                      ? "bg-primary font-medium text-white shadow-sm"
-                      : "font-normal text-slate-600 hover:bg-[#e4e6eb]"
+                      ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b]"
+                      : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b]"
                   )}
                 >
                   {ChildIcon ? (
@@ -211,18 +214,23 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
           type="button"
           aria-label="Notifications"
           /* Session 16 (R15-B): the reference's Bell renders slate-600
-             (rgb(71,85,105) measured) — not the muted-foreground token. */
-          className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 transition-colors hover:bg-slate-100 hover:text-foreground"
+             (rgb(71,85,105) measured) — not the muted-foreground token.
+             Session 20 (R19-C): the color lives on the SVG (REF's own class
+             beats the parent's hover color, so the icon STAYS slate-600
+             under hover) and the button hovers accent + accent-foreground. */
+          className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-          <Bell className="h-4 w-4" aria-hidden="true" />
+          <Bell className="h-4 w-4 text-slate-600" aria-hidden="true" />
         </button>
         <button
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
           onClick={() => setDark((d) => !d)}
           /* Session 16 (R15-B): the reference's Moon renders zinc-700
-             (rgb(63,63,70) = #3F3F46 — pinned in the palette). */
-          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-zinc-700 transition-colors hover:bg-slate-100 hover:text-foreground"
+             (rgb(63,63,70) = #3F3F46 — pinned in the palette).
+             Session 20 (R19-C2): ghost hover = accent + accent-foreground
+             (icon inherits → #171717 under hover, REF-measured). */
+          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-zinc-700 transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>
@@ -260,10 +268,11 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           <CircleUser className="h-4 w-4 text-white" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1 text-left">
-          {/* Session 16 (R15-B): the reference renders the user name at
-              zinc-700 #3F3F46 (rgb(63,63,70) measured on the redeployed
-              reference) — the session-6 slate-900 reading is stale. */}
-          <p className="truncate text-sm font-medium text-zinc-700">{user.name}</p>
+          {/* Session 20 (R19-D): the reference renders the user name at
+              slate-900 rgb(15,23,42) (DOM-verified class + computed color;
+              the R15 zinc-700 reading measured the BUTTON's inherited
+              color, not this span). */}
+          <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
           <p className="truncate text-xs text-slate-500">{user.email}</p>
         </div>
       </DropdownMenu.Trigger>
@@ -281,7 +290,7 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           <DropdownMenu.Item asChild>
             <Link
               href="/profile"
-              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors focus:bg-secondary"
+              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground"
             >
               <User className="h-4 w-4" aria-hidden="true" />
               My Profile
@@ -290,7 +299,7 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           <DropdownMenu.Item asChild>
             <Link
               href="/logout"
-              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-red-600 outline-none transition-colors focus:bg-red-50"
+              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-red-600 outline-none transition-colors focus:bg-accent focus:text-accent-foreground"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               Logout

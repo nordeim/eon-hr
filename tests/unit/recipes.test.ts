@@ -74,8 +74,8 @@ describe("sidebar-nav reference recipe (session 5)", () => {
     expect(navLinkBlock).not.toContain("h-5 w-5");
   });
 
-  it("leaf hover uses the reference --accent-color #e4e6eb with opacity-80", () => {
-    expect(sidebarNav).toContain("hover:bg-[#e4e6eb]");
+  it("leaf hover uses the sidebar tokens — zinc-100 bg + #18181B text + opacity-80 (session 20, R19-A)", () => {
+    expect(sidebarNav).toContain("hover:bg-[#f4f4f5] hover:text-[#18181b]");
     expect(sidebarNav).toContain("hover:opacity-80");
     expect(sidebarNav).toContain("transition-all duration-200");
   });
@@ -368,11 +368,11 @@ describe("app-shell canvas + main padding (session 6)", () => {
   });
 });
 
-describe("sidebar user name color (session 6)", () => {
-  it("UserMenu name renders zinc-700 like the reference (session 16 re-measure)", () => {
-    // Session 6 measured slate-900; the redeployed reference renders
-    // rgb(63,63,70) = zinc-700 #3F3F46 (same as the Moon icon — R15-B).
-    expect(sidebarNav).toContain("text-sm font-medium text-zinc-700");
+describe("sidebar user name color (session 6, re-measured session 20)", () => {
+  it("UserMenu name renders slate-900 like the reference (R19-D re-measure)", () => {
+    // Session 20 DOM-verified REF's span class text-slate-900 → rgb(15,23,42);
+    // the R15 zinc-700 reading measured the BUTTON's inherited color.
+    expect(sidebarNav).toContain("text-sm font-medium text-slate-900");
     expect(sidebarNav).not.toContain("text-sm font-medium text-foreground");
   });
 });
@@ -1318,15 +1318,15 @@ describe("tab-pill inactive trigger color (session 16, R15-A)", () => {
   });
 });
 
-describe("sidebar footer colors (session 16, R15-B)", () => {
-  it("Bell ghost icon renders slate-600, Moon ghost icon renders zinc-700", () => {
-    expect(sidebarNav).toMatch(/h-9 w-9[^"]*text-slate-600/);
-    expect(sidebarNav).toMatch(/h-9 w-9[^"]*text-zinc-700/);
+describe("sidebar footer colors (session 16 R15-B; hover re-measured session 20)", () => {
+  it("Bell ghost icon renders slate-600 (on the SVG), Moon ghost icon renders zinc-700", () => {
+    expect(sidebarNav).toMatch(/<Bell className="h-4 w-4 text-slate-600"/);
+    expect(sidebarNav).toMatch(/h-9 w-9 select-none[^"]*text-zinc-700|text-zinc-700[^"]*h-9 w-9 select-none/);
   });
 
-  it("the user name renders zinc-700 (the redeployed reference's measured color, not the stale slate-900)", () => {
-    expect(sidebarNav).toMatch(/<p className="truncate text-sm font-medium text-zinc-700">\{user\.name\}<\/p>/);
-    expect(sidebarNav).not.toMatch(/text-slate-900">\{user\.name\}/);
+  it("the user name renders slate-900 (session 20 re-measure — the R15 zinc-700 reading was the button's inherited color)", () => {
+    expect(sidebarNav).toMatch(/<p className="truncate text-sm font-medium text-slate-900">\{user\.name\}<\/p>/);
+    expect(sidebarNav).not.toMatch(/text-zinc-700">\{user\.name\}/);
   });
 });
 
@@ -1491,5 +1491,116 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
     expect(tabs).toContain(
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     );
+  });
+});
+
+/**
+ * Session-20 parity recipes — the HOVER/ACTIVE dimension (parity round 19).
+ * Every recipe measured live on both apps with real :hover (CDP mouse moves;
+ * LOC probed through the documented v4 @media (hover: hover) polyfill — see
+ * docs/remediation-plan-session20.md). Settled reads (>= 2s) — REF's
+ * transition-all duration-200 produces mid-flight artifacts at ~750ms.
+ */
+describe("session-20 hover recipes (parity round 19)", () => {
+  const employeesPage = read("src", "app", "(app)", "employees", "page.tsx");
+  const staffrequestsPage = read("src", "app", "(app)", "staffrequests", "page.tsx");
+  const loginPage = read("src", "app", "login", "page.tsx");
+  const dropdownMenu = read("src", "components", "ui", "dropdown-menu.tsx");
+
+  it("R19-A: inactive leaf + sub-item hover = sidebar-accent zinc-100 bg + sidebar-accent-foreground text (NOT the stale #e4e6eb)", () => {
+    expect(sidebarNav).toContain("hover:bg-[#f4f4f5] hover:text-[#18181b]");
+    expect(sidebarNav).not.toContain("hover:bg-[#e4e6eb]");
+    expect(sidebarNav).toContain("hover:opacity-80");
+  });
+
+  it("R19-B: the ACTIVE leaf hover flips text to #18181b (bg stays primary; REF's custom-primary-bg beats its hover:bg-sidebar-accent)", () => {
+    expect(sidebarNav).toMatch(
+      /"bg-primary font-medium text-white shadow-sm hover:text-\[#18181b\]"/
+    );
+  });
+
+  it("R19-C: Bell button = ghost hover:bg-accent + hover:text-accent-foreground; the ICON owns text-slate-600 (survives hover)", () => {
+    expect(sidebarNav).toMatch(
+      /aria-label="Notifications"[\s\S]{0,700}?hover:bg-accent hover:text-accent-foreground/
+    );
+    expect(sidebarNav).toMatch(/<Bell className="h-4 w-4 text-slate-600"/);
+    // the BUTTON itself carries no color class (the icon owns it)
+    expect(sidebarNav).toMatch(
+      /className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"/
+    );
+  });
+
+  it("R19-C2: Moon button keeps zinc-700 base + hover:bg-accent hover:text-accent-foreground", () => {
+    expect(sidebarNav).toMatch(
+      /text-zinc-700 transition-colors hover:bg-accent hover:text-accent-foreground/
+    );
+    expect(sidebarNav).not.toContain("hover:text-foreground");
+  });
+
+  it("R19-D: the user name span renders slate-900 (rgb(15,23,42) — DOM-verified class), NOT the stale R15 zinc-700", () => {
+    expect(sidebarNav).toMatch(
+      /<p className="truncate text-sm font-medium text-slate-900">\{user\.name\}<\/p>/
+    );
+    expect(sidebarNav).not.toMatch(/text-sm font-medium text-zinc-700/);
+  });
+
+  it("R19-F: Import CSV = outline + border-blue-300 + text-blue-700 + hover:bg-blue-50 (REF's blue-tinted outline)", () => {
+    const csvBlock = employeesPage.slice(
+      employeesPage.indexOf("Import CSV") - 600,
+      employeesPage.indexOf("Import CSV")
+    );
+    expect(csvBlock).toContain("text-blue-700");
+    expect(csvBlock).toContain("border-blue-300");
+    expect(csvBlock).toContain("hover:bg-blue-50");
+  });
+
+  it("R19-G: staffrequests search placeholder uses REF's three ASCII dots (NOT U+2026)", () => {
+    expect(staffrequestsPage).toContain('placeholder="Search requests..."');
+    expect(staffrequestsPage).not.toContain("Search requests…");
+  });
+
+  it("R19-H: login Sign in carries REF's shadow-sm (rgba(0,0,0,0.05) 0 1px 2px)", () => {
+    const signinBlock = loginPage.slice(
+      loginPage.indexOf("type=\"submit\""),
+      loginPage.indexOf("Sign in</button>")
+    );
+    expect(signinBlock).toContain("shadow-sm");
+  });
+
+  it("R19-I: login forgot link hovers text only — NO underline (REF has none)", () => {
+    const forgotBlock = loginPage.slice(
+      loginPage.indexOf("Forgot password?") - 300,
+      loginPage.indexOf("Forgot password?")
+    );
+    expect(forgotBlock).not.toContain("hover:underline");
+    expect(forgotBlock).toContain("hover:text-slate-700");
+  });
+
+  it("R19-J: mobile hamburger inherits foreground (NO base color class) + hover:bg-slate-100 hover:text-accent-foreground", () => {
+    expect(appShell).toMatch(
+      /className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"/
+    );
+  });
+
+  it("R19-K: mobile bottom tabs have NO hover color change (REF renders none)", () => {
+    const tabsBlock = appShell.slice(
+      appShell.indexOf("min-h-[44px]"),
+      appShell.indexOf("min-h-[44px]") + 700
+    );
+    expect(tabsBlock).toContain('active ? "text-blue-600" : "text-slate-600"');
+    expect(tabsBlock).not.toContain("hover:text-foreground");
+  });
+
+  it("R19-L: dropdown primitive items focus in accent + accent-foreground (NOT secondary)", () => {
+    expect(dropdownMenu).toContain("focus:bg-accent focus:text-accent-foreground");
+    expect(dropdownMenu).not.toContain("focus:bg-secondary");
+  });
+
+  it("R19-L: sidebar user-menu items — My Profile accent recipe; Logout keeps text-red-600 but drops focus:bg-red-50", () => {
+    const menuBlock = sidebarNav.slice(sidebarNav.indexOf("function UserMenu"));
+    expect(menuBlock).toContain("focus:bg-accent focus:text-accent-foreground");
+    expect(menuBlock).not.toContain("focus:bg-secondary");
+    expect(menuBlock).not.toContain("focus:bg-red-50");
+    expect(menuBlock).toContain("text-red-600");
   });
 });

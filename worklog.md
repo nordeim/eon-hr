@@ -647,3 +647,31 @@ Work Log:
 Stage Summary:
 - Parity round 18 complete: 7 focus-ring gap groups fixed with 10 new TDD pins — the interaction dimension opened and closed (Tab order byte-identical; every ring recipe now matches REF's taxonomy), plus the final unswept viewport band (sub-390) audited clean
 - 373 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 32 (session 20 / parity round 19)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, skills-assisted audit (redeploy check + mobile nav + the FIRST hover/active-state dimension), TDD remediation of 12 gap groups, docs, commit + push
+
+Work Log:
+- Workspace survived at e58abcc (git pull added session_31.md only); .env intact (file:../db/custom.db); DB pristine (users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on DB/build commands
+- Baseline gates: lint 0/0, tsc, 373/373 unit, build, 86/86 E2E — the e58abcc state exactly; static audit of the R18 diff clean (one "any" = "Company" in a comment)
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions authenticated (the documented password-fill flake hit both — manual refill); probe scripts: r19-hover/hover2/hover3/login + cdp-test + hover-emul + mobile + verify-r19 (persisted in scripts/)
+- Redeploy check: 12 routes byte-identical — REF unchanged since R18
+- Mobile navigation audit (user priority): top bar 390×73, tabs x 10/79/139/204/313 + active rgb(37,99,235), drawer 288×844 #FAFAFA z-50 (links 141/301/421/461/581, footer 121@723, no close), kickers (standard 53 + profile 69), md boundary 767/800 — ALL byte-identical; no Tailwind v4 bug
+- NEW: FIRST hover/active-state audit (24 surfaces, real CDP hovers, computed dumps rest + settled): PROBE TRAP DEFEATED — v4 wraps hover:* in @media (hover: hover) (85 rules) which the headless browser (hover:none) never matches while REF's v3 rules apply; Emulation.setEmulatedMedia cannot override the hover feature (CDP-tested — color-scheme works, hover does not); FIX = probe-side polyfill re-injecting the wrapped rules verbatim into a second @layer utilities block; touch sticky-hover stays an engine difference (not cloned). Settle lesson (>=2s — 0.2s transitions produce mid-flight artifacts). Styled-element lesson (REF's chips style an inner div — the anchor measured "no hover"; chips actually MATCH)
+- 12 gap groups (R19-A..L): sidebar leaf+sub-item hover tokens (zinc-100 #F4F4F5 + #18181B + 0.8 — the #e4e6eb pin was STALE), active-leaf hover text flip #18181B (custom-primary-bg beats REF's hover bg), footer ghost accent recipe (bell SVG owns text-slate-600 — survives hover), user name slate-900 correction (the R15 zinc-700 read the BUTTON's inherited color), blue-tinted Import CSV outline (border-blue-300 + hover:bg-blue-50), accent menu-item recipe on BOTH items incl. the red Logout flip, login Sign in shadow-sm, forgot no-underline, mobile hamburger foreground + accent hover, bottom tabs no-hover, staffrequests ASCII-dots placeholder
+- Non-gaps documented: group buttons, عربي, outline CTAs, view-all underline, CTA hover gradient (to-right vs 90deg serialization), Kanban dark toggle (rgba vs lab), tabs/inputs/staffrequests trigger no-hover, login socials, quick chips, REF's invisible CTA hover bg-color, 0px login borders, reduced-motion (one rule per side)
+- docs/remediation-plan-session20.md written (12 groups + probe taxonomy + non-goals) + codebase-validated (every site read during audit)
+- TDD: 13 new pins (all RED → GREEN); 4 stale pins updated + tokens comment; mid-flight pin corrections (negative regexes caught my own comments/neighboring h1 — switched to positive full-className pins, reworded comments)
+- Gates: lint 0/0, tsc, 386/386 unit (+13), build, 86/86 E2E
+- Live verification: every fixed surface byte-exact (inactive leaf + menu items full JSON MATCH; bell/moon/name/import-csv/placeholder/login/hamburger/bottom-tabs verified individually; shadow/lab serialization diffs documented invisible); post-fix canonical 12-route 12/12 MATCH + mobile regression clean — zero layout impact
+- Probe-session flakes documented: Secure-cookie-over-HTTP logout family on :3200 (re-auth; E2E storageState unaffected) + the login rate limiter after repeated probe logins (server restart resets)
+- 8 screenshots (5 new hover evidence: 63/64/65/66/67 with states live; 3 standards refreshed: 02/11/37-desktop) → 80 total; VLM spot-checks confirmed the leaf hover, Import CSV tint, menu highlight, hamburger hover
+- Docs: AGENTS session-20 layer + 386 specs; SKILL v3.3.0 + §32 + counts; PAD [S20] + test table + checklist; CLAUDE 472-spec pyramid + session-20 pins; README 386 specs + 80 captures + hover-parity row; docs/session_32.md; worklog.md; remediation-plan completion record
+- DB pristine (users=1, employees=1, leaveBalances=2, payroll=0, expenses=0)
+
+Stage Summary:
+- Parity round 19 complete: 12 hover-dimension gap groups fixed with 13 new TDD pins — the interaction map now covers focus (R18) + hover (R19); the v4 hover-media probe trap documented and defeated probe-side
+- 386 unit + 86 E2E green; ready for commit + push

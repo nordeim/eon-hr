@@ -210,7 +210,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Sign in
@@ -220,7 +220,7 @@ function LoginForm() {
             <div className="mt-2 flex items-center justify-between text-sm">
               <button
                 type="button"
-                className="text-slate-500 hover:text-slate-700 hover:underline"
+                className="text-slate-500 hover:text-slate-700"
                 onClick={() => setError("Password reset is not configured on this deployment")}
               >
                 Forgot password?

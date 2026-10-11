@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 373 specs) |
+| Unit tests | `bun run test` (Vitest, 386 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -617,6 +617,44 @@ below 390 (attendance 943–1199, settings pill 1003–1259, shiftcalendar
 344@320, profile 539) where the clone fits or overflows less. **Settle
 lesson: REF needs ≥5s at odd sub-390 widths** (2.4s captured the 61px
 mid-hydration state at 344/389).
+
+## Session-20 recipe layer (parity round 19 — the hover dimension)
+
+The first systematic hover/active-state audit (real CDP mouse moves; LOC
+probed through the v4 `@media (hover: hover)` polyfill — the probe browser
+reports hover:none, so v4 hover variants never apply headless while REF's
+v3-era rules do; the asymmetry is probe-only, real desktops match).
+
+- **Sidebar leaf + sub-item hover (R19-A, systemic)**: REF renders
+  `hover:bg-sidebar-accent hover:text-sidebar-accent-foreground
+  hover:opacity-80` → settled zinc-100 **#F4F4F5** bg + **#18181B** text +
+  0.8 opacity. The old `hover:bg-[#e4e6eb]` pin was stale (settled
+  re-measure; mid-transition reads at ~750ms show the 0.2s transition in
+  flight — settle >= 2s).
+- **Active leaf hover text (R19-B)**: text flips to #18181B (REF's
+  custom-primary-bg beats its hover bg, so the tile stays blue).
+- **Footer ghost buttons (R19-C/C2)**: bell + moon hover `bg-accent
+  text-accent-foreground` (#F5F5F5 + #171717); the bell SVG OWNS
+  `text-slate-600` (an element's own class beats the parent's hover color —
+  the icon stays slate-600 under hover; put colors on the SVG, not the
+  button).
+- **User name span (R19-D)**: `text-slate-900` rgb(15,23,42) — the R15
+  zinc-700 reading measured the BUTTON's inherited color, not the span.
+- **Import CSV (R19-F)**: REF's blue-tinted outline — `border-blue-300
+  text-blue-700 hover:bg-blue-50` on the outline variant.
+- **Dropdown menu items (R19-L)**: BOTH items (incl. Logout) focus in
+  `focus:bg-accent focus:text-accent-foreground` — the red Logout text
+  turns #171717 on hover (REF-measured; the focus:text beats text-red-600).
+- **Login (R19-H/I)**: Sign in carries `shadow-sm`; the forgot link has NO
+  hover:underline.
+- **Mobile (R19-J/K)**: hamburger inherits foreground (#0A0A0A) + hovers
+  bg-slate-100 + accent-foreground; bottom tabs have NO hover classes.
+- **Staffrequests (R19-G)**: placeholder `"Search requests..."` — three
+  ASCII dots, not U+2026.
+- **Probe lessons**: agent-browser eval args are shell-escaped (single-quote
+  browser JS; snapshot regexes must allow `[expanded=false, ref=eN]` and
+  never end with `\)`); measure the STYLED element (REF's quick chips
+  style an inner div of a class-less anchor — the anchor shows no hover).
 
 ## Page architecture (session 6) — where padding and gradients live
 

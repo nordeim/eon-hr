@@ -147,7 +147,7 @@ describe("globals.css token contract", () => {
     expect(theme).toContain("--color-neutral-500: #737373");
   });
 
-  it("pins zinc-700 #3F3F46 — the reference's footer Moon icon + user name color (session 16, R15-B)", () => {
+  it("pins zinc-700 #3F3F46 — the reference's footer Moon icon color (session 16, R15-B; the user-name attribution was corrected to slate-900 in session 20, R19-D)", () => {
     expect(theme).toContain("--color-zinc-700: #3f3f46");
   });
 });

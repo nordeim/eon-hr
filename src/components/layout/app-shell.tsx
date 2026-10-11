@@ -75,7 +75,11 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
               aria-label="Toggle Sidebar"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              /* Session 20 (R19-J): REF's hamburger inherits the foreground
+                 (#0A0A0A, no color class) and hovers bg-slate-100 +
+                 text-accent-foreground (#171717) — measured, replacing the
+                 text-slate-900 rest color. */
+              className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <PanelLeft className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -110,7 +114,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
                   href={tab.href}
                   className={cn(
                     "flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
-                    active ? "text-blue-600" : "text-slate-600 hover:text-foreground"
+                  /* Session 20 (R19-K): REF's bottom tabs carry NO hover
+                     classes — the inactive tab stays slate-600 (the clone's
+                     old hover color flip was an unmeasured superset). */
+                    active ? "text-blue-600" : "text-slate-600"
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />

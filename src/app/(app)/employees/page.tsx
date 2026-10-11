@@ -152,7 +152,7 @@ export default function EmployeesPage() {
           <>
             <Button
               variant="outline"
-              className="text-blue-700"
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
               onClick={() =>
                 toast.toast({
                   title: "CSV import",

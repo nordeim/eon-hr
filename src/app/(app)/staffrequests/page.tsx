@@ -242,7 +242,7 @@ export default function StaffRequestsPage() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             aria-label="Search requests"
-            placeholder="Search requests…"
+            placeholder="Search requests..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"

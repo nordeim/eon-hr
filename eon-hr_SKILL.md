@@ -10,11 +10,12 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.2.0 (session-19 remediation complete) · **Last updated:**
-> 2026-10-26 · **State:** 373 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.3.0 (session-20 remediation complete) · **Last updated:**
+> 2026-10-26 · **State:** 386 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
-> the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy).
+> the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
+> the hover/active-state taxonomy).
 
 ---
 
@@ -1425,3 +1426,55 @@ settings 987, profile 523, documenttracker 348). **Settle lesson: REF
 needs ≥5s at odd sub-390 widths** — 2.4s captured the 61px mid-hydration
 state at 344/389 (the artifact family extends below 390; settled re-probes
 match byte-for-byte).
+
+## 32. Session-20 Recipe Layer — parity round 19 (the hover dimension)
+
+The first systematic hover/active-state audit: real agent-browser hovers
+(CDP mouse moves trigger the true `:hover` pseudo-class) with full computed
+style dumps at rest AND settled-under-hover on both apps, across 24
+surfaces (sidebar chrome, footer ghosts, quick chips, CTAs, tabs, inputs,
+login page, mobile chrome, dropdown items).
+
+**The probe trap (pin this):** Tailwind v4 wraps every `hover:*` utility in
+`@media (hover: hover)` — the headless probe browser reports hover:none, so
+v4 hover styles NEVER apply in agent-browser while REF's v3-era (unwrapped)
+rules do. `Emulation.setEmulatedMedia` cannot override the `hover` feature.
+**Fix: a probe-side polyfill** — extract every rule inside
+`@media (hover: hover)` and re-inject verbatim into a second
+`@layer utilities` style block (scripts/probe-r19-hover2.mjs). On touch
+devices REF keeps sticky hover and the clone does not — v4's intended a11y
+behavior; engine difference, do not clone.
+
+**The settled-read lesson:** REF's `transition-all duration-200` means a
+~750ms post-hover read catches mid-flight values (bg alpha 0.086, opacity
+0.983). Settle **>= 2s** before reading hover states.
+
+**The styled-element lesson (L2 again):** REF's dashboard quick chips style
+an INNER `<div>` of a class-less `<a>` — measuring the anchor showed "no
+hover change". Verify which element carries the classes before concluding.
+
+**The recipe taxonomy (all measured):**
+
+| Surface | REF recipe | Rendered |
+|---|---|---|
+| Sidebar leaf + sub-item (inactive) | `hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:opacity-80` | zinc-100 #F4F4F5 + #18181B + 0.8 |
+| Sidebar ACTIVE leaf | same + text flips #18181B (custom-primary-bg beats the hover bg — stays blue) | blue tile, dark text, 0.8 |
+| Sidebar group button | `hover:bg-blue-50 hover:text-blue-700` | blue-50 + blue-700 (no opacity) |
+| Footer ghost (bell/moon) | `hover:bg-accent hover:text-accent-foreground` | #F5F5F5 + #171717; bell SVG owns text-slate-600 (survives hover) |
+| عربi outline | `hover:bg-slate-100 hover:text-accent-foreground` | slate-100 + #171717 |
+| User trigger | `hover:bg-slate-100` + name span `text-slate-900` | slate-100; name rgb(15,23,42) |
+| Import CSV (blue outline) | outline + `border-blue-300 text-blue-700 hover:bg-blue-50` | blue-300 border, blue-50 hover |
+| Default outline (Edit/New Project/Generate All) | `hover:bg-accent hover:text-accent-foreground` | #F5F5F5 + #171717 |
+| Dark toggle (Kanban) | `hover:bg-[#171717]/90` | rgba(23,23,23,.9) — clone serializes lab(), same color |
+| Gradient CTA (Add Employee) | darker gradient on hover | #1D4ED8→#4338CA (clone: 90deg vs REF to-right serialization, same direction) |
+| Login socials | `hover:border-slate-300 hover:bg-slate-50` | slate-50 + slate-300 |
+| Login Sign in | `bg-slate-900 hover:bg-slate-800` + `shadow-sm` | slate-800 + 0 1px 2px rgba(0,0,0,.05) |
+| Login forgot/signup | `hover:text-slate-700` ONLY (no underline) | slate-700, no underline |
+| Menu items (BOTH incl. Logout) | `focus:bg-accent focus:text-accent-foreground` | #F5F5F5 + #171717 (red Logout turns dark) |
+| Mobile hamburger | inherit fg + `hover:bg-slate-100 hover:text-accent-foreground` | #0A0A0A rest, slate-100 + #171717 |
+| Mobile bottom tabs | NO hover classes | no change |
+| Tab triggers / search inputs / staffrequests trigger / quick chips | no hover change (chips: `hover:border-blue-300 hover:bg-blue-50` on the inner div) | — |
+
+**Spec count:** 386 unit (recipes 249, tokens 19, auth 14, utils 13,
+shell-recipes 76, db-path 15) + 86 E2E. Placeholder detail: REF uses three
+ASCII dots ("Search requests..."), never U+2026.
