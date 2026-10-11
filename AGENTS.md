@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 391 specs) |
+| Unit tests | `bun run test` (Vitest, 398 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -704,6 +704,62 @@ and on touch directly.
   else): CTAs, outline buttons, ghost buttons, menu items (the red Logout
   turns #171717 under press via its focus recipe on both), login surfaces,
   hamburger (rides hover), inactive bottom tabs.
+
+## Session-22 recipe layer (parity round 21 — the motion dimension)
+
+The first transitions/animations audit (static CSSOM enumeration of every
+transition/animation/@keyframes rule on both apps + DOM classList audit +
+empirical requestAnimationFrame frame-sampling of live transitions).
+
+- **The enter/exit animation family (R21-B, systemic)**: REF animates its
+dropdowns, dialogs and select content with the tailwindcss-animate plugin
+utilities (`data-[state=open]:animate-in` + `fade-in-0` + `zoom-in-95` →
+computed `animation: enter 0.15s ease` — measured on the user menu, the
+loans dialog and the attendance select). The clone's shadcn components
+carried the exact same classes but v4 generated NO CSS for them (0
+animation rules in the built output — plugin utilities don't exist in
+CSS-first v4). Fix: a hand-authored `@utility` subset in globals.css
+(`@keyframes enter/exit` reading `--tw-enter-*`/`--tw-exit-*` custom
+properties + animate-in/out, fade-in/out(-0), zoom-in/out-95,
+slide-in-from-left/out-to-left/from-bottom-2). No `initial` custom-property
+resets (the v3 plugin's cascade trick — every animated surface here is
+portal-mounted, so inheritance can't leak); the select content + sidebar
+user dropdown got the missing classes added.
+- **The mobile drawer slide (R21-C, the round's visible mobile gap)**: REF
+slides the 288px drawer in over 500ms with cubic-bezier(0.32,0.72,0,1)
+(vaul), closes over ~300ms, overlay fades ~150ms. The clone's drawer
+POPPED instantly — Radix Portal mounts the Content fresh with
+data-state=open already set, and a transition needs a state change on a
+live element; animations run from mount. Fix: animate-in/out +
+slide-in-from-left/out-to-left + `data-[state=open]:[animation-duration:
+500ms] data-[state=closed]:[animation-duration:300ms]` + the vaul bezier
+via an arbitrary property. Radix waits for animationend before unmounting,
+so the close plays too (verified ~305ms slide + ~170ms fade).
+- **Group trigger transition (R21-A)**: REF's group buttons carry
+`transition-all duration-200` like every nav item; the clone's had
+`transition-colors` (150ms). Frame-sampled: REF settles ~269ms, the clone
+~229ms; after the fix ~272ms. One-word class change.
+- **Chevron snap (R21-D)**: REF's group chevron carries NO transition
+classes (computed `all 0s` — the rotate-90 toggles instantly). The clone's
+200ms swing was an extra; removed.
+- **Toast enter (R21-E, superset polish)**: the toast cards' state-gated
+animate class never fired (no data-state attribute on the divs); replaced
+with an ungated `animate-in fade-in slide-in-from-bottom-2` (REF's sonner
+toasts animate but are unmeasurable — every triggering control is dead
+there).
+- **Dormant REF CSS (documented non-gaps)**: the sidebar collapse family
+(3 ease-linear divs — no trigger at ≥768), accordion-down/up +
+data-motion rules (group expand is INSTANT on REF — 728→516 in one
+frame), base44-fade-in/scale-in keyframes (no navigation animations fire),
+badge-spin, and prefers-reduced-motion (REF's only rule is sonner-library
+internal; no app-level recipe exists to mirror — the a11y item stays open
+on both apps).
+- **Probe lessons**: agent-browser eval does NOT await Promise-based
+expressions (run the async work via window globals + follow-up reads);
+snapshot refs need attribute-tolerant regexes (`\[[^\]]*ref=`);
+`$`-prefixed passwords must be single-quoted in shell fills ($Abcd1234
+expands to empty in double quotes); drawer-close needs Escape or a real
+pointerdown (the overlay ignores synthetic .click()).
 
 ## Page architecture (session 6) — where padding and gradients live
 

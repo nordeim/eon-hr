@@ -17,6 +17,9 @@ const read = (...p: string[]) =>
 const sidebarNav = read("src", "components", "layout", "sidebar-nav.tsx");
 const appShell = read("src", "components", "layout", "app-shell.tsx");
 const pageHeader = read("src", "components", "shared", "page-header.tsx");
+const selectUi = read("src", "components", "ui", "select.tsx");
+const toastUi = read("src", "components", "ui", "toast.tsx");
+const globalsCss = read("src", "app", "globals.css");
 
 /** Route -> (layout recipe, badge icon class) — reference-measured map. */
 const BADGE_PAGES: Record<
@@ -1642,5 +1645,100 @@ describe("session-21 pressed-state recipes (parity round 20 — the :active dime
       appShell.indexOf("min-h-[44px]") + 900
     );
     expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600" : "text-slate-600"');
+  });
+});
+
+describe("session-22 transition + animation recipes (parity round 21 — the motion dimension)", () => {
+  it("R21-A: the group trigger transitions over 200ms like every REF nav item (measured settle ~269ms REF vs ~229ms clone at 150ms)", () => {
+    const trigIdx = sidebarNav.indexOf("flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2");
+    expect(trigIdx).toBeGreaterThan(-1);
+    const trigBlock = sidebarNav.slice(trigIdx, trigIdx + 320);
+    expect(trigBlock).toContain("transition-all duration-200");
+    expect(trigBlock).not.toContain("transition-colors");
+  });
+
+  it("R21-D: the group chevron SNAPS (REF authors no chevron motion classes — computed all 0s; the swing was a clone extra)", () => {
+    const chevIdx = sidebarNav.indexOf('open && "rotate-90"');
+    expect(chevIdx).toBeGreaterThan(-1);
+    const chevBlock = sidebarNav.slice(chevIdx - 220, chevIdx + 40);
+    expect(chevBlock).not.toContain("transition-transform");
+    expect(chevBlock).not.toContain("duration-200");
+  });
+
+  it("R21-B1: globals.css carries the enter/exit keyframes + the v4 utility subset (the plugin classes generate real CSS)", () => {
+    expect(globalsCss).toContain("@keyframes enter");
+    expect(globalsCss).toContain("@keyframes exit");
+    for (const u of [
+      "animate-in",
+      "animate-out",
+      "fade-in-0",
+      "fade-out-0",
+      "fade-in",
+      "fade-out",
+      "zoom-in-95",
+      "zoom-out-95",
+      "slide-in-from-left",
+      "slide-out-to-left",
+      "slide-in-from-bottom-2",
+    ]) {
+      expect(globalsCss).toContain(`@utility ${u}`);
+    }
+    // the keyframes read the enter/exit custom properties with unit fallbacks
+    expect(globalsCss).toContain("--tw-enter-opacity");
+    expect(globalsCss).toContain("--tw-exit-translate-x");
+  });
+
+  it("R21-B2: the select content animates like REF's (enter 0.15s, fade + zoom — measured on the attendance select)", () => {
+    const selIdx = selectUi.indexOf("SelectPrimitive.Content");
+    expect(selIdx).toBeGreaterThan(-1);
+    const selBlock = selectUi.slice(selIdx, selIdx + 950);
+    expect(selBlock).toContain("data-[state=open]:animate-in");
+    expect(selBlock).toContain("data-[state=open]:fade-in-0");
+    expect(selBlock).toContain("data-[state=open]:zoom-in-95");
+    expect(selBlock).toContain("data-[state=closed]:animate-out");
+    expect(selBlock).toContain("data-[state=closed]:fade-out-0");
+    expect(selBlock).toContain("data-[state=closed]:zoom-out-95");
+  });
+
+  it("R21-B3: the sidebar user dropdown animates (REF-measured enter 0.15s on the same recipe)", () => {
+    const ddIdx = sidebarNav.indexOf("z-50 min-w-[200px]");
+    expect(ddIdx).toBeGreaterThan(-1);
+    const ddBlock = sidebarNav.slice(ddIdx, ddIdx + 700);
+    expect(ddBlock).toContain("data-[state=open]:animate-in");
+    expect(ddBlock).toContain(
+      "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+    );
+    expect(ddBlock).toContain("data-[state=closed]:animate-out");
+  });
+
+  it("R21-C: the mobile drawer slides (REF: 500ms open / 300ms close with the vaul cubic-bezier(0.32,0.72,0,1); the overlay fades 150ms — the mount-fresh drawer could never run a transition)", () => {
+    const ovIdx = appShell.indexOf("bg-[rgba(0,0,0,0.8)]");
+    expect(ovIdx).toBeGreaterThan(-1);
+    const ovBlock = appShell.slice(ovIdx, ovIdx + 500);
+    expect(ovBlock).toContain("data-[state=open]:animate-in");
+    expect(ovBlock).toContain("data-[state=open]:fade-in");
+    expect(ovBlock).toContain("data-[state=closed]:animate-out");
+    expect(ovBlock).toContain("data-[state=closed]:fade-out");
+    expect(ovBlock).not.toContain("transition-opacity");
+
+    const panelIdx = appShell.indexOf("w-[288px]");
+    expect(panelIdx).toBeGreaterThan(-1);
+    const panelBlock = appShell.slice(panelIdx, panelIdx + 800);
+    expect(panelBlock).toContain("data-[state=open]:animate-in");
+    expect(panelBlock).toContain("data-[state=open]:slide-in-from-left");
+    expect(panelBlock).toContain("data-[state=closed]:animate-out");
+    expect(panelBlock).toContain("data-[state=closed]:slide-out-to-left");
+    expect(panelBlock).toContain("data-[state=open]:[animation-duration:500ms]");
+    expect(panelBlock).toContain("data-[state=closed]:[animation-duration:300ms]");
+    expect(panelBlock).toContain("[animation-timing-function:cubic-bezier(0.32,0.72,0,1)]");
+    expect(panelBlock).not.toContain("transition-transform");
+  });
+
+  it("R21-E: the toast card enters with a fade + slide (superset polish — REF's sonner animates but is unmeasurable; the old state-gated class never fired)", () => {
+    const tIdx = toastUi.indexOf("pointer-events-auto flex items-start gap-3");
+    expect(tIdx).toBeGreaterThan(-1);
+    const tBlock = toastUi.slice(tIdx, tIdx + 700);
+    expect(tBlock).toContain("animate-in fade-in slide-in-from-bottom-2");
+    expect(tBlock).not.toContain("data-[state=open]:animate-in");
   });
 });

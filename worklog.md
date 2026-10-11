@@ -702,3 +702,27 @@ Work Log:
 Stage Summary:
 - Parity round 20 complete: 5 pressed-dimension gap groups fixed with 5 new TDD pins — the interaction map now covers focus (R18) + hover (R19) + pressed (R20); the round's highlight: the active bottom tab blue-50 pill, a visible mobile gap every prior round missed, plus the group-button gray press and the expanded-group hover recipe
 - 391 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: session-22
+Agent: main (Super Z)
+Task: Parity round 21 — the motion dimension (transitions/animations audit + fixes)
+
+Work Log:
+- Fresh clone at 2864b51; .env recreated (DATABASE_URL="file:../db/custom.db"); bun install; db:push + db:seed; shell DATABASE_URL trap guarded with env -u
+- Baseline gates green: lint 0/0 · tsc · 391/391 unit · build · 86/86 E2E · DB pristine
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged); mobile navigation byte-identical (no v4 bug); with-data re-check — REF still zero-data (blocked, documented)
+- The motion audit: static CSSOM enumeration (REF 26 keyframes/25 anim rules/27 transition rules vs LOC 4/0/17), DOM classList audits on dashboard/employees/recruitment, and rAF frame-sampling of live transitions on both apps
+- Engine discoveries: (1) the dead plugin-utility trap — v4 generates NO CSS for tailwindcss-animate classes (0 animation rules in the built output; REF computes "animation: enter 0.15s ease" on dropdowns/dialogs/selects); (2) the mount-fresh Radix trap — Portal Content mounts with data-state=open already set, so transition-* classes can never fire (the drawer popped instantly; REF's vaul slides 500ms/300ms + bezier(0.32,0.72,0,1), overlay ~150ms)
+- Measured gaps: group trigger transition-colors 150ms vs REF transition-all 200ms (settle ~229ms vs ~269ms); the clone's chevron 200ms swing vs REF's instant snap; select content + user dropdown missing the animate classes
+- Dormant REF CSS documented: sidebar collapse family (no trigger ≥768), accordion keyframes (group expand INSTANT — 728→516 one frame), base44-fade-in/scale-in, badge-spin, prefers-reduced-motion (sonner-internal only — a11y item open on both apps)
+- docs/remediation-plan-session22.md written + validated; TDD: 7 RED pins → 6 file edits (globals.css @utility subset + keyframes, sidebar-nav trigger/chevron/user-dropdown, app-shell overlay+panel, select.tsx, toast.tsx) → 398/398 GREEN
+- Live verification: drawer open ~500ms slide + ~150ms overlay fade; close via Escape ~305ms + ~170ms (unmount ~340ms — Radix waits for animationend); dropdown enter 0.15s (opacity 0.58→1, scale 0.979→1); select enter 0.15s; group hover settle ~272ms (REF ~269ms); chevron all 0s
+- Regressions: 12/12 canonical MATCH + mobile chrome byte-identical + pressed/hover 7/7 MATCH (one documented LOC cookie flake mid-sweep — re-authed, re-ran clean)
+- 5 screenshots (71 drawer open, 72 dropdown open, 73 select open + 02/11 standards refreshed) → 88 total; VLM spot-checks confirmed
+- Docs updated: AGENTS session-22 layer + 398 specs; SKILL v3.5.0 + §34; PAD [S22] + recipes 261; CLAUDE 484 pyramid; README 398/88 + motion feature row; session_36.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 21 (the motion dimension) complete and pushed to main: the enter/exit animation family alive in v4 (dropdowns/dialogs/selects fade+zoom 150ms), the mobile drawer slides 500ms/300ms with the vaul bezier, nav transitions 200ms, chevron snaps, toasts fade+slide in
+- Gates: lint 0/0 · tsc · 398/398 unit (+7) · build · 86/86 E2E; DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), possible scroll dimension, reduced-motion (open on both apps)

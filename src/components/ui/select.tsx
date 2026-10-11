@@ -58,6 +58,11 @@ function SelectContent({
       <SelectPrimitive.Content
         className={cn(
           "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md",
+          /* Session 22 (R21-B2): REF's select content animates in (computed
+             "animation: enter 0.15s ease", fade + zoom — measured on the
+             attendance All-Departments select). Same recipe as the dropdown
+             family; the globals.css @utility block generates the CSS in v4. */
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
           className
         )}

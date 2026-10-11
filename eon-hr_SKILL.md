@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.4.0 (session-21 remediation complete) · **Last updated:**
-> 2026-10-11 · **State:** 391 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.5.0 (session-22 remediation complete) · **Last updated:**
+> 2026-10-11 · **State:** 398 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -1523,4 +1523,65 @@ bg-blue-800, shadow-none) generated from scanned library content — only
 `active:cursor-grabbing` is authored (taskmanager). Not gaps.
 
 **Spec count:** 391 unit (recipes 254, tokens 19, auth 14, utils 13,
+shell-recipes 76, db-path 15) + 86 E2E.
+
+## 34. Session-22 Recipe Layer — parity round 21 (the motion dimension)
+
+The first transitions/animations audit. Method: static CSSOM enumeration
+(every `transition-*`/`animation`/`@keyframes` rule on both apps), DOM
+classList audit (which elements carry the classes), and empirical
+requestAnimationFrame frame-sampling of live transitions (hover fades,
+drawer slides, dropdown/dialog enter).
+
+**Engine discovery — the dead plugin-utility trap:** Tailwind v4 generates
+NO CSS for tailwindcss-animate plugin utilities (`animate-in`, `fade-in-0`,
+`zoom-in-95`...). The shadcn components carried the exact classes REF uses,
+but the built output had ZERO animation rules — every dialog, dropdown and
+select snapped open while REF computed `animation: enter 0.15s ease`. The
+v4-native fix is a hand-authored subset in globals.css: `@keyframes
+enter/exit` reading `--tw-enter-*`/`--tw-exit-*` custom properties with
+unit fallbacks, plus `@utility` blocks for each class. NO `initial`
+custom-property resets (the v3 plugin's cascade-order trick): every
+animated surface in this app is portal-mounted, so custom-property
+inheritance cannot leak between overlay/panel/content.
+
+**The mount-fresh Radix trap:** a Radix Portal Content that renders only
+when open mounts with `data-state="open"` already applied — `transition-*`
+classes can never fire (a transition needs a state change on a live
+element). Animations run from mount, so `animate-in` + `slide-in-from-left`
+works where `transition-transform data-[state=open]:translate-x-0` was
+silently dead. On close, Radix waits for `animationend` before unmounting —
+the exit animation plays too (frame-verified: ~305ms slide + ~170ms fade).
+
+**The motion taxonomy (measured):**
+
+| Surface | REF | Clone recipe |
+|---|---|---|
+| Dropdown/dialog/select content | `enter 0.15s ease` (fade-in-0 + zoom-in-95) | `data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95` + the @utility block |
+| Mobile drawer panel | slide 500ms open / ~300ms close, cubic-bezier(0.32,0.72,0,1) (vaul) | animate-in/out + slide-in-from-left/out-to-left + `data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)]` |
+| Mobile drawer overlay | fade ~150ms both ways | animate-in/out + fade-in/fade-out (the 0.15s @utility default) |
+| Sidebar nav (leaves, sub-items, GROUP buttons) | `transition-all duration-200` (settles ~269ms) | the group trigger's old `transition-colors` (150ms, ~229ms) corrected to the full recipe |
+| Group chevron | NO motion classes — instant snap | the clone's 200ms swing removed (an extra REF never renders) |
+| Quick chips / footer buttons / bottom tabs / Input / TabsTrigger | `transition-colors`/`transition-all` 150ms | already byte-identical |
+
+**Dormant REF CSS (documented non-gaps):** the sidebar collapse family
+(`transition-[width]` / `[left,right,width]` / `[margin,opacity]` +
+duration-200 ease-linear — shadcn sidebar internals with NO trigger at
+desktop), accordion-down/up + data-motion animate rules (REF's group expand
+is INSTANT — height 728→516 in one frame), base44-fade-in/scale-in
+keyframes (no navigation animations fire), badge-spin, and
+prefers-reduced-motion (REF's only rule is sonner-library internal — no
+app-level recipe exists to mirror; the a11y item stays open on both apps).
+
+**Probe lessons:** agent-browser eval does NOT await Promise-based
+expressions — park results on `window.__x` and read them in a follow-up
+eval. Snapshot refs need attribute-tolerant regexes
+(`\\[[^\\]]*ref=(\\w+)` — `[expanded=false, ref=e44]`). `$`-prefixed
+passwords expand to empty in double-quoted shell fills — single-quote them.
+Drawer-close needs Escape or a real pointerdown (the Radix overlay ignores
+synthetic `.click()` — no pointerdown event). Animations are NOT
+media-wrapped (unlike v4 `hover:`), so the probe browser applies them
+natively — no polyfill needed for the motion dimension.
+
+**Spec count:** 398 unit (recipes 261, tokens 19, auth 14, utils 13,
 shell-recipes 76, db-path 15) + 86 E2E.

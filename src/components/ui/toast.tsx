@@ -70,7 +70,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             className={cn(
               "pointer-events-auto flex items-start gap-3 rounded-xl border bg-card p-4 shadow-lg",
-              "data-[state=open]:animate-in"
+              /* Session 22 (R21-E): superset polish — enter with a fade +
+                 slide (the sonner enter feel; REF's toasts animate but are
+                 unmeasurable — every triggering control is dead there).
+                 The old state-gated class never fired: these cards carry
+                 no data-state attribute. Ungated animate-in runs on mount. */
+              "animate-in fade-in slide-in-from-bottom-2"
             )}
           >
             <div className="mt-0.5 shrink-0">{ICONS[t.variant]}</div>

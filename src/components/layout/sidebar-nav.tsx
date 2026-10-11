@@ -137,7 +137,10 @@ function CollapsibleNavItem({
           // Reference group-button recipe: p-2/gap-2 geometry with a 20px
           // leading icon (session-5: measured distinctly from leaf links),
           // hover bg-blue-50 + text-blue-700, mb-1 for the 40px pitch.
-          "flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2 text-sm mb-1 outline-none transition-colors",
+          // Session 22 (R21-A): REF's group buttons carry the SAME motion
+          // recipe as every nav item (settled-measured ~269ms vs the old
+          // color-only 150ms ~229ms) — transition-all over 200ms.
+          "flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2 text-sm mb-1 outline-none transition-all duration-200",
           // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
         // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
         // measured rgb(59,130,246) on leaf links AND group buttons), not
@@ -156,7 +159,10 @@ function CollapsibleNavItem({
         <Icon className="h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
         <span className="flex-1 truncate text-left">{item.label}</span>
         <ChevronRight
-          className={cn("h-4 w-4 shrink-0 text-slate-600 transition-transform duration-200", open && "rotate-90")}
+          /* Session 22 (R21-D): REF's chevron carries NO motion classes
+             (computed all 0s) — the rotation snaps instantly. The old
+             200ms swing was a clone extra; removed for authored parity. */
+          className={cn("h-4 w-4 shrink-0 text-slate-600", open && "rotate-90")}
           aria-hidden="true"
         />
       </Collapsible.Trigger>
@@ -293,7 +299,11 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           side="top"
           align="start"
           sideOffset={8}
-          className="z-50 min-w-[200px] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+          /* Session 22 (R21-B3): REF's dropdown animates in (computed
+             "animation: enter 0.15s ease", fade + zoom — measured on the
+             user menu). Same recipe as ui/dropdown-menu.tsx, which needed
+             the globals.css @utility block to generate real CSS in v4. */
+          className="z-50 min-w-[200px] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
           <DropdownMenu.Label className="px-2 py-1.5 text-xs text-muted-foreground">
             {user.role.replace(/\b\w/g, (c) => c.toUpperCase())}

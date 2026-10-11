@@ -47,12 +47,20 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
       {/* Mobile drawer (reference: 288px sheet, dark 80% overlay, no X button) */}
       <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
         <DialogPrimitive.Portal>
+          {/* Session 22 (R21-C): REF's drawer overlay fades ~150ms (vaul
+              fadeIn/fadeOut) and the panel SLIDES — 500ms open /
+              300ms close with cubic-bezier(0.32,0.72,0,1) (measured
+              frame-sampled). The old transition-* classes could never
+              fire: Radix mounts the Content fresh with data-state=open
+              already set, and transitions need a state change on a live
+              element — animations run from mount. Radix also waits for
+              animationend before unmounting, so the close plays too. */}
           <DialogPrimitive.Overlay
-            className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.8)] transition-opacity duration-300 data-[state=closed]:opacity-0 data-[state=open]:opacity-100 md:hidden"
+            className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.8)] data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out md:hidden"
             aria-hidden="true"
           />
           <DialogPrimitive.Content
-            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none transition-transform duration-300 data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 md:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
           >
             <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>
