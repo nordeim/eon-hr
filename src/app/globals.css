@@ -87,10 +87,21 @@
      borders use the neutral scale — neutral-200 #E5E5E5 (cards/inputs) and
      neutral-950 #0A0A0A (badge text). neutral-900 #171717 (session 6): the
      reference's shadcn --primary renders on the taskmanager active toggle
-     and the empty-state CTAs (dark button variant). */
+     and the empty-state CTAs (dark button variant). neutral-500 #737373
+     (session 16, R15-A): the reference's --muted-foreground token, which
+     visibly renders on INACTIVE TAB TRIGGERS (rgb(115,115,115) measured on
+     every pill) — tab surfaces use this pin, not the muted-foreground
+     token (whose other 300+ usages render the reference's explicit slate
+     classes). */
   --color-neutral-200: #e5e5e5;
+  --color-neutral-500: #737373;
   --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
+
+  /* zinc-700 #3F3F46 (session 16, R15-B): the reference's sidebar footer
+     Moon icon and user name (rgb(63,63,70) measured on the redeployed
+     reference — the session-6 slate-900 name reading is stale). */
+  --color-zinc-700: #3f3f46;
 
   --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;

@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 337 specs) |
+| Unit tests | `bun run test` (Vitest, 349 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -468,6 +468,37 @@ reference — never re-add it.
   `type="button"` (no implicit submit).
 - **compliancedashboard (R14-F)**: the three Notify All buttons render at
   `size="sm"` (h-8, 32px, text-xs) — 166/173/173 with mr-1 icons.
+
+## Session-16 recipe layer (parity round 15)
+
+- **Tab-pill inactive color (R15-A, systemic)**: the reference's inactive
+  tab triggers render its `--muted-foreground` TOKEN **#737373**
+  (rgb(115,115,115) — pinned as `--color-neutral-500`); the clone's
+  muted-foreground token (#64748B slate-500) is NOT the tab color — the
+  session-6 "token never visibly renders" claim was wrong for tab
+  surfaces. `ui/tabs.tsx` TabsList + the reports selector + the
+  staffrequests pill all carry `text-neutral-500`; the muted-foreground
+  TOKEN itself stays #64748b (300+ usages render REF's explicit slate
+  classes).
+- **Sidebar footer colors (R15-B)**: Bell ghost = slate-600
+  (rgb(71,85,105)), Moon ghost = zinc-700 (#3F3F46 — pinned
+  `--color-zinc-700`), user name = zinc-700 (the session-6 slate-900
+  reading is stale — REF redeployed). Applies to the desktop sidebar AND
+  the mobile drawer footer (same component).
+- **Actions cluster fitting (R15-C)**: NO `shrink-0` on the PageHeader
+  default actions cluster — a shrink-0 child keeps its natural width
+  inside the wrapping header row and overflows at mid viewports
+  (attendance docW 1199 at 1100). Shrinking only engages under
+  constraint, so fitting pages render identically.
+- **organogram (R15-D)**: a BARE centered card (NO CardHeader) inside
+  `overflow-x-auto pb-8` > `min-w-max flex justify-center p-8`; the
+  empty state is the SIMPLE recipe (64px slate-300 icon mb-4 + ONE
+  16px slate-500 line, 783×202 card) — with-data trees ride `p-8`
+  inside the same wrapper.
+- **staffrequests (R15-E)**: the pill renders `bg-secondary` (#F5F5F5 —
+  REF's surface), NOT bg-muted; the default scope is `"mine"` (the
+  trigger renders the reference's selected look — white bg + #0A0A0A —
+  at load; the toggle-to-all remains the superset).
 
 ## Page architecture (session 6) — where padding and gradients live
 

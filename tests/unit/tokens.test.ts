@@ -131,6 +131,17 @@ describe("globals.css token contract", () => {
     // reference surface renders explicit slate classes instead; the token
     // value never visibly renders. The clone's 336 text-muted-foreground
     // usages render the slate-500 the reference actually shows.
+    // Session 16 (R15-A) caveat: TAB surfaces are the exception — the
+    // reference's inactive tab triggers DO render the #737373 token, so
+    // tab pills use the pinned neutral-500 below, not this token.
     expect(theme).toContain("--color-muted-foreground: #64748b");
+  });
+
+  it("pins neutral-500 #737373 — the reference's visibly-rendered tab-inactive color (session 16, R15-A)", () => {
+    expect(theme).toContain("--color-neutral-500: #737373");
+  });
+
+  it("pins zinc-700 #3F3F46 — the reference's footer Moon icon + user name color (session 16, R15-B)", () => {
+    expect(theme).toContain("--color-zinc-700: #3f3f46");
   });
 });

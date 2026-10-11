@@ -10,7 +10,12 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
   return (
     <TabsPrimitive.List
       className={cn(
-        "inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-muted-foreground",
+        // Session 16 (R15-A): the inactive trigger color is the reference's
+        // muted-foreground TOKEN #737373 (neutral-500) — measured
+        // rgb(115,115,115) on every reference pill. NOT the clone's
+        // muted-foreground token (slate-500): tab surfaces are the one
+        // place the reference's token visibly renders.
+        "inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-neutral-500",
         className
       )}
       {...props}

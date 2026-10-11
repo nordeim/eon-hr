@@ -238,7 +238,7 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
             flex-wrap h-auto`), rows centered with NO row gap (28px pitch),
             each chip carrying a 16px icon with gap-2 (measured chips
             170-222px wide vs our icon-less 126-198). */}
-        <TabsList className="h-auto w-full flex-wrap justify-center border border-slate-200 bg-white text-muted-foreground">
+        <TabsList className="h-auto w-full flex-wrap justify-center border border-slate-200 bg-white text-neutral-500">
           {CATEGORIES.map((c) => (
             <TabsTrigger key={c.id} value={c.id} className="gap-2">
               {c.icon}

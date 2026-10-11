@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 2.8.0 (session-15 remediation complete) · **Last updated:**
-> 2026-10-15 · **State:** 337 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 2.9.0 (session-16 remediation complete) · **Last updated:**
+> 2026-10-16 · **State:** 349 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual parity with the live reference verified by dual-browser audit.
 
 ---
@@ -1216,3 +1216,40 @@ Title, 68px line-box); Change Photo carries `type="button"`.
 
 **compliancedashboard:** the three Notify All buttons render at
 `size="sm"` (h-8, 32px, px-3, text-xs) with mr-1 icons — 166/173/173.
+
+## 28. Session-16 Recipe Layer — parity round 15
+
+**Tab-pill inactive color (R15-A, systemic):** the reference's inactive
+tab triggers render its `--muted-foreground` TOKEN **#737373**
+(rgb(115,115,115) — pinned as `--color-neutral-500` in the palette).
+`ui/tabs.tsx` TabsList, the reports selector pill and the staffrequests
+pill all carry `text-neutral-500`. The muted-foreground TOKEN itself
+stays #64748b — the session-6 "token never visibly renders" claim was
+wrong for TAB surfaces only (300+ other usages render REF's explicit
+slate classes). **Lesson: a token claim is per-surface, not global —
+re-probe after component rebuilds introduce new token consumers.**
+
+**Sidebar footer colors (R15-B):** Bell ghost = slate-600
+(rgb(71,85,105)), Moon ghost = zinc-700 (#3F3F46 — pinned
+`--color-zinc-700`), user name = zinc-700 (NOT the session-6 slate-900 —
+that reading is stale; the reference redeployed). Same component renders
+the desktop sidebar AND the mobile drawer footer.
+
+**Actions-cluster fitting (R15-C):** NO `shrink-0` on the PageHeader
+default actions cluster. A shrink-0 flex child keeps its natural width
+(911px on attendance) inside the wrapping header row and overflows the
+page at mid viewports (docW 1199 at 1100) instead of letting the
+cluster's own flex-wrap wrap its buttons. Shrinking only engages under
+constraint — fitting pages render identically.
+
+**organogram (R15-D):** a BARE centered card (NO CardHeader) inside
+`overflow-x-auto pb-8` > `min-w-max flex justify-center p-8` (wide org
+trees scroll horizontally); the empty state is the SIMPLE recipe — 64px
+slate-300 icon mb-4 + ONE 16px slate-500 line (card 783×202@228, icon
+y=277, line y=357).
+
+**staffrequests (R15-E):** the pill renders `bg-secondary` (#F5F5F5 —
+REF's rgb(245,245,245) surface), NOT bg-muted (slate-100); the default
+scope is `"mine"` — the trigger renders the reference's SELECTED look
+(white bg + #0A0A0A + shadow) at load. The toggle-to-all remains the
+superset.

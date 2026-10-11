@@ -369,8 +369,10 @@ describe("app-shell canvas + main padding (session 6)", () => {
 });
 
 describe("sidebar user name color (session 6)", () => {
-  it("UserMenu name renders slate-900 like the reference", () => {
-    expect(sidebarNav).toContain("text-sm font-medium text-slate-900");
+  it("UserMenu name renders zinc-700 like the reference (session 16 re-measure)", () => {
+    // Session 6 measured slate-900; the redeployed reference renders
+    // rgb(63,63,70) = zinc-700 #3F3F46 (same as the Moon icon — R15-B).
+    expect(sidebarNav).toContain("text-sm font-medium text-zinc-700");
     expect(sidebarNav).not.toContain("text-sm font-medium text-foreground");
   });
 });
@@ -1264,8 +1266,8 @@ describe("staffrequests pill wrapper (session 15, R14-D)", () => {
   const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
 
   it("the pill sits in a plain block wrapper (no flex-col stretch — 145px left pill)", () => {
-    expect(page).not.toMatch(/<div className="flex flex-col">\s*<div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted/);
-    expect(page).toMatch(/<div>\s*<div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted/);
+    expect(page).not.toMatch(/<div className="flex flex-col">[\s\S]{0,80}<div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary/);
+    expect(page).toMatch(/<div>[\s\S]{0,400}?<div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary/);
   });
 });
 
@@ -1298,5 +1300,72 @@ describe("compliance notify buttons (session 15, R14-F)", () => {
 
   it("notify buttons render at the h-8 size (sm — 32px, 166/173/173)", () => {
     expect(page).toMatch(/<Button\s+key=\{w\}\s+variant="outline"\s+size="sm"/);
+  });
+});
+
+describe("tab-pill inactive trigger color (session 16, R15-A)", () => {
+  const tabs = read("src", "components", "ui", "tabs.tsx");
+  const reportsBrowser = read("src", "app", "(app)", "reports", "reports-browser.tsx");
+
+  it("TabsList carries the reference's neutral-500 inactive color (its muted-foreground token renders visibly on tab surfaces)", () => {
+    expect(tabs).toMatch(/rounded-lg bg-secondary p-1 text-neutral-500/);
+    expect(tabs).not.toMatch(/text-muted-foreground/);
+  });
+
+  it("the reports selector pill's explicit override matches the same neutral-500", () => {
+    expect(reportsBrowser).toMatch(/border-slate-200 bg-white text-neutral-500/);
+    expect(reportsBrowser).not.toMatch(/text-muted-foreground/);
+  });
+});
+
+describe("sidebar footer colors (session 16, R15-B)", () => {
+  it("Bell ghost icon renders slate-600, Moon ghost icon renders zinc-700", () => {
+    expect(sidebarNav).toMatch(/h-9 w-9[^"]*text-slate-600/);
+    expect(sidebarNav).toMatch(/h-9 w-9[^"]*text-zinc-700/);
+  });
+
+  it("the user name renders zinc-700 (the redeployed reference's measured color, not the stale slate-900)", () => {
+    expect(sidebarNav).toMatch(/<p className="truncate text-sm font-medium text-zinc-700">\{user\.name\}<\/p>/);
+    expect(sidebarNav).not.toMatch(/text-slate-900">\{user\.name\}/);
+  });
+});
+
+describe("page-header actions cluster fitting (session 16, R15-C)", () => {
+  it("the default actions cluster carries no shrink-0 — the documented wrap-to-second-row fitting must engage at mid viewports", () => {
+    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3", actionsClassName');
+    expect(pageHeader).not.toContain("flex flex-wrap items-center gap-3 shrink-0");
+  });
+});
+
+describe("organogram bare card + simple empty (session 16, R15-D)", () => {
+  const page = read("src", "app", "(app)", "organogram", "page.tsx");
+
+  it("renders NO CardHeader (no title/description) — the reference's card is bare", () => {
+    expect(page).not.toMatch(/CardTitle>Reporting Structure/);
+    expect(page).not.toMatch(/CardDescription/);
+  });
+
+  it("renders the simple empty recipe: 64px icon + ONE 16px line inside p-12 text-center", () => {
+    expect(page).toMatch(/p-12 text-center/);
+    expect(page).not.toMatch(/<EmptyState/);
+    expect(page).toMatch(/No reporting structure defined\./);
+  });
+
+  it("wraps the chart card in the centering + horizontal-scroll container (overflow-x-auto + min-w-max justify-center p-8)", () => {
+    expect(page).toMatch(/overflow-x-auto pb-8/);
+    expect(page).toMatch(/min-w-max flex justify-center p-8/);
+  });
+});
+
+describe("staffrequests pill recipe + default scope (session 16, R15-E)", () => {
+  const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
+
+  it("the pill renders the secondary surface (#F5F5F5) with the neutral-500 inactive color", () => {
+    expect(page).toMatch(/rounded-lg bg-secondary p-1 text-neutral-500/);
+    expect(page).not.toMatch(/bg-muted p-1 text-muted-foreground/);
+  });
+
+  it("the default scope is \"mine\" — the trigger renders the reference's selected look at load", () => {
+    expect(page).toMatch(/useState<"all" \| "mine">\("mine"\)/);
   });
 });

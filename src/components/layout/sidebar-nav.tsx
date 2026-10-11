@@ -198,7 +198,9 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
         <button
           type="button"
           aria-label="Notifications"
-          className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+          /* Session 16 (R15-B): the reference's Bell renders slate-600
+             (rgb(71,85,105) measured) — not the muted-foreground token. */
+          className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 transition-colors hover:bg-slate-100 hover:text-foreground"
         >
           <Bell className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -206,7 +208,9 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
           onClick={() => setDark((d) => !d)}
-          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+          /* Session 16 (R15-B): the reference's Moon renders zinc-700
+             (rgb(63,63,70) = #3F3F46 — pinned in the palette). */
+          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-zinc-700 transition-colors hover:bg-slate-100 hover:text-foreground"
         >
           {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>
@@ -244,9 +248,10 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
           <CircleUser className="h-4 w-4 text-white" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1 text-left">
-          {/* Session 6: reference renders the user name at slate-900
-              (#0f172a — measured), not the neutral foreground token. */}
-          <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
+          {/* Session 16 (R15-B): the reference renders the user name at
+              zinc-700 #3F3F46 (rgb(63,63,70) measured on the redeployed
+              reference) — the session-6 slate-900 reading is stale. */}
+          <p className="truncate text-sm font-medium text-zinc-700">{user.name}</p>
           <p className="truncate text-xs text-slate-500">{user.email}</p>
         </div>
       </DropdownMenu.Trigger>

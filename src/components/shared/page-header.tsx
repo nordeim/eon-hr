@@ -215,7 +215,13 @@ export function PageHeader({
           </p>
         ) : null}
       </div>
-      {actions ? <div className={cn("flex flex-wrap items-center gap-3 shrink-0", actionsClassName)}>{actions}</div> : null}
+      {/* Session 16 (R15-C): NO shrink-0 on the cluster — a shrink-0 flex
+          child keeps its 911px natural width inside the wrapping header row
+          and overflows the page at mid viewports (attendance docW 1199 at
+          1100) instead of letting the cluster's own flex-wrap wrap its
+          buttons. Shrinking only engages under constraint, so pages whose
+          cluster fits its row render identically. */}
+      {actions ? <div className={cn("flex flex-wrap items-center gap-3", actionsClassName)}>{actions}</div> : null}
       </div>
     </>
   );

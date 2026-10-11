@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Network, Users } from "lucide-react";
 import { initials } from "@/lib/utils";
@@ -140,27 +139,33 @@ export default async function OrganogramPage() {
         subtitle="Visual representation of your organization structure"
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Reporting Structure</CardTitle>
-          <CardDescription>Managers and their direct reports</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!hasStructure || trees.length === 0 ? (
-            <EmptyState
-              icon={<Network className="h-6 w-6" aria-hidden="true" />}
-              title="No reporting structure defined."
-              description="Assign managers to employees to build the org chart."
-            />
-          ) : (
-            <div className="flex flex-col gap-10">
-              {trees.map((tree) => (
-                <OrgNode key={tree.id} node={tree} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Session 16 (R15-D): the reference renders a BARE centered card
+          (no CardHeader — no "Reporting Structure" title or description)
+          inside `overflow-x-auto pb-8` > `min-w-max flex justify-center
+          p-8`; wide org trees scroll horizontally while the empty card
+          centers. The empty state is the SIMPLE recipe: a 64px slate-300
+          icon + ONE 16px slate-500 line (measured 783x202@228, icon
+          y=277, line y=357) — not the full EmptyState component. */}
+      <div className="overflow-x-auto pb-8">
+        <div className="min-w-max flex justify-center p-8">
+          <Card className="border-slate-200">
+            {!hasStructure || trees.length === 0 ? (
+              <div className="p-12 text-center">
+                <Network className="mx-auto mb-4 h-16 w-16 text-slate-300" aria-hidden="true" />
+                <p className="text-base text-slate-500">
+                  No reporting structure defined. Assign managers to employees to build the org chart.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-10 p-8">
+                {trees.map((tree) => (
+                  <OrgNode key={tree.id} node={tree} />
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
     </div>
     </div>
   );

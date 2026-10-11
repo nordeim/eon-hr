@@ -538,3 +538,30 @@ Work Log:
 Stage Summary:
 - Parity round 14 complete: 6 gap groups fixed with 13 new TDD pins — the white-pill completion (recruitment + performancemanagement), the staffrequests X-position bug (the always-pin-X lesson), the profile tab-value fix, the training affordance relocation, the compliance notify size — every fixed surface live-verified byte-exact against the reference
 - 337 unit + 86 E2E green; ready for commit + push
+
+---
+Task ID: 28 (session 16 / parity round 15)
+Agent: main (Super Z)
+Task: Full parity cycle — workspace refresh, skills-assisted audit (redeploy check + mobile nav + 46-route sweep + empty-state sweep + mid-viewport fitting + token-surface colors), TDD remediation of 5 gap groups, docs, commit + push
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at 357fb65; .env recreated (file:../db/custom.db + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2); Playwright chromium installed; LOC standalone server on :3200 via ensure-server.sh (one stale-server kill after the post-fix rebuild)
+- Baseline gates: lint 0/0, tsc, 337/337 unit, build, 86/86 E2E — the 357fb65 state exactly; static audit of the R14 diff clean
+- Skills consulted: tdd (red→green, seams), agent-browser (dual sessions), clone-app-pat-pro (computed styles = ground truth), tailwind-patterns
+- agent-browser dual sessions (loc/ref) authenticated; REF password fill needed one retry (the documented flake); the loc session was re-authenticated once after an accidental close
+- Redeploy check: 12 routes byte-identical — REF unchanged since R14
+- Mobile navigation audit (user priority): top bar 73, bottom tabs 78@766 (x 10/79/139/204/313), drawer 288×844 + footer 121@723 + NO close button, submenu, kicker 53@89 + scroll-away, md boundary 767/800 (hamburger 28@24 both) — ALL byte-identical; no Tailwind v4 bug; found + fixed the prior rounds' REF-drawer probe bug (offsetParent is null for fixed-position elements — assert on position:fixed instead)
+- 46-route sweep + NEW zero-data empty-state sweep (13 routes) + mid-viewport fitting audit (docW at 1280/1100) + token-surface color audit: 5 gap groups (R15-A…E) — the systemic tab-pill inactive color (REF renders its muted-foreground TOKEN #737373 on tab surfaces; 9 pills affected), the sidebar footer Bell slate-600 / Moon zinc-700 / name zinc-700 (stale session-6 measurements), the actions-cluster shrink-0 mid-viewport overflow (attendance docW 1199 at 1100), the organogram headed card vs REF's bare centered 783×202 simple-empty card, the staffrequests bg-muted vs REF's #F5F5F5 secondary + wrong default trigger state
+- Non-gaps documented: Category-A h1 furniture ×9, attendance fitting family (REF docW 1558/235px cards/lg breakpoint), settings pill 1100 overflow = REF parity (pill right 1259 both), templates/hrletters CTA supersets, evaluations hydration race, REF-dead user button + reports tiles (clone supersets), staffrequests aria-pressed a11y superset, documenttracker empty byte-identical
+- docs/remediation-plan-session16.md written (5 groups + non-goals) + codebase-validated
+- TDD: 12 new pins (all RED) → GREEN; 3 stale pins updated (session-6 name color, R14-D pill window, shrink-0 pin); 2 pins refined in flight (comment-broken \s* window → [\s\S]{0,400}; not.toMatch(/EmptyState/) matched its own comment → <EmptyState)
+- New pins: --color-neutral-500 #737373 + --color-zinc-700 #3f3f46 palette pins; TabsList/reports/staffrequests text-neutral-500; sidebar-nav Bell/Moon/name classes; page-header cluster without shrink-0; organogram bare card + simple empty + overflow wrapper; staffrequests bg-secondary + mine default
+- Gates: lint 0/0, tsc, 349/349 unit (+12), build, 86/86 E2E
+- Live verification: 9/9 pill surfaces byte-exact (rgb(115,115,115) inactive; staffrequests pill 145 rgb(245,245,245) + white/dark trigger); footer colors byte-exact on desktop AND mobile drawer; organogram byte-exact (783×202@457, icon 64@277, line @357); attendance fit 1199→1100 at 1100 with 1440 unchanged (h1 457, cluster 192); full-route sweep clean of non-documented diffs; mobile regression clean
+- With-data smoke: 2 injected reports rendered the org tree in the new bare-card wrapper (browser-verified — the first fetch-based attempt hit the auth redirect), then removed; DB pristine
+- 13 screenshots captured/refreshed (21-organogram, 32-staffrequests, 33-settings, 34-profile, 35-attendance, 36-compliance, 37-reports, 40-recruitment, 20-evaluations, 42-performancemanagement, 02-dashboard, 11-mobile-dashboard, 12-mobile-drawer-open) → 53 total
+- Docs: AGENTS session-16 layer + 349 specs; SKILL v2.9.0 + §28; PAD [S16] + Last Updated + corrected test table (recipes 220 / tokens 18); CLAUDE 435-spec pyramid + session-16 pins; README 349 specs; docs/session_24.md; worklog.md; remediation-plan completion record
+
+Stage Summary:
+- Parity round 15 complete: 5 gap groups fixed with 12 new TDD pins — the systemic tab-pill token color (the per-surface token lesson), three footer colors (stale measurements refreshed), the cluster fitting rule, the organogram bare-card rebuild, the staffrequests surface + default state — every fixed surface live-verified byte-exact against the reference
+- 349 unit + 86 E2E green; ready for commit + push

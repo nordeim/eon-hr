@@ -81,7 +81,7 @@ export default function StaffRequestsPage() {
   const [requests, setRequests] = React.useState<StaffRequest[]>([]);
   const [mineCount, setMineCount] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
-  const [scope, setScope] = React.useState<"all" | "mine">("all");
+  const [scope, setScope] = React.useState<"all" | "mine">("mine");
   const [category, setCategory] = React.useState("all");
   const [status, setStatus] = React.useState("all");
   const [busy, setBusy] = React.useState<string | null>(null);
@@ -280,7 +280,10 @@ export default function StaffRequestsPage() {
           x=288 with the trigger at x=292). The reference's pill sits inside
           the Radix Tabs root — an unclassed BLOCK div. */}
       <div>
-      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+      {/* Session 16 (R15-E): the pill renders the SECONDARY surface
+          (#F5F5F5 — the reference's rgb(245,245,245)) with the neutral-500
+          inactive color (the reference's muted-foreground token, R15-A). */}
+      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-neutral-500">
         <button
           type="button"
           aria-pressed={scope === "mine"}

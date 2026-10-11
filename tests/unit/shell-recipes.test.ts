@@ -227,7 +227,7 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
     // Reference: `flex gap-3` (Import CSV 145 + 12 + Add Employee 165 = 322).
     // Session 13 (R12-D): the cluster is now parameterized — the DEFAULT
     // stays gap-3; hrreports overrides to `flex gap-2` per REF measurement.
-    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3 shrink-0", actionsClassName');
+    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3", actionsClassName');
   });
 
   it("R8-B: PageHeader declares the centered prop for text-center headers", () => {
@@ -574,7 +574,8 @@ describe("session-11 parity round 10 — page restructures (R10-J..R)", () => {
     expect(src).toMatch(/flex flex-wrap gap-3/);
     expect(src).toContain("All Categories");
     expect(src).toContain("All Status");
-    expect(src).toMatch(/bg-muted p-1/);
+    // Session 16 (R15-E): the pill surface is the SECONDARY (#F5F5F5), not muted.
+    expect(src).toMatch(/bg-secondary p-1/);
   });
 
   it("R10-Q: workflowconfigpage empty state carries the Create First Workflow CTA", () => {
