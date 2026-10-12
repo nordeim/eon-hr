@@ -10,12 +10,13 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.8.0 (session-25 remediation complete) · **Last updated:**
-> 2026-10-12 · **State:** 411 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.9.0 (session-26 remediation complete) · **Last updated:**
+> 2026-10-12 · **State:** 432 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
-> the hover/active-state taxonomy + the pressed-state taxonomy).
+> the hover/active-state taxonomy + the pressed-state taxonomy + the head/SEO
+> contract).
 
 ---
 
@@ -1651,7 +1652,7 @@ input-event trick does not. The sidebar brand is an `<h1>` — h1 probes must
 filter `offsetParent !== null`. VLM checks need `createVision` + a vision
 model (the plain chat endpoint rejects image content).
 
-**Spec count:** 420 unit (recipes 283, tokens 19, auth 14, utils 13,
+**Spec count:** 432 unit (recipes 295, tokens 19, auth 14, utils 13,
 shell-recipes 76, db-path 15) + 86 E2E.
 
 ## 36. Session-24 Recipe Layer — parity round 23 (the cursor + selection dimension)
@@ -1694,3 +1695,32 @@ buttons) or its base44 branding imgs. Census method: role + aria-* +
 label-wiring summed over 4 surfaces, then element-level dumps per
 divergent family; fixed-position elements report offsetParent null (do
 not visibility-filter them).
+
+## 38. Session-26 Recipe Layer — parity round 25 (the SEO/meta dimension)
+
+The head map: REF generates page SEO mechanically from the route slug —
+title `<slug-capitalized> | Eon HR` (taskmanager renders "Taskmanager",
+NOT "Tasks & Projects"; dashboard + login render the plain "Eon HR"),
+description "<Slug> on Eon HR. <base>", og 6 + twitter 5 + canonical per
+app route, JSON-LD WebSite + Organization everywhere, and login adds
+apple-touch-icon + manifest + theme-color #000000 + og:image
+width/height/alt. Mirror with `src/lib/meta.ts` (`pageMetadata(route)`)
+exported from a 5-line server `layout.tsx` in every (app) route dir
+(client pages cannot export metadata; codemod
+`scripts/r25-codemod-layouts.mjs`). The root layout's
+`generateMetadata` derives `metadataBase` from `headers()`
+(x-forwarded-proto + host) so canonical/og:image/og:url resolve absolute
+against the ACTUAL serving origin. TRAP: Next REPLACES the parent
+openGraph object with the child's — og:type + og:site_name must repeat
+PER-ROUTE or they vanish (verified live). The asset family generates
+from public/eon-logo.png (`scripts/r25-gen-assets.py`): og-image.png
+1200×630 white canvas with the logo content ~1107×429 centered (REF's
+supabase render composition), icon-192/512 + apple-touch-icon 180
+square, and public/manifest.json (REF's field set). Do NOT replicate
+REF's OnboardFlow junk description copy (own base with the same prefix
+rule), its supabase-hosted assets (self-host instead), or its
+twitter:url (not a standard Card tag — og:url is the fallback).
+Probe-tooling lessons: agent-browser `--full` (not `--full-page`) is the
+full-page flag; `link.href` absolutizes (use getAttribute for the raw
+attribute); Next resolves alternates.canonical against metadataBase
+(dump-verify before assuming relative).

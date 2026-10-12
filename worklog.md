@@ -799,3 +799,26 @@ Stage Summary:
 - Round 24 (the a11y-attribute dimension) complete and ready for push: the group toggles carry aria-controls in both states like REF's older Radix, and the notifications bell opens the reference's exact popover (replacing the clone's dead button — the last measured REF-only behavior); the clone's stricter a11y supersets kept, REF's bugs (dangling describedby) not replicated
 - Gates: lint 0/0 · tsc · 420/420 unit (+4) · build · 86/86 E2E; DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), form-error surfaces (hidden by zero-data), print dimension, possible drag-drop/keyboard-shortcut + SEO/meta dimensions
+
+---
+Task ID: session-26
+Agent: main (Super Z)
+Task: Parity round 25 — the SEO/meta dimension (head audit + fixes)
+
+Work Log:
+- Workspace SURVIVED: git pull a6d028b→2d8fd6e (session_43.md added); .env intact (file:../db/custom.db); DB pristine (users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); one lint incident (throwaway diagnostic script tripped no-require-imports — deleted); the background-nohup build was silently killed once — re-run in foreground (the subshell-detachment lesson)
+- Baseline gates green: lint 0/0 · tsc · 420/420 unit · build · 86/86 E2E
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged); mobile navigation byte-identical — the r24 topbar:false-on-REF artifact ROOT-CAUSED (REF's hamburger is TEXT-named, no aria-label, no lucide-menu svg; direct measurement: strip 342×40 transparent @ (24,16) both, hamburger 28×28 @ (24,22) both, tabs, drawer, kicker, 800px brand x=76 y=25 both — no Tailwind v4 bug); with-data re-check — REF still zero-data (blocked, documented)
+- The SEO/meta audit (the round's core): full head census on 13 routes + element-level dumps — REF's mechanical per-route rules (slug-capitalized titles, "<Slug> on Eon HR." descriptions, og 6 + twitter 5 + canonical per app route, icon = the EONHR logo, JSON-LD WebSite+Organization, login extras: apple-touch-icon + manifest + theme #000000 + og:image dims/alt + BreadcrumbList); REF's og:image geometry measured (1200×630 white canvas, logo content ~1107×429 centered — the same logo as public/eon-logo.png, content ratio 2.56≈2.58); REF's manifest.json + full OnboardFlow-junk description recovered
+- The clone's gaps: title "Eon HR" everywhere (tab-visible), zero og/twitter/canonical/JSON-LD, NO icon link (favicon.svg never referenced)
+- docs/remediation-plan-session26.md written (5 gap groups + divergences) + codebase-validated (the client-page constraint: per-route server layouts required)
+- TDD: 12 RED pins → GREEN (2 pin corrections: og/twitter title = the FULL templated string; the alt field name); fixes = src/lib/meta.ts + 46 codemod layouts (scripts/r25-codemod-layouts.mjs) + root layout generateMetadata (headers()-derived metadataBase; the Next openGraph-REPLACEMENT discovery — og:type/siteName repeat per-route, pin strengthened) + login/layout.tsx + scripts/r25-gen-assets.py (og-image 1200×630, icon-192/512, apple-touch 180) + public/manifest.json
+- Gates: lint 0/0 · tsc · 432/432 unit (+12) · build · 86/86 E2E
+- Live verification: 13/13 titles byte-identical + 13/13 structure OK (canonical absolute per-origin, og/twitter families, icons, JSON-LD, login extras); canonical 12-route geometry 12/12 MATCH; mobile chrome clean
+- 3 screenshots (83 seo-meta-head-contract evidence page, 84 og-image asset, 85 login meta shell + 02×3/11 standards refreshed) → 98 total
+- Docs updated: AGENTS session-26 layer + 432 specs; SKILL v3.9.0 + §38 + recipes 295; PAD [S26] + test table + Last Updated; CLAUDE 518 pyramid; README 432/98 + SEO/meta parity row; docs/session_44.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 25 (the SEO/meta dimension) complete and ready for push: every route titles like REF (the mechanical slug pattern — "Taskmanager | Eon HR"), the full og/twitter/canonical/JSON-LD head contract live with a self-hosted asset family, and the tab favicon restored — all resolved against the serving origin (portable to any deployment)
+- Gates: lint 0/0 · tsc · 432/432 unit (+12) · build · 86/86 E2E; DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), form-error surfaces (hidden by zero-data), drag-drop/keyboard-shortcut dimension (kanban zero-draggables documented), print dimension beyond session-18

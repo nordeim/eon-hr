@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 420 specs) |
+| Unit tests | `bun run test` (Vitest, 432 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -979,3 +979,69 @@ scope lock: only the bell gains the popover). Gates: lint 0/0 · tsc ✓ ·
 the full bell contract (hp/exp/ctrl), the popover byte-exact geometry,
 canonical 12-route 12/12 MATCH, mobile chrome unchanged (tabs/drawer
 byte-identical).
+
+## Session-26 layer — parity round 25: the SEO/meta dimension
+
+The never-swept family (session_42's suggested next step): full `<head>`
+census on the canonical 12 routes + login (title/lang/charset/viewport/
+robots/description/og:*/twitter:*/canonical/icon/apple/manifest/
+theme-color/JSON-LD), then element-level dumps (the /employees full-tag
+dump, the login extras, the JSON-LD contents, REF's manifest.json, and
+REF's og:image render geometry).
+
+**REF's mechanical per-route rules**: title = `<slug capitalized> |
+Eon HR` (/taskmanager → "Taskmanager | Eon HR" — the route slug, NOT the
+human "Tasks & Projects"; dashboard + login = plain "Eon HR" — REF
+serves its dashboard at "/"); description = "<Slug> on Eon HR. <base>"
+for single-word slugs, plain base for compound slugs (the generator's
+humanize fails on compounds); og 6 per app route (title/description/
+image/url/type/site_name) + twitter 5 (card/title/description/image —
+REF's twitter:url is not a standard Card tag, og:url is the fallback);
+canonical per-route absolute; JSON-LD WebSite + Organization on every
+route (+BreadcrumbList on login); login adds apple-touch-icon + manifest
++ theme-color #000000 + og:image:width/height/alt.
+
+**The clone's gaps (all fixed)**: title "Eon HR" on EVERY route (the
+tab-visible gap), zero og/twitter/canonical/JSON-LD, and NO icon link at
+all (public/favicon.svg existed but was never referenced — the tab had
+no favicon).
+
+**R25-A (src/lib/meta.ts + 46 per-route layouts)**: `pageMetadata(route)`
+implements the mechanical rules; a 5-line server `layout.tsx` in every
+(app) route dir exports it (client pages cannot export metadata — the
+idiomatic Next 16 pattern; codemod `scripts/r25-codemod-layouts.mjs`).
+**R25-B/C (root layout generateMetadata)**: `metadataBase` derived from
+`headers()` (x-forwarded-proto + host) so canonical/og:image/og:url
+resolve against the ACTUAL serving origin (absolute per-origin,
+byte-structural parity, self-consistent on any deployment). og:type +
+og:site_name repeat PER-ROUTE in the helper — Next REPLACES the parent
+openGraph object with the child's (root defaults alone vanish; verified
+live). **R25-D (assets)**: the family generated from
+public/eon-logo.png (`scripts/r25-gen-assets.py`): og-image.png 1200×630
+(white #FEFEFE canvas, logo content ~1107×429 centered — REF's supabase
+/render/image/ composition measured and reproduced), icon-192/512
+(square full logo, REF's manifest icons), apple-touch-icon.png 180×180;
+public/manifest.json (REF's field set, own copy). **R25-E (JSON-LD)**:
+root layout renders WebSite + Organization (origin from headers());
+login adds BreadcrumbList (Home → login).
+
+**Documented divergences**: REF's description base copy is leftover
+OnboardFlow-template junk ("Streamline your new hire onboarding...") —
+the clone keeps its own copy with the same structural prefix rule; REF's
+assets are supabase-hosted base44 platform storage — the clone
+self-hosts the same-logo family; REF's manifest start_url/scope are
+absolute platform URLs — the clone ships the portable relative form;
+REF's /dashboard canonical is "/" (serves / directly) — the clone's is
+/dashboard (root redirects); REF's og:image:alt is "Base44 link
+preview" — the clone uses "Eon HR"; viewport serializes "1" not "1.0"
+(Next default — semantically identical).
+
+**Pins**: 12 new (tests/unit/recipes.test.ts session-26 block — the
+mechanical title/description rules BEHAVIORALLY (module import), the
+og/twitter/canonical fields, the root-layout metadataBase/JSON-LD, the
+login distribution, the 46-layout coverage fs-scan, PNG IHDR dimensions,
+manifest fields). Gates: lint 0/0 · tsc ✓ · 432/432 unit · build ✓ ·
+86/86 E2E. Live-verified: **13/13 titles byte-identical + 13/13
+structure OK** (canonical/og/twitter/icons/jsonld/login extras), the
+12-route geometry sweep 12/12 MATCH (metadata moves nothing), mobile
+chrome unchanged.

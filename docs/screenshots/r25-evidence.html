@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Eon HR — Parity Round 25: The SEO/meta dimension</title>
+<style>
+  body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #fafafa; color: #18181b; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 40px; }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 4px; }
+  .sub { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+  h2 { font-size: 17px; font-weight: 600; margin: 28px 0 10px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; font-size: 13px; }
+  th { text-align: left; padding: 8px 14px; background: #f4f4f5; font-weight: 600; border-bottom: 1px solid #e4e4e7; }
+  td { padding: 8px 14px; border-bottom: 1px solid #f4f4f5; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: ui-monospace, monospace; font-size: 12px; background: #f4f4f5; padding: 1px 5px; border-radius: 4px; }
+  .ok { color: #16a34a; font-weight: 600; }
+  .pill { display: inline-block; background: #eff6ff; color: #2563eb; border-radius: 999px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Parity Round 25 — the SEO/meta dimension</h1>
+  <div class="sub">Head-contract census, 13 canonical routes · clone :3200 standalone vs https://eon.base44.app · live-verified 2026-10-12</div>
+
+  <h2>Per-route titles — 13/13 byte-identical</h2>
+  <table>
+    <tr><th>Route</th><th>REF document.title</th><th>LOC document.title</th><th></th></tr>
+    <tr><td>/dashboard</td><td><code>Eon HR</code></td><td><code>Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/employees</td><td><code>Employees | Eon HR</code></td><td><code>Employees | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/payroll</td><td><code>Payroll | Eon HR</code></td><td><code>Payroll | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/taskmanager</td><td><code>Taskmanager | Eon HR</code></td><td><code>Taskmanager | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/leavemanagement</td><td><code>Leavemanagement | Eon HR</code></td><td><code>Leavemanagement | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/expenses</td><td><code>Expenses | Eon HR</code></td><td><code>Expenses | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/loans</td><td><code>Loans | Eon HR</code></td><td><code>Loans | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/attendance</td><td><code>Attendance | Eon HR</code></td><td><code>Attendance | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/settings</td><td><code>Settings | Eon HR</code></td><td><code>Settings | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/profile</td><td><code>Profile | Eon HR</code></td><td><code>Profile | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/compliancedashboard</td><td><code>Compliancedashboard | Eon HR</code></td><td><code>Compliancedashboard | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/reports</td><td><code>Reports | Eon HR</code></td><td><code>Reports | Eon HR</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>/login</td><td><code>Eon HR</code></td><td><code>Eon HR</code></td><td class="ok">MATCH</td></tr>
+  </table>
+
+  <h2>The head contract (structure — 13/13 OK)</h2>
+  <table>
+    <tr><th>Family</th><th>REF</th><th>LOC (before)</th><th>LOC (after)</th></tr>
+    <tr><td>og:*</td><td>6 per app route · 9 on login</td><td>0</td><td class="ok">6 · 9 (image 1200×630 + alt on login)</td></tr>
+    <tr><td>twitter:*</td><td>5 per app route · 6 on login</td><td>0</td><td class="ok">5 · 6 (card, title, description, image, +image:alt on login)</td></tr>
+    <tr><td>canonical</td><td>per-route absolute</td><td>none</td><td class="ok">per-route absolute (metadataBase = request origin)</td></tr>
+    <tr><td>icon / apple-touch</td><td>logo PNG · login adds apple</td><td>none (favicon.svg unreferenced)</td><td class="ok">icon-192 · apple-touch-icon on login</td></tr>
+    <tr><td>theme-color</td><td>#000000 on login</td><td>none</td><td class="ok">#000000 on login</td></tr>
+    <tr><td>manifest</td><td>/manifest.json on login</td><td>none</td><td class="ok">/manifest.json on login</td></tr>
+    <tr><td>JSON-LD</td><td>WebSite + Organization · +BreadcrumbList on login</td><td>0</td><td class="ok">2 · 3 (schemas with self-hosted logo)</td></tr>
+    <tr><td>viewport / lang / charset / robots</td><td>en · utf-8 · none</td><td>identical</td><td class="ok">unchanged</td></tr>
+  </table>
+
+  <h2>The asset family (self-hosted, from public/eon-logo.png)</h2>
+  <table>
+    <tr><th>Asset</th><th>Recipe</th></tr>
+    <tr><td><code>og-image.png</code></td><td>1200×630 white canvas, logo content ~1107×429 centered — REF's supabase /render/image/ composition measured &amp; reproduced</td></tr>
+    <tr><td><code>icon-192.png</code> / <code>icon-512.png</code></td><td>square full logo (REF's manifest icons = the raw square logo)</td></tr>
+    <tr><td><code>apple-touch-icon.png</code></td><td>180×180 (login distribution)</td></tr>
+    <tr><td><code>manifest.json</code></td><td>REF's field set with the clone's own copy (no OnboardFlow junk)</td></tr>
+  </table>
+
+  <h2>Round scope</h2>
+  <div style="font-size:13px; color:#3f3f46; line-height:1.7">
+    Standing audits: redeploy check <span class="ok">12/12 MATCH</span> · mobile navigation <span class="ok">byte-identical</span> (top strip 342×40, hamburger 28×28 @ (24,22), tabs, drawer, 800px brand x=76 y=25 — no Tailwind v4 bug) · with-data re-check <span class="pill">REF still zero-data — blocked</span><br/>
+    Gates: lint 0/0 · tsc ✓ · <b>432/432 unit (+12)</b> · build ✓ · <b>86/86 E2E</b> · geometry regression 12/12 MATCH.<br/>
+    Fixes: <code>src/lib/meta.ts</code> (the mechanical per-route rules) · 46 per-route server layouts + login/layout.tsx · root layout generateMetadata (headers()-derived metadataBase) · the asset family + manifest.json.
+  </div>
+</div>
+</body>
+</html>

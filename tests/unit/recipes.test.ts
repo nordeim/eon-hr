@@ -7,7 +7,7 @@
  *
  * If a recipe drifts from the reference contract, this test fails.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -1986,5 +1986,140 @@ describe("session-25 a11y attribute recipes (parity round 24 — the aria dimens
     // the moon button keeps its plain onClick toggle (no popover wrap)
     const moonIdx = sidebarNav.indexOf('aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}');
     expect(moonIdx).toBeGreaterThan(-1);
+  });
+});
+
+describe("session-26 SEO/meta recipes (parity round 25 — the head dimension)", () => {
+  const rootLayout = read("src", "app", "layout.tsx");
+  let loginLayout = "";
+  try { loginLayout = read("src", "app", "login", "layout.tsx"); } catch { /* RED until created */ }
+
+  // PNG IHDR dimension reader (bytes 16..24: width/height big-endian)
+  const pngSize = (...p: string[]) => {
+    const b = readFileSync(join(process.cwd(), ...p));
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  };
+
+  it("R25-A1: pageMetadata implements REF's mechanical title rule — slug-capitalized + the site template (taskmanager renders 'Taskmanager', NOT the human 'Tasks & Projects')", async () => {
+    const { pageMetadata } = await import("@/lib/meta");
+    const employees = pageMetadata("/employees");
+    expect(employees.title).toBe("Employees");
+    const taskmanager = pageMetadata("/taskmanager");
+    expect(taskmanager.title).toBe("Taskmanager");
+    const compliance = pageMetadata("/compliancedashboard");
+    expect(compliance.title).toBe("Compliancedashboard");
+    // compound slug stays whole — no word splitting
+    const hrletters = pageMetadata("/hrletters");
+    expect(hrletters.title).toBe("Hrletters");
+  });
+
+  it("R25-A2: the dashboard special-case — REF serves its dashboard at '/' so the title is the plain site name (no template)", async () => {
+    const { pageMetadata } = await import("@/lib/meta");
+    const dashboard = pageMetadata("/dashboard");
+    expect(dashboard.title).toEqual({ absolute: "Eon HR" });
+  });
+
+  it("R25-A3: the description prefix rule — '<Name> on Eon HR.' + the clone's own base copy (REF's OnboardFlow template junk is NOT replicated — same divergence family as the base44 branding)", async () => {
+    const { pageMetadata, BASE_DESCRIPTION } = await import("@/lib/meta");
+    const employees = pageMetadata("/employees");
+    expect(employees.description).toBe(`Employees on Eon HR. ${BASE_DESCRIPTION}`);
+    // REF's junk copy must not leak into the clone
+    expect(employees.description ?? "").not.toContain("OnboardFlow");
+    expect(BASE_DESCRIPTION).toContain("Eon HR");
+  });
+
+  it("R25-B/C: every route carries canonical + og:title/description/url + twitter card fields (REF: 6 og + 5 twitter per app route)", async () => {
+    const { pageMetadata } = await import("@/lib/meta");
+    const m = pageMetadata("/employees");
+    expect(m.alternates?.canonical).toBe("/employees");
+    const og = m.openGraph as Record<string, unknown>;
+    // REF's og:title is the FULL templated string (og tags don't ride the
+    // title template — measured "og:title=Employees | Eon HR" on REF)
+    expect(og.title).toBe("Employees | Eon HR");
+    // type + siteName repeat per-route: Next REPLACES the parent openGraph
+    // object with the child's — root defaults alone vanish (verified live)
+    expect(og.type).toBe("website");
+    expect(og.siteName).toBe("Eon HR");
+    expect(og.description).toContain("Employees on Eon HR.");
+    expect(og.url).toBe("/employees");
+    const images = og.images as Array<Record<string, unknown>>;
+    expect(images[0]?.url).toBe("/og-image.png");
+    const tw = m.twitter as Record<string, unknown>;
+    expect(tw.card).toBe("summary_large_image");
+    expect(tw.title).toBe("Employees | Eon HR");
+    expect(tw.description).toContain("Employees on Eon HR.");
+    const twImages = tw.images as Array<Record<string, unknown>>;
+    expect(twImages[0]?.url).toBe("/og-image.png");
+  });
+
+  it("R25-C1: the root layout derives metadataBase from the request host (headers()) so canonical/og URLs resolve against the ACTUAL serving origin — self-consistent on any deployment", () => {
+    expect(rootLayout).toContain("generateMetadata");
+    expect(rootLayout).toContain("headers()");
+    expect(rootLayout).toContain("metadataBase");
+    expect(rootLayout).toContain("x-forwarded-proto");
+  });
+
+  it("R25-B2: the root layout authors the site-level og/twitter defaults (og:site_name + og:type survive per-route overrides via Next's shallow merge) and the icon link", () => {
+    expect(rootLayout).toContain('siteName: "Eon HR"');
+    expect(rootLayout).toContain('type: "website"');
+    expect(rootLayout).toContain('card: "summary_large_image"');
+    expect(rootLayout).toContain("icon-192.png");
+  });
+
+  it("R25-E1: the root layout renders the two REF JSON-LD schemas (WebSite + Organization with the own logo)", () => {
+    expect(rootLayout).toContain("application/ld+json");
+    expect(rootLayout).toContain('"@type": "WebSite"');
+    expect(rootLayout).toContain('"@type": "Organization"');
+    expect(rootLayout).toContain("/eon-logo.png");
+  });
+
+  it("R25-D1: the login layout carries REF's platform-shell distribution — absolute 'Eon HR' title, theme-color #000000, manifest, apple-touch-icon, og image dims/alt + twitter:image:alt", () => {
+    expect(loginLayout).toContain('title: { absolute: "Eon HR" }');
+    expect(loginLayout).toContain('themeColor: "#000000"');
+    expect(loginLayout).toContain('manifest: "/manifest.json"');
+    expect(loginLayout).toContain("apple-touch-icon.png");
+    expect(loginLayout).toContain("width: 1200");
+    expect(loginLayout).toContain("height: 630");
+    expect(loginLayout).toContain('alt: "Eon HR"');
+  });
+
+  it("R25-E2: the login layout adds the BreadcrumbList JSON-LD (Home → login — REF's 3rd login script)", () => {
+    expect(loginLayout).toContain("BreadcrumbList");
+    expect(loginLayout).toContain('"Home"');
+  });
+
+  it("R25-A4 coverage: every (app) route dir has a layout.tsx exporting pageMetadata('<route>') — client pages cannot export metadata", () => {
+    const base = join(process.cwd(), "src", "app", "(app)");
+    const dirs = readdirSync(base, { withFileTypes: true }).filter((d) => d.isDirectory());
+    expect(dirs.length).toBe(46);
+    for (const d of dirs) {
+      const layoutPath = join(base, d.name, "layout.tsx");
+      expect(existsSync(layoutPath), `${d.name}/layout.tsx missing`).toBe(true);
+      const src = read(layoutPath.slice(process.cwd().length + 1));
+      expect(src, `${d.name}/layout.tsx must export metadata`).toContain("export const metadata");
+      expect(src, `${d.name}/layout.tsx must reference its route`).toContain(`pageMetadata("/${d.name}")`);
+    }
+  });
+
+  it("R25-D2: the asset family — og-image 1200x630 (the REF composition), icon-192/512 (square full logo), apple-touch-icon 180x180", () => {
+    expect(pngSize("public", "og-image.png")).toEqual({ w: 1200, h: 630 });
+    expect(pngSize("public", "icon-192.png")).toEqual({ w: 192, h: 192 });
+    expect(pngSize("public", "icon-512.png")).toEqual({ w: 512, h: 512 });
+    expect(pngSize("public", "apple-touch-icon.png")).toEqual({ w: 180, h: 180 });
+  });
+
+  it("R25-D3: manifest.json carries REF's field set with the clone's own copy", () => {
+    const manifestJson = JSON.parse(read("public", "manifest.json"));
+    expect(manifestJson.name).toBe("Eon HR");
+    expect(manifestJson.short_name).toBe("Eon HR");
+    expect(manifestJson.description).toContain("Eon HR");
+    expect(manifestJson.description).not.toContain("OnboardFlow");
+    expect(manifestJson.icons).toHaveLength(2);
+    expect(manifestJson.icons.map((i: { sizes: string }) => i.sizes).sort()).toEqual(["192x192", "512x512"]);
+    expect(manifestJson.start_url).toBe("/");
+    expect(manifestJson.display).toBe("standalone");
+    expect(manifestJson.theme_color).toBe("#000000");
+    expect(manifestJson.background_color).toBe("#ffffff");
+    expect(manifestJson.scope).toBe("/");
   });
 });
