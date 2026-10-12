@@ -106,4 +106,106 @@ test.describe("recruitment pipeline drag-drop (session 28 superset)", () => {
       await page.request.delete(`/api/jobs?id=${jobId}`);
     }
   });
+
+  /**
+   * Session 29 (R28-A): the within-stage ordering superset — the same
+   * round-trip as the taskmanager reorder (session 28 / R27-B) applied to
+   * the pipeline. Two candidates in Applied (Beta renders above Alpha via
+   * the appliedAt tiebreak — both positions backfill to 0); drag Alpha
+   * ONTO Beta to insert it before her, assert the visual order flips +
+   * the "Order updated" toast, reload, assert persistence via the
+   * position column.
+   */
+  test("candidate card reorders within its stage and persists after reload", async ({ page }) => {
+    const jobRes = await page.request.post("/api/jobs", {
+      data: { title: "E2E Reorder Probe Role", department: "QA", openings: 1 },
+    });
+    const jobJson = await jobRes.json();
+    expect(jobJson.ok).toBe(true);
+    const jobId: string = jobJson.data.job.id;
+
+    // Alpha first, then Beta — with equal positions the appliedAt desc
+    // tiebreak renders Beta ABOVE Alpha in the Applied column.
+    const alphaRes = await page.request.post("/api/candidates", {
+      data: { jobPostingId: jobId, name: "E2E Alpha", email: "alpha@example.com" },
+    });
+    const betaRes = await page.request.post("/api/candidates", {
+      data: { jobPostingId: jobId, name: "E2E Beta", email: "beta@example.com" },
+    });
+    expect((await alphaRes.json()).ok).toBe(true);
+    expect((await betaRes.json()).ok).toBe(true);
+
+    try {
+      await page.goto("/recruitmentkanban");
+      const board = page.locator("div.flex.gap-4.overflow-x-auto").first();
+      await expect(board).toBeVisible();
+      const appliedCol = board.locator("div.w-64", { hasText: "Applied" }).first();
+
+      const readOrder = () =>
+        appliedCol.evaluate((col) =>
+          [...col.querySelectorAll("div[draggable='true'] p.font-medium")].map((p) =>
+            p.textContent?.trim()
+          )
+        );
+
+      // Before: Beta above Alpha (the appliedAt tiebreak).
+      await expect(board.locator("div[draggable='true']", { hasText: "E2E Beta" })).toBeVisible();
+      expect(await readOrder()).toEqual(["E2E Beta", "E2E Alpha"]);
+
+      // Drag Alpha ONTO Beta — the insertion drop inserts Alpha BEFORE Beta.
+      const alpha = board.locator("div[draggable='true']", { hasText: "E2E Alpha" });
+      const beta = board.locator("div[draggable='true']", { hasText: "E2E Beta" });
+      await alpha.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("dragstart", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+      await page.waitForTimeout(150);
+      await beta.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("dragover", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+      await page.waitForTimeout(60);
+      await beta.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("drop", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+
+      // The optimistic flip + the same-stage toast.
+      await expect(page.getByText("Order updated")).toBeVisible();
+      expect(await readOrder()).toEqual(["E2E Alpha", "E2E Beta"]);
+
+      // Persistence: reload and re-read the board from the server (the
+      // position column now orders the stage).
+      await page.reload();
+      const board2 = page.locator("div.flex.gap-4.overflow-x-auto").first();
+      await expect(board2).toBeVisible();
+      const appliedCol2 = board2.locator("div.w-64", { hasText: "Applied" }).first();
+      const order2 = await appliedCol2.evaluate((col) =>
+        [...col.querySelectorAll("div[draggable='true'] p.font-medium")].map((p) =>
+          p.textContent?.trim()
+        )
+      );
+      expect(order2).toEqual(["E2E Alpha", "E2E Beta"]);
+
+      // Both cards still live in Applied (the reorder did not move stages).
+      expect(order2.length).toBe(2);
+    } finally {
+      await page.request.delete(`/api/jobs?id=${jobId}`);
+    }
+  });
 });

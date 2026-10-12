@@ -311,6 +311,11 @@ model Candidate {
   cvUrl        String?
   cvText       String? // extracted text for AI scoring
   stage        String   @default("applied") // applied | interviewing | offer | hired | rejected
+  // Session 29 (R28-A): the within-stage ordering superset — the same
+  // position-column pattern as Task (session 28 / R27-B). All existing
+  // rows backfill to 0; the appliedAt desc tiebreak preserves the
+  // newest-first render for untouched stages.
+  position     Int      @default(0)
   aiScore      Int? // 0..100
   skillsMatch  Int? // 0..100
   notes        String?

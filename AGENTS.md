@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 445 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 89 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 451 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 91 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1136,3 +1136,49 @@ cross-column regression PASS; the 12-route geometry 12/12 MATCH (at
 pinned 1440×900); mobile chrome byte-identical; the insertion ring
 DOM-verified + pixel-verified (rgb(177,205,251) = blue-500@40% over
 white — VLM cannot perceive the subtle 2px ring, documented).
+
+## Session-29 recipe layer (parity round 28 — within-stage ordering + print)
+
+- **R28-A (recruitment within-stage ordering superset)**: the round-27
+  Task pattern applied to Candidate — `position Int @default(0)` (db
+  pushed; rows backfill 0), GET orders `[{ position: "asc" },
+  { appliedAt: "desc" }]` (untouched stages keep the newest-first
+  render), PATCH accepts `order: string[]` (one stage's full ordered id
+  list; position = index in a `$transaction`, existence-validated,
+  NOT_FOUND on mismatch). The pipeline cards are insertion drop targets
+  (`dragOverId` → the `ring-2 ring-inset ring-blue-500/40` ring;
+  `onDrop` inserts BEFORE with `stopPropagation`; column-body drops
+  append). **The order computes over the FULL `candidates` array, NOT
+  the filtered `visible` view** — an active job filter or search cannot
+  corrupt persisted positions. The cross-stage toast stays
+  `${name} → ${Label}` (the round-27 E2E contract); same-stage reorders
+  toast "Order updated".
+- **R28-B (print superset)**: an UNLAYERED `@media print` block in
+  globals.css (the reduced-motion placement rule — unlayered !important
+  beats every v4 cascade layer; zero screen-media impact): `aside,
+  header, nav, [data-radix-portal] { display: none !important }` (the
+  app shell's elements are the ONLY such tags in the tree — census),
+  `main { padding-bottom: 0 !important }` (drop pb-20), `body > div
+  { min-height: 0 !important }` (drop min-h-screen), `.rounded-xl,
+  table tr { break-inside: avoid }` (cards/rows never split across
+  pages). REF ships zero print rules (session-18 census) — the print
+  output becomes clean while REF's stays chrome-laden.
+- **Probe-tooling lessons**: agent-browser's `set media` supports only
+  dark|light|reduced-motion — print emulation lives in the Playwright
+  layer (`page.emulateMedia({ media: "print" })`), which is why the
+  print verification is the permanent tests/e2e/print-media.spec.ts
+  (also the cascade proof: under print the sidebar computes
+  display:none vs `flex` from `md:flex`). The FIRST `body > div` is
+  Next.js's hidden bootstrap div — locate the app root as
+  `body > div.min-h-screen`. Loc cookie flakes after server restarts
+  (0/12 login-page signature) — re-run scripts/auth-r22.mjs.
+- **Pins**: 6 new (tests/unit/recipes.test.ts session-29 block). Gates:
+  lint 0/0 · tsc ✓ · 451/451 unit · build ✓ · 91/91 E2E (+2 first-run
+  passes: the recruitment within-stage reorder + the print-media
+  spec). Live-verified: the reorder round-trip (Beta,Alpha →
+  Alpha,Beta, persisted via position — VLM confirmed the insertion
+  ring on Beta + the mid-drag opacity on Alpha); the print emulation
+  VLM-confirmed (no sidebar, content-only "Employees" page) + the
+  screen contrast shot; the 12-route geometry 12/12 MATCH (pinned
+  1440×900); mobile chrome byte-identical (the one DRAWER DIFF was a
+  transient un-registered click — re-run clean). DB pristine.

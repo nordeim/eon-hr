@@ -2236,3 +2236,65 @@ describe("session-28 DnD depth recipes (parity round 27 — the recruitment pipe
     expect(src).toMatch(/order:\s*\w+/);
   });
 });
+
+describe("session-29 DnD ordering depth + print recipes (parity round 28 — the recruitment within-stage ordering superset + the print superset)", () => {
+  it("R28-A1: the Candidate model carries an explicit position column — the within-stage order becomes persistent state (existing rows backfill to 0; the appliedAt tiebreak preserves today's newest-first render)", () => {
+    const src = read("prisma", "schema.prisma");
+    const candBlock = src.slice(src.indexOf("model Candidate {"), src.indexOf("// ============================================================ Onboarding"));
+    expect(candBlock).toContain("position");
+    expect(candBlock).toContain("@default(0)");
+  });
+
+  it("R28-A2: GET /api/candidates orders by position asc with the appliedAt desc tiebreak — array order IS render order for the optimistic reorder", () => {
+    const src = read("src", "app", "api", "candidates", "route.ts");
+    expect(src).toContain('orderBy: [{ position: "asc" }, { appliedAt: "desc" }]');
+  });
+
+  it("R28-A3: PATCH /api/candidates accepts an order array — CandidatePatch schema + the positional reassignment loop (position = index for every listed id, existence-validated in a transaction)", () => {
+    const src = read("src", "app", "api", "candidates", "route.ts");
+    expect(src).toContain("order: z.array(");
+    expect(src).toContain("data.order");
+    expect(src).toMatch(/position: index|position: i\b/);
+    expect(src).toMatch(/order[\s\S]*findMany|findMany[\s\S]*order/);
+    expect(src).toContain("$transaction");
+  });
+
+  it("R28-A4: the pipeline cards are insertion drop targets — dragOverId + reorderCandidate + the { stage?, order } PATCH body computed over the FULL stage list (filters cannot corrupt persisted positions)", () => {
+    const src = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+    expect(src).toContain("reorderCandidate");
+    expect(src).toContain("dragOverId");
+    // the order is computed over the unfiltered candidates array, not the
+    // filtered `visible` view
+    expect(src).toMatch(/candidates\.filter\(\(c\) => c\.stage === /);
+    // the PATCH body carries the order array
+    expect(src).toMatch(/order:\s*\w+/);
+    // same-stage reorders get their own toast; cross-stage keeps the R27 contract
+    expect(src).toContain("Order updated");
+    expect(src).toContain("→ ${labelize(");
+  });
+
+  it("R28-B1: the print superset — a scoped @media print block in globals.css hides the shell chrome (aside/header/nav + Radix portals), resets the tab-bar padding and min-h-screen, and avoids splitting cards/rows across pages", () => {
+    const src = read("src", "app", "globals.css");
+    const at = src.indexOf("@media print");
+    expect(at).toBeGreaterThan(-1);
+    const block = src.slice(at);
+    expect(block).toContain("display: none !important");
+    expect(block).toContain("[data-radix-portal]");
+    expect(block).toContain("break-inside: avoid");
+    expect(block).toContain("padding-bottom: 0 !important");
+    expect(block).toContain("min-height: 0 !important");
+  });
+
+  it("R28-B2: the print block is UNLAYERED and important — an unlayered !important rule beats every v4 cascade layer (the round-26 reduced-motion placement rule), and no print rule existed on either side before (session-18 census: both apps shipped browser defaults)", () => {
+    const src = read("src", "app", "globals.css");
+    const at = src.indexOf("@media print");
+    expect(at).toBeGreaterThan(-1);
+    // everything before the print block: the reduced-motion block is the
+    // last unlayered rule — the print block must come after it, outside
+    // any @layer/@utility block
+    const before = src.slice(0, at);
+    const lastLayer = Math.max(before.lastIndexOf("@layer"), before.lastIndexOf("@utility"));
+    expect(at).toBeGreaterThan(lastLayer);
+    expect(before.lastIndexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(lastLayer);
+  });
+});

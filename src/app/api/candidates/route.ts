@@ -99,6 +99,10 @@ const CandidateInput = z.object({
 const CandidatePatch = z.object({
   stage: z.enum(["applied", "interviewing", "offer", "hired", "rejected"]).optional(),
   notes: z.string().trim().max(1000).optional(),
+  // Session 29 (R28-A): the within-stage reorder — the full ordered id
+  // list for ONE stage; the server reassigns position = index for every
+  // listed id (the Task contract from session 28 / R27-B).
+  order: z.array(z.string().min(1)).max(200).optional(),
 });
 
 const STAGES = ["applied", "interviewing", "offer", "hired", "rejected"] as const;
@@ -118,7 +122,10 @@ export async function GET(req: NextRequest) {
         AND: [jobId ? { jobPostingId: jobId } : {}, stage !== "all" ? { stage } : {}],
       },
       include: { jobPosting: { select: { id: true, title: true, department: true } } },
-      orderBy: { appliedAt: "desc" },
+      // Session 29 (R28-A): position asc with the appliedAt desc tiebreak —
+      // untouched stages (all positions equal) keep the newest-first
+      // render; array order IS render order for the optimistic reorder.
+      orderBy: [{ position: "asc" }, { appliedAt: "desc" }],
     });
 
     if (sort === "aiScore") {
@@ -186,8 +193,8 @@ export async function PATCH(req: NextRequest) {
 
     const { data, response: bad } = await parseBody(req, CandidatePatch);
     if (!data) return bad;
-    if (!data.stage && data.notes === undefined) {
-      return err("VALIDATION", "Provide a stage or notes");
+    if (!data.stage && data.notes === undefined && !data.order) {
+      return err("VALIDATION", "Provide a stage, notes or order");
     }
 
     const existing = await db.candidate.findUnique({ where: { id } });
@@ -201,6 +208,25 @@ export async function PATCH(req: NextRequest) {
       },
       include: { jobPosting: { select: { id: true, title: true, department: true } } },
     });
+
+    // Session 29 (R28-A): the within-stage reorder — reassign position =
+    // index for every id in the order array (top to bottom). The array is
+    // one stage's full listing; ids are existence-validated so a stale
+    // board cannot silently half-reorder.
+    if (data.order) {
+      const existing = await db.candidate.findMany({
+        where: { id: { in: data.order } },
+        select: { id: true },
+      });
+      if (existing.length !== data.order.length) {
+        return err("NOT_FOUND", "One or more candidates in the order list do not exist");
+      }
+      await db.$transaction(
+        data.order.map((cid, index) =>
+          db.candidate.update({ where: { id: cid }, data: { position: index } })
+        )
+      );
+    }
     return ok({ candidate });
   });
 }

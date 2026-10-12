@@ -307,3 +307,43 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Session 29 (R28-B): the print superset. Session-18's census (re-confirmed
+   rounds 22 and 27): ZERO @media print rules on either side — both apps
+   hand printing to the browser defaults, which prints the sticky sidebar,
+   the mobile chrome and any open portal over the page. The clone
+   supersedes on the print axis instead of replicating the defect (the
+   same category as the round-26 reduced-motion superset).
+
+   The recipe: hide the shell chrome — the desktop sidebar (the app
+   shell's <aside> is the ONLY aside in the tree; the sidebar-nav's inner
+   <nav> lives inside it), the mobile topbar (<header>) and the bottom
+   tabs (<nav>) — plus the Radix portal layer (an open drawer, dialog or
+   toast must not print over the page). Reset the tab-bar padding reserve
+   (pb-20) and the min-h-screen root so short pages do not force a blank
+   trailing page. Cards (.rounded-xl — the card recipe class) and table
+   rows do not split across page boundaries.
+
+   Like the reduced-motion block: deliberately UNLAYERED and !important —
+   an unlayered important rule beats every v4 cascade layer. Under SCREEN
+   media this block does not apply at all — visual parity with the
+   reference is byte-identical (the 12-route geometry + mobile chrome
+   regression sweeps re-prove it live after this change). */
+@media print {
+  aside,
+  header,
+  nav,
+  [data-radix-portal] {
+    display: none !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+  body > div {
+    min-height: 0 !important;
+  }
+  .rounded-xl,
+  table tr {
+    break-inside: avoid;
+  }
+}

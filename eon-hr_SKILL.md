@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.11.0 (session-28 remediation complete) · **Last updated:**
-> 2026-10-12 · **State:** 445 unit + 89 E2E tests green, lint/typecheck/build
+> **Version:** 3.12.0 (session-29 remediation complete) · **Last updated:**
+> 2026-10-12 · **State:** 451 unit + 91 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -1824,3 +1824,57 @@ pixel-truth corollary: the 2px 40%-alpha insertion ring is real in the
 screenshot (pixel-verified rgb(177,205,251) = blue-500@40% over white)
 while the VLM cannot perceive it — computed DOM + pixel sampling beat
 visual-language confirmation at low alphas.
+
+## 41. Session-29 Recipe Layer — parity round 28 (the within-stage ordering + print supersets)
+
+The round took session-48's two suggested next steps: further DnD depth
+(the within-stage candidate ordering) and the print superset.
+
+**The within-stage candidate ordering (R28-A)**: the round-27 Task pattern
+applied to Candidate — `position Int @default(0)` (db pushed; rows backfill
+0), GET `/api/candidates` orders `[{ position: "asc" }, { appliedAt:
+"desc" }]` (untouched stages keep the newest-first render — every row ties
+at position 0, the tiebreak decides), PATCH accepts `order: string[]`
+(one stage's full ordered id list; position = index in a `$transaction`,
+existence-validated, NOT_FOUND on mismatch). The pipeline cards are
+insertion drop targets: `onDragOver` on the card (preventDefault + a
+`dragOverId` state driving the `ring-2 ring-inset ring-blue-500/40`
+insertion ring) and `onDrop` inserts the dragged card BEFORE the hovered
+one (`stopPropagation` — the column handler must not double-fire); the
+column-body drop appends to the end through the same `reorderCandidate`.
+**The order computes over the FULL `candidates` array, NOT the filtered
+`visible` view** — an active job filter or search query cannot corrupt the
+persisted positions (the filtered render follows the array subsequence).
+Optimistic state: array order IS render order. The cross-stage toast stays
+`${name} → ${Label}` (the round-27 E2E contract); same-stage reorders toast
+"Order updated".
+
+**The print superset (R28-B)**: an UNLAYERED `@media print` block in
+globals.css — the reduced-motion placement rule (an unlayered !important
+rule beats every v4 cascade layer; zero screen-media impact, re-proven by
+the 12-route + mobile regression sweeps): `aside, header, nav,
+[data-radix-portal] { display: none !important }` (the app shell's
+sidebar/topbar/bottom-tabs are the ONLY such tags in the tree — the
+sidebar-nav's inner nav lives inside the hidden aside; census), `main
+{ padding-bottom: 0 !important }` (drop the pb-20 tab-bar reserve), `body
+> div { min-height: 0 !important }` (drop min-h-screen so short pages do
+not force a blank trailing page), `.rounded-xl, table tr { break-inside:
+avoid }` (cards and rows never split across page boundaries). REF ships
+zero print rules (the session-18 census, re-confirmed rounds 22 and 27) —
+the clone's print output becomes clean while REF's stays chrome-laden.
+
+**Probe-tooling lessons (this round's three)**: (1) agent-browser's
+`set media` supports only `dark|light|reduced-motion` — print emulation is
+NOT available at the CLI layer (`matchMedia("print").matches` stays false);
+it lives in the Playwright layer via `page.emulateMedia({ media: "print"
+})`, which is why the print verification is the permanent
+tests/e2e/print-media.spec.ts (also the cascade proof: under print the
+sidebar computes display:none vs `flex` from `md:flex`). (2) The FIRST
+`body > div` is Next.js's hidden bootstrap div — the app root (min-h-screen
+flex) is a LATER sibling; locate it as `body > div.min-h-screen` or a probe
+reads the hidden div's min-height 0px as a false-positive proof. (3) The
+loc session cookie flakes after server restarts — the 12-route sweep
+suddenly reads a 0/12 "login page" signature; re-running
+scripts/auth-r22.mjs restores it. Corollary: one mobile-audit DRAWER DIFF
+was a transient (the drawer click did not register that run) — re-run
+before diagnosing.
