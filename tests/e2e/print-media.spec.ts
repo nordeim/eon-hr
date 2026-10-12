@@ -40,6 +40,12 @@ test.describe("print media superset (session 29)", () => {
     const card = page.locator(".rounded-xl").first();
     await expect(card).toHaveCSS("break-inside", "avoid");
 
+    // Session 30 (R29-C): the print color fidelity — the browser default
+    // (economy) strips backgrounds from print output, blanking every
+    // status badge and table tint; the block forces exact on everything.
+    await expect(card).toHaveCSS("print-color-adjust", "exact");
+    await expect(card).toHaveCSS("-webkit-print-color-adjust", "exact");
+
     // --- Mobile viewport + print media ---------------------------------
     // At 390px the mobile topbar (<header>, md:hidden does NOT apply) and
     // the pb-20 tab-bar reserve are live — the print block must override

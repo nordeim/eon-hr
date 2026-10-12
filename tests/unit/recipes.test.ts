@@ -96,8 +96,8 @@ describe("sidebar-nav reference recipe (session 5)", () => {
     expect(sidebarNav).toContain("hover:text-blue-700");
   });
 
-  it("sub-list has the measured 4px top gap (mt-1)", () => {
-    expect(sidebarNav).toContain("mt-1 mb-1 flex flex-col gap-1 pl-4");
+  it("sub-list has the measured 4px top gap (mt-1; the trailing side is the root wrapper's gap-1 only — session-30 re-measured, mb-1 removed)", () => {
+    expect(sidebarNav).toContain("mt-1 flex flex-col gap-1 pl-4");
   });
 
   it("brand header: px-6 row, 18px slate-900 h2, 12px Demo sub", () => {
@@ -2296,5 +2296,58 @@ describe("session-29 DnD ordering depth + print recipes (parity round 28 — the
     const lastLayer = Math.max(before.lastIndexOf("@layer"), before.lastIndexOf("@utility"));
     expect(at).toBeGreaterThan(lastLayer);
     expect(before.lastIndexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(lastLayer);
+  });
+});
+
+describe("session-30 sidebar leaf-gap + organogram DnD + print color recipes (parity round 29)", () => {
+  it("R29-A1: the leaf-list ul drops mb-1 — the trailing gap after an expanded group is the root wrapper's 4px gap-1 only (REF-measured: next root at +4, the session-5 over-generalized bottom margin removed)", () => {
+    expect(sidebarNav).toContain("mt-1 flex flex-col gap-1 pl-4");
+    expect(sidebarNav).not.toContain("mt-1 mb-1 flex flex-col gap-1 pl-4");
+  });
+
+  it("R29-B1: the organogram page delegates the tree render to the client island (the page-folder convention) while keeping the server-side tree build", () => {
+    const src = read("src", "app", "(app)", "organogram", "page.tsx");
+    expect(src).toContain("OrganogramTree");
+    expect(src).toContain("buildNode");
+    expect(src).toMatch(/trees=\{/);
+  });
+
+  it("R29-B2: the organogram client island's DnD source contract — draggable cards + dataTransfer + dragOverId ring + the unified reparent with the { managerId } PATCH body and router.refresh", () => {
+    const src = read("src", "app", "(app)", "organogram", "organogram-tree.tsx");
+    expect(src).toContain("draggable");
+    expect(src).toContain("onDragStart");
+    expect(src).toContain("dataTransfer");
+    expect(src).toContain("dragOverId");
+    expect(src).toContain("ring-2 ring-inset ring-blue-500/40");
+    expect(src).toContain("reparent");
+    expect(src).toContain("managerId");
+    expect(src).toContain("router.refresh");
+    expect(src).toContain("opacity-50");
+    expect(src).toContain("cursor-grab");
+  });
+
+  it("R29-B3: the client cycle guard — a node cannot be dropped onto its own descendant (the tree walk precedes any request)", () => {
+    const src = read("src", "app", "(app)", "organogram", "organogram-tree.tsx");
+    expect(src).toMatch(/isDescendant|descendant/);
+    expect(src).toContain("cycle");
+  });
+
+  it("R29-B4: the employees PATCH carries the ancestor-walk cycle guard (a re-parent that would loop the chain is a VALIDATION error, not an FK crash or corrupt tree)", () => {
+    const src = read("src", "app", "api", "employees", "route.ts");
+    expect(src).toContain("reporting cycle");
+    const at = src.indexOf("reporting cycle");
+    // the guard lives inside the PATCH managerId block, after the existence check
+    expect(src.lastIndexOf("Selected manager does not exist", at)).toBeGreaterThan(-1);
+  });
+
+  it("R29-C1: the print block gains color fidelity — print-color-adjust exact (both prefixes) and a consistent @page margin (media-scoped, zero screen impact)", () => {
+    const src = read("src", "app", "globals.css");
+    const at = src.indexOf("@media print");
+    expect(at).toBeGreaterThan(-1);
+    const block = src.slice(at);
+    expect(block).toContain("print-color-adjust: exact !important");
+    expect(block).toContain("-webkit-print-color-adjust: exact !important");
+    expect(src).toContain("@page");
+    expect(src).toContain("margin: 10mm");
   });
 });

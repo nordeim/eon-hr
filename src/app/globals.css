@@ -328,7 +328,19 @@
    an unlayered important rule beats every v4 cascade layer. Under SCREEN
    media this block does not apply at all — visual parity with the
    reference is byte-identical (the 12-route geometry + mobile chrome
-   regression sweeps re-prove it live after this change). */
+   regression sweeps re-prove it live after this change).
+
+   Session 30 (R29-C) — the print color fidelity: browsers strip
+   backgrounds from print output by default, which would blank every
+   status badge, severity bucket, chart fill and table header tint —
+   the semantic color language of the report pages. print-color-adjust:
+   exact (both prefixes) restores it ("print what you see"). The @page
+   margin pins consistent print margins across browsers (REF ships zero
+   print rules; browser defaults vary 10–12mm). Both are media-scoped
+   like the rest of the block — zero screen-media impact. */
+@page {
+  margin: 10mm;
+}
 @media print {
   aside,
   header,
@@ -345,5 +357,9 @@
   .rounded-xl,
   table tr {
     break-inside: avoid;
+  }
+  * {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 }

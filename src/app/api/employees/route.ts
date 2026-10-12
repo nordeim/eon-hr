@@ -217,6 +217,18 @@ export async function PATCH(req: NextRequest) {
     if (data.managerId && data.managerId !== existing.managerId) {
       const mgr = await db.employee.findUnique({ where: { id: data.managerId } });
       if (!mgr) return err("VALIDATION", "Selected manager does not exist");
+      // Session-30 (R29-B4): the ancestor-walk cycle guard — walking up from
+      // the proposed manager, if the chain reaches the employee being moved,
+      // the re-parent would loop the reporting line (the organogram DnD and
+      // any future bulk-move path must not be able to corrupt the tree; the
+      // page's render cycle guard tolerates it, the API must not create it).
+      let cursor: typeof mgr | null = mgr;
+      for (let depth = 0; depth < 1000 && cursor?.managerId; depth++) {
+        if (cursor.managerId === id) {
+          return err("VALIDATION", "This manager assignment would create a reporting cycle");
+        }
+        cursor = await db.employee.findUnique({ where: { id: cursor.managerId } });
+      }
     }
 
     await db.employee.update({

@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.12.0 (session-29 remediation complete) · **Last updated:**
-> 2026-10-12 · **State:** 451 unit + 91 E2E tests green, lint/typecheck/build
+> **Version:** 3.13.0 (session-30 remediation complete) · **Last updated:**
+> 2026-10-13 · **State:** 457 unit + 93 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -1878,3 +1878,81 @@ suddenly reads a 0/12 "login page" signature; re-running
 scripts/auth-r22.mjs restores it. Corollary: one mobile-audit DRAWER DIFF
 was a transient (the drawer click did not register that run) — re-run
 before diagnosing.
+
+## 42. Session-30 Recipe Layer — parity round 29 (the sidebar leaf-gap fix + the organogram DnD + the print color fidelity)
+
+**The round's find (R29-A — a REAL at-rest parity bug, 28 rounds
+undetected)**: the standing audits pin h1 geometry only, so
+sidebar-internal drift was invisible. The census that found it: a FULL nav
+y-map on both apps reading buttons AND links together (REF's "Training
+LMS"/"Assets"/"Staff Requests"/"AI HR Assistant" entries are single-route
+ANCHORS, not collapsible buttons — a button-only census under-counts REF's
+nav and mismeasures the group pitch). The finding: after an expanded
+group's last leaf (ends y=861), the next root item sits at +4px on REF
+(AI HR Assistant y=865, Settings group y=905) but +8px on the clone (869 /
+909) — the nested leaf-ul's `mb-1` PLUS the root wrapper's gap-1. The
+LEADING side always matched (first leaf y=577 both — REF via the root gap,
+the clone via mt-1), which is how the session-5 pin got the top right and
+over-generalized the bottom. The fix: the leaf-list ul drops `mb-1` →
+`mt-1 flex flex-col gap-1 pl-4` (the session-5 pin corrected in
+tests/unit/recipes.test.ts). Post-fix: 865=865 / 905=905 byte-identical;
+the same SidebarNav renders the mobile drawer, and the mobile chrome audit
+re-ran clean.
+
+**The organogram drag-drop superset (R29-B)**: REF ships zero draggables
+on /organogram (re-verified; the zero-data empty state is byte-identical).
+The architecture: the server page KEEPS the tree build (roots, render
+cycle guard, directReports counts) and delegates the render to the client
+island `src/app/(app)/organogram/organogram-tree.tsx` (the page-folder
+convention: employee-wizard, customize-button) receiving the serializable
+`OrgNodeData[]` as props. The DnD recipe (the rounds-26–28 pattern): node
+cards `draggable` + onDragStart (dataTransfer setData + draggedId state +
+`opacity-50` mid-drag) + the round-27 `cursor-grab` affordance; drop
+targets via dragOverId state → `ring-2 ring-inset ring-blue-500/40` on the
+hovered card. The unified `reparent(draggedId, targetId)`: (1) the CLIENT
+cycle guard first — `isDescendant(trees, draggedId, targetId)` walks the
+local tree and toasts "Cannot create a reporting cycle" BEFORE any
+request; (2) the optimistic surgery — removeNode detaches the subtree,
+insertChild appends under the target, recount recomputes directReports
+(the local forest IS render order); (3) `PATCH /api/employees?id=
+{draggedId}` with body `{ managerId: targetId }`; (4) the toast
+`${name} now reports to ${targetName}`; (5) `router.refresh()` — server is
+truth, the island re-syncs from refreshed props via the useEffect keyed on
+the prop reference; failures revert to the previous forest + error toast.
+The API's PATCH gains the ANCESTOR-WALK cycle guard (walk the proposed
+manager's managerId chain up to 1000 deep; if it reaches the employee
+being moved → VALIDATION "This manager assignment would create a reporting
+cycle") — the page's render cycle guard tolerates corrupt data, the API
+must not create it. POST needs no guard (a new employee cannot be anyone's
+manager yet). The keyboard path is the employee edit form (unchanged).
+E2E: tests/e2e/organogram-dnd.spec.ts — the re-parent round-trip (create
+the A→B→C chain via the API, depths 0/1/2, drag C onto A, depth 2→1,
+persisted after reload, cleanup leaves-first) + the cycle rejection.
+
+**The print color fidelity (R29-C)**: the round-28 print block gains `* {
+print-color-adjust: exact !important; -webkit-print-color-adjust: exact
+!important }` — the browser "economy" default strips backgrounds from
+print output, which would blank every status badge, severity bucket, chart
+fill and table header tint; exact restores "print what you see". Plus
+`@page { margin: 10mm }` — consistent print margins across browsers (REF
+ships zero print rules; browser defaults vary 10–12mm). Media-scoped like
+the rest of the block: zero screen-media impact (re-proven by the 12-route
+geometry + mobile chrome regression sweeps). The E2E print-media spec pins
+the computed `print-color-adjust: exact` on cards under emulation. The
+print-button-on-report-pages idea from the frontier list is CONSIDERED AND
+DEFERRED: a visible at-rest button would break visual parity on report
+surfaces — a future decision, not shipped.
+
+**Probe-tooling lessons (this round's three)**: (1) the standing audits
+pin h1 geometry only — sidebar internals drifted undetected since session
+5; a sidebar-internal census (buttons AND links together) is now part of
+the round's standing probes. (2) Chrome serializes ring box-shadows with
+the inset geometry LAST — `lab(54.6 8.76 -65.79 / 0.4) 0px 0px 0px 2px
+inset` — so the ring assertion must match `/0px 0px 0px 2px inset/`, not
+`/2px 0px 0px 0px/` (one E2E regex fix; the ring itself rendered
+correctly on the first run). (3) In-page fetch evals break on JSON bodies
+(double quotes inside double-quoted shell words) — drive the API from
+Node with the session cookie (the verify-r29 pattern) instead; also
+md5-compare screenshot pairs before trusting a capture (an identical-hash
+pair means the dispatch sequence never registered — re-run with
+per-dispatch logging).

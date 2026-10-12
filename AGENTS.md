@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 451 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 91 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 457 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 93 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1182,3 +1182,74 @@ white — VLM cannot perceive the subtle 2px ring, documented).
   screen contrast shot; the 12-route geometry 12/12 MATCH (pinned
   1440×900); mobile chrome byte-identical (the one DRAWER DIFF was a
   transient un-registered click — re-run clean). DB pristine.
+
+## Session-30 recipe layer (parity round 29 — the sidebar leaf-gap + organogram DnD + print color)
+
+- **The round's find (R29-A — a REAL at-rest parity bug, 28 rounds
+  undetected)**: the standing audits pin h1 geometry only; a
+  sidebar-internal census (full nav y-map, buttons AND links) found
+  the expanded-group trailing gap diverges — REF's next root item
+  sits at +4px (AI HR Assistant y=865, Settings group y=905), the
+  clone's nested leaf-ul (`mt-1 mb-1`) added mb-1 + the root gap =
+  +8px (869/909). The LEADING side always matched (first leaf y=577
+  both — REF via the root gap, the clone via mt-1), which is why the
+  session-5 pin got the top right and over-generalized the bottom.
+  FIX: the leaf-list ul drops `mb-1` (`mt-1 flex flex-col gap-1
+  pl-4` — the session-5 pin corrected); post-fix both sides read
+  865/905 byte-identical; the same SidebarNav renders the mobile
+  drawer, and the mobile chrome audit re-ran clean.
+- **R29-B (the organogram drag-drop superset)**: REF ships zero
+  draggables on /organogram (re-verified; zero-data empty state
+  byte-identical). The page keeps the server tree-build and delegates
+  the render to the client island `organogram-tree.tsx` (the
+  page-folder convention): node cards draggable + dataTransfer +
+  mid-drag opacity-50 + the round-27 cursor-grab affordance; drop
+  targets with dragOverId → `ring-2 ring-inset ring-blue-500/40`;
+  `reparent` = client cycle guard (the tree walk precedes any
+  request) → optimistic surgery (remove/insert/recount — local forest
+  IS render order) → `PATCH /api/employees { managerId }` → toast
+  `${name} now reports to ${target}` → `router.refresh()` (server is
+  truth; the island re-syncs from refreshed props). The API PATCH
+  gains the ancestor-walk cycle guard (1000-deep walk from the
+  proposed manager; VALIDATION "This manager assignment would create
+  a reporting cycle" — the render cycle guard tolerates corrupt
+  data, the API must not create it). Keyboard path: the employee edit
+  form (unchanged). E2E +2: the re-parent round-trip (A→B→C chain,
+  drag C onto A, depth 2→1, persisted after reload) + the cycle
+  rejection (drag A onto its own descendant C — toast, no move, no
+  persistence).
+- **R29-C (the print color fidelity)**: the round-28 print block
+  gains `* { print-color-adjust: exact !important;
+  -webkit-print-color-adjust: exact !important }` (browsers strip
+  backgrounds from print by default — the economy default would
+  blank every badge/chart fill/table tint) + `@page { margin: 10mm }`
+  (consistent print margins; browser defaults vary 10–12mm).
+  Media-scoped like the rest of the block — zero screen impact. The
+  E2E print-media spec pins the computed `print-color-adjust: exact`
+  on cards under emulation. The print-button-on-report-pages idea is
+  CONSIDERED AND DEFERRED (a visible at-rest button would break
+  visual parity on report surfaces).
+- **Probe-tooling lessons**: (1) the standing audits pin h1 geometry
+  only — sidebar internals drifted undetected since session 5; a
+  sidebar-internal census (buttons AND links together — REF's
+  "Training LMS"/"Assets"/"Staff Requests"/"AI HR Assistant" are
+  single-route anchors, not collapsible buttons) is now part of the
+  round's probes; (2) Chrome serializes ring box-shadows with the
+  inset geometry LAST — the ring assertion must match `/0px 0px 0px
+  2px inset/`, not `/2px 0px 0px 0px/` (one E2E regex fix, the ring
+  rendered correctly on the first run); (3) in-page fetch evals
+  break on JSON bodies (double quotes inside double quotes) — drive
+  the API from Node with the session cookie instead.
+- **Pins**: 6 new (tests/unit/recipes.test.ts session-30 block) + the
+  session-5 sub-list pin corrected. Gates: lint 0/0 · tsc ✓ · 457/457
+  unit · build ✓ · 93/93 E2E (+2: the organogram re-parent + cycle
+  rejection, both first-run passes after the regex fix). Live-
+  verified: the sidebar geometry 865=865 / 905=905 byte-identical;
+  the re-parent round-trip (ring lab(54.6 8.76 -65.79 / 0.4) 0px 0px
+  0px 2px inset + opacity 0.5 + depths 0/1/2 → C moves 2→1,
+  persisted); the cycle rejection; the print CSS ships
+  print-color-adjust + @page; 12/12 redeploy MATCH; mobile chrome
+  byte-identical; 5 new screenshots (94 evidence, 95 the organogram
+  ring VLM-confirmed, 96 the sidebar fixed geometry, 97/97b the
+  print-color pair VLM-confirmed) + 02/11 standards refreshed → 112
+  PNG captures. DB pristine.

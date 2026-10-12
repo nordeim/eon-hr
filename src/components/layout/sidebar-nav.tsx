@@ -179,7 +179,7 @@ function CollapsibleNavItem({
         />
       </Collapsible.Trigger>
       <Collapsible.Content id={contentId}>
-        <ul className="mt-1 mb-1 flex flex-col gap-1 pl-4">
+        <ul className="mt-1 flex flex-col gap-1 pl-4">
           {item.children?.map((child: NavChild) => {
             const active = pathname === child.href;
             const ChildIcon = child.icon;

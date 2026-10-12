@@ -1,0 +1,169 @@
+#!/usr/bin/env node
+// capture-r29.mjs — session-30 / parity round 29 screenshots:
+// 94 = the round's evidence page (census + verdicts, rendered as HTML)
+// 95 = the organogram re-parent live insertion ring (dragstart on the
+//      leaf, dragover on the root — SEPARATED dispatches, the React-flush
+//      lesson — then the screenshot mid-drag)
+// 96 = the sidebar leaf-gap fix (the expanded Analytics group — the
+//      trailing geometry now matches REF's measured contract)
+// + refresh the 02/11 standards (the regression signal).
+// 97 (print color pair) is captured by capture-r29-print.mjs — Playwright
+// layer (agent-browser's set media supports only dark|light|reduced-motion).
+import { execSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
+function run(cmd) { try { return execSync(cmd, { stdio: "pipe", timeout: 60000 }).toString(); } catch (e) { return "ERR:" + String(e).slice(0, 200); } }
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const SHOTS = "/home/z/my-project/eon-hr/docs/screenshots";
+
+run("agent-browser --session loc set viewport 1440 900");
+
+// ---------- 94: the evidence page ----------
+const evidence = `<!doctype html>
+<html><head><meta charset="utf-8"><title>Round 29 Evidence</title>
+<style>
+  body { font-family: ui-sans-serif, system-ui, sans-serif; background: #fafafa; color: #0a0a0a; margin: 0; padding: 40px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: #64748b; margin: 0 0 28px; font-size: 14px; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; background: #f8fafc; color: #64748b; font-weight: 500; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: 0; }
+  .pass { color: #16a34a; font-weight: 600; }
+  .fix { color: #dc2626; font-weight: 600; }
+  .info { color: #2563eb; font-weight: 600; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px; margin: 12px 0; font-size: 13px; line-height: 1.7; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+</style></head><body><div class="wrap">
+<h1>Parity Round 29 — the sidebar leaf-gap + organogram DnD + print color dimensions</h1>
+<p class="sub">Session 30 evidence report · clone :3200 standalone vs https://eon.base44.app · computed-DOM ground truth</p>
+
+<h2>Standing audits</h2>
+<table>
+<tr><th>Audit</th><th>Result</th><th>Evidence</th></tr>
+<tr><td>Redeploy check (12 canonical routes, viewports pinned 1440×900)</td><td class="pass">12/12 MATCH</td><td>h1 text/font/x/y byte-identical — REF unchanged since round 28</td></tr>
+<tr><td>Mobile navigation (user priority)</td><td class="pass">byte-identical</td><td>tabs x=10/79/139/204/313, kicker "Dashboard" y=101 h=28 fs=18px fw=700, drawer overlay 390×844 rgba(0,0,0,0.8) z-50 — no Tailwind v4 bug</td></tr>
+<tr><td>With-data re-check</td><td class="info">blocked</td><td>REF still renders zero data (0 rows on 4 surfaces)</td></tr>
+</table>
+
+<h2>The round's census — the sidebar-internal dimension (a REAL parity bug found)</h2>
+<table>
+<tr><th>Surface</th><th>REF</th><th>Clone (before)</th><th>Clone (after)</th></tr>
+<tr><td>expanded-group trailing gap (desktop sidebar)</td><td>next root at +4px (AI HR Assistant y=865, Settings y=905)</td><td class="fix">+8px (y=869 / y=909 — the nested leaf-ul's mb-1 + the root gap)</td><td class="pass">+4px (865/905 — mb-1 removed, byte-identical)</td></tr>
+<tr><td>first-leaf offset</td><td>+4px (y=577 via the root gap)</td><td colspan="2" class="pass">+4px (y=577 via mt-1) — always matched, unchanged</td></tr>
+<tr><td>organogram</td><td>zero draggables (re-verified; zero-data empty state byte-identical)</td><td>read-only server-rendered tree</td><td class="pass">DnD re-parenting superset: draggable cards + insertion rings + PATCH managerId + cycle guards (client walk + API ancestor walk)</td></tr>
+<tr><td>print color</td><td>zero print rules (browser economy default strips backgrounds)</td><td>round-28 block hides chrome but colors would wash out</td><td class="pass">print-color-adjust: exact (both prefixes) + @page 10mm</td></tr>
+</table>
+
+<h2>Live verification (all PASS)</h2>
+<div class="card">
+<b>Sidebar geometry (R29-A)</b> — the expanded Analytics group on /organogram: last leaf bottom y=861 on BOTH apps;
+next root (AI HR Assistant) y=<b>865=865</b>; Settings group button y=<b>905=905</b> — the 4px divergence eliminated,
+byte-identical. The 12-route redeploy sweep re-ran 12/12 MATCH and the mobile chrome audit re-ran byte-identical
+after the fix (the same SidebarNav renders the drawer).
+</div>
+<div class="card">
+<b>Organogram re-parent round-trip (R29-B)</b> — create the A→B→C chain via the API (depths 0/1/2) → synthetic drag
+of C onto A → the insertion ring on A computes <code>lab(54.6 8.76 -65.79 / 0.4) 0px 0px 0px 2px inset</code> (the
+round-27 recipe) + C's mid-drag opacity 0.5 → optimistic move (C depth 2→1) → reload → persisted (C=1, B=1) →
+cleanup. Cycle rejection: dragging A onto its own descendant C leaves A at depth 0 — the client tree-walk guard fires
+before any request; the API's ancestor-walk guard is the authoritative second line (E2E-pinned: 2 new specs, both
+first-run passes after one box-shadow regex fix — the ring IS <code>0px 0px 0px 2px inset</code>, not
+<code>2px 0px 0px 0px</code>).
+</div>
+<div class="card">
+<b>Print color fidelity (R29-C)</b> — the served CSS carries <code>print-color-adjust: exact !important</code> (both
+prefixes) inside the unlayered print block + <code>@page { margin: 10mm }</code>; the E2E print-media spec pins the
+computed <code>print-color-adjust: exact</code> on cards under emulation and the screen-media restore. The
+print-button-on-report-pages idea from the frontier list is CONSIDERED AND DEFERRED — a visible at-rest button would
+break visual parity on report surfaces.
+</div>
+
+<h2>Gates</h2>
+<table>
+<tr><th>Gate</th><th>Result</th></tr>
+<tr><td>lint / typecheck</td><td class="pass">0 errors / clean</td></tr>
+<tr><td>Unit (Vitest)</td><td class="pass">457/457 (+6 session-30 pins; the session-5 sub-list pin corrected)</td></tr>
+<tr><td>Build (standalone)</td><td class="pass">passing</td></tr>
+<tr><td>E2E (Playwright)</td><td class="pass">93/93 (+2: the organogram re-parent round-trip + the cycle rejection)</td></tr>
+</table>
+
+<h2>Probe-tooling lessons this round</h2>
+<div class="card">
+1. <b>The standing audits pin h1 geometry only — sidebar internals drifted undetected since session 5.</b> The
+session-5 leaf-list pin got the leading mt-1 right but over-generalized the trailing mb-1 (both sides read the
+first leaf at y=577; the trailing side was never measured). A sidebar-internal census is now part of the round's
+standing probes (the full nav y-map: buttons AND links).<br>
+2. <b>REF's sidebar groups render as mixed BUTTON/A trees</b> — "Training LMS", "Assets", "Staff Requests" and
+"AI HR Assistant" are single-route anchors, not collapsible buttons; a button-only census under-counts REF's nav
+and mismeasures the group pitch. Always census <code>button, a</code> together.<br>
+3. <b>Chrome serializes ring box-shadows with the inset geometry LAST</b> — the insertion-ring assertion must match
+<code>/0px 0px 0px 2px inset/</code>, not <code>/2px 0px 0px 0px/</code> (one E2E regex fix; the ring itself
+rendered correctly on the first run).
+</div>
+</div></body></html>`;
+writeFileSync(`${SHOTS}/r29-evidence.html`, evidence);
+await run(`agent-browser --session loc open "file://${SHOTS}/r29-evidence.html"`);
+await sleep(1200);
+run(`agent-browser --session loc screenshot ${SHOTS}/94-sidebar-organogram-print-evidence.png`);
+console.log("94 captured (evidence page)");
+
+// ---------- 95: the organogram re-parent live insertion ring ----------
+// Navigate back to the app FIRST (the file:// evidence page breaks relative
+// in-page fetch() — the round-27 lesson). The API calls run from Node with
+// the session cookie (the verify-r29 pattern) — in-page fetch strings with
+// JSON bodies break the shell quoting (double quotes inside double quotes).
+await run(`agent-browser --session loc open "http://127.0.0.1:3200/organogram"`);
+await sleep(2500);
+const BASE = "http://127.0.0.1:3200";
+const COOKIE = run("agent-browser --session loc cookies get").trim().split("\n").find((l) => l.startsWith("eon_session="));
+async function api(path, method, body) {
+  const res = await fetch(`${BASE}${path}`, { method, headers: { "Content-Type": "application/json", ...(COOKIE ? { Cookie: COOKIE } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  return res.json();
+}
+const aRes = await api("/api/employees", "POST", { firstName: "R29cap", lastName: "Root", email: "r29cap.root@example.com", jobTitle: "Probe" });
+const aId = aRes?.data?.employee?.id;
+const bRes = await api("/api/employees", "POST", { firstName: "R29cap", lastName: "Mid", email: "r29cap.mid@example.com", jobTitle: "Probe", managerId: aId });
+const bId = bRes?.data?.employee?.id;
+const cRes = await api("/api/employees", "POST", { firstName: "R29cap", lastName: "Leaf", email: "r29cap.leaf@example.com", jobTitle: "Probe", managerId: bId });
+const cId = cRes?.data?.employee?.id;
+if (!aId || !bId || !cId) { console.error("chain creation failed", JSON.stringify({ aId, bId, cId })); process.exit(1); }
+await run(`agent-browser --session loc open "http://127.0.0.1:3200/organogram"`);
+await sleep(3500);
+const card = (name, type) => `(() => { const c = [...document.querySelectorAll('div[draggable=true]')].find(x => (x.querySelector('p.font-medium')||{}).textContent === '${name}'); if (!c) return 'nocard'; c.dispatchEvent(new DragEvent('${type}', {bubbles: true, cancelable: true, dataTransfer: new DataTransfer()})); return 'ok'; })()`;
+// SEPARATED dispatches (the React-flush lesson): dragstart on the leaf …
+console.log("dragstart:", run(`agent-browser --session loc eval "${card("R29cap Leaf", "dragstart")}"`).trim());
+await sleep(400);
+// … then dragover on the root (sets dragOverId → the insertion ring renders)
+console.log("dragover:", run(`agent-browser --session loc eval "${card("R29cap Root", "dragover")}"`).trim());
+await sleep(600);
+// verify the mid-drag state is live before the screenshot (computed DOM)
+const ringCheck = run(`agent-browser --session loc eval "(() => { const c = [...document.querySelectorAll('div[draggable=true]')].find(x => (x.querySelector('p.font-medium')||{}).textContent === 'R29cap Root'); return c ? getComputedStyle(c).boxShadow.slice(0, 90) : 'nocard'; })()"`).trim();
+console.log("ring on root:", ringCheck);
+run(`agent-browser --session loc screenshot ${SHOTS}/95-organogram-reparent-ring.png`);
+console.log("95 captured (organogram insertion ring)");
+// end the drag + cleanup
+run(`agent-browser --session loc eval "${card("R29cap Leaf", "dragend")}"`);
+await run(`agent-browser --session loc eval "fetch('/api/employees?id=${cId}', {method: 'DELETE'}).then(r => r.json())"`);
+await run(`agent-browser --session loc eval "fetch('/api/employees?id=${bId}', {method: 'DELETE'}).then(r => r.json())"`);
+await run(`agent-browser --session loc eval "fetch('/api/employees?id=${aId}', {method: 'DELETE'}).then(r => r.json())"`);
+console.log("95 cleanup done");
+
+// ---------- 96: the sidebar leaf-gap fix (expanded Analytics group) ----------
+await run(`agent-browser --session loc open "http://127.0.0.1:3200/organogram"`);
+await sleep(3500);
+run(`agent-browser --session loc screenshot ${SHOTS}/96-sidebar-leafgap-fixed.png`);
+console.log("96 captured (sidebar fixed geometry)");
+
+// ---------- standards refresh ----------
+await run(`agent-browser --session loc open "http://127.0.0.1:3200/dashboard"`);
+await sleep(3200);
+run(`agent-browser --session loc screenshot ${SHOTS}/02-dashboard-desktop.png`);
+console.log("02 refreshed");
+await run("agent-browser --session loc set viewport 390 844");
+await sleep(800);
+await run(`agent-browser --session loc open "http://127.0.0.1:3200/dashboard"`);
+await sleep(3200);
+run(`agent-browser --session loc screenshot ${SHOTS}/11-mobile-dashboard.png`);
+console.log("11 refreshed");

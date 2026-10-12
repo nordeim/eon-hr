@@ -1,9 +1,8 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Network, Users } from "lucide-react";
-import { initials } from "@/lib/utils";
+import { OrganogramTree, type OrgNodeData } from "./organogram-tree";
 
 interface EmployeeRow {
   id: string;
@@ -13,16 +12,6 @@ interface EmployeeRow {
   managerId: string | null;
   avatarUrl: string | null;
   department: string | null;
-}
-
-interface OrgNodeData {
-  id: string;
-  name: string;
-  jobTitle: string | null;
-  department: string | null;
-  avatarUrl: string | null;
-  directReports: number;
-  children: OrgNodeData[];
 }
 
 function buildNode(
@@ -46,37 +35,6 @@ function buildNode(
     directReports: children.length,
     children,
   };
-}
-
-function OrgNode({ node }: { node: OrgNodeData }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm">
-        <Avatar className="h-10 w-10 shrink-0">
-          {node.avatarUrl ? <AvatarImage src={node.avatarUrl} alt={node.name} /> : null}
-          <AvatarFallback>{initials(node.name)}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
-          <p className="truncate font-medium text-foreground">{node.name}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {[node.jobTitle, node.department].filter(Boolean).join(" · ") || "—"}
-          </p>
-        </div>
-        {node.directReports > 0 ? (
-          <span className="ml-auto shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-            {node.directReports} {node.directReports === 1 ? "report" : "reports"}
-          </span>
-        ) : null}
-      </div>
-      {node.children.length > 0 ? (
-        <div className="ml-6 flex flex-col gap-4 border-l-2 border-border pl-6">
-          {node.children.map((child) => (
-            <OrgNode key={child.id} node={child} />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 export default async function OrganogramPage() {
@@ -157,11 +115,7 @@ export default async function OrganogramPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-10 p-8">
-                {trees.map((tree) => (
-                  <OrgNode key={tree.id} node={tree} />
-                ))}
-              </div>
+              <OrganogramTree trees={trees} />
             )}
           </Card>
         </div>
