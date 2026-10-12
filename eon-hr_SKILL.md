@@ -10,13 +10,13 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.9.0 (session-26 remediation complete) · **Last updated:**
-> 2026-10-12 · **State:** 432 unit + 86 E2E tests green, lint/typecheck/build
+> **Version:** 3.10.0 (session-27 remediation complete) · **Last updated:**
+> 2026-10-12 · **State:** 438 unit + 87 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
 > the hover/active-state taxonomy + the pressed-state taxonomy + the head/SEO
-> contract).
+> contract + the reduced-motion/keyboard-order/drag-drop supersets).
 
 ---
 
@@ -1724,3 +1724,50 @@ Probe-tooling lessons: agent-browser `--full` (not `--full-page`) is the
 full-page flag; `link.href` absolutizes (use getAttribute for the raw
 attribute); Next resolves alternates.canonical against metadataBase
 (dump-verify before assuming relative).
+
+## 39. Session-27 Recipe Layer — parity round 26 (the reduced-motion + drag-drop supersets)
+
+The motion-a11y map: BOTH apps ignore `prefers-reduced-motion` (emulated-media
+census — the group/leaf transitions still compute 0.2s, the drawer `enter
+0.5s`, the dropdown `enter 0.15s` under reduce on both; sonner's toast
+internals are the only aware rules anywhere). The clone SUPSERSCES REF on the
+WCAG 2.3.3 axis with a top-level UNLAYERED `@media (prefers-reduced-motion:
+reduce)` block in globals.css: `*, ::before, ::after { animation-duration:
+0.01ms !important; animation-iteration-count: 1 !important;
+transition-duration: 0.01ms !important; scroll-behavior: auto !important; }`.
+TWO HARD RULES: (1) never `animation: none` — Radix waits for `animationend`
+before unmounting portal content; at 0.01ms every animation completes
+instantly and the event still fires (the drawer close stays clean,
+live-verified); (2) the block must stay UNLAYERED + `!important` so it beats
+the v4 utilities layer (layered rules lose to unlayered utilities — the
+session-21 lesson). Under DEFAULT media the block is inert — parity is
+byte-identical (regression-swept). Emulate with `agent-browser set media
+reduced-motion` (reset with bare `set media`); computed durations serialize
+`0.01ms` as `1e-05s` — compare accordingly.
+
+The drag-drop superset: REF's kanban ships zero draggables while its cards
+LOOK grabbable (cursor-grab). The clone wires real HTML5 DnD onto the
+existing `moveTask` PATCH path in the taskmanager page: cards `draggable` +
+`onDragStart` (dataTransfer payload + a `dragTaskId` state driving the
+mid-drag `opacity-50` affordance), columns `onDragOver` with preventDefault
+(the HTML5 contract — without it the browser refuses the drop) + a
+`ring-blue-500/40` highlight on non-source columns while dragging + `onDrop`
+→ moveTask. The "Move to" dropdown stays as the keyboard/a11y path. E2E
+TRAP: HTML5 DnD cannot be driven by plain mouse events — dispatch synthetic
+`DragEvent`s (dragstart → dragover → drop) with `new DataTransfer()`, and
+give React a tick after dragstart so the drop handler's state read is fresh
+(`tests/e2e/taskmanager-dnd.spec.ts` is the working recipe).
+
+The keyboard-order sweep (first of the dimension): Tab-order is
+byte-identical on /login (8/8 — REF's extra tab-9 stop is its base44 "Close
+badge" platform artifact) and /dashboard (14/16 — the 2 diffs are the
+clone's kept aria-label supersets on the bell/moon buttons; REF's are
+unnamed). No action needed; the sweep is the evidence.
+
+Probe-tooling lessons: `//` comments inside flattened one-line evals swallow
+the rest of the line (use `/* */` — re-hit after 5 rounds); REF's sidebar
+group chevron is `lucide-chevron-right` when COLLAPSED (chevron-down only
+when expanded — locate group buttons via `[aria-expanded]` instead); REF's
+CDN-JIT Tailwind layout can go stale after viewport/media churn within a
+session (a fresh session + fresh auth recovers it); REF's Tailwind runs via
+cdn.tailwindcss.com (the production warning is expected noise).

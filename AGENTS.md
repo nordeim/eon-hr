@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 432 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 438 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 87 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1045,3 +1045,52 @@ manifest fields). Gates: lint 0/0 · tsc ✓ · 432/432 unit · build ✓ ·
 structure OK** (canonical/og/twitter/icons/jsonld/login extras), the
 12-route geometry sweep 12/12 MATCH (metadata moves nothing), mobile
 chrome unchanged.
+
+### Session 27 — parity round 26: the reduced-motion + drag-drop dimensions
+
+**Audit basis**: emulated-media census (`agent-browser set media
+reduced-motion`, computed-DOM ground truth) + the FIRST keyboard Tab-order
+sweep (login 8/8 MATCH — REF's extra tab-9 stop is the base44 "Close
+badge" platform artifact; dashboard 14/16 — the 2 diffs are the clone's
+kept aria-label supersets on bell/moon, REF's buttons are unnamed) + the
+kanban drag census (REF: zero draggables, documented since session-21).
+
+**The finding**: BOTH apps ignore `prefers-reduced-motion` — under
+emulated reduce the group/leaf transitions still compute 0.2s, the drawer
+panel `enter 0.5s`, the dropdown `enter 0.15s` on BOTH (sonner internals
+are the only reduced-motion-aware rules on either side). The WCAG 2.3.3
+a11y gap was open on both apps.
+
+**R26-A (the reduced-motion SUPERSET — globals.css)**: a top-level
+UNLAYERED `@media (prefers-reduced-motion: reduce)` block pins the
+modern-normalize recipe — `animation-duration: 0.01ms !important`,
+`animation-iteration-count: 1 !important`, `transition-duration: 0.01ms
+!important`, `scroll-behavior: auto !important` on `*, ::before,
+::after`. Two hard constraints: (1) 0.01ms durations, NEVER `animation:
+none` — Radix waits for `animationend` before unmounting portal content
+(at 0.01ms every animation completes instantly and the event fires — the
+drawer close stays clean, live-verified); (2) unlayered + `!important` so
+the block beats the v4 utilities layer (the session-21 unlayered-class
+lesson). Under DEFAULT media the block is inert — parity byte-identical
+(the 12-route geometry + mobile chrome + motion regressions re-proved).
+
+**R26-B (the kanban drag-drop SUPERSET — taskmanager)**: REF ships zero
+draggables while its cards LOOK grabbable (the cursor-grab recipe) — the
+clone wires real HTML5 DnD onto the existing `moveTask` PATCH path:
+cards `draggable` + `onDragStart` (dataTransfer payload + the mid-drag
+`opacity-50` affordance, live-verified 0.5 → 1 on dragend), columns
+`onDragOver` preventDefault (the HTML5 contract) + a `ring-blue-500/40`
+highlight while dragging + `onDrop` → moveTask (optimistic state +
+toast). The "Move to" dropdown stays as the keyboard/a11y path. E2E:
+`tests/e2e/taskmanager-dnd.spec.ts` — synthetic DragEvents (HTML5 DnD
+cannot be driven by mouse events), create → drag Backlog→Done → toast →
+reload → persisted → cleanup.
+
+**Pins**: 6 new (tests/unit/recipes.test.ts session-27 block — the
+reduced-motion block's presence/recipe/unlayeredness/media-scoping + the
+DnD source contract: draggable/setData/preventDefault/onDrop/moveTask).
+Gates: lint 0/0 · tsc ✓ · 438/438 unit · build ✓ · 87/87 E2E.
+Live-verified: LOC calms under reduce (1e-05s) while REF keeps animating
+(0.2s/0.15s/0.5s); under default LOC computes 0.2s/0.15s — byte-parity;
+the 12-route geometry 12/12 MATCH; mobile chrome byte-identical; the
+mid-drag opacity + drop-target rings VLM/DOM-verified.

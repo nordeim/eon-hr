@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Eon HR — Parity Round 26: The reduced-motion + drag-drop dimensions</title>
+<style>
+  body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #fafafa; color: #18181b; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 40px; }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 4px; }
+  .sub { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+  h2 { font-size: 17px; font-weight: 600; margin: 28px 0 10px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; font-size: 13px; }
+  th { text-align: left; padding: 8px 14px; background: #f4f4f5; font-weight: 600; border-bottom: 1px solid #e4e4e7; }
+  td { padding: 8px 14px; border-bottom: 1px solid #f4f4f5; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: ui-monospace, monospace; font-size: 12px; background: #f4f4f5; padding: 1px 5px; border-radius: 4px; }
+  .ok { color: #16a34a; font-weight: 600; }
+  .sup { color: #2563eb; font-weight: 600; }
+  .pill { display: inline-block; background: #eff6ff; color: #2563eb; border-radius: 999px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
+  .note { background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 14px 18px; font-size: 13px; color: #52525b; margin: 12px 0; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Parity Round 26 — the reduced-motion + drag-drop dimensions</h1>
+  <div class="sub">Emulated-media census + keyboard Tab-order sweep + kanban DnD round-trip · clone :3200 standalone vs https://eon.base44.app · live-verified 2026-10-12</div>
+
+  <h2>Standing audits — all green</h2>
+  <table>
+    <tr><th>Audit</th><th>Result</th><th></th></tr>
+    <tr><td>Redeploy check (12 canonical routes, h1 text/font/x/y)</td><td>byte-identical — REF unchanged since round 25</td><td class="ok">12/12 MATCH</td></tr>
+    <tr><td>Mobile navigation (direct measurement)</td><td>strip 342×40 transparent @(24,16) · hamburger 28×28 @(24,22) · tabs x=10/79/139/204/313 · drawer 288×844 #FAFAFA z-50 · kicker y=101 h=28 · 800px brand x=76 y=25</td><td class="ok">byte-identical — no Tailwind v4 bug</td></tr>
+    <tr><td>With-data re-check</td><td>REF renders 0 rows on employees/payroll/leavemanagement/taskmanager</td><td class="ok">frontier stays blocked (documented)</td></tr>
+  </table>
+
+  <h2>The reduced-motion census (emulated prefers-reduced-motion: reduce)</h2>
+  <table>
+    <tr><th>Surface</th><th>REF under reduce</th><th>LOC under reduce</th><th>Verdict</th></tr>
+    <tr><td>sidebar group trigger transition</td><td><code>0.2s all</code></td><td><code>0.01ms</code> (computed <code>1e-05s</code>)</td><td class="sup">SUPERSET — the clone calms</td></tr>
+    <tr><td>user dropdown menu animation</td><td><code>enter 0.15s</code></td><td><code>enter 0.01ms</code></td><td class="sup">SUPERSET</td></tr>
+    <tr><td>mobile drawer panel animation</td><td><code>enter 0.5s</code></td><td><code>enter 0.01ms</code></td><td class="sup">SUPERSET</td></tr>
+    <tr><td>drawer close → unmount (Escape)</td><td>clean (0 panels left)</td><td>clean (0 panels left)</td><td class="ok">the Radix animationend contract holds</td></tr>
+  </table>
+  <div class="note"><strong>Both apps ignore the preference</strong> (sonner's toast internals are the only reduced-motion-aware rules on either side — documented session-22). The clone now supersedes REF on the WCAG 2.3.3 axis: near-zero durations (never <code>animation: none</code> — Radix needs <code>animationend</code> to unmount portals), unlayered + <code>!important</code> so the v4 utilities layer yields. Under DEFAULT media the block is inert — parity byte-identical.</div>
+
+  <h2>Default-media regression (after the fix)</h2>
+  <table>
+    <tr><th>Surface</th><th>REF default</th><th>LOC default</th><th></th></tr>
+    <tr><td>group trigger transition</td><td><code>0.2s all</code></td><td><code>0.2s all</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>user dropdown animation</td><td><code>enter 0.15s</code></td><td><code>enter 0.15s</code></td><td class="ok">MATCH</td></tr>
+    <tr><td>12-route geometry sweep</td><td>—</td><td>—</td><td class="ok">12/12 MATCH</td></tr>
+    <tr><td>mobile chrome (tabs/drawer/kicker)</td><td>—</td><td>—</td><td class="ok">byte-identical</td></tr>
+  </table>
+
+  <h2>The keyboard Tab-order sweep (first sweep of the dimension)</h2>
+  <table>
+    <tr><th>Surface</th><th>Result</th><th></th></tr>
+    <tr><td>/login (8 stops: Google → Microsoft → Apple → email → password → Sign in → Forgot → Sign up)</td><td>order + geometry byte-identical</td><td class="ok">8/8 MATCH</td></tr>
+    <tr><td>/dashboard (16 stops: nav family + footer chrome)</td><td>order byte-identical; the 2 label diffs are the clone's kept aria-label supersets (REF's bell/moon are unnamed)</td><td class="ok">14/16 + 2 supersets</td></tr>
+    <tr><td>REF's extra tab-9 stop on login ("Close badge")</td><td>the base44 platform builder badge</td><td>documented non-goal</td></tr>
+  </table>
+
+  <h2>The kanban drag-drop superset (E2E-verified round-trip)</h2>
+  <table>
+    <tr><th>Fact</th><th>Detail</th></tr>
+    <tr><td>REF's kanban</td><td>zero draggables (documented since session-21) — cards merely LOOK grabbable (<code>cursor-grab</code>)</td></tr>
+    <tr><td>The clone now</td><td>real HTML5 DnD: cards <code>draggable</code> + <code>dataTransfer</code> payload + mid-drag <code>opacity-50</code>; columns accept <code>dragover</code>/<code>drop</code> with a ring highlight; drops route through the existing <code>moveTask</code> PATCH (optimistic state + toast)</td></tr>
+    <tr><td>The keyboard path stays</td><td>the "Move to" dropdown menu survives alongside DnD (a11y parity)</td></tr>
+    <tr><td>E2E</td><td>create → drag Backlog→Done → toast → reload → persisted → cleanup: <span class="ok">passing</span> (tests/e2e/taskmanager-dnd.spec.ts)</td></tr>
+  </table>
+
+  <div class="note">Round gates: lint 0/0 · tsc ✓ · 438/438 unit (+6) · build ✓ · 87/87 E2E (+1) · DB pristine. Screenshots 86–87 + 2 standards refreshed → 100 total.</div>
+</div>
+</body>
+</html>

@@ -2123,3 +2123,61 @@ describe("session-26 SEO/meta recipes (parity round 25 — the head dimension)",
     expect(manifestJson.scope).toBe("/");
   });
 });
+
+describe("session-27 reduced-motion + kanban DnD recipes (parity round 26 — the a11y superset + the drag-drop superset)", () => {
+  it("R26-A1: globals.css carries the prefers-reduced-motion block (both apps ignore the preference — the clone supersedes REF on the WCAG 2.3.3 a11y axis)", () => {
+    expect(globalsCss).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
+  it("R26-A2: the block pins the modern-normalize recipe — 0.01ms animation/transition durations + iteration-count 1 + scroll-behavior auto (near-zero, never zero-none: Radix needs animationend to fire so portal close paths still unmount)", () => {
+    const block = globalsCss.slice(globalsCss.indexOf("@media (prefers-reduced-motion: reduce)"));
+    expect(block).toContain("animation-duration: 0.01ms");
+    expect(block).toContain("transition-duration: 0.01ms");
+    expect(block).toContain("animation-iteration-count: 1");
+    expect(block).toContain("scroll-behavior: auto");
+    // The Radix unmount trap: `animation: none` would starve the
+    // animationend listener and hang every dialog/drawer/dropdown close.
+    expect(block.slice(0, block.indexOf("}") + 1)).not.toContain("animation: none");
+  });
+
+  it("R26-A3: the block is UNLAYERED and !important — an unlayered important rule beats every v4 cascade layer (the session-21 unlayered-class lesson), so utility animation classes yield under reduce", () => {
+    const idx = globalsCss.indexOf("@media (prefers-reduced-motion: reduce)");
+    const block = globalsCss.slice(idx, idx + 700);
+    expect(block).toContain("!important");
+    // Must NOT live inside @layer base (layered rules lose to unlayered
+    // utilities under the v4 cascade — the block would be dead code).
+    const before = globalsCss.slice(0, idx);
+    const openLayers = (before.match(/@layer base \{/g) || []).length;
+    const closeLayers = (before.match(/\n\}/g) || []).length;
+    expect(openLayers).toBeLessThanOrEqual(closeLayers);
+  });
+
+  it("R26-A4: under DEFAULT media the block is inert — parity is byte-identical (the 12-route geometry + motion regression sweeps re-prove it live; this pin locks the media scoping)", () => {
+    const idx = globalsCss.indexOf("@media (prefers-reduced-motion: reduce)");
+    expect(idx).toBeGreaterThan(-1);
+    // The motion family stays intact OUTSIDE the media block.
+    const outside = globalsCss.slice(0, idx);
+    expect(outside).toContain("@keyframes enter");
+    expect(outside).toContain("@utility animate-in");
+    expect(outside).toContain("animation-duration: var(--tw-animate-duration, 0.15s)");
+  });
+
+  it("R26-B1: the kanban task card is HTML5-draggable (REF ships zero draggables — the superset), carrying the task id on dataTransfer and a mid-drag affordance", () => {
+    const src = read("src", "app", "(app)", "taskmanager", "page.tsx");
+    expect(src).toContain("draggable");
+    expect(src).toContain("onDragStart");
+    expect(src).toContain('dataTransfer.setData');
+    expect(src).toContain("opacity-50");
+    expect(src).toContain("onDragEnd");
+  });
+
+  it("R26-B2: the kanban columns are drop zones — dragover preventDefault (the HTML5 DnD contract) + a hover highlight + onDrop wired to the existing moveTask PATCH path", () => {
+    const src = read("src", "app", "(app)", "taskmanager", "page.tsx");
+    expect(src).toContain("onDragOver");
+    expect(src).toContain("preventDefault");
+    expect(src).toContain("onDrop");
+    expect(src).toContain("moveTask(");
+    // The keyboard/a11y path stays: the Move-to dropdown survives alongside DnD.
+    expect(src).toContain("Move to");
+  });
+});

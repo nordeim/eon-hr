@@ -82,6 +82,12 @@ export default function TaskManagerPage() {
   const [projectDialogOpen, setProjectDialogOpen] = React.useState(false);
   const [dialogSeq, setDialogSeq] = React.useState(0);
   const [saving, setSaving] = React.useState(false);
+  /* Session 27 (R26-B): the kanban drag-drop superset. REF ships zero
+     draggables (documented since session-21) while its cards LOOK
+     grabbable (the cursor-grab recipe) — the clone wires real HTML5 DnD
+     onto the existing moveTask PATCH path. dragTaskId drives the
+     mid-drag card affordance (opacity-50) and the column highlight. */
+  const [dragTaskId, setDragTaskId] = React.useState<string | null>(null);
 
   function openTaskDialog() {
     setDialogSeq((s) => s + 1);
@@ -260,7 +266,37 @@ export default function TaskManagerPage() {
               {COLUMNS.map((col) => {
                 const columnTasks = tasks.filter((t) => t.status === col.id);
                 return (
-                  <div key={col.id} className="space-y-3 rounded-lg p-3">
+                  <div
+                    key={col.id}
+                    /* Session 27 (R26-B): the column is a drop zone —
+                        dragover preventDefault is the HTML5 DnD contract
+                        (without it the browser refuses the drop); the
+                        highlight runs while a card hovers. */
+                    onDragOver={(e) => {
+                      if (!dragTaskId) return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                    }}
+                    onDragEnter={(e) => {
+                      if (!dragTaskId) return;
+                      e.preventDefault();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const id = dragTaskId;
+                      setDragTaskId(null);
+                      if (!id) return;
+                      const task = tasks.find((t) => t.id === id);
+                      if (task && task.status !== col.id) {
+                        moveTask(id, col.id);
+                      }
+                    }}
+                    className={`space-y-3 rounded-lg p-3 ${
+                      dragTaskId && tasks.find((t) => t.id === dragTaskId)?.status !== col.id
+                        ? "ring-2 ring-inset ring-blue-500/40"
+                        : ""
+                    }`}
+                  >
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-slate-900">{col.label}</h3>
                       {/* Reference count chip (session 6): rounded-md
@@ -277,7 +313,16 @@ export default function TaskManagerPage() {
                       {columnTasks.map((task) => (
                           <div
                             key={task.id}
-                            className="group cursor-grab rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+                            draggable
+                            onDragStart={(e) => {
+                              setDragTaskId(task.id);
+                              e.dataTransfer.effectAllowed = "move";
+                              e.dataTransfer.setData("text/plain", task.id);
+                            }}
+                            onDragEnd={() => setDragTaskId(null)}
+                            className={`group cursor-grab rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
+                              dragTaskId === task.id ? "opacity-50" : ""
+                            }`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <p className="min-w-0 flex-1 break-words text-sm font-medium text-foreground">

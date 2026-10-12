@@ -277,3 +277,33 @@
 @utility slide-in-from-bottom-2 {
   --tw-enter-translate-y: 0.5rem;
 }
+
+/* Session 27 (R26-A): the reduced-motion superset. Both apps ignore
+   prefers-reduced-motion (round-26 emulated-media census: the group/leaf
+   transitions 0.2s, the drawer enter 0.5s and the dropdown enter 0.15s all
+   still play on REF under reduce — sonner's toast internals are the only
+   reduced-motion-aware rules on either side). The clone supersedes REF on
+   the WCAG 2.3.3 axis instead of replicating the defect (the same category
+   as the round-24 aria-label supersets).
+
+   The recipe (modern-normalize): near-zero durations, NEVER
+   `animation: none` — Radix listens for animationend before unmounting
+   portal content (dialog/drawer/dropdown/select close paths); at 0.01ms
+   every animation still completes instantly and the event fires, so the
+   unmount contract holds. The block is deliberately UNLAYERED and
+   !important: an unlayered important rule beats every v4 cascade layer,
+   so the utilities-layer animation classes yield under reduce.
+
+   Under DEFAULT media this block does not apply at all — visual parity
+   with the reference is byte-identical (the 12-route geometry + motion
+   regression sweeps re-prove it live). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

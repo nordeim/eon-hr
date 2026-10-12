@@ -822,3 +822,28 @@ Stage Summary:
 - Round 25 (the SEO/meta dimension) complete and ready for push: every route titles like REF (the mechanical slug pattern — "Taskmanager | Eon HR"), the full og/twitter/canonical/JSON-LD head contract live with a self-hosted asset family, and the tab favicon restored — all resolved against the serving origin (portable to any deployment)
 - Gates: lint 0/0 · tsc · 432/432 unit (+12) · build · 86/86 E2E; DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), form-error surfaces (hidden by zero-data), drag-drop/keyboard-shortcut dimension (kanban zero-draggables documented), print dimension beyond session-18
+
+---
+Task ID: session-27
+Agent: main (Super Z)
+Task: Parity round 26 — the reduced-motion dimension (a11y superset) + the kanban drag-drop superset + the first keyboard Tab-order sweep
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at cb85ba2; .env recreated (DATABASE_URL="file:../db/custom.db" + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on every DB/build command
+- Baseline gates green: lint 0/0 · tsc · 432/432 unit · build · 86/86 E2E
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged); mobile navigation byte-identical via the DIRECT measurement (strip 342×40 transparent @(24,16), hamburger 28×28 @(24,22), tabs, drawer, kicker, 800px brand x=76 y=25 — no Tailwind v4 bug; the probe's topbar:false-on-REF artifact stays documented); with-data re-check — REF still zero-data (blocked, documented)
+- The reduced-motion audit (the round's core): agent-browser `set media reduced-motion` emulated on both sessions — computed-DOM census found BOTH apps ignore the preference (group/leaf transitions 0.2s, drawer enter 0.5s, dropdown enter 0.15s still play on both; sonner internals the only aware rules) — the WCAG 2.3.3 gap open on both
+- The keyboard Tab-order sweep (NEW dimension): /login 8/8 byte-identical (REF's extra tab-9 = the base44 Close-badge artifact); /dashboard 14/16 (the 2 diffs = the clone's kept aria-label supersets on bell/moon — REF's buttons unnamed) — parity, no action; documented as evidence
+- The drag-drop census: REF kanban zero draggables (documented); the clone's cards carried the cursor-grab recipe + the moveTask dropdown path but no actual DnD — the superset opportunity
+- docs/remediation-plan-session27.md written (2 gap groups + census maps + divergences) + codebase-validated
+- TDD: 6 RED pins → GREEN (no pin corrections): R26-A the reduced-motion block (globals.css top-level UNLAYERED @media — 0.01ms durations + iteration-count 1 + scroll-behavior auto, all !important; NEVER animation:none — the Radix animationend unmount trap); R26-B the kanban HTML5 DnD (cards draggable + onDragStart dataTransfer + mid-drag opacity-50; columns onDragOver preventDefault + ring-blue-500/40 highlight + onDrop → moveTask; Move-to dropdown kept as the keyboard path) + the new E2E spec (synthetic DragEvents — HTML5 DnD can't be driven by mouse events; create → drag Backlog→Done → toast → reload → persisted → cleanup)
+- Gates: lint 0/0 · tsc · 438/438 unit (+6) · build · 87/87 E2E (+1, first-run pass)
+- Live verification: under reduce LOC calms (1e-05s group/dropdown; the drawer close unmounts clean — the Radix contract holds) while REF keeps animating (0.2s/enter 0.15s) — the deliberate a11y superset; under default LOC restores 0.2s/0.15s — byte-parity; mid-drag opacity 0.5→1 DOM-verified + drop-target rings VLM-confirmed; regressions: 12-route geometry 12/12 MATCH (one LOC re-auth — the documented cookie flake) + mobile chrome byte-identical
+- 2 screenshots (86 reduced-motion+dnd evidence page, 87 kanban mid-drag state + 02/11 standards refreshed) → 100 total
+- Probe-tooling lessons: // comments break flattened evals (re-hit after 5 rounds — use /* */); REF's group chevron is chevron-RIGHT when collapsed (locate via [aria-expanded]); REF's CDN-JIT layout went stale once after viewport/media churn (fresh session recovers); agent-browser's full-page flag is --full (not --full-page)
+- Docs updated: AGENTS session-27 layer + 438/87 counts; SKILL v3.10.0 + §39 + counts; PAD [S27] + Last Updated; CLAUDE 525-spec pyramid + session-27 pins + DnD E2E entry; README 438/87 + 100 captures + the reduced-motion/DnD parity rows; docs/session_46.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 26 (the reduced-motion + drag-drop dimensions) complete and ready for push: the clone now respects prefers-reduced-motion (the a11y superset over REF's ignored preference — near-zero durations with the Radix unmount contract preserved) and the kanban board actually drags (real HTML5 DnD on the reference's merely-visual cursor-grab recipe, E2E round-tripped); the keyboard Tab-order sweep documented parity
+- Gates: lint 0/0 · tsc · 438/438 unit (+6) · build · 87/87 E2E (+1); DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), form-error surfaces (hidden by zero-data), print dimension beyond session-18, DnD depth (within-column reordering, recruitment pipeline)
