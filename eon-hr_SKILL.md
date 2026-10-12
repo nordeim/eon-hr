@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.6.0 (session-23 remediation complete) · **Last updated:**
+> **Version:** 3.8.0 (session-25 remediation complete) · **Last updated:**
 > 2026-10-12 · **State:** 411 unit + 86 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -1651,7 +1651,7 @@ input-event trick does not. The sidebar brand is an `<h1>` — h1 probes must
 filter `offsetParent !== null`. VLM checks need `createVision` + a vision
 model (the plain chat endpoint rejects image content).
 
-**Spec count:** 416 unit (recipes 279, tokens 19, auth 14, utils 13,
+**Spec count:** 420 unit (recipes 283, tokens 19, auth 14, utils 13,
 shell-recipes 76, db-path 15) + 86 E2E.
 
 ## 36. Session-24 Recipe Layer — parity round 23 (the cursor + selection dimension)
@@ -1672,3 +1672,25 @@ computed values + zero authored rules). Probe lessons: REF's stylesheet is
 CSSOM-unreadable (cross-origin family) — computed DOM census is the only
 ground truth on that side; bare-string agent-browser evals must be
 JSON.stringify'd or the harness parses them into error objects.
+
+## 37. Session-25 Recipe Layer — parity round 24 (the a11y-attribute dimension)
+
+The aria map: REF's sidebar group toggles carry `aria-controls` in BOTH
+states (older Radix authors it unconditionally); the clone's Radix only
+sets it while the content is mounted. Mirror with a stable
+`React.useId()` on BOTH the Collapsible Trigger (`aria-controls=
+{contentId}`) and Content (`id={contentId}`) — user props spread AFTER
+Radix's own, so the override holds in both states. The bell: REF's is a
+Radix Popover trigger (haspopup=dialog + expanded + controls, persisting
+closed) opening the 384×175 notifications panel — author
+`ui/popover.tsx` (shadcn over @radix-ui/react-popover) + the measured
+recipe (w-96, alignOffset −16 for x=0, header px-4 py-3 border-b with
+the h3, body py-8 text-center with the faded h-8 bell + "No
+notifications yet"). Keep the clone's a11y supersets (aria-label on the
+icon buttons, aria-current=page, role=progressbar, named buttons,
+aria-hidden decorative svgs) and do NOT replicate REF's bugs (the
+dangling aria-describedby on its loans dialog, the unnamed svg-only
+buttons) or its base44 branding imgs. Census method: role + aria-* +
+label-wiring summed over 4 surfaces, then element-level dumps per
+divergent family; fixed-position elements report offsetParent null (do
+not visibility-filter them).

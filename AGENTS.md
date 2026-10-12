@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 416 specs) |
+| Unit tests | `bun run test` (Vitest, 420 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -924,3 +924,58 @@ Live-verified: 13-20/13-20 buttons pointer per surface, login 6/6, the
 8 routes none + 3 auto representatives, attendance tab none, employees
 input none, loans dialog portal escape, canonical 12-route geometry
 12/12 + mobile top bar 390×73 (zero layout impact).
+
+## Session-25 layer — parity round 24: the a11y-attribute dimension
+
+The never-swept family (session_40's suggested next step): full role +
+aria-* + label-wiring census on 4 canonical surfaces (summed), then
+element-level dumps of every divergent family + targeted probes (loans
+dialog, login via throwaway sessions, the mobile drawer).
+
+**R24-A (the aria-controls contract)**: REF's 9 sidebar group toggles
+carry `aria-controls` in BOTH states (its older Radix sets it
+unconditionally — radix-:rh: etc. measured on every collapsed group);
+the clone's Radix only authors it while the content is mounted. Fix: a
+stable `React.useId()` per group passed to BOTH the Collapsible Trigger
+(`aria-controls={contentId}`) and Content (`id={contentId}`) — user
+props spread AFTER Radix's own in the v1.1.x source, so the override
+holds collapsed AND matches the mounted id open. Verified: 8/8 toggles
+carry it, all resolving.
+
+**R24-B (the notifications bell popover)**: REF's bell (sidebar footer)
+is a Radix Popover trigger — aria-haspopup="dialog" + aria-expanded +
+aria-controls (all measured, persisting closed) — opening a 384×175
+popover at x=0 y=617 (bg-popover white, rounded-md border shadow-md,
+sideOffset 4, 16px LEFT of the bell via alignOffset −16): header
+`flex items-center justify-between px-4 py-3 border-b` with
+`h3.font-semibold.text-slate-900` "Notifications" (16px/600) + an empty
+gap-2 cluster, body `max-h-[480px] overflow-y-auto` → `py-8 text-center
+text-slate-500` with `Bell h-8 w-8 mx-auto mb-2 opacity-30` + `p.text-sm`
+"No notifications yet" (slate-500). The clone's bell was a DEAD button
+(the only measured surface where REF did more). Fix: the shadcn
+`ui/popover.tsx` primitive + the exact recipe; the same stable-id trick
+keeps aria-controls authored closed. Verified byte-exact: 384×175 @
+x=0 y=617, h3 16px/600, p rgb(100,116,139); works from the mobile
+drawer too (Radix portals out).
+
+**The census map (4 routes summed)**: roles — tab 7/7, tablist 1/1,
+tabpanel 1/1 identical; progressbar ref=0 loc=2 (the leave-balance
+Radix Progress — clone superset kept). aria — controls 44/10 (the R24-A
+gap family), expanded 41/37, haspopup 9/5 (the R24-B gap family),
+selected 7/7, labelledby 1/1, orientation 1/1; clone supersets kept:
+aria-label 18 vs 4, aria-current 4 vs 0, aria-hidden 175 vs 0, all
+buttons named vs REF's 10 unnamed svg-only (bell/moon/list/grid).
+Non-gaps: login a11y byte-identical (labels/for + placeholders +
+unnamed=0); the drawer role=dialog contract identical (no aria-modal
+both); REF's loans-dialog `aria-describedby` is a DANGLING reference
+(broken on REF — the clone's conditional describedby is correct and
+stays); REF's 2 base44-branded imgs per route are platform branding,
+not replicated.
+
+**Pins**: 4 new (tests/unit/recipes.test.ts session-25 block — the
+stable-id contract, the popover primitive + recipe, and a NEGATIVE
+scope lock: only the bell gains the popover). Gates: lint 0/0 · tsc ✓ ·
+420/420 unit · build ✓ · 86/86 E2E. Live-verified: 8/8 group controls,
+the full bell contract (hp/exp/ctrl), the popover byte-exact geometry,
+canonical 12-route 12/12 MATCH, mobile chrome unchanged (tabs/drawer
+byte-identical).

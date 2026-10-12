@@ -775,3 +775,27 @@ Stage Summary:
 - Round 23 (the cursor + selection dimension) complete and ready for push: every button computes cursor:pointer like the v3 reference (the v4 preflight removal compensated in the base layer), the 8 core-module pages are user-select:none like REF's touch-pan-y wrapper (portals + chrome stay selectable), caret/::selection verified identical
 - Gates: lint 0/0 · tsc · 416/416 unit (+5) · build · 86/86 E2E; DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), dialog-surface sweep (only loans measurable), possible a11y-attribute + form-error + print dimensions
+
+---
+Task ID: session-25
+Agent: main (Super Z)
+Task: Parity round 24 — the a11y-attribute dimension (audit + fixes)
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at 19df86b; .env recreated (DATABASE_URL="file:../db/custom.db" + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on every DB/build command
+- Baseline gates green: lint 0/0 · tsc · 416/416 unit · build · 86/86 E2E · DB pristine
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged; one LOC re-auth needed — localhost vs 127.0.0.1 cookie-origin mismatch, documented); mobile navigation byte-identical (top strip 390×73, hamburger 24/22 28×28, tabs 10/79/139/204/313, drawer 288×844 #FAFAFA z-50, kicker y=101 h=28, boundary tabs@800 vanish both, sidebar brand x=76 y=25 both — no v4 bug; the nav-element sidebar=false on REF was a probe artifact, REF's sidebar is div-based); with-data re-check — REF still zero-data (blocked, documented)
+- The a11y-attribute audit (the round's core): full role + aria-* + label-wiring census on 4 surfaces (summed) + element-level dumps of every divergent family + loans-dialog/login/drawer contract probes
+- Key discoveries: (1) the aria-controls gap — REF's 9 group toggles carry it in BOTH states (older Radix unconditional), the clone's only when open (Radix's open-conditional pattern); (2) the bell gap — REF's bell is a Radix Popover trigger (haspopup=dialog + expanded + controls, persisting closed) opening a 384×175 notifications popover (recipe DOM-dumped: header px-4 py-3 border-b + h3 16px/600 + empty gap-2 cluster, body py-8 text-center + faded h-8 bell + "No notifications yet" slate-500, x=0 via 16px-left offset, y=617 via sideOffset 4); the clone's bell was a dead button — the only measured surface where REF did more
+- Non-gaps documented: login a11y byte-identical (labels/placeholders/unnamed=0); tabs family identical; drawer role=dialog contract identical (no aria-modal both); clone supersets kept (aria-label 18 vs 4, aria-current, progressbar, named buttons, aria-hidden svgs); REF's dangling aria-describedby (loans) + base44 branding imgs NOT replicated
+- docs/remediation-plan-session25.md written (2 gap groups + the census map + non-goals) + codebase-validated
+- TDD: 4 RED pins → GREEN (one mid-flight strengthening: the closed-state controls + alignOffset contract added after live verification exposed them); fixes = ui/popover.tsx created + sidebar-nav.tsx (stable useId on Collapsible Trigger+Content; the bell as Popover trigger with alignOffset -16 + the measured recipe + the same stable-id trick on the popover)
+- Gates: lint 0/0 · tsc · 420/420 unit (+4) · build · 86/86 E2E
+- Live verification: 8/8 group controls present + resolving; the bell's full contract closed; the popover byte-exact 384×175 @ x=0 y=617 (h3 16px/600, p rgb(100,116,139), radius 6px); the popover opens from the mobile drawer too; canonical 12-route 12/12 MATCH; mobile chrome clean
+- 2 screenshots (81 notifications popover open, 82 group toggle aria-controls expanded + 02/11 standards refreshed) → 95 total
+- Docs updated: AGENTS session-25 layer + 420 specs; SKILL v3.8.0 + §37 + recipes 283; PAD [S25] + Last Updated; CLAUDE 506-spec pyramid; README 420 specs + a11y parity row; docs/session_42.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 24 (the a11y-attribute dimension) complete and ready for push: the group toggles carry aria-controls in both states like REF's older Radix, and the notifications bell opens the reference's exact popover (replacing the clone's dead button — the last measured REF-only behavior); the clone's stricter a11y supersets kept, REF's bugs (dangling describedby) not replicated
+- Gates: lint 0/0 · tsc · 420/420 unit (+4) · build · 86/86 E2E; DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), form-error surfaces (hidden by zero-data), print dimension, possible drag-drop/keyboard-shortcut + SEO/meta dimensions

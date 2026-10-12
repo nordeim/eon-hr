@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight, Bell, Moon, Sun, Languages, LogOut, User, CircleUser, Briefcase } from "lucide-react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { NAV_ITEMS, type NavItem, type NavChild } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 
@@ -133,9 +134,17 @@ function CollapsibleNavItem({
     if (childActive) setOpen(true);
   }, [childActive]);
   const Icon = item.icon;
+  /* Session 25 (R24-A): REF's group toggles carry aria-controls in BOTH
+     states (its older Radix sets it unconditionally — measured radix-:rh:
+     etc. on every collapsed group). The clone's Radix only authors it when
+     the content is mounted, so a stable useId is passed to BOTH sides;
+     user props spread after Radix's own in the v1.1.x source, so the
+     override holds collapsed AND matches the mounted content id open. */
+  const contentId = React.useId();
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
       <Collapsible.Trigger
+        aria-controls={contentId}
         className={cn(
           // Reference group-button recipe: p-2/gap-2 geometry with a 20px
           // leading icon (session-5: measured distinctly from leaf links),
@@ -169,7 +178,7 @@ function CollapsibleNavItem({
           aria-hidden="true"
         />
       </Collapsible.Trigger>
-      <Collapsible.Content>
+      <Collapsible.Content id={contentId}>
         <ul className="mt-1 mb-1 flex flex-col gap-1 pl-4">
           {item.children?.map((child: NavChild) => {
             const active = pathname === child.href;
@@ -217,6 +226,11 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
   // Reference default shows the Arabic target label ("عربي"); toggling flips
   // to "EN" — a display-only switch, exactly like the original app.
   const [lang, setLang] = React.useState<"EN" | "عربي">("عربي");
+  /* Session 25 (R24-B): the stable popover content id — REF's bell carries
+     aria-controls even while closed (measured radix-:ro: with exp=false);
+     Radix authors it only while open, so the same stable-id override as
+     R24-A applies (user props spread after Radix's own). */
+  const bellContentId = React.useId();
 
   React.useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -231,18 +245,45 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
   return (
     <div className="flex flex-col gap-2 border-t border-slate-200 dark:border-slate-800 p-4">
       <div className="flex items-center gap-2 mb-2">
-        <button
-          type="button"
-          aria-label="Notifications"
-          /* Session 16 (R15-B): the reference's Bell renders slate-600
-             (rgb(71,85,105) measured) — not the muted-foreground token.
-             Session 20 (R19-C): the color lives on the SVG (REF's own class
-             beats the parent's hover color, so the icon STAYS slate-600
-             under hover) and the button hovers accent + accent-foreground. */
-          className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
-        >
-          <Bell className="h-4 w-4 text-slate-600" aria-hidden="true" />
-        </button>
+        {/* Session 25 (R24-B): REF's bell is a Radix POPOVER trigger
+            (aria-haspopup="dialog" + aria-expanded + aria-controls,
+            measured live) opening a 384px notifications panel — the only
+            measured surface where REF did more than the clone (the old
+            clone bell was a dead button). Recipe DOM-measured: header
+            px-4 py-3 border-b row with the h3, body max-h-[480px]
+            overflow-y-auto with the faded-bell empty state. */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="Notifications"
+              aria-controls={bellContentId}
+              /* Session 16 (R15-B): the reference's Bell renders slate-600
+                 (rgb(71,85,105) measured) — not the muted-foreground token.
+                 Session 20 (R19-C): the color lives on the SVG (REF's own
+                 class beats the parent's hover color, so the icon STAYS
+                 slate-600 under hover) and the button hovers accent +
+                 accent-foreground. */
+              className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Bell className="h-4 w-4 text-slate-600" aria-hidden="true" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" side="top" alignOffset={-16} id={bellContentId} className="w-96">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h3 className="font-semibold text-slate-900">Notifications</h3>
+              {/* REF renders this empty cluster (the mark-all-read slot on
+                  zero data) — kept for DOM parity. */}
+              <div className="flex items-center gap-2" />
+            </div>
+            <div className="max-h-[480px] overflow-y-auto">
+              <div className="py-8 text-center text-slate-500">
+                <Bell className="h-8 w-8 mx-auto mb-2 opacity-30" aria-hidden="true" />
+                <p className="text-sm">No notifications yet</p>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
         <button
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}

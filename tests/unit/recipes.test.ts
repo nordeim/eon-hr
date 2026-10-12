@@ -1936,3 +1936,55 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
     expect(m?.[0]).not.toContain("select-none");
   });
 });
+
+describe("session-25 a11y attribute recipes (parity round 24 — the aria dimension)", () => {
+  const popoverUi = read("src", "components", "ui", "popover.tsx");
+
+  it("R24-A: the CollapsibleNavItem authors a stable content id — the Trigger carries aria-controls in BOTH states (REF's 9 group toggles all carry it; Radix only sets it when open)", () => {
+    // the stable id exists
+    expect(sidebarNav).toContain("const contentId = React.useId()");
+    // the trigger carries the override (user props spread after Radix's own)
+    expect(sidebarNav).toContain("aria-controls={contentId}");
+    // the content mounts with the SAME id so the reference resolves when open
+    expect(sidebarNav).toMatch(/<Collapsible\.Content\s+id=\{contentId\}/);
+  });
+
+  it("R24-B1: the shadcn popover primitive exists (Root/Trigger/Content over @radix-ui/react-popover — the bell needs it)", () => {
+    expect(popoverUi).toContain('@radix-ui/react-popover');
+    expect(popoverUi).toContain("PopoverPrimitive.Portal");
+    expect(popoverUi).toContain("PopoverPrimitive.Content");
+    expect(popoverUi).toContain("PopoverPrimitive.Trigger");
+  });
+
+  it("R24-B2: the bell is a real popover trigger (REF's bell: haspopup=dialog + expanded + controls EVEN CLOSED; the clone's was a dead button — the only measured surface where REF did more)", () => {
+    expect(sidebarNav).toContain("PopoverTrigger");
+    // the closed-state aria-controls override (same stable-id trick as R24-A —
+    // Radix only authors it while open; REF's measured radix-:ro: persists closed)
+    expect(sidebarNav).toContain("aria-controls={bellContentId}");
+    expect(sidebarNav).toMatch(/<PopoverContent[^>]*id=\{bellContentId\}/);
+    // REF's popover lands x=0 (16px LEFT of the bell's left edge — measured
+    // translate(0px, 617px); sideOffset 4 default keeps y=617)
+    expect(sidebarNav).toContain("alignOffset={-16}");
+    // the w-96 (384px) content with the REF-measured recipe
+    expect(sidebarNav).toContain('className="w-96"');
+    // the header row: h3 font-semibold text-slate-900 Notifications + border-b
+    expect(sidebarNav).toMatch(/h3[^>]*font-semibold text-slate-900/);
+    expect(sidebarNav).toContain("Notifications</h3>");
+    // the empty-state body: py-8 text-center text-slate-500 + the faded bell icon
+    expect(sidebarNav).toContain("py-8 text-center text-slate-500");
+    expect(sidebarNav).toContain("h-8 w-8 mx-auto mb-2 opacity-30");
+    expect(sidebarNav).toContain("No notifications yet");
+  });
+
+  it("R24-B-scope: only the bell gains the popover — the moon and the عربي language buttons stay plain buttons (REF authors no popover on them)", () => {
+    const popoverUses = sidebarNav.match(/<Popover>/g) ?? [];
+    expect(popoverUses.length).toBe(1);
+    const bellIdx = sidebarNav.indexOf('aria-label="Notifications"');
+    const popoverIdx = sidebarNav.indexOf("<Popover>");
+    expect(popoverIdx).toBeGreaterThan(-1);
+    expect(bellIdx).toBeGreaterThan(popoverIdx);
+    // the moon button keeps its plain onClick toggle (no popover wrap)
+    const moonIdx = sidebarNav.indexOf('aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}');
+    expect(moonIdx).toBeGreaterThan(-1);
+  });
+});
