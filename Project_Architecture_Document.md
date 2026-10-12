@@ -3,7 +3,7 @@
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Document:** README.md (user-facing), CLAUDE.md (agent constitution), AGENTS.md (operating notes)
-**Last Updated:** 2026-10-12 (session 27 / parity round 26 — the reduced-motion + drag-drop supersets)
+**Last Updated:** 2026-10-12 (session 28 / parity round 27 — the DnD depth supersets: within-column reorder + the recruitment pipeline drag-drop)
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
@@ -11,6 +11,7 @@
 
 | Tag | Source | Change |
 |---|---|---|
+| `[S28]` | session 28 | Parity round 27 — the DnD DEPTH dimension (session-46's suggested next step). Standing audits green: redeploy check 12/12 MATCH (after pinning both viewports — the ref session defaulted to 800×900 and produced two phantom DIFFs: /payroll y=136 vs 116 (at 800px the title column shrinks to min-content — badge 56px, subtitle 3 lines) and /profile x=288 vs 336; the pinned 1440×900 sweep is clean — ALWAYS `set viewport` before sweeping), mobile navigation byte-identical (no Tailwind v4 bug), with-data still blocked (REF zero-data). 2 gap groups fixed as SUPERSETS: R27-A the recruitment pipeline HTML5 drag-drop (REF re-verified: zero draggables, zero cursor-grab — cards draggable + onDragStart dataTransfer + dragCandId state + mid-drag opacity-50; w-64 columns onDragOver/onDragEnter preventDefault + ring-blue-500/40 highlight + onDrop → the existing onMove stage PATCH; Move-to dropdown kept as the keyboard path; the card's cursor-grab is the hover-state-only affordance superset) and R27-B the taskmanager within-column reorder (`Task.position Int @default(0)`; GET orders position-asc/createdAt-desc so untouched columns keep the newest-first render; PATCH accepts `order: string[]` — the full ordered id list for one column, positions reassigned 0..n-1 in a transaction, existence-validated; cards are insertion drop targets — onDragOver + dragOverId state + ring-2 ring-inset ring-blue-500/40 on the hovered card, onDrop inserts BEFORE it with stopPropagation; the column body append stays; optimistic state = array order IS render order). E2E +2 first-run passes (recruitment-dnd.spec.ts + the within-column reorder test; synthetic DragEvents). Probe lessons: React state does NOT flush inside a single eval (dispatch and read in SEPARATE evals); Chrome serializes modern colors as lab() — ring-blue-500/40 reads `lab(54.6 8.76 -65.79 / 0.4)`, match on geometry; the 2px 40%-alpha insertion ring is pixel-real (rgb(177,205,251)) but VLM-imperceptible — computed DOM + pixel sampling beat VLM at low alphas. 534-spec pyramid (445 unit + 89 E2E). |
 | `[S27]` | session 27 | Parity round 26 — the REDUCED-MOTION + DRAG-DROP dimensions: the emulated-media census (agent-browser `set media reduced-motion`, computed-DOM ground truth) found BOTH apps ignoring prefers-reduced-motion (group/leaf transitions 0.2s, drawer enter 0.5s, dropdown enter 0.15s all still play under reduce on both; sonner internals the only aware rules). 2 gap groups fixed as SUPERSETS: R26-A the reduced-motion block (a top-level UNLAYERED `@media (prefers-reduced-motion: reduce)` in globals.css — 0.01ms animation/transition durations + iteration-count 1 + scroll-behavior auto, all !important; NEVER `animation: none` because Radix waits for animationend to unmount portals — the drawer close stays clean, live-verified; unlayered+important so it beats the v4 utilities layer; inert under default media — parity byte-identical, regression-swept) and R26-B the kanban HTML5 drag-drop (REF ships zero draggables while its cards look grabbable — cards draggable + onDragStart dataTransfer payload + mid-drag opacity-50 (0.5→1 live-verified), columns onDragOver preventDefault + ring-blue-500/40 highlight + onDrop → the existing moveTask PATCH; the Move-to dropdown stays as the keyboard path; E2E via synthetic DragEvents — HTML5 DnD cannot be driven by mouse events). Also the FIRST keyboard Tab-order sweep: login 8/8 byte-identical (REF's extra tab-9 = its base44 Close-badge artifact), dashboard 14/16 (the 2 diffs = the clone's kept aria-label supersets — documented, no action). 525-spec pyramid (438 unit + 87 E2E). |
 | `[S26]` | session 26 | Parity round 25 — the SEO/META dimension: the first `<head>` census (13 routes: title/lang/charset/viewport/robots/description/og/twitter/canonical/icons/manifest/theme-color/JSON-LD + element-level dumps of REF's manifest.json, og:image render geometry, and login extras). 5 gap groups fixed: the per-route mechanical titles (src/lib/meta.ts pageMetadata — slug-capitalized "Taskmanager \| Eon HR", dashboard/login plain "Eon HR" — exported from a 5-line server layout.tsx in each of the 46 (app) route dirs; client pages cannot export metadata), the og/twitter card family (6 + 5 per app route; og:type/site_name repeat per-route — Next REPLACES the parent openGraph with the child's), the canonical family (per-route, resolved absolute against the headers()-derived metadataBase — self-consistent on any origin), the asset family (og-image 1200×630 reproducing REF's white-canvas/logo-centered composition from public/eon-logo.png + icon-192/512 + apple-touch-icon 180 + manifest.json with REF's field set), and the JSON-LD family (WebSite + Organization in the root layout; login adds BreadcrumbList + theme-color #000000 + apple-touch-icon + manifest). REF's OnboardFlow junk description copy, supabase-hosted assets, non-standard twitter:url, and "1.0" viewport serialization documented as divergences. Mobile nav byte-identical; with-data frontier stays blocked. 518-spec pyramid (432 unit + 86 E2E). |
 | `[S22]` | session 22 | Parity round 21 — the MOTION dimension: the first transitions/animations audit (static CSSOM enumeration of every transition/animation/@keyframes rule on both apps + DOM classList audit + requestAnimationFrame frame-sampling of live transitions). 5 gap groups fixed: the enter/exit animation family (REF animates dropdowns/dialogs/selects with tailwindcss-animate classes → computed "animation: enter 0.15s ease" fade+zoom; the clone's identical classes generated NO CSS in v4 — fixed by hand-authoring the @keyframes enter/exit + @utility subset in globals.css, adding the missing classes to select.tsx + the user dropdown), the mobile drawer slide (REF: 500ms open / ~300ms close with cubic-bezier(0.32,0.72,0,1), overlay ~150ms fade — vaul; the clone popped instantly because Radix mounts the Content fresh and transitions need a live-element state change; animations run from mount and Radix waits for animationend on close), the group trigger transition-all duration-200 (150ms→200ms; frame-sampled settle ~229ms→~272ms vs REF ~269ms), the chevron instant-snap (REF authors no chevron motion classes — the clone's 200ms swing removed), and the toast fade+slide enter (superset polish — REF's sonner animates but is unmeasurable). Dormant REF CSS documented: the sidebar collapse family, accordion keyframes (group expand is instant on REF), base44-fade-in/scale-in, badge-spin, prefers-reduced-motion (sonner-library-only on REF — the a11y item stays open on both apps). 484-spec pyramid (398 unit + 86 E2E). |
@@ -427,12 +428,14 @@ Session model: stateless HMAC cookie; `getSessionUser()` re-reads the user on ev
 | Auth crypto/session | 1 | 14 | `tests/unit/auth.test.ts` | Vitest |
 | Money/date utils | 1 | 13 | `tests/unit/utils.test.ts` | Vitest |
 | Design tokens | 1 | 19 | `tests/unit/tokens.test.ts` | Vitest |
-| Parity recipes (s5–s26) | 1 | 295 | `tests/unit/recipes.test.ts` | Vitest |
+| Parity recipes (s5–s28) | 1 | 308 | `tests/unit/recipes.test.ts` | Vitest |
 | Shell recipes (s7–s9/s18: boundary/kickers/wizard/header recipes) | 1 | 76 | `tests/unit/shell-recipes.test.ts` | Vitest |
-| E2E auth surface | 1 | 4 | `tests/e2e/auth.spec.ts` | Playwright |
+| E2E auth surface | 1 | 6 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E navigation (46 routes) | 1 | 53 | `tests/e2e/navigation.spec.ts` | Playwright |
-| E2E mobile navigation + boundary | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E dashboard + inline-wizard CRUD | 1 | 5 | `tests/e2e/dashboard.spec.ts` | Playwright |
+| E2E mobile navigation + boundary | 1 | 13 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| E2E dashboard + inline-wizard CRUD | 1 | 13 | `tests/e2e/dashboard.spec.ts` | Playwright |
+| E2E taskmanager DnD (cross-column + within-column reorder) | 1 | 2 | `tests/e2e/taskmanager-dnd.spec.ts` | Playwright |
+| E2E recruitment pipeline DnD | 1 | 1 | `tests/e2e/recruitment-dnd.spec.ts` | Playwright |
 
 ### 7.2 Test Patterns
 
@@ -449,9 +452,9 @@ The pure seams (`src/lib/auth.ts`, `src/lib/db-path.ts`, `src/lib/utils.ts`) car
 
 - [ ] `bun run lint` clean
 - [ ] `bun run typecheck` clean
-- [ ] `bun run test` — 391/391
+- [ ] `bun run test` — 445/445
 - [ ] `bun run build` succeeds
-- [ ] `bun run test:e2e` — 86/86
+- [ ] `bun run test:e2e` — 89/89
 - [ ] No new secrets in the tree (`git diff --staged | grep -iE "secret|key"`)
 - [ ] Screenshots in `docs/screenshots/` refreshed if UI changed
 

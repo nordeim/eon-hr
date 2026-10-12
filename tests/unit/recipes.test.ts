@@ -2181,3 +2181,58 @@ describe("session-27 reduced-motion + kanban DnD recipes (parity round 26 — th
     expect(src).toContain("Move to");
   });
 });
+
+describe("session-28 DnD depth recipes (parity round 27 — the recruitment pipeline superset + the within-column reorder superset)", () => {
+  it("R27-A1: the recruitment pipeline card is HTML5-draggable (REF ships zero draggables on /recruitmentkanban — re-verified round 27), carrying the candidate id on dataTransfer and a mid-drag affordance", () => {
+    const src = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+    expect(src).toContain("draggable");
+    expect(src).toContain("onDragStart");
+    expect(src).toContain("dataTransfer.setData");
+    expect(src).toContain("opacity-50");
+    expect(src).toContain("onDragEnd");
+  });
+
+  it("R27-A2: the pipeline columns are drop zones — dragover preventDefault (the HTML5 DnD contract) + a hover highlight + onDrop wired to the existing onMove stage PATCH path; the Move-to dropdown stays as the keyboard path", () => {
+    const src = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+    expect(src).toContain("onDragOver");
+    expect(src).toContain("preventDefault");
+    expect(src).toContain("onDrop");
+    expect(src).toContain("onMove(");
+    expect(src).toContain("Move to");
+  });
+
+  it("R27-A3: the draggable card carries the grab affordance (hover-state superset — REF's card shows the default cursor while being un-draggable; a draggable card that does not look draggable is a usability defect)", () => {
+    const src = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+    expect(src).toContain("cursor-grab");
+    expect(src).toContain("active:cursor-grabbing");
+  });
+
+  it("R27-B1: the Task model carries an explicit position column — the within-column order becomes persistent state (all existing rows backfill to 0; the createdAt tiebreak preserves today's newest-first render)", () => {
+    const src = read("prisma", "schema.prisma");
+    const taskBlock = src.slice(src.indexOf("model Task {"), src.indexOf("model Project {"));
+    expect(taskBlock).toContain("position");
+    expect(taskBlock).toContain("@default(0)");
+  });
+
+  it("R27-B2: GET /api/tasks orders by position asc with the createdAt desc tiebreak — array order IS render order for the optimistic reorder", () => {
+    const src = read("src", "app", "api", "tasks", "route.ts");
+    expect(src).toContain('orderBy: [{ position: "asc" }, { createdAt: "desc" }]');
+  });
+
+  it("R27-B3: PATCH /api/tasks accepts an order array — TaskPatch schema + the positional reassignment loop (position = index for every listed id, existence-validated)", () => {
+    const src = read("src", "app", "api", "tasks", "route.ts");
+    expect(src).toContain("order: z.array(");
+    expect(src).toContain("data.order");
+    // the reassignment loop + the existence validation
+    expect(src).toMatch(/position: index|position: i\b/);
+    expect(src).toMatch(/order[\s\S]*findMany|findMany[\s\S]*order/);
+  });
+
+  it("R27-B4: the taskmanager cards are insertion drop targets — onDragOver/onDrop on the card, the reorderTask function, and the { status?, order } PATCH body", () => {
+    const src = read("src", "app", "(app)", "taskmanager", "page.tsx");
+    expect(src).toContain("reorderTask");
+    expect(src).toContain("dragOverId");
+    // the PATCH body carries the order array
+    expect(src).toMatch(/order:\s*\w+/);
+  });
+});

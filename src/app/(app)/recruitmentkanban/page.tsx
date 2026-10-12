@@ -72,6 +72,12 @@ export default function RecruitmentKanbanPage() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [form, setForm] = React.useState({ name: "", email: "", jobId: "", stage: "applied" });
+  /* Session 28 (R27-A): the pipeline drag-drop superset. REF ships zero
+     draggables on /recruitmentkanban (re-verified round 27) — the clone
+     wires real HTML5 DnD onto the existing onMove stage PATCH. dragCandId
+     drives the mid-drag card affordance (opacity-50) and the column
+     highlight. */
+  const [dragCandId, setDragCandId] = React.useState<string | null>(null);
 
   const load = React.useCallback(async () => {
     try {
@@ -242,7 +248,37 @@ export default function RecruitmentKanbanPage() {
           {COLUMNS.map((col) => {
             const colCandidates = visible.filter((c) => c.stage === col.stage);
             return (
-              <div key={col.stage} className="w-64 shrink-0 rounded-lg border-2 border-slate-300 bg-slate-100 p-3.5">
+              <div
+                key={col.stage}
+                /* Session 28 (R27-A): the column is a drop zone —
+                    dragover preventDefault is the HTML5 DnD contract
+                    (without it the browser refuses the drop); the
+                    highlight runs while a card hovers. */
+                onDragOver={(e) => {
+                  if (!dragCandId) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                }}
+                onDragEnter={(e) => {
+                  if (!dragCandId) return;
+                  e.preventDefault();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = dragCandId;
+                  setDragCandId(null);
+                  if (!id) return;
+                  const candidate = candidates.find((c) => c.id === id);
+                  if (candidate && candidate.stage !== col.stage) {
+                    onMove(candidate, col.stage);
+                  }
+                }}
+                className={`w-64 shrink-0 rounded-lg border-2 border-slate-300 bg-slate-100 p-3.5 ${
+                  dragCandId && candidates.find((c) => c.id === dragCandId)?.stage !== col.stage
+                    ? "ring-2 ring-inset ring-blue-500/40"
+                    : ""
+                }`}
+              >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
                   <span className="inline-flex h-[22px] items-center rounded-md border px-2.5 text-xs font-semibold text-muted-foreground">
@@ -253,7 +289,21 @@ export default function RecruitmentKanbanPage() {
                   {colCandidates.map((candidate) => (
                     <div
                       key={candidate.id}
-                      className="flex flex-col gap-2 rounded-md border bg-card p-3 text-left shadow-sm"
+                      /* Session 28 (R27-A): the card is HTML5-draggable
+                          (the superset — REF's pipeline cards only move via
+                          the dropdown). The cursor-grab affordance is the
+                          hover-state superset: a draggable card that does
+                          not look draggable is a usability defect. */
+                      draggable
+                      onDragStart={(e) => {
+                        setDragCandId(candidate.id);
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", candidate.id);
+                      }}
+                      onDragEnd={() => setDragCandId(null)}
+                      className={`flex cursor-grab flex-col gap-2 rounded-md border bg-card p-3 text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
+                        dragCandId === candidate.id ? "opacity-50" : ""
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">

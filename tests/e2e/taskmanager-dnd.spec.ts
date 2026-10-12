@@ -97,4 +97,98 @@ test.describe("taskmanager kanban drag-drop (session 27 superset)", () => {
       await page.request.delete(`/api/tasks?kind=task&id=${taskId}`);
     }
   });
+
+  /**
+   * Session 28 (R27-B): the within-column reorder — dropping a card ONTO
+   * another card inserts it immediately before that card, and the order
+   * persists (position column) after reload.
+   */
+  test("card reorders within its column and persists after reload", async ({ page }) => {
+    // Setup: two tasks in Backlog. Position ties break on createdAt desc
+    // (newest first), so Beta (created second) renders ABOVE Alpha; the
+    // test then drags the LOWER card (Alpha) onto Beta to flip the order.
+    const createA = await page.request.post("/api/tasks", {
+      data: { kind: "task", title: "E2E Reorder Alpha", status: "backlog", priority: "low" },
+    });
+    const jsonA = await createA.json();
+    expect(jsonA.ok).toBe(true);
+    const idA: string = jsonA.data.task.id;
+
+    const createB = await page.request.post("/api/tasks", {
+      data: { kind: "task", title: "E2E Reorder Beta", status: "backlog", priority: "low" },
+    });
+    const jsonB = await createB.json();
+    expect(jsonB.ok).toBe(true);
+    const idB: string = jsonB.data.task.id;
+
+    try {
+      await page.goto("/taskmanager");
+      const board = page.locator("div.md\\:grid-cols-5").first();
+      await expect(board).toBeVisible();
+
+      const backlogCol = board.locator("div.space-y-3", { hasText: "Backlog" }).first();
+      const alpha = backlogCol.locator("div[draggable='true']", { hasText: "E2E Reorder Alpha" });
+      const beta = backlogCol.locator("div[draggable='true']", { hasText: "E2E Reorder Beta" });
+      await expect(alpha).toBeVisible();
+      await expect(beta).toBeVisible();
+
+      // Baseline: Beta (created later) renders ABOVE Alpha.
+      const yBefore = await alpha.boundingBox();
+      const yBetaBefore = await beta.boundingBox();
+      expect(yBetaBefore!.y).toBeLessThan(yBefore!.y);
+
+      // Drag Alpha ONTO Beta — insert Alpha immediately before Beta (above
+      // it). Synthetic DragEvents with a real DataTransfer.
+      await alpha.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("dragstart", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+      await page.waitForTimeout(150);
+      await beta.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("dragover", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+      await page.waitForTimeout(60);
+      await beta.evaluate((el) => {
+        el.dispatchEvent(
+          new DragEvent("drop", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: new DataTransfer(),
+          })
+        );
+      });
+
+      // The optimistic reorder: Alpha now renders ABOVE Beta + the toast.
+      const yAfter = await alpha.boundingBox();
+      const yBetaAfter = await beta.boundingBox();
+      expect(yAfter!.y).toBeLessThan(yBetaAfter!.y);
+      await expect(page.getByText("Order updated")).toBeVisible();
+
+      // Persistence: reload and re-read the board from the server.
+      await page.reload();
+      const board2 = page.locator("div.md\\:grid-cols-5").first();
+      await expect(board2).toBeVisible();
+      const backlogCol2 = board2.locator("div.space-y-3", { hasText: "Backlog" }).first();
+      const alpha2 = backlogCol2.locator("div[draggable='true']", { hasText: "E2E Reorder Alpha" });
+      const beta2 = backlogCol2.locator("div[draggable='true']", { hasText: "E2E Reorder Beta" });
+      const yAlphaReloaded = await alpha2.boundingBox();
+      const yBetaReloaded = await beta2.boundingBox();
+      expect(yAlphaReloaded!.y).toBeLessThan(yBetaReloaded!.y);
+    } finally {
+      // Cleanup: restore the seeded state regardless of outcome.
+      await page.request.delete(`/api/tasks?kind=task&id=${idA}`);
+      await page.request.delete(`/api/tasks?kind=task&id=${idB}`);
+    }
+  });
 });

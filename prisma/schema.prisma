@@ -652,6 +652,10 @@ model Task {
   priority    String    @default("medium") // low | medium | high | urgent
   dueDate     DateTime?
   projectId   String?
+  // Session 28 (R27-B): persistent within-column order. The board renders
+  // position asc with a createdAt desc tiebreak, so existing rows (all 0)
+  // keep today's newest-first layout until a drag reassigns 0..n-1.
+  position    Int       @default(0)
   createdAt   DateTime  @default(now())
 }
 

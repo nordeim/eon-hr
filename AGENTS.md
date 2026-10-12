@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 438 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 87 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 445 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 89 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1094,3 +1094,45 @@ Live-verified: LOC calms under reduce (1e-05s) while REF keeps animating
 (0.2s/0.15s/0.5s); under default LOC computes 0.2s/0.15s — byte-parity;
 the 12-route geometry 12/12 MATCH; mobile chrome byte-identical; the
 mid-drag opacity + drop-target rings VLM/DOM-verified.
+
+## Session-28 recipe layer (parity round 27 — the DnD depth)
+
+- **R27-A (recruitment pipeline DnD superset)**: the recruitmentkanban
+candidate cards are HTML5-draggable (REF ships zero draggables on the
+pipeline — re-verified round 27) — `draggable` + `onDragStart`
+(dataTransfer payload + a `dragCandId` state driving the mid-drag
+`opacity-50`) + `onDragEnd`; the w-64 columns are drop zones
+(`onDragOver`/`onDragEnter` preventDefault + the `ring-blue-500/40`
+highlight on non-source columns + `onDrop` → the existing `onMove` stage
+PATCH). The "Move to" dropdown stays as the keyboard/a11y path. The
+card carries `cursor-grab active:cursor-grabbing` (the hover-state-only
+superset — a draggable card that does not look draggable is a usability
+defect; same category as the round-24 aria-label supersets).
+- **R27-B (taskmanager within-column reorder superset)**: `Task.position
+Int @default(0)`; GET orders `[{ position: "asc" }, { createdAt: "desc"
+}]` (untouched columns keep the newest-first render — all positions tie
+at 0); PATCH accepts `order: string[]` (the full ordered id list for one
+column — reassigns position 0..n-1 in a transaction, existence-validated);
+the kanban cards are insertion drop targets (`onDragOver` + a `dragOverId`
+state driving a `ring-2 ring-inset ring-blue-500/40` insertion ring on
+the hovered card; `onDrop` on a card inserts BEFORE it — the column
+body append stays via `reorderTask(id, col, null)`). Optimistic state:
+array order IS render order (splice before the insertion point).
+- **Probe-tooling lessons**: ALWAYS pin both viewports before sweeping —
+the ref session defaulted to 800×900 and produced two phantom DIFFs
+(/payroll y=136 vs 116: at 800px the title column shrinks to min-content
+186px — the badge wraps to 56px, the subtitle to 3 lines; /profile
+x=288 vs 336: the centered header re-centers). React state does NOT
+flush inside a single eval — dispatch and read in SEPARATE evals. Chrome
+serializes modern colors as lab() — the ring-blue-500/40 shadow reads
+`lab(54.6 8.76 -65.79 / 0.4)`, match on geometry or parse tolerantly.
+- **Pins**: 7 new (tests/unit/recipes.test.ts session-28 block). Gates:
+lint 0/0 · tsc ✓ · 445/445 unit · build ✓ · 89/89 E2E (+2 first-run
+passes: tests/e2e/recruitment-dnd.spec.ts + the within-column reorder
+test). Live-verified: the pipeline round-trip (applied → interviewing,
+persisted, opacity 0.5→1, cursor grab); the reorder round-trip
+(Beta,Alpha → Alpha,Beta, persisted via position); the round-26
+cross-column regression PASS; the 12-route geometry 12/12 MATCH (at
+pinned 1440×900); mobile chrome byte-identical; the insertion ring
+DOM-verified + pixel-verified (rgb(177,205,251) = blue-500@40% over
+white — VLM cannot perceive the subtle 2px ring, documented).

@@ -88,6 +88,10 @@ export default function TaskManagerPage() {
      onto the existing moveTask PATCH path. dragTaskId drives the
      mid-drag card affordance (opacity-50) and the column highlight. */
   const [dragTaskId, setDragTaskId] = React.useState<string | null>(null);
+  /* Session 28 (R27-B): the within-column reorder superset — the hovered
+     card is an insertion target (drop ON a card inserts before it); the
+     ring highlights the exact insertion point while dragging. */
+  const [dragOverId, setDragOverId] = React.useState<string | null>(null);
 
   function openTaskDialog() {
     setDialogSeq((s) => s + 1);
@@ -134,6 +138,67 @@ export default function TaskManagerPage() {
       toast.toast({ title: "Task moved", description: `Moved to ${labelize(status)}.`, variant: "success" });
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
+    }
+  }
+
+  /* Session 28 (R27-B): the within-column reorder superset. Computes the
+     target column's new order (insert before `beforeId`, or append when
+     null), optimistically rewrites the tasks array (array order IS render
+     order per column), and PATCHes { status?, order } — the server
+     reassigns positions 0..n-1 so the order survives reload. */
+  async function reorderTask(draggedId: string, targetStatus: string, beforeId: string | null) {
+    const dragged = tasks.find((t) => t.id === draggedId);
+    if (!dragged) return;
+    const currentOrder = tasks.filter((t) => t.status === targetStatus).map((t) => t.id);
+    const newOrder = currentOrder.filter((id) => id !== draggedId);
+    if (beforeId) {
+      const at = newOrder.indexOf(beforeId);
+      if (at === -1) return; // stale board — the insertion target vanished
+      newOrder.splice(at, 0, draggedId);
+    } else {
+      newOrder.push(draggedId);
+    }
+    if (newOrder.join("\u0000") === currentOrder.join("\u0000")) return; // no-op drop
+    const movedColumns = dragged.status !== targetStatus;
+
+    // Optimistic: splice the dragged card into the array right before its
+    // insertion point (array-end append otherwise) — per-column render
+    // order follows the array subsequence.
+    setTasks((prev) => {
+      const without = prev.filter((t) => t.id !== draggedId);
+      const moved = { ...dragged, status: targetStatus };
+      if (beforeId) {
+        const at = without.findIndex((t) => t.id === beforeId);
+        if (at === -1) return prev;
+        without.splice(at, 0, moved);
+        return without;
+      }
+      return [...without, moved];
+    });
+
+    try {
+      const res = await fetch(`/api/tasks?kind=task&id=${draggedId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(movedColumns ? { status: targetStatus } : {}),
+          order: newOrder,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        toast.toast({ title: "Reorder failed", description: json.error?.message, variant: "error" });
+        await load();
+        return;
+      }
+      toast.toast(
+        movedColumns
+          ? { title: "Task moved", description: `Moved to ${labelize(targetStatus)}.`, variant: "success" }
+          : { title: "Order updated", description: "New position saved.", variant: "success" }
+      );
+    } catch {
+      toast.toast({ title: "Network error", variant: "error" });
+      await load();
     }
   }
 
@@ -285,11 +350,14 @@ export default function TaskManagerPage() {
                       e.preventDefault();
                       const id = dragTaskId;
                       setDragTaskId(null);
+                      setDragOverId(null);
                       if (!id) return;
                       const task = tasks.find((t) => t.id === id);
-                      if (task && task.status !== col.id) {
-                        moveTask(id, col.id);
-                      }
+                      if (!task) return;
+                      /* Session 28 (R27-B): the column body appends to the
+                          end (same visual as round 26's moveTask, now with
+                          persistent positions via the order array). */
+                      reorderTask(id, col.id, null);
                     }}
                     className={`space-y-3 rounded-lg p-3 ${
                       dragTaskId && tasks.find((t) => t.id === dragTaskId)?.status !== col.id
@@ -319,9 +387,38 @@ export default function TaskManagerPage() {
                               e.dataTransfer.effectAllowed = "move";
                               e.dataTransfer.setData("text/plain", task.id);
                             }}
-                            onDragEnd={() => setDragTaskId(null)}
+                            onDragEnd={() => {
+                              setDragTaskId(null);
+                              setDragOverId(null);
+                            }}
+                            /* Session 28 (R27-B): the card is an insertion
+                                drop target — drop ON a card inserts the
+                                dragged card immediately before it. */
+                            onDragOver={(e) => {
+                              if (!dragTaskId || dragTaskId === task.id) return;
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                              setDragOverId(task.id);
+                            }}
+                            onDragLeave={() => {
+                              setDragOverId((cur) => (cur === task.id ? null : cur));
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation(); // the column handler must not double-fire
+                              const id = dragTaskId;
+                              const before = task.id;
+                              setDragTaskId(null);
+                              setDragOverId(null);
+                              if (!id || id === before) return;
+                              reorderTask(id, task.status, before);
+                            }}
                             className={`group cursor-grab rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
                               dragTaskId === task.id ? "opacity-50" : ""
+                            } ${
+                              dragOverId === task.id && dragTaskId && dragTaskId !== task.id
+                                ? "ring-2 ring-inset ring-blue-500/40"
+                                : ""
                             }`}
                           >
                             <div className="flex items-start justify-between gap-2">

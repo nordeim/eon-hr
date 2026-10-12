@@ -10,13 +10,14 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.10.0 (session-27 remediation complete) · **Last updated:**
-> 2026-10-12 · **State:** 438 unit + 87 E2E tests green, lint/typecheck/build
+> **Version:** 3.11.0 (session-28 remediation complete) · **Last updated:**
+> 2026-10-12 · **State:** 445 unit + 89 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
 > the hover/active-state taxonomy + the pressed-state taxonomy + the head/SEO
-> contract + the reduced-motion/keyboard-order/drag-drop supersets).
+> contract + the reduced-motion/keyboard-order/drag-drop supersets + the DnD-depth
+> supersets: within-column reorder + the recruitment pipeline drag-drop).
 
 ---
 
@@ -1771,3 +1772,55 @@ when expanded — locate group buttons via `[aria-expanded]` instead); REF's
 CDN-JIT Tailwind layout can go stale after viewport/media churn within a
 session (a fresh session + fresh auth recovers it); REF's Tailwind runs via
 cdn.tailwindcss.com (the production warning is expected noise).
+
+## 40. Session-28 Recipe Layer — parity round 27 (the DnD depth supersets)
+
+The round took session-46's suggested next step: superset depth on the DnD
+surface. Two gap groups, both pure supersets (REF ships zero draggables on
+either board — the taskmanager documented since session-21, the recruitment
+pipeline re-verified this round: 0 draggables, 0 cursor-grab cards).
+
+**The recruitment pipeline DnD (R27-A)**: the recruitmentkanban candidate
+cards are HTML5-draggable — `draggable` + `onDragStart` (dataTransfer
+payload + a `dragCandId` state driving the mid-drag `opacity-50`) +
+`onDragEnd`; the w-64 columns are drop zones (`onDragOver`/`onDragEnter`
+preventDefault + the `ring-blue-500/40` highlight on non-source columns +
+`onDrop` → the existing `onMove` stage PATCH). The "Move to" dropdown stays
+as the keyboard/a11y path. The card carries `cursor-grab
+active:cursor-grabbing` — the hover-state-only affordance superset (REF's
+card shows the default cursor while being un-draggable; a draggable card
+that does not look draggable is a usability defect — same category as the
+round-24 aria-label supersets).
+
+**The within-column reorder (R27-B)**: `Task.position Int @default(0)` +
+GET orders `[{ position: "asc" }, { createdAt: "desc" }]` (untouched
+columns keep the newest-first render — every row ties at position 0, the
+tiebreak decides) + PATCH accepts `order: string[]` (the full ordered id
+list for ONE column; reassigns position 0..n-1 in a transaction,
+existence-validated so a stale board cannot half-reorder). The kanban cards
+are insertion drop targets: `onDragOver` on the card (preventDefault + a
+`dragOverId` state driving a `ring-2 ring-inset ring-blue-500/40` insertion
+ring on the hovered card) and `onDrop` inserts the dragged card BEFORE the
+hovered one (`stopPropagation` — the column handler must not double-fire);
+dropping on the column body appends to the end. Optimistic state: array
+order IS render order (splice the dragged card in before its insertion
+point; per-column render follows the array subsequence). The toast stays
+"Task moved" for cross-column drops (the round-26 E2E contract) and reads
+"Order updated" for same-column reorders.
+
+**Probe-tooling lessons (this round's three)**: (1) ALWAYS pin both
+viewports before sweeping — the ref session defaulted to 800×900 and
+produced two phantom DIFFs (/payroll y=136 vs 116: at 800px the payroll
+title column shrinks to min-content 186px, the badge wraps to 56px, the
+subtitle to 3 lines; /profile x=288 vs 336: the centered header
+re-centers). (2) React state does NOT flush inside a single eval —
+dispatching dragstart and reading opacity/boxShadow in the SAME eval reads
+the pre-state (the round-26 lesson, re-hit on the screenshot capture);
+split the dispatch and the read into separate evals with settle delays.
+(3) Chrome serializes modern colors as lab() — `ring-blue-500/40`
+computes to `lab(54.6 8.76 -65.79 / 0.4) 0px 0px 0px 2px inset`, NOT
+`rgba(96,165,250,.4)`; match on geometry or parse tolerantly. And the
+pixel-truth corollary: the 2px 40%-alpha insertion ring is real in the
+screenshot (pixel-verified rgb(177,205,251) = blue-500@40% over white)
+while the VLM cannot perceive it — computed DOM + pixel sampling beat
+visual-language confirmation at low alphas.

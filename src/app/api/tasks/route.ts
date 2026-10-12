@@ -39,6 +39,10 @@ const TaskPatch = z.object({
   priority: z.enum(TASK_PRIORITIES).optional(),
   dueDate: z.string().trim().optional().or(z.literal("")),
   projectId: z.string().trim().optional().or(z.literal("")),
+  // Session 28 (R27-B): the within-column reorder contract — the full
+  // ordered id list for one column (top to bottom). Combined with `status`
+  // it expresses "move to column X inserted before card Y".
+  order: z.array(z.string().trim().min(1)).min(1).max(200).optional(),
 });
 
 const ProjectPatch = z.object({
@@ -55,7 +59,10 @@ export async function GET() {
 
     const [tasks, projects] = await Promise.all([
       db.task.findMany({
-        orderBy: { createdAt: "desc" },
+        // Session 28 (R27-B): position asc with the createdAt desc tiebreak —
+        // untouched columns (all positions equal) keep the newest-first
+        // render; a reordered column persists its dragged order.
+        orderBy: [{ position: "asc" }, { createdAt: "desc" }],
         select: {
           id: true,
           title: true,
@@ -171,6 +178,25 @@ export async function PATCH(req: NextRequest) {
         ...(data.projectId !== undefined ? { projectId: data.projectId || null } : {}),
       },
     });
+
+    // Session 28 (R27-B): the within-column reorder — reassign position =
+    // index for every id in the order array (top to bottom). The array is
+    // one column's full listing; ids are existence-validated so a stale
+    // board cannot silently half-reorder.
+    if (data.order) {
+      const existing = await db.task.findMany({
+        where: { id: { in: data.order } },
+        select: { id: true },
+      });
+      if (existing.length !== data.order.length) {
+        return err("NOT_FOUND", "One or more tasks in the order list do not exist");
+      }
+      await db.$transaction(
+        data.order.map((tid, index) =>
+          db.task.update({ where: { id: tid }, data: { position: index } })
+        )
+      );
+    }
     return ok({ updated: true });
   });
 }
