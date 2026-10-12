@@ -195,6 +195,15 @@
   html {
     -webkit-tap-highlight-color: transparent;
   }
+  /* Session 24 (R23-A): Tailwind v4's preflight dropped the v3
+     `button { cursor: pointer }` rule — the reference (v3 engine)
+     computes pointer on 100% of its measured buttons (sidebar groups,
+     header chrome, dialogs, login). Restored here in the base layer;
+     utility-layer cursor classes (e.g. disabled:cursor-not-allowed)
+     still win the v4 cascade. */
+  button {
+    cursor: pointer;
+  }
 }
 
 /* Session 23 (R22-A): the custom thin-scrollbar block (the session-1

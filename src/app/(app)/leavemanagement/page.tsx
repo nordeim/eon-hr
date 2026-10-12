@@ -123,7 +123,7 @@ export default function LeaveManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8 select-none">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       {/* Reference header: "Leave Management" kicker + "Leave Requests"
           title + "Request time off and manage approvals" subtitle. */}

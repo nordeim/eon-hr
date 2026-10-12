@@ -750,3 +750,28 @@ Stage Summary:
 - Round 22 (the scroll dimension + the dialog surface) complete and ready for push: browser-default scrollbars everywhere like REF, the v4 phantom margin eliminated (tab cards end where REF's do), the loans dialog rebuilt to the full REF recipe (672px, Loan Type + live installment + Paid From + Requesting-for card — schema/API backed), the compliance order + title, and two per-page table recipes
 - Gates: lint 0/0 · tsc · 411/411 unit (+13) · build · 86/86 E2E; DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), possible cursor/selection dimensions, a dialog-surface sweep of the clone's other dialogs (only loans is measurable on REF)
+
+---
+Task ID: session-24
+Agent: main (Super Z)
+Task: Parity round 23 — the cursor + selection dimension (audit + fixes)
+
+Work Log:
+- Workspace RESET (fresh sandbox): fresh clone at a00272b; .env recreated (DATABASE_URL="file:../db/custom.db" + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine users=1/employees=1/leaveBalances=2/payroll=0/expenses=0); env -u DATABASE_URL guard on every DB/build command
+- Baseline gates green: lint 0/0 · tsc · 411/411 unit · build · 86/86 E2E · DB pristine
+- Standing audits: redeploy check 12/12 MATCH (REF unchanged); mobile navigation byte-identical (no v4 bug); with-data re-check — REF still zero-data (blocked, documented)
+- The cursor + selection audit (the round's core): computed cursor/user-select/caret-color census on 4 surfaces + element-level parent-chain walks (Chrome inherits user-select — the chain pinpoints the author) + the 46-route user-select classification + login census via throwaway sessions
+- Key discoveries: (1) REF's stylesheet is CSSOM-UNREADABLE (cssText scan finds zero rules yet buttons compute pointer — cross-origin sheet family; computed DOM census is the ground truth); (2) the systemic button-cursor gap — v3's preflight ships button{cursor:pointer}, v4 REMOVED it (every REF button pointer; every LOC button default); (3) the touch-pan-y wrapper — REF wraps page content in a div computing user-select:none, everything (incl. inputs) inherits none while portals escape to auto; EXACTLY 8 routes wrapped (dashboard, employees, payroll, attendance, leavemanagement, expenses, loans, taskmanager — the base44 core-module family), the other 37 content routes auto; (4) chrome recipes — REF's moon self-authors select-none (clone already matched), REF's Customize/attendance-tabs none via the page wrapper (covered by the root fix)
+- Non-gaps documented: caret-color rgb(10,10,10) both; ::selection zero rules + identical empirical application; input/link/tab/switch/table-cell cursor matches; kanban zero draggables; dialog portal escapes match. Blocked: checkbox cursor, option cursor, disabled-button cursor (zero measurable REF surfaces)
+- docs/remediation-plan-session24.md written (2 gap groups + the cursor/selection map + non-goals) + codebase-validated
+- TDD: 5 RED pins → GREEN (one mid-flight correction: the first B1/B2 draft pinned pre-fix strings and passed vacuously — rewritten to pin the post-fix contract); fixes = globals.css @layer base button{cursor:pointer} (utilities still win the v4 cascade) + select-none on exactly the 8 page roots
+- Gates: lint 0/0 · tsc · 416/416 unit (+5) · build · 86/86 E2E
+- Live verification: buttons 13/13, 18/18, 20/20, 15/15 pointer across 4 surfaces + login 6/6; the 8 routes none + settings/compliance/profile auto; attendance tab + employees input none; loans dialog portal escape (pointer + auto); canonical 12-route geometry 12/12 MATCH + mobile top bar 390×73 — zero layout impact
+- 3 screenshots (78 loans dialog pointer, 79 employees select-none page, 80 settings selectable scope + 02/11 standards refreshed) → 95 total
+- Probe-tooling lessons documented: REF CSSOM-blind (computed census only); bare-string evals must be JSON.stringify'd; the agent-browser daemon resolves relative screenshot paths from ITS cwd (absolute paths required)
+- Docs updated: AGENTS session-24 layer + 416 specs; SKILL v3.7.0 + §36 + recipes 279; PAD [S24] + Last Updated; CLAUDE 502-spec pyramid + session-24 pins; README 416/95 + cursor/selection parity row; docs/session_40.md; this worklog; remediation-plan completion record
+
+Stage Summary:
+- Round 23 (the cursor + selection dimension) complete and ready for push: every button computes cursor:pointer like the v3 reference (the v4 preflight removal compensated in the base layer), the 8 core-module pages are user-select:none like REF's touch-pan-y wrapper (portals + chrome stay selectable), caret/::selection verified identical
+- Gates: lint 0/0 · tsc · 416/416 unit (+5) · build · 86/86 E2E; DB pristine
+- Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), reduced-motion (open on both apps), dialog-surface sweep (only loans measurable), possible a11y-attribute + form-error + print dimensions

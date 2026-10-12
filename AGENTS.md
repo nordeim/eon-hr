@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 411 specs) |
+| Unit tests | `bun run test` (Vitest, 416 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 86 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -874,3 +874,53 @@ is sRGB-pinned `bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]` (trap 3 —
 the last unpinned gradient), the advancing CTA carries a trailing
 ArrowRight (w-4 h-4 ml-2 — 97px Next), and field rows use the 68px wrapper
 recipe (`pt-1` + `leading-4` label → 84px pitch, 872px step-1 card).
+
+## Session-24 layer — parity round 23: the cursor + selection dimension
+
+The never-swept interaction layer (session_38's suggested next step):
+computed `cursor` / `user-select` / `caret-color` census on 4 surfaces +
+element-level parent-chain walks (Chrome INHERITS user-select, so the
+chain pinpoints the authoring element) + a full 46-route user-select
+classification + login census via throwaway sessions. REF's stylesheet is
+UNREADABLE to CSSOM walking (its rules live behind a cross-origin/blob
+sheet — zero hits on a cssText scan that found the computed behavior), so
+computed DOM census is the only ground truth on that side.
+
+**R23-A (the button cursor — systemic)**: Tailwind v3's preflight ships
+`button { cursor: pointer }`; v4 REMOVED it. Every REF button computes
+pointer (group toggles, header chrome, dialogs, login — 100% of measured
+buttons, all enabled); every clone button computed default (except
+tabs/switch/CTA tiles carrying explicit `cursor-pointer` utilities). Fix:
+`@layer base { button { cursor: pointer } }` in globals.css —
+utility-layer cursor classes (`disabled:cursor-not-allowed`) keep winning
+the v4 cascade, so no existing surface regresses.
+
+**R23-B (the touch-pan-y select-none wrapper)**: REF wraps page content in
+`div.touch-pan-y` (computes `user-select: none`) between
+`div.relative.overflow-hidden` and the page root — everything inside
+inherits none (h1, cards, CTA tiles, table text, INPUTS), while portaled
+surfaces (dialogs/dropdowns/drawer) escape to auto. The 46-route sweep
+classifies REF: EXACTLY 8 routes are none-wrapped — /dashboard,
+/employees, /payroll, /attendance, /leavemanagement, /expenses, /loans,
+/taskmanager (the base44 core-module family); the other 37 content routes
+compute auto (REF per-page inconsistent — its /settings renders the tabs
+directly in the page root with NO touch-pan-y layer). Fix: `select-none`
+on exactly those 8 clone page roots (chrome + portals stay auto — the
+computed map matches REF on every route; attendance tabs + page inputs +
+the Customize button + the CTA tiles all inherit none like REF).
+
+**Non-gaps (measured)**: caret-color rgb(10,10,10) both; ::selection zero
+authored rules + identical empirical application; input cursor text/
+default per type; link pointer (UA); table cells auto; kanban zero
+[draggable] both; dialog buttons auto/pointer (portal escape both);
+the moon's self-authored select-none (the clone already matched). Blocked
+(zero-data REF): checkbox cursor, [role=option] cursor, disabled-button
+cursor (REF renders no disabled button on any measurable surface).
+
+**Pins**: 5 new (tests/unit/recipes.test.ts session-24 block — the base
+rule, the 8 roots, and a NEGATIVE scope lock on /settings for the 38 auto
+routes). Gates: lint 0/0 · tsc ✓ · 416/416 unit · build ✓ · 86/86 E2E.
+Live-verified: 13-20/13-20 buttons pointer per surface, login 6/6, the
+8 routes none + 3 auto representatives, attendance tab none, employees
+input none, loans dialog portal escape, canonical 12-route geometry
+12/12 + mobile top bar 390×73 (zero layout impact).

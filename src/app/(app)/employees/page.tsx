@@ -123,7 +123,7 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 select-none">
       <div className="mx-auto flex w-full max-w-7xl flex-col">
       {mode === "wizard" ? (
         /* Session 7 (R6-C): the reference renders the Add/Edit wizard as a

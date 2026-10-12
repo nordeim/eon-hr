@@ -1887,3 +1887,52 @@ describe("session-23 scroll-dimension recipes (parity round 22 — the scroll di
     expect(sumBlock).not.toContain("<EmptyState");
   });
 });
+
+describe("session-24 cursor + selection recipes (parity round 23 — the cursor dimension)", () => {
+  const dashPage = read("src", "app", "(app)", "dashboard", "page.tsx");
+  const employeesPage = read("src", "app", "(app)", "employees", "page.tsx");
+  const payrollPage = read("src", "app", "(app)", "payroll", "page.tsx");
+  const attendancePage = read("src", "app", "(app)", "attendance", "page.tsx");
+  const leavePage = read("src", "app", "(app)", "leavemanagement", "page.tsx");
+  const expensesPage = read("src", "app", "(app)", "expenses", "page.tsx");
+  const taskPage = read("src", "app", "(app)", "taskmanager", "page.tsx");
+  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+
+  it("R23-A: the base layer re-authors the v3 preflight button cursor (v4 removed button{cursor:pointer}; REF computes pointer on 100% of measured buttons — group toggles, header chrome, dialogs, login)", () => {
+    const baseIdx = globalsCss.indexOf("@layer base");
+    expect(baseIdx).toBeGreaterThan(-1);
+    const baseBlock = globalsCss.slice(baseIdx, baseIdx + 800);
+    expect(baseBlock).toContain("button {");
+    expect(baseBlock).toContain("cursor: pointer");
+  });
+
+  it("R23-B1: the dashboard page root carries select-none (REF wraps its 8 core-module pages in a user-select:none container — the touch-pan-y layer)", () => {
+    expect(dashPage).toContain('className="p-4 md:p-8 space-y-8 select-none"');
+  });
+
+  it("R23-B2: the employees page root carries select-none", () => {
+    expect(employeesPage).toContain('className="p-4 md:p-8 select-none"');
+  });
+
+  it("R23-B3..B8: the six gradient-rooted core pages carry select-none (payroll, attendance, leavemanagement, expenses, loans, taskmanager — the REF-wrapped family)", () => {
+    const roots: [string, string][] = [
+      ["payroll", payrollPage],
+      ["attendance", attendancePage],
+      ["leavemanagement", leavePage],
+      ["expenses", expensesPage],
+      ["loans", loansPage],
+      ["taskmanager", taskPage],
+    ];
+    for (const [name, src] of roots) {
+      const m = src.match(/className="min-h-screen[^"]*"/);
+      expect(m, name).toBeTruthy();
+      expect(m?.[1] ?? m?.[0], name).toContain("select-none");
+    }
+  });
+
+  it("R23-B-scope: settings (the representative of the 38 unwrapped REF routes) stays selectable — REF renders its tabs directly in the page root with no touch-pan-y layer", () => {
+    const m = settingsPage.match(/className="min-h-screen[^"]*"/);
+    expect(m).toBeTruthy();
+    expect(m?.[0]).not.toContain("select-none");
+  });
+});

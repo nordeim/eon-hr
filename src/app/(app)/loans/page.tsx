@@ -183,7 +183,7 @@ export default function LoansPage() {
     ({ standard: "Standard Loan", emergency: "Emergency Loan", "salary-advance": "Salary Advance", personal: "Personal Loan" })[t] ?? t;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8 select-none">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"

@@ -1651,5 +1651,24 @@ input-event trick does not. The sidebar brand is an `<h1>` — h1 probes must
 filter `offsetParent !== null`. VLM checks need `createVision` + a vision
 model (the plain chat endpoint rejects image content).
 
-**Spec count:** 411 unit (recipes 274, tokens 19, auth 14, utils 13,
+**Spec count:** 416 unit (recipes 279, tokens 19, auth 14, utils 13,
 shell-recipes 76, db-path 15) + 86 E2E.
+
+## 36. Session-24 Recipe Layer — parity round 23 (the cursor + selection dimension)
+
+The cursor map: REF (v3 preflight) computes `cursor: pointer` on 100% of
+measured buttons; v4 removed the preflight rule — restore it with
+`@layer base { button { cursor: pointer } }` (utilities still win for
+`disabled:cursor-not-allowed`). The selection map: REF wraps its 8
+core-module pages (dashboard, employees, payroll, attendance,
+leavemanagement, expenses, loans, taskmanager) in a `touch-pan-y`
+container computing `user-select: none` — Chrome INHERITS user-select, so
+page content (including inputs) computes none while Radix portals
+(dialogs/dropdowns/drawer) escape to auto. The other 37 content routes
+stay selectable (per-page REF inconsistency). Mirror: `select-none` on
+exactly those 8 page roots; pin the scope NEGATIVELY (the settings root
+must NOT carry it). caret-color and ::selection need nothing (identical
+computed values + zero authored rules). Probe lessons: REF's stylesheet is
+CSSOM-unreadable (cross-origin family) — computed DOM census is the only
+ground truth on that side; bare-string agent-browser evals must be
+JSON.stringify'd or the harness parses them into error objects.

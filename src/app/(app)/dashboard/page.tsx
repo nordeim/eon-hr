@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   const totalExpense = expenses?._sum.amount ?? 0;
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-8 select-none">
       {/* Mobile page-title kicker (session-6 re-measurement; session 9
           R8-G re-pin): the reference renders `md:hidden … bg-white border-b
           border-slate-200 px-4 py-3` INSIDE its p-4 page wrapper (so the

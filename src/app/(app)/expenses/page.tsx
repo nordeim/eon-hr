@@ -182,7 +182,7 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#fdf2f8)] p-4 md:p-8">
+    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#fdf2f8)] p-4 md:p-8 select-none">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
