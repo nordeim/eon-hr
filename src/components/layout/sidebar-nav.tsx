@@ -53,7 +53,7 @@ export function SidebarNav({
 
 function SidebarHeader() {
   return (
-    <div className="flex items-center gap-3 border-b border-sidebar-border px-6 py-6">
+    <div className="flex items-center gap-3 border-b border-sidebar-border dark:border-slate-800 px-6 py-6">
       {/* Brand mark — reference (live-measured session 3): 40×40 squircle,
           12px radius, gradient to-right-bottom #2563EB → #4F46E5 (sRGB —
           arbitrary value per Tailwind v4 trap 3, oklab interpolation would
@@ -65,7 +65,10 @@ function SidebarHeader() {
         <Briefcase className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
       </div>
       <div className="flex min-w-0 flex-col">
-        <h2 className="text-lg font-bold leading-tight text-slate-900">EonHR</h2>
+        {/* Session 33 (R32-A): REF's brand title flips to white in dark
+            (dark:text-white, live-measured rgb(255,255,255)); the sub
+            keeps its muted token (flips to neutral-400). */}
+        <h2 className="text-lg font-bold leading-tight text-slate-900 dark:text-white">EonHR</h2>
         <span className="text-xs leading-tight text-muted-foreground">Demo</span>
       </div>
     </div>
@@ -222,19 +225,43 @@ function CollapsibleNavItem({
 }
 
 function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" | "mobile" }) {
+  /* Session 33 (R32-A): the Moon is a REAL theme toggle on REF — html.dark
+     + localStorage darkMode="true" (the shadcn-neutral palette extracted
+     from its live stylesheet now lives in globals.css). The boot script in
+     layout.tsx applies the stored theme pre-paint; this state syncs
+     post-hydration for the aria-label, and the ICON is class-driven
+     (dark:hidden / hidden dark:block) so it can never desync from the
+     applied theme. */
   const [dark, setDark] = React.useState(false);
-  // Reference default shows the Arabic target label ("عربي"); toggling flips
-  // to "EN" — a display-only switch, exactly like the original app.
+  React.useEffect(() => {
+    setDark(localStorage.getItem("darkMode") === "true");
+  }, []);
+  const onMoonClick = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("darkMode", String(next));
+  };
+  /* Session 33 (R32-B): REF's عربي flips the app to RTL mode — dir=rtl +
+     localStorage app_lang="ar"; the whole layout mirrors (sidebar right,
+     tabs mirrored) while the strings stay English (its i18n is not
+     wired). The label flips to "EN" with an Arabic title
+     ("التبديل إلى الإنجليزية", REF-measured). */
   const [lang, setLang] = React.useState<"EN" | "عربي">("عربي");
+  React.useEffect(() => {
+    setLang(localStorage.getItem("app_lang") === "ar" ? "EN" : "عربي");
+  }, []);
+  const onLangClick = () => {
+    const next = lang === "EN" ? "عربي" : "EN";
+    setLang(next);
+    document.documentElement.dir = next === "EN" ? "rtl" : "ltr";
+    localStorage.setItem("app_lang", next === "EN" ? "ar" : "en");
+  };
   /* Session 25 (R24-B): the stable popover content id — REF's bell carries
      aria-controls even while closed (measured radix-:ro: with exp=false);
      Radix authors it only while open, so the same stable-id override as
      R24-A applies (user props spread after Radix's own). */
   const bellContentId = React.useId();
-
-  React.useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
 
   // Session 12 (R11-A) — reference footer recipe (live-measured):
   //   div.flex.flex-col.gap-2.border-t.border-slate-200.dark:border-slate-800.p-4
@@ -287,19 +314,24 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
         <button
           type="button"
           aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-          onClick={() => setDark((d) => !d)}
+          onClick={onMoonClick}
           /* Session 16 (R15-B): the reference's Moon renders zinc-700
              (rgb(63,63,70) = #3F3F46 — pinned in the palette).
              Session 20 (R19-C2): ghost hover = accent + accent-foreground
-             (icon inherits → #171717 under hover, REF-measured). */
-          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-zinc-700 transition-colors hover:bg-accent hover:text-accent-foreground"
+             (icon inherits → #171717 under hover, REF-measured).
+             Session 33 (R32-A): in dark REF's control renders zinc-100
+             (rgb(244,244,245) — its sidebar-foreground token flips); the
+             icon swaps Moon→Sun with the .dark class itself (class-driven,
+             boot-script-safe). */
+          className="flex h-9 w-9 select-none items-center justify-center rounded-md text-zinc-700 dark:text-zinc-100 transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-          {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+          <Moon className="h-4 w-4 dark:hidden" aria-hidden="true" />
+          <Sun className="h-4 w-4 hidden dark:block" aria-hidden="true" />
         </button>
         <button
           type="button"
-          onClick={() => setLang((l) => (l === "EN" ? "عربي" : "EN"))}
-          title={lang === "عربي" ? "Switch to Arabic" : "Switch to English"}
+          onClick={onLangClick}
+          title={lang === "عربي" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
           className="flex h-8 min-w-[64px] items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-background px-3 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 hover:text-accent-foreground"
         >
           <Languages className="h-4 w-4" aria-hidden="true" />

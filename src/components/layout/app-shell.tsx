@@ -51,6 +51,37 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   const swipe = React.useRef({ startX: 0, startY: 0, active: false });
   const SWIPE_THRESHOLD = 96;
 
+  /* Session 33 (R32-C): the swipe-to-open twin — a horizontal-dominant,
+     rightward drag that STARTS within 32px of the left viewport edge
+     (mobile, drawer closed) opens the drawer once the drag passes 24px;
+     the panel then plays its own 500ms slide-in. Handlers live on the
+     main column wrapper — the bottom nav and the drawer panel are
+     siblings, untouched. The edge window keeps ordinary horizontal
+     scrolls (carousels, tables) from summoning the drawer, and the
+     dominant-axis guard keeps vertical page scrolls inert. At-rest
+     DOM and desktop are unchanged (interaction-state only, the R30-D
+     pattern; REF ships no open gesture — this is the documented
+     mobile-menu superset). */
+  const EDGE = 32;
+  const OPEN_THRESHOLD = 24;
+  const edgeSwipe = React.useRef({ startX: 0, startY: 0, armed: false, fired: false });
+
+  const onMainTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1 || mobileOpen) return;
+    const t = e.touches[0];
+    edgeSwipe.current = { startX: t.clientX, startY: t.clientY, armed: t.clientX <= EDGE, fired: false };
+  };
+  const onMainTouchMove = (e: React.TouchEvent) => {
+    const s = edgeSwipe.current;
+    if (!s.armed || s.fired || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - s.startX;
+    const dy = e.touches[0].clientY - s.startY;
+    if (dx >= OPEN_THRESHOLD && dx > Math.abs(dy)) {
+      s.fired = true;
+      setMobileOpen(true);
+    }
+  };
+
   const onDrawerTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length !== 1) return;
     swipe.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, active: true };
@@ -87,9 +118,18 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]">
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col">
+    /* Session 33 (R32-A): the dark canvas — REF's shell root swaps the
+       slate-50 -> blue-50 gradient for slate-900 -> slate-800 in dark
+       (sRGB-pinned per trap 3, live-measured
+       rgb(15,23,42) -> rgb(30,41,59)). */
+    <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]">
+      {/* Desktop sidebar. Session 33 (R32-A/E): REF authors its aside with
+          hardcoded classes — bg-white in LIGHT (a 31-round-invisible 5-unit
+          find: every prior audit compared sidebar geometry or the MOBILE
+          drawer, which is the --sidebar token #fafafa on both apps) and
+          dark:bg-slate-900 + dark:border-slate-800 in dark. The mobile
+          drawer below keeps the token (bg-sidebar), which flips. */}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 md:flex md:flex-col">
         <SidebarNav user={user} />
       </aside>
 
@@ -127,14 +167,18 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
 
-      {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* Main column — carries the swipe-to-open edge listeners (R32-C):
+          the handlers only arm inside the 32px left-edge window, so
+          ordinary content scrolls never trigger. */}
+      <div className="flex min-w-0 flex-1 flex-col" onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove}>
         {/* Mobile top bar (session-5 re-measurement): px-6 py-4 + a 40px
             content row — 28×28 toggle with a 16px PanelLeft icon, brand
             block = h1 "EonHR" 16px/700 slate-900 + p "Demo" text-xs
             text-slate-500 stacked (24+16 = 40px). items-center; header =
-            16+40+16+1 = 73px. */}
-        <header className="sticky top-0 z-10 border-b border-sidebar-border bg-white px-6 py-4 md:hidden">
+            16+40+16+1 = 73px. Session 33 (R32-A): the dark chrome — REF's
+            mobile header flips to slate-900 bg + slate-800 border (dark:
+            classes, live-measured); the brand h1/sub stay hardcoded. */}
+        <header className="sticky top-0 z-10 border-b border-sidebar-border dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 md:hidden">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -165,10 +209,14 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
         {/* Mobile bottom tab bar (session-5 re-measurement): labels are
             text-sm font-medium (14px/21px), 61px items, 78px bar — and the
             ACTIVE tab is highlighted text-blue-600 (#2563EB, icon + label;
-            the earlier "no active highlight" note was a stale measurement). */}
+            the earlier "no active highlight" note was a stale measurement).
+            Session 33 (R32-A): the dark chrome — the bar flips to
+            slate-900 + slate-800 border; the active tab flips to blue-400
+            on a blue-900/20 pill; inactive tabs flip to slate-400 (all
+            REF-measured in dark). */}
         <nav
           aria-label="Bottom navigation"
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border dark:border-slate-800 bg-white dark:bg-slate-900 pb-[env(safe-area-inset-bottom)] md:hidden"
         >
           <div className="flex items-center justify-around px-2 py-2">
             {BOTTOM_NAV.map((tab) => {
@@ -188,7 +236,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
                      REF's mobile dashboard — missed by prior rounds that
                      compared label color/geometry but never the tab's own
                      background). */
-                    active ? "bg-blue-50 text-blue-600" : "text-slate-600"
+                    active ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />

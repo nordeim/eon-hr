@@ -322,7 +322,7 @@ export default function ChatPage() {
                           className={cn(
                             "max-w-[75%] rounded-xl px-3.5 py-2 text-sm",
                             own
-                              ? "bg-primary text-primary-foreground"
+                              ? "bg-primary text-primary-foreground dark:text-white"
                               : "bg-secondary text-secondary-foreground"
                           )}
                         >
@@ -330,7 +330,7 @@ export default function ChatPage() {
                             <p className="mb-0.5 text-xs font-medium text-muted-foreground">{m.senderName}</p>
                           ) : null}
                           <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                          <p className={cn("mt-1 text-[11px]", own ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                          <p className={cn("mt-1 text-[11px]", own ? "text-primary-foreground/70 dark:text-white/70" : "text-muted-foreground")}>
                             {timeAgo(m.sentAt)}
                           </p>
                         </div>

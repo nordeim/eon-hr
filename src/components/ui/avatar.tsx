@@ -24,7 +24,11 @@ function AvatarFallback({
   return (
     <AvatarPrimitive.Fallback
       className={cn(
-        "flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground",
+        // Session 33 (R32-A): the fallback keeps white text in dark (the
+        // token would flip to #171717 on the unchanged blue gradient —
+        // REF's zero-data surfaces never render a fallback in dark; the
+        // documented readability superset, light untouched).
+        "flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground dark:text-white",
         className
       )}
       {...props}

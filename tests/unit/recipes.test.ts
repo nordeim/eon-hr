@@ -1469,7 +1469,10 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
   });
 
   it("R18-C: globals.css pins the sidebar-ring token to REF's blue-500 (#3B82F6 = 217.2 91.2% 59.8%)", () => {
-    expect(globals).toContain("--color-sidebar-ring: #3b82f6");
+    /* Session 33: the token moved to the :root runtime-var layer (it maps
+       through --color-sidebar-ring: var(--sidebar-ring) in @theme). */
+    expect(globals).toContain("--sidebar-ring: #3b82f6");
+    expect(globals).toContain("--color-sidebar-ring: var(--sidebar-ring)");
   });
 
   it("R18-D: the mobile hamburger carries REF's button focus recipe (the bare button had none)", () => {
@@ -1541,9 +1544,9 @@ describe("session-20 hover recipes (parity round 19)", () => {
     );
   });
 
-  it("R19-C2: Moon button keeps zinc-700 base + hover:bg-accent hover:text-accent-foreground", () => {
+  it("R19-C2: Moon button keeps zinc-700 base + hover:bg-accent hover:text-accent-foreground (dark: zinc-100 since session 33)", () => {
     expect(sidebarNav).toMatch(
-      /text-zinc-700 transition-colors hover:bg-accent hover:text-accent-foreground/
+      /text-zinc-700 dark:text-zinc-100 transition-colors hover:bg-accent hover:text-accent-foreground/
     );
     expect(sidebarNav).not.toContain("hover:text-foreground");
   });
@@ -1598,7 +1601,7 @@ describe("session-20 hover recipes (parity round 19)", () => {
       appShell.indexOf("min-h-[44px]"),
       appShell.indexOf("min-h-[44px]") + 900
     );
-    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600" : "text-slate-600"');
+    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"');
     expect(tabsBlock).not.toContain("hover:text-foreground");
   });
 
@@ -1652,7 +1655,7 @@ describe("session-21 pressed-state recipes (parity round 20 — the :active dime
       appShell.indexOf("min-h-[44px]"),
       appShell.indexOf("min-h-[44px]") + 900
     );
-    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600" : "text-slate-600"');
+    expect(tabsBlock).toContain('active ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"');
   });
 });
 
@@ -1899,11 +1902,9 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
   const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
 
   it("R23-A: the base layer re-authors the v3 preflight button cursor (v4 removed button{cursor:pointer}; REF computes pointer on 100% of measured buttons — group toggles, header chrome, dialogs, login)", () => {
-    const baseIdx = globalsCss.indexOf("@layer base");
-    expect(baseIdx).toBeGreaterThan(-1);
-    const baseBlock = globalsCss.slice(baseIdx, baseIdx + 800);
-    expect(baseBlock).toContain("button {");
-    expect(baseBlock).toContain("cursor: pointer");
+    /* Session 33: the base block grew (the runtime-var body comment), so
+       the pin matches the rule inside @layer base by regex. */
+    expect(globalsCss).toMatch(/@layer base[\s\S]*?button \{[\s\S]*?cursor: pointer/);
   });
 
   it("R23-B1: the dashboard page root carries select-none (REF wraps its 8 core-module pages in a user-select:none container — the touch-pan-y layer)", () => {
@@ -2360,8 +2361,10 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     const m = appShell.match(/DialogPrimitive\.Content[\s\S]*?className="([^"]+)"/);
     expect(m).toBeTruthy();
     expect(m![1]).toContain("border-r");
-    // the DESKTOP sidebar border stays the slate token (both apps measured)
-    expect(appShell).toContain("border-r border-sidebar-border");
+    /* Session 33 (R32-A/E): the DESKTOP aside moved to REF's authored
+       classes — bg-white in light (the 5-unit find) + the dark slate
+       pair. The drawer keeps the token flip (bg-sidebar -> #18181b). */
+    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
   });
 
   it("R30-B1: the chat left card — CardHeader p-4 border-b border-slate-200 with the 14px/600 title, the p-2 max-h-96 body, and the plain muted 'No chats' line (no icon, no centered EmptyState)", () => {
@@ -2504,7 +2507,12 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
   it("R31-C6: /payrollreports — the raised header + green WhatsApp CTA, the 4-tile horizontal stat row, the filter card, the Monthly/Tax/History white tab pills", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
     expect(src).toContain("from-blue-50 to-indigo-50");
-    expect(src).toMatch(/title="Payroll Reports"/);
+    /* Session 33 baseline fix: round-31's live-verification rebuilt this
+       header by hand (badge+CTA row y=56, h1 y=108, sub y=156 — distinct
+       from the standard raised-36) but the pin still expected the PageHeader
+       prop pattern; the final unit re-run was skipped, so the pushed HEAD
+       carried the stale pin. Pinned to the raw h1 like R31-C7/C8. */
+    expect(src).toMatch(/>Payroll Reports<\/h1>/);
     expect(src).toContain("Send Payslips via WhatsApp");
     expect(src).toContain("bg-green-600");
     expect(src).toContain("Total Earnings");
@@ -2598,5 +2606,139 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     }
     const swapsApi = read("src", "app", "api", "shiftswaps", "route.ts");
     expect(swapsApi).toContain('z.object');
+  });
+});
+
+describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)", () => {
+  /* The round's census: REF's Moon toggles a REAL shadcn-neutral dark
+     theme (html.dark + localStorage darkMode="true", extracted verbatim
+     from REF's live stylesheet) and REF's عربي flips dir=rtl
+     (localStorage app_lang) — the clone's controls were display-only
+     stubs. Plus a 31-round-invisible light find: REF's desktop aside is
+     bg-white (not the sidebar token). All values REF-measured this
+     round — see docs/remediation-plan-session33.md. */
+
+  const root = globalsCss.slice(globalsCss.indexOf(":root {"), globalsCss.indexOf(".dark {"));
+  const darkBlock = globalsCss.slice(globalsCss.indexOf(".dark {"), globalsCss.lastIndexOf("@theme inline"));
+  const themeBlock = globalsCss.slice(globalsCss.lastIndexOf("@theme inline"), globalsCss.indexOf("@layer base"));
+
+  it("R32-A1: globals.css uses the shadcn runtime-var pattern — :root light pins, .dark overrides, @theme inline var() indirection", () => {
+    expect(globalsCss).toContain(":root {");
+    expect(globalsCss).toContain(".dark {");
+    // the indirection layer: color tokens point at the runtime vars
+    expect(themeBlock).toContain("--color-background: var(--background)");
+    expect(themeBlock).toContain("--color-foreground: var(--foreground)");
+    expect(themeBlock).toContain("--color-border: var(--border)");
+    expect(themeBlock).toContain("--color-card: var(--card)");
+    expect(themeBlock).toContain("--color-primary-foreground: var(--primary-foreground)");
+    expect(themeBlock).toContain("--color-sidebar: var(--sidebar)");
+    // light pins move to :root verbatim
+    expect(root).toContain("--background: #ffffff");
+    expect(root).toContain("--foreground: #0a0a0a");
+    expect(root).toContain("--primary: #1877f2");
+    expect(root).toContain("--primary-foreground: #fafafa");
+    expect(root).toContain("--border: #e5e5e5");
+    expect(root).toContain("--sidebar: #fafafa");
+  });
+
+  it("R32-A2: the .dark block carries REF's extracted shadcn-neutral palette (live stylesheet verbatim)", () => {
+    expect(darkBlock).toContain("--background: #0a0a0a");
+    expect(darkBlock).toContain("--foreground: #fafafa");
+    expect(darkBlock).toContain("--card: #0a0a0a");
+    expect(darkBlock).toContain("--card-foreground: #fafafa");
+    expect(darkBlock).toContain("--popover: #0a0a0a");
+    expect(darkBlock).toContain("--popover-foreground: #fafafa");
+    expect(darkBlock).toContain("--primary-foreground: #171717");
+    expect(darkBlock).toContain("--secondary: #262626");
+    expect(darkBlock).toContain("--secondary-foreground: #fafafa");
+    expect(darkBlock).toContain("--muted: #262626");
+    expect(darkBlock).toContain("--muted-foreground: #a3a3a3");
+    expect(darkBlock).toContain("--accent: #262626");
+    expect(darkBlock).toContain("--accent-foreground: #fafafa");
+    expect(darkBlock).toContain("--destructive: #7f1d1d");
+    expect(darkBlock).toContain("--border: #262626");
+    expect(darkBlock).toContain("--input: #262626");
+    expect(darkBlock).toContain("--ring: #d4d4d4");
+    // the drawer flip: REF's dark --sidebar-background 240 5.9% 10%
+    expect(darkBlock).toContain("--sidebar: #18181b");
+  });
+
+  it("R32-A3: the tokens that must NOT flip — primary (the active-nav blue), link, and the body flip via var", () => {
+    // REF authors its blue via custom classes that survive dark; the
+    // clone's --color-primary stays the literal in @theme (no .dark
+    // override exists for --primary).
+    expect(themeBlock).toContain("--color-primary: #1877f2");
+    expect(darkBlock).not.toContain("--primary:");
+    expect(themeBlock).toContain("--color-link: #2563eb");
+    // the neutral-400 pin (the dark inactive-tab color) joins the palette
+    expect(themeBlock).toContain("--color-neutral-400: #a3a3a3");
+    // the body base flips with the runtime var (dark body = #0a0a0a)
+    expect(globalsCss).toContain("background-color: var(--background)");
+  });
+
+  it("R32-A4: the app shell's dark surfaces — canvas gradient, aside (the light bg-white find), mobile chrome, bottom tabs", () => {
+    // canvas: slate-900 -> slate-800, sRGB-pinned per trap 3
+    expect(appShell).toContain("dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]");
+    // the desktop aside: REF's authored classes — bg-white in LIGHT (the
+    // 31-round-invisible find; the drawer keeps the sidebar token)
+    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
+    // mobile header + bottom nav: dark slate-900/800 chrome
+    expect(appShell.match(/dark:bg-slate-900/g)?.length).toBeGreaterThanOrEqual(3);
+    // bottom tabs: inactive flips slate-400, active flips blue-400 + blue-900/20
+    expect(appShell).toContain("dark:text-slate-400");
+    expect(appShell).toContain("dark:bg-blue-900/20 dark:text-blue-400");
+  });
+
+  it("R32-A5: the sidebar's dark details — brand h2, moon, brand-row border (the nav/bell/user colors stay hardcoded, REF's own behavior)", () => {
+    expect(sidebarNav).toContain("text-slate-900 dark:text-white");
+    expect(sidebarNav).toContain("text-zinc-700 dark:text-zinc-100");
+    expect(sidebarNav).toContain("dark:border-slate-800");
+  });
+
+  it("R32-A6: the Moon persists — initializes from localStorage.darkMode, writes on every toggle", () => {
+    expect(sidebarNav).toContain('localStorage.getItem("darkMode")');
+    expect(sidebarNav).toContain('localStorage.setItem("darkMode"');
+  });
+
+  it("R32-A7: the button dark variant tracks REF's bg-primary flip (dark #fafafa bg, #171717 text via the token)", () => {
+    const src = read("src", "components", "ui", "button.tsx");
+    expect(src).toContain("dark:bg-[#fafafa]");
+    expect(src).toContain("dark:hover:bg-[#fafafa]/90");
+  });
+
+  it("R32-A8: the tab list's inactive color flips to neutral-400 in dark (REF's muted-foreground dark token)", () => {
+    expect(tabsUi).toContain("dark:text-neutral-400");
+  });
+
+  it("R32-A9: the primary-foreground text surfaces stay readable in dark (the unmeasurable-surface superset)", () => {
+    const checkbox = read("src", "components", "ui", "checkbox.tsx");
+    expect(checkbox).toContain("dark:data-[state=checked]:text-white");
+    const avatar = read("src", "components", "ui", "avatar.tsx");
+    expect(avatar).toContain("dark:text-white");
+    for (const p of ["chat", "hrassistantchat"]) {
+      const src = read("src", "app", "(app)", p, "page.tsx");
+      expect(src).toContain("dark:text-white");
+      expect(src).toContain("dark:text-white/70");
+    }
+  });
+
+  it("R32-A10: the pre-paint boot script — darkMode and app_lang apply before first paint (no FOUC, reload-persistent)", () => {
+    const src = read("src", "app", "layout.tsx");
+    expect(src).toContain("darkMode");
+    expect(src).toContain("classList.add(\"dark\")");
+    expect(src).toContain("app_lang");
+    expect(src).toContain("dir");
+  });
+
+  it("R32-B1: the عربي RTL contract — dir flip + app_lang persistence + the Arabic title string", () => {
+    expect(sidebarNav).toContain('document.documentElement.dir');
+    expect(sidebarNav).toContain('localStorage.setItem("app_lang"');
+    expect(sidebarNav).toContain("التبديل إلى الإنجليزية");
+  });
+
+  it("R32-C1: the swipe-to-open contract — left-edge, rightward, horizontal-dominant, threshold-gated (interaction-state only)", () => {
+    expect(appShell).toContain("EDGE");
+    expect(appShell).toMatch(/OPEN_THRESHOLD|EDGE_THRESHOLD/);
+    expect(appShell).toMatch(/setMobileOpen\(true\)/);
   });
 });

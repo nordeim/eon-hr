@@ -264,7 +264,7 @@ export default function HrAssistantChatPage() {
                           className={cn(
                             "max-w-[75%] rounded-xl px-3.5 py-2 text-sm",
                             isUser
-                              ? "bg-primary text-primary-foreground"
+                              ? "bg-primary text-primary-foreground dark:text-white"
                               : "bg-secondary text-secondary-foreground"
                           )}
                         >
@@ -272,7 +272,7 @@ export default function HrAssistantChatPage() {
                           <p
                             className={cn(
                               "mt-1 text-[11px]",
-                              isUser ? "text-primary-foreground/70" : "text-muted-foreground"
+                              isUser ? "text-primary-foreground/70 dark:text-white/70" : "text-muted-foreground"
                             )}
                           >
                             {timeAgo(m.createdAt)}

@@ -52,7 +52,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
 | Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens, shell recipes) |
-| E2E tests | Playwright | 1.63 | 121 specs across auth, nav (61 routes — the full registry), mobile, dashboard, inline 4-step wizard CRUD, kanban drag-drop (cross-column + within-column reorder) + recruitment pipeline drag-drop (cross-stage + within-stage reorder) + organogram re-parent drag-drop (+ cycle rejection) + print-media emulation (chrome hidden + color fidelity) + hr-assistant chat empty states + legacy /assets contract & round-trip + drawer border & swipe-to-close (CDP touch) + the session-32 orphan-route contracts (blank stubs, aliases, empty states, the shiftswap/requestsettings/tenantsetup round-trips) + session-4/6/7 geometry pins |
+| E2E tests | Playwright | 1.63 | 133 specs across auth, nav (61 routes — the full registry), mobile, dashboard, inline 4-step wizard CRUD, kanban drag-drop (cross-column + within-column reorder) + recruitment pipeline drag-drop (cross-stage + within-stage reorder) + organogram re-parent drag-drop (+ cycle rejection) + print-media emulation (chrome hidden + color fidelity) + hr-assistant chat empty states + legacy /assets contract & round-trip + drawer border & swipe-to-close (CDP touch) + the session-32 orphan-route contracts (blank stubs, aliases, empty states, the shiftswap/requestsettings/tenantsetup round-trips) + session-4/6/7 geometry pins + the session-33 dark-mode contracts (toggle, persistence across reload, the pre-paint boot, the Moon-to-Sun swap, the dark mobile chrome, the RTL triple) + the swipe-to-open CDP touch quartet |
 
 ## File Hierarchy
 
@@ -80,7 +80,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 │   ├── 📄 db-path.test.ts          # DB path resolution contract (15 specs)
 │   └── 📂 e2e/                     # Playwright: 91 specs, isolated e2e.db
 ├── 📂 docs/
-│   ├── 📂 screenshots/             # 127 remediated UI captures (desktop + mobile + tablet bands + wizard + focus rings + hover + pressed states + motion + scroll/dialog + cursor + a11y + SEO/meta + reduced-motion/DnD + DnD-depth + ordering/print + sidebar/organogram/print-color + drawer-border/chat/legacy-assets evidence)
+│   ├── 📂 screenshots/             # 133 remediated UI captures (desktop + mobile + tablet bands + wizard + focus rings + hover + pressed states + motion + scroll/dialog + cursor + a11y + SEO/meta + reduced-motion/DnD + DnD-depth + ordering/print + sidebar/organogram/print-color + drawer-border/chat/legacy-assets/orphan-routes evidence + the dark-theme pair + dark settings + dark mobile drawer + RTL + light-restored)
 │   ├── 📄 remediation-plan-session1.md       # Session-2 gap inventory & fix log
 │   └── 📄 Tailwind-V4-Validation-Report.md    # Engine trap log
 └── 📄 AGENTS.md • CLAUDE.md • Project_Architecture_Document.md • eon-hr_SKILL.md
@@ -134,8 +134,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (480 specs: db-path, auth, utils, tokens, session-5..32 recipes)
-bun run test:e2e      # Playwright E2E (121 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (493 specs: db-path, auth, utils, tokens, session-5..33 recipes)
+bun run test:e2e      # Playwright E2E (133 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```

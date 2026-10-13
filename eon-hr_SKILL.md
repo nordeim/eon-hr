@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.15.0 (session-32 remediation complete — the orphan-route hunt) · **Last updated:**
+> **Version:** 3.16.0 (session-33 remediation complete — the dark theme + RTL + swipe-to-open) · **Last updated:**
 > 2026-10-13 · **State:** 480 unit + 121 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2120,3 +2120,88 @@ backend data — the h1+hero match, the zero-data contract verified on
 the empty load); 12/12 redeploy; mobile chrome byte-identical; sidebar
 navmap 865/905; DB pristine. 127 PNG captures (9 new + 02/11
 refreshed).
+
+
+## 45. Session-33 Recipe Layer — parity round 32 (the dark theme + the RTL mode + the swipe-to-open)
+
+**The round's census**: the sidebar footer controls (Moon / عربي) — a
+never-audited dimension. REF's Moon is a REAL theme controller
+(`html.dark` + `localStorage darkMode="true"`, persisted across
+reloads) and REF's عربي flips the app to **RTL** (`dir=rtl` +
+`app_lang="ar"`, strings stay English, the layout mirrors, the drawer
+stays left-anchored). The clone's controls were display-only stubs.
+
+**The v4 dark-variant trap (the round's engine lesson)**: v4's `dark:`
+variant defaults to the prefers-color-scheme MEDIA query. The
+class-based strategy every shadcn app uses must be declared explicitly:
+
+```css
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+Without it, `dark:bg-slate-900` / `dark:hidden` compile to media queries
+that never fire under `html.dark` — found via E2E (the moon icon's
+dark:hidden stayed visible with the class applied).
+
+**The runtime-var restructure (globals.css)**: `:root` carries the
+light pins verbatim; `.dark` carries REF's extracted neutral palette
+(background #0a0a0a, foreground #fafafa, border/input/secondary/accent/
+muted #262626, primary-foreground #171717, muted-foreground #a3a3a3,
+destructive #7f1d1d, ring #d4d4d4, sidebar #18181b); `@theme inline`
+maps `--color-*: var(--*)`. The token contract test slices with
+`:root {` / `.dark {` / `lastIndexOf("@theme inline")` markers (the
+header comments mention the bare strings — indexOf grabs the comment).
+
+**Tokens that must NOT flip**: `--color-primary` #1877F2 (REF's
+active-nav blue survives dark — its own --primary flip to 0 0% 98%
+renders only on its bg-primary surfaces, which the clone tracks with
+explicit `dark:bg-[#fafafa]` on the button dark variant, measured on
+the /hrassistant send button), `--color-link`, and the v3 palette
+families (hardcoded slate-*/zinc-* classes stay put on both apps —
+even REF's "broken" bits: user-name text-slate-900 on slate-900,
+gradient-CTA #171717 text on blue).
+
+**The SSR theme boot (layout.tsx)**: a pre-paint inline script reads
+`darkMode` / `app_lang` and applies `.dark` / `dir` before first paint
+(no FOUC — REF re-applies on every load, verified by reload). The
+Moon's icon swap is CLASS-DRIVEN (`dark:hidden` / `hidden dark:block`)
+so it can never desync from the applied theme; the state syncs
+post-hydration for the aria-label only. The عربي label/title flip
+syncs the same way (title → "التبديل إلى الإنجليزية" in Arabic mode).
+
+**The swipe-to-open superset (R32-C)**: a horizontal-dominant RIGHTWARD
+touch starting within 32px of the left viewport edge (≥24px travel)
+opens the drawer; the handlers live on the main column wrapper (the
+bottom nav and drawer panel are siblings); the edge window keeps
+horizontal content scrolls inert; zero at-rest DOM impact (the R30-D
+pattern).
+
+**Readability supersets (dark-only, light untouched)**: the
+checkbox/avatar/chat-bubble text stays white in dark — REF's zero-data
+surfaces never render these controls in dark (unmeasurable), and the
+token flip would put #171717 text on the unchanged blue.
+
+**The 31-round-invisible LIGHT find (R32-E)**: REF's desktop aside is
+authored `bg-white dark:bg-slate-900 border-slate-200
+dark:border-slate-800` — it renders rgb(255,255,255) in light while
+the clone's `bg-sidebar` rendered #fafafa. Every prior audit compared
+sidebar GEOMETRY (navmap) or the MOBILE drawer (the --sidebar token =
+#fafafa on BOTH apps) — never the desktop aside's computed background.
+The aside now mirrors REF's authored classes; the drawer keeps the
+token (flips to #18181b in dark — REF's --sidebar-background 240 5.9%
+10%, byte-verified live on both apps).
+
+**Probe-tooling lessons (this round's five)**: (1) the dark sweep must
+drive BOTH apps via localStorage + reload — moon-CLICKS race and
+desync the sessions (alternating light/dark reads); (2) drawer-open
+probes must filter `getBoundingClientRect().width > 0` — display:none
+sidebar buttons return zero rects that satisfy y<100/x<60 and steal
+the click (audit scripts that "passed" this way compared two failed
+opens — {found:false} === {found:false}); (3) v4 opacity modifiers
+serialize as `lab(... / 0.2)` via color-mix while v3 refs serialize
+`rgba(30,58,138,0.2)` — the SAME color; match endpoints, not notation;
+(4) gradient serialization differs (`to right` vs the computed
+`90deg`) — identical renders; (5) the RTL sidebar probe needs the
+same selector logic on both apps (REF has no `<aside>` — an
+aside-fallback grabs the drawer wrapper at x=0 and muddies the
+comparison).

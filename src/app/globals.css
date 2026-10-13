@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Session 33 (R32-A): v4's `dark:` variant defaults to the
+   prefers-color-scheme MEDIA query — the class-based strategy every
+   shadcn app (and the reference) uses must be declared explicitly.
+   Without this, dark:bg-slate-900 / dark:text-* compile to media queries
+   that never fire under html.dark (the E2E lesson: the moon icon's
+   dark:hidden stayed visible with .dark applied). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ==========================================================================
    Eon HR — Tailwind CSS 4 theme (CSS-first, no tailwind.config.js)
    Reference: docs/Tailwind-V4-Validation-Report.md trap log.
@@ -11,17 +19,18 @@
      4. space-y selector rewrite: no explicit margin-top or margin-bottom
         children inside space-y containers (mobile nav CTA rule)
      5. --shadow-sm pinned to v3 geometry (v4 shifted the scale one notch)
+   Session 33 (parity round 32): the theme moved to the shadcn runtime-var
+   pattern — `:root` carries the light pins, `.dark` carries the reference
+   app's extracted dark palette (its live stylesheet, verbatim), and
+   `@theme inline` maps `--color-*` to the runtime vars so the sidebar
+   Moon toggle flips them (REF: html.dark + localStorage darkMode="true",
+   body rgb(10,10,10), cards #0a0a0a + border #262626). Tokens that must
+   NOT flip: --color-primary (REF authors its blue via custom classes
+   that survive dark — active nav stays #1877F2), --color-link, and the
+   palette families below.
    ========================================================================== */
 
-@theme inline {
-  /* Font stack pinned to the reference app's computed body font (session-4
-     live measurement): the v4.0-era default ui-sans-serif stack — the
-     reference self-hosts NO webfont. (The installed Tailwind 4.3.3 default
-     drifted to -apple-system…, so pin it explicitly. Self-hosted Inter
-     drifted text metrics — e.g. CTA button widths — off the reference.) */
-  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-
+:root {
   /* Palette pinned to v3-era hexes (trap 2).
      Values re-measured against the live reference app (session 2 audit):
      - primary #1877F2  (reference "custom-primary-bg": active nav, primary
@@ -37,34 +46,106 @@
      neutral surface blue; they are now pinned to the reference's exact
      rendered neutrals. The blue accents live in explicit slate/blue
      utilities, exactly like the reference composes them. */
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: #0a0a0a;
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: #0a0a0a;
-  --color-primary: #1877f2;
-  --color-primary-foreground: #fafafa;
-  --color-secondary: #f5f5f5;
-  --color-secondary-foreground: #171717;
-  --color-muted: hsl(210 40% 96%);
-  --color-muted-foreground: #64748b;
-  --color-accent: #f5f5f5;
-  --color-accent-foreground: #171717;
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: #e5e5e5;
-  --color-input: #e5e5e5;
-  --color-ring: #0a0a0a;
-  --color-sidebar: #fafafa;
-  --color-sidebar-foreground: hsl(221 39% 11%);
-  --color-sidebar-accent: hsl(214 95% 93%);
-  --color-sidebar-border: #e2e8f0;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: hsl(0 0% 100%);
+  --card-foreground: #0a0a0a;
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: #0a0a0a;
+  --primary: #1877f2;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: #64748b;
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #0a0a0a;
+  --sidebar: #fafafa;
+  --sidebar-foreground: hsl(221 39% 11%);
+  --sidebar-accent: hsl(214 95% 93%);
+  --sidebar-border: #e2e8f0;
   /* Session 19 (R18-C): the reference's sidebar focus ring — its
      --sidebar-ring token (hsl 217.2 91.2% 59.8%) renders blue-500
      rgb(59,130,246) on sidebar links/groups, distinct from the dark
      global --color-ring. */
-  --color-sidebar-ring: #3b82f6;
+  --sidebar-ring: #3b82f6;
+}
+
+/* Session 33 (R32-A): the reference app's .dark block, extracted verbatim
+   from its live stylesheet (the stock shadcn NEUTRAL dark palette — the
+   hsl equivalents noted inline). The desktop aside and mobile chrome use
+   hardcoded dark: classes (slate-900/800) authored by the reference; the
+   tokens below drive the body, cards, popovers, inputs, the drawer
+   (bg-sidebar -> #18181b, its --sidebar-background 240 5.9% 10%), and the
+   tab/trigger surfaces. --primary is deliberately NOT overridden: the
+   reference's active-nav blue survives dark (measured #1877F2), so the
+   clone's primary stays pinned. */
+.dark {
+  --background: #0a0a0a; /* 0 0% 3.9% */
+  --foreground: #fafafa; /* 0 0% 98% */
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+  --popover: #0a0a0a;
+  --popover-foreground: #fafafa;
+  --primary-foreground: #171717; /* 0 0% 9% — REF's CTA text in dark */
+  --secondary: #262626; /* 0 0% 14.9% */
+  --secondary-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3; /* 0 0% 63.9% — REF's dark tab-inactive */
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d; /* 0 62.8% 30.6% = red-900 */
+  --destructive-foreground: #fafafa;
+  --border: #262626;
+  --input: #262626;
+  --ring: #d4d4d4; /* 0 0% 83.1% */
+  --sidebar: #18181b; /* 240 5.9% 10% = rgb(24,24,27) — the drawer flip */
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+}
+
+@theme inline {
+  /* Font stack pinned to the reference app's computed body font (session-4
+     live measurement): the v4.0-era default ui-sans-serif stack — the
+     reference self-hosts NO webfont. (The installed Tailwind 4.3.3 default
+     drifted to -apple-system…, so pin it explicitly. Self-hosted Inter
+     drifted text metrics — e.g. CTA button widths — off the reference.) */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Session 33 (R32-A): the shadcn semantic colors map to the runtime
+     vars above — the .dark block flips them. Primary stays a literal
+     (it must not flip; see the .dark comment). */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: #1877f2;
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
   /* Reference text-link blue (text-blue-600 "View all" / "Request leave")
      kept as a named token so link affordances survive a primary change. */
@@ -99,6 +180,7 @@
      token (whose other 300+ usages render the reference's explicit slate
      classes). */
   --color-neutral-200: #e5e5e5;
+  --color-neutral-400: #a3a3a3;
   --color-neutral-500: #737373;
   --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
@@ -186,9 +268,11 @@
       moved to the AppShell root div — the reference paints it on its
       `min-h-screen flex w-full bg-gradient-to-br` shell root, so it
       stretches with the content height instead of staying viewport-
-      anchored. The body keeps a plain white base (reference --background
-      0 0% 100%) for overscroll. */
-    background-color: #ffffff;
+      anchored. The body keeps the token base (reference --background
+      0 0% 100%) for overscroll — Session 33 (R32-A): it follows the
+      runtime var, so dark mode flips it to #0a0a0a (REF-measured
+      rgb(10,10,10)). */
+    background-color: var(--background);
     @apply text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }

@@ -103,3 +103,113 @@ test.describe("drawer border + swipe-to-close (session 31)", () => {
     expect(x).toBe(0);
   });
 });
+
+test.describe("swipe-to-open (session 33, R32-C)", () => {
+  /* The swipe-to-close twin: a horizontal-dominant RIGHTWARD drag that
+     starts within 32px of the left viewport edge opens the drawer (at
+     >= 24px of travel; the panel then plays its own 500ms slide-in).
+     REF ships no open gesture — this is the documented mobile-menu
+     superset. CDP dispatches follow the R30-D lessons: inter-phase
+     frames between the gesture phases. */
+  test("a rightward edge swipe opens the drawer", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    expect(await page.getByRole("dialog").count()).toBe(0);
+
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: 8, y: 400 }],
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: 120, y: 400 }], // 112px rightward from the edge
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+
+    const drawer = page.getByRole("dialog", { name: "Navigation menu" });
+    await expect(drawer).toBeVisible();
+    // The panel plays its own 500ms slide-in — poll until it settles at
+    // the left anchor (like REF's, even in RTL).
+    await expect
+      .poll(() => drawer.evaluate((el) => Math.round(el.getBoundingClientRect().x)))
+      .toBe(0);
+  });
+
+  test("a sub-threshold edge swipe does not open the drawer", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: 8, y: 400 }],
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: 20, y: 400 }], // 12px — below the 24px threshold
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await page.waitForTimeout(300);
+
+    expect(await page.getByRole("dialog").count()).toBe(0);
+  });
+
+  test("a mid-screen rightward drag does not open the drawer (the edge window)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: 100, y: 400 }], // outside the 32px edge window
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: 260, y: 400 }],
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await page.waitForTimeout(300);
+
+    expect(await page.getByRole("dialog").count()).toBe(0);
+  });
+
+  test("a vertical edge touch does not open the drawer (dominant-axis guard)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: 8, y: 400 }],
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: 14, y: 520 }], // vertical-dominant scroll from the edge
+    });
+    await page.waitForTimeout(100);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await page.waitForTimeout(300);
+
+    expect(await page.getByRole("dialog").count()).toBe(0);
+  });
+});

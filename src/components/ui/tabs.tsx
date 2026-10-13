@@ -15,7 +15,9 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
         // rgb(115,115,115) on every reference pill. NOT the clone's
         // muted-foreground token (slate-500): tab surfaces are the one
         // place the reference's token visibly renders.
-        "inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-neutral-500",
+        // Session 33 (R32-A): REF's token flips to #a3a3a3 (0 0% 63.9%)
+        // in dark — measured rgb(163,163,163) on every dark pill.
+        "inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-neutral-500 dark:text-neutral-400",
         className
       )}
       {...props}

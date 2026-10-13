@@ -25,7 +25,12 @@ const buttonVariants = cva(
         // where --primary = 0 0% 9%): renders #171717 with #FAFAFA text.
         // Measured on the taskmanager active toggle and the empty-state
         // CTAs (NOT the gradient recipe).
-        dark: "bg-[#171717] text-primary-foreground shadow hover:bg-[#171717]/90",
+        // Session 33 (R32-A): REF's --primary FLIPS in dark (0 0% 98%) —
+        // its bg-primary surfaces render #fafafa with #171717 text
+        // (live-measured on the /hrassistant send button). The dark:
+        // variants track that flip; the text flips via the
+        // primary-foreground token.
+        dark: "bg-[#171717] dark:bg-[#fafafa] text-primary-foreground shadow hover:bg-[#171717]/90 dark:hover:bg-[#fafafa]/90",
         // Session 6 — per-page gradient CTAs (measured endpoints, sRGB;
         // resting state byte-equal, hover shades are a superset nicety —
         // the reference does not change its gradient on hover).

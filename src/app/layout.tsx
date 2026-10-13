@@ -60,6 +60,21 @@ function JsonLdScripts({ origin }: { origin: string }) {
   );
 }
 
+/**
+ * Session 33 (R32-A/R32-B): the pre-paint theme boot. REF persists its
+ * dark mode (localStorage darkMode="true") and RTL mode (app_lang="ar")
+ * and re-applies both on every load before first paint — verified by
+ * reload on the live reference (html.dark survives; the sidebar flips
+ * right). This inline script mirrors that contract for the SSR clone:
+ * it runs in <head> before any rendering, so there is no flash of the
+ * wrong theme. The Moon/عربي handlers in the sidebar write the same
+ * keys, so the three writers (boot script, Moon, عربي) never disagree.
+ */
+const THEME_BOOT = `(function(){try{
+if(localStorage.getItem("darkMode")==="true"){document.documentElement.classList.add("dark");}
+if(localStorage.getItem("app_lang")==="ar"){document.documentElement.setAttribute("dir","rtl");}
+}catch(e){}})();`;
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "http";
@@ -68,6 +83,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+      </head>
       <body className="font-sans antialiased">
         <ToastProvider>{children}</ToastProvider>
         <JsonLdScripts origin={origin} />

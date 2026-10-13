@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 480 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 99 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 493 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 133 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1440,3 +1440,68 @@ white — VLM cannot perceive the subtle 2px ring, documented).
   new screenshots (102 evidence, 103/103b the shiftswap pair, 104
   tenantsetup, 105 careers, 106 payrollai, 107 hrassistant, 108 mobile
   shiftswap) + 02/11 standards refreshed → 127 PNG captures. DB pristine.
+
+
+## Session 33 (parity round 32) — THE DARK THEME + RTL + SWIPE-TO-OPEN
+
+The footer-controls census: REF's Moon toggles a REAL shadcn-neutral dark
+theme (html.dark + `localStorage darkMode="true"`, persisted across
+reloads) and REF's عربي flips the app to **RTL mode** (dir=rtl +
+`localStorage app_lang="ar"`; strings stay English — its i18n is not
+wired; the layout mirrors; the drawer stays left-anchored). The clone's
+controls were display-only stubs. Plus a 31-round-invisible LIGHT find:
+REF's desktop aside is authored `bg-white` (rgb 255,255,255) — every
+prior audit compared sidebar GEOMETRY or the MOBILE drawer (the
+`--sidebar-background` token = #fafafa on both apps), never the desktop
+aside's computed background.
+
+- **globals.css**: restructured to the shadcn runtime-var pattern —
+  `:root` (light pins verbatim) + `.dark` (REF's extracted neutral
+  palette: background #0a0a0a, border #262626, primary-foreground
+  #171717, muted-foreground #a3a3a3, sidebar #18181b) + `@theme inline`
+  var() indirection. `--color-primary` does NOT flip (REF's active-nav
+  blue survives dark — measured #1877F2). Body follows `var(--background)`.
+- **THE v4 TRAP (new, session 33)**: v4's `dark:` variant defaults to
+  the prefers-color-scheme MEDIA query — the class strategy must be
+  declared: `@custom-variant dark (&:where(.dark, .dark *));`. Without
+  it, every dark: utility compiles to a media query that never fires
+  under html.dark (found via E2E: the moon icon's dark:hidden stayed
+  visible).
+- **app-shell**: canvas `dark:bg-[linear-gradient(...,#0f172a,#1e293b)]`
+  (slate-900→800, sRGB-pinned); aside → `border-slate-200
+  dark:border-slate-800 bg-white dark:bg-slate-900`; mobile header/nav
+  `dark:bg-slate-900 dark:border-slate-800`; bottom tabs
+  `dark:text-slate-400` / `dark:bg-blue-900/20 dark:text-blue-400`.
+- **sidebar-nav**: brand h2 `dark:text-white`; moon `dark:text-zinc-100`
+  (REF's sidebar-foreground token flip) + a class-driven Moon↔Sun swap
+  (dark:hidden/hidden dark:block — never desyncs); the Moon/عربي
+  persistence contracts; عربي flips `document.documentElement.dir` +
+  app_lang, title → "التبديل إلى الإنجليزية" in Arabic mode.
+- **layout.tsx**: the pre-paint THEME_BOOT script (darkMode + app_lang
+  applied before first paint — no FOUC, reload-persistent like REF).
+- **button dark variant**: `dark:bg-[#fafafa]` (REF's bg-primary flip —
+  measured on the /hrassistant send button: #fafafa bg + #171717 text).
+- **tabs**: `dark:text-neutral-400` (REF's dark tab-inactive, 0 0% 63.9%).
+- **Readability supersets (dark-only, light untouched)**:
+  checkbox/avatar/chat-bubble text stays white in dark (REF's zero-data
+  surfaces never render these in dark — unmeasurable; the token flip
+  would put #171717 text on the unchanged blue).
+- **Swipe-to-open** (R32-C): a rightward, horizontal-dominant touch
+  starting within 32px of the left edge (≥24px travel) opens the drawer
+  — the R30-D interaction-state pattern; handlers on the main column.
+- **Pins**: 12 new (session-33 block) + the tokens.test evolution
+  (:root/.dark/@theme slices, the indirection map, dark pins) + 6 legacy
+  pins updated to the restructured literals. Gates: lint 0/0 · tsc ✓ ·
+  493/493 unit (+13 net) · build ✓ · 133/133 E2E (+12: the dark-mode
+  spec's 8 — toggle/persistence/boot/icon/mobile-chrome/light-back +
+  the RTL triple — and the swipe-to-open spec's 4).
+  Live-verified: the dark sweep byte-identical (body/canvas/card/
+  sidebar/tabs/drawer rgb(24,24,27)+#262626 on both apps); RTL mirrors
+  (sidebar x=1184, h1 x=623); light regressions 12/12 + mobile chrome +
+  navmap byte-identical. 5 probe DIFFs all resolved as artifacts (the
+  to-right/90deg serialization, the lab()/rgba() notation on
+  blue-900/20 — same color, the zero-rect display:none decoy button in
+  drawer probes — filter width>0, the aside-fallback in RTL probes, the
+  un-settled kicker transient). 6 new screenshots (109/109b the dark
+  pair, 110 dark settings, 111 dark mobile drawer, 112 RTL, 113 light
+  restored) → 133 PNG captures. DB pristine.
