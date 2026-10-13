@@ -4,9 +4,8 @@ import * as React from "react";
 import { ArrowLeft, CalendarDays, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/input";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
@@ -42,18 +41,23 @@ interface EmployeeOption {
 }
 
 /**
- * The /shiftswap orphan route — parity round 31 (R31-C9).
+ * The /shiftswap page — parity rounds 31 + 33.
  *
- * REF serves this page (registry: ShiftSwap — the shiftcalendar's
- * anchor target, session 13's R13-L find): the violet→blue canvas; the
- * flat36 header (h1 "Shift Swap" y=84 + the 18px sub y=136); the 4-tile
- * 82h horizontal stat row ("0 My Requests" / "0 Peer Approval Needed" /
- * "0 Manager Review" / "0 Approved"); the tab row y=315 — "My Requests"
- * violet-600 button (121px) + the "Peer Approval (0)" ghost pill
- * (154px); the 48px slate-300 ArrowLeft empty (y=437).
- * Superset: the new ShiftSwap model + /api/shiftswaps — the request
- * dialog + the status flow (pending → peer_approved → manager_review
- * → approved) with live stat counts.
+ * Round 31 delivered the structure (registry: ShiftSwap — the
+ * shiftcalendar's anchor target): the violet→blue canvas; the flat36
+ * header (h1 "Shift Swap" y=84 + the 18px sub y=136); the 4-tile 82h
+ * stat row; the tab row y=315 — "My Requests" violet-600 + the "Peer
+ * Approval (N)" ghost; the 48px slate-300 ArrowLeft empty.
+ *
+ * Round 33 (R33-D): the at-rest census found round-31's wiring had
+ * added a "Request Swap" header button REF does not render (REF's
+ * at-rest carries exactly two buttons — the tab pills) and a
+ * tab-dependent empty line; REF ships "No swap requests in this
+ * category" (text-slate-500) on BOTH tabs. The button is gone; the
+ * superset's entry is now the invisible-at-rest "n" keyboard shortcut
+ * (the Gmail/Linear pattern — no at-rest chrome; the round-32
+ * interaction-state doctrine), and the /api/shiftswaps CRUD + status
+ * flow are unchanged.
  */
 export default function ShiftSwapPage() {
   const toast = useToast();
@@ -96,6 +100,19 @@ export default function ShiftSwapPage() {
     }
   }, [dialogOpen, employees, form.requesterId]);
 
+  /* The superset's invisible entry: "n" opens the request dialog (the
+     at-rest DOM stays REF-identical — no button, no extra chrome). */
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "n" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+      setDialogOpen(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.requesterId || !form.swapDate) {
@@ -137,12 +154,6 @@ export default function ShiftSwapPage() {
           sectionIcon={<CalendarDays aria-hidden="true" />}
           title="Shift Swap"
           subtitle="Request, approve, and manage shift swaps"
-          actions={
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2" aria-hidden="true" />
-              Request Swap
-            </Button>
-          }
         />
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -163,8 +174,10 @@ export default function ShiftSwapPage() {
           ))}
         </div>
 
-        {/* REF's tab row: the violet active pill + the ghost peer pill */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* REF's tab row (round 33 re-measure): the pills sit in a
+            `flex gap-1 bg-white border border-slate-200 p-1 rounded-xl`
+            container (the pill lands x=293 y=315). */}
+        <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-xl w-fit">
           <button
             type="button"
             onClick={() => setTab("mine")}
@@ -198,9 +211,7 @@ export default function ShiftSwapPage() {
                 <div className="mb-3 flex justify-center">
                   <ArrowLeft className="h-12 w-12 text-slate-300" aria-hidden="true" />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {tab === "mine" ? "No swap requests yet — request one above." : "No swaps waiting for peer approval."}
-                </p>
+                <p className="text-sm text-slate-500">No swap requests in this category</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -271,7 +282,7 @@ export default function ShiftSwapPage() {
               </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Request Swap
+                Submit Request
               </Button>
             </DialogFooter>
           </form>

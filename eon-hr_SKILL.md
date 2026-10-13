@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.16.0 (session-33 remediation complete — the dark theme + RTL + swipe-to-open) · **Last updated:**
+> **Version:** 3.17.0 (session-34 remediation complete — the wired-page at-rest audit + the login Alert) · **Last updated:**
 > 2026-10-13 · **State:** 480 unit + 121 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2205,3 +2205,52 @@ serialize as `lab(... / 0.2)` via color-mix while v3 refs serialize
 same selector logic on both apps (REF has no `<aside>` — an
 aside-fallback grabs the drawer wrapper at x=0 and muddies the
 comparison).
+
+## 46. Session-34 Recipe Layer — parity round 33 (the wired-page at-rest audit + the login Alert)
+
+**The census**: round 31 wired data supersets into nine recovered pages
+and audited only h1+hero — the bodies below the headers were never
+inventoried. The button/input/text census (plus the never-audited
+form-error dimension) found six pages with genuine at-rest gaps; REF's
+CSS chunk was unchanged (`index-BGNH4KkS.css`) — clone-side drift.
+
+**The recipes** (all live-measured):
+- /payrollreports — the white-pill kicker + the SOLID green-600 CTA on
+  the pill row (y=56); the filter card (Label fs12 above a w-full
+  select); the 4-col grid tab list (with Custom); the summary card
+  (inline-icon title + the w-40 month input + FileSpreadsheet/FileText
+  mr-1 outline buttons; the stats INSIDE with colored font-bold text-lg
+  values; the 8-col uppercase thead + the "No records for {month}" TD).
+- /requestreports — the 2×2 section cards ("No data" py-8 empties) +
+  the Request Log 7-col table; the stock Card recipe on the tiles.
+- /requestsettings — the 4-col approval row (name+email+level+Add
+  dark) + space-y-2 None-set rows + the iconed card heads (Shield
+  blue-600 / Users purple-600); the 3-row limits grid; the
+  LEFT-aligned Back+title header in max-w-5xl.
+- /shiftswap — the tab pills in the `bg-white border p-1 rounded-xl`
+  container; NO header action (the superset's entry is the "n"
+  keyboard shortcut — invisible at rest); "No swap requests in this
+  category" on both tabs.
+- /careers — the page canvas + the max-w-6xl hero with the job-search
+  input (h=302); the "Browse by Company" H2 + h-46 rounded-md chips.
+- /payrollai — the green-gradient CTA riding the badge row
+  (actionsStart) + the CircleCheckBig "All Clear!" empty.
+- /login — the shadcn Alert error (bg-red-50/70 border-red-200
+  rounded-xl + the text-red-700 description, 368×54) + the full stack
+  rebuild (p-4 outer; ONE wrapper > space-y-6 sm:space-y-8; field DIVs
+  with label leading-5 + input mt-1.5; noValidate removed).
+
+**THE v4 TRAP (session 34)**: `space-y-*` in v4 margins the
+`:not(:last-child)` child — an INLINE label's margin-bottom is ignored
+vertically, so v3's label→input gap collapses (the login fields and
+the payrollreports filter both hit it). Fix: explicit `mt-*` on the
+following block. **The button lesson**: the default variant's CTA
+gradient is a bg-IMAGE that paints over any bg-color className adds —
+solid buttons need `bg-none` or a real variant. **The component
+lesson**: shadcn sub-components must `cn()`-merge their className
+props (the AlertDescription initially dropped `text-red-700` — the
+E2E color pin caught it).
+
+Gates: lint 0/0 · tsc ✓ · 507/507 unit (+14) · build ✓ · 135/135 E2E
+(+2). Live: verify-r33 19/19 MATCH, 0 DIFFs (the payrollai to-right/
+90deg serialization aside). 11 screenshots → 145 PNG captures.

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { CheckCircle, CircleCheckBig, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatCard } from "@/components/shared/stat-card";
@@ -71,9 +71,12 @@ export default function PayrollAiPage() {
           sectionIcon={<Sparkles aria-hidden="true" />}
           title="Payroll AI Suggestions"
           subtitle="AI-powered payroll analysis and recommendations"
+          actionsStart
           actions={
-            <Button onClick={() => void onRun()} disabled={running}>
-              {running ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            /* REF (round 33 re-measure): the green-gradient CTA rides the
+               badge row — `flex justify-between items-start`, y=32. */
+            <Button variant="green" onClick={() => void onRun()} disabled={running}>
+              {running ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />}
               Run AI Analysis
             </Button>
           }
@@ -102,10 +105,12 @@ export default function PayrollAiPage() {
 
         <Card className="border-slate-200">
           <CardContent className="p-12 text-center">
-            <div className="mb-4 flex justify-center">
-              <CheckCircle className="h-16 w-16 text-green-500" aria-hidden="true" />
-            </div>
-            <p className="text-slate-500">No pending suggestions — your payroll looks clean.</p>
+            {/* REF's empty contract (round 33): the 64px CircleCheckBig
+                (all utilities on the icon — REF's exact chain) + the 18px
+                semibold heading + the 16px slate-500 line. */}
+            <CircleCheckBig className="w-16 h-16 mx-auto mb-4 text-green-500" aria-hidden="true" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">All Clear!</h3>
+            <p className="text-slate-500">No payroll adjustments needed</p>
           </CardContent>
         </Card>
       </div>

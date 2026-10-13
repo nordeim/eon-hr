@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 function GoogleIcon() {
   return (
@@ -101,7 +102,7 @@ function LoginForm() {
        p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10), top h-1 accent bar, circular
        logo, h-12 inputs (rounded-xl, bg-slate-50/50, border-slate-200,
        pl-10) and an h-12 sign-in action. */
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4">
       <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-card-foreground shadow-2xl backdrop-blur-sm">
           {/* Reference top accent bar: slate-200 → slate-300 → slate-200. */}
@@ -109,24 +110,31 @@ function LoginForm() {
             className="absolute left-0 right-0 top-0 h-1 bg-[linear-gradient(to_right,#e2e8f0,#cbd5e1,#e2e8f0)]"
             aria-hidden="true"
           />
-          <div className="flex flex-col items-center gap-4 p-8 pt-8 sm:p-10 md:px-10 md:pt-12">
+          {/* REF's card body (round 33 re-measure): ONE padded wrapper
+              (p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10) > ONE
+              `flex flex-col items-center text-center space-y-6
+              sm:space-y-8` stack — logo (96), the title block
+              (space-y-2 sm:space-y-3), then the w-full column (social
+              space-y-3 + the my-6 or-divider + the form). */}
+          <div className="p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10">
+            <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
             {/* Circular brand mark — self-hosted copy of the reference logo
                 (public/eon-logo.png) in a ring-wrapped shadowed circle. */}
             <div className="flex h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-lg ring-4 ring-white/50 transition-all duration-300 sm:h-24 sm:w-24">
               { }
               <img src="/eon-logo.png" alt="Eon HR" className="aspect-square h-full w-full object-cover" />
             </div>
-            <div className="text-center">
+            <div className="w-full space-y-2 sm:space-y-3">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Welcome to Eon HR
               </h1>
-              <p className="mt-1 text-sm font-medium text-slate-500 sm:text-base">
+              <p className="text-sm font-medium text-slate-500 sm:text-base">
                 Sign in to continue
               </p>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-3 p-8 pb-8 sm:p-10 md:px-10 md:pb-10">
+            <div className="w-full">
+            <div className="space-y-3">
             <button
               type="button"
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
@@ -152,86 +160,101 @@ function LoginForm() {
               Continue with Apple
             </button>
 
-            <div className="my-3 flex items-center gap-3" role="separator" aria-label="or">
+            <div className="relative my-6 flex items-center gap-3" role="separator" aria-label="or">
               <span className="h-px flex-1 bg-slate-200" />
               <span className="text-xs font-medium uppercase tracking-wider text-slate-400">or</span>
               <span className="h-px flex-1 bg-slate-200" />
             </div>
 
-            <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="email">Email</Label>
-                {/* Reference: envelope icon inline inside the field. */}
-                <div className="relative">
-                  <Mail
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    required
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+            {/* REF's form (round 33): space-y-4 sm:space-y-5 — two field
+                DIVs (each `space-y-1.5`: label + the iconed input), then
+                the alert, then the space-y-3 actions (button + links). */}
+            <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <Label htmlFor="email" className="text-slate-700 leading-5">Email</Label>
+                  {/* Reference: envelope icon inline inside the field. The
+                      v3 space-y-1.5 put mt on this BLOCK (v4 would put mb on
+                      the inline label — ignored vertically; explicit mt-1.5). */}
+                  <div className="relative mt-1.5">
+                    <Mail
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="password">Password</Label>
-                {/* Reference: lock icon inline inside the field. */}
-                <div className="relative">
-                  <Lock
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    required
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                <div>
+                  <Label htmlFor="password" className="text-slate-700 leading-5">Password</Label>
+                  {/* Reference: lock icon inline inside the field. */}
+                  <div className="relative mt-1.5">
+                    <Lock
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 shadow-none focus:border-slate-400 focus-visible:ring-slate-400"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* REF's error surface is the shadcn Alert — the translucent
+                  red-50/70 bg + red-200 border + rounded-xl p-4 wrapper with a
+                  text-red-700 text-sm description (live-measured, round 33). */}
               {error ? (
-                <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {error}
-                </p>
+                <Alert variant="error">
+                  <AlertDescription className="text-red-700">{error}</AlertDescription>
+                </Alert>
               ) : null}
 
-              {/* Reference sign-in action: dark slate-900, h-12. */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Sign in
-              </button>
-            </form>
+              <div className="space-y-3">
+                {/* Reference sign-in action: dark slate-900, h-12. */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  Sign in
+                </button>
 
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <button
-                type="button"
-                className="text-slate-500 hover:text-slate-700"
-                onClick={() => setError("Password reset is not configured on this deployment")}
-              >
-                Forgot password?
-              </button>
-              <button
-                type="button"
-                className="text-slate-500 hover:text-slate-700"
-                onClick={() => setError("Sign up is disabled on this demo deployment")}
-              >
-                Need an account? <span className="font-medium">Sign up</span>
-              </button>
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    type="button"
+                    className="text-slate-500 hover:text-slate-700"
+                    onClick={() => setError("Password reset is not configured on this deployment")}
+                  >
+                    Forgot password?
+                  </button>
+                  <button
+                    type="button"
+                    className="text-slate-500 hover:text-slate-700"
+                    onClick={() => setError("Sign up is disabled on this demo deployment")}
+                  >
+                    Need an account? <span className="font-medium">Sign up</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+            </div>
+            </div>
             </div>
           </div>
         </div>

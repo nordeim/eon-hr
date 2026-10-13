@@ -269,7 +269,7 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
        Edit); the content is `p-6` > `space-y-6` > `grid
        md:grid-cols-2 gap-6` of read-only p-4 tiles (label
        text-sm slate-500 mb-1 + value font-medium). 631px card. */
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
         <div className="flex items-center justify-between">
           <div className="font-semibold leading-none tracking-tight">Company Information</div>
@@ -438,7 +438,7 @@ function WorkflowsTab() {
   }, []);
 
   return (
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader>
         <CardTitle>Approval Workflows</CardTitle>
         <CardDescription>Multi-level approval hierarchies for requests and expenses.</CardDescription>
@@ -493,7 +493,7 @@ function ShiftsTab() {
   }, []);
 
   return (
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader>
         <CardTitle>Shifts</CardTitle>
         <CardDescription>Shift templates used by the shift calendar.</CardDescription>
@@ -611,7 +611,7 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
   }
 
   return (
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <div className="min-w-0">
           <CardTitle>Departments</CardTitle>
@@ -779,7 +779,7 @@ function ThemeTab({ toast }: { toast: ReturnType<typeof useToast> }) {
   }
 
   return (
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader>
         <CardTitle>Theme &amp; Layout</CardTitle>
         <CardDescription>Layout preferences are saved to this browser.</CardDescription>
@@ -847,7 +847,7 @@ function LogsTab() {
   }, []);
 
   return (
-    <Card>
+    <Card className="border-slate-200">
       <CardHeader>
         <CardTitle>System Logs</CardTitle>
         <CardDescription>Audit trail of recent system actions.</CardDescription>

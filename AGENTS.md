@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 493 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 133 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 507 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 135 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1505,3 +1505,102 @@ aside's computed background.
   un-settled kicker transient). 6 new screenshots (109/109b the dark
   pair, 110 dark settings, 111 dark mobile drawer, 112 RTL, 113 light
   restored) → 133 PNG captures. DB pristine.
+
+## Session 34 (parity round 33) — THE WIRED-PAGE AT-REST AUDIT + THE LOGIN ALERT
+
+The round-31 orphan-route hunt wired data supersets into nine pages and
+then audited "h1+hero byte-identical" — the BODIES below the headers
+were never inventoried. This round's census (button/input/text
+inventories on all nine + the form-error dimension — the login error,
+never audited) found six pages carrying genuine at-rest gaps; REF's
+asset fingerprints were UNCHANGED (`index-BGNH4KkS.css`) — clone-side
+drift, not REF movement.
+
+- **R33-A /payrollreports (the headline rebuild)**: canvas slate-50→
+  blue-50 (sRGB-pinned — was blue→indigo); the white-pill kicker
+  (`px-4 py-2 bg-white rounded-full shadow-sm mb-4` + the 16px blue
+  BarChart3) with the green-600 WhatsApp CTA (MessageCircle; SOLID —
+  `bg-none` suppresses the default variant's gradient, a bg-image that
+  paints OVER any bg-color) riding the pill row at y=56; the filter
+  card (Label fs12 above the w-full select in `space-y-1 flex-1
+  min-w-[180px]` — the v4 inline-label trap AGAIN: v3's space-y put mt
+  on the following block, v4 puts mb on the inline label (ignored
+  vertically) — explicit `mt-1` on the trigger, the login fix); the
+  4-col grid tab list (Monthly active=white, Tax & Deductions, History,
+  **Custom** — inert on REF); the summary card (`flex flex-col
+  md:flex-row justify-between gap-3` header: the INLINE-Calendar title
+  + the mt-1 sub | `flex gap-2 flex-wrap`: the w-40 month input +
+  FileSpreadsheet/FileText mr-1 CSV/PDF) with the stats INSIDE (labels
+  `text-xs text-slate-500 mb-1` + `font-bold text-lg` values colored
+  blue-700/red-600/green-700/slate-700) and the 8-col table (thead
+  bg-slate-50, th `text-xs font-bold uppercase text-slate-600`; the
+  colspan "No records for {YYYY-MM}" TD). Tabs+card ride a space-y-4
+  wrapper inside the space-y-6 flow.
+- **R33-B /requestreports**: the stat tiles reverted to the stock Card
+  recipe (`shadow` + the default border token); the 4 section cards
+  (Requests by Category / Status Breakdown / Financial Amount by
+  Category (SAR) / Top Requesters — 2×2, CardHeader p-6 + content
+  `p-6 pt-0` with `text-slate-400 text-center py-8` "No data"/"No
+  financial requests"); the Request Log card with its 7-col table;
+  the right controls gap-2.
+- **R33-C /requestsettings**: rebuilt to REF's forms — the Approval
+  card (the 4-col row: Approver name + Approver email + Level select +
+  Add dark) + the 3 static "LEVEL N APPROVERS / None set" rows
+  (space-y-2; the heads carry icons: Shield blue-600 / Users
+  purple-600, w-5 h-5); the Limits card (the 3-row grid: Limit
+  name/Finance/Monthly + Sub-type/Max requests/Max amount + All
+  Staff/Add Limit + "No limits configured"); the header is
+  LEFT-aligned Back+title (not centered) in `p-4 md:p-8 max-w-5xl
+  mx-auto`; the Back ghost is the default sm (85px, ArrowLeft mr-2
+  h-4). The API accepts name+email (resolved against Employee —
+  SQLite has no case-insensitive equals; JS-side match).
+- **R33-D /shiftswap**: the "Request Swap" header button REMOVED
+  (REF's at-rest carries exactly the two tab pills); REF's empty text
+  on both tabs ("No swap requests in this category"); the pills sit in
+  REF's `flex gap-1 bg-white border border-slate-200 p-1 rounded-xl`
+  container; the superset entry is now the invisible-at-rest **"n"
+  keyboard shortcut** (Gmail/Linear pattern — no at-rest chrome).
+- **R33-E /careers**: the page's own canvas (blue-50→indigo-50); the
+  hero restructured (max-w-6xl mx-auto px-4 > text-center > h1 mb-4 +
+  blue-100 sub mb-8 + the job-search input — hero h=302); the "Browse
+  by Company" H2 + REF's chip geometry (h-46 rounded-md outline, no
+  All-Companies chip); the search filters client-side (superset).
+- **R33-F /payrollai**: the empty state (CircleCheckBig w-16 h-16
+  mx-auto mb-4 text-green-500 + "All Clear!" + "No payroll
+  adjustments needed"); the CTA is the GREEN gradient variant riding
+  the badge row (actionsStart, y=32 — was the blue default at y=80).
+- **R33-G the login Alert**: the new `src/components/ui/alert.tsx`
+  (shadcn Alert/AlertTitle/AlertDescription — the className props MERGE
+  via cn, the round's component lesson); the login error rebuilt on it
+  (`bg-red-50/70 border-red-200 rounded-xl` + the text-red-700
+  description — REF-measured 368×54 at y=738). The login STACK was
+  also never audited: rebuilt to REF's (p-4 outer, ONE padded wrapper >
+  `flex flex-col items-center text-center space-y-6 sm:space-y-8`,
+  two `space-y-1.5`-structured field DIVs — the label leading-5 (lh
+  20px) + the input wrapper's explicit mt-1.5, the v4 inline-label
+  space-y trap's second sighting; noValidate REMOVED so the empty
+  submit keeps REF's HTML5 blocking).
+- **R33-H /settings**: the cards carry `border-slate-200` (the 3-unit
+  deferred micro-diff).
+- **The v4 trap (new, session 34)**: v4's `space-y-*` puts margin on
+  `:not(:last-child)` — when the first child is an INLINE label, its
+  margin-bottom is IGNORED vertically (inline boxes), so v3's
+  label→input gap silently collapses by the space-y amount. Fix:
+  explicit `mt-*` on the following BLOCK (login fields + the
+  payrollreports filter select).
+- **The button lesson**: the default variant's CTA GRADIENT is a
+  background-IMAGE — it paints OVER any bg-color a className adds
+  (tailwind-merge can't dedupe across the bg-image/bg-color groups).
+  Solid-color buttons need `bg-none` (or a real variant).
+- **Pins**: 14 new (session-34 block) + R31-C1/C5/C6/C7/C8 evolved to
+  the rebuilt structures. Gates: lint 0/0 · tsc ✓ · **507/507 unit
+  (+14)** · build ✓ · **135/135 E2E (+2: the login-error spec — the
+  Alert geometry + the empty-submit HTML5 contract)**.
+  Live-verified: the 5 wired pages' button/color/geometry inventories
+  MATCH byte-identically (the payrollai "DIFF" is the documented
+  to-right/90deg serialization); the login stack + Alert pair MATCH;
+  the standing audits hold (dark sweep artifacts unchanged, light
+  redeploy 12/12 + mobile chrome + navmap, verify-r33: 19/19 MATCH,
+  0 DIFFs). 11 new screenshots (114-119 the wired-page pairs + 118
+  careers hero + 119 payrollai + 120 the login-error pair) → 145 PNG
+  captures. DB pristine.

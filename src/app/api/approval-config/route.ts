@@ -14,7 +14,15 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 const ApprovalConfigInput = z.object({
   category: z.enum(["general", "it", "hr", "facilities", "finance", "admin"]).default("general"),
   level: z.number().int().min(1).max(3),
-  approverId: z.string().min(1, "Approver is required"),
+  /* Round 33 (R33-C): REF's form collects free-text name+email (no
+     employee picker). The API accepts either the direct approverId or
+     the name+email pair, resolving the email against Employee — the
+     superset's persistence path stays schema-identical. */
+  approverId: z.string().min(1).optional(),
+  approverName: z.string().min(1).optional(),
+  approverEmail: z.string().email().optional(),
+}).refine((d) => d.approverId || (d.approverName && d.approverEmail), {
+  message: "Either approverId or approverName+approverEmail is required",
 });
 
 const SELECT = {
@@ -55,10 +63,23 @@ export async function POST(req: NextRequest) {
 
     const { data, response: bad } = await parseBody(req, ApprovalConfigInput);
     if (!data) return bad;
-    const { category, level, approverId } = data;
+    const { category, level } = data;
+
+    let approverId = data.approverId;
+    if (!approverId) {
+      /* SQLite has no case-insensitive `equals` filter — resolve the
+         email in JS over the small employee table. */
+      const employees = await db.employee.findMany({ select: { id: true, email: true } });
+      const match = employees.find((e) => e.email?.toLowerCase() === data.approverEmail?.toLowerCase());
+      if (!match) {
+        return err("NOT_FOUND", `No employee found with email ${data.approverEmail}`);
+      }
+      approverId = match.id;
+    }
 
     const employee = await db.employee.findUnique({ where: { id: approverId }, select: { id: true } });
     if (!employee) return err("NOT_FOUND", "Employee not found");
+    approverId = employee.id;
 
     const existing = await db.approvalConfig.findUnique({
       where: { category_level_approverId: { category, level, approverId } },

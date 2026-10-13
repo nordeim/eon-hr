@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ArrowLeft, FileDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import {
   Select,
@@ -13,39 +13,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface RequestRow {
+  id: string;
+  refNumber?: string;
+  title: string;
+  category: string;
+  status: string;
+  amount?: number;
+  createdAt: string;
+  requesterName?: string;
+}
+
 /**
- * The /requestreports orphan route — parity round 31 (R31-C7).
+ * The /requestreports page — parity round 33 (R33-B), completed to the
+ * live-measured REF structure:
  *
- * REF serves this page (registry: RequestReports): the slate→blue
- * canvas; the CENTERED 24px header (x=385 y=32) with the Back ghost
- * button (12px, h-32, x=288 y=42) + the 14px sub (y=64); the Monthly
- * select (144px x=1111 y=40) + the white "Export CSV" button (145px
- * x=1263 y=40); the documenttracker-recipe 4-tile row (82h, p-4 flex
- * items-center gap-3, 24px values, 12px labels) — "0 Total Requests" /
- * "0 Approved" / "0 Pending" / "0 Total Amount (SAR)".
- * Superset: aggregates StaffRequest + a real CSV export.
+ * the slate→blue canvas; the centered 24px header (Back ghost + h1 +
+ * the Monthly select + the white Export CSV button); the 4-tile stat
+ * row (the stock Card recipe: `rounded-xl border bg-card
+ * text-card-foreground shadow`, p-4 flex items-center, 24px bold
+ * values + 12px slate-500 labels); the 2×2 section grid — "Requests
+ * by Category" / "Status Breakdown" / "Financial Amount by Category
+ * (SAR)" / "Top Requesters" — each the CardHeader (`flex flex-col
+ * space-y-1.5 p-6`, DIV title `font-semibold tracking-tight
+ * text-base`) + CardContent `p-6 pt-0` with the P
+ * `text-slate-400 text-center py-8` "No data" (the financial card:
+ * "No financial requests"); the full-width "Request Log - Monthly"
+ * card with the 7-column table (Ref # / Employee / Category / Title /
+ * Amount / Status / Date — text-sm left-aligned th, empty tbody at
+ * zero data).
+ *
+ * Supersets: the sections compute real distributions from
+ * /api/staff-requests when data exists (with-data rendering is
+ * REF-unmeasurable — the documented superset territory) + a real CSV
+ * export.
  */
 export default function RequestReportsPage() {
   const toast = useToast();
   const [loading, setLoading] = React.useState(true);
-  const [stats, setStats] = React.useState({ total: 0, approved: 0, pending: 0, amount: 0 });
-  const [rows, setRows] = React.useState<{ id: string; title: string; category: string; status: string; createdAt: string }[]>([]);
+  const [rows, setRows] = React.useState<RequestRow[]>([]);
 
   React.useEffect(() => {
     (async () => {
       try {
         const res = await fetch("/api/staff-requests?scope=all");
         const json = await res.json();
-        if (json.ok) {
-          const requests = json.data.requests ?? [];
-          setRows(requests);
-          setStats({
-            total: requests.length,
-            approved: requests.filter((r: { status: string }) => r.status === "resolved").length,
-            pending: requests.filter((r: { status: string }) => r.status === "pending").length,
-            amount: 0,
-          });
-        }
+        if (json.ok) setRows(json.data.requests ?? []);
       } catch {
         /* zero-data keeps the zero-state */
       } finally {
@@ -54,9 +67,40 @@ export default function RequestReportsPage() {
     })();
   }, []);
 
+  const stats = {
+    total: rows.length,
+    approved: rows.filter((r) => r.status === "resolved" || r.status === "approved").length,
+    pending: rows.filter((r) => r.status === "pending").length,
+    amount: rows.reduce((s, r) => s + (r.amount ?? 0), 0),
+  };
+  const byCategory = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) m.set(r.category, (m.get(r.category) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }, [rows]);
+  const byStatus = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) m.set(r.status, (m.get(r.status) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }, [rows]);
+  const financial = React.useMemo(
+    () => byCategory.filter(([c]) => ["petty_cash", "fuel", "expense", "loan"].includes(c)),
+    [byCategory]
+  );
+  const topRequesters = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      const k = r.requesterName ?? "Unknown";
+      m.set(k, (m.get(k) ?? 0) + 1);
+    }
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [rows]);
+
   function onExportCsv() {
-    const header = "Title,Category,Status,Created\n";
-    const body = rows.map((r) => `${r.title},${r.category},${r.status},${r.createdAt}`).join("\n");
+    const header = "Ref,Employee,Category,Title,Amount,Status,Created\n";
+    const body = rows
+      .map((r) => `${r.refNumber ?? r.id},${r.requesterName ?? ""},${r.category},${r.title},${r.amount ?? 0},${r.status},${r.createdAt}`)
+      .join("\n");
     const blob = new Blob([header + body], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -72,15 +116,15 @@ export default function RequestReportsPage() {
       <div className="w-full p-4 md:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="px-2 text-xs text-slate-500" onClick={() => history.back()}>
-              <ArrowLeft className="mr-1 h-3 w-3" aria-hidden="true" />
+            <Button variant="ghost" size="sm" onClick={() => history.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
               Back
             </Button>
             <div className="flex-1 text-center">
               <h1 className="text-2xl font-bold text-slate-900">Request Reports</h1>
               <p className="text-sm text-slate-500">Analytics and reporting by area and period</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Select defaultValue="monthly">
                 <SelectTrigger className="w-[144px]">
                   <SelectValue placeholder="Monthly" />
@@ -103,9 +147,9 @@ export default function RequestReportsPage() {
               { label: "Total Requests", value: stats.total },
               { label: "Approved", value: stats.approved },
               { label: "Pending", value: stats.pending },
-              { label: "Total Amount (SAR)", value: stats.amount },
+              { label: "Total Amount (SAR)", value: (stats.amount / 100).toFixed(2) },
             ].map((s) => (
-              <Card key={s.label} className="border-slate-200 shadow-sm">
+              <Card key={s.label}>
                 <CardContent className="flex items-center gap-3 p-4">
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{loading ? "…" : s.value}</p>
@@ -116,22 +160,130 @@ export default function RequestReportsPage() {
             ))}
           </div>
 
-          <Card className="border-slate-200">
-            <CardContent className="p-6">
+          {/* REF's 2×2 section grid */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-col space-y-1.5 p-6">
+                <CardTitle className="font-semibold tracking-tight text-base">Requests by Category</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                {byCategory.length === 0 ? (
+                  <p className="py-8 text-center text-slate-400">No data</p>
+                ) : (
+                  <div className="space-y-2">
+                    {byCategory.map(([c, n]) => (
+                      <div key={c} className="flex items-center justify-between text-sm">
+                        <span className="capitalize text-slate-600">{c.replace(/_/g, " ")}</span>
+                        <span className="font-medium text-slate-900">{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-col space-y-1.5 p-6">
+                <CardTitle className="font-semibold tracking-tight text-base">Status Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                {byStatus.length === 0 ? (
+                  <p className="py-8 text-center text-slate-400">No data</p>
+                ) : (
+                  <div className="space-y-2">
+                    {byStatus.map(([s, n]) => (
+                      <div key={s} className="flex items-center justify-between text-sm">
+                        <span className="capitalize text-slate-600">{s}</span>
+                        <span className="font-medium text-slate-900">{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-col space-y-1.5 p-6">
+                <CardTitle className="font-semibold tracking-tight text-base">Financial Amount by Category (SAR)</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                {financial.length === 0 ? (
+                  <p className="py-8 text-center text-slate-400">No financial requests</p>
+                ) : (
+                  <div className="space-y-2">
+                    {financial.map(([c, n]) => (
+                      <div key={c} className="flex items-center justify-between text-sm">
+                        <span className="capitalize text-slate-600">{c.replace(/_/g, " ")}</span>
+                        <span className="font-medium text-slate-900">{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-col space-y-1.5 p-6">
+                <CardTitle className="font-semibold tracking-tight text-base">Top Requesters</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                {topRequesters.length === 0 ? (
+                  <p className="py-8 text-center text-slate-400">No data</p>
+                ) : (
+                  <div className="space-y-2">
+                    {topRequesters.map(([name, n]) => (
+                      <div key={name} className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">{name}</span>
+                        <span className="font-medium text-slate-900">{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* REF's full-width Request Log */}
+          <Card>
+            <CardHeader className="flex flex-col space-y-1.5 p-6">
+              <CardTitle className="font-semibold tracking-tight text-base">Request Log - Monthly</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 pt-0">
               {loading ? (
                 <div className="flex h-24 items-center justify-center">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
-              ) : rows.length === 0 ? (
-                <p className="py-12 text-center text-muted-foreground">No requests in the selected period.</p>
               ) : (
-                <div className="divide-y">
-                  {rows.map((r) => (
-                    <div key={r.id} className="flex items-center justify-between px-1 py-3">
-                      <span className="text-sm font-medium text-slate-900">{r.title}</span>
-                      <span className="text-sm capitalize text-slate-500">{r.category} · {r.status}</span>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Ref #</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Employee</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Category</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Title</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Amount</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Status</th>
+                        <th className="px-4 py-3 text-left font-medium text-slate-600">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.length === 0
+                        ? null
+                        : rows.map((r) => (
+                            <tr key={r.id} className="border-b">
+                              <td className="px-4 py-3 text-slate-600">{r.refNumber ?? r.id.slice(0, 8)}</td>
+                              <td className="px-4 py-3 text-slate-600">{r.requesterName ?? "—"}</td>
+                              <td className="px-4 py-3 capitalize text-slate-600">{r.category.replace(/_/g, " ")}</td>
+                              <td className="px-4 py-3 font-medium text-slate-900">{r.title}</td>
+                              <td className="px-4 py-3 text-slate-600">
+                                {r.amount != null ? `${(r.amount / 100).toFixed(2)} SAR` : "—"}
+                              </td>
+                              <td className="px-4 py-3 capitalize text-slate-600">{r.status}</td>
+                              <td className="px-4 py-3 text-slate-600">
+                                {new Date(r.createdAt).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>

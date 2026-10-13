@@ -61,7 +61,9 @@ test.describe("logged-out surface", () => {
     await page.getByLabel("Email").fill("sepnetflix2023@outlook.com");
     await page.getByLabel("Password").fill("wrong-password");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
-    await expect(page.locator("p[role='alert']")).toContainText(/invalid email or password/i);
+    /* Round 33 (R33-G): REF's error surface is the shadcn Alert —
+       [data-slot=alert] replaced the round-4-era hand-rolled P. */
+    await expect(page.locator("[data-slot=alert]")).toContainText(/invalid email or password/i);
     await expect(page).toHaveURL(/\/login/);
   });
 });

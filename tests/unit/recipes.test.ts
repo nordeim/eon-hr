@@ -2448,13 +2448,13 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     }
   });
 
-  it("R31-C1: /careers — the blue→indigo sRGB hero canvas, the centered 48px white h1 + blue-200 line, the job-grid + zero-data No Open Positions card", () => {
+  it("R31-C1: /careers — the blue→indigo sRGB hero canvas + the page canvas, the centered 48px white h1 + the blue-100 line + the job-search input, the job-grid + zero-data No Open Positions card (evolved round 33: REF's hero re-measured)", () => {
     const src = read("src", "app", "(app)", "careers", "page.tsx");
     expect(src).toContain("bg-[linear-gradient(to_right,#2563eb,#4f46e5)]");
-    expect(src).toContain("text-white py-16");
+    expect(src).toContain("from-blue-50 to-indigo-50");
     expect(src).toMatch(/>Find Your Dream Job<\/h1>/);
     expect(src).toContain("Explore opportunities from top companies powered by EonHR");
-    expect(src).toContain("text-blue-200");
+    expect(src).toContain("text-blue-100");
     expect(src).toContain("No Open Positions");
     expect(src).toContain("Check back later for new opportunities!");
     expect(src).toContain("/api/jobs");
@@ -2504,14 +2504,17 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     expect(src).toContain("text-green-500");
   });
 
-  it("R31-C6: /payrollreports — the raised header + green WhatsApp CTA, the 4-tile horizontal stat row, the filter card, the Monthly/Tax/History white tab pills", () => {
+  it("R31-C6: /payrollreports — the raised header + green WhatsApp CTA, the filter card, the 4-trigger tab list, the summary card (evolved round 33: the body rebuilt to the live-measured REF structure)", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
-    expect(src).toContain("from-blue-50 to-indigo-50");
     /* Session 33 baseline fix: round-31's live-verification rebuilt this
        header by hand (badge+CTA row y=56, h1 y=108, sub y=156 — distinct
        from the standard raised-36) but the pin still expected the PageHeader
        prop pattern; the final unit re-run was skipped, so the pushed HEAD
-       carried the stale pin. Pinned to the raw h1 like R31-C7/C8. */
+       carried the stale pin. Pinned to the raw h1 like R31-C7/C8.
+       Session 34 (R33-A): the round-31 body below the header drifted from
+       REF (stats above the filter, 3 dark-active tabs, no month input, no
+       table) — rebuilt and re-pinned here; the detailed contracts live in
+       the session-34 block below. */
     expect(src).toMatch(/>Payroll Reports<\/h1>/);
     expect(src).toContain("Send Payslips via WhatsApp");
     expect(src).toContain("bg-green-600");
@@ -2534,14 +2537,14 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     expect(src).toContain("Total Amount (SAR)");
   });
 
-  it("R31-C8: /requestsettings — the centered 24px header + Back ghost, the 960px Approval Workflow + Request Limits cards, the None-set lines", () => {
+  it("R31-C8: /requestsettings — the LEFT-aligned 24px header + Back ghost, the max-w-5xl Approval Workflow + Request Limits cards, the None-set lines (evolved round 33: REF's structure re-measured)", () => {
     const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
     expect(src).toContain("from-slate-50 to-blue-50");
     expect(src).toMatch(/>Request Settings<\/h1>/);
     expect(src).toContain("Configure approvers and request limits");
     expect(src).toContain("Approval Workflow");
     expect(src).toContain("Set up to 3 approval levels per request category");
-    expect(src).toContain("max-w-[960px]");
+    expect(src).toContain("max-w-5xl");
     expect(src).toContain("Level {lvl}");
     expect(src).toContain("None set");
     expect(src).toContain("Request Limits");
@@ -2740,5 +2743,148 @@ describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)"
     expect(appShell).toContain("EDGE");
     expect(appShell).toMatch(/OPEN_THRESHOLD|EDGE_THRESHOLD/);
     expect(appShell).toMatch(/setMobileOpen\(true\)/);
+  });
+});
+
+/* ============================================================
+ * SESSION 34 / PARITY ROUND 33 — the at-rest DOM parity of the
+ * round-31-wired pages (the button/input/text census) + the
+ * form-error dimension (the login Alert) + the /settings border.
+ * Ground truth live-measured this round (see
+ * docs/remediation-plan-session34.md).
+ * ============================================================ */
+describe("session-34 pins (parity round 33)", () => {
+
+  it("R33-G1: the shadcn Alert primitive exists (the login error's component)", () => {
+    const src = read("src", "components", "ui", "alert.tsx");
+    expect(src).toContain("bg-red-50/70");
+    expect(src).toContain("border-red-200");
+    expect(src).toContain("rounded-xl");
+    expect(src).toContain("AlertDescription");
+  });
+
+  it("R33-G2: the login error uses the Alert (REF: translucent red-50/70 + red-200 border + rounded-xl + the text-red-700 description)", () => {
+    const src = read("src", "app", "login", "page.tsx");
+    expect(src).toContain("<Alert");
+    expect(src).toContain("text-red-700");
+    expect(src).not.toContain("rounded-lg bg-red-50 px-3 py-2");
+  });
+
+  it("R33-A1: /payrollreports — the slate→blue sRGB canvas + the white-pill kicker + the green MessageCircle CTA", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]");
+    expect(src).toContain("bg-white rounded-full shadow-sm mb-4");
+    expect(src).toContain("bg-green-600");
+    expect(src).toContain("MessageCircle");
+    expect(src).not.toContain("from-blue-50 to-indigo-50");
+  });
+
+  it("R33-A2: /payrollreports — the filter card (Label above the w-full select, records right) + the 4-col grid tab list with the Custom trigger", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain("Filter by Employee");
+    expect(src).toContain("space-y-1 flex-1 min-w-[180px]");
+    expect(src).toContain("flex flex-wrap gap-4 items-end");
+    expect(src).toContain("total records");
+    expect(src).toContain("grid grid-cols-4");
+    expect(src).toContain("Custom");
+    expect(src).not.toContain("data-[state=active]:bg-slate-900");
+  });
+
+  it("R33-A3: /payrollreports — the summary card carries the Calendar icon + the month input; the stats live INSIDE the card with REF's colored values; the 8-col table + the No-records TD", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain("Monthly Payroll Summary");
+    expect(src).toMatch(/Calendar\b/);
+    expect(src).toContain('type="month"');
+    expect(src).toContain("text-blue-700");
+    expect(src).toContain("text-red-600");
+    expect(src).toContain("text-green-700");
+    expect(src).toContain("<thead");
+    expect(src).toContain("Payslip");
+    expect(src).toContain("No records for");
+    expect(src).not.toContain("No payroll records for the selected period.");
+  });
+
+  it("R33-B1: /requestreports — the stat tiles carry REF's shadow + default border; the 4 section cards + the Request Log table", () => {
+    const src = read("src", "app", "(app)", "requestreports", "page.tsx");
+    expect(src).toContain("Requests by Category");
+    expect(src).toContain("Status Breakdown");
+    expect(src).toContain("Financial Amount by Category (SAR)");
+    expect(src).toContain("Top Requesters");
+    expect(src).toContain("No data");
+    expect(src).toContain("No financial requests");
+    expect(src).toContain("Request Log - Monthly");
+    expect(src).toContain("Ref #");
+    expect(src).toContain("Date");
+    expect(src).not.toContain("No requests in the selected period.");
+  });
+
+  it("R33-C1: /requestsettings — REF's Approval Workflow row (name + email inputs + level select + Add) + the 3 static None-set rows", () => {
+    const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
+    expect(src).toContain('placeholder="Approver name"');
+    expect(src).toContain('placeholder="Approver email"');
+    expect(src).toContain("Level 1 (First)");
+    expect(src).toContain("Level 3 (Final)");
+    expect(src).toContain("None set");
+    expect(src).not.toContain('placeholder="Select approver"');
+  });
+
+  it("R33-C2: /requestsettings — REF's Request Limits grid (limit/sub-type/max inputs + Finance/Monthly/All Staff selects + Add Limit + the empty line)", () => {
+    const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
+    expect(src).toContain('placeholder="Limit name (e.g. Petty Cash Monthly)"');
+    expect(src).toContain('placeholder="Sub-type (e.g. petty_cash)"');
+    expect(src).toContain('placeholder="Max requests (optional)"');
+    expect(src).toContain('placeholder="Max amount SAR (optional)"');
+    expect(src).toContain("All Staff");
+    expect(src).toContain("Add Limit");
+    expect(src).toContain("No limits configured");
+    expect(src).not.toContain("All Employees");
+  });
+
+  it("R33-D1: /shiftswap — no at-rest header action (REF renders none) + REF's empty text on both tabs", () => {
+    const src = read("src", "app", "(app)", "shiftswap", "page.tsx");
+    expect(src).not.toContain("Request Swap</Button>");
+    expect(src).not.toContain("actions=");
+    expect(src).toContain("No swap requests in this category");
+    expect(src).not.toContain("No swap requests yet");
+  });
+
+  it("R33-D2: /shiftswap — the superset entry is the invisible-at-rest keyboard shortcut (n opens the dialog; the API round-trip unchanged)", () => {
+    const src = read("src", "app", "(app)", "shiftswap", "page.tsx");
+    expect(src).toMatch(/addEventListener\("keydown"/);
+    expect(src).toMatch(/e\.key !== "n"|key === "n"/);
+    expect(src).toContain("/api/shiftswaps");
+  });
+
+  it("R33-E1: /careers — the page canvas + REF's hero structure (max-w-6xl px-4, h1 mb-4, blue-100 sub, the job-search input)", () => {
+    const src = read("src", "app", "(app)", "careers", "page.tsx");
+    expect(src).toContain("bg-gradient-to-br from-blue-50 to-indigo-50");
+    expect(src).toContain("max-w-6xl mx-auto px-4");
+    expect(src).toContain("text-5xl font-bold mb-4");
+    expect(src).toContain("text-blue-100 mb-8");
+    expect(src).toContain("Search jobs by title, department, or location...");
+    expect(src).not.toContain("text-blue-200");
+  });
+
+  it("R33-E2: /careers — the Browse by Company H2 + REF's chip geometry (h-46 outline, no All-Companies chip)", () => {
+    const src = read("src", "app", "(app)", "careers", "page.tsx");
+    expect(src).toContain("Browse by Company");
+    expect(src).toContain("text-2xl font-bold text-slate-900 mb-4");
+    expect(src).toContain("h-[46px] rounded-md");
+    expect(src).not.toContain("All Companies");
+  });
+
+  it("R33-F1: /payrollai — REF's empty state (the 64px CircleCheckBig + All Clear! + the exact line)", () => {
+    const src = read("src", "app", "(app)", "payrollai", "page.tsx");
+    expect(src).toContain("CircleCheckBig");
+    expect(src).toContain("w-16 h-16 mx-auto mb-4 text-green-500");
+    expect(src).toContain("All Clear!");
+    expect(src).toContain("No payroll adjustments needed");
+    expect(src).not.toContain("No pending suggestions");
+  });
+
+  it("R33-H1: /settings — the cards carry REF's hardcoded border-slate-200 (the 3-unit deferred micro-diff)", () => {
+    const src = read("src", "app", "(app)", "settings", "page.tsx");
+    expect(src).toContain('<Card className="border-slate-200">');
+    expect(src).not.toMatch(/<Card>\s*$/m);
   });
 });

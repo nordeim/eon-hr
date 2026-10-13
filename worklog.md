@@ -991,3 +991,21 @@ Stage Summary:
 - Gates: lint 0/0 · tsc ✓ · 493/493 unit (+13) · build ✓ · 133/133 E2E (+12); DB pristine
 - New engine lesson: the v4 dark-variant media-query default (@custom-variant dark required)
 - Frontier after this round: with-data (blocked on REF), form-error surfaces, the deferred print-button decision, the /settings card border-slate-200 micro-diff (3 units, one page), deep RTL polish, dark with-data surfaces
+
+---
+Task ID: session-34
+Agent: main (Super Z)
+Task: eon-hr parity round 33 (session 34) — the wired-page at-rest audit + the login Alert: census, TDD rebuilds, live verification, docs, push
+
+Work Log:
+- git pull (889cda3 + session_63.md); docs re-read; baseline gates ALL GREEN (493/493 + 133/133); standing audits re-run clean (4 DIFFs = documented artifacts; dark drawer re-verified MATCH)
+- Census: at-rest button/input/text inventories on the 9 round-31-wired pages + the form-error dimension → 6 pages with genuine gaps + the login P-error/stack + the /settings border micro-diff; REF CSS chunk unchanged (clone-side drift)
+- TDD: 14 RED pins → GREEN (alert.tsx + login, payrollreports, requestreports, requestsettings, shiftswap, careers, payrollai, settings) + R31-C1/C5/C6/C7/C8 pin evolution
+- Three follow-up alignment rounds (colors + geometry): the bg-none gradient-over-color fix, the dark Add variants, the v4 inline-label space-y trap (mt-1/mt-1.5), the card-header/tab/filter chains — all verified via dedicated probes (chain2/btncolors/verify6/7)
+- E2E: shiftswap via the "n" shortcut; requestsettings via name+email; the new login-error spec (2); auth.spec selector evolution
+- Gates: lint 0/0 · tsc ✓ · 507/507 unit (+14) · build ✓ · 135/135 E2E (+2)
+- Live: verify-r33 19/19 MATCH 0 DIFFs; dark sweep artifacts unchanged; 11 screenshots (114-120) → 145 PNG; DB pristine
+- Docs: AGENTS session-34 layer, SKILL 3.17.0 + §46, PAD [S34], CLAUDE/README counts, session_64/65, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 33 delivered: the six wired pages rebuilt to live-measured REF (byte-identical inventories), the login Alert + never-audited login stack aligned, two new engine lessons documented (the v4 inline-label space-y trap; the bg-image gradient over bg-color), 507 unit + 135 E2E green

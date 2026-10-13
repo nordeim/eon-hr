@@ -65,34 +65,40 @@ test.describe("orphan routes (session 32)", () => {
     await expect(page.getByText(/We don't have any open positions at the moment/)).toBeVisible();
   });
 
-  test("/careers renders the hero + the zero-data card", async ({ page }) => {
+  test("/careers renders the hero + the search input + the zero-data card", async ({ page }) => {
     await page.goto("/careers");
     await expect(page.getByRole("heading", { name: "Find Your Dream Job" })).toBeVisible();
     await expect(page.getByText("Explore opportunities from top companies powered by EonHR")).toBeVisible();
+    await expect(page.getByPlaceholder("Search jobs by title, department, or location...")).toBeVisible();
     await expect(page.getByText(/No Open Positions/)).toBeVisible();
     await expect(page.getByText("Check back later for new opportunities!")).toBeVisible();
   });
 
-  test("/payrollai renders the stat row + the green CheckCircle empty", async ({ page }) => {
+  test("/payrollai renders the stat row + the green CircleCheckBig empty", async ({ page }) => {
     await page.goto("/payrollai");
     await expect(page.getByRole("heading", { name: "Payroll AI Suggestions" })).toBeVisible();
     await expect(page.getByText("Pending Suggestions", { exact: true })).toBeVisible();
     await expect(page.getByText("Total Adjustments")).toBeVisible();
     await expect(page.getByRole("button", { name: "Run AI Analysis" })).toBeVisible();
+    await expect(page.getByText("All Clear!")).toBeVisible();
+    await expect(page.getByText("No payroll adjustments needed")).toBeVisible();
   });
 
-  test("/shiftswap: the request round-trip via the dialog (the superset)", async ({ page }) => {
+  test("/shiftswap: the request round-trip via the keyboard-n dialog (the superset)", async ({ page }) => {
     await page.goto("/shiftswap");
     await expect(page.getByRole("heading", { name: "Shift Swap" })).toBeVisible();
     await expect(page.getByText("Request, approve, and manage shift swaps")).toBeVisible();
+    // REF's at-rest empty contract (round 33) — no header button exists
+    await expect(page.getByText("No swap requests in this category")).toBeVisible();
 
-    // open the dialog + submit (the first seeded employee + tomorrow)
-    await page.getByRole("button", { name: "Request Swap" }).click();
+    // open the dialog via the invisible-at-rest "n" shortcut + submit
+    // (the first seeded employee + tomorrow)
+    await page.keyboard.press("n");
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
     await dialog.locator("#swap-date").fill("2026-12-01");
     await dialog.locator("#swap-notes").fill("R31 probe swap");
-    await dialog.getByRole("button", { name: "Request Swap" }).click();
+    await dialog.getByRole("button", { name: "Submit Request" }).click();
     await expect(dialog).toBeHidden();
 
     // the list + the counts refresh
@@ -101,7 +107,7 @@ test.describe("orphan routes (session 32)", () => {
     expect(myCount).toBeTruthy();
   });
 
-  test("/requestsettings: the Add approver round-trip (the superset)", async ({ page }) => {
+  test("/requestsettings: the Add approver round-trip via name+email (the superset)", async ({ page }) => {
     await page.goto("/requestsettings");
     await expect(page.getByRole("heading", { name: "Request Settings" })).toBeVisible();
     await expect(page.getByText("Set up to 3 approval levels per request category")).toBeVisible();
@@ -109,19 +115,16 @@ test.describe("orphan routes (session 32)", () => {
     // zero-state lines
     await expect(page.getByText("None set").first()).toBeVisible();
 
-    // pick an approver in the Level 1 select + Add (combobox #1 — #0 is
-    // the category select above it)
-    const trigger = page.getByRole("combobox").nth(1);
-    await trigger.click();
-    const option = page.getByRole("option").first();
-    const optionName = (await option.textContent())?.trim() ?? "";
-    await option.click();
+    // REF's form (round 33): free-text name + email resolved against
+    // Employee by the API — the seeded demo employee's identity
+    await page.getByLabel("Approver name").fill("Demo Employee");
+    await page.getByLabel("Approver email").fill("sepnetflix2023@outlook.com");
     await page.getByRole("button", { name: "Add", exact: true }).click();
 
     // the level-1 block swaps "None set" for the approver row (levels 2/3
     // legitimately keep theirs — only level 1 was configured)
     await expect(page.getByText("None set").first()).toBeVisible();
-    await expect(page.getByRole("listitem").filter({ hasText: optionName }).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole("listitem").filter({ hasText: /Demo|Employee|sepnetflix/i }).first()).toBeVisible({ timeout: 8000 });
   });
 
   test("/tenantsetup renders the wizard card + Continue PATCHes the company", async ({ page }) => {
