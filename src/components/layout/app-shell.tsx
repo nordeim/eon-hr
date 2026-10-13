@@ -37,6 +37,55 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
     setMobileOpen(false);
   }, [pathname]);
 
+  /* Session 31 (R30-D): the swipe-to-close gesture — the mobile-menu
+     superset. Touch handlers on the drawer panel: a horizontal-dominant,
+     leftward drag live-translates the panel; past the threshold (96px, a
+     third of the 288px panel) the release closes. tailwindcss-animate's
+     exit keyframes define only the `to` state, so the close animation
+     starts from the CURRENT inline transform — the panel continues from
+     the finger, no snap-back. Below the threshold the panel springs back
+     (300ms, the drawer's own curve). The vertical nav scroll is untouched
+     (the dominant-axis guard) and the at-rest geometry is unchanged —
+     the panel carries no transform until a gesture starts. */
+  const drawerRef = React.useRef<HTMLDivElement | null>(null);
+  const swipe = React.useRef({ startX: 0, startY: 0, active: false });
+  const SWIPE_THRESHOLD = 96;
+
+  const onDrawerTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    swipe.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, active: true };
+  };
+  const onDrawerTouchMove = (e: React.TouchEvent) => {
+    if (!swipe.current.active || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - swipe.current.startX;
+    const dy = e.touches[0].clientY - swipe.current.startY;
+    if (dx >= 0 || Math.abs(dx) <= Math.abs(dy)) return; // leftward + horizontal-dominant only
+    const el = drawerRef.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.transform = `translateX(${Math.max(dx, -288)}px)`;
+  };
+  const onDrawerTouchEnd = (e: React.TouchEvent) => {
+    if (!swipe.current.active) return;
+    swipe.current.active = false;
+    const el = drawerRef.current;
+    if (!el) return;
+    const dx = e.changedTouches[0].clientX - swipe.current.startX;
+    if (dx < -SWIPE_THRESHOLD) {
+      // keep the inline transform — the Radix exit animation continues
+      // from it; only the transition style would fight the animation
+      el.style.transition = "";
+      setMobileOpen(false);
+    } else {
+      // spring back along the drawer's own curve
+      el.style.transition = "transform 300ms cubic-bezier(0.32, 0.72, 0, 1)";
+      el.style.transform = "";
+      window.setTimeout(() => {
+        if (el.isConnected) el.style.transition = "";
+      }, 320);
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]">
       {/* Desktop sidebar */}
@@ -60,7 +109,16 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
             aria-hidden="true"
           />
           <DialogPrimitive.Content
-            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
+            ref={drawerRef}
+            onTouchStart={onDrawerTouchStart}
+            onTouchMove={onDrawerTouchMove}
+            onTouchEnd={onDrawerTouchEnd}
+            /* Session 31 (R30-A): REF's drawer panel ships a 1px right
+               border in the DEFAULT border color #e5e5e5 (measured
+               rgb(229,229,229) — the base layer's * { border-color },
+               NOT the desktop sidebar's slate token). border-r picks it
+               up; the panel stays 288px (border-box). */
+            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col border-r bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
           >
             <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>

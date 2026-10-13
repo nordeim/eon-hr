@@ -7,7 +7,10 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 
 const AssetInput = z.object({
   name: z.string().trim().min(1, "Name is required").max(80),
-  type: z.enum(["laptop", "phone", "monitor", "furniture", "vehicle", "other"]).default("laptop"),
+  /* Session 31 (R30-C): desktop + tablet join the enum — REF's legacy
+     /assets dialog offers them (measured live); the DB column is a free
+     String and the modern page's filter list stays REF's contract. */
+  type: z.enum(["laptop", "desktop", "phone", "tablet", "monitor", "furniture", "vehicle", "other"]).default("laptop"),
   serialNumber: z.string().trim().max(60).optional().or(z.literal("")),
   assignedToId: z.string().optional().or(z.literal("")),
   value: z.number().int().min(0).max(1_000_000_000).default(0),

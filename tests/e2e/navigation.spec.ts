@@ -103,6 +103,8 @@ const ROUTES: [string, string][] = [
   ["/evaluations", "360° Evaluations & Appraisals"],
   ["/workflowautomation", "Automated Workflows"],
   ["/assetmanagement", "Asset Management"],
+  // Session 31 (R30-C): REF's legacy orphan route — now replicated.
+  ["/assets", "Assets"],
   ["/staffrequests", "Staff Requests"],
   ["/companywall", "Company Updates"],
   ["/announcements", "Company Announcements"],

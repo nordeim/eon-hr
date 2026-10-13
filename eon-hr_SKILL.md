@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.13.0 (session-30 remediation complete) · **Last updated:**
-> 2026-10-13 · **State:** 457 unit + 93 E2E tests green, lint/typecheck/build
+> **Version:** 3.14.0 (session-31 remediation complete) · **Last updated:**
+> 2026-10-13 · **State:** 464 unit + 100 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -1956,3 +1956,104 @@ Node with the session cookie (the verify-r29 pattern) instead; also
 md5-compare screenshot pairs before trusting a capture (an identical-hash
 pair means the dispatch sequence never registered — re-run with
 per-dispatch logging).
+
+
+## 43. Session-31 Recipe Layer — parity round 30 (the drawer border + the chat structure + the legacy /assets route + the swipe superset)
+
+**The round's standing audits**: redeploy 12/12 MATCH (viewports pinned
+1440×900 from the start); mobile chrome byte-identical (tabs, kicker,
+drawer overlay — no Tailwind v4 bug); with-data re-check — REF still
+zero-data (blocked, documented); the round-29 sidebar-internal census
+re-run clean (collapsed 141→621, expanded leaves 577→829, roots
+865/905 — the fix holds in both collapse directions).
+
+**The round's census — four new probes**: (1) the sidebar
+collapse-boundary sweep (collapsed → expand → re-collapse — all three
+states byte-identical); (2) the drawer EXPANDED-state census at
+390×844 — the internal nav y-map matches, but the panel's BORDER did
+not (the standing audit pins the overlay, never the panel): REF ships
+`border-right: 1px #e5e5e5` — the DEFAULT border color, not the
+desktop sidebar's slate-200 token. REF uses different border colors on
+its two nav surfaces; the clone now mirrors both. (3) The bottom-tab
+active-state route sweep — 18 routes, the Home/Staff/Tasks/Attendance/
+Profile highlighting + kickers identical everywhere (verified non-gap).
+(4) The orphan-route census — REF serves a LEGACY page at /assets that
+the clone 404'd on (the sidebar links "Assets" → /assetmanagement on
+BOTH apps; the modern page is byte-identical — this is a second,
+simpler assets page REF also serves).
+
+**R30-A — the drawer border recipe**: `border-r` alone on the drawer
+`DialogPrimitive.Content` — the width-1 border inherits the base
+layer's `* { border-color: #e5e5e5 }` (the `--color-border` token;
+REF's measured rgb(229,229,229)). Never add a color class here: the
+slate-200 `border-sidebar-border` belongs to the DESKTOP sidebar only.
+
+**R30-B — the /hrassistantchat empty-state recipes**: the left card is
+a NATURAL-HEIGHT `Card border-slate-200` (never `flex min-h-0 flex-1`
+— REF's card hugs content, bottom y≈362, while the grid row is 650px)
+with `CardHeader className="border-b border-slate-200 p-4"` holding
+`CardTitle className="text-sm"` (14px/600 #0a0a0a via card-foreground;
+the DEFAULT 20px line box — an explicit leading-[1.5] overshoots by
+1px and pushes the body line to 303) over the
+`max-h-96 space-y-1 overflow-y-auto p-2` list body whose empty state
+is a single `<p className="text-sm text-muted-foreground">No chats</p>`
+in the list flow. The right pane wraps in a bare `lg:col-span-3` div;
+its empty state is the `flex h-full flex-col border-slate-200` card's
+`CardContent` (default `p-6 pt-0` + `flex h-full items-center
+justify-center`) around a `text-center` div: the 64px slate-300
+**MessageSquare** in an `mb-4 flex justify-center` wrapper over ONE
+16px slate-500 line — no h3, no description, no iconed EmptyState.
+Icon identity comes from the SVG path fingerprint
+(`M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z` =
+MessageSquare), not from guessing.
+
+**R30-C — the legacy /assets route**: `PageHeader layout="flat36"
+actionsStart rowBreakpoint="sm" className="flex-row justify-between
+items-start"` — the ALWAYS-ROW header (measured side-by-side at 390px;
+the class trio forces row at every width, twMerge keeps the sm:
+variants harmless) with the Add Asset button riding the badge row
+(y=32). The page canvas is REF's green→blue
+(`bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)]` — trap 3's
+sRGB pin). The card: `border-slate-200` + `CardHeader
+className="border-b bg-slate-50"` (the gray band, h=65) with
+`CardTitle className="leading-none"` (16px/600, h=16) + `CardContent
+className="p-0"` holding the systemic `p-12 text-center` empty state:
+the 64px slate-300 **Inbox** (path-fingerprinted) in the mb-4 wrapper
+over `<p className="text-slate-500">No assets yet</p>`. The dialog:
+Asset Name / Type (Laptop, Desktop, Phone, Tablet, Monitor, Other) /
+Serial Number / Assign To (Optional, "Not Assigned" none-item) —
+POSTs the shared /api/assets. The API's zod enum gains desktop +
+tablet (the DB column is a free String; the modern page's filter
+stays REF's contract). Route metadata: the mechanical
+`pageMetadata("/assets")` layout — the R25-A4 coverage pin's route
+count goes 46→47.
+
+**R30-D — the drawer swipe-to-close superset**: touch handlers on the
+drawer panel (touchstart records; touchmove with the
+horizontal-dominant leftward guard live-translates via inline
+`translateX(dx)` with `transition: none`; touchend past 96px closes,
+below springs back along `transform 300ms cubic-bezier(0.32,0.72,0,1)`).
+The close path KEEPS the inline transform — tailwindcss-animate's exit
+keyframes define only the `to` state, so the animation runs from the
+current inline value (the panel continues from the finger; clearing
+the transform first would snap it to 0). Zero at-rest impact.
+
+**Probe-tooling lessons (this round's three)**: (1) text-only DOM
+censuses miss icons — REF's /assets "No assets yet" had an 80px gap
+above it that was a 64px Inbox + mb-4, invisible to a text-node census
+(the subtree's kids:2 was the tell; read child counts + geometry, not
+just text). (2) CDP touch dispatches need the enter animation settled
+(a touch landing mid-flight targets the OVERLAY — the panel hasn't
+slid under the finger yet, and the overlay is the Content's SIBLING,
+so the React handlers never see it) plus ~100ms inter-phase frames
+(back-to-back `Input.dispatchTouchEvent` calls drop the touchMove —
+the round-26 separate-evals lesson, touch edition). (3) Radix's portal
+renders the overlay and the panel as SIBLINGS — "the overlay's
+children" is always empty; locate the panel by its own geometry
+(fixed, w 200–340, h≥800, non-overlay background).
+
+**Gates**: lint 0/0 · tsc ✓ · 464/464 unit (+7 session-31 pins, the
+R25-A4 count updated) · build ✓ · 100/100 E2E (+7). Live-verified:
+drawer border + chat y-map + /assets y-map (desktop AND mobile)
+byte-identical; 12/12 redeploy; mobile chrome byte-identical; sidebar
+navmap 865/905; DB pristine. 118 PNG captures (6 new, VLM-confirmed).

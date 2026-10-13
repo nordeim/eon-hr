@@ -5,7 +5,7 @@ import { Bot, Loader2, MessageSquare, Plus, Send, Sparkles, Target } from "lucid
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
@@ -164,7 +164,10 @@ export default function HrAssistantChatPage() {
           (`lg:col-span-1 space-y-4`, 262px) carries the New Chat button
           (purple gradient, h-9, full column width) DIRECTLY — not inside a
           card — with the conversations card below (y=240 on the
-          reference); the chat area spans the remaining 3 columns. */}
+          reference); the chat area spans the remaining 3 columns.
+          Session 31 (R30-B): the card is REF's natural-height recipe —
+          CardHeader (p-4, border-b) + the p-2 max-h-96 list body — NOT a
+          stretched column card (REF's bottom lands at y≈362). */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:h-[calc(100vh-250px)]">
         {/* chat list */}
         <div className="flex flex-col space-y-4 lg:col-span-1">
@@ -172,17 +175,22 @@ export default function HrAssistantChatPage() {
             <Plus className="mr-2" aria-hidden="true" />
             New Chat
           </Button>
-          <Card className="flex min-h-0 flex-1 flex-col">
-            <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-              <p className="text-xs font-medium text-muted-foreground">Active Chats</p>
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-                {loading ? (
-                  <div className="flex h-full items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
-                  </div>
-                ) : chats.length === 0 ? (
-                  <EmptyState title="No chats" description="Start a new chat to ask a question." className="py-6" />
-                ) : (
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-200 p-4">
+              {/* REF: a 14px/600 #0a0a0a title — text-sm's DEFAULT 20px
+                  line box (the header lands h=53, body y=294, line y=302) */}
+              <CardTitle className="text-sm">Active Chats</CardTitle>
+            </CardHeader>
+            <div className="max-h-96 space-y-1 overflow-y-auto p-2">
+              {loading ? (
+                <div className="flex h-20 items-center justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                </div>
+              ) : chats.length === 0 ? (
+                /* REF: a single muted 14px line in the list flow (y=302) —
+                   no icon, no centered empty-state block */
+                <p className="text-sm text-muted-foreground">No chats</p>
+              ) : (
                   <div className="flex flex-col gap-1">
                     {chats.map((c) => (
                       <button
@@ -208,36 +216,39 @@ export default function HrAssistantChatPage() {
                   </div>
                 )}
               </div>
-            </CardContent>
           </Card>
         </div>
 
-        {/* chat pane */}
-        <Card className="flex h-[520px] flex-col lg:col-span-3 lg:h-auto lg:min-h-0">
-          {active ? (
-            <>
-              <div className="flex items-center gap-3 border-b p-4">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                  <Bot className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">{active.title}</p>
-                  <p className="text-xs text-muted-foreground">Ask about leave, payroll, letters or policy</p>
-                </div>
-              </div>
-              <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
-                {messagesLoading ? (
-                  <div className="flex flex-1 items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+        {/* chat pane — Session 31 (R30-B): REF wraps the pane in a bare
+            lg:col-span-3 div; the empty state is the h-full card's
+            centered block (64px slate-300 MessageSquare + the single
+            muted line), NOT an iconed EmptyState with a title */}
+        <div className="lg:col-span-3">
+          <Card className="flex h-full flex-col border-slate-200">
+            {active ? (
+              <>
+                <div className="flex items-center gap-3 border-b p-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                    <Bot className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">{active.title}</p>
+                    <p className="text-xs text-muted-foreground">Ask about leave, payroll, letters or policy</p>
                   </div>
-                ) : messages.length === 0 ? (
-                  <EmptyState
-                    icon={<Sparkles className="h-6 w-6" aria-hidden="true" />}
-                    title="Ask me anything HR"
-                    description="Leave balances, payroll periods, HR letters and company policy."
-                    className="py-8"
-                  />
-                ) : (
+                </div>
+                <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
+                  {messagesLoading ? (
+                    <div className="flex flex-1 items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <EmptyState
+                      icon={<Sparkles className="h-6 w-6" aria-hidden="true" />}
+                      title="Ask me anything HR"
+                      description="Leave balances, payroll periods, HR letters and company policy."
+                      className="py-8"
+                    />
+                  ) : (
                   messages.map((m) => {
                     const isUser = m.role === "user";
                     return (
@@ -311,15 +322,21 @@ export default function HrAssistantChatPage() {
               </form>
             </>
           ) : (
-            <CardContent className="flex flex-1 items-center justify-center">
-              <EmptyState
-                icon={<Bot className="h-6 w-6" aria-hidden="true" />}
-                title="Select a chat or start a new one"
-                description="Your HR assistant answers questions about leave, payroll, HR letters and company policy."
-              />
+            /* REF's empty pane: CardContent (p-6 pt-0, the default) flexing
+               full-height around a centered text-center block — the 64px
+               slate-300 MessageSquare (mb-4 wrapper, y=449) over the single
+               16px slate-500 line (y=529). No title, no description. */
+            <CardContent className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="mb-4 flex justify-center">
+                  <MessageSquare className="h-16 w-16 text-slate-300" aria-hidden="true" />
+                </div>
+                <p className="text-slate-500">Select a chat or start a new one</p>
+              </div>
             </CardContent>
           )}
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
     </div>

@@ -2091,7 +2091,9 @@ describe("session-26 SEO/meta recipes (parity round 25 — the head dimension)",
   it("R25-A4 coverage: every (app) route dir has a layout.tsx exporting pageMetadata('<route>') — client pages cannot export metadata", () => {
     const base = join(process.cwd(), "src", "app", "(app)");
     const dirs = readdirSync(base, { withFileTypes: true }).filter((d) => d.isDirectory());
-    expect(dirs.length).toBe(46);
+    /* 47 since session 31 (R30-C): the legacy /assets route joined the
+       app (REF's orphan page — route-coverage parity). */
+    expect(dirs.length).toBe(47);
     for (const d of dirs) {
       const layoutPath = join(base, d.name, "layout.tsx");
       expect(existsSync(layoutPath), `${d.name}/layout.tsx missing`).toBe(true);
@@ -2349,5 +2351,80 @@ describe("session-30 sidebar leaf-gap + organogram DnD + print color recipes (pa
     expect(block).toContain("-webkit-print-color-adjust: exact !important");
     expect(src).toContain("@page");
     expect(src).toContain("margin: 10mm");
+  });
+});
+describe("session-31 drawer border + chat structure + legacy assets + swipe recipes (parity round 30)", () => {
+  it("R30-A1: the mobile drawer panel carries the reference's right border — border-r picks up the base layer's #e5e5e5 (REF's measured rgb(229,229,229); the desktop sidebar keeps border-sidebar-border)", () => {
+    expect(appShell).toContain('w-[288px]');
+    const m = appShell.match(/DialogPrimitive\.Content[\s\S]*?className="([^"]+)"/);
+    expect(m).toBeTruthy();
+    expect(m![1]).toContain("border-r");
+    // the DESKTOP sidebar border stays the slate token (both apps measured)
+    expect(appShell).toContain("border-r border-sidebar-border");
+  });
+
+  it("R30-B1: the chat left card — CardHeader p-4 border-b border-slate-200 with the 14px/600 title, the p-2 max-h-96 body, and the plain muted 'No chats' line (no icon, no centered EmptyState)", () => {
+    const src = read("src", "app", "(app)", "hrassistantchat", "page.tsx");
+    expect(src).toContain('CardHeader');
+    expect(src).toContain('border-b border-slate-200 p-4');
+    expect(src).toMatch(/CardTitle className="text-sm">Active Chats/);
+    expect(src).toContain("Active Chats");
+    expect(src).toContain("max-h-96 space-y-1 overflow-y-auto p-2");
+    expect(src).toContain('<p className="text-sm text-muted-foreground">No chats</p>');
+    // the stretched column-card recipe is gone (the natural-height card)
+    expect(src).toContain('<Card className="border-slate-200">');
+    expect(src).not.toContain('<Card className="flex min-h-0');
+  });
+
+  it("R30-B2: the chat right-pane empty — the h-full card with the centered 64px slate-300 MessageSquare + the single muted line (no h3 title, no description)", () => {
+    const src = read("src", "app", "(app)", "hrassistantchat", "page.tsx");
+    expect(src).toContain("MessageSquare");
+    expect(src).toContain("h-16 w-16 text-slate-300");
+    expect(src).toContain("Select a chat or start a new one");
+    expect(src).toContain("flex h-full items-center justify-center");
+    // REF renders no description under the line
+    expect(src).not.toContain("Your HR assistant answers questions");
+    expect(src).not.toContain("Start a new chat to ask a question");
+  });
+
+  it("R30-C1: the legacy /assets route — flat36 header with the always-row actions (green→blue canvas, bg-slate-50 card header, p-12 centered empty)", () => {
+    const src = read("src", "app", "(app)", "assets", "page.tsx");
+    expect(src).toContain('layout="flat36"');
+    expect(src).toContain('section="Asset Management"');
+    expect(src).toContain('title="Assets"');
+    expect(src).toContain("Track and manage company assets");
+    expect(src).toContain("flex-row justify-between items-start");
+    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)]");
+    expect(src).toContain("border-b bg-slate-50");
+    expect(src).toContain("leading-none");
+    expect(src).toContain("p-12 text-center");
+    expect(src).toContain('Inbox className="h-16 w-16 text-slate-300"');
+    expect(src).toContain("No assets yet");
+  });
+
+  it("R30-C2: the legacy Add Asset dialog field set — name, type (incl. Desktop/Tablet), serial, optional assignee, posting to the assets API", () => {
+    const src = read("src", "app", "(app)", "assets", "page.tsx");
+    expect(src).toContain("Asset Name");
+    expect(src).toContain("Serial Number");
+    expect(src).toContain("Assign To (Optional)");
+    expect(src).toContain("Desktop");
+    expect(src).toContain("Tablet");
+    expect(src).toContain("/api/assets");
+  });
+
+  it("R30-C3: the assets API accepts the legacy dialog's desktop/tablet types (the modern page's filter stays the reference contract)", () => {
+    const src = read("src", "app", "api", "assets", "route.ts");
+    const m = src.match(/z\.enum\(\[([^\]]+)\]/);
+    expect(m).toBeTruthy();
+    expect(m![1]).toContain('"desktop"');
+    expect(m![1]).toContain('"tablet"');
+    expect(m![1]).toContain('"laptop"');
+  });
+
+  it("R30-D1: the drawer swipe-to-close contract — touch handlers with the horizontal-dominant guard and the close threshold (interaction-state only, zero at-rest impact)", () => {
+    expect(appShell).toContain("onTouchStart");
+    expect(appShell).toContain("onTouchMove");
+    expect(appShell).toContain("onTouchEnd");
+    expect(appShell).toMatch(/SWIPE_THRESHOLD|threshold/i);
   });
 });

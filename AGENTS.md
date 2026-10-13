@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 457 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 93 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 464 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 99 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1253,3 +1253,94 @@ white — VLM cannot perceive the subtle 2px ring, documented).
   ring VLM-confirmed, 96 the sidebar fixed geometry, 97/97b the
   print-color pair VLM-confirmed) + 02/11 standards refreshed → 112
   PNG captures. DB pristine.
+
+## Session-31 recipe layer (parity round 30 — the drawer border + chat structure + legacy /assets + the swipe superset)
+
+- **Standing audits**: redeploy 12/12 MATCH (viewports pinned 1440×900 from
+  the start); mobile chrome byte-identical (tabs/kicker/drawer overlay —
+  no Tailwind v4 bug); with-data — REF still zero-data (blocked,
+  documented); the round-29 sidebar-internal census re-run — collapsed
+  groups 141→621, expanded leaves 577→829, roots 865/905 all
+  byte-identical (the fix holds; re-collapse leaves no residual margin).
+- **The round's new probes**: (1) the sidebar collapse-boundary census
+  (collapsed → expand → re-collapse, all three states byte-identical);
+  (2) the drawer EXPANDED-state census at 390×844 — the internal nav
+  y-map matches, but the panel's BORDER did not: REF ships
+  `border-right: 1px #e5e5e5` (the default border color — NOT the
+  desktop sidebar's slate-200 token; REF uses different border colors on
+  the two surfaces and so does the clone after the fix); (3) the
+  bottom-tab active-state route sweep — 18 routes, Home/Staff/Tasks/
+  Attendance/Profile highlighting + kickers identical on all (verified
+  non-gap, first full sweep); (4) the orphan-route census — REF serves a
+  LEGACY page at /assets the clone 404'd on (the sidebar links to
+  /assetmanagement on both apps; the modern page is byte-identical).
+- **R30-A (the drawer border parity fix)**: `border-r` on the drawer
+  `DialogPrimitive.Content` — the width-1 border picks up the base
+  layer's `#e5e5e5` (REF's measured rgb(229,229,229), the clone's
+  `--color-border`). Panel stays 288px (border-box). Live-verified:
+  computed borderRightWidth 1px + color rgb(229,229,229) byte-identical.
+- **R30-B (the /hrassistantchat empty-state restoration)**: the left
+  card becomes REF's natural-height recipe — `Card border-slate-200` +
+  `CardHeader` (`border-b border-slate-200 p-4`) with a `CardTitle
+  className="text-sm"` "Active Chats" (14px/600 #0a0a0a, the DEFAULT
+  20px line box — leading-[1.5]'s 21px pushed the body line 1px low)
+  + the `max-h-96 space-y-1 overflow-y-auto p-2` body holding a plain
+  `text-sm text-muted-foreground` "No chats" (y=302) — NOT a stretched
+  column card with a centered iconed EmptyState. The right pane wraps
+  in a bare `lg:col-span-3` div; its empty state is the h-full card's
+  centered block: `CardContent` (`flex h-full items-center
+  justify-center`, the default p-6 pt-0) around a `text-center` div
+  with the 64px slate-300 **MessageSquare** (mb-4 wrapper, y=449 —
+  path-fingerprinted `M21 15a2 2 0 0 1-2 2H7l-4 4V5…`) over the single
+  16px slate-500 line (y=529). The extra copy ("Start a new chat to
+  ask a question." / "Your HR assistant answers questions…") is gone.
+- **R30-C (the legacy /assets route)**: a NEW page replicating REF's
+  orphan contract — flat36 always-row header (`flex-row justify-between
+  items-start` at EVERY width, measured side-by-side at 390px), the
+  green→blue canvas (`bg-[linear-gradient(to_right_bottom,#f0fdf4,
+  #eff6ff)]`, trap 3), the `border-slate-200` card with the
+  `border-b bg-slate-50` header band (the leading-none 16px/600
+  "Assets" title, h=16) + `CardContent p-0` holding the `p-12
+  text-center` empty state (the 64px slate-300 **Inbox** —
+  path-fingerprinted — over "No assets yet"). The Add Asset dialog:
+  Asset Name / Type (Laptop/Desktop/Phone/Tablet/Monitor/Other) /
+  Serial Number / Assign To (Optional) — POSTs the shared /api/assets;
+  the API's zod enum gains desktop + tablet (the modern page's filter
+  stays REF's contract). Route metadata via the mechanical
+  `pageMetadata("/assets")` (the R25-A4 coverage pin's count 46→47).
+  With data (unverifiable — the with-data frontier): a divide-y asset
+  list (the superset on a REF-stub surface).
+- **R30-D (the drawer swipe-to-close superset)**: touch handlers on the
+  drawer panel — a horizontal-dominant leftward drag live-translates
+  the panel (`translateX(dx)`, transition suppressed mid-drag); past
+  the 96px threshold the release closes (tailwindcss-animate's exit
+  keyframes define only the `to` state, so the close animation
+  continues from the CURRENT inline transform — no snap-back); below it
+  the panel springs back along the drawer's own curve. Zero at-rest
+  impact. E2E via CDP `Input.dispatchTouchEvent`.
+- **Probe-tooling lessons**: (1) text-only DOM censuses miss icons —
+  REF's /assets empty state's 80px gap was a 64px Inbox + mb-4
+  (invisible to a text-node census; the subtree's kids:2 was the tell);
+  (2) CDP touch dispatches need the enter animation settled (a touch
+  landing mid-flight targets the OVERLAY — the panel hasn't slid under
+  the finger, and the overlay is the Content's SIBLING so the React
+  handlers never see it) + ~100ms inter-phase frames (back-to-back
+  dispatches drop the touchMove — the round-26 separate-evals lesson,
+  touch edition); (3) Radix renders the overlay and the panel as
+  SIBLINGS in the portal — locate the panel by its own geometry, not
+  the overlay's children.
+- **Pins**: 7 new (tests/unit/recipes.test.ts session-31 block) + the
+  R25-A4 route count updated. Gates: lint 0/0 · tsc ✓ · 464/464 unit ·
+  build ✓ · 100/100 E2E (+7: the chat empty-state contract, the legacy
+  page contract, the add-asset round-trip, the drawer border, the
+  threshold close, the sub-threshold spring-back with a non-vacuous
+  mid-gesture transform poll, the /assets row in the navigation sweep). Live-verified: the drawer border
+  byte-identical; the chat y-map byte-identical (title 257 / line 302 /
+  icon 449 / line 529); the /assets y-map byte-identical (desktop:
+  kicker 40, h1 84, sub 136, button 32/1274, card 196, band 197/65,
+  Inbox 310, line 390; mobile: h1 141, button 89/240, card 281/16);
+  12/12 redeploy MATCH; mobile chrome byte-identical; sidebar navmap
+  865/905. 6 new screenshots (98 evidence, 99/99b the drawer border
+  pair, 100 the chat page, 101/101b the legacy /assets desktop+mobile
+  — VLM-confirmed) + 02/11 standards refreshed → 118 PNG captures. DB
+  pristine.
