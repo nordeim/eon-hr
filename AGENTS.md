@@ -12,7 +12,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 464 specs) |
+| Unit tests | `bun run test` (Vitest, 480 specs) |
 | E2E tests | `bun run test:e2e` (Playwright, 99 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
@@ -1344,3 +1344,99 @@ white — VLM cannot perceive the subtle 2px ring, documented).
   pair, 100 the chat page, 101/101b the legacy /assets desktop+mobile
   — VLM-confirmed) + 02/11 standards refreshed → 118 PNG captures. DB
   pristine.
+
+## Session-32 recipe layer (parity round 31 — the orphan-route hunt: 14 new routes)
+
+- **The round's method (the big find)**: REF's SPA bundle
+  (`/assets/index-C-IrDy5f.js`, 2.2MB) carries the FULL page registry —
+  `VKe={…61 keys}` — plus the mechanical path function
+  `We(name)="/"+name.toLowerCase().replace(/ /g,"-")`. Cross-referencing
+  the 61 registry names against the clone's 47 routes found **14 routes
+  REF serves that the clone 404'd on**. ALL render inside the app shell
+  (main x=256, 17 nav items — measured). Route-coverage parity is now
+  COMPLETE: the clone serves all 61 registry routes.
+- **R31-A (the 10 real pages)**: /careers (the blue→indigo sRGB hero
+  `bg-[linear-gradient(to_right,#2563eb,#4f46e5)] text-white py-16
+  text-center`, 48px white h1 y=64 + 20px blue-200 line y=128; the
+  company chips + 548px job grid are with-data only; zero-data = the
+  "No Open Positions / Check back later for new opportunities!" card;
+  REF's job list FLUCTUATES per load — its backend data, documented
+  divergence), /employeeportal (canvas `from-blue-50 to-indigo-100 flex
+  items-center justify-center`; max-w-md shadow-xl card, p-8 text-center;
+  the 64px bg-blue-100 ClipboardList circle mb-4 + **H2 20px/700** "No
+  Onboarding Found" y=448 + 16px line y=484), /externaljobapplication
+  (blue→indigo canvas; centered 36px h1 y=32 + 18px sub **mt-3** y=84;
+  wrapper **space-y-12** (48px, NOT the standard 32 — card y=160);
+  CardContent p-6 pt-0 > div **pt-12** > 64px slate-300 Briefcase mb-4
+  y=209 + h3 20px mb-2 y=289 + 16px slate-600 line y=325 — the ICON
+  rides FIRST), /hrassistant (max-w-4xl mx-auto; the flat36 centered
+  header — kicker pill "AI HR Assistant" y=40 + 36px h1 y=84 + 18px line
+  y=136; shadow-xl chat card CardContent p-0 with the h-[460px] message
+  area + "Ask me anything about HR..." textarea + 48px icon send button;
+  persists via the existing /api/ai-chat, single-pane), /payrollai (the
+  /assets green→blue canvas twin; flat36 + "Run AI Analysis" gradient
+  button y=32; 3-col gap-6 p-6 170h stat tiles; the 64px green-500
+  CheckCircle empty), /payrollreports (**a page-specific header recipe**
+  — hand-rolled, NOT PageHeader: the badge pill + green-600 WhatsApp CTA
+  ride a row at y=56 (24px below canvas top), 36px h1 y=108, 16px sub
+  y=156 — distinct from the standard raised-36 116/168; 4×72h horizontal
+  stat tiles; p-4 filter card; Monthly/Tax/History white pills h-7;
+  border-b p-6 pb-3 report card), /requestreports + /requestsettings
+  (canvas `min-h-screen flex w-full from-slate-50 to-blue-50`; the
+  CENTERED 24px h1 y=32 + Back ghost (12px h-8 x=288) + sub **mt-0**
+  FLUSH y=64 — the hrreports mt-0 recipe; requestsettings' cards are
+  `max-w-[960px] mx-auto`), /shiftswap (violet→blue canvas
+  `bg-[linear-gradient(to_right_bottom,#f5f3ff,#eff6ff)]`; flat36 + 4×82h
+  horizontal tiles; the violet-600 "My Requests" pill + ghost "Peer
+  Approval (N)" row y=315; 48px slate-300 ArrowLeft empty), /tenantsetup
+  (canvas from-blue-50 to-indigo-50 centered; max-w-2xl **shadow** card;
+  CardHeader border-b p-6 text-center: the 64px bg-blue-100 Users circle
+  **mb-[22px]** — v4's space-y flip means REF's v3 mb-4+space-y-1.5
+  STACK to 22px while v4's :where() lets mb-4 win, so the explicit
+  mb-[22px] + the h2 `font-semibold tracking-tight text-2xl` + 16px line
+  y=358; CardContent p-6 form space-y-6 with h-11 inputs + `pt-4` on the
+  justify-end Continue row — card h=483, y=209).
+- **R31-B (the 2 aliases)**: /organizationsetup + /dynamicdashboard
+  re-export the dashboard page component; both take the plain "Eon HR"
+  title (PLAIN_TITLE_ROUTES) — REF renders the dashboard byte-identical
+  there (bodyLen 322, 4 cards, "Welcome back" h1).
+- **R31-C (the 2 blank stubs)**: /home + /employeedetail render `null`
+  with the mechanical titles — REF renders NOTHING in main on both
+  (verified twice; ?id= changes nothing; a path segment → REF's own
+  404). Pinned: main has zero h1/h3/button.
+- **R31-S (the schema supersets)**: `ShiftSwap` (requesterId → Employee,
+  swapDate, notes?, status pending|peer_approved|manager_review|
+  approved|rejected) + `ApprovalConfig` (category, level 1-3, approverId
+  → Employee, @@unique triple). APIs: /api/shiftswaps (GET list+counts,
+  POST, PATCH status, DELETE) + /api/approval-config (GET, POST
+  admin/hr, DELETE admin/hr). The pages wire real data (careers/
+  externaljobapplication → JobPosting; employeeportal → OnboardingProcess
+  with the progress superset; payrollai/payrollreports/requestreports →
+  aggregations with a real CSV export; requestsettings → the Add-approver
+  round-trip; tenantsetup → the Company PATCH; shiftswap → the full
+  request round-trip).
+- **Probe-tooling lessons**: (1) the standing audit's `aside`-selector
+  navmap reads REF EMPTY (REF's sidebar is div-based — locate items via
+  `div.min-h-screen button/a` + x<260; the audit script's drawer click
+  also flakes on cold sessions — the dedicated probes are the truth);
+  (2) the standalone server restart needs the OLD next-server killed by
+  PID (`ss -tlnp` — pkill -f server.js misses it; an EADDRINUSE failure
+  leaves the STALE build serving, which reads as page errors on new
+  routes); (3) eval strings with `//` comments die when joined to one
+  line (the comment eats the rest — strip comments from probe evals);
+  (4) the v4 space-y flip bites INSIDE cards too (REF's v3 mb-4 +
+  space-y-1.5 stack to 22px; v4's :where() wrapper lets the utility
+  win — use explicit mb-[22px]).
+- **Pins**: 16 new (tests/unit/recipes.test.ts session-32 block) + the
+  R25-A4 route count 47→61. Gates: lint 0/0 · tsc ✓ · 480/480 unit (+16)
+  · build ✓ · 121/121 E2E (+21: 12 navigation rows/specials + the
+  orphan-routes spec's 10 — the blanks/aliases/empty-state contracts +
+  the shiftswap round-trip + the requestsettings Add round-trip + the
+  tenantsetup PATCH with company restore). Live-verified: 13/14 routes
+  byte-identical (the /careers line diff is REF's fluctuating live job
+  data — h1+hero byte-identical, the zero-data contract verified
+  matching on the empty load); 12/12 redeploy MATCH; mobile chrome
+  byte-identical (tabs/kicker/drawer border); sidebar navmap 865/905. 9
+  new screenshots (102 evidence, 103/103b the shiftswap pair, 104
+  tenantsetup, 105 careers, 106 payrollai, 107 hrassistant, 108 mobile
+  shiftswap) + 02/11 standards refreshed → 127 PNG captures. DB pristine.

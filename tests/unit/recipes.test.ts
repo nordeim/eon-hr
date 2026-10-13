@@ -2091,9 +2091,10 @@ describe("session-26 SEO/meta recipes (parity round 25 — the head dimension)",
   it("R25-A4 coverage: every (app) route dir has a layout.tsx exporting pageMetadata('<route>') — client pages cannot export metadata", () => {
     const base = join(process.cwd(), "src", "app", "(app)");
     const dirs = readdirSync(base, { withFileTypes: true }).filter((d) => d.isDirectory());
-    /* 47 since session 31 (R30-C): the legacy /assets route joined the
-       app (REF's orphan page — route-coverage parity). */
-    expect(dirs.length).toBe(47);
+    /* 61 since session 32 (R31): the orphan-route hunt found 14 more
+       routes REF serves (the bundle's page registry cross-reference) —
+       10 real pages, 2 dashboard aliases, 2 blank stubs. */
+    expect(dirs.length).toBe(61);
     for (const d of dirs) {
       const layoutPath = join(base, d.name, "layout.tsx");
       expect(existsSync(layoutPath), `${d.name}/layout.tsx missing`).toBe(true);
@@ -2426,5 +2427,176 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     expect(appShell).toContain("onTouchMove");
     expect(appShell).toContain("onTouchEnd");
     expect(appShell).toMatch(/SWIPE_THRESHOLD|threshold/i);
+  });
+});
+
+describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new routes)", () => {
+  const APP = join(process.cwd(), "src", "app", "(app)");
+
+  it("R31-COV: the 14 orphan routes the REF bundle registry serves (VKe={61 keys} + We(name)=/lowercase) all have page dirs — route-coverage parity", () => {
+    const dirs = readdirSync(APP, { withFileTypes: true }).filter((d) => d.isDirectory());
+    /* 61 since session 32 (R31-A/B/C): REF's page registry cross-reference
+       found 14 routes the clone 404'd on — 10 real pages, 2 dashboard
+       aliases, 2 blank stubs. */
+    expect(dirs.length).toBe(61);
+    for (const r of ["careers","employeeportal","externaljobapplication","hrassistant","payrollai","payrollreports","requestreports","requestsettings","shiftswap","tenantsetup","organizationsetup","dynamicdashboard","home","employeedetail"]) {
+      expect(existsSync(join(APP, r, "page.tsx")), `${r}/page.tsx missing`).toBe(true);
+      expect(existsSync(join(APP, r, "layout.tsx")), `${r}/layout.tsx missing`).toBe(true);
+    }
+  });
+
+  it("R31-C1: /careers — the blue→indigo sRGB hero canvas, the centered 48px white h1 + blue-200 line, the job-grid + zero-data No Open Positions card", () => {
+    const src = read("src", "app", "(app)", "careers", "page.tsx");
+    expect(src).toContain("bg-[linear-gradient(to_right,#2563eb,#4f46e5)]");
+    expect(src).toContain("text-white py-16");
+    expect(src).toMatch(/>Find Your Dream Job<\/h1>/);
+    expect(src).toContain("Explore opportunities from top companies powered by EonHR");
+    expect(src).toContain("text-blue-200");
+    expect(src).toContain("No Open Positions");
+    expect(src).toContain("Check back later for new opportunities!");
+    expect(src).toContain("/api/jobs");
+  });
+
+  it("R31-C2: /employeeportal — the blue→indigo-100 centered canvas with the max-w-md shadow-xl card + the onboarding empty state", () => {
+    const src = read("src", "app", "(app)", "employeeportal", "page.tsx");
+    expect(src).toContain("from-blue-50 to-indigo-100");
+    expect(src).toContain("flex items-center justify-center");
+    expect(src).toContain("max-w-md");
+    expect(src).toContain("shadow-xl");
+    expect(src).toContain("No Onboarding Found");
+    expect(src).toContain("You don&apos;t have an active onboarding process yet. Please contact your HR team.");
+  });
+
+  it("R31-C3: /externaljobapplication — the blue→indigo canvas, centered 36px header, the Briefcase icon-over-line empty card", () => {
+    const src = read("src", "app", "(app)", "externaljobapplication", "page.tsx");
+    expect(src).toContain("from-blue-50 to-indigo-50");
+    expect(src).toMatch(/>Job Opportunities<\/h1>/);
+    expect(src).toContain("Join our team and make an impact");
+    expect(src).toContain("Briefcase");
+    expect(src).toContain("h-16 w-16 text-slate-300");
+    expect(src).toContain("We don&apos;t have any open positions at the moment. Check back later!");
+  });
+
+  it("R31-C4: /hrassistant — the max-w-4xl centered header (kicker pill + 36px h1 + line) + the single-pane shadow-xl chat card with the textarea + dark send button", () => {
+    const src = read("src", "app", "(app)", "hrassistant", "page.tsx");
+    expect(src).toContain("from-blue-50 to-indigo-50");
+    expect(src).toContain("max-w-4xl mx-auto");
+    expect(src).toContain("AI HR Assistant");
+    expect(src).toMatch(/title="HR Assistant"/);
+    expect(src).toContain("Ask me anything about HR policies, leave, payroll, and more");
+    expect(src).toContain("shadow-xl");
+    expect(src).toContain("Ask me anything about HR...");
+    expect(src).toContain("/api/ai");
+  });
+
+  it("R31-C5: /payrollai — the green→blue canvas (the /assets twin), the Run AI Analysis gradient header button, the 3-tile stat row, the green CheckCircle empty", () => {
+    const src = read("src", "app", "(app)", "payrollai", "page.tsx");
+    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)]");
+    expect(src).toMatch(/title="Payroll AI Suggestions"/);
+    expect(src).toContain("AI-powered payroll analysis and recommendations");
+    expect(src).toContain("Run AI Analysis");
+    expect(src).toContain("Pending Suggestions");
+    expect(src).toContain("Total Adjustments");
+    expect(src).toContain("CheckCircle");
+    expect(src).toContain("text-green-500");
+  });
+
+  it("R31-C6: /payrollreports — the raised header + green WhatsApp CTA, the 4-tile horizontal stat row, the filter card, the Monthly/Tax/History white tab pills", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain("from-blue-50 to-indigo-50");
+    expect(src).toMatch(/title="Payroll Reports"/);
+    expect(src).toContain("Send Payslips via WhatsApp");
+    expect(src).toContain("bg-green-600");
+    expect(src).toContain("Total Earnings");
+    expect(src).toContain("Net Payroll");
+    expect(src).toContain("Filter by Employee");
+    expect(src).toContain("Monthly Payroll Summary");
+    expect(src).toContain("Tax & Deductions");
+    expect(src).toContain("History");
+  });
+
+  it("R31-C7: /requestreports — the slate→blue canvas, the centered 24px header + Back ghost button, the documenttracker-recipe 4-tile row", () => {
+    const src = read("src", "app", "(app)", "requestreports", "page.tsx");
+    expect(src).toContain("from-slate-50 to-blue-50");
+    expect(src).toMatch(/>Request Reports<\/h1>/);
+    expect(src).toContain("Analytics and reporting by area and period");
+    expect(src).toContain("Back");
+    expect(src).toContain("Export CSV");
+    expect(src).toContain("Total Requests");
+    expect(src).toContain("Total Amount (SAR)");
+  });
+
+  it("R31-C8: /requestsettings — the centered 24px header + Back ghost, the 960px Approval Workflow + Request Limits cards, the None-set lines", () => {
+    const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
+    expect(src).toContain("from-slate-50 to-blue-50");
+    expect(src).toMatch(/>Request Settings<\/h1>/);
+    expect(src).toContain("Configure approvers and request limits");
+    expect(src).toContain("Approval Workflow");
+    expect(src).toContain("Set up to 3 approval levels per request category");
+    expect(src).toContain("max-w-[960px]");
+    expect(src).toContain("Level {lvl}");
+    expect(src).toContain("None set");
+    expect(src).toContain("Request Limits");
+    expect(src).toContain("/api/approval-config");
+  });
+
+  it("R31-C9: /shiftswap — the violet→blue canvas, the 4-tile stat row, the violet My Requests tab + ghost Peer Approval pill, the ArrowLeft empty", () => {
+    const src = read("src", "app", "(app)", "shiftswap", "page.tsx");
+    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f5f3ff,#eff6ff)]");
+    expect(src).toMatch(/title="Shift Swap"/);
+    expect(src).toContain("Request, approve, and manage shift swaps");
+    expect(src).toContain("My Requests");
+    expect(src).toContain("Peer Approval Needed");
+    expect(src).toContain("Manager Review");
+    expect(src).toContain("bg-violet-600");
+    expect(src).toContain("ArrowLeft");
+    expect(src).toContain("/api/shiftswaps");
+  });
+
+  it("R31-C10: /tenantsetup — the blue→indigo centered canvas, the max-w-2xl shadow wizard card, the Company Name/Owner Email fields + Continue", () => {
+    const src = read("src", "app", "(app)", "tenantsetup", "page.tsx");
+    expect(src).toContain("from-blue-50 to-indigo-50");
+    expect(src).toContain("flex items-center justify-center");
+    expect(src).toContain("max-w-2xl");
+    expect(src).toContain("Welcome to EonHR");
+    expect(src).toContain("Let&apos;s set up your HR management workspace");
+    expect(src).toContain("Company Name");
+    expect(src).toContain("Owner Email");
+    expect(src).toContain("Continue");
+  });
+
+  it("R31-B1: the dashboard aliases — /organizationsetup + /dynamicdashboard re-export the Dashboard page and take the plain Eon HR title", () => {
+    for (const r of ["organizationsetup", "dynamicdashboard"]) {
+      const src = read("src", "app", "(app)", r, "page.tsx");
+      expect(src).toContain('../dashboard/page');
+    }
+    const meta = read("src", "lib", "meta.ts");
+    expect(meta).toContain('"/organizationsetup"');
+    expect(meta).toContain('"/dynamicdashboard"');
+  });
+
+  it("R31-D1: the blank stubs — /home + /employeedetail render null content with mechanical titles", () => {
+    for (const r of ["home", "employeedetail"]) {
+      const src = read("src", "app", "(app)", r, "page.tsx");
+      expect(src).toMatch(/return null/);
+    }
+  });
+
+  it("R31-S1: the ShiftSwap model — requester, shift date, notes, the 5-status flow", () => {
+    expect(prismaSchema).toMatch(/model ShiftSwap \{[\s\S]*?requesterId[\s\S]*?swapDate[\s\S]*?status\s+String\s+@default\("pending"\)/);
+  });
+
+  it("R31-S2: the ApprovalConfig model — category + level + approver with the unique triple", () => {
+    expect(prismaSchema).toMatch(/model ApprovalConfig \{[\s\S]*?@@unique\(\[category, level, approverId\]\)/);
+  });
+
+  it("R31-S3: the two new API routes exist with the ApiResult envelope + Zod validation", () => {
+    for (const r of ["shiftswaps", "approval-config"]) {
+      const src = read("src", "app", "api", r, "route.ts");
+      expect(src).toContain("guard(");
+      expect(src).toContain("requireUser");
+    }
+    const swapsApi = read("src", "app", "api", "shiftswaps", "route.ts");
+    expect(swapsApi).toContain('z.object');
   });
 });

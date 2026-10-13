@@ -24,8 +24,10 @@ export const SITE_NAME = "Eon HR";
 export const BASE_DESCRIPTION =
   "Eon HR — modern HR management: employees, payroll, recruitment, training, compliance, performance, analytics.";
 
-/** The dashboard + login special case: REF titles them the plain site name. */
-const PLAIN_TITLE_ROUTES = new Set(["/dashboard"]);
+/** The dashboard + login special case: REF titles them the plain site name.
+ *  Session 32 (R31-B): /organizationsetup + /dynamicdashboard render the
+ *  Dashboard page on REF (measured title "Eon HR") — the alias contract. */
+const PLAIN_TITLE_ROUTES = new Set(["/dashboard", "/organizationsetup", "/dynamicdashboard"]);
 
 const humanize = (slug: string) => slug.charAt(0).toUpperCase() + slug.slice(1);
 

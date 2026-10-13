@@ -943,3 +943,27 @@ Stage Summary:
 - Round 30 (the drawer border + chat structure + legacy /assets + swipe dimensions) complete and ready for push: three REAL at-rest parity gaps eliminated (the drawer's missing 1px default-token border, the chat page's invented empty-state structure/copy, and the 404 where REF serves its legacy assets page) plus the mobile-menu superset (the swipe-to-close drawer with the animation-continuation contract)
 - Gates: lint 0/0 · tsc ✓ · 464/464 unit (+7) · build ✓ · 100/100 E2E (+7); DB pristine
 - Frontier after this round: with-data (blocked on REF), checkbox focus recipe (no REF surface), form-error surfaces (hidden by zero-data), the deferred print-button decision (report-bearing pages), a systematic orphan-route hunt (/assets suggests REF may serve more aliases), mobile gesture depth (swipe-to-open from the screen edge)
+
+---
+Task ID: session-32
+Agent: main (Super Z)
+Task: Parity round 31 — the systematic orphan-route hunt: 14 recovered routes (route coverage now REF's complete 61-page registry) + the ShiftSwap/ApprovalConfig schema supersets
+
+Work Log:
+- Workspace intact (no reset): git pull f661dc6 (session_57.md joined); root + session docs re-read; DB pristine via the absolute-URL dbcheck; baseline gates green after one cold-start E2E flake re-run (lint 0/0 · tsc ✓ · 464/464 · build ✓ · 100/100)
+- Standing audits green: redeploy 12/12; mobile chrome byte-identical (the kicker's first y=89 read was an un-settled transient — fresh-load re-read 101=101; drawer border 1px rgb(229,229,229) both); the combined audit's aside-selector navmap read REF empty (REF's sidebar is div-based) — the dedicated navmap2 probe confirmed 141→621 / 577→829 / roots 865/905 byte-identical
+- THE CENSUS: fetched REF's SPA bundle (/assets/index-C-IrDy5f.js, 2.2MB, plain curl) → extracted the page registry VKe={61 keys} + the path function We(name)="/"+lowercase → cross-reference vs the clone's 47 routes = 14 ORPHANS. Probed all live on REF: zero 404s, all inside the app shell → 10 real pages + 2 dashboard aliases + 2 blank stubs (/home + /employeedetail render NOTHING in main — verified twice)
+- Full measurement pass: structured DOM dumps (canvas classes, header geometry, stat rows, cards, empty states, icon path fingerprints) at 1440×900 + the 390×844 mobile sweep + the /careers data-fluctuation documentation (REF's backend job data is NOT a parity target; the zero-data card is)
+- docs/remediation-plan-session32.md written + codebase-validated
+- TDD: 16 RED pins → GREEN (three pin-literal iterations: class orders to REF's measured chains, raw-h1 pins for the non-PageHeader pages, apostrophe literals, the multi-space schema regex; R25-A4 count 47→61): ShiftSwap + ApprovalConfig models (db:push) + /api/shiftswaps + /api/approval-config (one parseBody destructure fix after tsc); 14 page dirs with mechanical pageMetadata; the aliases re-export the dashboard + PLAIN_TITLE_ROUTES; the blanks return null
+- E2E +21 after three spec iterations: navigation +12 (10 rows + 2 no-h1 specials — the /chat precedent) + orphan-routes.spec.ts +10 (blank/alias/empty-state contracts + the shiftswap round-trip + the requestsettings Add round-trip with the combobox nth(1) fix + the tenantsetup PATCH with company restore; describe-scoped pre-clean for the persistent e2e DB)
+- Live verification — three pixel-fix rounds: (1) employeeportal 64px circle + H2 20px/700, externaljobapplication icon-first + mt-3 sub, payrollreports hand-rolled 56/108/156 header, flush mt-0 subs on requestreports/requestsettings, tenantsetup Users circle + h-11 inputs; (2) the v4 space-y-flip compensation (mb-[22px] + pt-4 — the 483px card lands at y=209 exactly) + space-y-12 on externaljobapplication; (3) FINAL 13/14 byte-identical — the one DIFF is /careers' REF live job data (h1+hero byte-identical, zero-data contract verified on the empty load; documented)
+- The EADDRINUSE trap hit mid-round: the "restarted" server was the STALE build (new routes read as error pages) — killed by PID via ss -tlnp, restarted clean
+- Regressions: 12/12 redeploy · mobile chrome byte-identical · sidebar navmap 865/905 · 121/121 E2E · DB pristine
+- 9 screenshots (102 evidence, 103/103b the shiftswap pair, 104 tenantsetup, 105 careers, 106 payrollai, 107 hrassistant, 108 mobile) + 02/11 refreshed → 127 PNG captures
+- Docs updated: AGENTS session-32 layer + 480/121 counts; SKILL v3.15.0 + §44 + state; PAD [S32] + Last Updated; CLAUDE 601-pyramid + 61 routes + 51 endpoints + 47 models + the session-32 pin catalog; README 61 routes + 121 E2E + 127 captures + the registry-completion extension; docs/session_58.md + docs/session_59.md; this worklog; the plan's completion record
+
+Stage Summary:
+- Round 31 (the orphan-route hunt) complete and ready for push: route coverage is now REF's COMPLETE 61-page registry (14 recovered routes — 10 real pages byte-identical live, 2 dashboard aliases, 2 blank stubs), with two new Prisma models + APIs backing the functional supersets (shiftswap round-trip, approval-config round-trip, company PATCH, real aggregations + CSV export)
+- Gates: lint 0/0 · tsc ✓ · 480/480 unit (+16) · build ✓ · 121/121 E2E (+21); DB pristine
+- Frontier after this round: with-data surfaces (blocked on REF), checkbox focus recipe (no REF surface), form-error surfaces (zero-data hidden), the deferred print-button decision, mobile gesture depth (swipe-to-open)

@@ -105,6 +105,8 @@ model Employee {
   department        Department?          @relation(fields: [departmentId], references: [id])
   manager           Employee?            @relation("OrgChart", fields: [managerId], references: [id])
   reports           Employee[]           @relation("OrgChart")
+  shiftSwaps        ShiftSwap[]
+  approvalConfigs   ApprovalConfig[]
   leaveBalances     LeaveBalance[]
   leaveRequests     LeaveRequest[]
   attendanceRecords AttendanceRecord[]
@@ -708,4 +710,32 @@ model SecuritySettings {
   automatedBackups Boolean  @default(true)
   gdprCompliance   Boolean  @default(true)
   updatedAt        DateTime @updatedAt
+}
+
+// ============================================================ Shift swaps (session 32)
+
+model ShiftSwap {
+  id          String   @id @default(cuid())
+  requesterId String
+  swapDate    DateTime
+  notes       String?
+  status      String   @default("pending") // pending | peer_approved | manager_review | approved | rejected
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester Employee @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+
+  @@index([requesterId])
+}
+
+model ApprovalConfig {
+  id         String   @id @default(cuid())
+  category   String   @default("general") // general | it | hr | facilities | finance | admin
+  level      Int      @default(1) // 1 | 2 | 3
+  approverId String
+  createdAt  DateTime @default(now())
+
+  approver Employee @relation(fields: [approverId], references: [id], onDelete: Cascade)
+
+  @@unique([category, level, approverId])
 }

@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.14.0 (session-31 remediation complete) · **Last updated:**
-> 2026-10-13 · **State:** 464 unit + 100 E2E tests green, lint/typecheck/build
+> **Version:** 3.15.0 (session-32 remediation complete — the orphan-route hunt) · **Last updated:**
+> 2026-10-13 · **State:** 480 unit + 121 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -2057,3 +2057,66 @@ R25-A4 count updated) · build ✓ · 100/100 E2E (+7). Live-verified:
 drawer border + chat y-map + /assets y-map (desktop AND mobile)
 byte-identical; 12/12 redeploy; mobile chrome byte-identical; sidebar
 navmap 865/905; DB pristine. 118 PNG captures (6 new, VLM-confirmed).
+
+## 44. Session-32 Recipe Layer — parity round 31 (the orphan-route hunt: 14 recovered routes)
+
+**The method — mine the SPA bundle for the route registry.** REF's main
+bundle (`/assets/index-C-IrDy5f.js`, 2.2MB, plain curl — no auth needed)
+contains the page registry `VKe={AdvancedAnalytics:…, 61 keys}` and the
+mechanical path builder `We(e){return "/"+e.toLowerCase().replace( /
+/g,"-")}`. Cross-referencing those 61 names against the routes the clone
+served found 14 orphans in one shot — a census technique that beats
+route-guessing forever. Lesson: when hunting coverage gaps in a compiled
+SPA, extract the router's own registry from the bundle before probing.
+
+**The recovered routes (all inside the app shell — main x=256)**:
+
+1. **The 10 real pages** — measured at 1440×900 + 390×844 and
+   replicated: careers (public jobs; REF's data FLUCTUATES per load —
+   the zero-data card is the contract, the clone renders its own
+   JobPosting rows), employeeportal (centered max-w-md card: the 64px
+   bg-blue-100 circle + H2 20px/700 + the 16px line at y=448/484),
+   externaljobapplication (icon-FIRST empty: Briefcase y=209 → h3
+   y=289 → line y=325; wrapper space-y-12 + content pt-12), hrassistant
+   (single-pane chat under the flat36 centered header, reusing
+   /api/ai-chat), payrollai (the /assets green canvas twin + 3 stat
+   tiles + green CheckCircle empty), payrollreports (a PAGE-SPECIFIC
+   header: badge+CTA row y=56, h1 y=108, 16px sub y=156 — hand-rolled,
+   NOT the standard raised-36), requestreports + requestsettings
+   (centered 24px headers with the FLUSH mt-0 sub + Back ghost buttons;
+   960px config cards), shiftswap (violet canvas, 4 horizontal tiles,
+   violet/ghost tab pills), tenantsetup (max-w-2xl wizard card).
+2. **The 2 aliases** — organizationsetup + dynamicdashboard re-export
+   the dashboard page + its plain "Eon HR" title.
+3. **The 2 blank stubs** — home + employeedetail render `null` (REF
+   renders nothing in main; the mechanical titles still apply).
+
+**The v4 space-y flip INSIDE cards (trap 6, card edition)**: REF's
+tenantsetup card header stacks `mb-4` + `space-y-1.5` to a 22px gap
+(v3's margin-top-on-next-sibling stacks with the utility margin). In
+v4, `space-y` writes margin-BOTTOM on `:not(:last-child)` via a
+zero-specificity `:where()` — the `mb-4` utility WINS and the 6px is
+lost. Fix: explicit `mb-[22px]` on the circle wrapper (plus `pt-4` on
+the button row and h-11 inputs to land the 483px card at y=209).
+
+**Probe-tooling lessons (this round's four)**: (1) the standing
+navmap's `aside` selector reads REF empty — REF's sidebar is div-based;
+locate items via `div.min-h-screen button/a` + x<260 (the dedicated
+probe is the truth, the combined audit script flakes). (2) A standalone
+server restart that logs EADDRINUSE leaves the STALE build serving —
+new routes then read as error pages; kill by PID (`ss -tlnp`) and
+re-verify the health endpoint. (3) Probe evals joined to one line die
+on `//` comments — the comment eats the rest of the expression; strip
+comments from probe evals. (4) The first mobile kicker read after a
+viewport switch can be an un-settled transient (y=89 vs 101) — re-read
+after a fresh load before calling a DIFF.
+
+**Gates**: lint 0/0 · tsc ✓ · 480/480 unit (+16 session-32 pins; the
+R25-A4 route count 47→61) · build ✓ · 121/121 E2E (+21: the nav sweep's
+12 + the orphan-routes spec's 10 — blank/alias/empty-state contracts +
+the shiftswap, requestsettings and tenantsetup round-trips).
+Live-verified: 13/14 byte-identical (careers' line diff = REF's live
+backend data — the h1+hero match, the zero-data contract verified on
+the empty load); 12/12 redeploy; mobile chrome byte-identical; sidebar
+navmap 865/905; DB pristine. 127 PNG captures (9 new + 02/11
+refreshed).

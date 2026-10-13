@@ -105,6 +105,18 @@ const ROUTES: [string, string][] = [
   ["/assetmanagement", "Asset Management"],
   // Session 31 (R30-C): REF's legacy orphan route — now replicated.
   ["/assets", "Assets"],
+  // Session 32 (R31): the orphan-route hunt — 14 routes from REF's bundle
+  // page registry (10 real pages, 2 dashboard aliases, 2 blank stubs).
+  ["/careers", "Find Your Dream Job"],
+  ["/externaljobapplication", "Job Opportunities"],
+  ["/hrassistant", "HR Assistant"],
+  ["/payrollai", "Payroll AI Suggestions"],
+  ["/payrollreports", "Payroll Reports"],
+  ["/requestreports", "Request Reports"],
+  ["/requestsettings", "Request Settings"],
+  ["/shiftswap", "Shift Swap"],
+  ["/organizationsetup", "Welcome back"],
+  ["/dynamicdashboard", "Welcome back"],
   ["/staffrequests", "Staff Requests"],
   ["/companywall", "Company Updates"],
   ["/announcements", "Company Announcements"],
@@ -135,6 +147,20 @@ test.describe("all module routes render", () => {
       await expect(page.getByRole("heading", { level: 1 }).first()).toContainText(heading);
     });
   }
+
+  // Session 32 (R31): these orphan routes render NO page h1 on REF either
+  // (measured) — their contracts pin via their card headings.
+  test("/employeeportal renders (reference: no page h1 — the centered card)", async ({ page }) => {
+    const res = await page.goto("/employeeportal");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByText("No Onboarding Found")).toBeVisible();
+  });
+
+  test("/tenantsetup renders (reference: no page h1 — the wizard card)", async ({ page }) => {
+    const res = await page.goto("/tenantsetup");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByText("Welcome to EonHR")).toBeVisible();
+  });
 
   // /chat has NO page h1 in the reference — "Messages" is an h2 inside the
   // unified chat card (session-4 parity restructure).
