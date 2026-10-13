@@ -1009,3 +1009,22 @@ Work Log:
 
 Stage Summary:
 - Round 33 delivered: the six wired pages rebuilt to live-measured REF (byte-identical inventories), the login Alert + never-audited login stack aligned, two new engine lessons documented (the v4 inline-label space-y trap; the bg-image gradient over bg-color), 507 unit + 135 E2E green
+
+---
+Task ID: session-35
+Agent: main (Super Z)
+Task: eon-hr parity round 34 (session 35) — the dialog interiors + the deep-RTL find: census, TDD rebuilds, live verification, docs, push
+
+Work Log:
+- Workspace reset: fresh clone at cafc05b (the owner's session_66.md narrative joined); .env recreated (file:../db/custom.db + fresh AUTH_SECRET); bun install; db:push + db:seed (pristine); root + session docs re-read; baseline gates ALL GREEN (507/507 + 135/135)
+- Census (the frontier's next dimensions): the dialog interiors (loans + assets — the only two REF-exposed, measured geometrically for the first time) + the deep-RTL polish + the payrollreports tabs + the standing mobile-nav check; REF CSS chunk unchanged → clone-side
+- Findings: the asset dialog's 4 gaps (invented description, stacked Type/Serial, the icon button, the title LH); the loans installment/placeholder; the systemic DialogTitle 28→18px; THE DEEP-RTL FIND (REF's desktop sidebar does NOT mirror — fixed panel + transparent peer; the round-32 verification had measured the peer); the tabs still inert on REF
+- TDD: 14 RED pins → GREEN (dialog.tsx leading-none + bg-black/80, the asset rebuild, the loans fixes, the app-shell peer/fixed split, the payrollreports controlled tabs + 3 aggregate cards)
+- Three verification-driven follow-ups: the v4 inline-label collapse at dialog scale (mt-2 on every control), the NEW Radix native-select last-child trap (Select wrappers drop space-y — the phantom 8px traced cell-by-cell), and the sidebar surface correction (the bg-sidebar token #FAFAFA/#18181b — the round-32 "authored bg-white" had measured the covered container; pins evolved)
+- E2E: the dark-mode RTL pin evolved (aside x=0 fixed + main 1024); new payrollreports-tabs (5) + dialog-interiors (2) specs; two locator-iteration rounds (strict-mode paragraph filter, exact labels)
+- Gates: lint 0/0 · tsc ✓ · 521/521 unit (+14) · build ✓ · 142/142 E2E (+7)
+- Live: both dialogs element-identical (asset 512×372 y-for-y, loans ±1px, overlay 1 unit); the RTL + dark-sidebar pairs surface-identical; mobile chrome + navmap byte-identical; 11 screenshots (121-127, three retake rounds after state-drift lessons) → 156 PNG; DB pristine
+- Docs: AGENTS session-35 layer, SKILL 3.18.0 + §47, PAD [S35], CLAUDE/README counts, session_67/68, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 34 delivered: both REF-exposed dialogs rebuilt to byte-identical interiors, the systemic dialog recipes (leading-none title + 80% backdrop) applied app-wide, the RTL desktop rebuilt to REF's true fixed-panel architecture (plus the surface token correction), and the payrollreports tabs wired as the with-data superset; two new v4 engine lessons documented (the dialog-scale inline-label collapse; the Radix native-select last-child trap), 521 unit + 142 E2E green

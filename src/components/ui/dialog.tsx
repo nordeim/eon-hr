@@ -13,7 +13,11 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
   return (
     <DialogPrimitive.Overlay
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        /* Session 35 (R34-C): bg-black/80 — REF's dialog backdrop
+           (live-measured rgba(0,0,0,0.8) on both exposed dialogs; the
+           shadcn-default /50 renders rgb(125) vs REF's rgb(51) over a
+           white page). Matches the mobile drawer's 0.8 overlay. */
+        "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className
       )}
       {...props}
@@ -67,7 +71,11 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title className={cn("text-lg font-semibold", className)} {...props} />;
+  /* Session 35 (R34-C): leading-none — REF's dialog H2s measure
+     18px/18px/600 on BOTH exposed dialogs (loans + assets, computed
+     styles). v4's default line-height on text-lg is 28px — every dialog
+     title in the app inherits the corrected 18px box. */
+  return <DialogPrimitive.Title className={cn("text-lg font-semibold leading-none", className)} {...props} />;
 }
 
 function DialogDescription({

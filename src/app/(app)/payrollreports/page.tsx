@@ -54,6 +54,13 @@ export default function PayrollReportsPage() {
   const toast = useToast();
   const [loading, setLoading] = React.useState(true);
   const [rows, setRows] = React.useState<PayrollRow[]>([]);
+  /* Session 35 (R34-E): the tabs wired — REF's triggers are inert (its
+     Tax/History/Custom change nothing, re-verified this round), so any
+     content is the with-data superset the frontier framed. The at-rest
+     DOM (Monthly active + the summary card) is unchanged. */
+  const [tab, setTab] = React.useState("monthly");
+  const [range, setRange] = React.useState({ from: "", to: "", employee: "all" });
+  const [customRows, setCustomRows] = React.useState<PayrollRow[] | null>(null);
   const [month, setMonth] = React.useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -105,6 +112,54 @@ export default function PayrollReportsPage() {
     net: visible.reduce((s, r) => s + r.netPay, 0),
     employees: new Set(visible.map((r) => r.employeeName)).size,
   };
+
+  /* R34-E: the Tax & Deductions aggregation — per-employee gross /
+     deductions / effective rate / net, month-scoped (the same `visible`
+     slice the Monthly summary renders). */
+  const taxRows = React.useMemo(() => {
+    const byEmp = new Map<string, { gross: number; deductions: number; net: number }>();
+    for (const r of visible) {
+      const e = byEmp.get(r.employeeName) ?? { gross: 0, deductions: 0, net: 0 };
+      e.gross += r.grossPay;
+      e.deductions += r.deductions;
+      e.net += r.netPay;
+      byEmp.set(r.employeeName, e);
+    }
+    return [...byEmp.entries()].map(([name, v]) => ({
+      name,
+      ...v,
+      rate: v.gross > 0 ? v.deductions / v.gross : 0,
+    }));
+  }, [visible]);
+
+  /* R34-E: the History aggregation — every processed period with its
+     totals, descending (periods are "YYYY-MM" — a string sort is a
+    chronological sort). */
+  const periods = React.useMemo(() => {
+    const byPeriod = new Map<string, { records: number; gross: number; deductions: number; net: number }>();
+    for (const r of rows) {
+      const p = byPeriod.get(r.period) ?? { records: 0, gross: 0, deductions: 0, net: 0 };
+      p.records += 1;
+      p.gross += r.grossPay;
+      p.deductions += r.deductions;
+      p.net += r.netPay;
+      byPeriod.set(r.period, p);
+    }
+    return [...byPeriod.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+  }, [rows]);
+
+  /* R34-E: the Custom report — the from/to + employee range filter over
+     the loaded rows ("YYYY-MM" strings compare chronologically). */
+  function onGenerate() {
+    const filtered = rows.filter(
+      (r) =>
+        (!range.from || r.period >= range.from) &&
+        (!range.to || r.period <= range.to) &&
+        (range.employee === "all" || r.employeeName === range.employee)
+    );
+    setCustomRows(filtered);
+    toast.toast({ title: "Report generated", description: `${filtered.length} record(s) in range.`, variant: "success" });
+  }
 
   function onExportCsv() {
     const header = "Period,Employee,Gross,Net\n";
@@ -179,9 +234,12 @@ export default function PayrollReportsPage() {
         {/* REF (round 33): the tabs + the summary card ride a space-y-4
             wrapper (16px) inside the page's space-y-6 flow. */}
         <div className="space-y-4">
-        {/* REF's tab list: the 4-col grid (the triggers are inert on
-            REF — the Monthly summary below is the standing content). */}
-        <Tabs defaultValue="monthly">
+        {/* REF's tab list: the 4-col grid. Session 35 (R34-E): the
+            triggers are inert on REF — the clone wires them to real
+            aggregates (controlled; the sibling cards below swap by tab,
+            the Tabs component keeps rendering only the list — the
+            at-rest Monthly DOM is byte-identical). */}
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
             <TabsTrigger value="tax">Tax &amp; Deductions</TabsTrigger>
@@ -190,6 +248,7 @@ export default function PayrollReportsPage() {
           </TabsList>
         </Tabs>
 
+        {tab === "monthly" && (
         <Card className="border-slate-200">
           {/* REF's card header (round 33): `flex flex-col md:flex-row
               justify-between gap-3` — the bare left block (title DIV with
@@ -301,6 +360,191 @@ export default function PayrollReportsPage() {
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* R34-E: the Tax & Deductions card — the per-employee breakdown
+            on REF's card grammar (border-slate-200, the p-6 pb-3 border-b
+            header, the bg-slate-50 uppercase thead, the py-12 empty TD). */}
+        {tab === "tax" && (
+        <Card className="border-slate-200">
+          <CardHeader className="border-b p-6 pb-3">
+            <div>
+              <p className="font-semibold leading-none tracking-tight">Tax &amp; Deductions</p>
+              <p className="text-sm text-slate-500 mt-1">Deduction breakdown for {month}</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Employee</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Effective Rate</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {taxRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center text-slate-400">
+                        No records for {month}
+                      </td>
+                    </tr>
+                  ) : (
+                    taxRows.map((r) => (
+                      <tr key={r.name} className="border-b">
+                        <td className="px-4 py-3 font-medium text-slate-900">{r.name}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.gross)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.deductions)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{(r.rate * 100).toFixed(1)}%</td>
+                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(r.net)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+        )}
+
+        {/* R34-E: the History card — every processed period with its
+            totals, newest first. */}
+        {tab === "history" && (
+        <Card className="border-slate-200">
+          <CardHeader className="border-b p-6 pb-3">
+            <div>
+              <p className="font-semibold leading-none tracking-tight">Payroll History</p>
+              <p className="text-sm text-slate-500 mt-1">All processed periods</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Period</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Records</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {periods.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center text-slate-400">
+                        No payroll history yet
+                      </td>
+                    </tr>
+                  ) : (
+                    periods.map(([period, p]) => (
+                      <tr key={period} className="border-b">
+                        <td className="px-4 py-3 font-medium text-slate-900">{period}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{p.records}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(p.gross)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(p.deductions)}</td>
+                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(p.net)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+        )}
+
+        {/* R34-E: the Custom card — the from/to + employee range form and
+            the generated table. */}
+        {tab === "custom" && (
+        <Card className="border-slate-200">
+          <CardHeader className="border-b p-6 pb-3">
+            <div>
+              <p className="font-semibold leading-none tracking-tight">Custom Report</p>
+              <p className="text-sm text-slate-500 mt-1">Build a report for any range</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-wrap items-end gap-4 mb-6">
+              <div className="space-y-1">
+                <Label className="text-xs" htmlFor="custom-from">From</Label>
+                <Input
+                  id="custom-from"
+                  type="month"
+                  className="w-40 mt-1"
+                  value={range.from}
+                  onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs" htmlFor="custom-to">To</Label>
+                <Input
+                  id="custom-to"
+                  type="month"
+                  className="w-40 mt-1"
+                  value={range.to}
+                  onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1 flex-1 min-w-[180px]">
+                <Label className="text-xs">Employee</Label>
+                <Select
+                  value={range.employee}
+                  onValueChange={(v) => setRange((r) => ({ ...r, employee: v }))}
+                >
+                  <SelectTrigger className="w-full mt-1" aria-label="Filter employee">
+                    <SelectValue placeholder="All Employees" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Employees</SelectItem>
+                    {employeeNames.map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={onGenerate} disabled={loading}>Generate Report</Button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Period</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Employee</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
+                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(customRows ?? []).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center text-slate-400">
+                        No records in range
+                      </td>
+                    </tr>
+                  ) : (
+                    (customRows ?? []).map((r) => (
+                      <tr key={r.id} className="border-b">
+                        <td className="px-4 py-3 font-medium text-slate-900">{r.period}</td>
+                        <td className="px-4 py-3 text-slate-600">{r.employeeName}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.grossPay)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.deductions)}</td>
+                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(r.netPay)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+        )}
         </div>
       </div>
     </div>

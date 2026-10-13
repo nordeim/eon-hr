@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.17.0 (session-34 remediation complete — the wired-page at-rest audit + the login Alert) · **Last updated:**
-> 2026-10-13 · **State:** 480 unit + 121 E2E tests green, lint/typecheck/build
+> **Version:** 3.18.0 (session-35 remediation complete — the dialog interiors + the deep-RTL find) · **Last updated:**
+> 2026-10-14 · **State:** 521 unit + 142 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -2254,3 +2254,75 @@ E2E color pin caught it).
 Gates: lint 0/0 · tsc ✓ · 507/507 unit (+14) · build ✓ · 135/135 E2E
 (+2). Live: verify-r33 19/19 MATCH, 0 DIFFs (the payrollai to-right/
 90deg serialization aside). 11 screenshots → 145 PNG captures.
+
+## 47. Session-35 Recipe Layer — parity round 34 (the dialog interiors + the deep-RTL find)
+
+The census took the frontier's next dimensions: the dialog interiors
+(loans + assets — the only two REF-exposed dialogs, measured
+geometrically for the first time), the deep-RTL polish, and the
+payrollreports tab contents. REF's CSS chunk unchanged; its account
+still zero-data.
+
+- **The systemic dialog recipes** (R34-C): `DialogTitle` = `text-lg
+  font-semibold leading-none` (REF-measured 18px/18px/600 on both
+  dialogs — v4's default text-lg line-height is 28px, 10px too tall on
+  every dialog title). The backdrop = `bg-black/80` (REF's overlay is
+  rgba(0,0,0,0.8); the shadcn-default /50 renders rgb(125) vs REF's
+  rgb(51) over a white page — a 30-point never-audited gap the
+  verification screenshots caught).
+- **The asset dialog** (R34-A): H2-only header (no description — the
+  loans pattern); Type + Serial on one `grid grid-cols-2 gap-4` row
+  (223+223 over the 462 inner); the footer Add button TEXT-ONLY
+  (102×36 — icons widen it to 126). Byte-identical box: 512×372.
+- **The loans installment** (R34-B): the value is a P — `text-base
+  font-semibold text-blue-700` (16px/600/rgb(29,78,216)) inside the
+  matched `p-2.5 bg-slate-100 border border-slate-200 rounded-md
+  text-center` box; the Paid From input is BARE (no placeholder).
+- **THE v4 TRAP #7 — the inline-label gap collapse at dialog scale**:
+  REF's v3 `space-y-2` lands as margin-top on the FOLLOWING block → a
+  12px label→control gap (measured); v4's `:not(:last-child)` mb on
+  the INLINE label is ignored → 4px. Both dialogs were silently
+  affected (the session-34 login/payrollreports sightings generalized).
+  Fix: explicit `mt-2` on EVERY control inside a space-y-2 field
+  wrapper.
+- **THE v4 TRAP #8 — the Radix native-select last-child trap**: Radix
+  renders a hidden native `<select>` AFTER the SelectTrigger inside
+  the wrapper — so the trigger is NOT `:last-child`, and v4's space-y
+  puts the margin-bottom on the TRIGGER (a phantom 8px inside every
+  Select-ending wrapper; REF's v3 `* + *` selector never did this).
+  Fix: Select-ending wrappers DROP space-y entirely; the explicit
+  mt-2 carries the 12px gap alone. (Trap 7 + 8 stack: the wrapper
+  class list must be audited per-field, not per-form.)
+- **The deep-RTL find** (R34-D): REF's desktop sidebar does NOT mirror
+  in عربي mode. Architecture = an in-flow TRANSPARENT peer spacer
+  (mirrors with dir; left LTR / right RTL; paints nothing — its inner
+  box is `bg-transparent`) + a FIXED painting panel (`left:0
+  right:1184` at 1440 — identical computed offsets in BOTH directions;
+  internals mirror via the cascading dir: link svg at x=207, text
+  rtl). REF's RTL rendering: panel at x=0..256 OVER the main area's
+  start edge, main 0..1184 (h1 right-aligned at x=823), transparent
+  256px gap at the right showing the canvas. The clone now ships the
+  same fixed-panel + peer split; LTR is visually unchanged. **The
+  round-32 "RTL mirror matches" verification had measured the PEER**
+  (which mirrors at x=1184) — the aside-selector artifact's desktop
+  twin. Lesson: pin the PAINTED panel, not the layout wrapper.
+- **The sidebar surface correction** (R34-D): REF's visible sidebar =
+  the inner `bg-sidebar` div — #FAFAFA in light (pixel-verified on
+  LTR AND RTL) and #18181b in dark (computed — the .dark --sidebar
+  override; NOT slate-900 #0f172a). The round-32 "authored bg-white"
+  find had measured the COVERED fixed container. The desktop aside and
+  the mobile drawer are the SAME token surface. Lesson: measure the
+  element that PAINTS, not the element that AUTHORS.
+- **The payrollreports tabs** (R34-E, the superset): REF's triggers
+  are inert (re-verified) — the clone wires them via controlled state
+  (sibling cards swap by tab; the Tabs component renders only the
+  list; the at-rest Monthly DOM is byte-identical). Tax & Deductions =
+  per-employee gross/deductions/effective-rate/net; History = the
+  periods table descending; Custom = from/to + employee + Generate.
+  All on REF's card grammar with zero-data empty states.
+- **Pins**: 14 new (A1-3, B1-2, C1-3, D1-2, E1-4) + the R32-A4/R30
+  aside pins evolved to the token surface. Gates: lint 0/0 · tsc ✓ ·
+  521/521 unit (+14) · build ✓ · 142/142 E2E (+7). Live: both dialogs
+  byte-identical element-by-element; the RTL pair surfaces identical;
+  the dark sidebar #18181b both apps; mobile chrome + navmap
+  byte-identical. 11 screenshots → 156 PNG captures.

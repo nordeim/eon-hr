@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -236,15 +235,22 @@ function AssetDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
+        {/* Session 35 (R34-A): the H2-only header — REF renders no
+            description (the loans pattern, re-measured this round). */}
         <DialogHeader>
           <DialogTitle>Add Asset</DialogTitle>
-          <DialogDescription>Register a new company asset.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        {/* Session 35 (R34-A): REF's literal dialog classes — the
+            space-y-4 form + space-y-2 field wrappers (v3 semantics:
+            margin-top on the following block → 12px label→control gaps;
+            the v4 clone compensates with mt-2 on each control — the
+            session-34 inline-label trap). */}
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="asset-name">Asset Name</Label>
             <Input
               id="asset-name"
+              className="mt-2"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. MacBook Pro 16&quot;"
@@ -252,35 +258,46 @@ function AssetDialog({
               maxLength={80}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Type</Label>
-            <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
-              <SelectTrigger aria-label="Asset type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LEGACY_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Session 35 (R34-A): REF's 2-col row — Type + Serial ride one
+              grid-cols-2 gap-4 row (223+223 over the 462 inner width,
+              labels above each). */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* No space-y-2 here — Radix's hidden native select renders as
+                the LAST child, so v4's :not(:last-child) would put mb-8 on
+                the TRIGGER (a phantom 8px inside the cell; REF's v3
+                * + * selector never did this). The explicit mt-2 on the
+                trigger provides the 12px label→control gap alone. */}
+            <div>
+              <Label>Type</Label>
+              <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
+                <SelectTrigger aria-label="Asset type" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEGACY_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="asset-serial">Serial Number</Label>
+              <Input
+                id="asset-serial"
+                className="mt-2"
+                value={form.serialNumber}
+                onChange={(e) => setForm((f) => ({ ...f, serialNumber: e.target.value }))}
+                placeholder="Optional"
+                maxLength={60}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="asset-serial">Serial Number</Label>
-            <Input
-              id="asset-serial"
-              value={form.serialNumber}
-              onChange={(e) => setForm((f) => ({ ...f, serialNumber: e.target.value }))}
-              placeholder="Optional"
-              maxLength={60}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
+          <div>
             <Label>Assign To (Optional)</Label>
             <Select value={form.assignedToId} onValueChange={(v) => setForm((f) => ({ ...f, assignedToId: v }))}>
-              <SelectTrigger aria-label="Assign to employee">
+              <SelectTrigger aria-label="Assign to employee" className="mt-2">
                 <SelectValue placeholder="Not assigned" />
               </SelectTrigger>
               <SelectContent>
@@ -297,8 +314,9 @@ function AssetDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
+            {/* Session 35 (R34-A): text-only — REF's footer button is
+                102×36 with no icon. */}
             <Button type="submit" disabled={saving || !form.name.trim()}>
-              {saving ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Plus aria-hidden="true" />}
               Add Asset
             </Button>
           </DialogFooter>

@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 507 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 135 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 521 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 142 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -1604,3 +1604,72 @@ drift, not REF movement.
   0 DIFFs). 11 new screenshots (114-119 the wired-page pairs + 118
   careers hero + 119 payrollai + 120 the login-error pair) → 145 PNG
   captures. DB pristine.
+
+## Session 35 (parity round 34) — THE DIALOG INTERIORS + THE DEEP-RTL FIND
+
+Round 33 audited the wired pages' at-rest bodies; this round took the
+frontier's next dimensions: the dialog interiors (the loans + assets
+dialogs — the only two REF-exposed — measured geometrically for the
+first time), the deep-RTL polish, and the payrollreports tab contents.
+REF's CSS chunk was UNCHANGED (`index-BGNH4KkS.css`) and its account
+still zero-data — every diff was clone-side.
+
+- **R34-A /assets dialog**: rebuilt to byte-identical geometry (box
+  512×372, every element y-for-y with REF): the H2-only header (the
+  invented description line removed — the loans pattern), the Type +
+  Serial 2-col `grid grid-cols-2 gap-4` row (223+223, was stacked
+  full-width), and the text-only 102×36 Add button (the Plus icon
+  removed).
+- **R34-B /loans dialog**: the Monthly Installment value is REF's P —
+  `text-base font-semibold text-blue-700` inside the matched
+  slate-100 box (was a plain neutral DIV); the Paid From input's
+  invented placeholder removed; every control gains `mt-2` (below).
+- **R34-C the systemic dialog recipes**: `DialogTitle` → `text-lg
+  font-semibold leading-none` (REF-measured 18px/18px/600 on BOTH
+  dialogs — every dialog title in the app) and **the backdrop
+  `bg-black/80`** (REF's overlay is rgba(0,0,0,0.8); the shadcn
+  default /50 was a 30-point never-audited gap the verification
+  screenshots caught).
+- **R34-D the deep-RTL find (the headline)**: REF's desktop sidebar
+  does NOT mirror in عربي mode. Its architecture = an in-flow
+  TRANSPARENT peer spacer (mirrors with dir) + a FIXED painting panel
+  (left:0/right:1184 — never flips; internals mirror via the cascading
+  dir). REF's RTL: panel at x=0..256 over the main area's start edge,
+  main 0..1184, transparent gap at 1184..1440. The round-32 "RTL
+  mirror matches" verification had measured the PEER (which mirrors) —
+  the aside-selector artifact's desktop twin. The clone now ships
+  REF's exact architecture (LTR verified visually unchanged). **Plus
+  the surface correction**: REF's visible sidebar = the inner
+  `bg-sidebar` div (#FAFAFA light, pixel-verified; #18181b dark,
+  computed — NOT slate-900) — the round-32 "authored bg-white" pin had
+  measured the COVERED container; the aside now uses the token, the
+  same surface as the drawer.
+- **R34-E /payrollreports tabs wired (the superset)**: REF's triggers
+  are still inert (re-verified) — the clone's four tabs now render
+  real aggregates on controlled state: Tax & Deductions (per-employee
+  breakdown + effective rate), History (the periods table), Custom
+  (from/to + employee + Generate). The at-rest Monthly DOM is
+  byte-identical (pinned).
+- **THE v4 TRAPS (new, session 35)**: (1) the inline-label gap
+  collapse was silently affecting BOTH dialogs — REF's v3 space-y-2
+  renders 12px label→control, the clone's 4px; compensated with
+  explicit `mt-2` on every control (the session-34 recipe at dialog
+  scale). (2) **The Radix native-select last-child trap**: Radix's
+  hidden `<select>` renders AFTER the trigger, so v4's
+  `:not(:last-child)` puts the space-y mb on the TRIGGER — a phantom
+  8px inside every Select wrapper (REF's v3 `* + *` never did).
+  Select-ending wrappers DROP space-y; the mt-2 carries the gap alone.
+- **Pins**: 14 new (the session-35 block: A1-3, B1-2, C1-3, D1-2,
+  E1-4) + the R32-A4/R30-era aside pins evolved to the token surface.
+  Gates: lint 0/0 · tsc ✓ · **521/521 unit (+14)** · build ✓ ·
+  **142/142 E2E (+7: the payrollreports-tabs spec + the
+  dialog-interiors spec)**.
+  Live-verified: both dialogs byte-identical element-by-element (the
+  asset box 512×372 y-for-y; the loans ±1px); the overlay 1 unit; the
+  RTL pair surfaces identical (2-4% text-boundary noise); the dark
+  sidebar #18181b both apps; the mobile chrome + navmap byte-identical
+  (drawer 288@x0 / header 73h / tabs 766y+78h; nav y-positions exact);
+  the wizard empty-submit + the loans/asset required matrices match.
+  11 new screenshots (121 the RTL pair, 122/123 the dialog pairs,
+  124-126 the tabs, 127 the dark sidebar pair) → 156 PNG captures. DB
+  pristine.

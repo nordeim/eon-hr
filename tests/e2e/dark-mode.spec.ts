@@ -132,9 +132,29 @@ test.describe("RTL mode (session 33, R32-B)", () => {
     const en = page.getByRole("button", { name: "EN", exact: true });
     await expect(en).toBeVisible();
     expect(await en.getAttribute("title")).toBe("التبديل إلى الإنجليزية");
-    // The desktop sidebar mirrored to the right edge.
-    const asideRTL = await page.evaluate(() => Math.round(document.querySelector("aside")!.getBoundingClientRect().x));
-    expect(asideRTL).toBeGreaterThan(900);
+    // Session 35 (R34-D): REF's desktop sidebar does NOT mirror — the
+    // painted aside is a FIXED panel that stays physically left in both
+    // directions (REF's computed left:0/right:1184 never flip), while a
+    // transparent in-flow peer spacer reserves the 256px column on the
+    // right and the main area spans 0..1184 under the panel's start
+    // edge. The round-32 pin (>900) had measured the peer, not the
+    // panel — the aside-selector artifact's desktop twin.
+    const rtl = await page.evaluate(() => {
+      const aside = document.querySelector("aside")!;
+      const main = document.querySelector("main")!;
+      return {
+        asideX: Math.round(aside.getBoundingClientRect().x),
+        mainX: Math.round(main.getBoundingClientRect().x),
+        mainW: Math.round(main.getBoundingClientRect().width),
+        position: getComputedStyle(aside).position,
+        dir: getComputedStyle(aside).direction,
+      };
+    });
+    expect(rtl.asideX).toBe(0);
+    expect(rtl.position).toBe("fixed");
+    expect(rtl.dir).toBe("rtl"); // the internals mirror (the cascading dir)
+    expect(rtl.mainX).toBe(0);
+    expect(rtl.mainW).toBe(1024); // 1280 (Desktop Chrome) - the 256px peer gap on the right
   });
 
   test("RTL survives a reload (the pre-paint boot applies it)", async ({ page }) => {

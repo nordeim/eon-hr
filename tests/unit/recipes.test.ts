@@ -2361,10 +2361,14 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     const m = appShell.match(/DialogPrimitive\.Content[\s\S]*?className="([^"]+)"/);
     expect(m).toBeTruthy();
     expect(m![1]).toContain("border-r");
-    /* Session 33 (R32-A/E): the DESKTOP aside moved to REF's authored
-       classes — bg-white in light (the 5-unit find) + the dark slate
-       pair. The drawer keeps the token flip (bg-sidebar -> #18181b). */
-    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
+    /* Session 33 (R32-A/E) → Session 35 (R34-D) CORRECTED: the desktop
+       aside's VISIBLE surface is the bg-sidebar TOKEN — REF's fixed
+       container authors bg-white/dark classes but its inner bg-sidebar
+       div fully covers it (#FAFAFA light, pixel-verified; #18181b dark,
+       computed — NOT slate-900). The round-32 pin had measured the
+       container, not the painted surface. The drawer keeps the token
+       flip (bg-sidebar -> #18181b). */
+    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-sidebar");
   });
 
   it("R30-B1: the chat left card — CardHeader p-4 border-b border-slate-200 with the 14px/600 title, the p-2 max-h-96 body, and the plain muted 'No chats' line (no icon, no centered EmptyState)", () => {
@@ -2682,11 +2686,13 @@ describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)"
   it("R32-A4: the app shell's dark surfaces — canvas gradient, aside (the light bg-white find), mobile chrome, bottom tabs", () => {
     // canvas: slate-900 -> slate-800, sRGB-pinned per trap 3
     expect(appShell).toContain("dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]");
-    // the desktop aside: REF's authored classes — bg-white in LIGHT (the
-    // 31-round-invisible find; the drawer keeps the sidebar token)
-    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
-    // mobile header + bottom nav: dark slate-900/800 chrome
-    expect(appShell.match(/dark:bg-slate-900/g)?.length).toBeGreaterThanOrEqual(3);
+    // the desktop aside: the bg-sidebar TOKEN (session-35 correction —
+    // REF's inner div paints #FAFAFA/#18181b; the round-32 "authored
+    // bg-white" find had measured the covered container)
+    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-sidebar");
+    // mobile header + bottom nav: dark slate-900/800 chrome (session-35:
+    // the aside moved to the token — two chrome carriers remain)
+    expect(appShell.match(/dark:bg-slate-900/g)?.length).toBeGreaterThanOrEqual(2);
     // bottom tabs: inactive flips slate-400, active flips blue-400 + blue-900/20
     expect(appShell).toContain("dark:text-slate-400");
     expect(appShell).toContain("dark:bg-blue-900/20 dark:text-blue-400");
@@ -2886,5 +2892,124 @@ describe("session-34 pins (parity round 33)", () => {
     const src = read("src", "app", "(app)", "settings", "page.tsx");
     expect(src).toContain('<Card className="border-slate-200">');
     expect(src).not.toMatch(/<Card>\s*$/m);
+  });
+});
+
+describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity round 34)", () => {
+  /* The round's census: the dialog-interior dimension (loans + assets —
+     the only two REF-exposed dialogs, measured geometrically for the
+     first time), the deep-RTL frontier (REF's desktop sidebar does NOT
+     mirror: a fixed painting panel stays LEFT while a transparent
+     in-flow peer spacer mirrors — the round-32 "mirror match" had
+     measured the peer), and the payrollreports tab contents (REF's
+     triggers are inert — wiring them is the with-data superset).
+     All values REF-measured this round — see
+     docs/remediation-plan-session35.md. */
+
+  it("R34-C1: the systemic DialogTitle recipe — text-lg font-semibold leading-none (REF-measured 18px/18px/600 on both dialogs)", () => {
+    expect(dialogUi).toContain("text-lg font-semibold leading-none");
+  });
+
+  it("R34-C3: the dialog backdrop — bg-black/80 (REF's overlay, live-measured rgba(0,0,0,0.8); the shadcn-default /50 was a never-audited 30-point gap)", () => {
+    expect(dialogUi).toContain("bg-black/80");
+    expect(dialogUi).not.toContain("bg-black/50");
+  });
+
+  it("R34-A1: the asset dialog ships the H2-only header (REF renders no description — the loans pattern)", () => {
+    const src = read("src", "app", "(app)", "assets", "page.tsx");
+    expect(src).not.toContain("Register a new company asset");
+    expect(src).not.toContain("<DialogDescription>");
+    const hdrIdx = src.indexOf("<DialogTitle>Add Asset</DialogTitle>");
+    const formIdx = src.indexOf('<form onSubmit={onSubmit}');
+    expect(hdrIdx).toBeGreaterThan(-1);
+    expect(formIdx).toBeGreaterThan(hdrIdx);
+  });
+
+  it("R34-A2: the asset dialog's Type + Serial ride REF's 2-col row (223+223 over the 462 inner width)", () => {
+    const src = read("src", "app", "(app)", "assets", "page.tsx");
+    const nameIdx = src.indexOf('id="asset-name"');
+    const typeIdx = src.indexOf("<Label>Type</Label>");
+    const serialIdx = src.indexOf('<Label htmlFor="asset-serial">Serial Number</Label>');
+    const assignIdx = src.indexOf("<Label>Assign To (Optional)</Label>");
+    const gridIdx = src.indexOf('className="grid grid-cols-2 gap-4"');
+    expect(gridIdx).toBeGreaterThan(-1);
+    // the row sits between the Asset Name field and the Assign field, wrapping Type + Serial
+    expect(gridIdx).toBeGreaterThan(nameIdx);
+    expect(typeIdx).toBeGreaterThan(gridIdx);
+    expect(serialIdx).toBeGreaterThan(typeIdx);
+    expect(assignIdx).toBeGreaterThan(serialIdx);
+  });
+
+  it("R34-A3: the asset dialog's Add button is text-only (REF: 102×36, no icon)", () => {
+    const src = read("src", "app", "(app)", "assets", "page.tsx");
+    const footIdx = src.indexOf("<DialogFooter>");
+    const foot = src.slice(footIdx);
+    expect(foot).toContain("Add Asset");
+    expect(foot).not.toContain("<Plus");
+    expect(foot).not.toContain("Loader2");
+  });
+
+  it("R34-B1: the loans installment value — REF's P recipe (16px/600/blue-700 inside the matched box)", () => {
+    const instIdx = loansPage.indexOf("Monthly Installment</Label>");
+    const block = loansPage.slice(instIdx, instIdx + 600);
+    expect(block).toContain("p-2.5 bg-slate-100 border border-slate-200 rounded-md text-center");
+    expect(block).toContain('<p className="text-base font-semibold text-blue-700">');
+  });
+
+  it("R34-B2: the loans Paid From input carries no placeholder (REF: empty)", () => {
+    const pfIdx = loansPage.indexOf('id="loan-paid-from"');
+    const block = loansPage.slice(pfIdx, pfIdx + 400);
+    expect(block).not.toContain("placeholder=");
+  });
+
+  it("R34-D1: REF's RTL shell — the in-flow transparent peer spacer reserves the column (mirrors with dir)", () => {
+    expect(appShell).toContain('className="hidden h-screen w-64 shrink-0 md:block"');
+    expect(appShell).toContain('aria-hidden="true"');
+  });
+
+  it("R34-D2: the desktop aside is REF's fixed painting panel — physically left in BOTH directions (never flips)", () => {
+    expect(appShell).toMatch(/<aside className="fixed left-0 top-0 z-10 hidden h-screen w-64/);
+    expect(appShell).not.toContain('<aside className="sticky top-0');
+  });
+
+  it("R34-C2: the v4 Radix-native-select trap — Select-ending field wrappers carry NO space-y (v4's :not(:last-child) would margin the TRIGGER: Radix's hidden native select is the last child, a phantom 8px; the explicit mt-2 carries the 12px gap alone)", () => {
+    const assets = read("src", "app", "(app)", "assets", "page.tsx");
+    // the two Select wrappers on the asset dialog
+    const typeIdx = assets.indexOf("<Label>Type</Label>");
+    const assignIdx = assets.indexOf("<Label>Assign To (Optional)</Label>");
+    expect(assets.slice(assets.lastIndexOf("<div", typeIdx), typeIdx)).not.toContain("space-y-2");
+    expect(assets.slice(assets.lastIndexOf("<div", assignIdx), assignIdx)).not.toContain("space-y-2");
+    // the two Select wrappers on the loans dialog
+    const empIdx = loansPage.indexOf('htmlFor="loan-employee"');
+    const ltIdx = loansPage.indexOf('htmlFor="loan-type"');
+    expect(loansPage.slice(loansPage.lastIndexOf("<div", empIdx), empIdx)).not.toContain("space-y-2");
+    expect(loansPage.slice(loansPage.lastIndexOf("<div", ltIdx), ltIdx)).not.toContain("space-y-2");
+  });
+
+  it("R34-E1: the payrollreports tabs are wired (controlled) — the at-rest Monthly DOM unchanged", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain('<Tabs value={tab} onValueChange={setTab}>');
+    expect(src).toContain("Monthly Payroll Summary");
+  });
+
+  it("R34-E2: the Tax & Deductions card — the per-employee breakdown on REF's card grammar", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain('tab === "tax"');
+    expect(src).toContain("Tax & Deductions");
+    expect(src).toContain("Effective Rate");
+  });
+
+  it("R34-E3: the History card — the processed-periods table", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain('tab === "history"');
+    expect(src).toContain("Payroll History");
+    expect(src).toContain("No payroll history yet");
+  });
+
+  it("R34-E4: the Custom card — the from/to range form + the filtered table", () => {
+    const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    expect(src).toContain('tab === "custom"');
+    expect(src).toContain("Custom Report");
+    expect(src).toContain("Generate Report");
   });
 });

@@ -50,12 +50,14 @@ describe("globals.css token contract", () => {
     expect(root).toContain("--sidebar-border: #e2e8f0");
   });
 
-  it("pins the sidebar surface to reference #FAFAFA (session-3 measurement — the MOBILE DRAWER token)", () => {
+  it("pins the sidebar surface to reference #FAFAFA (session-3 measurement — the drawer AND the desktop aside token)", () => {
     // Live-measured on the mobile drawer sheet: rgb(250,250,250) — NOT
-    // white. (Session 33: REF's DESKTOP aside is authored bg-white —
-    // see the app-shell recipe pin; this token serves the drawer and
-    // flips to rgb(24,24,27) in dark, REF's --sidebar-background
-    // 240 5.9% 10%.)
+    // white. (Session 35 correction: REF's DESKTOP sidebar also paints
+    // this token — its fixed container authors bg-white but the inner
+    // bg-sidebar div fully covers it; pixel-verified #FAFAFA in light
+    // on both LTR and RTL. The token flips to rgb(24,24,27) in dark,
+    // REF's --sidebar-background 240 5.9% 10% — also the desktop
+    // surface, computed-verified; NOT slate-900.)
     expect(root).toContain("--sidebar: #fafafa");
     expect(dark).toContain("--sidebar: #18181b");
   });

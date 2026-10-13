@@ -123,13 +123,39 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
        (sRGB-pinned per trap 3, live-measured
        rgb(15,23,42) -> rgb(30,41,59)). */
     <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]">
-      {/* Desktop sidebar. Session 33 (R32-A/E): REF authors its aside with
-          hardcoded classes — bg-white in LIGHT (a 31-round-invisible 5-unit
-          find: every prior audit compared sidebar geometry or the MOBILE
-          drawer, which is the --sidebar token #fafafa on both apps) and
-          dark:bg-slate-900 + dark:border-slate-800 in dark. The mobile
-          drawer below keeps the token (bg-sidebar), which flips. */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 md:flex md:flex-col">
+      {/* Desktop sidebar. Session 35 (R34-D correction): the visible
+          surface is the bg-sidebar TOKEN — REF's fixed container
+          authors bg-white/dark classes but its inner bg-sidebar div
+          fully covers it (#FAFAFA light pixel-verified, #18181b dark
+          computed). The round-32 "authored bg-white" find measured the
+          covered container. The border pair stays (border-slate-200 /
+          dark:border-slate-800). The mobile drawer below uses the same
+          token surface. */}
+      {/* Session 35 (R34-D): REF's RTL architecture — the peer spacer +
+          the fixed painting panel. REF's desktop sidebar does NOT mirror
+          in عربي mode: an in-flow TRANSPARENT peer reserves the 256px
+          column (it mirrors with dir=rtl — left in LTR, right in RTL,
+          painting nothing), while the fixed aside stays physically LEFT
+          in both directions (left:0/right:1184 at 1440 — REF's computed
+          offsets never flip), its internals mirroring via the cascading
+          dir. LTR renders identical to the old in-flow aside (spacer at
+          0..256 + panel over it + main at 256..1440); RTL renders REF's
+          exact layout: panel at 0..256 over the main area's start edge,
+          main 0..1184, transparent gap at 1184..1440 showing the canvas.
+          The round-32 "RTL mirror matches" verification had measured the
+          PEER (which mirrors) — the aside-selector artifact's desktop
+          twin. */}
+      <div className="hidden h-screen w-64 shrink-0 md:block" aria-hidden="true" />
+      {/* Session 35 (R34-D correction): the surface is the bg-sidebar
+          TOKEN — REF's fixed container authors bg-white/dark classes but
+          its inner `bg-sidebar` div FULLY COVERS it and paints the
+          visible surface: #FAFAFA in light (pixel-verified LTR+RTL this
+          round) and #18181b in dark (the .dark --sidebar override —
+          computed-verified; NOT slate-900 #0f172a). The round-32
+          "authored bg-white" find measured the container, not the
+          painted surface — corrected here; the desktop aside and the
+          mobile drawer are the same token surface, as REF renders. */}
+      <aside className="fixed left-0 top-0 z-10 hidden h-screen w-64 border-r border-slate-200 dark:border-slate-800 bg-sidebar md:flex md:flex-col">
         <SidebarNav user={user} />
       </aside>
 

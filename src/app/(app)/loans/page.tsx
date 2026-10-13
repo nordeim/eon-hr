@@ -356,10 +356,13 @@ export default function LoansPage() {
             <DialogTitle>New Loan Request</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
+            {/* No space-y-2 — Radix's native select is the last child;
+                v4 would margin the TRIGGER (the phantom-8px cell bug).
+                The mt-2 carries the 12px gap alone (R34-B). */}
+            <div>
               <Label htmlFor="loan-employee">Employee</Label>
               <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
-                <SelectTrigger id="loan-employee">
+                <SelectTrigger id="loan-employee" className="mt-2">
                   <SelectValue placeholder="Select employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,10 +391,12 @@ export default function LoansPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              {/* No space-y-2 — the Radix native-select last-child trap
+                  (the trigger would carry the mb). mt-2 alone (R34-B). */}
+              <div>
                 <Label htmlFor="loan-type">Loan Type</Label>
                 <Select value={form.loanType} onValueChange={(v) => setForm({ ...form, loanType: v })}>
-                  <SelectTrigger id="loan-type">
+                  <SelectTrigger id="loan-type" className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -404,11 +409,17 @@ export default function LoansPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="loan-amount">Amount (SAR)</Label>
+                {/* Session 35 (R34-B): mt-2 on every control — REF's v3
+                    space-y-2 lands as margin-top on the FOLLOWING block
+                    (12px measured on both dialogs); v4's
+                    :not(:last-child) mb on the INLINE label is ignored —
+                    the session-34 inline-label trap, compensated. */}
                 <Input
                   id="loan-amount"
                   type="number"
                   min="0.01"
                   step="0.01"
+                  className="mt-2"
                   required
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
@@ -422,6 +433,7 @@ export default function LoansPage() {
                   min="1"
                   max="60"
                   step="1"
+                  className="mt-2"
                   required
                   value={form.months}
                   onChange={(e) => setForm({ ...form, months: e.target.value })}
@@ -430,9 +442,13 @@ export default function LoansPage() {
               <div className="space-y-2">
                 <Label>Monthly Installment</Label>
                 {/* Session 23 (R22-C2): REF's read-only display — "SAR 0.00"
-                    (prefix + 2 decimals, text-center, border-slate-200). */}
-                <div className="p-2.5 bg-slate-100 border border-slate-200 rounded-md text-center">
-                  SAR {monthlyPreview !== null ? (monthlyPreview / 100).toFixed(2) : "0.00"}
+                    (prefix + 2 decimals, text-center, border-slate-200).
+                    Session 35 (R34-B): the VALUE is REF's P recipe — 16px /
+                    weight 600 / blue-700 (live-measured rgb(29,78,216)). */}
+                <div className="p-2.5 bg-slate-100 border border-slate-200 rounded-md text-center mt-2">
+                  <p className="text-base font-semibold text-blue-700">
+                    SAR {monthlyPreview !== null ? (monthlyPreview / 100).toFixed(2) : "0.00"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -441,7 +457,7 @@ export default function LoansPage() {
               <Textarea
                 id="loan-reason"
                 rows={3}
-                className="min-h-[60px]"
+                className="min-h-[60px] mt-2"
                 placeholder="e.g. Family relocation, education, medical…"
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
@@ -452,7 +468,8 @@ export default function LoansPage() {
               <Input
                 id="loan-paid-from"
                 type="text"
-                placeholder="e.g. Monthly payroll"
+                className="mt-2"
+                /* Session 35 (R34-B): no placeholder — REF's input is bare. */
                 value={form.paidFrom}
                 onChange={(e) => setForm({ ...form, paidFrom: e.target.value })}
               />
