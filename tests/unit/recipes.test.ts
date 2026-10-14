@@ -1489,7 +1489,10 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
   });
 
   it("R18-E: the login Sign in ring is REF's page-scoped zinc-950 (#09090B), NOT slate-400", () => {
-    const submit = login.slice(login.indexOf('type="submit"'), login.indexOf('type="submit"') + 700);
+    /* Session-39 amendment: the three social buttons are now type="submit"
+       too (R38-F1) — the anchor moved to the Sign in's unique
+       disabled={loading}, same as the R19-H amendment. */
+    const submit = login.slice(login.indexOf("disabled={loading}"), login.indexOf("disabled={loading}") + 700);
     expect(submit).toContain("focus-visible:ring-[#09090b]");
     expect(submit).not.toContain("ring-slate-400");
   });
@@ -1574,8 +1577,11 @@ describe("session-20 hover recipes (parity round 19)", () => {
   });
 
   it("R19-H: login Sign in carries REF's shadow-sm (rgba(0,0,0,0.05) 0 1px 2px)", () => {
+    /* Session-39 amendment: the three social buttons are now type="submit"
+       too (R38-F1), so the first indexOf('type="submit"') is the Google
+       button — the anchor moved to the Sign in's unique disabled={loading}. */
     const signinBlock = loginPage.slice(
-      loginPage.indexOf("type=\"submit\""),
+      loginPage.indexOf("disabled={loading}"),
       loginPage.indexOf("Sign in</button>")
     );
     expect(signinBlock).toContain("shadow-sm");
@@ -3615,5 +3621,127 @@ describe("session-38b pixel-diff forensics (parity round 37, addendum)", () => {
 
   it("R37-F1: the loans Requesting-for card carries REF's border border-blue-200 (1px rgb(191,219,254); the clone's borderless card was 2px short — the 698-vs-696 dialog height)", () => {
     expect(loansPage38b).toMatch(/<div className="p-4 bg-blue-50 rounded-lg border border-blue-200">/);
+  });
+});
+
+describe("session-39 login re-audit contracts (parity round 38 — the redeploy)", () => {
+  /* REF's /login static JS chunk changed (index-CneaUv24.js →
+     index-BYE5Ojxh.js) while every other build fingerprint held — the
+     login page re-audited end to end, at 1440×900 AND (for the first
+     time) 390×844. All twelve findings live-measured on both apps. */
+
+  const login39 = read("src", "app", "login", "page.tsx");
+
+  it("R38-G1: the login canvas root is REF's MAIN element with the pinned sRGB gradient + p-4 + the zinc-950 foreground (REF's login build uses the zinc palette — computed rgb(9,9,11) on the typed text; the app pages keep the pinned neutral-950 token)", () => {
+    expect(login39).toMatch(
+      /<main className="flex min-h-screen items-center justify-center bg-\[linear-gradient\(to_bottom_right,#f8fafc,#f1f5f9\)\] p-4 text-\[#09090b\]">/
+    );
+    expect(login39).not.toMatch(/<div className="flex min-h-screen items-center justify-center bg-\[linear-gradient/);
+  });
+
+  it("R38-A1: the login inputs + Sign in are REF's responsive heights — h-11 sm:h-12 (44px mobile / 48px ≥640px; the clone's flat h-12 measured 48px at 390×844 vs REF's 44px — the login was never probed below 1440 before)", () => {
+    expect(login39.match(/h-11 sm:h-12/g)?.length).toBe(3);
+  });
+
+  it("R38-A2: the login inputs are REF's responsive font — text-base md:text-sm (16px mobile / 14px ≥768px; the flat text-sm measured 14px at mobile vs REF's 16px)", () => {
+    expect(login39.match(/text-base md:text-sm/g)?.length).toBe(2);
+  });
+
+  it("R38-B1: the login inputs render REF's placeholder slate-600 (rgb(71,85,105) — live-measured on both fields; NOT the base's muted-foreground slate-500 rgb(100,116,139))", () => {
+    expect(login39.match(/placeholder:text-slate-600/g)?.length).toBe(2);
+  });
+
+  it("R38-I1: the login inputs carry NO shadow-none remnant (the Input base sets no at-rest shadow; the class computed the 5-layer transparent-zeros string vs REF's literal none)", () => {
+    expect(login39).not.toContain("shadow-none");
+  });
+
+  it("R38-D1: REF's sm:hidden spacer footnote below the card (mt-8 text-center text-xs text-slate-400 > p:&nbsp; — the invisible line pins the card to y=16 and scrolls the mobile page 18px: 862 vs the 844 viewport)", () => {
+    expect(login39).toMatch(/<div className="mt-8 text-center text-xs text-slate-400 sm:hidden">/);
+    expect(login39).toMatch(/<p>&nbsp;<\/p>/);
+  });
+
+  it("R38-E1: the Sign in button is REF's recipe — inline-flex, gap-1, whitespace-nowrap, px-3 py-2, transition-all duration-200 (200ms all-properties vs the clone's 150ms colors-only — the motion dimension; the loading spinner rides the 4px gap)", () => {
+    const idx = login39.indexOf("disabled={loading}");
+    const btn = login39.slice(idx, idx + 800);
+    expect(btn).toContain("inline-flex");
+    expect(btn).toContain("gap-1");
+    expect(btn).toContain("whitespace-nowrap");
+    expect(btn).toContain("px-3 py-2");
+    expect(btn).toContain("transition-all duration-200");
+    expect(btn).not.toContain("transition-colors");
+  });
+
+  it("R38-F1: the three social buttons are REF's family — type=submit (inert: they sit outside the form), REF's exact class list with text-[16px] + group", () => {
+    expect(
+      login39.match(
+        /type="submit"\s+className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3\.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
+      )?.length
+    ).toBe(3);
+    expect(login39).not.toMatch(/<button\s+type="button"\s+className="w-full flex/);
+  });
+
+  it("R38-F2: the social icons ride REF's wrappers — ONLY Google carries the -ml-4 pull (live-measured: REF's Google div x=84.8 with ml=-16, its Microsoft/Apple divs have NO -ml-4 and sit at 84.6/98.2 on their own text widths); the labels are span-wrapped", () => {
+    expect(login39.match(/<div className="transition-transform duration-200 -ml-4">/g)?.length).toBe(1);
+    expect(login39.match(/<div className="transition-transform duration-200">/g)?.length).toBe(2);
+    expect(login39).toMatch(/<div className="transition-transform duration-200 -ml-4">\s*<GoogleIcon \/>/);
+    expect(login39).toMatch(/<div className="transition-transform duration-200">\s*<MicrosoftIcon \/>/);
+    expect(login39).toMatch(/<div className="transition-transform duration-200">\s*<AppleIcon \/>/);
+    expect(login39).toMatch(/<span>Continue with Google<\/span>/);
+    expect(login39).toMatch(/<span>Continue with Microsoft<\/span>/);
+    expect(login39).toMatch(/<span>Continue with Apple<\/span>/);
+  });
+
+  it("R38-J1: the links row is REF's responsive direction — flex-col at mobile, row ≥sm (the clone's flat row wrapped BOTH links to two lines at 390px — the shrunken buttons measured 118+176=294 filling the row, h=40 each vs REF's clean h=20 stack)", () => {
+    expect(login39).toMatch(
+      /<div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">/
+    );
+  });
+
+  it("R38-J2: the links carry REF's text recipes — Forgot: font-medium + transition-colors; Need: transition-colors; the Sign up span: font-medium text-slate-700 (the clone's bare span inherited slate-500 — a visible color diff)", () => {
+    expect(login39).toMatch(
+      /className="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"/
+    );
+    expect(login39).toMatch(
+      /className="text-sm text-slate-500 hover:text-slate-700 transition-colors"/
+    );
+    expect(login39).toMatch(/<span className="font-medium text-slate-700">Sign up<\/span>/);
+  });
+
+  it("R38-K1: the or-divider is REF's continuous-line + white-chip pattern (the absolute 1px slate-200 line + the centered bg-white px-3 chip in slate-500 — the clone's segmented divider rendered the 'or' in slate-400)", () => {
+    expect(login39).toMatch(/<div className="relative my-6" role="separator" aria-label="or">/);
+    expect(login39).toMatch(
+      /<div data-orientation="horizontal" role="none" className="shrink-0 h-\[1px\] w-full bg-slate-200" \/>/
+    );
+    expect(login39).toMatch(
+      /<span className="bg-white px-3 text-slate-500 font-medium tracking-wider">or<\/span>/
+    );
+  });
+
+  it("R38-L1: the logo carries REF's glow layer (the blur-xl slate gradient at opacity-30 → 40 on group-hover) inside a relative group wrapper", () => {
+    expect(login39).toMatch(/<div className="relative group">/);
+    expect(login39).toMatch(
+      /className="absolute inset-0 bg-\[linear-gradient\(to_bottom_right,#e2e8f0,#cbd5e1\)\] rounded-full blur-xl opacity-30 group-hover:opacity-40 transition-opacity duration-300"/
+    );
+  });
+
+  it("R38-L2: the logo circle is REF's SPAN with the hover shadow-xl + the 'Eon HR logo' alt (the clone's div carried alt='Eon HR')", () => {
+    expect(login39).toMatch(
+      /<span className="flex shrink-0 overflow-hidden rounded-full relative h-20 w-20 sm:h-24 sm:w-24 shadow-lg ring-4 ring-white\/50 group-hover:shadow-xl transition-all duration-300">/
+    );
+    expect(login39).toContain('alt="Eon HR logo"');
+  });
+
+  it("R38-H1: the title block is REF's shrink-to-fit (space-y-2 sm:space-y-3 — NO w-full; the w-full stretched the H1 box to 368 vs REF's 317)", () => {
+    expect(login39).toMatch(/<div className="space-y-2 sm:space-y-3">/);
+    expect(login39).not.toMatch(/<div className="w-full space-y-2 sm:space-y-3">/);
+  });
+
+  it("R38-M1: the social icons are REF's exact glyphs (the pixel-diff forensics addendum — the Microsoft icon's viewBox is 0 0 24 24, NOT the clone's 0 0 23 23; the Apple icon is REF's classic two-path glyph, NOT the clone's alternate)", () => {
+    expect(login39).not.toContain('viewBox="0 0 23 23"');
+    expect(login39).toMatch(/<svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">/);
+    // REF's Apple leaf path (the second path of the two-path glyph)
+    expect(login39).toContain("M13 3.5c.73-.83 1.94-1.46 2.94-1.5");
+    // REF's Microsoft squares live in the 24-box (M1 1h10v10H1z family × 4)
+    expect(login39.match(/M1 1h10v10H1z|M13 1h10v10H13z|M1 13h10v10H1z|M13 13h10v10H13z/g)?.length).toBeGreaterThanOrEqual(4);
   });
 });

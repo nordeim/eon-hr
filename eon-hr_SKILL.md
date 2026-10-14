@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.21.0 (session-38 remediation complete — the keyboard/focus dimension: the DialogTrigger family) · **Last updated:** 2026-10-14
-> 2026-10-14 · **State:** 521 unit + 142 E2E tests green, lint/typecheck/build
+> **Version:** 3.22.0 (session-39 remediation complete — the login redeploy re-audit: the mobile-viewport dimension) · **Last updated:** 2026-10-14
+> 2026-10-14 · **State:** 598 unit + 167 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -2477,3 +2477,70 @@ roots, the asset saving-only disabled, the Add Level mr-1, the loans
 reason/placeholder/defaults/no-min-max/no-guard, the SelectTrigger
 data-placeholder colors, the card's border-blue-200. Gates: 582/582
 unit · 165/165 E2E. Live: 13/13 pair MATCH.
+
+## §51 Session 39 (parity round 38) — the login redeploy re-audit
+
+**The trigger**: REF's /login static JS chunk changed
+(index-CneaUv24.js → index-BYE5Ojxh.js) while the login CSS and both
+app chunks held — a login-scoped redeploy. The re-audit (desktop
+1440×900 +, for the first time, mobile 390×844) found 13 finding
+families; the desktop geometry was already byte-identical, so every
+find was a recipe/mobile/DOM-structure diff.
+
+**The two-build palette lesson (R38-C)**: REF ships TWO CSS builds —
+the login static build (zinc palette: --card-foreground = zinc-950
+#09090B, computed rgb(9,9,11) on the typed input text) and the app
+build (neutral-950 #0A0A0A). A single shared token cannot match both;
+the clone's login card pins `text-[#09090b]` literally. THE TRAP:
+putting the override on the page root is NOT enough — the card's own
+`text-card-foreground` beats inheritance (ANY rule beats inheritance);
+override on the card or the element itself.
+
+**The never-probed-viewport lesson (R38-A/J)**: 37 rounds of
+desktop-only login auditing missed an entire responsive dimension —
+`h-11 sm:h-12` inputs (44px mobile) + `text-base md:text-sm` (16px
+mobile), and the links row `flex flex-col sm:flex-row` (STACKED at
+mobile). The flat-row clone wrapped BOTH link labels to two lines at
+390px (the two buttons' intrinsic widths 118+176 exactly filled the
+294px row → flex-shrink → wrap → h=40 buttons). Always probe the
+login/auth surfaces at mobile too — they live outside the app shell
+and escape the mobile-nav standing audits.
+
+**The per-button wrapper (R38-F)**: REF's `-ml-4` icon-wrapper pull
+applies ONLY to the Google button (its div x=84.8, ml=-16); the
+Microsoft/Apple divs carry no pull (x=84.6/98.2 on their own text
+widths). A uniform -ml-4 mis-places Microsoft by 8px — the flexbox
+centering math with a negative margin: the margin shrinks the child's
+outer width (20→4), the free space grows, and the border box lands
+16px LEFT of the margin box. Measure each button; do not generalize
+from one.
+
+**The negative-space recipes (R38-D/K/L)**: the sm:hidden `&nbsp;`
+spacer below the card (pins the card to y=16 + the 18px mobile
+scroll), the continuous-line or-divider (an absolute full-width 1px
+line + the centered bg-white chip — NOT two segments), and the
+blur-xl logo glow (opacity-30 → 40 on group-hover) — all invisible in
+a class-list diff, all measurable in geometry/DOM reads.
+
+**The stale-:3200-server trap (the round's environment lesson)**:
+after `bun run build`, a still-running standalone server keeps serving
+the OLD build manifest's chunk hashes — the rebuilt CSS file no longer
+exists under its old name, the stylesheet URL returns a 21-byte
+"Internal Server Error" body, and the page renders FULLY UNSTYLED
+while `ensure-server.sh`'s HTML liveness check still passes (the HTML
+serves fine from the stale RSC cache). Procedure: kill the :3200
+process after EVERY rebuild before any browser probe — a page that
+suddenly renders unstyled is a stale server, not a code regression.
+
+**The icon-glyph addendum (R38-M)**: the pixel-diff (4.33% vs the
+1.1-1.6% baseline on mobile) traced to the Microsoft viewBox (23 vs
+24) and a completely different Apple glyph. SVG icons need path-level
+diffing, not just size checks. After the fixes: desktop 0.84%, mobile
+3.27% — the remainder is REF's fixed "Edit with Base 44" builder badge
+(the documented non-clone).
+
+Recipe pins added: 16 (the responsive family, the placeholder, the
+spacer, the Sign in recipes, the per-button wrappers, the links row,
+the divider, the logo glow family, the icon glyphs). Gates: 598/598
+unit · 167/167 E2E. Live: the mobile login pair byte-identical; the
+desktop pair MATCH (four documented non-gaps).

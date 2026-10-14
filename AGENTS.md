@@ -1929,3 +1929,88 @@ Escape and read the restore target.
   redeploy (login static build + app chunks all unchanged); REF still
   zero-data. 8 new screenshots (140-143, ref+loc pairs) → **188 PNG
   captures**. DB pristine.
+
+## Session 39 (parity round 38) — THE LOGIN REDEPLOY RE-AUDIT: the mobile-viewport dimension
+
+**Scope**: REF's /login static JS chunk changed (index-CneaUv24.js →
+index-BYE5Ojxh.js) while every other build fingerprint held — the login
+page re-audited end to end, at 1440×900 AND (for the first time ever)
+390×844. The desktop geometry was already byte-identical; every finding
+was a recipe, mobile-viewport, or DOM-structure diff.
+
+- **R38-A — the responsive input family**: REF's login inputs are
+  `h-11 sm:h-12` (44px mobile / 48px ≥640px) with `text-base
+  md:text-sm` (16px mobile / 14px ≥768px); the Sign in button is
+  `h-11 sm:h-12`. The clone's flat h-12/text-sm rendered 48px/14px at
+  mobile. Applied at the PAGE level (the shared Input base is untouched
+  — the app pages keep their pinned recipes; tailwind-merge dedups
+  h-9→h-11, text-sm→text-base).
+- **R38-B — the placeholder color**: `placeholder:text-slate-600`
+  (rgb(71,85,105)) — NOT the base's muted-foreground slate-500.
+- **R38-C — the two-build palette lesson**: REF's login inputs compute
+  zinc-950 rgb(9,9,11) — the login static build's --card-foreground is
+  the ZINC palette while the app build's is neutral-950 #0A0A0A. The
+  clone's login card pins `text-[#09090b]` literally (putting it on the
+  root main is NOT enough — the card's own text-card-foreground overrides
+  inheritance; the E2E caught the first attempt).
+- **R38-D — the sm:hidden spacer**: REF renders
+  `div.mt-8.text-center.text-xs.text-slate-400.sm:hidden > p:&nbsp;`
+  below the card — invisible but layout-affecting: the card pins to y=16
+  and the mobile page scrolls 18px (862 vs 844). Cloned.
+- **R38-E — the Sign in recipes**: inline-flex, gap-1, whitespace-nowrap,
+  px-3 py-2 (not px-4), transition-all duration-200 (not 150ms
+  colors-only — the motion dimension).
+- **R38-F — the social family + the per-button wrapper**: type=submit ×3
+  (inert — outside the form), text-[16px], group, span-wrapped labels,
+  and the icon divs `transition-transform duration-200` — **ONLY Google's
+  carries -ml-4** (live-measured: Google div x=84.8 with ml=-16;
+  Microsoft/Apple have no pull and sit at 84.6/98.2 on their own text
+  widths). A uniform -ml-4 mis-places Microsoft by 8px (the negative
+  margin shrinks the flex sum → more free space → the border box lands
+  16px left of the margin box). The group/transition-transform members
+  are inert (no hover trigger — verified).
+- **R38-G/H/I**: the canvas root is a `<main>` (the clone's was a div);
+  the title block is shrink-to-fit (NO w-full — blockW 317); the login
+  inputs' `shadow-none` remnant deleted (computed "none" parity — the
+  Input base sets no at-rest shadow).
+- **R38-J — the links row (the round's most visible mobile find)**:
+  `flex flex-col sm:flex-row items-center justify-between gap-2
+  sm:gap-0` — the links STACK at mobile. The clone's flat row made the
+  two buttons' intrinsic widths (118+176=294) exactly fill the 294px row
+  → flex-shrink wrapped BOTH labels to two lines (h=40 each). Plus:
+  Forgot carries font-medium + transition-colors; the Sign up span is
+  `font-medium text-slate-700`.
+- **R38-K — the or-divider**: REF's continuous-line pattern — an absolute
+  full-width 1px slate-200 line with the centered "or" chip
+  (`bg-white px-3 text-slate-500 font-medium tracking-wider`) on top, NOT
+  two line segments (and the "or" is slate-500, not slate-400).
+- **R38-L — the logo family**: the `relative group` wrapper + the glow
+  layer (`absolute inset-0` slate-200→300 gradient, `rounded-full
+  blur-xl opacity-30 group-hover:opacity-40 transition-opacity
+  duration-300`) + the circle as a SPAN with `group-hover:shadow-xl` +
+  alt="Eon HR logo".
+- **R38-M — the icon glyphs (the pixel-diff addendum)**: the clone's
+  Microsoft icon shipped viewBox 0 0 23 23 (REF: 24 24) and a different
+  Apple glyph — both replaced with REF's exact paths.
+- **Kept supersets (documented)**: the autoComplete attrs
+  (email/current-password — REF has none), the focus-visible:ring-slate-400
+  variant (the R18-E lesson), the role=separator on the divider.
+- **The probe lessons**: (1) **the stale-:3200-server trap** — after
+  `bun run build`, a running standalone server keeps serving the OLD
+  manifest's chunk hashes; the rebuilt CSS 500s ("Internal Server Error"
+  as the body) and the page renders UNSTYLED while the HTML liveness
+  check still passes — kill the :3200 process after EVERY rebuild. (2)
+  The login at mobile was a never-probed viewport — 37 rounds of
+  desktop-only auditing had missed an entire responsive dimension. (3)
+  The comments-in-source regex inflation (round-37's lesson): reword the
+  comment, don't recalibrate the count.
+- **Pins**: 16 new (G1, A1-A2, B1, C1-via-E2E, D1, E1, F1-F2, I1, J1-J2,
+  K1, L1-L2, H1, M1; three earlier pins amended — R18-E/R19-H anchors,
+  the E2E img name). Gates: lint 0/0 · tsc ✓ · **598/598 unit** ·
+  build ✓ · **167/167 E2E** (+2). Live: the desktop pair MATCH (the
+  four documented non-gaps aside); the mobile pair byte-identical (email
+  y=516 h=44 font 16px, card y=16, scrollHeight 862, icon x 85/85/98,
+  links y=718/746 h=20); the standing audits 5/5. Pixel-diffs: desktop
+  0.84% (below baseline), mobile 3.27% (REF's builder badge — the
+  documented non-clone — plus font AA). 8 screenshots (144-147) →
+  **196 PNG captures**. DB pristine.
