@@ -1,3 +1,118 @@
+工作区已重置 —— 本地不存在 eon-hr 仓库。我将先进行全新克隆并建立基准。
+已克隆：在 main 分支的 a754971，工作区干净。提交历史确认了第 35 次会话 / 第 34 轮一致性审计已推送（“对话内部结构 + deep-RTL 发现”）。这使我们在内部成为了第 36 次会话 / 第 35 轮一致性检查。现在正在读取文档链。
+仓库结构已确认 —— `db/` 目录已存在且包含 `.gitignore`。现在正在读取 5 份根文档。
+Let me read AGENTS.md directly from the repo in chunks.
+Read 工具正在持久化过大的输出。我将采取策略性地阅读最近的配方层（会话 31–35），它们定义了当前状态。
+Session 33–35 layers fully absorbed. Now reading the 4 session documents.
+4 份会话文档已全部读取。当前状态已明确：第 35 轮已在 `60ed3b6` 推送（521 个单元测试 / 142 个端到端测试 / 156 张截图）。本次会话 = 第 36 次会话 / 第 35 轮对齐。现在正在阅读剩余的根文档。
+Root docs + session docs internalized. Now step ④ — validating codebase alignment with the documented state.
+All round-34 deliverables verified in code. Now setting up the environment (.env + install + DB) and running baseline gates.
+Unit 521/521 green. Running build + E2E to complete the baseline.
+E2E 出现了故障 —— 让我获取完整的失败详情。
+141/142 在约 1ms 内失败 —— 这是系统性的设置失败，而非测试回归。让我看看具体的错误。
+Fresh sandbox — Playwright browser binaries missing. Installing chromium (the documented one-time setup).
+Headless shell (which the failure pointed to) is now installed. Re-running E2E.
+**Baseline ALL GREEN: lint 0/0 · tsc ✓ · 521/521 unit · build ✓ · 142/142 E2E** — codebase fully aligned with documented state. Now step ⑤ — the skills audit.
+Catalog audited. Loading the round's key skills: `agent-browser`, `tdd`, `tailwind-patterns`.
+Skills audited (agent-browser CLI available, tdd + tailwind-patterns internalized). Now step ⑥ — the round-35 census. First: check REF's CSS chunk fingerprint (redeploy watch) and start the LOC server.
+**重大事件**：REF 的 CSS chunk 发生了变化 —— `index-D0Q6-tUz.css`（在第 32–34 轮中为 `index-BGNH4KkS.css`）。**自第 31 轮以来的首次重新部署。** 这定义了本轮的前沿：重新部署差异审计。正在下载新的 CSS 以与固定的 token 进行对比。
+The new chunk carries a **zinc-flavored shadcn dark palette** (`240 10% 3.9%`) vs the previously extracted neutral one (`0 0% 3.9%`). Checking the light `:root` and the old pins to quantify the redeploy drift.
+REF's redeploy switched the shadcn base from **neutral to zinc** (1–2 sRGB units per channel on foreground/border/muted). Now checking the app's custom overrides (`--primary` #1877F2 etc.) in the new chunk.
+CSS chunk analysis done — now the live ground truth. Setting up dual-browser sessions with agent-browser.
+REF 已完成身份验证。现在进行关键排查——应用的实时 token 层以及 zinc 与 neutral 的差异。
+The live tokens are still **neutral** (`0 0% 3.9%`) — the chunk's zinc defaults are overridden by an app-authored layer. Locating it.
+The dashboard still loads the OLD `index-BGNH4KkS.css` while /login links the NEW chunk. Enumerating all stylesheets on the live app.
+Clear picture: the **app chunk `/assets/index-BGNH4KkS.css` is UNCHANGED** (all app pins intact); the **/login page links a separate `/static/index-D0Q6-tUz.css` build** (zinc-flavored). Need to verify whether the login page's *rendering* drifted. Fetching its HTML.
+/login 页面是由 `static/index-CneaUv24.js` 渲染的客户端外壳。我正在下载该 bundle 以检查其渲染的类。
+Static analysis is inefficient — going direct: clearing auth state to view the live login page.
+REF login button is **slate-900** rgb(15,23,42), h1 slate-900 30px/700. The clone was pinned with a **zinc-950** Sign-in — checking the clone's login now.
+The clone's button is `bg-slate-900` matching REF — the zinc-950 was only the focus ring. Now a full login-surface diff: REF vs LOC geometry inventory.
+Login layout is **byte-identical** (all y-positions match after scroll-offset normalization). One text difference: REF says "Invalid email or password" vs clone "Validation failed" — checking whether that's an input-length artifact or a real gap.
+**Root cause found**: the sandbox shell exports `DATABASE_URL=file:/home/z/my-project/db/custom.db` (outer workspace) which silently overrides `.env` — the exact trap AGENTS.md documents. Restarting the server with the env var scrubbed.
+LOC fixed. Now completing the redeploy-check: the app's JS chunks.
+App JS (`index-C-IrDy5f.js`) and CSS (`index-BGNH4KkS.css`) both **unchanged** — only the login page's static build is new, and it renders byte-identically to the clone. Now checking REF's data state (the with-data frontier).
+REF 仍然**处于零数据状态**（“管理您的 0 名员工”）—— 包含数据的边界依然被阻塞。但仪表板的转储显示了一个从未经过审计的 **“自定义” (Customize) 按钮**。我来探究一下它在 REF 上有什么作用。
+The clone's Customize is already a wired superset (REF's is inert). Next census probe: can I fire a **REF toast** (the never-measured card interior)? Trying the compliance Notify All buttons.
+在零数据的 REF 上无法触发 Toast（未渲染 toaster）——已记录为既定的非差距（non-gap）。现在开始优先检查移动端导航（用户重点）。
+REF mobile chrome **byte-identical to pins** (nav 766y+78h, tabs x=10/79/139/204/313, active blue-600). Now the clone's mobile chrome.
+Mobile bottom tabs **byte-identical**. Now the drawer itself — opening on REF.
+Mobile drawer **byte-identical** (panel 288@x0 #FAFAFA + 1px #e5e5e5 border, overlay 80%). Mobile nav fully green — no Tailwind v4 bug. Continuing census: the requestsettings form-error state (the remaining form-error surface).
+REF 的空数据提交是一个静默的无操作（no-op）。正在检查克隆在相同路径下的行为。
+Clone 的空提交会触发错误提示（Toast） —— 这是既定的超集框架，静止表面一致。接下来：铃铛弹出框（bell popover）和用户下拉菜单（user-dropdown）内部（刷新轮次-25/22 的审计）。
+Still at mobile viewport — the bell lives in the sidebar footer. Switching to desktop.
+Bell popover **byte-identical** (384×175, same interior). Next: the user dropdown.
+REF's user button is **inert** (zero DOM delta). Checking the clone's — the round-22 motion audit pinned a dropdown.
+Synthetic clicks don't trigger Radix (probe artifact!) — REF's user button needs a real CDP click before I call it inert.
+**发现真实差异** — REF 的用户菜单：192×74 @ (47,770)，**无角色标签**（克隆版本虚构了“Admin”标签 + 分隔符），且内嵌了 31px。正在精确测量 REF 的菜单。
+REF's user menu contract captured: **align=end, sideOffset=4, no Label, min-width 128, radius 6px, cursor-default + rounded-sm items** — vs the clone's align=start, offset 8, invented Label, min-w-200, rounded-lg. Checking REF's item highlight styles.
+REF's items carry the newer shadcn recipe (`relative cursor-default rounded-sm`), same focus:bg-accent. Now checking the clone's shared `ui/dropdown-menu.tsx` for the same drift pattern.
+The user menu is the only REF-exposed dropdown, but the shared component carries the same drift. Also checking the bell popover's radius/border/shadow on both apps (round-25 audited geometry only).
+Bell popover outer styles match (6px radius, same border/shadow) but padding differs (REF 4px vs clone 0px). Comparing interiors.
+Bell popover interiors **byte-identical**. Spot-checking the mobile drawer's user menu on REF to confirm the shared contract.
+Mobile drawer user menu: same contract (192×74, align=end, no Label). Now checking the **Select dropdown interiors** — the same rounded-sm/cursor drift may exist there.
+The clone's select uses `rounded-lg` + `cursor-pointer rounded-md` items — same drift family as the dropdown. Verifying live on LOC.
+Container radius + item recipe drift **confirmed live**. Plus a content difference: the option SETS differ. Getting full lists from both.
+**Real content gap found**: REF's document types are `Iqama, Visa, Passport, Contract, Probation` (Saudi-specific); the clone ships an invented set. Locating the source.
+Documenttracker chips byte-identical. Checking the compliance **status select** options too (the neighbor of the drifted type select).
+The stat tiles use one label taxonomy, but REF's select uses another ("Within N days"). Verifying REF's stat tiles + trigger text together.
+REF ground truth confirmed: trigger "All" + options "Within N days". Checking the clone's type-filter logic before fixing.
+API enum + page list scoped. Continuing census: REF's 404 page, settings tab interiors, RTL spot-check.
+**第四个实际差距 — 404 页面**：REF 在标题中渲染了路由别名，显示引用了该路由的完整句子，并带有一个“返回首页”链接；而克隆版本仅渲染了裸文本 “404 | Page Not Found”。正在测量 REF 的合约。
+在 `/reviews` 上已确认达成一致。正在检查 REF 对嵌套未知路径的处理（标题 + 句子格式）。
+The httpOnly cookie can't be cleared via JS — checking the clone's guard behavior from source, and how the (app) layout redirects.
+The not-found should `redirect("/login")` when logged out — matching REF. Re-authenticating both sessions and continuing the census.
+两者均已重新认证。接下来进行设置：对较少审计的标签页内部进行抽检。
+**Departments tab gaps found** (invented description, wrong title recipe, button size, 48px icon, P-based empty text). Checking the sibling tabs for the shared pattern.
+Same drift on Approval Workflows. Dumping the remaining REF tabs' exact contracts.
+Login contract holds. The census is complete — 5 gap groups identified. Checking the clone's audit-log API surface before writing the plan.
+The audit-logs API exists — the rebuild can wire real data. Checking E2E usage of document types before changing the enum.
+Census complete — 5 gap groups, all live-measured. The "All Alerts" tab pin is safe (hardcoded separately from FILTERS). Writing the remediation plan.
+Plan saved. Now validating against the codebase — reading the settings page structure and the THEME_BOOT script.
+All settings tabs read. Re-measuring REF's Departments header button precisely (icon position question).
+All contracts captured. Executing TDD — writing the RED pins first. Checking the test file structure.
+Writing the session-36 RED pin block.
+正在验证 RED — 正在运行新的 pin block。
+**RED confirmed: 20/20 failing** (exactly the new pins). Now GREEN — starting with R35-A (UserMenu).
+R35-A 已应用。现在处理 R35-B —— 共享组件。
+R35-B 已完成。现在进行 R35-C —— 合规选择器 + 文档 API。
+R35-C 已完成。在编写 R35-D 之前，精确测量 REF 的 404 垂直边距。
+The DIV is a **divider bar** (`h-0.5 w-16 bg-slate-200 mx-auto`) — a structural element I nearly missed. Mapping the full outer stack.
+已捕获完整结构。正在获取 P 和按钮的精确类，然后编写 R35-D。
+Updating pins D1/D4 to the measured structure (the H2 carries no mt — it rides a space-y-3 block; the island is a separate client file).
+Now writing the 404 implementation — the client island + the rebuilt server page.
+R35-D 已写入。正在验证 REF 的 Go Home 目标（无害导航）。
+Go Home → "/" ✓. Now capturing the remaining R35-E details (Active badge, theme stack, logs grid) in one sweep.
+All contracts captured. Now implementing the settings tabs — Workflows + Shifts first.
+现在处理 Departments —— 带有 h-9 添加按钮的头部以及双行空状态。
+接下来是集成部分 —— 四块 text-chip 磁贴重建。
+接下来是 Theme 标签页。正在检查当前可用的导入以及 `THEME_BOOT` 脚本。
+正在编写 Theme 标签页重构。
+接下来处理 Logs 标签页——即 filter viewer 的重构。
+All tabs implemented. Now cleaning up imports and dead constants.
+类型检查通过。正在运行单元测试。
+Pin fixes needed: literal-class pins that must match source forms (`<Building2`, `initials: "WA"`, the `&amp;` entity) + the R21-B3 legacy pin evolution + the 404 sentence living in the island. Fixing all.
+My own comment trips the pin — rewording.
+**Unit 541/541 GREEN (+20)** · lint · tsc clean. Now the E2E specs. Checking the existing style.
+`test.use` is file-scoped at top level — must move it inside the logged-out describe.
+接下来是 settings-tabs 和 compliance-filter 规范。
+Radix 的 aria-hidden 导致菜单打开时无法找到触发器 —— 在点击*之前*测量触发器。正在检查其他失败。
+REF 在引用路径时**没有**前导斜杠 —— 正在修复该 island。
+The persistent e2e DB carries audit logs from CRUD round-trips — making the spec robust to both states.
+正在修复注释中夹杂的中文字符以及 `user-menu` 触发时机。
+有三个可修复的问题。首先，使用新构建版本重启 `LOC` 服务器，并实时调试 `title-revert` 行为。
+手动设置可以生效——React 在 hydration 过程中会将其还原。正在尝试使用符合 React 惯用法的单例 `<title>` 渲染。
+Updating pin D4 to the `<title>`-render approach + fixing the two spec expectations.
+The `<title>` render didn't take either. Debugging live on the fresh build.
+The head carries three titles — the metadata title wins by order. Testing a removal-based approach live.
+The removal sticks. Implementing: keep the rendered `<title>` + an effect that drops the layout's default title after hydration.
+The effect fires but Next's hydration re-adds the title afterward. Delaying past the hydration window.
+**Title fixed** — "Bar | Eon HR" wins. Re-running the E2E specs.
+User-menu passes solo — cross-test interference in the combined run. Checking the combined failure mode.
+Fixing the early title read — switching to the polling assertion.
+**全部 10 个新 spec 已通过（GREEN）。** 正在运行完整的 E2E 测试套件（预期 152 个）。
+**151/151 E2E GREEN** (142 + 9 new). Full gates pass: lint · tsc · 541 unit · build · E2E. Now the live dual-browser verification — user menu pair first.
+克隆的菜单在所有审计维度上均匹配，除了宽度（128 对比 REF 的 192）。正在检查 REF 的条目内部结构以寻找宽度驱动因素。
+
 工作区在会话中断后得以保留——所有 round-35 的整改变更（R35-A 到 R35-E）均已保留，且基于 a754971 有尚未 commit 的内容。让我重新确认状态：工作日志、文档以及待处理的 user-menu 宽度调查（128 vs REF 192）。
 服务器运行正常，`.env` 正确，`.env.example` 已存在，162 张截图。现在让我检查工作日志状态和整改计划，看看具体还有哪些工作未完成。
 工作日志确认了会话 36 / 第 35 轮的状态：步骤 1–4 已完成（20 个 RED→GREEN，541 个单元测试，151 个 E2E，全部通过），在步骤 5 的实时验证中途中断 —— 正在调查 user-menu 的**宽度驱动因素**（clone 128 vs REF 192）。让我来制定剩余的计划。
