@@ -11,7 +11,11 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 // PATCH  → ?id= update (admin/hr)
 // DELETE → ?id= remove (admin/hr)
 
-const APPLIES_TO = ["leave_requests", "expenses", "staff_requests"] as const;
+/* Session 36 (R35-F3): the five types of REF's Create Approval
+   Workflow dialog (measured: Leave/Expense/Loan/Payroll/Recruitment).
+   The first three predate this round; loans/payroll/recruitment joined
+   with the dialog. */
+const APPLIES_TO = ["leave_requests", "expenses", "staff_requests", "loans", "payroll", "recruitment"] as const;
 
 const WorkflowInput = z.object({
   name: z.string().trim().min(1, "Workflow name is required").max(120),
@@ -27,6 +31,9 @@ const MODULE_BY_APPLIES: Record<(typeof APPLIES_TO)[number], string> = {
   leave_requests: "leave",
   expenses: "expense",
   staff_requests: "general",
+  loans: "general",
+  payroll: "general",
+  recruitment: "recruitment",
 };
 
 interface Conditions {

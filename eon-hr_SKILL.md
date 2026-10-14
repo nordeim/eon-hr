@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.18.0 (session-35 remediation complete — the dialog interiors + the deep-RTL find) · **Last updated:**
+> **Version:** 3.19.0 (session-36 remediation complete — the re-measure: the census's blind spots + the prefetch-logout bug) · **Last updated:**
 > 2026-10-14 · **State:** 521 unit + 142 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2326,3 +2326,42 @@ still zero-data.
   byte-identical element-by-element; the RTL pair surfaces identical;
   the dark sidebar #18181b both apps; mobile chrome + navmap
   byte-identical. 11 screenshots → 156 PNG captures.
+
+## 48. Session-36 Recipe Layer — parity round 35 (the re-measure: the census's blind spots + the prefetch-logout bug)
+
+The round's live verification did what the census could not: it compared
+the BUILT clone against REF surface-by-surface and found six gap groups
+the census had recorded incompletely or not at all. Three engine
+lessons came out of it:
+
+- **THE LINK-PREFETCH ROUTE-HANDLER TRAP (the round's critical find)**:
+  never point a `<Link>` at a route handler with side effects. Next
+  prefetches Link targets when they mount (viewport), and the prefetch
+  is a GET — for `/logout` (a route.ts whose GET clears the session
+  cookie) the menu item LOGGED THE USER OUT the moment the menu opened.
+  The full test pyramid stayed green because no spec navigated after
+  opening the menu — the bug only manifests on the NEXT navigation.
+  Fix: side-effecting actions are `<button>`s with real navigation
+  handlers (`window.location.href`), never Links. Guard: a spec that
+  navigates after the interaction.
+- **The census-vs-re-measure lesson**: a census taken with
+  snapshot-ref clicking can click the WRONG element when lines carry
+  attributes (`[selected, ref=e12]` breaks naive `\[ref=` regexes —
+  the pattern then matches the NEXT line). Always re-verify census
+  findings against the LIVE pair before closing a round; geometry
+  pinned from a mis-clicked panel is worse than no pin. Corollary:
+  slice(0, N) on class strings silently truncates `w-full` off the end
+  — the LOC select triggers "lacked" w-full only because the probe cut
+  the string at 110 chars.
+- **The zoom-in-95 read race (the third sighting)**: Radix popover
+  geometry must be polled to settle (≥190 of 192) before measuring —
+  getBoundingClientRect mid-transform returns the SCALED box (the
+  191/190 "width failures" were the enter animation's tail).
+
+Recipe pins added: the settings header actions are the dark solid
+(bg-[#171717], icon mr-2 — NOT the gradient CTA); the two dialogs
+(max-w-3xl workflow with the five Type options + level cards; max-w-lg
+shift with the seven fields); the Quick Presets cards; the Logs
+slate-50 island; the 404 min-h-screen wrapper + the Go Home icon; the
+user menu's FIXED w-48 + the 16px icon-to-text (mr-2 rides ON TOP of
+gap-2). Gates: 556/556 unit · 157/157 E2E. Live: 11/12 pair MATCH.

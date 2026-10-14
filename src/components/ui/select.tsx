@@ -57,7 +57,9 @@ function SelectContent({
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md",
+        /* Session 36 (R35-B): rounded-md — REF-measured 6px on the
+           compliance All Types select (the clone's rounded-lg was 8px). */
+          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md",
           /* Session 22 (R21-B2): REF's select content animates in (computed
              "animation: enter 0.15s ease", fade + zoom — measured on the
              attendance All-Departments select). Same recipe as the dropdown
@@ -99,7 +101,9 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-md py-1.5 pl-2 pr-8 text-sm outline-none",
+        /* Session 36 (R35-B): REF's option recipe — cursor-default +
+           rounded-sm (measured on the compliance select options). */
+        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none",
         "focus:bg-secondary focus:text-secondary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}

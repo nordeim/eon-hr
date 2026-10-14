@@ -26,9 +26,12 @@ async function auth(session, base) {
   console.log(`[${session}] opening ${base}/login ...`);
   run(`agent-browser --session ${session} open "${base}/login"`);
   await new Promise(r => setTimeout(r, 2500));
-  run(`agent-browser --session ${session} fill "input[type=email]" "${EMAIL}"`);
+  // Single-quote the values for the shell — the demo password starts
+  // with $, which double quotes would expand to an empty string (the
+  // session-36 re-auth failure: both password boxes filled as "").
+  run(`agent-browser --session ${session} fill 'input[type=email]' '${EMAIL}'`);
   await new Promise(r => setTimeout(r, 400));
-  run(`agent-browser --session ${session} fill "input[type=password]" "${PASSWORD}"`);
+  run(`agent-browser --session ${session} fill 'input[type=password]' '${PASSWORD}'`);
   await new Promise(r => setTimeout(r, 400));
   const ref = findButtonRef(session, "sign in");
   if (!ref) { console.log(`[${session}] no Sign in button found`); return "/login"; }

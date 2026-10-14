@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
+import { ok, err, guard, requireUser, requireRole, zodErr } from "@/lib/api";
 
 // /api/shifts — shared by two consumers:
 // 1. Settings → Shifts tab: GET ?active=true → { shifts } (read-only list with
@@ -15,6 +15,22 @@ const AssignInput = z.object({
   employeeId: z.string().trim().min(1, "Employee is required"),
   shiftId: z.string().trim().min(1, "Shift is required"),
   date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+});
+
+/* Session 36 (R35-F6): REF's Add Shift dialog fields (live-measured on
+   the reference: Shift Name / Code "e.g., M, E, N" / Start Time / End
+   Time / Break minutes / Tolerance minutes "0" / Status). The clone's
+   Shift model gained the three nullable columns; creation is
+   discriminated from calendar assignment by the payload shape — the
+   existing shiftcalendar POST (employeeId+shiftId+date) is unchanged. */
+const ShiftInput = z.object({
+  name: z.string().trim().min(1, "Shift name is required").max(60),
+  code: z.string().trim().max(8).optional(),
+  startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "Start time must be HH:MM"),
+  endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "End time must be HH:MM"),
+  breakMinutes: z.number().int().min(0).max(480).optional(),
+  toleranceMinutes: z.number().int().min(0).max(240).optional(),
+  active: z.boolean().default(true),
 });
 
 function dateKey(d: Date): string {
@@ -123,38 +139,79 @@ export async function GET(req: NextRequest) {
   });
 }
 
-// POST /api/shifts — assign a shift to an employee on a date
+// POST /api/shifts — assign a shift to an employee on a date, or create a
+// shift definition (shape-discriminated; see ShiftInput above)
 export async function POST(req: NextRequest) {
-  return guard(async () => {
+  return guard<{ assignment: { id: string } } | { shift: { id: string; name: string } }>(async () => {
     const { user, response } = await requireRole(["admin", "hr"]);
     if (!user) return response;
 
-    const { data, response: bad } = await parseBody(req, AssignInput);
-    if (!data) return bad;
+    /* Session 36 (R35-F6): shape discrimination — a payload carrying
+       employeeId is a calendar assignment (the shiftcalendar consumer);
+       anything else parses as a shift definition from the Settings →
+       Shifts tab's Add Shift dialog. The body is read ONCE (a fetch
+       Request's stream is single-use — a second req.json() throws). */
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return err("VALIDATION", "Invalid JSON body");
+    }
+    const shape =
+      raw && typeof raw === "object" && !Array.isArray(raw)
+        ? (raw as Record<string, unknown>)
+        : null;
 
-    const [employee, shift] = await Promise.all([
-      db.employee.findUnique({ where: { id: data.employeeId }, select: { id: true } }),
-      db.shift.findUnique({ where: { id: data.shiftId }, select: { id: true } }),
-    ]);
-    if (!employee) return err("NOT_FOUND", "Employee not found");
-    if (!shift) return err("NOT_FOUND", "Shift not found");
+    if (shape && typeof shape.employeeId === "string") {
+      const parsed = AssignInput.safeParse(raw);
+      if (!parsed.success) return zodErr(parsed.error);
+      const data = parsed.data;
 
-    const day = new Date(`${data.date}T00:00:00`);
-    if (Number.isNaN(day.getTime())) return err("VALIDATION", "Enter a valid date");
+      const [employee, shift] = await Promise.all([
+        db.employee.findUnique({ where: { id: data.employeeId }, select: { id: true } }),
+        db.shift.findUnique({ where: { id: data.shiftId }, select: { id: true } }),
+      ]);
+      if (!employee) return err("NOT_FOUND", "Employee not found");
+      if (!shift) return err("NOT_FOUND", "Shift not found");
 
-    const existing = await db.shiftAssignment.findFirst({
-      where: { employeeId: data.employeeId, date: day },
-      select: { id: true },
-    });
-    if (existing) {
-      return err("CONFLICT", "This employee already has a shift on this date (overlap prevention)");
+      const day = new Date(`${data.date}T00:00:00`);
+      if (Number.isNaN(day.getTime())) return err("VALIDATION", "Enter a valid date");
+
+      const existing = await db.shiftAssignment.findFirst({
+        where: { employeeId: data.employeeId, date: day },
+        select: { id: true },
+      });
+      if (existing) {
+        return err("CONFLICT", "This employee already has a shift on this date (overlap prevention)");
+      }
+
+      const assignment = await db.shiftAssignment.create({
+        data: { employeeId: data.employeeId, shiftId: data.shiftId, date: day },
+        select: { id: true },
+      });
+      return ok({ assignment });
     }
 
-    const assignment = await db.shiftAssignment.create({
-      data: { employeeId: data.employeeId, shiftId: data.shiftId, date: day },
-      select: { id: true },
+    const parsed = ShiftInput.safeParse(raw);
+    if (!parsed.success) return zodErr(parsed.error);
+    const data = parsed.data;
+
+    const end = data.endTime === "00:00" ? "24:00" : data.endTime;
+    if (end <= data.startTime) return err("VALIDATION", "End time must be after start time");
+
+    const createShift = await db.shift.create({
+      data: {
+        name: data.name,
+        code: data.code || null,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        breakMinutes: data.breakMinutes ?? null,
+        toleranceMinutes: data.toleranceMinutes ?? null,
+        active: data.active,
+      },
+      select: { id: true, name: true },
     });
-    return ok({ assignment });
+    return ok({ shift: createShift });
   });
 }
 
@@ -163,6 +220,17 @@ export async function DELETE(req: NextRequest) {
   return guard(async () => {
     const { user, response } = await requireRole(["admin", "hr"]);
     if (!user) return response;
+
+    /* Session 36 (R35-F6): ?shiftId= removes a shift DEFINITION (the
+       Settings → Shifts tab's cleanup path — assignments cascade);
+       ?id= keeps its assignment semantics for the shift calendar. */
+    const shiftId = req.nextUrl.searchParams.get("shiftId");
+    if (shiftId) {
+      const existingShift = await db.shift.findUnique({ where: { id: shiftId }, select: { id: true } });
+      if (!existingShift) return err("NOT_FOUND", "Shift not found");
+      await db.shift.delete({ where: { id: shiftId } });
+      return ok({ deleted: true });
+    }
 
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return err("VALIDATION", "Assignment id is required");

@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Building2, Clock, FileText, Loader2, MessageSquare, Palette, Pencil, Plug, Plus, SettingsIcon, Shield, Trash2, Users, Video, Workflow } from "lucide-react";
+import { Building2, CircleCheckBig, Clock, FileText, Loader2, Palette, Pencil, Plug, Plus, Save, SettingsIcon, Trash2, Users, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -94,8 +94,6 @@ const COMPANY_FIELDS: { key: keyof CompanyInfo; label: string }[] = [
 ];
 
 const SIZE_OPTIONS = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
-const COMPACT_KEY = "eon.settings.compact";
-const DENSITY_KEY = "eon.settings.density";
 
 export default function SettingsPage() {
   const toast = useToast();
@@ -143,10 +141,10 @@ export default function SettingsPage() {
           <CompanyTab canEdit={canEdit} toast={toast} />
         </TabsContent>
         <TabsContent value="workflows" className="mt-0">
-          <WorkflowsTab />
+          <WorkflowsTab toast={toast} />
         </TabsContent>
         <TabsContent value="shifts" className="mt-0">
-          <ShiftsTab />
+          <ShiftsTab toast={toast} />
         </TabsContent>
         <TabsContent value="departments" className="mt-0">
           <DepartmentsTab canEdit={canEdit} toast={toast} />
@@ -419,41 +417,52 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
 
 // ----------------------------------------------------------- Approval Workflows
 
-function WorkflowsTab() {
+function WorkflowsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
   const [workflows, setWorkflows] = React.useState<WorkflowRow[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [addOpen, setAddOpen] = React.useState(false);
+
+  const load = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/approval-workflows");
+      const json = await res.json();
+      if (json.ok) setWorkflows(json.data.workflows);
+    } catch {
+      // non-critical tab
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/approval-workflows");
-        const json = await res.json();
-        if (json.ok) setWorkflows(json.data.workflows);
-      } catch {
-        // non-critical tab
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    void load();
+  }, [load]);
 
   return (
     <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle>Approval Workflows</CardTitle>
-        <CardDescription>Multi-level approval hierarchies for requests and expenses.</CardDescription>
+      {/* Session 36 (R35-F1): REF's header — the flex-row recipe with the
+          Add Workflow action riding the row (REF: 160×36, the dark solid
+          bg rgb(23,23,23) + Plus mr-2 — the live re-measure found the
+          button the census missed entirely). */}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
+        <div className="font-semibold leading-none tracking-tight">Approval Workflows</div>
+        <Button variant="dark" onClick={() => setAddOpen(true)}>
+          <Plus className="mr-2" aria-hidden="true" />
+          Add Workflow
+        </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : workflows.length === 0 ? (
-          <EmptyState
-            icon={<Shield className="h-6 w-6" aria-hidden="true" />}
-            title="No approval workflows configured"
-            description="Set up a workflow in the Approval Workflow Engine."
-          />
+          /* Session 36 (R35-E): REF's empty — the 48px slate-300 icon + the
+             single 16px slate-500 P (no second line; measured y-for-y). */
+          <div className="py-14 text-center">
+            <CircleCheckBig className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+            <p className="text-base text-slate-500">No workflows configured</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {workflows.map((w) => (
@@ -468,35 +477,241 @@ function WorkflowsTab() {
           </div>
         )}
       </CardContent>
+      <CreateWorkflowDialog open={addOpen} onOpenChange={setAddOpen} onCreated={load} toast={toast} />
     </Card>
+  );
+}
+
+/* Session 36 (R35-F2): REF's Create Approval Workflow dialog —
+   live-measured contract: max-w-3xl (768px), the H2-only header, Row 1 =
+   Workflow Name | Type (a w-full h-9 select with the five options
+   Leave/Expense/Loan/Payroll/Recruitment), the Approval Levels row
+   (label + the 113×32 outline size-sm Add Level at the right), level
+   cards (rounded-xl border p-4 border-slate-200: the H4 "Level N" + the
+   40×32 Trash2 text-red-600 remove + grid grid-cols-2 gap-3 with the
+   "Level Name (e.g., Manager)" / "Role (e.g., Department Head)" /
+   "Delay (hours)" inputs + the Mandatory checkbox), footer Cancel
+   (outline 81×36) + Create (dark 79×36, right-aligned).
+   Superset wiring: Create posts to the existing /api/approval-workflows
+   endpoint (levels capped at the API's 3; the level drafts persist in
+   the actions JSON). */
+const APPLIES_BY_TYPE: Record<string, string> = {
+  leave: "leave_requests",
+  expense: "expenses",
+  loan: "loans",
+  payroll: "payroll",
+  recruitment: "recruitment",
+};
+
+interface LevelDraft {
+  name: string;
+  role: string;
+  delay: string;
+  mandatory: boolean;
+}
+
+function CreateWorkflowDialog({
+  open,
+  onOpenChange,
+  onCreated,
+  toast,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onCreated: () => Promise<void>;
+  toast: ReturnType<typeof useToast>;
+}) {
+  const [name, setName] = React.useState("");
+  const [type, setType] = React.useState<string>("leave");
+  const [levels, setLevels] = React.useState<LevelDraft[]>([]);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  function addLevel() {
+    setLevels((ls) =>
+      ls.length >= 3 ? ls : [...ls, { name: "", role: "", delay: "", mandatory: false }]
+    );
+  }
+
+  function patchLevel(i: number, patch: Partial<LevelDraft>) {
+    setLevels((ls) => ls.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  }
+
+  async function create() {
+    if (!name.trim()) {
+      setError("Workflow name is required");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/approval-workflows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          levels: Math.max(1, levels.length),
+          appliesTo: APPLIES_BY_TYPE[type] ?? "leave_requests",
+          threshold: 0,
+          active: true,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        setError(json.error?.message || "Could not create the workflow");
+        return;
+      }
+      onOpenChange(false);
+      setName("");
+      setType("leave");
+      setLevels([]);
+      await onCreated();
+      toast.toast({ title: "Workflow created", variant: "success" });
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Create Approval Workflow</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="wf-name">Workflow Name</Label>
+            <Input
+              id="wf-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder=""
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="leave">Leave</SelectItem>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="loan">Loan</SelectItem>
+                <SelectItem value="payroll">Payroll</SelectItem>
+                <SelectItem value="recruitment">Recruitment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <Label className="text-sm font-medium leading-none">Approval Levels</Label>
+            <Button variant="outline" size="sm" onClick={addLevel}>
+              <Plus className="mr-2" aria-hidden="true" />
+              Add Level
+            </Button>
+          </div>
+          {levels.map((level, i) => (
+            <Card key={i} className="p-4 border-slate-200">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold">Level {i + 1}</h4>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-10"
+                    onClick={() => setLevels((ls) => ls.filter((_, idx) => idx !== i))}
+                    aria-label={`Remove level ${i + 1}`}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    value={level.name}
+                    onChange={(e) => patchLevel(i, { name: e.target.value })}
+                    placeholder="Level Name (e.g., Manager)"
+                  />
+                  <Input
+                    value={level.role}
+                    onChange={(e) => patchLevel(i, { role: e.target.value })}
+                    placeholder="Role (e.g., Department Head)"
+                  />
+                  <Input
+                    type="number"
+                    value={level.delay}
+                    onChange={(e) => patchLevel(i, { delay: e.target.value })}
+                    placeholder="Delay (hours)"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`wf-level-${i}-mandatory`}
+                      checked={level.mandatory}
+                      onCheckedChange={(v) => patchLevel(i, { mandatory: v === true })}
+                    />
+                    <Label
+                      htmlFor={`wf-level-${i}-mandatory`}
+                      className="text-sm font-medium leading-none"
+                    >
+                      Mandatory
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="dark" onClick={create} disabled={saving}>
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 // ---------------------------------------------------------------- Shifts
 
-function ShiftsTab() {
+function ShiftsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
   const [shifts, setShifts] = React.useState<ShiftRow[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [addOpen, setAddOpen] = React.useState(false);
+
+  const load = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/shifts");
+      const json = await res.json();
+      if (json.ok) setShifts(json.data.shifts);
+    } catch {
+      // non-critical tab
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/shifts");
-        const json = await res.json();
-        if (json.ok) setShifts(json.data.shifts);
-      } catch {
-        // non-critical tab
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    void load();
+  }, [load]);
 
   return (
     <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle>Shifts</CardTitle>
-        <CardDescription>Shift templates used by the shift calendar.</CardDescription>
+      {/* Session 36 (R35-F4): REF's header — the flex-row recipe with the
+          Add Shift action (REF: 127×36, the dark solid + Plus mr-2 — the
+          live re-measure found the button the census missed). */}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
+        <div className="font-semibold leading-none tracking-tight">Work Shifts</div>
+        <Button variant="dark" onClick={() => setAddOpen(true)}>
+          <Plus className="mr-2" aria-hidden="true" />
+          Add Shift
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
@@ -504,11 +719,10 @@ function ShiftsTab() {
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : shifts.length === 0 ? (
-          <EmptyState
-            icon={<Clock className="h-6 w-6" aria-hidden="true" />}
-            title="No shifts defined"
-            description="Create shifts to build the shift calendar."
-          />
+          <div className="py-14 text-center">
+            <Clock className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+            <p className="text-base text-slate-500">No shifts configured</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -536,7 +750,163 @@ function ShiftsTab() {
           </Table>
         )}
       </CardContent>
+      <AddShiftDialog open={addOpen} onOpenChange={setAddOpen} onCreated={load} toast={toast} />
     </Card>
+  );
+}
+
+/* Session 36 (R35-F5): REF's Add Shift dialog — live-measured contract:
+   max-w-lg (512px), the H2-only header, three 2-col rows (Shift Name |
+   Code with the "e.g., M, E, N" placeholder; Start Time | End Time as
+   type=time; Break (minutes) | Tolerance (minutes) with the "0"
+   placeholder), the Status row (label + the Active/Inactive select),
+   footer Cancel (outline) + Create (dark). Superset wiring: Create posts
+   to /api/shifts in its new shape-discriminated create mode. */
+function AddShiftDialog({
+  open,
+  onOpenChange,
+  onCreated,
+  toast,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onCreated: () => Promise<void>;
+  toast: ReturnType<typeof useToast>;
+}) {
+  const [name, setName] = React.useState("");
+  const [code, setCode] = React.useState("");
+  const [startTime, setStartTime] = React.useState("09:00");
+  const [endTime, setEndTime] = React.useState("17:00");
+  const [breakMinutes, setBreakMinutes] = React.useState("");
+  const [toleranceMinutes, setToleranceMinutes] = React.useState("");
+  const [status, setStatus] = React.useState("active");
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  async function create() {
+    if (!name.trim()) {
+      setError("Shift name is required");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/shifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          code: code.trim() || undefined,
+          startTime,
+          endTime,
+          breakMinutes: breakMinutes === "" ? undefined : Number(breakMinutes),
+          toleranceMinutes: toleranceMinutes === "" ? undefined : Number(toleranceMinutes),
+          active: status === "active",
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        setError(json.error?.message || "Could not create the shift");
+        return;
+      }
+      onOpenChange(false);
+      setName("");
+      setCode("");
+      setStartTime("09:00");
+      setEndTime("17:00");
+      setBreakMinutes("");
+      setToleranceMinutes("");
+      setStatus("active");
+      await onCreated();
+      toast.toast({ title: "Shift created", variant: "success" });
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Add Shift</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="shift-name">Shift Name</Label>
+            <Input id="shift-name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shift-code">Code</Label>
+            <Input
+              id="shift-code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="e.g., M, E, N"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shift-start">Start Time</Label>
+            <Input
+              id="shift-start"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shift-end">End Time</Label>
+            <Input
+              id="shift-end"
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shift-break">Break (minutes)</Label>
+            <Input
+              id="shift-break"
+              type="number"
+              value={breakMinutes}
+              onChange={(e) => setBreakMinutes(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shift-tolerance">Tolerance (minutes)</Label>
+            <Input
+              id="shift-tolerance"
+              type="number"
+              value={toleranceMinutes}
+              onChange={(e) => setToleranceMinutes(e.target.value)}
+              placeholder="0"
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label>Status</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-[223px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="dark" onClick={create} disabled={saving}>
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -612,29 +982,33 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
 
   return (
     <Card className="border-slate-200">
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <div className="min-w-0">
-          <CardTitle>Departments</CardTitle>
-          <CardDescription>Organize employees into departments.</CardDescription>
-        </div>
+      {/* Session 36 (R35-E): REF's header — the title-only border-b recipe
+          + the Add Department button at the DEFAULT h-9 size (180×36,
+          dark variant, Plus icon — measured; the clone's outline size-sm
+          was 158×32). */}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
+        <div className="font-semibold leading-none tracking-tight">Departments</div>
         {canEdit ? (
-          <Button variant="outline" size="sm" onClick={() => setAddOpen(true)}>
+          <Button variant="dark" onClick={() => setAddOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Add Department
           </Button>
         ) : null}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : departments.length === 0 ? (
-          <EmptyState
-            icon={<Building2 className="h-6 w-6" aria-hidden="true" />}
-            title="No departments yet"
-            description="Add your first department to organize employees."
-          />
+          /* Session 36 (R35-E): REF's empty — the 48px slate-300 Building2
+             + the P-based two-line empty (16px slate-500 title + 14px
+             slate-400 description; measured y-for-y). */
+          <div className="py-14 text-center">
+            <Building2 className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+            <p className="text-base text-slate-500">No departments yet</p>
+            <p className="mt-1 text-sm text-slate-400">Click &quot;Add Department&quot; to create your first department.</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {departments.map((d) => (
@@ -720,105 +1094,272 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
 // ------------------------------------------------------------ Integrations
 
 function IntegrationsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
+  /* Session 36 (R35-E): REF's integration registry (live-measured — the
+     four 527×98 tiles): WhatsApp / SMS Gateway / Email Service / ZKT
+     BioTime Cloud, each with a 48px text-initials chip (w-12 h-12
+     {color}-100 rounded-lg + {color}-700 font-bold text-lg) and an
+     outline Connect/Configure action — Email carries the Active badge
+     instead. The clone's previous icon-chip tile set was invented. */
   const integrations = [
-    { name: "Slack", description: "Post announcements to Slack channels", icon: <MessageSquare className="h-5 w-5" aria-hidden="true" /> },
-    { name: "Google Workspace", description: "Sync calendar and drive", icon: <Plug className="h-5 w-5" aria-hidden="true" /> },
-    { name: "Zoom", description: "Attach meetings to interviews", icon: <Video className="h-5 w-5" aria-hidden="true" /> },
+    {
+      name: "WhatsApp Integration",
+      description: "Send notifications via WhatsApp",
+      initials: "WA",
+      chipBg: "bg-green-100",
+      chipText: "text-green-700",
+      action: "Connect" as const,
+    },
+    {
+      name: "SMS Gateway",
+      description: "Twilio or local provider",
+      initials: "SMS",
+      chipBg: "bg-blue-100",
+      chipText: "text-blue-700",
+      action: "Configure" as const,
+    },
+    {
+      name: "Email Service",
+      description: "Built-in email integration",
+      initials: "@",
+      chipBg: "bg-slate-100",
+      chipText: "text-slate-700",
+      active: true,
+    },
+    {
+      name: "ZKT BioTime Cloud",
+      description: "Biometric Attendance Sync",
+      initials: "ZKT",
+      chipBg: "bg-indigo-100",
+      chipText: "text-indigo-700",
+      action: "Connect" as const,
+    },
   ];
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {integrations.map((i) => (
-        <Card key={i.name}>
-          <CardContent className="flex flex-col gap-3 p-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-              {i.icon}
-            </div>
-            <div>
-              <p className="font-medium text-foreground">{i.name}</p>
-              <p className="text-sm text-muted-foreground">{i.description}</p>
-            </div>
-            <Button
-              className="w-full"
-              onClick={() =>
-                toast.toast({
-                  title: `${i.name} integration coming soon`,
-                  description: "You'll be able to connect your workspace in a future update.",
-                  variant: "info",
-                })
-              }
+    <Card className="border-slate-200">
+      <CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+        <div className="font-semibold leading-none tracking-tight">System Integrations</div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="grid md:grid-cols-2 gap-4">
+          {integrations.map((i) => (
+            <div
+              key={i.name}
+              className="p-6 border border-slate-200 rounded-lg flex items-center justify-between"
             >
-              Connect
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 ${i.chipBg} rounded-lg flex items-center justify-center`}>
+                  <span className={`${i.chipText} font-bold text-lg`}>{i.initials}</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">{i.name}</h3>
+                  <p className="text-sm text-slate-500">{i.description}</p>
+                </div>
+              </div>
+              {i.active ? (
+                /* REF's Active badge: the green-100/green-700 pair. */
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700 border-transparent">
+                  Active
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    toast.toast({
+                      title: `${i.name} is not configured`,
+                      description: "Set the provider credentials in your deployment environment to connect.",
+                      variant: "info",
+                    })
+                  }
+                >
+                  {i.action}
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 // ------------------------------------------------------------ Theme & Layout
 
+/* Session 36 (R35-E): REF's real theme form (live-measured): the three
+   workspace colors (the html-token triple #1877f2 / #42b72a / #e4e6eb as
+   the starting values), a preview box with three 80px swatches, and the
+   Layout Settings section (Menu Position select + the two collapse
+   checkboxes). The clone's Compact Mode / Density controls were invented.
+   Superset wiring: Save Theme applies the three custom properties to
+   document.documentElement.style and persists them to localStorage
+   (restored on boot by the THEME_BOOT sibling in layout.tsx). */
+const THEME_COLORS_KEY = "eon-theme-colors";
+const DEFAULT_THEME_COLORS = { primary: "#1877f2", secondary: "#42b72a", accent: "#e4e6eb" };
+
+/* Session 36 (R35-F8): REF's three Quick Presets (live-measured swatch
+   triples — see the ThemeTab comment). */
+const THEME_PRESETS = [
+  { name: "Facebook (Default)", primary: "#1877f2", secondary: "#42b72a", accent: "#e4e6eb" },
+  { name: "Professional Blue", primary: "#3b82f6", secondary: "#6366f1", accent: "#e0e7ff" },
+  { name: "Fresh Green", primary: "#10b981", secondary: "#059669", accent: "#d1fae5" },
+] as const;
+
 function ThemeTab({ toast }: { toast: ReturnType<typeof useToast> }) {
-  const [compact, setCompact] = React.useState(false);
-  const [density, setDensity] = React.useState("comfortable");
+  const [colors, setColors] = React.useState(DEFAULT_THEME_COLORS);
+  const [menuPosition, setMenuPosition] = React.useState("left");
+  const [allowCollapse, setAllowCollapse] = React.useState(true);
+  const [startCollapsed, setStartCollapsed] = React.useState(false);
 
   React.useEffect(() => {
-    setCompact(window.localStorage.getItem(COMPACT_KEY) === "true");
-    const stored = window.localStorage.getItem(DENSITY_KEY);
-    if (stored) setDensity(stored);
+    try {
+      const raw = window.localStorage.getItem(THEME_COLORS_KEY);
+      if (raw) setColors({ ...DEFAULT_THEME_COLORS, ...JSON.parse(raw) });
+    } catch {
+      /* corrupted storage — keep defaults */
+    }
   }, []);
 
-  function persistCompact(v: boolean) {
-    setCompact(v);
-    window.localStorage.setItem(COMPACT_KEY, String(v));
+  function applyPreset(preset: { primary: string; secondary: string; accent: string }) {
+    setColors({ primary: preset.primary, secondary: preset.secondary, accent: preset.accent });
   }
 
-  function persistDensity(v: string) {
-    setDensity(v);
-    window.localStorage.setItem(DENSITY_KEY, v);
+  function saveTheme() {
+    setColors((c) => {
+      try {
+        window.localStorage.setItem(THEME_COLORS_KEY, JSON.stringify(c));
+        document.documentElement.style.setProperty("--primary-color", c.primary);
+        document.documentElement.style.setProperty("--secondary-color", c.secondary);
+        document.documentElement.style.setProperty("--accent-color", c.accent);
+      } catch {
+        /* storage unavailable — session-only */
+      }
+      return c;
+    });
+    toast.toast({ title: "Theme saved", variant: "success" });
   }
+
+  const fields = [
+    { key: "primary" as const, label: "Primary Color" },
+    { key: "secondary" as const, label: "Secondary Color" },
+    { key: "accent" as const, label: "Accent Color" },
+  ];
 
   return (
     <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle>Theme &amp; Layout</CardTitle>
-        <CardDescription>Layout preferences are saved to this browser.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground">Compact Mode</p>
-            <p className="text-xs text-muted-foreground">Reduce padding across tables and cards</p>
-          </div>
-          <Switch checked={compact} onCheckedChange={persistCompact} aria-label="Compact mode" />
-        </div>
-        <div className="flex flex-col gap-1.5 rounded-lg border p-4">
-          <Label htmlFor="density">Density</Label>
-          <Select value={density} onValueChange={persistDensity}>
-            <SelectTrigger id="density" className="w-full sm:w-56">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="comfortable">Comfortable</SelectItem>
-              <SelectItem value="compact">Compact</SelectItem>
-              <SelectItem value="spacious">Spacious</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            Controls row height and spacing in lists and tables.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          className="self-start"
-          onClick={() => {
-            persistCompact(false);
-            persistDensity("comfortable");
-            toast.toast({ title: "Layout reset", variant: "info" });
-          }}
-        >
-          Reset to defaults
+      {/* REF's header: the title-only border-b recipe + the dark Save
+          Theme action riding the header row (36px). */}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
+        <div className="font-semibold leading-none tracking-tight">Theme &amp; Layout Settings</div>
+        {/* Session 36 (R35-F7): REF's Save Theme — the dark solid
+           (bg rgb(23,23,23), 151×36) with the lucide-save mr-2 icon
+           (re-measured; the gradient CTA was the wrong recipe family). */}
+        <Button variant="dark" onClick={saveTheme}>
+          <Save className="mr-2" aria-hidden="true" />
+          Save Theme
         </Button>
+      </CardHeader>
+      <CardContent className="p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Colors</h3>
+        <div className="grid md:grid-cols-3 gap-6">
+          {fields.map((f) => (
+            <div key={f.key} className="space-y-2">
+              <Label htmlFor={`theme-${f.key}`}>{f.label}</Label>
+              {/* REF's field row: the 64×40 color input + the hex text
+                  field (269×36). */}
+              <div className="flex gap-2">
+                <input
+                  id={`theme-${f.key}`}
+                  type="color"
+                  className="flex rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-16 h-10"
+                  value={colors[f.key]}
+                  onChange={(e) => setColors({ ...colors, [f.key]: e.target.value })}
+                />
+                <Input
+                  className="sm:max-w-[269px]"
+                  value={colors[f.key]}
+                  onChange={(e) => setColors({ ...colors, [f.key]: e.target.value })}
+                  aria-label={`${f.label} hex value`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* REF's preview box: mt-4 p-4 bg-slate-50 rounded-lg with the
+            "Preview:" label + three 80px swatch tiles. */}
+        <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+          <p className="text-sm text-slate-600 mb-3">Preview:</p>
+          <div className="flex gap-3">
+            <div className="w-20 h-20 rounded-lg shadow-sm border-2" style={{ backgroundColor: colors.primary }} />
+            <div className="w-20 h-20 rounded-lg shadow-sm border-2" style={{ backgroundColor: colors.secondary }} />
+            <div className="w-20 h-20 rounded-lg shadow-sm border-2" style={{ backgroundColor: colors.accent }} />
+          </div>
+        </div>
+        {/* REF's Layout Settings: the pt-6 border-t section with the Menu
+            Position select + the two collapse checkboxes. */}
+        <div className="pt-6 border-t mt-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Layout Settings</h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Menu Position</Label>
+              <Select value={menuPosition} onValueChange={setMenuPosition}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left Sidebar</SelectItem>
+                  <SelectItem value="top">Top Bar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="allow-collapse"
+                checked={allowCollapse}
+                onCheckedChange={(v) => setAllowCollapse(v === true)}
+              />
+              <Label htmlFor="allow-collapse" className="text-sm font-medium leading-none">
+                Allow sidebar to collapse
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="start-collapsed"
+                checked={startCollapsed}
+                onCheckedChange={(v) => setStartCollapsed(v === true)}
+              />
+              <Label htmlFor="start-collapsed" className="text-sm font-medium leading-none">
+                Start with sidebar collapsed
+              </Label>
+            </div>
+          </div>
+        </div>
+        {/* Session 36 (R35-F8): REF's Quick Presets — the three outline
+           cards (REF: 346×86 each in the 3-col grid; outline variant +
+           h-auto p-4 flex flex-col items-start gap-2; the three w-6 h-6
+           rounded swatches + the name). Live-measured swatches:
+           Facebook (Default) #1877f2/#42b72a/#e4e6eb, Professional Blue
+           #3b82f6/#6366f1/#e0e7ff, Fresh Green #10b981/#059669/#d1fae5.
+           Click populates the three color fields (REF behavior — the
+           card itself carries no active state). */}
+        <div className="pt-6 border-t mt-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Presets</h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {THEME_PRESETS.map((preset) => (
+              <Button
+                key={preset.name}
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-start gap-2"
+                onClick={() => applyPreset(preset)}
+              >
+                <div className="flex gap-2">
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: preset.primary }} />
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: preset.secondary }} />
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: preset.accent }} />
+                </div>
+                <span className="text-sm font-medium">{preset.name}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -826,10 +1367,21 @@ function ThemeTab({ toast }: { toast: ReturnType<typeof useToast> }) {
 
 // ------------------------------------------------------------ System Logs
 
+/* Session 36 (R35-E): REF's log-viewer shell (live-measured): the border-b
+   header with the "{N} total logs" counter, the five-field filter grid
+   (grid md:grid-cols-5 gap-4 — Search / User / Action / From Date / To
+   Date) with a Clear Filters size-sm action below, and the "No logs found
+   matching your filters" empty line (16px slate-500, text-center py-8 —
+   no icon). The with-data table stays as the clone's superset. */
 function LogsTab() {
   const [logs, setLogs] = React.useState<AuditLogRow[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [forbidden, setForbidden] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const [user, setUser] = React.useState("all");
+  const [action, setAction] = React.useState("all");
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState("");
 
   React.useEffect(() => {
     void (async () => {
@@ -846,13 +1398,101 @@ function LogsTab() {
     })();
   }, []);
 
+  const users = React.useMemo(
+    () => Array.from(new Set(logs.map((l) => l.userName))).sort(),
+    [logs]
+  );
+  const actions = React.useMemo(
+    () => Array.from(new Set(logs.map((l) => l.action))).sort(),
+    [logs]
+  );
+
+  const filtered = logs.filter((l) => {
+    if (search && !`${l.action} ${l.entity} ${l.userName}`.toLowerCase().includes(search.toLowerCase())) return false;
+    if (user !== "all" && l.userName !== user) return false;
+    if (action !== "all" && l.action !== action) return false;
+    if (from && new Date(l.createdAt) < new Date(from)) return false;
+    if (to && new Date(l.createdAt) > new Date(`${to}T23:59:59`)) return false;
+    return true;
+  });
+
   return (
     <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle>System Logs</CardTitle>
-        <CardDescription>Audit trail of recent system actions.</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
+        <div className="font-semibold leading-none tracking-tight">System Audit Logs</div>
+        <div className="text-sm text-slate-600">{filtered.length} total logs</div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-6">
+        {/* Session 36 (R35-F9): REF's filter area rides a slate-50 island —
+            mb-6 p-4 bg-slate-50 rounded-lg space-y-4 wraps the five-field
+            grid + the Clear Filters action (re-measured: the wrapper's p-4
+            gives REF's 195px grid columns; the clone's bare grid rendered
+            201 — the census had the grid recipe but missed the wrapper). */}
+        <div className="mb-6 p-4 bg-slate-50 rounded-lg space-y-4">
+          <div className="grid md:grid-cols-5 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="log-search">Search</Label>
+            <Input
+              id="log-search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search logs..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>User</Label>
+            <Select value={user} onValueChange={setUser}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Users</SelectItem>
+                {users.map((u) => (
+                  <SelectItem key={u} value={u}>{u}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Action</Label>
+            <Select value={action} onValueChange={setAction}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Actions</SelectItem>
+                {actions.map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="log-from">From Date</Label>
+            <Input id="log-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="log-to">To Date</Label>
+            <Input id="log-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearch("");
+                setUser("all");
+                setAction("all");
+                setFrom("");
+                setTo("");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -862,29 +1502,37 @@ function LogsTab() {
             title="Access restricted"
             description="Only admin, HR or security roles can view system logs."
           />
-        ) : logs.length === 0 ? (
-          <EmptyState title="No system activity yet" description="Actions like company updates will appear here." />
+        ) : filtered.length === 0 ? (
+          /* Session 36 (R35-F13): REF's empty carries the 48px FileText
+             slate-300 icon above the line (live-measured — the census
+             had recorded "no icon"). */
+          <div className="text-center py-8">
+            <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+            <p className="text-slate-500">No logs found matching your filters</p>
+          </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Action</TableHead>
-                <TableHead>Entity</TableHead>
-                <TableHead>When</TableHead>
-                <TableHead>User</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.map((l) => (
-                <TableRow key={l.id}>
-                  <TableCell className="font-medium text-foreground">{l.action}</TableCell>
-                  <TableCell className="text-muted-foreground">{l.entity}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatDateTime(l.createdAt)}</TableCell>
-                  <TableCell className="text-muted-foreground">{l.userName}</TableCell>
+          <div className="mt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Entity</TableHead>
+                  <TableHead>When</TableHead>
+                  <TableHead>User</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((l) => (
+                  <TableRow key={l.id}>
+                    <TableCell className="font-medium text-foreground">{l.action}</TableCell>
+                    <TableCell className="text-muted-foreground">{l.entity}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatDateTime(l.createdAt)}</TableCell>
+                    <TableCell className="text-muted-foreground">{l.userName}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

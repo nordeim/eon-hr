@@ -1028,3 +1028,23 @@ Work Log:
 
 Stage Summary:
 - Round 34 delivered: both REF-exposed dialogs rebuilt to byte-identical interiors, the systemic dialog recipes (leading-none title + 80% backdrop) applied app-wide, the RTL desktop rebuilt to REF's true fixed-panel architecture (plus the surface token correction), and the payrollreports tabs wired as the with-data superset; two new v4 engine lessons documented (the dialog-scale inline-label collapse; the Radix native-select last-child trap), 521 unit + 142 E2E green
+
+---
+Task ID: session-36
+Agent: main (Super Z)
+Task: eon-hr parity round 35 (session 36, two windows) — the re-measure: the census's blind spots + the prefetch-logout bug
+
+Work Log:
+- Window 1 (session 70): baseline at a754971 all green (521 unit / 142 E2E); the REF CSS redeploy analyzed (login static build only — the app chunk unchanged); the census: the user menu interior, the compliance Saudi taxonomy, the 404 contract, the six settings tab bodies, the shared select/dropdown recipes; 20 RED pins → 541/541 unit; 10 E2E specs → 151/151
+- Window 2 (session 71, this one): the user-menu width driver measured (the FIXED w-48 + CircleUser/LogOut + 16px icon-to-text) → amended; the zoom-in-95 read race fixed (poll ≥190)
+- THE PREFETCH-LOGOUT BUG: Logout as a Link → Next's prefetch GETs the /logout route handler → the session cookie cleared the moment the menu opened (found live — the LOC browser session died after every menu measurement); fixed with a real button + pin A6 + the navigate-after-open regression spec
+- The R35-F family (the census's blind spots, all live-measured first): the dark-solid header actions ×4 (the clone had the gradient CTA), the Create Approval Workflow dialog (five types — APPLIES_TO extended), the Add Shift dialog (Shift model + code/break/tolerance, the shape-discriminated POST with the single body read, DELETE ?shiftId=), Save Theme's icon, the Quick Presets (three outline cards + measured swatches), the Logs slate-50 island (the 195px columns), the 404 min-h-screen wrapper (y=306, was 226) + the Go Home icon (123×38), the Logs 48px FileText empty
+- The auth-sessions.mjs $-quoting fix; the verify-r35 probe family hardened (line-based refs for attribute lines, encodeURIComponent evals, the bell's unnamed-button locator, tag-agnostic Go Home)
+- Gates: lint 0/0 · tsc ✓ · 556/556 unit · build ✓ · 157/157 E2E
+- Live: 11/12 pair MATCH (user menu, compliance select, all six settings tabs, mobile chrome, bell popover, login stack; the 404 equal except Go Home = the clone's real <a> vs REF's JS button — the documented superset); 16 screenshots (128-135) → 172 PNG; DB pristine
+- Docs: AGENTS session-36 layer, SKILL 3.19.0 + §48 (the Link-prefetch route-handler trap + the census-vs-re-measure lesson + the zoom race), PAD [S36], CLAUDE/README counts, session_70/71, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 35 delivered: the settings surface completed against live-measured REF (the header actions, both dialogs with real persistence, the presets, the island, the 404 re-centering), the user menu's true contract pinned, and a critical self-logout bug eliminated (the Link-prefetch trap — the round's headline lesson, SKILL §48)
+- Gates: 556/556 unit (+35) · 157/157 E2E (+15) · 172 captures
+- Frontier after this round: with-data surfaces (still blocked on REF's zero-data state), the workflow dialog's with-data list rendering (superset-designed), form-error surfaces on the new dialogs, REF's next redeploy

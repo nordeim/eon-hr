@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Bell, Moon, Sun, Languages, LogOut, User, CircleUser, Briefcase } from "lucide-react";
+import { ChevronRight, Bell, Moon, Sun, Languages, LogOut, CircleUser, Briefcase } from "lucide-react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -371,37 +371,53 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
+        {/* Session 36 (R35-A): REF's user menu measured — 192×74 (TWO items,
+            no Label/Separator: the "Admin" label row was invented),
+            align=end (menu right-edge = the trigger's right-edge),
+            sideOffset=4, w-48 (the 192px width is a FIXED class, not
+            content-sized — re-measured after the initial implementation
+            rendered 128px), rounded-md container (6px). Same enter
+            animation as ui/dropdown-menu.tsx (round 22: enter 0.15s,
+            fade + zoom). */}
         <DropdownMenu.Content
           side="top"
-          align="start"
-          sideOffset={8}
-          /* Session 22 (R21-B3): REF's dropdown animates in (computed
-             "animation: enter 0.15s ease", fade + zoom — measured on the
-             user menu). Same recipe as ui/dropdown-menu.tsx, which needed
-             the globals.css @utility block to generate real CSS in v4. */
-          className="z-50 min-w-[200px] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          align="end"
+          sideOffset={4}
+          className="z-50 min-w-[8rem] w-48 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
-          <DropdownMenu.Label className="px-2 py-1.5 text-xs text-muted-foreground">
-            {user.role.replace(/\b\w/g, (c) => c.toUpperCase())}
-          </DropdownMenu.Label>
-          <DropdownMenu.Separator className="-mx-1 my-1 h-px bg-border" />
           <DropdownMenu.Item asChild>
             <Link
               href="/profile"
-              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground"
+              /* Session 36 (R35-A): REF's item recipe — cursor-default +
+                 rounded-sm (the newer shadcn classes; measured on both
+                 REF items). 32px rows, 16px svgs, focus:bg-accent.
+                 The svg rides [&>svg]:size-4 + mr-2 ON TOP of the item's
+                 gap-2 → 16px icon-to-text (REF-measured 60→92). */
+              className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"
             >
-              <User className="h-4 w-4" aria-hidden="true" />
+              <CircleUser className="h-4 w-4 mr-2" aria-hidden="true" />
               My Profile
             </Link>
           </DropdownMenu.Item>
+          {/* Session 36 (R35-A amendment): Logout is a BUTTON, not a
+              Link — Next prefetches Link targets when they mount, and a
+              prefetch of the /logout ROUTE HANDLER fires its GET, which
+              clears the session cookie. A Link-ified Logout item
+              therefore logged the user out the moment the menu opened
+              (found live: the browser session died after every
+              user-menu measurement; the E2E never caught it because no
+              spec navigated afterward). */}
           <DropdownMenu.Item asChild>
-            <Link
-              href="/logout"
-              className="flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-red-600 outline-none transition-colors focus:bg-accent focus:text-accent-foreground"
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/logout";
+              }}
+              className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
               Logout
-            </Link>
+            </button>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

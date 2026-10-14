@@ -47,15 +47,22 @@ interface ComplianceData {
   stats: ComplianceStats;
 }
 
+/* Session 36 (R35-C): REF's window-select taxonomy — the SELECT labels are
+   "All / Expired / Within N days" (live-measured on the compliance status
+   select); the STAT TILES keep their own "Expiring ≤ N days" labels — REF
+   renders BOTH taxonomies on the same page. */
 const FILTERS = [
-  { key: "all", label: "All Alerts" },
+  { key: "all", label: "All" },
   { key: "expired", label: "Expired" },
-  { key: "d7", label: "Expiring ≤ 7 days" },
-  { key: "d15", label: "Expiring ≤ 15 days" },
-  { key: "d30", label: "Expiring ≤ 30 days" },
+  { key: "d7", label: "Within 7 days" },
+  { key: "d15", label: "Within 15 days" },
+  { key: "d30", label: "Within 30 days" },
 ] as const;
 
-const TYPE_OPTIONS = ["all", "contract", "id", "passport", "visa", "certificate", "medical", "other"];
+/* Session 36 (R35-C): REF's Saudi document-type taxonomy (live-measured on
+   the All Types select: Iqama, Visa, Passport, Contract, Probation — the
+   clone's certificate/medical/id/other set was invented). */
+const TYPE_OPTIONS = ["all", "iqama", "visa", "passport", "contract", "probation"];
 
 function labelize(v: string): string {
   return v === "all" ? "All Types" : v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

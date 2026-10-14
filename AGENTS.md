@@ -1673,3 +1673,66 @@ still zero-data — every diff was clone-side.
   11 new screenshots (121 the RTL pair, 122/123 the dialog pairs,
   124-126 the tabs, 127 the dark sidebar pair) → 156 PNG captures. DB
   pristine.
+
+## Session 36 (parity round 35) — THE RE-MEASURE: THE CENSUS'S BLIND SPOTS + THE PREFETCH-LOGOUT BUG
+
+**Scope**: the round's live verification found what the census missed —
+the user menu's fixed width, the settings header actions, two never-built
+dialogs, the Quick Presets, the Logs island, the 404 vertical recipe, and
+a self-logout bug the whole test pyramid had sailed over.
+
+- **The w-48 amendment (R35-A)**: REF's user menu is a FIXED `w-48`
+  (192px), not content-sized — the initial build rendered 128. The items
+  are `CircleUser` + `LogOut`, both `mr-2` ON TOP of the item's `gap-2`
+  → 16px icon-to-text (60→92, measured on both items). The enter
+  animation (zoom-in-95) races geometry reads — poll to ≥190 before
+  measuring (the 191/190 failures were the transform's tail, not the
+  width).
+- **THE PREFETCH-LOGOUT BUG (R35-A amendment)**: the Logout item was
+  first built as a `<Link href="/logout">` — Next PREFETCHES Link
+  targets when they mount, the prefetch GETs the /logout ROUTE HANDLER,
+  and its GET clears the session cookie. The menu logged the user out
+  the moment it OPENED. Found live (the browser session died after
+  every user-menu measurement); the E2E never caught it because no spec
+  navigated afterward. Fix: a real `<button>` + `window.location.href`.
+  Regression guard: user-menu.spec's navigate-after-open test + pin A6.
+- **The R35-F family (the census's blind spots, all live-measured)**:
+  (F1/F4/F10) the four settings header actions are the DARK SOLID
+  (bg rgb(23,23,23) + white + icon) — the clone had the blue gradient
+  CTA on all four; (F2) the Create Approval Workflow dialog — max-w-3xl,
+  the five Type options (Leave/Expense/Loan/Payroll/Recruitment — the
+  API's APPLIES_TO extended), Approval Levels + Add Level (outline
+  size-sm) + level cards (H4 + Trash2 red-600 remove + the three
+  measured placeholders + Mandatory); (F5/F6) the Add Shift dialog —
+  max-w-lg, the seven fields ("e.g., M, E, N" / "0" placeholders), the
+  Shift model's code/breakMinutes/toleranceMinutes columns, and the
+  shape-discriminated POST /api/shifts (employeeId = assignment, else
+  definition — the body is read ONCE: a fetch Request's stream is
+  single-use); (F7) Save Theme = dark solid + the lucide-save mr-2 icon
+  (151×36; the clone's gradient was 119); (F8) the Quick Presets —
+  three outline cards (h-auto p-4 flex-col items-start gap-2, 346×86,
+  three w-6 h-6 rounded swatches; Facebook #1877f2/#42b72a/#e4e6eb,
+  Professional Blue #3b82f6/#6366f1/#e0e7ff, Fresh Green
+  #10b981/#059669/#d1fae5), click populates the color fields; (F9) the
+  Logs filter island — mb-6 p-4 bg-slate-50 rounded-lg space-y-4 wraps
+  the grid + Clear Filters (the wrapper's p-4 gives REF's 195px columns
+  — the clone's bare grid rendered 201); (F11) the 404 wrapper —
+  min-h-screen + p-6 + the slate-50 page background (content centers at
+  y=306 of 900; the clone's 70vh-min + 160px bottom padding centered at
+  226 — an 80px offset); (F12) Go Home carries the 16px Home icon
+  (123×38 with it, 99 without); (F13) the Logs empty carries the 48px
+  FileText slate-300 icon (the census had recorded "no icon").
+- **The auth-sessions.mjs quoting fix**: the demo password starts with
+  `$` — double quotes in the shell expanded it to an empty string (both
+  password boxes filled as ""). Single-quote the fill values.
+- **Pins**: 24 new this round (A1-6, B1-2, C1-3, D1-4, E1-7, F1-13 —
+  minus overlaps: the R35-E block from the first pass + the A5/A6/F
+  amendments). Gates: lint 0/0 · tsc ✓ · **556/556 unit** · build ✓ ·
+  **157/157 E2E** (+15: user-menu ×2, not-found ×2, settings-tabs ×10,
+  compliance-filters — see the spec files).
+  Live: **11/12 pair MATCH** (user menu, compliance select, all six
+  settings tabs, mobile chrome, bell popover, login stack) + the 404
+  pair identical except Go Home = the clone's real `<a>` (REF renders a
+  JS button — the navigation superset, geometry 123×38 equal). 16 new
+  screenshots (128-135, ref+loc pairs) → 172 PNG captures. DB pristine
+  (the E2E probes clean up after themselves).

@@ -191,13 +191,16 @@ model AttendanceRecord {
 }
 
 model Shift {
-  id           String            @id @default(cuid())
-  name         String
-  startTime    String // "09:00"
-  endTime      String // "17:00"
-  departmentId String?
-  active       Boolean           @default(true)
-  assignments  ShiftAssignment[]
+  id               String            @id @default(cuid())
+  name             String
+  startTime        String // "09:00"
+  endTime          String // "17:00"
+  code             String? // Session 36 (R35-F6): REF's Add Shift dialog — "e.g., M, E, N"
+  breakMinutes     Int? // REF's "Break (minutes)"
+  toleranceMinutes Int? // REF's "Tolerance (minutes)"
+  departmentId     String?
+  active           Boolean           @default(true)
+  assignments      ShiftAssignment[]
 }
 
 model ShiftAssignment {
@@ -219,7 +222,7 @@ model Document {
   id         String    @id @default(cuid())
   employeeId String
   name       String
-  type       String    @default("other") // contract | id | passport | visa | certificate | medical | other
+  type       String    @default("other") // iqama | visa | passport | contract | probation | other (session 36: REF's Saudi taxonomy)
   fileUrl    String?
   issueDate  DateTime?
   expiryDate DateTime?

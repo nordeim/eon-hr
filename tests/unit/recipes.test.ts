@@ -1711,8 +1711,8 @@ describe("session-22 transition + animation recipes (parity round 21 — the mot
     expect(selBlock).toContain("data-[state=closed]:zoom-out-95");
   });
 
-  it("R21-B3: the sidebar user dropdown animates (REF-measured enter 0.15s on the same recipe)", () => {
-    const ddIdx = sidebarNav.indexOf("z-50 min-w-[200px]");
+  it("R21-B3: the sidebar user dropdown animates (REF-measured enter 0.15s on the same recipe; session 36 evolved the anchor — the menu is now the measured min-w-[8rem] recipe)", () => {
+    const ddIdx = sidebarNav.indexOf("z-50 min-w-[8rem]");
     expect(ddIdx).toBeGreaterThan(-1);
     const ddBlock = sidebarNav.slice(ddIdx, ddIdx + 700);
     expect(ddBlock).toContain("data-[state=open]:animate-in");
@@ -3011,5 +3011,348 @@ describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity r
     expect(src).toContain('tab === "custom"');
     expect(src).toContain("Custom Report");
     expect(src).toContain("Generate Report");
+  });
+});
+
+describe("session-36 footer-menu family + compliance selects + 404 + settings tabs (parity round 35)", () => {
+  /* The round's census: the user-dropdown menu (round 22 pinned only its
+     motion — the interior was never measured), the systemic menu-family
+     recipes (dropdown + select containers/items), the compliance filter
+     option sets, the 404 page (round 10 pinned only the two headings), and
+     the settings tab interiors (round 13 pinned only the tab strip + the
+     Company card). All values REF-measured this round — see
+     docs/remediation-plan-session36.md. */
+
+  const dropdownUi = read("src", "components", "ui", "dropdown-menu.tsx");
+  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+  const notFoundPage = read("src", "app", "not-found.tsx");
+  const documentsApi = read("src", "app", "api", "documents", "route.ts");
+
+  it("R35-A1: the user menu renders NO Label/Separator (REF: 192×74, two items only — the 'Admin' label was invented)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).not.toContain("<DropdownMenu.Label");
+    expect(block).not.toContain("<DropdownMenu.Separator");
+  });
+
+  it("R35-A2: the user menu aligns END with the 4px offset (REF: menu right-edge = trigger right-edge; bottom gap 4)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).toContain('side="top"');
+    expect(block).toContain('align="end"');
+    expect(block).toContain("sideOffset={4}");
+  });
+
+  it("R35-A3: the user menu drops the invented min-w-[200px], renders the rounded-md container and the FIXED w-48 (REF: 192px width, radius 6px — re-measured after the initial content-sized implementation rendered 128)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).not.toContain("min-w-[200px]");
+    expect(block).toContain("min-w-[8rem] w-48");
+    expect(block).toContain("rounded-md border bg-popover p-1 text-popover-foreground shadow-md");
+  });
+
+  it("R35-A4: the user menu items carry REF's recipe — cursor-default + rounded-sm (the newer shadcn item classes)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).toContain("cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm");
+    expect(block).not.toMatch(/cursor-pointer[^\n]*rounded-md/);
+  });
+
+  it("R35-A5: the user menu icons are REF's pair — CircleUser on My Profile (not User) and LogOut, both mr-2 over the item's gap-2 (16px icon-to-text; the svgs ride the [&>svg]:size-4 variant)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).toContain("[&>svg]:size-4 [&>svg]:shrink-0");
+    expect(block).toContain('<CircleUser className="h-4 w-4 mr-2"');
+    expect(block).toContain('<LogOut className="h-4 w-4 mr-2"');
+    expect(block).not.toContain('<User className="h-4 w-4"');
+  });
+
+  it("R35-A6: Logout is a BUTTON with a real navigation handler — NOT a Link (a <Link href=\"/logout\"> gets PREFETCHED when the menu opens; the prefetch GETs the route handler, which clears the session cookie — the menu logged the user out on open, found live)", () => {
+    const menuIdx = sidebarNav.indexOf("function UserMenu(");
+    const block = sidebarNav.slice(menuIdx);
+    expect(block).not.toContain('href="/logout"');
+    expect(block).toContain('window.location.href = "/logout"');
+  });
+
+  it("R35-B1: the shared dropdown-menu Content is rounded-md and its Item is cursor-default rounded-sm (REF-measured on the user menu)", () => {
+    expect(dropdownUi).toContain("rounded-md border bg-popover p-1 text-popover-foreground shadow-md");
+    expect(dropdownUi).not.toContain("rounded-lg border bg-popover");
+    expect(dropdownUi).toContain("cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm");
+  });
+
+  it("R35-B2: the shared select Content is rounded-md and its Item is cursor-default rounded-sm (REF-measured on the compliance All Types select: radius 6px, cursor default)", () => {
+    expect(selectUi).toContain("rounded-md border bg-popover text-popover-foreground shadow-md");
+    expect(selectUi).not.toContain("rounded-lg border bg-popover");
+    expect(selectUi).toContain("cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm");
+  });
+
+  it("R35-C1: the compliance type options are REF's Saudi taxonomy (Iqama/Visa/Passport/Contract/Probation)", () => {
+    expect(compliancePage).toContain(
+      'const TYPE_OPTIONS = ["all", "iqama", "visa", "passport", "contract", "probation"];'
+    );
+  });
+
+  it("R35-C2: the compliance window-select labels are REF's select taxonomy (All/Expired/Within N days — the stat tiles keep their own labels)", () => {
+    expect(compliancePage).toContain('{ key: "all", label: "All" }');
+    expect(compliancePage).toContain('{ key: "d7", label: "Within 7 days" }');
+    expect(compliancePage).toContain('{ key: "d30", label: "Within 30 days" }');
+    expect(compliancePage).not.toContain('{ key: "all", label: "All Alerts" }');
+    // the stat tiles keep the Expiring ≤ taxonomy (both render on REF)
+    expect(compliancePage).toMatch(/label="Expiring ≤ 7 days"/);
+  });
+
+  it("R35-C3: the documents API accepts REF's five types (+ the model's default fallback)", () => {
+    expect(documentsApi).toContain(
+      'const DOC_TYPES = ["iqama", "visa", "passport", "contract", "probation", "other"] as const;'
+    );
+  });
+
+  it("R35-D1: the 404 headings — 72px/300 slate-300 + 24px/500 slate-800 in the measured stack (divider bar + space-y-3 block)", () => {
+    expect(notFoundPage).toContain('className="text-7xl font-light text-slate-300"');
+    expect(notFoundPage).toContain('className="text-2xl font-medium text-slate-800"');
+    expect(notFoundPage).toContain('className="space-y-2"');
+    expect(notFoundPage).toContain('className="h-0.5 w-16 bg-slate-200 mx-auto"');
+  });
+
+  it("R35-D2: the 404 sentence — the quoted full pathname + the Go Home outline button (REF: 123×38, slate-200 border, rounded-lg)", () => {
+    const island = read("src", "app", "not-found-copy.tsx");
+    expect(island).toContain("could not be found in this application");
+    expect(island).toContain("font-medium text-slate-700");
+    expect(notFoundPage).toContain("Go Home");
+    expect(notFoundPage).toMatch(/border-slate-200 rounded-lg/);
+  });
+
+  it("R35-D3: the logged-out 404 redirects to /login (REF's guard behavior — the round-10 'unmeasurable' assumption corrected)", () => {
+    expect(notFoundPage).toContain('redirect("/login")');
+    expect(notFoundPage).not.toContain("canvas-gradient");
+  });
+
+  it("R35-D4: the 404 title + sentence come from the pathname (client island: usePathname + the React-19 <title> singleton rendered via the computed title — a raw document.title mutation is reverted by React's reconciliation)", () => {
+    const island = read("src", "app", "not-found-copy.tsx");
+    expect(island).toContain("usePathname");
+    expect(island).toContain("`${slug} | Eon HR`");
+    expect(island).toMatch(/<title>\{title\}/);
+    // The final mechanics: the layout's default title renders first in the
+    // head and Next's metadata controller re-asserts it during hydration —
+    // the island delays past that window, then drops competing titles.
+    expect(island).toContain('document.querySelectorAll("head title")');
+    expect(notFoundPage).toContain("NotFoundCopy");
+  });
+
+  it("R35-E1: the settings tab headers are the title-only 16px leading-none recipe (no CardDescription on the non-Company tabs)", () => {
+    for (const title of ["Approval Workflows", "Work Shifts", "Departments", "System Integrations", "Theme &amp; Layout Settings", "System Audit Logs"]) {
+      expect(settingsPage).toContain(`font-semibold leading-none tracking-tight">${title}`);
+    }
+    expect(settingsPage).not.toContain("Multi-level approval hierarchies");
+    expect(settingsPage).not.toContain("Shift templates used by the shift calendar");
+    expect(settingsPage).not.toContain("Organize employees into departments");
+    expect(settingsPage).not.toContain("Audit trail of recent system actions");
+  });
+
+  it("R35-E2: the Departments tab — h-9 Add (default variant, 180×36) + the 48px slate-300 empty icon + the P-based two-line empty", () => {
+    const idx = settingsPage.indexOf("function DepartmentsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function IntegrationsTab("));
+    expect(block).not.toContain('size="sm"');
+    expect(block).toContain("No departments yet");
+    expect(block).toContain('Click &quot;Add Department&quot; to create your first department.');
+    expect(block).toContain("w-12 h-12 mx-auto mb-3 text-slate-300");
+    expect(block).toContain('<Building2 className="w-12 h-12 mx-auto mb-3 text-slate-300"');
+  });
+
+  it("R35-E3: the Workflows tab empty — CircleCheckBig 48px slate-300 + the single P 'No workflows configured'", () => {
+    const idx = settingsPage.indexOf("function WorkflowsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    expect(block).toContain("No workflows configured");
+    expect(block).not.toContain("Set up a workflow in the Approval Workflow Engine");
+    expect(block).toContain('<CircleCheckBig className="w-12 h-12 mx-auto mb-3 text-slate-300"');
+  });
+
+  it("R35-E4: the Shifts tab — the 'Work Shifts' title + the single P 'No shifts configured' + the Clock 48px", () => {
+    const idx = settingsPage.indexOf("function ShiftsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    expect(block).toContain(">Work Shifts<");
+    expect(block).toContain("No shifts configured");
+    expect(block).not.toContain("Create shifts to build the shift calendar");
+    expect(block).toContain('<Clock className="w-12 h-12 mx-auto mb-3 text-slate-300"');
+  });
+
+  it("R35-E5: the Integrations tab — REF's four text-chip tiles (WhatsApp/SMS/Email/ZKT) with the Active badge", () => {
+    const idx = settingsPage.indexOf("function IntegrationsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+    for (const name of ["WhatsApp Integration", "SMS Gateway", "Email Service", "ZKT BioTime Cloud"]) {
+      expect(block).toContain(name);
+    }
+    expect(block).toContain("Send notifications via WhatsApp");
+    expect(block).toContain("Twilio or local provider");
+    expect(block).toContain("Built-in email integration");
+    expect(block).toContain("Biometric Attendance Sync");
+    expect(block).toContain('initials: "WA"');
+    expect(block).toContain("bg-green-100");
+    expect(block).toContain('chipText: "text-green-700"');
+    expect(block).toContain("${i.chipText} font-bold text-lg");
+    expect(block).toContain('bg-green-100 text-green-700 border-transparent');
+    expect(block).not.toContain("Slack");
+  });
+
+  it("R35-E6: the Theme tab — REF's real form (three color fields + Preview + Menu Position + the two collapse checkboxes + Save Theme)", () => {
+    const idx = settingsPage.indexOf("function ThemeTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    expect(block).toContain("Save Theme");
+    expect(block).toContain(">Colors<");
+    expect(block).toContain("Primary Color");
+    expect(block).toContain("Secondary Color");
+    expect(block).toContain("Accent Color");
+    expect(block).toContain('type="color"');
+    expect(block).toContain(">Preview:<");
+    expect(block).toContain("Layout Settings");
+    expect(block).toContain("Menu Position");
+    expect(block).toContain("Left Sidebar");
+    expect(block).toContain("Allow sidebar to collapse");
+    expect(block).toContain("Start with sidebar collapsed");
+    expect(block).not.toContain("Compact Mode");
+    expect(block).not.toContain("Density");
+  });
+
+  it("R35-E7: the System Logs tab — the filter shell (Search/User/Action/From/To + Clear Filters) + the P empty line", () => {
+    const idx = settingsPage.indexOf("function LogsTab(");
+    const block = settingsPage.slice(idx);
+    expect(block).toContain("total logs");
+    expect(block).toContain("All Users");
+    expect(block).toContain("All Actions");
+    expect(block).toContain("Clear Filters");
+    expect(block).toContain("No logs found matching your filters");
+  });
+
+  /* ---- R35-F: the live-verification amendments (the re-measure found
+     what the census missed — the header action buttons + the dialogs +
+     the Quick Presets + the w-full selects + the button COLOR family) ---- */
+
+  it("R35-F1: the Workflows tab header carries the Add Workflow action (REF: 160×36, dark solid + Plus — the census missed the button entirely)", () => {
+    const idx = settingsPage.indexOf("function WorkflowsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    expect(block).toContain("flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6");
+    expect(block).toContain("Add Workflow");
+    expect(block).toMatch(/<Plus className="mr-2"/);
+    expect(block).toContain('variant="dark"');
+  });
+
+  it("R35-F2: the Create Approval Workflow dialog — REF's contract (max-w-3xl, Name | Type select with the five types, Approval Levels + Add Level + Mandatory, Cancel/Create)", () => {
+    const idx = settingsPage.indexOf("function WorkflowsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    expect(block).toContain("Create Approval Workflow");
+    expect(block).toContain("max-w-3xl");
+    expect(block).toContain("Workflow Name");
+    expect(block).toContain(">Type<");
+    for (const t of ["Leave", "Expense", "Loan", "Payroll", "Recruitment"]) {
+      expect(block).toContain(`<SelectItem value="${t.toLowerCase()}">${t}</SelectItem>`);
+    }
+    expect(block).toContain("Approval Levels");
+    expect(block).toContain("Add Level");
+    expect(block).toContain("Mandatory");
+    expect(block).toMatch(/>\s*Create\s*<\/Button>/);
+    expect(block).toMatch(/>\s*Cancel\s*<\/Button>/);
+  });
+
+  it("R35-F3: the approval-workflows API accepts the dialog's five types (APPLIES_TO extended with loans/payroll/recruitment)", () => {
+    const api = read("src", "app", "api", "approval-workflows", "route.ts");
+    expect(api).toContain('"leave_requests", "expenses", "staff_requests", "loans", "payroll", "recruitment"');
+    expect(api).toContain('loans: "general"');
+    expect(api).toContain('payroll: "general"');
+    expect(api).toContain('recruitment: "recruitment"');
+  });
+
+  it("R35-F4: the Shifts tab header carries the Add Shift action (REF: 127×36, dark solid + Plus)", () => {
+    const idx = settingsPage.indexOf("function ShiftsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    expect(block).toContain("flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6");
+    expect(block).toContain("Add Shift");
+    expect(block).toMatch(/<Plus className="mr-2"/);
+    expect(block).toContain('variant="dark"');
+  });
+
+  it("R35-F5: the Add Shift dialog — REF's contract (max-w-lg, the seven fields with REF's placeholders, Status select, Cancel/Create)", () => {
+    const idx = settingsPage.indexOf("function ShiftsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    expect(block).toContain("Add Shift");
+    expect(block).toContain("max-w-lg");
+    expect(block).toContain("Shift Name");
+    expect(block).toContain(">Code<");
+    expect(block).toContain('placeholder="e.g., M, E, N"');
+    expect(block).toContain("Start Time");
+    expect(block).toContain("End Time");
+    expect(block).toContain("Break (minutes)");
+    expect(block).toContain("Tolerance (minutes)");
+    expect(block).toContain('placeholder="0"');
+    expect(block).toContain(">Status<");
+    expect(block).toContain('<SelectItem value="active">Active</SelectItem>');
+    expect(block).toContain('<SelectItem value="inactive">Inactive</SelectItem>');
+  });
+
+  it("R35-F6: the shifts API discriminates creation from assignment (the Shift model carries REF's code/break/tolerance fields)", () => {
+    const api = read("src", "app", "api", "shifts", "route.ts");
+    expect(api).toContain("ShiftInput");
+    // The body is read ONCE (single-use stream) then shape-discriminated on
+    // employeeId — assignment vs shift definition.
+    expect(api).toContain("typeof shape.employeeId === \"string\"");
+    expect(api).toContain("createShift");
+    const schema = read("prisma", "schema.prisma");
+    const shiftModel = schema.slice(schema.indexOf("model Shift {"), schema.indexOf("model ShiftAssignment"));
+    expect(shiftModel).toContain("code");
+    expect(shiftModel).toContain("breakMinutes");
+    expect(shiftModel).toContain("toleranceMinutes");
+  });
+
+  it("R35-F7: Save Theme is REF's dark solid with the Save icon (REF: 151×36 bg rgb(23,23,23) + lucide-save mr-2 — NOT the blue gradient CTA)", () => {
+    const idx = settingsPage.indexOf("function ThemeTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    expect(block).toContain('<Button variant="dark" onClick={saveTheme}>');
+    expect(block).toContain('<Save className="mr-2"');
+    expect(block).not.toContain("linear-gradient");
+  });
+
+  it("R35-F8: the Quick Presets section — REF's three outline cards (h-auto p-4 flex-col items-start gap-2, three w-6 h-6 rounded swatches; click populates the color fields)", () => {
+    const idx = settingsPage.indexOf("function ThemeTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    expect(block).toContain("Quick Presets");
+    expect(block).toContain("Facebook (Default)");
+    expect(block).toContain("Professional Blue");
+    expect(block).toContain("Fresh Green");
+    expect(block).toContain("h-auto p-4 flex flex-col items-start gap-2");
+    expect(block).toContain("w-6 h-6 rounded");
+    expect(block).toContain("#1877f2");
+    expect(block).toContain("#42b72a");
+    expect(block).toContain("#3b82f6");
+    expect(block).toContain("#6366f1");
+    expect(block).toContain("#10b981");
+    expect(block).toContain("applyPreset");
+  });
+
+  it("R35-F9: the Logs filter selects carry REF's w-full (REF: the triggers fill their grid columns at 195px; the clone's content-sized renders were 201)", () => {
+    const idx = settingsPage.indexOf("function LogsTab(");
+    const block = settingsPage.slice(idx);
+    expect(block.match(/<SelectTrigger className="w-full">/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("R35-F10: the Departments Add button is REF's dark solid too (bg rgb(23,23,23) + white text — the live pair caught the gradient CTA on all four header actions)", () => {
+    const idx = settingsPage.indexOf("function DepartmentsTab(");
+    const block = settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+    expect(block).toContain('<Button variant="dark" onClick={() => setAddOpen(true)}>');
+    expect(block).not.toContain("linear-gradient");
+  });
+
+  it("R35-F11: the 404 wrapper is REF's vertical recipe — min-h-screen + p-6 + the slate-50 page background (content centers at y=306 of 900; the clone's min-h-[70vh] + pb-40 had centered at 226 — an 80px offset)", () => {
+    expect(notFoundPage).toContain('className="min-h-screen flex items-center justify-center p-6 bg-slate-50"');
+    expect(notFoundPage).not.toContain("min-h-[70vh]");
+    expect(notFoundPage).not.toContain("pb-40");
+  });
+
+  it("R35-F12: the 404 Go Home carries REF's 16px Home icon at mr-2 (REF: 123×38 with it; the icon-less clone rendered 99px)", () => {
+    expect(notFoundPage).toContain('<Home className="h-4 w-4 mr-2"');
+  });
+
+  it("R35-F13: the Logs empty carries REF's 48px FileText slate-300 icon above the line (live-measured; the census had recorded \"no icon\")", () => {
+    const idx = settingsPage.indexOf("function LogsTab(");
+    const block = settingsPage.slice(idx);
+    expect(block).toContain('<FileText className="w-12 h-12 mx-auto mb-3 text-slate-300"');
   });
 });

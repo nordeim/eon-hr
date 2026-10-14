@@ -9,7 +9,9 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 // PATCH  ?id= → update (status recomputed when expiry changes).
 // DELETE ?id= → delete the document and its compliance alerts.
 
-const DOC_TYPES = ["contract", "id", "passport", "visa", "certificate", "medical", "other"] as const;
+// Session 36 (R35-C): REF's Saudi document-type taxonomy (live-measured on
+// the compliance All Types select) + the model's default fallback.
+const DOC_TYPES = ["iqama", "visa", "passport", "contract", "probation", "other"] as const;
 
 const DocInput = z.object({
   employeeId: z.string().trim().min(1, "Employee is required"),
