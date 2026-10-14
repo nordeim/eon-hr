@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.20.0 (session-37 remediation complete — the form-contract family: the empty-submit probe) · **Last updated:** 2026-10-14
+> **Version:** 3.21.0 (session-38 remediation complete — the keyboard/focus dimension: the DialogTrigger family) · **Last updated:** 2026-10-14
 > 2026-10-14 · **State:** 521 unit + 142 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2415,3 +2415,65 @@ the Add Department rebuild (max-w-lg, "Department Name \*",
 Description, Manager Email, Create submit), the asset text layer
 ("e.g., Macbook Air 2024", the bare serial, "Not assigned"). Gates:
 569/569 unit · 158/158 E2E. Live: 22/22 pair MATCH.
+
+## §50 Session 38 (parity round 37) — the keyboard/focus dimension
+
+**The probe**: open each dialog on both apps, record activeElement
+after open, Tab ×10 reading focus each press, then Escape and read the
+restore target. The Tab orders came back structurally identical on all
+five parity dialogs — the dimension's find was the CLOSE, not the walk.
+
+**The DialogTrigger contract (R37-A)**: REF's dialog triggers are
+Radix DialogTriggers — `aria-haspopup="dialog"` + `aria-expanded` +
+type=button, focus RETURNS to the trigger on close. A plain
+`<Button onClick={setOpen}>` trigger breaks all three: no aria
+contract, and on close focus dies on BODY — read from
+@radix-ui/react-dialog 1.2.0, `DialogContentModal`'s `onCloseAutoFocus`
+focuses `context.triggerRef.current` (null without a trigger) AND its
+`preventDefault()` kills the FocusScope's
+`focus(previouslyFocusedElement)` fallback. The fix REQUIRES the
+root-lift: DialogTrigger only works inside its Dialog root's context,
+so the `<Dialog open onOpenChange>` wrapper moves up to enclose the
+trigger region (renders no DOM); the dialog components drop their own
+roots and render bare `<DialogContent>`.
+
+**The asset submit's at-rest disabled (R37-B)**: a `disabled` button
+leaves the Tab order and deadens the empty-submit — REF keeps the
+submit enabled so the native validation tooltip fires. `saving`-only.
+
+**The Add Level mr-1 (R37-C)**: the icon-margin recipe — REF's
+interior dialog buttons ride `w-4 h-4 mr-1` (113×32), the header
+triggers `mr-2` (160/127/180 wide). Two different margins in one
+family; pin the button, not the class.
+
+**The loans text layer (R37-D)**: geometry audits miss text — the
+round-36 lesson, re-fired: the Reason placeholder ("Hi, I'm buying an
+apartment and I need a loan for the down payment."), required on the
+textarea, the Amount "0" default, the Paid From "New Era LLC" prefill
+(a hardcoded literal in REF's code — its company is "Demo"), NO
+min/max/step on the number inputs (required only; the API's Zod +
+toast is the superset), and the silent-return guard → the toast.
+
+**The addendum (R37-E/F)**: the screenshot pixel-diff is a census
+instrument — a 3.73% pair (vs the ~1.1% baseline) traced to (E) the
+SelectTrigger placeholder-state color (Radix's `data-placeholder`
+renders neutral-500 light / neutral-400 dark on REF — NOT the
+muted-foreground token) and (F) the Requesting-for card's
+`border border-blue-200` (2px of dialog height — the 698-vs-696 drift
+that shifted the interior 1px). After both: byte-identical, 1.41%.
+
+**The probe traps (three new)**: (1) 220ms inter-press settles produce
+phantom Tab-sequence skips — 300ms+ is the floor (a "skipped Cancel"
+artifact disproved by manual trace: only DISABLED buttons are skipped).
+(2) the drawer probe needs an explicit closed-state reset before
+opening — a second run through an open drawer CLOSES it and reads the
+mid-exit frame. (3) NO `//` comments inside flattened evals (a
+flattened `//` swallows the closing `})()` — the round-36 newline
+lesson's inverse), and property-based reads (`i.type`) over CSS
+attribute selectors (`[type=text]` misses REF's attribute-less input).
+
+Recipe pins added: the five DialogTrigger wrappings + the lifted
+roots, the asset saving-only disabled, the Add Level mr-1, the loans
+reason/placeholder/defaults/no-min-max/no-guard, the SelectTrigger
+data-placeholder colors, the card's border-blue-200. Gates: 582/582
+unit · 165/165 E2E. Live: 13/13 pair MATCH.

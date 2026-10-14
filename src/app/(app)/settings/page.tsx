@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -441,6 +442,11 @@ function WorkflowsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
   }, [load]);
 
   return (
+    /* Session 38 (R37-A): the Dialog root LIFTED to wrap the Card —
+       the DialogTrigger (below) must sit inside the root's context
+       for REF's trigger contract (aria-haspopup="dialog" +
+       focus-restore-on-close via triggerRef). Renders no DOM. */
+    <Dialog open={addOpen} onOpenChange={setAddOpen}>
     <Card className="border-slate-200">
       {/* Session 36 (R35-F1): REF's header — the flex-row recipe with the
           Add Workflow action riding the row (REF: 160×36, the dark solid
@@ -448,10 +454,12 @@ function WorkflowsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
           button the census missed entirely). */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
         <div className="font-semibold leading-none tracking-tight">Approval Workflows</div>
-        <Button variant="dark" onClick={() => setAddOpen(true)}>
-          <Plus className="mr-2" aria-hidden="true" />
-          Add Workflow
-        </Button>
+        <DialogTrigger asChild>
+          <Button variant="dark">
+            <Plus className="mr-2" aria-hidden="true" />
+            Add Workflow
+          </Button>
+        </DialogTrigger>
       </CardHeader>
       <CardContent className="p-6">
         {loading ? (
@@ -479,8 +487,9 @@ function WorkflowsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
           </div>
         )}
       </CardContent>
-      <CreateWorkflowDialog open={addOpen} onOpenChange={setAddOpen} onCreated={load} toast={toast} />
+      <CreateWorkflowDialog onOpenChange={setAddOpen} onCreated={load} toast={toast} />
     </Card>
+    </Dialog>
   );
 }
 
@@ -513,12 +522,10 @@ interface LevelDraft {
 }
 
 function CreateWorkflowDialog({
-  open,
   onOpenChange,
   onCreated,
   toast,
 }: {
-  open: boolean;
   onOpenChange: (v: boolean) => void;
   onCreated: () => Promise<void>;
   toast: ReturnType<typeof useToast>;
@@ -571,8 +578,9 @@ function CreateWorkflowDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+    /* Session 38 (R37-A): the root lives in WorkflowsTab now — this
+       renders the Content directly (trigger + content share the root). */
+    <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Create Approval Workflow</DialogTitle>
         </DialogHeader>
@@ -622,8 +630,12 @@ function CreateWorkflowDialog({
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <Label className="text-sm font-medium leading-none">Approval Levels</Label>
+              {/* Session 38 (R37-C1): REF's interior Add Level = 113×32 —
+                  the Plus rides w-4 h-4 mr-1 (16px icon + 4px margin);
+                  the clone's mr-2 measured 117×32 and shifted the
+                  dialog's right-edge stack (Cancel x 911 vs REF 907). */}
               <Button variant="outline" size="sm" type="button" onClick={addLevel}>
-                <Plus className="mr-2" aria-hidden="true" />
+                <Plus className="mr-1" aria-hidden="true" />
                 Add Level
               </Button>
             </div>
@@ -687,8 +699,7 @@ function CreateWorkflowDialog({
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 }
 
@@ -716,16 +727,22 @@ function ShiftsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
   }, [load]);
 
   return (
+    /* Session 38 (R37-A): the Dialog root LIFTED to wrap the Card — the
+       DialogTrigger (below) must sit inside the root's context for REF's
+       trigger contract (aria-haspopup="dialog" + focus-restore). */
+    <Dialog open={addOpen} onOpenChange={setAddOpen}>
     <Card className="border-slate-200">
       {/* Session 36 (R35-F4): REF's header — the flex-row recipe with the
           Add Shift action (REF: 127×36, the dark solid + Plus mr-2 — the
           live re-measure found the button the census missed). */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
         <div className="font-semibold leading-none tracking-tight">Work Shifts</div>
-        <Button variant="dark" onClick={() => setAddOpen(true)}>
-          <Plus className="mr-2" aria-hidden="true" />
-          Add Shift
-        </Button>
+        <DialogTrigger asChild>
+          <Button variant="dark">
+            <Plus className="mr-2" aria-hidden="true" />
+            Add Shift
+          </Button>
+        </DialogTrigger>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
@@ -764,8 +781,9 @@ function ShiftsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
           </Table>
         )}
       </CardContent>
-      <AddShiftDialog open={addOpen} onOpenChange={setAddOpen} onCreated={load} toast={toast} />
+      <AddShiftDialog onOpenChange={setAddOpen} onCreated={load} toast={toast} />
     </Card>
+    </Dialog>
   );
 }
 
@@ -777,12 +795,10 @@ function ShiftsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
    footer Cancel (outline) + Create (dark). Superset wiring: Create posts
    to /api/shifts in its new shape-discriminated create mode. */
 function AddShiftDialog({
-  open,
   onOpenChange,
   onCreated,
   toast,
 }: {
-  open: boolean;
   onOpenChange: (v: boolean) => void;
   onCreated: () => Promise<void>;
   toast: ReturnType<typeof useToast>;
@@ -837,8 +853,9 @@ function AddShiftDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+    /* Session 38 (R37-A): the root lives in ShiftsTab now — this renders
+       the Content directly (trigger + content share the root). */
+    <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Add Shift</DialogTitle>
         </DialogHeader>
@@ -935,8 +952,7 @@ function AddShiftDialog({
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 }
 
@@ -1014,6 +1030,10 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
   }
 
   return (
+    /* Session 38 (R37-A): the Dialog root LIFTED to wrap the Card — the
+       DialogTrigger (below) must sit inside the root's context for REF's
+       trigger contract (aria-haspopup="dialog" + focus-restore). */
+    <Dialog open={addOpen} onOpenChange={setAddOpen}>
     <Card className="border-slate-200">
       {/* Session 36 (R35-E): REF's header — the title-only border-b recipe
           + the Add Department button at the DEFAULT h-9 size (180×36,
@@ -1022,10 +1042,12 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
       <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6">
         <div className="font-semibold leading-none tracking-tight">Departments</div>
         {canEdit ? (
-          <Button variant="dark" onClick={() => setAddOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
-            Add Department
-          </Button>
+          <DialogTrigger asChild>
+            <Button variant="dark">
+              <Plus className="mr-2" aria-hidden="true" />
+              Add Department
+            </Button>
+          </DialogTrigger>
         ) : null}
       </CardHeader>
       <CardContent className="p-6">
@@ -1082,7 +1104,8 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
           type=email ph "manager@company.com"), the footer's
           flex justify-end gap-3 with Cancel (outline 81×36, button) +
           Create (dark solid 79×36, submit). No DialogDescription. */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      {/* Session 38 (R37-A): the root is lifted — the Content renders
+          directly under the tab-level root. */}
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Department</DialogTitle>
@@ -1137,8 +1160,8 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
             </div>
           </form>
         </DialogContent>
-      </Dialog>
     </Card>
+    </Dialog>
   );
 }
 

@@ -76,8 +76,13 @@ test.describe("legacy /assets route (session 31)", () => {
     await dialog.getByLabel("Serial Number").fill("R30-SN-001");
     await dialog.getByRole("button", { name: "Add Asset" }).last().click();
 
-    // The row lands + the toast confirms.
-    await expect(page.getByText("R30 Legacy Probe")).toBeVisible();
+    // The row lands + the toast confirms. exact:true — the toast's
+    // description ("R30 Legacy Probe registered.") also contains the name
+    // and a non-exact match resolves to BOTH (the round-36 strict-mode
+    // race, re-fired under full-suite load).
+    await expect(page.getByText("R30 Legacy Probe", { exact: true })).toBeVisible();
+    // the serial rides INSIDE the row's second line ("Desktop · R30-SN-001")
+    // and the toast description never contains it — non-exact is safe here.
     await expect(page.getByText("R30-SN-001")).toBeVisible();
     await expect(page.getByText("Asset added")).toBeVisible();
 

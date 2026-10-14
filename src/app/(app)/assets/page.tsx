@@ -12,6 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -126,6 +127,15 @@ export default function LegacyAssetsPage() {
   }
 
   return (
+    /* Session 38 (R37-A): the Dialog root is LIFTED to wrap the page —
+       DialogTrigger only works inside its root's context, and REF's
+       trigger is a real Radix trigger (aria-haspopup="dialog" +
+       focus-restore-on-close via triggerRef; read from
+       @radix-ui/react-dialog 1.2.0: DialogContentModal's onCloseAutoFocus
+       focuses context.triggerRef.current — null with the old plain
+       onClick button, which dropped focus to BODY on close). The root
+       renders no DOM — layout untouched. */
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)] p-4 md:p-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <PageHeader
@@ -141,10 +151,12 @@ export default function LegacyAssetsPage() {
           title="Assets"
           subtitle="Track and manage company assets"
           actions={
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2" aria-hidden="true" />
-              Add Asset
-            </Button>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2" aria-hidden="true" />
+                Add Asset
+              </Button>
+            </DialogTrigger>
           }
         />
 
@@ -197,6 +209,7 @@ export default function LegacyAssetsPage() {
         onSave={onSave}
       />
     </div>
+    </Dialog>
   );
 }
 
@@ -233,8 +246,10 @@ function AssetDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+    /* Session 38 (R37-A): the root lives on the page now — this
+       component renders the Content directly (the context requirement:
+       the trigger and the content must share the lifted root). */
+    <DialogContent className="max-w-lg">
         {/* Session 35 (R34-A): the H2-only header — REF renders no
             description (the loans pattern, re-measured this round). */}
         <DialogHeader>
@@ -314,13 +329,16 @@ function AssetDialog({
               Cancel
             </Button>
             {/* Session 35 (R34-A): text-only — REF's footer button is
-                102×36 with no icon. */}
-            <Button type="submit" disabled={saving || !form.name.trim()}>
+                102×36 with no icon.
+                Session 38 (R37-B): disabled ONLY while saving — REF keeps
+                the submit enabled at rest (its Tab order includes it and
+                the empty-submit fires the native validation tooltip; the
+                !form.name.trim() clause removed it from the Tab order). */}
+            <Button type="submit" disabled={saving}>
               Add Asset
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 }

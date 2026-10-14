@@ -18,6 +18,14 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       className={cn(
         "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm",
+        /* Session 38 (R37-E): REF renders the PLACEHOLDER state (Radix's
+           data-placeholder attribute, already set on every trigger) in
+           neutral-500 — rgb(115,115,115) live-measured on the loans
+           "Select employee" + the assets "Not assigned" (valued triggers
+           stay dark: "Standard Loan" = rgb(10,10,10)). NOT the
+           muted-foreground token (slate-500 #64748b — a different REF
+           gray). Dark mode flips to #a3a3a3 (neutral-400, live-measured). */
+        "data-[placeholder]:text-neutral-500 dark:data-[placeholder]:text-neutral-400",
         "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
         className
       )}

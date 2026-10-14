@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -72,7 +73,11 @@ export default function LoansPage() {
   const [loading, setLoading] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({ employeeId: "", loanType: "standard", amount: "", months: "12", paidFrom: "", reason: "" });
+  /* Session 38 (R37-D2): REF's form defaults — amount "0", paidFrom
+     "New Era LLC" (live-measured, stable across re-opens; hardcoded in
+     REF's form code — its own company is "Demo", so the literal is not
+     company-driven). */
+  const [form, setForm] = React.useState({ employeeId: "", loanType: "standard", amount: "0", months: "12", paidFrom: "New Era LLC", reason: "" });
 
   const load = React.useCallback(async () => {
     try {
@@ -95,10 +100,13 @@ export default function LoansPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    /* Session 38 (R37-D4): the silent-return guards are gone (the
+       round-36 anti-pattern) — with the "0" amount prefill an immediate
+       submit now flows to the API, whose Zod rejects non-positive
+       amounts / bad months and surfaces the error as a toast (the
+       documented superset). */
     const amount = Number(form.amount);
     const months = Number(form.months);
-    if (!Number.isFinite(amount) || amount <= 0) return;
-    if (!Number.isInteger(months) || months < 1 || months > 60) return;
     setSaving(true);
     try {
       const res = await fetch("/api/loans", {
@@ -124,7 +132,7 @@ export default function LoansPage() {
         variant: "success",
       });
       setDialogOpen(false);
-      setForm({ employeeId: "", loanType: "standard", amount: "", months: "12", paidFrom: "", reason: "" });
+      setForm({ employeeId: "", loanType: "standard", amount: "0", months: "12", paidFrom: "New Era LLC", reason: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -183,6 +191,11 @@ export default function LoansPage() {
     ({ standard: "Standard Loan", emergency: "Emergency Loan", "salary-advance": "Salary Advance", personal: "Personal Loan" })[t] ?? t;
 
   return (
+    /* Session 38 (R37-A): the Dialog root LIFTED to wrap the page —
+       the trigger (PageHeader actions) must sit inside the root's
+       context for the Radix trigger contract (aria-haspopup="dialog",
+       focus-restore-on-close). Renders no DOM — layout untouched. */
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
     <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8 select-none">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
@@ -196,10 +209,12 @@ export default function LoansPage() {
         title="Employee Loans"
         subtitle="Manage and track loan requests"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
-            New Loan Request
-          </Button>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2" aria-hidden="true" />
+              New Loan Request
+            </Button>
+          </DialogTrigger>
         }
       />
 
@@ -345,12 +360,13 @@ export default function LoansPage() {
       </div>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        {/* Session 23 (R22-C): the REF recipe — 672px (max-w-2xl), H2-only
-            header (REF renders no description), space-y-2 field rows, the
-            Requesting-for preview card, the 4-cell grid with the computed
-            Monthly Installment display, min-h-[60px] Reason, Paid From, and
-            the right-aligned justify-end gap-3 actions with Submit Request. */}
+      {/* Session 23 (R22-C): the REF recipe — 672px (max-w-2xl), H2-only
+          header (REF renders no description), space-y-2 field rows, the
+          Requesting-for preview card, the 4-cell grid with the computed
+          Monthly Installment display, min-h-[60px] Reason, Paid From, and
+          the right-aligned justify-end gap-3 actions with Submit Request.
+          Session 38 (R37-A): the root is lifted — this renders the Content
+          directly under the page-level root. */}
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>New Loan Request</DialogTitle>
@@ -379,7 +395,10 @@ export default function LoansPage() {
                 until one is picked): p-4 bg-blue-50 rounded-lg > flex
                 items-center gap-3 mb-3 > 20px user icon + the 2-line stack
                 (text-sm slate-600 label + font-semibold slate-900 name). */}
-            <div className="p-4 bg-blue-50 rounded-lg">
+            {/* Session 38 (R37-F): REF's card carries border border-blue-200 (1px
+                rgb(191,219,254) — live-measured; the borderless clone was
+                2px short, the 698-vs-696 dialog-height drift). */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-3 mb-3">
                 <User className="w-5 h-5" aria-hidden="true" />
                 <div>
@@ -413,12 +432,14 @@ export default function LoansPage() {
                     space-y-2 lands as margin-top on the FOLLOWING block
                     (12px measured on both dialogs); v4's
                     :not(:last-child) mb on the INLINE label is ignored —
-                    the session-34 inline-label trap, compensated. */}
+                    the session-34 inline-label trap, compensated.
+                    Session 38 (R37-D3): NO min/max/step — REF's number
+                    inputs carry required only; the invented constraints
+                    changed the native validation surface (the API's Zod +
+                    toast is the enforced superset). */}
                 <Input
                   id="loan-amount"
                   type="number"
-                  min="0.01"
-                  step="0.01"
                   className="mt-2"
                   required
                   value={form.amount}
@@ -430,9 +451,6 @@ export default function LoansPage() {
                 <Input
                   id="loan-months"
                   type="number"
-                  min="1"
-                  max="60"
-                  step="1"
                   className="mt-2"
                   required
                   value={form.months}
@@ -458,7 +476,8 @@ export default function LoansPage() {
                 id="loan-reason"
                 rows={3}
                 className="min-h-[60px] mt-2"
-                placeholder="e.g. Family relocation, education, medical…"
+                required
+                placeholder="Hi, I'm buying an apartment and I need a loan for the down payment."
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
               />
@@ -485,8 +504,8 @@ export default function LoansPage() {
             </div>
           </form>
         </DialogContent>
-      </Dialog>
     </div>
     </div>
+    </Dialog>
   );
 }

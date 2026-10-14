@@ -1825,3 +1825,107 @@ dialogs with invented inline-error Ps.
   geometry-identical). No redeploy (login static build + app chunks
   all unchanged); REF still zero-data. 8 new screenshots (136-139,
   ref+loc pairs) → **180 PNG captures**. DB pristine.
+
+## Session 38 (parity round 37) — THE KEYBOARD/FOCUS DIMENSION: the DialogTrigger family
+
+**Scope**: round 36 named the frontier ("audit keyboard/focus flows —
+Tab order in dialogs"). The census: open each dialog on both apps,
+record activeElement after open, Tab ×10 reading focus each press, then
+Escape and read the restore target.
+
+- **The green half (recorded)**: Tab orders are structurally IDENTICAL
+  on all five parity dialogs (initial focus = the first tabbable; the
+  sequence follows the DOM: fields → footer → the Close X → wrap; the
+  time inputs cycle their internal segments identically — native
+  browser behavior). The staffrequests "New Request" trigger on REF is
+  a plain type=submit with NO dialog semantics — the clone's plain
+  trigger there is correct parity, deliberately outside the conversion.
+- **R37-A — the DialogTrigger conversion (the round's core)**: REF's
+  triggers on /assets, /loans and the three /settings tabs are Radix
+  DialogTriggers — live-measured `aria-expanded="false"` +
+  `aria-haspopup="dialog"` + `aria-controls="radix-:…:"` + type=button
+  — and on close focus RETURNS TO THE TRIGGER. The clone's five plain
+  `<Button onClick={setOpen}>` triggers dropped focus to BODY. Root
+  cause (read from the installed @radix-ui/react-dialog 1.2.0):
+  `DialogContentModal`'s `onCloseAutoFocus` focuses
+  `context.triggerRef.current` — null without a DialogTrigger — and
+  its `event.preventDefault()` ALSO suppresses the FocusScope's
+  fallback (`focus(previouslyFocusedElement)`). The fix: the
+  Radix-native `<DialogTrigger asChild>` at all five sites — which
+  REQUIRES the mechanical root-lift (the trigger must sit inside its
+  Dialog root's context, and all five roots wrapped only the Content):
+  the `<Dialog open onOpenChange>` wrapper moves up to enclose the
+  trigger region + dialog component (renders no DOM — layout
+  untouched); the dialog components drop their own roots and render
+  bare `<DialogContent>`. The Button sets no `type`, so the trigger's
+  type="button" survives the Slot merge (REF's measured type).
+- **R37-B**: the asset dialog's submit was `disabled={saving ||
+  !form.name.trim()}` — a disabled button leaves the Tab order and
+  deadens the empty-submit; REF keeps it enabled (native validation
+  fires). Now `disabled={saving}` only.
+- **R37-C**: REF's interior Add Level = 113×32 (`w-4 h-4 mr-1` — the
+  session-35 census documented 113 but never pinned it); the clone's
+  mr-2 measured 117 and shifted the dialog's right-edge stack (Cancel
+  x 911 vs 907). One-class fix. E2E pins a 110–115 window: headless
+  Chromium rasterizes the text ~2px narrower than the paired browser
+  (the tolerance precedent).
+- **R37-D — the loans text/contract layer** (the round-36 lesson
+  repeated: geometry audits miss text): the Reason textarea is
+  `required` on REF with the placeholder "Hi, I'm buying an apartment
+  and I need a loan for the down payment." (the clone's "e.g. Family
+  relocation…" was invented); the Amount input DEFAULTS to "0"; the
+  Paid From input PREFILLS "New Era LLC" (stable across re-opens — a
+  hardcoded form default in REF's code; REF's own company is "Demo",
+  so the literal is not company-driven); REF's number inputs carry NO
+  min/max/step (required only — the clone's invented constraints
+  changed the native validation surface; the API's Zod + toast is the
+  enforced superset); the silent-return client guard
+  (`amount <= 0 → return`) is the round-36 anti-pattern — with the "0"
+  prefill an immediate submit now flows to the API and toasts.
+- **R37-E — the SelectTrigger placeholder-state color (the addendum)**:
+  the screenshot pixel-diff (3.73% vs the ~1.1% baseline) traced to two
+  finds. REF renders a trigger in its PLACEHOLDER state (Radix's
+  `data-placeholder`, already set on every trigger) in neutral-500
+  rgb(115,115,115) — valued triggers stay dark; dark mode flips the
+  placeholder to #a3a3a3 (neutral-400). NOT the muted-foreground token
+  (slate-500 #64748b — a different REF gray). The systemic fix rides
+  the trigger recipe: `data-[placeholder]:text-neutral-500
+  dark:data-[placeholder]:text-neutral-400` in ui/select.tsx.
+- **R37-F — the loans Requesting-for card's border**: REF's card is
+  `p-4 bg-blue-50 rounded-lg border border-blue-200` (1px
+  rgb(191,219,254), unchanged in dark); the clone's borderless card
+  was 2px short — the 698-vs-696 dialog height that shifted the whole
+  interior 1px (dlgY 102 vs 101). After the fix the pair measured
+  byte-identical and the pixel-diff dropped to 1.41% (baseline band).
+- **The probe lessons (three)**: (1) a 220ms inter-press settle is too
+  fast for Tab-sequence reads — a "skipped Cancel" artifact that a
+  300ms manual trace disproved (ground truth: Cancel IS tabbable; only
+  the DISABLED submit is skipped); 300ms+ is the floor. (2) the drawer
+  probe needs an explicit closed-state reset (Escape + wait) — a second
+  run through an already-open drawer CLOSES it and reads the mid-exit
+  frame (the x=-244 artifact). (3) NO `//` comments inside flattened
+  evals — a flattened `//` swallows the closing `})()` (the round-36
+  newline lesson's inverse); and property-based reads (`i.type`)
+  over CSS attribute selectors (`[type=text]`) — REF's paid-from input
+  carries no explicit type attribute.
+- **The E2E races fixed en route**: the legacy-assets toast-name
+  strict-mode violation (getByText matched the row AND the toast
+  description — the round-36 class re-fired under the longer suite;
+  exact:true, with the serial left non-exact since it rides inside
+  "Desktop · R30-SN-001") and the loans initial-focus assertion
+  (assert focus-inside-dialog via poll, not the first input — the
+  loans dialog's first tabbable is the Employee combobox).
+- **Pins**: 13 new (A1-A5, B1, C1, D1-D4, E1, F1; three earlier pins
+  amended — R35-F10 and R22-C3 for the new markup, the D-block pins
+  recalibrated for comments-in-source). Gates: lint 0/0 · tsc ✓ ·
+  **582/582 unit** · build ✓ · **165/165 E2E** (+7: the five
+  focus-restore pairs, the trigger aria contract, the asset at-rest
+  enabled submit, the loans text layer, the Add Level window). Live:
+  **13/13 pair MATCH** (verify-r37.mjs — the restore targets, the
+  focused-after-open, the loans text layer, the asset submit, the Add
+  Level geometry) + the standing audits (mobile tabs byte-identical;
+  the drawer pair manually re-verified after a transient click — 288px
+  @ x=0, #FAFAFA, 1px #e5e5e5; navmap, bell, quick actions). No
+  redeploy (login static build + app chunks all unchanged); REF still
+  zero-data. 8 new screenshots (140-143, ref+loc pairs) → **188 PNG
+  captures**. DB pristine.

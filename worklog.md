@@ -1071,3 +1071,25 @@ Stage Summary:
 - Round 36 delivered: the dialog form-contract family rebuilt to live-measured REF (the empty-submit probe exposed what two geometry audits missed), the Add Department dialog rebuilt to its never-measured contract with real persistence, the asset text layer aligned, and three E2E race classes eliminated with the stable round-trip pattern
 - Gates: 569/569 unit (+13) · 158/158 E2E (+1) · 180 captures · 22/22 live pair MATCH
 - Frontier after this round: with-data surfaces (still blocked on REF's zero-data state), the remaining never-probed error surfaces (the toaster interior — unfireable on zero-data REF), REF's next redeploy (the /login static build re-diff)
+
+---
+Task ID: session-38
+Agent: main (Super Z)
+Task: eon-hr parity round 37 (session 38) — the keyboard/focus dimension: census, TDD fixes, live verification, docs, push
+
+Work Log:
+- Workspace reset — fresh clone at 0182f0d (round 36 + the session log commit); env rebuilt (bun install, .env with a generated AUTH_SECRET for the production boot guard, db:push + db:seed to <repo>/db/custom.db after unsetting a shell-level DATABASE_URL override that pointed outside the repo; Playwright chromium reinstalled after the reset)
+- Baseline gates ALL GREEN: lint 0/0 · tsc ✓ · 569/569 unit · build ✓ · 158/158 E2E — codebase aligned with the documented round-36 state
+- Skills audit: agent-browser CLI (0.39.0) + core guide, tdd (red-green-refactor, seams), tailwind-patterns (the established round toolset)
+- Census: no redeploy (login static + app chunks unchanged); REF still zero-data; standing audits 5/5 (mobile tabs byte-identical, the drawer pair after the Escape-reset pattern, navmap/bell/quick actions identical)
+- THE TAB-ORDER PROBE (the round's method): Tab orders structurally IDENTICAL on all five parity dialogs — but the CLOSE broken on the clone: focus dies on BODY (REF returns it to the trigger). Root cause read from @radix-ui/react-dialog 1.2.0: DialogContentModal's onCloseAutoFocus focuses context.triggerRef.current (null without a DialogTrigger) and its preventDefault kills the FocusScope fallback
+- TDD: 13 RED pins → 582/582 GREEN: the five DialogTrigger asChild conversions WITH the mechanical root-lift (the context requirement — roots moved up to enclose trigger + dialog component; the dialog components render bare DialogContent), the asset saving-only disabled, the Add Level mr-1, the loans text layer (reason required + the apartment placeholder, amount "0", paidFrom "New Era LLC", no min/max/step, the silent-return guard dead)
+- THE ADDENDUM (pixel-diff forensics): the loans screenshot pair diffed 3.73% vs the ~1.1% baseline → R37-E (the SelectTrigger placeholder-state color: data-[placeholder]:text-neutral-500 dark:text-neutral-400 — REF renders rgb(115,115,115)/#a3a3a3, NOT the muted-foreground token) + R37-F (the Requesting-for card's border border-blue-200 — the 2px 698-vs-696 dialog height); after both: the pair byte-identical, pixel-diff 1.41%
+- E2E races fixed: the legacy-assets toast-name strict-mode violation (exact:true — the round-36 class re-fired) + the loans initial-focus assertion (focus-inside-dialog poll — the first tabbable is the Employee combobox)
+- Gates: lint 0/0 · tsc ✓ · 582/582 unit (+13) · build ✓ · 165/165 E2E (+7). Live: verify-r37.mjs 13/13 MATCH + the standing audits. 8 screenshots (140-143) → 188 PNG. DB pristine. .env.example re-verified
+- Docs: AGENTS session-38 layer, SKILL 3.21.0 + §50, PAD [S38], CLAUDE/README counts, docs/session_75.md, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 37 delivered: the keyboard/focus dimension audited (the walk identical, the close broken), the five parity dialogs converted to REF's DialogTrigger contract (focus-restore + the aria family), the asset submit + Add Level one-liners, the loans text/contract layer, and the two pixel-diff forensics finds (the placeholder gray + the card border)
+- Gates: 582/582 unit (+13) · 165/165 E2E (+7) · 188 captures · 13/13 live pair MATCH
+- Frontier after this round: with-data surfaces (still blocked on REF's zero-data state), the toaster interior (unfireable on zero-data REF), REF's next redeploy (the /login static build re-diff), the keyboard/focus dimension's unexplored remainder (Shift+Tab walks, the login page's Tab order, focus flows in the popovers/menus)

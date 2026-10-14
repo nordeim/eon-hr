@@ -1814,13 +1814,17 @@ describe("session-23 scroll-dimension recipes (parity round 22 — the scroll di
     expect(loansPage).not.toContain("flex flex-col gap-1.5");
   });
 
-  it("R22-C3: the loans form renders the Requesting-for preview card when an employee is selected (p-4 bg-blue-50 rounded-lg, 20px user icon, name + email)", () => {
+  it("R22-C3: the loans form renders the Requesting-for preview card when an employee is selected (p-4 bg-blue-50 rounded-lg, 20px user icon, name + email; session-38 amendment: the card gained border border-blue-200 — R37-F — and the pin window widened past the new comment)", () => {
     expect(loansPage).toContain("bg-blue-50");
-    const cardIdx = loansPage.indexOf("bg-blue-50");
-    const cardBlock = loansPage.slice(cardIdx - 200, cardIdx + 500);
+    // target the CARD DIV itself (not any bg-blue-50 hit — the R37-F
+    // comment also names the classes)
+    const cardIdx = loansPage.indexOf('className="p-4 bg-blue-50 rounded-lg border border-blue-200"');
+    expect(cardIdx).toBeGreaterThan(-1);
+    const cardBlock = loansPage.slice(cardIdx, cardIdx + 900);
     expect(cardBlock).toContain("p-4");
     expect(cardBlock).toContain("rounded-lg");
     expect(cardBlock).toContain("Requesting for");
+    expect(cardBlock).toContain("border border-blue-200");
   });
 
   it("R22-C4: the loans actions row is justify-end gap-3 with the Submit Request label (REF-measured; the col-reverse Create Request was a clone extra)", () => {
@@ -3333,10 +3337,10 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     expect(block.match(/<SelectTrigger className="w-full">/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("R35-F10: the Departments Add button is REF's dark solid too (bg rgb(23,23,23) + white text — the live pair caught the gradient CTA on all four header actions)", () => {
+  it("R35-F10: the Departments Add button is REF's dark solid too (bg rgb(23,23,23) + white text — the live pair caught the gradient CTA on all four header actions; session-38 amendment: the button now rides inside DialogTrigger asChild — R37-A)", () => {
     const idx = settingsPage.indexOf("function DepartmentsTab(");
     const block = settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
-    expect(block).toContain('<Button variant="dark" onClick={() => setAddOpen(true)}>');
+    expect(block).toMatch(/<Button variant="dark">\s*<Plus className="mr-2" aria-hidden="true" \/>\s*Add Department/);
     expect(block).not.toContain("linear-gradient");
   });
 
@@ -3493,5 +3497,123 @@ describe("session-37 dialog form contracts (parity round 36)", () => {
   it("R36-C3: the assignment option reads 'Not assigned' (REF's casing; the clone had 'Not Assigned')", () => {
     expect(assetsPage).toContain('<SelectItem value="none">Not assigned</SelectItem>');
     expect(assetsPage).not.toContain("Not Assigned");
+  });
+});
+
+describe("session-38 keyboard/focus contracts (parity round 37)", () => {
+  /* The round's census: the keyboard/focus dimension (round 36's named
+     frontier). Tab orders measured structurally IDENTICAL on all five
+     parity dialogs — but REF's triggers are Radix DialogTriggers
+     (aria-haspopup="dialog" + focus-restore-on-close via triggerRef),
+     while the clone's plain onClick buttons drop focus to BODY on close
+     (read from @radix-ui/react-dialog 1.2.0: DialogContentModal's
+     onCloseAutoFocus focuses context.triggerRef.current — null without
+     a trigger — and its preventDefault also kills the FocusScope
+     fallback). Plus the asset submit's at-rest disabled, the Add Level
+     mr-1, and the loans dialog's never-compared text/contract layer.
+     All values REF-measured this round — see
+     docs/remediation-plan-session38.md. */
+
+  const settingsPage38 = read("src", "app", "(app)", "settings", "page.tsx");
+  const assetsPage38 = read("src", "app", "(app)", "assets", "page.tsx");
+  const loansPage38 = read("src", "app", "(app)", "loans", "page.tsx");
+
+  it("R37-A1: the assets Add Asset trigger is a DialogTrigger asChild (REF: aria-haspopup=dialog, aria-expanded, focus-restore) — the plain onClick pattern dies", () => {
+    expect(assetsPage38).toMatch(/<DialogTrigger asChild>\s*<Button>\s*<Plus className="mr-2" aria-hidden="true" \/>\s*Add Asset\s*<\/Button>\s*<\/DialogTrigger>/);
+    expect(assetsPage38).not.toMatch(/onClick=\{\(\) => setDialogOpen\(true\)\}/);
+    expect(assetsPage38).toContain("DialogTrigger");
+  });
+
+  it("R37-A2: the assets dialog root is LIFTED to wrap the page (the trigger must sit inside the root's context) and AssetDialog renders bare DialogContent", () => {
+    expect(assetsPage38).toMatch(/return \(\s*\/\*[\s\S]*?<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*<div className="min-h-screen/);
+    const dlgIdx = assetsPage38.indexOf("function AssetDialog(");
+    const dlg = assetsPage38.slice(dlgIdx);
+    expect(dlg).not.toMatch(/<Dialog open=\{open\} onOpenChange=\{onOpenChange\}>/);
+    expect(dlg).toMatch(/return \(\s*\/\*[\s\S]*?<DialogContent className="max-w-lg">/);
+  });
+
+  it("R37-A3: the loans New Loan Request HEADER trigger is a DialogTrigger asChild with the page-level root lift (the empty-state CTA stays a plain button — REF's own has no aria contract)", () => {
+    expect(loansPage38).toMatch(/actions=\{\s*<DialogTrigger asChild>\s*<Button>\s*<Plus className="mr-2" aria-hidden="true" \/>\s*New Loan Request\s*<\/Button>\s*<\/DialogTrigger>\s*\}/);
+    expect(loansPage38).toMatch(/return \(\s*\/\*[\s\S]*?<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*<div className="min-h-screen/);
+    // the inline old root is gone — the Content renders under the page root
+    expect(loansPage38).not.toMatch(/<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*\{\/\*/);
+  });
+
+  it("R37-A4: the three settings triggers (Add Workflow / Add Shift / Add Department) are DialogTriggers asChild inside lifted tab roots", () => {
+    for (const label of ["Add Workflow", "Add Shift", "Add Department"]) {
+      expect(settingsPage38).toMatch(
+        new RegExp(`<DialogTrigger asChild>\\s*<Button variant="dark">\\s*<Plus className="mr-2" aria-hidden="true" />\\s*${label}\\s*</Button>\\s*</DialogTrigger>`),
+      );
+    }
+    expect(settingsPage38).not.toMatch(/onClick=\{\(\) => setAddOpen\(true\)\}/);
+  });
+
+  it("R37-A5: the settings dialog components render bare DialogContent (their own roots lifted into the tabs)", () => {
+    expect(settingsPage38).not.toMatch(/<Dialog open=\{open\} onOpenChange=\{onOpenChange\}>/);
+    expect(settingsPage38).not.toMatch(/<Dialog open=\{addOpen\} onOpenChange=\{setAddOpen\}>\s*<CardContent/);
+    // the tabs own the roots now — one per tab, wrapping the Card
+    expect(settingsPage38).toMatch(/<Dialog open=\{addOpen\} onOpenChange=\{setAddOpen\}>\s*<Card className="border-slate-200">/);
+  });
+
+  it("R37-B1: the asset dialog's submit is disabled ONLY while saving (REF keeps it enabled at rest — the empty-submit fires native validation; the !form.name.trim() clause removed it from the Tab order)", () => {
+    expect(assetsPage38).toMatch(/<Button type="submit" disabled=\{saving\}>/);
+    expect(assetsPage38).not.toMatch(/disabled=\{saving \|\| !form\.name\.trim\(\)\}/);
+  });
+
+  it("R37-C1: the Add Level icon rides mr-1 (REF: w-4 h-4 mr-1 → 113×32; the clone's mr-2 measured 117×32 and shifted the dialog's right-edge stack)", () => {
+    const idx = settingsPage38.indexOf('onClick={addLevel}');
+    const block = settingsPage38.slice(idx - 200, idx + 300);
+    expect(block).toMatch(/<Plus className="mr-1" aria-hidden="true" \/>\s*Add Level/);
+    expect(block).not.toMatch(/<Plus className="mr-2"[^>]*>\s*\n\s*Add Level/);
+  });
+
+  it("R37-D1: the loans Reason textarea is REQUIRED and carries REF's placeholder 'Hi, I'm buying an apartment and I need a loan for the down payment.' (the clone's 'e.g. Family relocation…' was invented)", () => {
+    const idx = loansPage38.indexOf('id="loan-reason"');
+    const ta = loansPage38.slice(idx, loansPage38.indexOf("</Textarea>", idx));
+    expect(ta).toContain("required");
+    expect(ta).toContain('placeholder="Hi, I\'m buying an apartment and I need a loan for the down payment."');
+    expect(loansPage38).not.toContain("Family relocation");
+  });
+
+  it("R37-D2: the loans form DEFAULTS — Amount '0' and Paid From 'New Era LLC' (REF live-measured, stable across re-opens; hardcoded form defaults in REF's code — its own company is 'Demo')", () => {
+    expect(loansPage38).toMatch(/useState\(\{ employeeId: "", loanType: "standard", amount: "0", months: "12", paidFrom: "New Era LLC", reason: "" \}\)/);
+  });
+
+  it("R37-D3: the loans number inputs carry NO min/max/step (REF: required only — the invented constraints change the native validation surface; the API's Zod + toast is the superset)", () => {
+    for (const id of ["loan-amount", "loan-months"]) {
+      const idx = loansPage38.indexOf(`id="${id}"`);
+      const input = loansPage38.slice(idx, loansPage38.indexOf("/>", idx));
+      expect(input).not.toContain('min="');
+      expect(input).not.toContain('max="');
+      expect(input).not.toContain('step="');
+      expect(input).toContain("required");
+    }
+  });
+
+  it("R37-D4: the loans silent-return submit guard is gone (the round-36 anti-pattern — with the '0' prefill an immediate submit now flows to the API and surfaces the Zod error as a toast; the monthlyPreview display computation keeps its own null path)", () => {
+    expect(loansPage38).not.toMatch(/amount <= 0\) return;/);
+    expect(loansPage38).not.toMatch(/months < 1 \|\| months > 60\) return;/);
+  });
+});
+
+describe("session-38b pixel-diff forensics (parity round 37, addendum)", () => {
+  /* The round's screenshot pair diff (3.73% vs the ~1.1% baseline) led
+     to two live-measured finds on the loans dialog: REF's placeholder-
+     state Select triggers render neutral-500 (rgb(115,115,115); dark
+     #a3a3a3) via Radix's data-placeholder attribute — the clone's bare
+     SelectPrimitive.Value left them in the dark foreground — and REF's
+     Requesting-for card carries border border-blue-200 (the 2px the
+     dialog-height pair exposed: 698 vs 696). */
+
+  const selectUi38 = read("src", "components", "ui", "select.tsx");
+  const loansPage38b = read("src", "app", "(app)", "loans", "page.tsx");
+
+  it("R37-E1: the SelectTrigger renders the placeholder state in neutral-500 (REF: rgb(115,115,115) light / #a3a3a3 dark — the data-placeholder attribute Radix already sets; NOT the muted-foreground token, which is slate-500)", () => {
+    expect(selectUi38).toMatch(/data-\[placeholder\]:text-neutral-500/);
+    expect(selectUi38).toMatch(/dark:data-\[placeholder\]:text-neutral-400/);
+  });
+
+  it("R37-F1: the loans Requesting-for card carries REF's border border-blue-200 (1px rgb(191,219,254); the clone's borderless card was 2px short — the 698-vs-696 dialog height)", () => {
+    expect(loansPage38b).toMatch(/<div className="p-4 bg-blue-50 rounded-lg border border-blue-200">/);
   });
 });
