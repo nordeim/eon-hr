@@ -2014,3 +2014,100 @@ was a recipe, mobile-viewport, or DOM-structure diff.
   0.84% (below baseline), mobile 3.27% (REF's builder badge — the
   documented non-clone — plus font AA). 8 screenshots (144-147) →
   **196 PNG captures**. DB pristine.
+
+## Session 40 — parity round 39 (the shell restructure + the input migration + the careers org view)
+
+REF's login JS chunk redeployed twice more since round 38 (`BYE5Ojxh` →
+`Cqb_n9sO` → `BIuE7r17`; the login CSS and both app chunks unchanged),
+and the round's census opened three fronts at once. All recipes below
+live-measured on both apps (docs/remediation-plan-session40.md).
+
+**Front 1 — the login re-audit**: the social buttons DROPPED
+`type="submit"` (REF renders no type — the attribute was inert outside
+the form); and the login proved **THEME-INERT** (the round-38 frontier):
+with `darkMode="true"` armed, REF's login preserves the key but never
+applies `html.dark` (or `dir=rtl`) — the login build ships no theme
+boot. The clone's THEME_BOOT now returns early on `/login`; the app
+pages still boot from the same keys after sign-in (verified live both
+sides). The login inputs keep the pre-migration family via explicit
+counters (`shadow-none transition-none ring-offset-background
+focus-visible:ring-2 focus-visible:ring-offset-2`) — REF's login build
+did not pick up the app-side base migration (the two-build split).
+
+**Front 2 — the global Input/Textarea/Select migration** (a silent
+post-round-19 redeploy, caught by re-measuring the loans dialog): the
+v4 shadcn family — `bg-transparent` (was bg-card), `text-base
+md:text-sm` (16px mobile — the never-probed mobile-font dimension),
+at-rest `shadow-sm`, focus `ring-1` offset-0 (was ring-2 + offset-2),
+`file:text-foreground`; the Textarea `min-h-[60px]` (was 80); the
+SelectTrigger gains `shadow-sm` + `ring-offset-background` + the
+`focus:` prefix. Page-level overrides recalibrated: careers hero input
+(`pl-12 py-6 text-lg bg-white`, h=50) and tenantsetup (drop the stale
+h-11s).
+
+**Front 3 — the app-shell restructure** (REF's shadcn Sidebar
+architecture, the round's structural core): unclassed root div >
+`group/sidebar-wrapper` (inline `--sidebar-width: 16rem;
+--sidebar-width-icon: 3rem`) > the canvas (+ inert `safe-area-inset`);
+the sidebar is a `div.group.peer.hidden.text-sidebar-foreground.md:block`
+(NOT an aside — REF authors no aria-hidden anywhere) wrapping the RTL
+peer spacer + the fixed panel (`bg-white dark:bg-slate-900` container,
+inner `data-sidebar="sidebar"` div painting the bg-sidebar token); the
+mobile header lives INSIDE main (REF's exact string + inert
+`safe-area-top`); ALL page content rides a `flex-1 overflow-auto` scroll
+container (the document itself no longer scrolls the page); the bottom
+nav is the canvas's child (`md:hidden fixed bottom-0 left-0 right-0 …
+safe-area-bottom z-50`, explicit left/right). The toggle adopts REF's
+v4 Button family + `data-sidebar="trigger"` + the sr-only name span
+(the clone keeps aria-label/type/aria-expanded — the documented a11y
+superset). The brand block nests (flex-col gap-2 outer > flex
+items-center gap-3 row > `flex-1 min-w-0` text container — stretches to
+155px — with the h2 + a truncate `p` sub). The print superset follows:
+the escaped `.group\/sidebar-wrapper` selector hides the sidebar subtree
+and `main > div { overflow: visible }` un-clips the scroller for print.
+
+**Careers** (the with-data surface, finally measurable — REF's public
+board carries 517 cross-tenant company chips): the chips are the v4
+Button outline family (`h-auto py-3 px-4`, h=46) in a `flex gap-3
+flex-wrap`; a count h3 ("N Open Position(s)", text-xl font-semibold)
+rides between the section and the grid; and the chips NAVIGATE —
+`/careers?org=<slug>` renders the org view (the back button, the
+org-name h2 text-3xl, the filtered count). The clone's org state is
+URL-driven via useSearchParams (the (app) layout is dynamic — cookies —
+so no Suspense boundary).
+
+**The round's engineering lessons**:
+- **`w-[--sidebar-width]` does NOT compile under v4** — the v3-era
+  bracket form generates the invalid raw `width:--sidebar-width` (no
+  var() wrapper); REF's own CSS ships `width:var(--sidebar-width)`.
+  The v4 parenthesis form `w-(--sidebar-width)` generates the identical
+  output. Rendering parity over class-string parity when the two
+  diverge (the gradient-arbitrary-value precedent).
+- **v4's automatic content detection scans docs/*.md** — the
+  remediation plans' recipe quotes (bracket class strings) generated
+  dead CSS rules; `@source not "../../docs"` in globals.css keeps the
+  emitted CSS clean.
+- **The scroll container changed the scrolling element** — E2E specs
+  reaching into `main`'s children or relying on body scroll needed
+  re-scoping (five specs + the orphan-routes emptiness check); the
+  print block needed the overflow reset.
+- **The v4/v3 shadow-slot serialization non-gap**: v4 composes
+  5 shadow slots (all transparent at rest) vs REF's v3-era 3 — the
+  rendered result is identical (at-rest shadow-sm, focus 1px ring +
+  shadow-sm); only the serialized string differs (the lab()/rgba()
+  category).
+- **REF-side bug documented, not cloned**: REF's /loans dialog crashes
+  to a blank page at mobile 390 (works at desktop) — the /Dashboard
+  case precedent.
+
+**Pins**: 21 new (A1, B1, C1, D1, E1, F1, H1-O1, P1, Q1, R1, S1, U1,
+V1, W1) + 12 predecessors amended (R18-B/D/F, R19-J, R30-A1, R32-A4,
+R33-E2, R34-D1/D2, R38-F1, R38-I1, the brand-header pin, R6-A in
+shell-recipes). Gates: lint 0/0 · tsc ✓ · **619/619 unit** (+21) ·
+build ✓ · **174/174 E2E** (+7). Live: verify-r39.mjs 4/7 raw MATCH —
+the 3 diffs are the documented non-gaps (the shadow-none
+transparent-zeros string, the v4 shadow-slot serialization, REF's
+cross-tenant careers data vs the clone's empty tenant); the shell tree
+pair byte-identical (peer/scroller/header/surface); the standing audits
+5/5; tenantsetup mobile byte-identical (card x=16 w=358, input 36). 16
+screenshots (148-155) → **212 PNG captures**. DB pristine.

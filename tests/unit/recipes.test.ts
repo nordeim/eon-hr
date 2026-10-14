@@ -100,12 +100,12 @@ describe("sidebar-nav reference recipe (session 5)", () => {
     expect(sidebarNav).toContain("mt-1 flex flex-col gap-1 pl-4");
   });
 
-  it("brand header: px-6 row, 18px slate-900 h2, 12px Demo sub", () => {
-    expect(sidebarNav).toContain("px-6 py-6");
+  it("brand header: p-6 column + row, 18px slate-900 h2, the truncate p sub (session-40: REF's flex-col gap-2 outer + the flex-1 min-w-0 text container)", () => {
+    expect(sidebarNav).toContain("flex flex-col gap-2 border-b border-slate-200 dark:border-slate-800 p-6");
     expect(sidebarNav).toMatch(
-      /<h2 className="text-lg font-bold[^"]*text-slate-900[^"]*">EonHR<\/h2>/
+      /<h2 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">EonHR<\/h2>/
     );
-    expect(sidebarNav).toContain('className="text-xs leading-tight text-muted-foreground"');
+    expect(sidebarNav).toContain('className="text-xs text-slate-500 dark:text-slate-400 truncate"');
   });
 });
 
@@ -1452,13 +1452,17 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
     expect(button).not.toContain("focus-visible:ring-offset-1");
   });
 
-  it("R18-B: Input and Textarea render REF's ring-offset-2 (white 2px + ring 2px), NOT offset-1", () => {
+  it("R18-B: Input and Textarea render REF's v4 family (session-40 amendment — REF silently migrated the app-side base post-round-19: bg-transparent + text-base md:text-sm + at-rest shadow-sm + ring-1 offset-0; the round-19 ring-2/offset-2/bg-card recipe retired)", () => {
     expect(input).toContain(
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      "border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors"
     );
-    expect(input).not.toContain("focus-visible:ring-offset-1");
-    // both components (Input + Textarea) in one file — the recipe must appear twice
-    expect(input.match(/focus-visible:ring-offset-2/g)?.length).toBe(2);
+    expect(input).toContain(
+      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    );
+    expect(input).not.toContain("ring-offset-2");
+    expect(input).not.toContain("bg-card");
+    // both components (Input + Textarea) in one file — the v4 focus recipe must appear twice
+    expect(input.match(/focus-visible:ring-1 focus-visible:ring-ring/g)?.length).toBe(2);
   });
 
   it("R18-C: sidebar leaf links, group buttons and sub-items focus in REF's sidebar-ring blue, NOT the dark ring token", () => {
@@ -1489,19 +1493,22 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
   });
 
   it("R18-E: the login Sign in ring is REF's page-scoped zinc-950 (#09090B), NOT slate-400", () => {
-    /* Session-39 amendment: the three social buttons are now type="submit"
-       too (R38-F1) — the anchor moved to the Sign in's unique
-       disabled={loading}, same as the R19-H amendment. */
+    /* Session-39 amendment (superseded session-40): the social buttons
+       DROPPED type="submit" in the latest redeploy (R39-A1) — the first
+       type="submit" is the Sign in again — but the disabled={loading}
+       anchor stays (unique to Sign in). */
     const submit = login.slice(login.indexOf("disabled={loading}"), login.indexOf("disabled={loading}") + 700);
     expect(submit).toContain("focus-visible:ring-[#09090b]");
     expect(submit).not.toContain("ring-slate-400");
   });
 
-  it("R18-F: the Select trigger uses REF's button recipe — focus-visible:ring-1, NOT focus:ring-2", () => {
+  it("R18-F: the Select trigger uses REF's v4 button recipe (session-40 amendment — shadow-sm + ring-offset-background + the focus: prefix, live-measured on the loans dialog)", () => {
+    expect(select).toContain("text-sm shadow-sm ring-offset-background");
     expect(select).toContain(
-      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      "focus:outline-none focus:ring-1 focus:ring-ring"
     );
     expect(select).not.toContain("focus:ring-2");
+    expect(select).not.toContain("focus-visible:ring-1");
   });
 
   it("R18-G: the TabsTrigger adds REF's ring-offset-2 (4px total ring)", () => {
@@ -1577,9 +1584,9 @@ describe("session-20 hover recipes (parity round 19)", () => {
   });
 
   it("R19-H: login Sign in carries REF's shadow-sm (rgba(0,0,0,0.05) 0 1px 2px)", () => {
-    /* Session-39 amendment: the three social buttons are now type="submit"
-       too (R38-F1), so the first indexOf('type="submit"') is the Google
-       button — the anchor moved to the Sign in's unique disabled={loading}. */
+    /* Session-39 amendment (superseded session-40): the social buttons
+       dropped type="submit" (R39-A1), so the first indexOf('type="submit"')
+       is the Sign in again — the disabled={loading} anchor stays anyway. */
     const signinBlock = loginPage.slice(
       loginPage.indexOf("disabled={loading}"),
       loginPage.indexOf("Sign in</button>")
@@ -1596,10 +1603,13 @@ describe("session-20 hover recipes (parity round 19)", () => {
     expect(forgotBlock).toContain("hover:text-slate-700");
   });
 
-  it("R19-J: mobile hamburger inherits foreground (NO base color class) + hover:bg-slate-100 hover:text-accent-foreground", () => {
-    expect(appShell).toMatch(
-      /className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"/
+  it("R19-J: the mobile hamburger adopts REF's v4 Button family + data-sidebar=trigger + the sr-only name span (session-40 amendment — hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200; the clone KEEPS aria-label/type/aria-expanded, the documented a11y superset)", () => {
+    expect(appShell).toMatch(/data-sidebar="trigger"/);
+    expect(appShell).toMatch(/<span className="sr-only">Toggle Sidebar<\/span>/);
+    expect(appShell).toContain(
+      "hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200"
     );
+    expect(appShell).toContain('aria-label="Toggle Sidebar"');
   });
 
   it("R19-K: mobile bottom tabs have NO hover color change (REF renders none; session 21 re-pinned for the bg-blue-50 active pill — R20-B)", () => {
@@ -2378,7 +2388,8 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
        computed — NOT slate-900). The round-32 pin had measured the
        container, not the painted surface. The drawer keeps the token
        flip (bg-sidebar -> #18181b). */
-    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-sidebar");
+    expect(appShell).toContain("border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
+    expect(appShell).toContain('data-sidebar="sidebar"');
   });
 
   it("R30-B1: the chat left card — CardHeader p-4 border-b border-slate-200 with the 14px/600 title, the p-2 max-h-96 body, and the plain muted 'No chats' line (no icon, no centered EmptyState)", () => {
@@ -2696,10 +2707,12 @@ describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)"
   it("R32-A4: the app shell's dark surfaces — canvas gradient, aside (the light bg-white find), mobile chrome, bottom tabs", () => {
     // canvas: slate-900 -> slate-800, sRGB-pinned per trap 3
     expect(appShell).toContain("dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]");
-    // the desktop aside: the bg-sidebar TOKEN (session-35 correction —
-    // REF's inner div paints #FAFAFA/#18181b; the round-32 "authored
-    // bg-white" find had measured the covered container)
-    expect(appShell).toContain("border-slate-200 dark:border-slate-800 bg-sidebar");
+    // the desktop sidebar: session-40 — the shadcn div.peer architecture;
+    // the panel authors bg-white/dark:slate-900 while the INNER
+    // data-sidebar=sidebar div paints the bg-sidebar token (session-35
+    // correction preserved)
+    expect(appShell).toContain("border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
+    expect(appShell).toContain("flex h-full w-full flex-col bg-sidebar");
     // mobile header + bottom nav: dark slate-900/800 chrome (session-35:
     // the aside moved to the token — two chrome carriers remain)
     expect(appShell.match(/dark:bg-slate-900/g)?.length).toBeGreaterThanOrEqual(2);
@@ -2881,11 +2894,11 @@ describe("session-34 pins (parity round 33)", () => {
     expect(src).not.toContain("text-blue-200");
   });
 
-  it("R33-E2: /careers — the Browse by Company H2 + REF's chip geometry (h-46 outline, no All-Companies chip)", () => {
+  it("R33-E2: /careers — the Browse by Company H2 + REF's chip geometry (session-40 amendment: the v4 Button outline family — variant=outline + h-auto py-3 px-4, measured h=46; no All-Companies chip)", () => {
     const src = read("src", "app", "(app)", "careers", "page.tsx");
     expect(src).toContain("Browse by Company");
     expect(src).toContain("text-2xl font-bold text-slate-900 mb-4");
-    expect(src).toContain("h-[46px] rounded-md");
+    expect(src).toMatch(/<Button key=\{c\} variant="outline" className="h-auto py-3 px-4"/);
     expect(src).not.toContain("All Companies");
   });
 
@@ -2972,13 +2985,14 @@ describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity r
     expect(block).not.toContain("placeholder=");
   });
 
-  it("R34-D1: REF's RTL shell — the in-flow transparent peer spacer reserves the column (mirrors with dir)", () => {
-    expect(appShell).toContain('className="hidden h-screen w-64 shrink-0 md:block"');
-    expect(appShell).toContain('aria-hidden="true"');
+  it("R34-D1: REF's RTL shell — the in-flow transparent peer spacer reserves the column (mirrors with dir; session-40: the spacer is the shadcn peer wrapper's first child; REF authors no aria-hidden anywhere in the tree)", () => {
+    expect(appShell).toMatch(/<div className="group peer hidden text-sidebar-foreground md:block">/);
+    expect(appShell).toMatch(/<div className="relative h-svh w-\(--sidebar-width\) bg-transparent transition-\[width\] duration-200 ease-linear/);
   });
 
-  it("R34-D2: the desktop aside is REF's fixed painting panel — physically left in BOTH directions (never flips)", () => {
-    expect(appShell).toMatch(/<aside className="fixed left-0 top-0 z-10 hidden h-screen w-64/);
+  it("R34-D2: the desktop sidebar is REF's fixed painting panel — physically left in BOTH directions (session-40: the aside became the shadcn div.peer architecture, never flips)", () => {
+    expect(appShell).toMatch(/<div className="fixed inset-y-0 z-10 hidden h-svh w-\(--sidebar-width\) transition-\[left,right,width\] duration-200 ease-linear md:flex left-0/);
+    expect(appShell).not.toContain("<aside");
     expect(appShell).not.toContain('<aside className="sticky top-0');
   });
 
@@ -3651,8 +3665,8 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39.match(/placeholder:text-slate-600/g)?.length).toBe(2);
   });
 
-  it("R38-I1: the login inputs carry NO shadow-none remnant (the Input base sets no at-rest shadow; the class computed the 5-layer transparent-zeros string vs REF's literal none)", () => {
-    expect(login39).not.toContain("shadow-none");
+  it("R38-I1: the login inputs MUST carry shadow-none + transition-none (session-40 amendment — the migrated base now sets shadow-sm/transition-colors; REF's login build kept the pre-migration family with neither. shadow-none computes the transparent-zeros string vs REF's literal none — the accepted serialization non-gap, fully invisible)", () => {
+    expect(login39.match(/shadow-none transition-none/g)?.length).toBe(2);
   });
 
   it("R38-D1: REF's sm:hidden spacer footnote below the card (mt-8 text-center text-xs text-slate-400 > p:&nbsp; — the invisible line pins the card to y=16 and scrolls the mobile page 18px: 862 vs the 844 viewport)", () => {
@@ -3671,13 +3685,13 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(btn).not.toContain("transition-colors");
   });
 
-  it("R38-F1: the three social buttons are REF's family — type=submit (inert: they sit outside the form), REF's exact class list with text-[16px] + group", () => {
+  it("R38-F1: the three social buttons are REF's family (session-40 amendment — the redeploy DROPPED the type attr: REF renders no type on any of the three; they sit outside the form so it was inert), REF's exact class list with text-[16px] + group", () => {
     expect(
       login39.match(
-        /type="submit"\s+className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3\.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
+        /className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3\.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
       )?.length
     ).toBe(3);
-    expect(login39).not.toMatch(/<button\s+type="button"\s+className="w-full flex/);
+    expect(login39.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
   });
 
   it("R38-F2: the social icons ride REF's wrappers — ONLY Google carries the -ml-4 pull (live-measured: REF's Google div x=84.8 with ml=-16, its Microsoft/Apple divs have NO -ml-4 and sit at 84.6/98.2 on their own text widths); the labels are span-wrapped", () => {
@@ -3743,5 +3757,160 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39).toContain("M13 3.5c.73-.83 1.94-1.46 2.94-1.5");
     // REF's Microsoft squares live in the 24-box (M1 1h10v10H1z family × 4)
     expect(login39.match(/M1 1h10v10H1z|M13 1h10v10H13z|M1 13h10v10H1z|M13 13h10v10H13z/g)?.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe("session-40 shell restructure + input migration + careers org-view (parity round 39)", () => {
+  /* Round 39's three fronts, all live-measured on both apps this round:
+     (1) REF's login JS chunk redeployed twice more (BYE5Ojxh → Cqb_n9sO
+     → BIuE7r17) — the social buttons DROPPED type="submit" and the login
+     proved THEME-INERT (no html.dark/dir even with the storage keys
+     armed; the keys survive — REF's login build ships no theme boot).
+     (2) The app-side input family silently migrated to the v4 shadcn
+     recipes (bg-transparent + text-base md:text-sm + at-rest shadow-sm +
+     ring-1 offset-0) — measured on the loans dialog's input, textarea
+     and select trigger.
+     (3) REF's shell is the shadcn Sidebar architecture (peer wrapper +
+     fixed panel + the flex-1 overflow-auto scroll container, header
+     inside main, bottom nav as the canvas's child) and its public
+     careers board carries the ?org= company view. */
+
+  const login40 = read("src", "app", "login", "page.tsx");
+  const careers40 = read("src", "app", "(app)", "careers", "page.tsx");
+  const tenant40 = read("src", "app", "(app)", "tenantsetup", "page.tsx");
+  const extjob40 = read("src", "app", "(app)", "externaljobapplication", "page.tsx");
+  const layout40 = read("src", "app", "layout.tsx");
+  const input40 = read("src", "components", "ui", "input.tsx");
+
+  // --- A. the login redeploy re-audit ---
+
+  it("R39-A1: the three social buttons carry NO type attribute (the redeploy's change — REF renders type:null on all three; the buttons sit outside the form so the attribute was inert)", () => {
+    expect(login40.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
+    expect(login40.match(/className="w-full flex items-center justify-center gap-3 bg-white text-slate-700/g)?.length).toBe(3);
+  });
+
+  it("R39-B1: the theme boot is LOGIN-INERT — REF's login preserves darkMode/app_lang but never applies html.dark/dir (live-probed both sides); the boot returns early on /login BEFORE either applier", () => {
+    const boot = layout40.slice(layout40.indexOf("THEME_BOOT"), layout40.indexOf("THEME_BOOT") + 460);
+    expect(boot).toMatch(/pathname\s*===?\s*"\/login"/);
+    expect(boot.indexOf("/login")).toBeLessThan(boot.indexOf("darkMode"));
+    expect(boot.indexOf("/login")).toBeLessThan(boot.indexOf("app_lang"));
+  });
+
+  it("R39-C1: the login inputs counter the migrated base — shadow-none + transition-none + ring-offset-background + focus-visible:ring-2/offset-2 keep REF's login-build recipe (the two-build split: REF's login inputs kept the pre-migration family — ring-2/offset-2, no shadow, no transition, live-measured)", () => {
+    expect(login40.match(/shadow-none transition-none/g)?.length).toBe(2);
+    expect(login40.match(/ring-offset-background/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(login40.match(/focus-visible:ring-2 focus-visible:ring-offset-2/g)?.length).toBe(2);
+  });
+
+  // --- B. the base migration ---
+
+  it("R39-D1: the Input base is REF's migrated v4 recipe — bg-transparent + text-base md:text-sm + at-rest shadow-sm + ring-1 focus (offset-0) + file:text-foreground (live-measured on the loans dialog; the round-19 ring-2/offset-2/bg-card recipe retired)", () => {
+    expect(input40).toContain("border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors");
+    expect(input40).toContain("file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
+    expect(input40).toContain("disabled:cursor-not-allowed disabled:opacity-50 md:text-sm");
+    expect(input40).not.toContain("bg-card");
+    expect(input40).not.toContain("ring-offset-2");
+  });
+
+  it("R39-E1: the Textarea base is REF's migrated recipe — min-h-[60px] (was 80) + the same v4 family", () => {
+    expect(input40).toContain("flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm");
+    expect(input40).not.toContain("min-h-[80px]");
+  });
+
+  it("R39-F1: the SelectTrigger gains the v4 members — shadow-sm + ring-offset-background + the focus: prefix (was focus-visible:); the R37-E neutral-500 placeholder override stays (rendered rgb(115,115,115) verified identical on both sides)", () => {
+    expect(selectUi).toContain("px-3 py-2 text-sm shadow-sm ring-offset-background");
+    expect(selectUi).toContain("focus:outline-none focus:ring-1 focus:ring-ring");
+    expect(selectUi).not.toContain("focus-visible:ring-1");
+    expect(selectUi).toContain("data-[placeholder]:text-neutral-500 dark:data-[placeholder]:text-neutral-400");
+  });
+
+  // --- C. the app-shell restructure ---
+
+  it("R39-H1: the wrapper layers — unclassed root > group/sidebar-wrapper (the --sidebar-width: 16rem + --sidebar-width-icon: 3rem inline vars) > the canvas (the pinned sRGB gradient + REF's inert safe-area-inset class)", () => {
+    expect(appShell).toMatch(/<div>\s*<div\s+className="group\/sidebar-wrapper flex min-h-svh w-full has-\[\[data-variant=inset\]\]:bg-sidebar"\s+style=/);
+    expect(appShell).toContain('"--sidebar-width": "16rem"');
+    expect(appShell).toContain('"--sidebar-width-icon": "3rem"');
+    expect(appShell).toContain("dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)] safe-area-inset");
+  });
+
+  it("R39-I1: the sidebar is REF's peer architecture — div.group.peer (NOT an aside) wrapping the RTL spacer + the fixed panel; the panel authors bg-white/dark:slate-900 while the inner data-sidebar=sidebar div paints the bg-sidebar token (the session-35 two-layer surface)", () => {
+    expect(appShell).not.toContain("<aside");
+    expect(appShell).toMatch(/<div className="fixed inset-y-0 z-10 hidden h-svh w-\(--sidebar-width\) transition-\[left,right,width\] duration-200 ease-linear md:flex left-0/);
+    expect(appShell).toContain("border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900");
+    expect(appShell).toMatch(/<div data-sidebar="sidebar" className="flex h-full w-full flex-col bg-sidebar/);
+  });
+
+  it("R39-J1: the brand text container is REF's flex-1 min-w-0 BLOCK (stretches to 155px; the clone's shrink-wrapped flex-col measured 66px) inside the flex-col gap-2 outer + the flex items-center gap-3 row, with the h2 + a p sub (truncate, slate-500/400 — NOT the muted token)", () => {
+    expect(sidebarNav).toContain("flex flex-col gap-2 border-b border-slate-200 dark:border-slate-800 p-6");
+    expect(sidebarNav).toMatch(/<div className="flex items-center gap-3">/);
+    expect(sidebarNav).toMatch(/<div className="flex-1 min-w-0">/);
+    expect(sidebarNav).toMatch(/<h2 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">EonHR<\/h2>/);
+    expect(sidebarNav).toMatch(/<p className="text-xs text-slate-500 dark:text-slate-400 truncate">Demo<\/p>/);
+    expect(sidebarNav).not.toMatch(/flex min-w-0 flex-col/);
+  });
+
+  it("R39-K1: the mobile header lives INSIDE main (before the scroll container) with REF's exact string — explicit border-slate-200 + the inert safe-area-top", () => {
+    expect(appShell.indexOf("<header")).toBeGreaterThan(appShell.indexOf("<main"));
+    expect(appShell).toMatch(/<header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 md:hidden sticky top-0 z-10 safe-area-top">/);
+  });
+
+  it("R39-L1: the toggle adopts REF's v4 Button family — the shadcn base members + hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200 (measured 28×28, 16px icon, both sides)", () => {
+    expect(appShell).toContain("hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200");
+  });
+
+  it("R39-M1: the bottom nav is REF's canvas-side sibling — md:hidden fixed bottom-0 left-0 right-0 (explicit, not inset-x-0) + border-slate-200 + the inert safe-area-bottom; the clone's env() padding superset stays (0px on all test surfaces)", () => {
+    expect(appShell).toMatch(/className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 safe-area-bottom z-50 pb-\[env\(safe-area-inset-bottom\)\]"/);
+    expect(appShell).not.toContain("fixed inset-x-0 bottom-0");
+  });
+
+  it("R39-N1: the scroll container — main wraps the header + a div.flex-1.overflow-auto that carries the page content and the edge-swipe handlers (REF: the document itself does not scroll the page; the inner div does)", () => {
+    expect(appShell).toMatch(/<div className="flex-1 overflow-auto" onTouchStart=\{onMainTouchStart\} onTouchMove=\{onMainTouchMove\}>/);
+    expect(appShell).toMatch(/\{children\}\s*<\/div>\s*<\/main>/);
+  });
+
+  it("R39-O1: the print superset follows the restructure — the sidebar hides via the escaped .group\\/sidebar-wrapper selector (spacer + panel together) and the scroll container un-clips for print", () => {
+    const at = globalsCss.indexOf("@media print");
+    const block = globalsCss.slice(at);
+    expect(block).toContain(".group\\/sidebar-wrapper");
+    expect(block).toMatch(/overflow: visible !important/);
+  });
+
+  // --- D. careers: the with-data surface + the org view ---
+
+  it("R39-P1: the careers chips are REF's v4 Button outline family — variant=outline (the button.tsx recipe: border-input + bg-background + shadow-sm + the accent hover) + h-auto py-3 px-4 (measured h=46 both sides), parent flex gap-3 flex-wrap", () => {
+    expect(careers40).toMatch(/<Button key=\{c\} variant="outline" className="h-auto py-3 px-4"/);
+    expect(careers40).toContain("flex gap-3 flex-wrap");
+    expect(careers40).not.toContain("h-[46px]");
+  });
+
+  it("R39-Q1: the count heading — REF renders an h3 'N Open Position(s)' (text-xl font-semibold text-slate-900, pluralized with the count) between the chips and the grid; the zero-data card's h3 shares the recipe", () => {
+    expect(careers40).toMatch(/text-xl font-semibold text-slate-900/);
+    expect(careers40).toMatch(/\{visible\.length\} Open Position\{visible\.length === 1/);
+  });
+
+  it("R39-R1: the hero input is the migrated base + REF's overrides — md:text-sm pl-12 py-6 text-lg bg-white (h=50, 18px mobile font; the h-12 pl-11 rounded-lg recipe retired)", () => {
+    expect(careers40).toContain("pl-12 py-6 text-lg bg-white");
+    expect(careers40).not.toContain("h-12 pl-11");
+  });
+
+  it("R39-S1: the org view — the chip click navigates to ?org=<slug> (useSearchParams; the (app) layout is dynamic — cookies — so no Suspense boundary needed) rendering the org-name h2 text-3xl font-bold + the back button", () => {
+    expect(careers40).toContain("useSearchParams");
+    expect(careers40).toMatch(/text-3xl font-bold text-slate-900/);
+    expect(careers40).toContain("Back to all companies");
+  });
+
+  // --- E/F. tenantsetup + externaljobapplication ---
+
+  it("R39-U1: the tenantsetup canvas gains REF's p-4 (the card sits x=16 w=358 at 390 — live-measured both sides)", () => {
+    expect(tenant40).toContain("flex items-center justify-center p-4");
+  });
+
+  it("R39-V1: the tenantsetup inputs drop the stale h-11 overrides — the migrated base (h-9 = 36px) is REF's recipe now (live-measured)", () => {
+    expect(tenant40).not.toContain('className="h-11"');
+  });
+
+  it("R39-W1: the externaljobapplication content wrapper is REF's max-w-6xl (the clone's max-w-7xl rendered identically at 1440 but diverges ≥1536)", () => {
+    expect(extjob40).toContain("max-w-6xl");
+    expect(extjob40).not.toContain("max-w-7xl");
   });
 });

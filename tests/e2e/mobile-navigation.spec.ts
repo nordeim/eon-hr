@@ -135,7 +135,7 @@ test.describe("mobile navigation", () => {
 
   test("the desktop sidebar is hidden on mobile; the drawer is hidden on desktop", async ({ page }) => {
     // Mobile: no persistent sidebar
-    await expect(page.locator("aside")).toBeHidden();
+    await expect(page.locator('[data-sidebar="sidebar"]')).toBeHidden();
     await expect(page.getByRole("button", { name: "Toggle Sidebar" })).toBeVisible();
   });
 });
@@ -218,7 +218,7 @@ test.describe("mobile page kicker (session 6, re-pinned session 9)", () => {
     // 800px: desktop chrome — sidebar visible, mobile chrome gone.
     await expect(page.getByRole("button", { name: "Toggle Sidebar" })).toHaveCount(0);
     await expect(page.getByRole("navigation", { name: "Bottom navigation" })).toHaveCount(0);
-    const sidebar = page.locator("aside");
+    const sidebar = page.locator('[data-sidebar="sidebar"]');
     await expect(sidebar).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "Dashboard" })).toBeVisible();
   });

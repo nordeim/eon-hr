@@ -60,7 +60,7 @@ test.describe("dashboard", () => {
     await expect(chip).toHaveCSS("border-top-color", "rgb(226, 232, 240)");
     await expect(chip.locator("svg")).toHaveCSS("color", "rgb(37, 99, 235)");
     // Reference active-nav/primary blue is #1877F2.
-    await expect(page.locator("aside nav a[aria-current='page']")).toHaveCSS(
+    await expect(page.locator('[data-sidebar="sidebar"] nav a[aria-current="page"]')).toHaveCSS(
       "background-color",
       "rgb(24, 119, 242)"
     );
@@ -118,8 +118,9 @@ test.describe("dashboard", () => {
     await page.goto("/dashboard");
     // Reference: the shell root div carries the slate-50 -> blue-50 canvas
     // gradient (stretches with content, unlike a fixed body background).
-    // main's parent's parent = the shell root.
-    const shell = page.locator("main").locator("xpath=../..");
+    // Session 40 (R39-H): the shell gained wrapper layers (unclassed
+    // root > sidebar-wrapper > canvas) — main's PARENT is now the canvas.
+    const shell = page.locator("main").locator("xpath=..");
     const img = await shell.evaluate((el) => getComputedStyle(el).backgroundImage);
     expect(img).toContain("rgb(248, 250, 252)");
     expect(img).toContain("rgb(239, 246, 255)");
@@ -135,7 +136,9 @@ test.describe("dashboard", () => {
     // #059669); stat tiles are 48px bg-green-100 with 24px green-600 icons
     // and 30px/700 values; the empty-state CTA is the dark shadcn default
     // (#171717).
-    const pageGrad = page.locator("main > div");
+    /* Session 40 (R39-N): the page canvas rides inside the scroll
+       container — one level deeper than main. */
+    const pageGrad = page.locator("main > div > div");
     const img = await pageGrad.first().evaluate((el) => getComputedStyle(el).backgroundImage);
     expect(img).toContain("rgb(240, 253, 244)");
     expect(img).toContain("rgb(239, 246, 255)");

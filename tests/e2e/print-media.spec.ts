@@ -22,18 +22,21 @@ test.describe("print media superset (session 29)", () => {
     await page.goto("/employees");
 
     // The desktop sidebar: `hidden md:flex` computes flex at this width —
-    // the print block must force none (the cascade proof).
-    const aside = page.locator("aside").first();
+    // the print block must force none (the cascade proof). Session 40:
+    // the sidebar is the group/sidebar-wrapper div (the escaped-class
+    // selector in the print block hides spacer + panel together).
+    const aside = page.locator('div[class*="sidebar-wrapper"]');
     await expect(aside).toHaveCSS("display", "none");
 
     // The sidebar's inner nav (block by default at desktop) must hide.
     await expect(page.locator("nav").first()).toHaveCSS("display", "none");
 
     // The root drops min-h-screen (100vh would compute to the viewport
-    // height; the print reset forces 0). NOTE: the FIRST body>div is
-    // Next.js's hidden bootstrap div — the app root is the min-h-screen
-    // flex div (a body>div sibling, also covered by the print rule).
-    const root = page.locator("body > div.min-h-screen").first();
+    // height; the print reset forces 0). Session 40: the shell gained
+    // wrapper layers (unclassed root > sidebar-wrapper > canvas) — the
+    // canvas is the min-h-screen carrier, covered by the
+    // `.group\/sidebar-wrapper > div` print rule.
+    const root = page.locator("div.min-h-screen").first();
     await expect(root).toHaveCSS("min-height", "0px");
 
     // Cards do not split across page boundaries (auto without the block).

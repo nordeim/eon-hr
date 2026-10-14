@@ -34,8 +34,11 @@ describe("app-shell responsive boundary (session 7, R6-A)", () => {
   it("desktop sidebar mounts from md (768px) — reference measurement", () => {
     // Reference: sidebar visible at 768/800/900; clone must match. The
     // reference's own bottom bar is md:hidden and its shadcn sidebar
-    // container mounts from md up.
-    expect(appShell).toContain("md:flex md:flex-col");
+    // container mounts from md up. Session 40: the peer wrapper mounts
+    // via md:block and the fixed panel via md:flex (the R6-A boundary
+    // unchanged; the inner div carries the flex-col).
+    expect(appShell).toContain("md:flex left-0");
+    expect(appShell).toContain("flex h-full w-full flex-col bg-sidebar");
     expect(appShell).not.toContain("lg:flex");
   });
 

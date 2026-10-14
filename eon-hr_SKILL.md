@@ -10,14 +10,15 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.22.0 (session-39 remediation complete — the login redeploy re-audit: the mobile-viewport dimension) · **Last updated:** 2026-10-14
-> 2026-10-14 · **State:** 598 unit + 167 E2E tests green, lint/typecheck/build
+> **Version:** 3.23.0 (session-40 remediation complete — the shell restructure + the input migration + the careers org view) · **Last updated:** 2026-10-14
+> 2026-10-14 · **State:** 619 unit + 174 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
 > the hover/active-state taxonomy + the pressed-state taxonomy + the head/SEO
 > contract + the reduced-motion/keyboard-order/drag-drop supersets + the DnD-depth
-> supersets: within-column reorder + the recruitment pipeline drag-drop).
+> supersets: within-column reorder + the recruitment pipeline drag-drop + the
+> shadcn peer-sidebar shell architecture with the overflow-auto scroll container).
 
 ---
 
@@ -2544,3 +2545,75 @@ spacer, the Sign in recipes, the per-button wrappers, the links row,
 the divider, the logo glow family, the icon glyphs). Gates: 598/598
 unit · 167/167 E2E. Live: the mobile login pair byte-identical; the
 desktop pair MATCH (four documented non-gaps).
+
+## §52 Session 40 (parity round 39) — the shell restructure + the input migration + the careers org view
+
+Three fronts landed together: the login redeploy re-audit (the social
+type drop + the theme-inert login), the global Input/Textarea/Select
+migration to the v4 shadcn family (bg-transparent + text-base
+md:text-sm + at-rest shadow-sm + ring-1 offset-0 — a silent
+post-round-19 REF redeploy caught by re-measuring the loans dialog),
+and the app-shell restructure to REF's shadcn Sidebar architecture
+(the peer wrapper + fixed panel + the `flex-1 overflow-auto` scroll
+container, header inside main, bottom nav as the canvas's child).
+
+**The `w-(--sidebar-width)` lesson (the round's core v4 trap)**: REF's
+DOM carries the v3-era bracket form `w-[--sidebar-width]`, and REF's
+CSS generates `width:var(--sidebar-width)`. The clone's v4 build
+compiles the SAME bracket form to the invalid raw
+`width:--sidebar-width` (no var() wrapper) — the sidebar column
+collapses. The v4 parenthesis form `w-(--sidebar-width)` generates the
+identical `width:var(--sidebar-width)` output. Rule: when a class
+string and its compiled CSS diverge across major versions, pin the
+COMPILED OUTPUT, not the authored string (the
+gradient-arbitrary-value precedent, now with a second witness).
+
+**The docs-scanning lesson**: v4's automatic content detection scans
+every non-gitignored file — including `docs/*.md`. The remediation
+plans' recipe quotes (bracket class strings) generated dead CSS rules
+in the production stylesheet. `@source not "../../docs"` in
+globals.css excludes them; the emitted CSS stays clean.
+
+**The two-build split (login vs app)**: REF's login build did NOT pick
+up the app-side input migration — its login inputs keep the
+pre-migration family (ring-2/offset-2, no shadow, no transition,
+ring-offset-background). A shared base + page-level counters is the
+clone's equivalent: the login overrides carry `shadow-none
+transition-none ring-offset-background focus-visible:ring-2
+focus-visible:ring-offset-2`. The counters' cost: shadow-none computes
+the transparent-zeros string vs REF's literal `none` — invisible, the
+accepted serialization non-gap.
+
+**The scroll-container semantics**: with `flex-1 overflow-auto` inside
+main, the DOCUMENT no longer scrolls the page — the inner div does.
+Consequences: E2E specs that walk `main`'s children or rely on body
+scroll need re-scoping; the print block needs `main > div { overflow:
+visible !important }` or print output clips to the first screenful; the
+sticky header sits OUTSIDE the scroller (it never scrolls away — same
+visual behavior as the old body-scroll stickiness).
+
+**The theme-inert login**: REF's login build ships no theme boot —
+`darkMode="true"` survives in storage but `html.dark` never applies on
+/login (and dir stays ltr). The clone's THEME_BOOT returns early on
+/login; the app pages boot from the same keys after sign-in. This is a
+BUILD-scoped behavior, not a route-scoped one — the clone mirrors it
+with a pathname guard in the shared root layout.
+
+**The with-data careers surface**: REF's public board carries
+cross-tenant demo data (517 company chips) — the first measurable
+with-data board. The chips are the v4 Button outline family (h-auto
+py-3 px-4, h=46) in `flex gap-3 flex-wrap`; the count h3 pluralizes;
+the chips navigate to `/careers?org=<slug>` (REF's own client-side
+artifact: the capitalized /Careers path) rendering the org view. The
+clone's org state is URL-driven (useSearchParams — safe without a
+Suspense boundary because the (app) layout is dynamic via cookies).
+
+**The v4/v3 shadow-slot serialization non-gap**: v4 composes five
+box-shadow slots (all transparent at rest) vs REF's v3-era three — the
+rendered result is identical; only the serialized string differs. Same
+category as lab()/rgba(): compare rendered pixels, not serialization.
+
+Recipe pins added: 21; predecessors amended: 12. Gates: 619/619 unit ·
+174/174 E2E. Live: the shell tree pair byte-identical; verify-r39.mjs
+4/7 raw MATCH with the 3 diffs all documented non-gaps; the standing
+audits 5/5; 16 screenshots (148-155) → 212 captures.

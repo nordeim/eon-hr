@@ -35,7 +35,7 @@ test.describe("sidebar navigation", () => {
 
   test("the active route is highlighted in the sidebar", async ({ page }) => {
     await page.goto("/employees");
-    const active = page.locator("aside nav a[aria-current='page']");
+    const active = page.locator('[data-sidebar="sidebar"] nav a[aria-current="page"]');
     await expect(active).toHaveAttribute("href", "/employees");
     // Reference active treatment: solid #1877F2 with white text (also for
     // sub-items, not a tinted pill).
@@ -55,7 +55,7 @@ test.describe("sidebar navigation", () => {
   test("user avatar renders the reference gradient glyph", async ({ page }) => {
     await page.goto("/dashboard");
     // Reference: gradient circle (blue-500 → indigo-500) with CircleUser.
-    const avatar = page.locator("aside").locator("button").filter({ hasText: "sepnetflix2023" }).first().locator("span.rounded-full");
+    const avatar = page.locator('[data-sidebar="sidebar"]').locator("button").filter({ hasText: "sepnetflix2023" }).first().locator("span.rounded-full");
     await expect(avatar).toHaveCSS("background-image", /linear-gradient/);
   });
 

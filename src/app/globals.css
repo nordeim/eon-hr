@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Session 40 (R39-I): v4's automatic content detection scans EVERY
+   non-gitignored file — including docs/*.md, whose remediation-plan
+   recipe listings quote REF's v3-era bracket class strings
+   (w-[--sidebar-width]). Those quotes generated dead CSS rules
+   (width:--sidebar-width — invalid, matching no element, since the
+   app-shell uses the v4 parenthesis form). Excluding docs/ from
+   candidate scanning keeps the emitted CSS clean. */
+@source not "../../docs";
+
 /* Session 33 (R32-A): v4's `dark:` variant defaults to the
    prefers-color-scheme MEDIA query — the class-based strategy every
    shadcn app (and the reference) uses must be declared explicitly.
@@ -426,7 +435,12 @@
   margin: 10mm;
 }
 @media print {
-  aside,
+  /* Session 40 (R39-O): the sidebar became the shadcn div.peer
+     architecture — the escaped group/sidebar-wrapper class selector
+     hides the whole subtree (the transparent RTL spacer + the fixed
+     painting panel) together. header/nav still cover the mobile chrome;
+     [data-radix-portal] covers an open drawer/dialog/toast. */
+  .group\/sidebar-wrapper,
   header,
   nav,
   [data-radix-portal] {
@@ -435,8 +449,15 @@
   main {
     padding-bottom: 0 !important;
   }
-  body > div {
+  body > div,
+  .group\/sidebar-wrapper > div {
     min-height: 0 !important;
+  }
+  /* The scroll container (main > div.flex-1.overflow-auto) clips at
+     print otherwise — restore natural document flow so long pages
+     paginate instead of clipping to the first screenful. */
+  main > div {
+    overflow: visible !important;
   }
   .rounded-xl,
   table tr {

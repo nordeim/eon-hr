@@ -118,160 +118,187 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   };
 
   return (
-    /* Session 33 (R32-A): the dark canvas — REF's shell root swaps the
-       slate-50 -> blue-50 gradient for slate-900 -> slate-800 in dark
-       (sRGB-pinned per trap 3, live-measured
-       rgb(15,23,42) -> rgb(30,41,59)). */
-    <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)]">
-      {/* Desktop sidebar. Session 35 (R34-D correction): the visible
-          surface is the bg-sidebar TOKEN — REF's fixed container
-          authors bg-white/dark classes but its inner bg-sidebar div
-          fully covers it (#FAFAFA light pixel-verified, #18181b dark
-          computed). The round-32 "authored bg-white" find measured the
-          covered container. The border pair stays (border-slate-200 /
-          dark:border-slate-800). The mobile drawer below uses the same
-          token surface. */}
-      {/* Session 35 (R34-D): REF's RTL architecture — the peer spacer +
-          the fixed painting panel. REF's desktop sidebar does NOT mirror
-          in عربي mode: an in-flow TRANSPARENT peer reserves the 256px
-          column (it mirrors with dir=rtl — left in LTR, right in RTL,
-          painting nothing), while the fixed aside stays physically LEFT
-          in both directions (left:0/right:1184 at 1440 — REF's computed
-          offsets never flip), its internals mirroring via the cascading
-          dir. LTR renders identical to the old in-flow aside (spacer at
-          0..256 + panel over it + main at 256..1440); RTL renders REF's
-          exact layout: panel at 0..256 over the main area's start edge,
-          main 0..1184, transparent gap at 1184..1440 showing the canvas.
-          The round-32 "RTL mirror matches" verification had measured the
-          PEER (which mirrors) — the aside-selector artifact's desktop
-          twin. */}
-      <div className="hidden h-screen w-64 shrink-0 md:block" aria-hidden="true" />
-      {/* Session 35 (R34-D correction): the surface is the bg-sidebar
-          TOKEN — REF's fixed container authors bg-white/dark classes but
-          its inner `bg-sidebar` div FULLY COVERS it and paints the
-          visible surface: #FAFAFA in light (pixel-verified LTR+RTL this
-          round) and #18181b in dark (the .dark --sidebar override —
-          computed-verified; NOT slate-900 #0f172a). The round-32
-          "authored bg-white" find measured the container, not the
-          painted surface — corrected here; the desktop aside and the
-          mobile drawer are the same token surface, as REF renders. */}
-      <aside className="fixed left-0 top-0 z-10 hidden h-screen w-64 border-r border-slate-200 dark:border-slate-800 bg-sidebar md:flex md:flex-col">
-        <SidebarNav user={user} />
-      </aside>
-
-      {/* Mobile drawer (reference: 288px sheet, dark 80% overlay, no X button) */}
-      <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
-        <DialogPrimitive.Portal>
-          {/* Session 22 (R21-C): REF's drawer overlay fades ~150ms (vaul
-              fadeIn/fadeOut) and the panel SLIDES — 500ms open /
-              300ms close with cubic-bezier(0.32,0.72,0,1) (measured
-              frame-sampled). The old transition-* classes could never
-              fire: Radix mounts the Content fresh with data-state=open
-              already set, and transitions need a state change on a live
-              element — animations run from mount. Radix also waits for
-              animationend before unmounting, so the close plays too. */}
-          <DialogPrimitive.Overlay
-            className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.8)] data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out md:hidden"
-            aria-hidden="true"
-          />
-          <DialogPrimitive.Content
-            ref={drawerRef}
-            onTouchStart={onDrawerTouchStart}
-            onTouchMove={onDrawerTouchMove}
-            onTouchEnd={onDrawerTouchEnd}
-            /* Session 31 (R30-A): REF's drawer panel ships a 1px right
-               border in the DEFAULT border color #e5e5e5 (measured
-               rgb(229,229,229) — the base layer's * { border-color },
-               NOT the desktop sidebar's slate token). border-r picks it
-               up; the panel stays 288px (border-box). */
-            className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col border-r bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
-          >
-            <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
-            <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>
-            <SidebarNav user={user} variant="mobile" onNavigate={() => setMobileOpen(false)} />
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
-
-      {/* Main column — carries the swipe-to-open edge listeners (R32-C):
-          the handlers only arm inside the 32px left-edge window, so
-          ordinary content scrolls never trigger. */}
-      <div className="flex min-w-0 flex-1 flex-col" onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove}>
-        {/* Mobile top bar (session-5 re-measurement): px-6 py-4 + a 40px
-            content row — 28×28 toggle with a 16px PanelLeft icon, brand
-            block = h1 "EonHR" 16px/700 slate-900 + p "Demo" text-xs
-            text-slate-500 stacked (24+16 = 40px). items-center; header =
-            16+40+16+1 = 73px. Session 33 (R32-A): the dark chrome — REF's
-            mobile header flips to slate-900 bg + slate-800 border (dark:
-            classes, live-measured); the brand h1/sub stay hardcoded. */}
-        <header className="sticky top-0 z-10 border-b border-sidebar-border dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 md:hidden">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              aria-label="Toggle Sidebar"
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen(true)}
-              /* Session 20 (R19-J): REF's hamburger inherits the foreground
-                 (#0A0A0A, no color class) and hovers bg-slate-100 +
-                 text-accent-foreground (#171717) — measured, replacing the
-                 text-slate-900 rest color. */
-              className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <PanelLeft className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <div>
-              <h1 className="text-base font-bold text-slate-900">EonHR</h1>
-              <p className="text-xs text-slate-500">Demo</p>
+    /* Session 40 (R39-H): REF's shell wrapper layers — an unclassed root
+       div > the shadcn group/sidebar-wrapper (carrying the
+       --sidebar-width: 16rem / --sidebar-width-icon: 3rem inline vars)
+       > the canvas. The canvas keeps the dark-mode gradient swap below
+       (session 33, R32-A: slate-900 -> slate-800 in dark, sRGB-pinned
+       per trap 3, live-measured rgb(15,23,42) -> rgb(30,41,59)) and
+       gains REF's inert safe-area-inset class (no rules in REF's CSS —
+       a dead class, cloned for DOM parity). */
+    <div>
+      <div
+        className="group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar"
+        style={{ "--sidebar-width": "16rem", "--sidebar-width-icon": "3rem" } as React.CSSProperties}
+      >
+        <div className="flex min-h-screen w-full bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] dark:bg-[linear-gradient(to_right_bottom,#0f172a,#1e293b)] safe-area-inset">
+          {/* Desktop sidebar — session 40 (R39-I): REF's shadcn peer
+              NOTE: the width members use the v4 PARENTHESIS form
+              w-(--sidebar-width) — REF's v3-era bracket form compiles to
+              the invalid raw `width:--sidebar-width` under v4 (no var()
+              wrapper); the parenthesis form generates the identical
+              `width:var(--sidebar-width)` output REF ships. The
+              architecture. The peer wrapper (div.group.peer, NOT the
+              old aside element) mounts from md and wraps two children:
+              1. the in-flow TRANSPARENT spacer (relative, w on the
+                 --sidebar-width var, transition-[width] duration-200 —
+                 the RTL peer from session 35: it mirrors with dir=rtl,
+                 reserving the 256px column while painting nothing);
+              2. the FIXED panel (inset-y-0, physically left in both
+                 directions — left:0, never flips; the R34-D contract).
+              The panel authors bg-white/dark:slate-900 + the explicit
+              slate-200/800 border, but its INNER data-sidebar=sidebar
+              div FULLY COVERS it and paints the visible surface via the
+              bg-sidebar TOKEN (#FAFAFA light pixel-verified, #18181b
+              dark — the session-35 two-layer find, preserved). The
+              offcanvas/icon group-data variants are REF's members —
+              inert without a collapsible state, cloned for class
+              parity. */}
+          <div className="group peer hidden text-sidebar-foreground md:block">
+            <div className="relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-(--sidebar-width-icon)" />
+            <div className="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div data-sidebar="sidebar" className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow">
+                <SidebarNav user={user} />
+              </div>
             </div>
           </div>
-        </header>
 
-        {/* Reference main (session 6): bare flex column — `flex-1 flex
-            flex-col pb-20 md:pb-0`. Page padding lives on each page's own
-            root div (p-4 md:p-8, per-page gradient canvases — see the
-            codemod + docs/remediation-plan-session6.md §S2). */}
-        <main className="flex-1 flex flex-col pb-20 md:pb-0">{children}</main>
+          {/* Mobile drawer (reference: 288px sheet, dark 80% overlay, no X button) */}
+          <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
+            <DialogPrimitive.Portal>
+              {/* Session 22 (R21-C): REF's drawer overlay fades ~150ms (vaul
+                  fadeIn/fadeOut) and the panel SLIDES — 500ms open /
+                  300ms close with cubic-bezier(0.32,0.72,0,1) (measured
+                  frame-sampled). The old transition-* classes could never
+                  fire: Radix mounts the Content fresh with data-state=open
+                  already set, and transitions need a state change on a live
+                  element — animations run from mount. Radix also waits for
+                  animationend before unmounting, so the close plays too. */}
+              <DialogPrimitive.Overlay
+                className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.8)] data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out md:hidden"
+                aria-hidden="true"
+              />
+              <DialogPrimitive.Content
+                ref={drawerRef}
+                onTouchStart={onDrawerTouchStart}
+                onTouchMove={onDrawerTouchMove}
+                onTouchEnd={onDrawerTouchEnd}
+                /* Session 31 (R30-A): REF's drawer panel ships a 1px right
+                   border in the DEFAULT border color #e5e5e5 (measured
+                   rgb(229,229,229) — the base layer's * { border-color },
+                   NOT the desktop sidebar's slate token). border-r picks it
+                   up; the panel stays 288px (border-box). */
+                className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col border-r bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
+              >
+                <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
+                <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>
+                <SidebarNav user={user} variant="mobile" onNavigate={() => setMobileOpen(false)} />
+              </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+          </DialogPrimitive.Root>
 
-        {/* Mobile bottom tab bar (session-5 re-measurement): labels are
-            text-sm font-medium (14px/21px), 61px items, 78px bar — and the
-            ACTIVE tab is highlighted text-blue-600 (#2563EB, icon + label;
-            the earlier "no active highlight" note was a stale measurement).
-            Session 33 (R32-A): the dark chrome — the bar flips to
-            slate-900 + slate-800 border; the active tab flips to blue-400
-            on a blue-900/20 pill; inactive tabs flip to slate-400 (all
-            REF-measured in dark). */}
-        <nav
-          aria-label="Bottom navigation"
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-sidebar-border dark:border-slate-800 bg-white dark:bg-slate-900 pb-[env(safe-area-inset-bottom)] md:hidden"
-        >
-          <div className="flex items-center justify-around px-2 py-2">
-            {BOTTOM_NAV.map((tab) => {
-              const Icon = tab.icon;
-              const active = pathname === tab.href;
-              return (
-                <Link
-                  key={tab.label}
-                  href={tab.href}
-                  className={cn(
-                    "flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
-                  /* Session 20 (R19-K): REF's bottom tabs carry NO hover
-                     classes — the inactive tab stays slate-600 (the clone's
-                     old hover color flip was an unmeasured superset).
-                     Session 21 (R20-B): the ACTIVE tab renders the
-                     bg-blue-50 pill (rgb(239,246,255), pixel-verified on
-                     REF's mobile dashboard — missed by prior rounds that
-                     compared label color/geometry but never the tab's own
-                     background). */
-                    active ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"
-                  )}
+          {/* Main — session 40 (R39-K/N): REF's structure. The mobile
+              header lives INSIDE main (its first child), and ALL page
+              content rides the flex-1 overflow-auto scroll container —
+              the document itself does not scroll the page (REF's own
+              architecture; the scroller carries the swipe-to-open edge
+              listeners from session 33, R32-C — they only arm inside
+              the 32px left-edge window, so ordinary content scrolls
+              never trigger). */}
+          <main className="flex-1 flex flex-col pb-20 md:pb-0">
+            {/* Mobile top bar (session-5 re-measurement): px-6 py-4 + a
+                40px content row — 28×28 toggle with a 16px PanelLeft
+                icon, brand block = h1 "EonHR" 16px/700 slate-900 + p
+                "Demo" text-xs text-slate-500 stacked (24+16 = 40px).
+                items-center; header = 16+40+16+1 = 73px. Session 33
+                (R32-A): the dark chrome — REF's mobile header flips to
+                slate-900 bg + slate-800 border (dark: classes,
+                live-measured); the brand h1/sub stay hardcoded.
+                Session 40 (R39-K): REF's exact string — explicit
+                border-slate-200 + the inert safe-area-top. */}
+            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 md:hidden sticky top-0 z-10 safe-area-top">
+              <div className="flex items-center gap-4">
+                {/* Session 40 (R39-L): REF's v4 Button family + overrides —
+                    hover:text-accent-foreground h-7 w-7 hover:bg-slate-100
+                    p-2 rounded-lg transition-colors duration-200 (the
+                    R19-J hover contract, re-measured). REF authors NO
+                    type/aria-label/aria-expanded — the clone keeps them
+                    (the documented a11y superset, invisible to
+                    rendering; REF's own name comes from the sr-only
+                    span). */}
+                <button
+                  type="button"
+                  aria-label="Toggle Sidebar"
+                  aria-expanded={mobileOpen}
+                  data-sidebar="trigger"
+                  onClick={() => setMobileOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200"
                 >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-sm font-medium leading-normal">{tab.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+                  <PanelLeft className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">Toggle Sidebar</span>
+                </button>
+                <div>
+                  <h1 className="text-base font-bold text-slate-900">EonHR</h1>
+                  <p className="text-xs text-slate-500">Demo</p>
+                </div>
+              </div>
+            </header>
+
+            {/* Reference main (session 6): bare flex column — `flex-1 flex
+                flex-col pb-20 md:pb-0`. Page padding lives on each page's
+                own root div (p-4 md:p-8, per-page gradient canvases — see
+                the codemod + docs/remediation-plan-session6.md §S2).
+                Session 40 (R39-N): the scroll container. */}
+            <div className="flex-1 overflow-auto" onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove}>
+              {children}
+            </div>
+          </main>
+
+          {/* Mobile bottom tab bar (session-5 re-measurement): labels are
+              text-sm font-medium (14px/21px), 61px items, 78px bar — and the
+              ACTIVE tab is highlighted text-blue-600 (#2563EB, icon + label;
+              the earlier "no active highlight" note was a stale measurement).
+              Session 33 (R32-A): the dark chrome — the bar flips to
+              slate-900 + slate-800 border; the active tab flips to blue-400
+              on a blue-900/20 pill; inactive tabs flip to slate-400 (all
+              REF-measured in dark). Session 40 (R39-M): the bar is the
+              canvas's child (main's sibling) with REF's exact string —
+              explicit left-0 right-0 + border-slate-200 + the inert
+              safe-area-bottom; the clone's env() padding superset stays
+              (0px on all test surfaces). */}
+          <nav
+            aria-label="Bottom navigation"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 safe-area-bottom z-50 pb-[env(safe-area-inset-bottom)]"
+          >
+            <div className="flex items-center justify-around px-2 py-2">
+              {BOTTOM_NAV.map((tab) => {
+                const Icon = tab.icon;
+                const active = pathname === tab.href;
+                return (
+                  <Link
+                    key={tab.label}
+                    href={tab.href}
+                    className={cn(
+                      "flex min-h-[44px] select-none flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
+                      /* Session 20 (R19-K): REF's bottom tabs carry NO hover
+                         classes — the inactive tab stays slate-600 (the clone's
+                         old hover color flip was an unmeasured superset).
+                         Session 21 (R20-B): the ACTIVE tab renders the
+                         bg-blue-50 pill (rgb(239,246,255), pixel-verified on
+                         REF's mobile dashboard — missed by prior rounds that
+                         compared label color/geometry but never the tab's own
+                         background). */
+                      active ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <span className="text-sm font-medium leading-normal">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        </div>
       </div>
     </div>
   );

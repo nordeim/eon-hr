@@ -50,7 +50,7 @@ export default function TenantSetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl shadow">
         <CardHeader className="flex flex-col space-y-1.5 border-b p-6 text-center">
           <div className="mx-auto mb-[22px] flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
@@ -68,7 +68,6 @@ export default function TenantSetupPage() {
                 value={form.companyName}
                 onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
                 placeholder="Your company name"
-                className="h-11"
                 required
               />
             </div>
@@ -80,7 +79,6 @@ export default function TenantSetupPage() {
                 value={form.ownerEmail}
                 onChange={(e) => setForm((f) => ({ ...f, ownerEmail: e.target.value }))}
                 placeholder="owner@company.com"
-                className="h-11"
                 required
               />
             </div>

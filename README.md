@@ -134,8 +134,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (598 specs: db-path, auth, utils, tokens, session-5..39 recipes)
-bun run test:e2e      # Playwright E2E (167 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (619 specs: db-path, auth, utils, tokens, session-5..40 recipes)
+bun run test:e2e      # Playwright E2E (174 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```

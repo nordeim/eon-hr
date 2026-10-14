@@ -119,7 +119,7 @@ test.describe("RTL mode (session 33, R32-B)", () => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-    const asideLTR = await page.evaluate(() => Math.round(document.querySelector("aside")!.getBoundingClientRect().x));
+    const asideLTR = await page.evaluate(() => Math.round(document.querySelector('[data-sidebar="sidebar"]')!.parentElement!.getBoundingClientRect().x));
     expect(asideLTR).toBe(0);
 
     await page.getByRole("button", { name: "عربي", exact: true }).click();
@@ -140,7 +140,7 @@ test.describe("RTL mode (session 33, R32-B)", () => {
     // edge. The round-32 pin (>900) had measured the peer, not the
     // panel — the aside-selector artifact's desktop twin.
     const rtl = await page.evaluate(() => {
-      const aside = document.querySelector("aside")!;
+      const aside = document.querySelector('[data-sidebar="sidebar"]')!.parentElement!;
       const main = document.querySelector("main")!;
       return {
         asideX: Math.round(aside.getBoundingClientRect().x),

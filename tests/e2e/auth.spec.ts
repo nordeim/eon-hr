@@ -85,10 +85,12 @@ test.describe("login re-audit (session 39 — the login redeploy)", () => {
     expect(ph).toBe("rgb(71, 85, 105)");
     // R38-G: the canvas root is REF's MAIN element
     await expect(page.locator("main.min-h-screen")).toBeVisible();
-    // R38-F: the social family — type=submit (inert outside the form), the
-    // -ml-4 icon wrapper (the 8px left cluster shift), the span label
+    // R38-F (session-40 amendment): the social family — NO type attr
+    // (the latest redeploy dropped it; inert outside the form either
+    // way), the -ml-4 icon wrapper (the 8px left cluster shift), the
+    // span label
     const google = page.getByRole("button", { name: "Continue with Google" });
-    expect(await google.getAttribute("type")).toBe("submit");
+    expect(await google.getAttribute("type")).toBeNull();
     await expect(google.locator("div.transition-transform.-ml-4")).toBeAttached();
     await expect(google.locator("span", { hasText: "Continue with Google" })).toBeAttached();
     // R38-K: the or-chip rides REF's white chip in slate-500

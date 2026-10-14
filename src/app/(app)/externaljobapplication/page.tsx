@@ -49,7 +49,7 @@ export default function ExternalJobApplicationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-12">
+      <div className="mx-auto max-w-6xl space-y-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-slate-900">Job Opportunities</h1>
           <p className="mt-3 text-lg text-slate-600">Join our team and make an impact</p>

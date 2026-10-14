@@ -152,14 +152,14 @@ function LoginForm() {
 
             <div className="w-full">
             <div className="space-y-3">
-            {/* REF's social buttons (session-39): type=submit (inert — they
-                sit outside the form), text-[16px] + group, the icon in a
-                transition-transform wrapper — ONLY Google's carries the
-                -ml-4 pull (REF's Microsoft/Apple divs have none; the
-                icons sit at 85/85/98 on their own text widths) — and the
-                label span-wrapped. */}
+            {/* REF's social buttons (session-40 re-measure): NO type attr
+                (the latest redeploy dropped it — REF renders type:null; they
+                sit outside the form so it was inert), text-[16px] + group,
+                the icon in a transition-transform wrapper — ONLY Google's
+                carries the -ml-4 pull (REF's Microsoft/Apple divs have
+                none; the icons sit at 85/85/98 on their own text widths)
+                — and the label span-wrapped. */}
             <button
-              type="submit"
               className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
@@ -169,7 +169,6 @@ function LoginForm() {
               <span>Continue with Google</span>
             </button>
             <button
-              type="submit"
               className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
@@ -179,7 +178,6 @@ function LoginForm() {
               <span>Continue with Microsoft</span>
             </button>
             <button
-              type="submit"
               className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
@@ -222,7 +220,7 @@ function LoginForm() {
                       autoComplete="email"
                       placeholder="you@example.com"
                       required
-                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400"
+                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400 shadow-none transition-none ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -242,7 +240,7 @@ function LoginForm() {
                       autoComplete="current-password"
                       placeholder="••••••••"
                       required
-                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400"
+                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400 shadow-none transition-none ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />

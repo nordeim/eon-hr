@@ -53,23 +53,36 @@ export function SidebarNav({
 
 function SidebarHeader() {
   return (
-    <div className="flex items-center gap-3 border-b border-sidebar-border dark:border-slate-800 px-6 py-6">
-      {/* Brand mark — reference (live-measured session 3): 40×40 squircle,
-          12px radius, gradient to-right-bottom #2563EB → #4F46E5 (sRGB —
-          arbitrary value per Tailwind v4 trap 3, oklab interpolation would
-          shift the midpoint), v3 shadow-lg geometry, white 24px stroke-2
-          briefcase; rendered in CSS so parity needs no image asset.
-          Session 5: row px-6 (tile x=24), h2 text-lg 18px/700 slate-900
-          (#0f172a — NOT the gray-900 foreground token), sub text-xs. */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(to_right_bottom,#2563EB,#4F46E5)] shadow-lg">
-        <Briefcase className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
-      </div>
-      <div className="flex min-w-0 flex-col">
-        {/* Session 33 (R32-A): REF's brand title flips to white in dark
-            (dark:text-white, live-measured rgb(255,255,255)); the sub
-            keeps its muted token (flips to neutral-400). */}
-        <h2 className="text-lg font-bold leading-tight text-slate-900 dark:text-white">EonHR</h2>
-        <span className="text-xs leading-tight text-muted-foreground">Demo</span>
+    /* Session 40 (R39-J): REF's brand block structure — the outer
+       flex-COLUMN (gap-2, border-b, p-6, explicit border-slate-200) >
+       the flex items-center gap-3 row > [tile, text container]. The
+       text container is REF's flex-1 min-w-0 BLOCK (stretches to
+       155px; the clone's old shrink-wrapped flex-col measured 66px)
+       with the h2 + a p sub (truncate, slate-500/400 — NOT the muted
+       token). The tile keeps the sRGB-pinned arbitrary gradient (trap
+       3 — REF's class-based from-blue-600 to-indigo-600 renders the
+       same corner colors; the pinned form keeps the measured
+       interpolation). */
+    <div className="flex flex-col gap-2 border-b border-slate-200 dark:border-slate-800 p-6">
+      <div className="flex items-center gap-3">
+        {/* Brand mark — reference (live-measured session 3): 40×40 squircle,
+            12px radius, gradient to-right-bottom #2563EB → #4F46E5 (sRGB —
+            arbitrary value per Tailwind v4 trap 3, oklab interpolation would
+            shift the midpoint), v3 shadow-lg geometry, white 24px stroke-2
+            briefcase; rendered in CSS so parity needs no image asset.
+            Session 5: row px-6 (tile x=24), h2 text-lg 18px/700 slate-900
+            (#0f172a — NOT the gray-900 foreground token), sub text-xs. */}
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(to_right_bottom,#2563EB,#4F46E5)] shadow-lg">
+          <Briefcase className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          {/* Session 33 (R32-A): REF's brand title flips to white in dark
+              (dark:text-white, live-measured rgb(255,255,255)); the sub
+              flips to slate-400. Session 40: REF's member order + the p
+              element with truncate. */}
+          <h2 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">EonHR</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">Demo</p>
+        </div>
       </div>
     </div>
   );

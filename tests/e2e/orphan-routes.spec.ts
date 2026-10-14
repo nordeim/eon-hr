@@ -36,11 +36,14 @@ test.describe("orphan routes (session 32)", () => {
     await expect(page).toHaveTitle("Home | Eon HR");
     const main = page.locator("main");
     await expect(main).toBeVisible();
-    await expect(main.locator("h1, h3, button")).toHaveCount(0);
+    /* Session 40 (R39-N): the mobile header now lives INSIDE main (its
+       toggle button is a main descendant) — scope the emptiness check to
+       the scroll container that carries the page content. */
+    await expect(main.locator("> div").locator("h1, h3, button")).toHaveCount(0);
 
     await page.goto("/employeedetail");
     await expect(page).toHaveTitle("Employeedetail | Eon HR");
-    await expect(page.locator("main").locator("h1, h3, button")).toHaveCount(0);
+    await expect(page.locator("main > div").locator("h1, h3, button")).toHaveCount(0);
   });
 
   test("the dashboard aliases render the dashboard page with the plain title", async ({ page }) => {

@@ -69,8 +69,17 @@ function JsonLdScripts({ origin }: { origin: string }) {
  * it runs in <head> before any rendering, so there is no flash of the
  * wrong theme. The Moon/عربي handlers in the sidebar write the same
  * keys, so the three writers (boot script, Moon, عربي) never disagree.
+ *
+ * Session 40 (R39-B): the login skip. REF's login is THEME-INERT —
+ * live-probed with darkMode="true" armed: the key survives in storage
+ * but html.dark never applies (and dir stays ltr with app_lang="ar").
+ * REF's login build ships no theme boot at all; the app pages boot from
+ * the same keys after sign-in (verified: both apps hand off to a dark
+ * /dashboard). The early return mirrors that split for the SSR clone,
+ * where /login shares this root layout.
  */
 const THEME_BOOT = `(function(){try{
+if(location.pathname==="/login"){return;}
 if(localStorage.getItem("darkMode")==="true"){document.documentElement.classList.add("dark");}
 if(localStorage.getItem("app_lang")==="ar"){document.documentElement.setAttribute("dir","rtl");}
 }catch(e){}})();`;
