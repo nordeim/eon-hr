@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.24.0 (session-41 remediation complete — the careers family + the login button members) · **Last updated:** 2026-10-15
+> **Version:** 3.25.0 (session-42 remediation complete — the footer focus family + the native select) · **Last updated:** 2026-10-15
 > 2026-10-15 · **State:** 636 unit + 180 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2691,3 +2691,90 @@ Gates: 636/636 unit · 180/180 E2E. Live: verify-r40 3/6 raw MATCH with
 the 3 diffs documented (the trap-3 gradient class-string, the org-view
 data + cursor-pointer superset, the external superset resolution); the
 standing audits 5/5; 8 screenshots (156-159) → 220 captures.
+
+
+## §54 Session 42 (parity round 41) — the footer focus family + the native select
+
+**The round's census**: the session-38 named remainder — the
+keyboard/focus flows in the popovers/menus (round 37 walked the
+dialogs; this family never). The walk instrument: open → initial focus
+→ Tab/Arrow ×N reading focus → Escape → restore, both apps.
+
+**The green half (the walks already matched)**: the bell Popover —
+`div role=dialog` 384×175 at (0,617), focus lands ON the content div
+and stays trapped through Tab ×8 (no tabbable children in the zero
+state), Escape restores the trigger with aria-expanded=false. The user
+DropdownMenu — focus0 = the `div role=menu`, ArrowDown walks the items
+in order, ArrowUp reverses, Home/End jump, Escape restores. The
+whole-shell Tab sweep: every sidebar element renders the IDENTICAL
+blue-500 ring (`rgb(59,130,246) 0 0 0 2px`) both sides; the content
+links render browser-default outlines on BOTH (REF authors nothing
+there).
+
+**R41-A — the footer ghost family's v4 Button base (the real gap)**:
+the bell/moon/عربي/user-trigger carried hand-rolled strings on the
+clone; under keyboard focus they rendered the BROWSER-DEFAULT outline
+(auto, no ring) while REF rendered `rgb(10,10,10) 0 0 0 1px` (the
+base's `focus-visible:ring-1 focus-visible:ring-ring` pair). Adopted
+verbatim — including the bell's `relative` (the unread-badge context)
+and REF's authored `w-5 h-5` svg glyphs (the base's
+`[&_svg]:size-4` guard overrides them to 16px — pin the base BEFORE
+matching authored glyph sizes, or the icons render 20px).
+
+**R41-B/T — the moon's conditional glyph + the token fix**: REF's
+moon button carries NO color class anywhere — the icon color
+INHERITS `text-sidebar-foreground` from the peer wrapper (zinc-700
+#3F3F46 light / zinc-100 #F4F4F5 dark). The icon itself is ONE
+state-driven svg (moon in light / sun in dark — REF's DOM carries a
+single glyph per theme; a class-driven pair keeps a hidden extra
+node). The clone's light `--sidebar-foreground` had been set to the
+APP-foreground slate-800 — the inheritance only renders REF's colors
+after the token fix (240 5.3% 26.1%). Check the token BEFORE removing
+an authored color in favor of inheritance.
+
+**R41-C — the plain Radix menu items**: REF's user-menu items are
+plain `div role=menuitem` (182px full-row stretch — the shadcn p-1
+container's block children stretch). The clone's `asChild`-wrapped
+Link/Button surfaced their own tags; the Logout BUTTON rendered 96px
+(the highlight pill covered half the row). Plain
+`DropdownMenu.Item` divs now — My Profile navigates via onSelect +
+router.push, Logout via onSelect + `window.location.href` (the
+anti-prefetch contract survives: the HANDLER is the contract, not the
+tag — a Next Link to the logout route gets prefetched on menu open
+and kills the session).
+
+**R41-D — the employees native select (the v4 engine trap)**: v4's
+preflight resets `select { background-color: transparent }`; v3's
+(REF's build) does not — REF's native select keeps the UA `buttonface`
+fill rgb(239,239,239). Restore with `bg-[buttonface]` (the SYSTEM
+keyword tracks the browser theme like the UA default — robust, not a
+hex pin). The same row: the search is FIXED `md:w-64` + wrapper
+`md:flex-none` (an intrinsic-basis arrangement can silently shrink
+after a base migration — re-measure after component-base changes);
+the select defaults to "active" (three fresh loads, not "all"); the
+focus recipe is `focus:ring-2 focus:ring-blue-500` (page-specific —
+NOT the global ring token).
+
+**R41-E — the shadcn Sidebar attribute family**: REF's shell carries
+the component's full data-sidebar map — header / content / group /
+group-label / group-content / menu / menu-button ×13 (the 5
+standalone links + the 8 group toggles) / menu-item ×5 (the
+standalone links ONLY — wrapped in `li.group/menu-item.relative`; the
+group toggles sit BARE in the ul) / footer. Additive attributes on
+the clone's rendered-identical tree + the toggle lis dropped; the
+nav-button class recipes stay as-authored (their rendered contract is
+pinned by 20+ rounds of audits — attributes are the DOM contract,
+classes only change when the RENDER diverges).
+
+**Probe lessons (this round's)**: (1) the a11y snapshot truncates
+accessible names — read full class strings from the DOM, never from
+snapshot slices (the bottom-tab "missing" bg-blue-50 was a 130-char
+read cut); (2) `agent-browser press` dispatches REAL keys — synthetic
+KeyboardEvent dispatches never move focus (r37's lesson, re-used);
+(3) eval-clicks on Radix triggers close the menu (untrusted events +
+focus loss) — use `agent-browser click @ref` from the snapshot; (4)
+the Tab-walk break condition must not key on aria-labels the REF
+lacks (the superset asymmetry shifts the walk's start element); (5)
+the focus-walk probe reads the transient hover state — move the
+mouse away (`agent-browser mouse move x y`) before reading rest-state
+backgrounds.

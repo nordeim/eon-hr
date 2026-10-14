@@ -1329,10 +1329,12 @@ describe("tab-pill inactive trigger color (session 16, R15-A)", () => {
   });
 });
 
-describe("sidebar footer colors (session 16 R15-B; hover re-measured session 20)", () => {
-  it("Bell ghost icon renders slate-600 (on the SVG), Moon ghost icon renders zinc-700", () => {
-    expect(sidebarNav).toMatch(/<Bell className="h-4 w-4 text-slate-600"/);
-    expect(sidebarNav).toMatch(/h-9 w-9 select-none[^"]*text-zinc-700|text-zinc-700[^"]*h-9 w-9 select-none/);
+describe("sidebar footer colors (session 16 R15-B; hover re-measured session 20; the strings re-pinned session 43)", () => {
+  it("Bell ghost icon renders slate-600 (on the SVG, w-5 h-5 authored — the base's svg guard renders 16px); the Moon's color is INHERITED (session 43: no color classes — the sidebar-foreground token)", () => {
+    expect(sidebarNav).toMatch(/<Bell className="w-5 h-5 text-slate-600"/);
+    const moonIdx = sidebarNav.indexOf('aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}');
+    const moonBlock = sidebarNav.slice(moonIdx, moonIdx + 900);
+    expect(moonBlock).not.toContain("text-zinc-700");
   });
 
   it("the user name renders slate-900 (session 20 re-measure — the R15 zinc-700 reading was the button's inherited color)", () => {
@@ -1543,20 +1545,20 @@ describe("session-20 hover recipes (parity round 19)", () => {
     );
   });
 
-  it("R19-C: Bell button = ghost hover:bg-accent + hover:text-accent-foreground; the ICON owns text-slate-600 (survives hover)", () => {
+  it("R19-C: Bell button = REF's full v4 Button base + the ghost hover pair + relative (session 43: the base's focus-visible ring-1 pair is the keyboard-focus contract); the ICON owns text-slate-600 (survives hover)", () => {
     expect(sidebarNav).toMatch(
-      /aria-label="Notifications"[\s\S]{0,700}?hover:bg-accent hover:text-accent-foreground/
+      /aria-label="Notifications"[\s\S]{0,900}?hover:bg-accent hover:text-accent-foreground h-9 w-9 relative/
     );
-    expect(sidebarNav).toMatch(/<Bell className="h-4 w-4 text-slate-600"/);
-    // the BUTTON itself carries no color class (the icon owns it)
-    expect(sidebarNav).toMatch(
-      /className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"/
+    expect(sidebarNav).toMatch(/<Bell className="w-5 h-5 text-slate-600"/);
+    // the button carries the full base (focus-visible ring + svg guards)
+    expect(sidebarNav).toContain(
+      "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
     );
   });
 
-  it("R19-C2: Moon button keeps zinc-700 base + hover:bg-accent hover:text-accent-foreground (dark: zinc-100 since session 33)", () => {
-    expect(sidebarNav).toMatch(
-      /text-zinc-700 dark:text-zinc-100 transition-colors hover:bg-accent hover:text-accent-foreground/
+  it("R19-C2: Moon button = the v4 base + select-none, NO color classes (the icon inherits the sidebar-foreground token — session 43); hover:bg-accent hover:text-accent-foreground", () => {
+    expect(sidebarNav).toContain(
+      "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 select-none"
     );
     expect(sidebarNav).not.toContain("hover:text-foreground");
   });
@@ -2721,9 +2723,8 @@ describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)"
     expect(appShell).toContain("dark:bg-blue-900/20 dark:text-blue-400");
   });
 
-  it("R32-A5: the sidebar's dark details — brand h2, moon, brand-row border (the nav/bell/user colors stay hardcoded, REF's own behavior)", () => {
+  it("R32-A5: the sidebar's dark details — brand h2, brand-row border (the nav/bell/user colors stay hardcoded, REF's own behavior; session 43: the moon's dark color comes from the inherited sidebar-foreground token, not a class)", () => {
     expect(sidebarNav).toContain("text-slate-900 dark:text-white");
-    expect(sidebarNav).toContain("text-zinc-700 dark:text-zinc-100");
     expect(sidebarNav).toContain("dark:border-slate-800");
   });
 
@@ -3086,12 +3087,12 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     const menuIdx = sidebarNav.indexOf("function UserMenu(");
     const block = sidebarNav.slice(menuIdx);
     expect(block).toContain("[&>svg]:size-4 [&>svg]:shrink-0");
-    expect(block).toContain('<CircleUser className="h-4 w-4 mr-2"');
-    expect(block).toContain('<LogOut className="h-4 w-4 mr-2"');
+    expect(block).toContain('<CircleUser className="w-4 h-4 mr-2"');
+    expect(block).toContain('<LogOut className="w-4 h-4 mr-2"');
     expect(block).not.toContain('<User className="h-4 w-4"');
   });
 
-  it("R35-A6: Logout is a BUTTON with a real navigation handler — NOT a Link (a <Link href=\"/logout\"> gets PREFETCHED when the menu opens; the prefetch GETs the route handler, which clears the session cookie — the menu logged the user out on open, found live)", () => {
+  it("R35-A6: Logout carries a real navigation handler with NO prefetchable Link (a Link to the logout route gets PREFETCHED when the menu opens; the prefetch GETs the route handler, which clears the session cookie — the menu logged the user out on open, found live; session 43: the item is a plain div like REF's — the contract is the handler, not the tag)", () => {
     const menuIdx = sidebarNav.indexOf("function UserMenu(");
     const block = sidebarNav.slice(menuIdx);
     expect(block).not.toContain('href="/logout"');
@@ -4057,5 +4058,111 @@ describe("session-41 careers family + login button members (parity round 40)", (
     expect(extjob41).toContain("useSearchParams");
     expect(extjob41).toMatch(/searchParams\.get\("org"\)/);
     expect(extjob41).toMatch(/searchParams\.get\("job"\)/);
+  });
+});
+
+describe("session-42 footer focus family + employees row + sidebar attributes (parity round 41)", () => {
+  const sidebarNav42 = read("src", "components", "layout", "sidebar-nav.tsx");
+  const employees42 = read("src", "app", "(app)", "employees", "page.tsx");
+  const globals42 = read("src", "app", "globals.css");
+
+  // --- A. the footer ghost family's v4 Button base ---
+
+  it("R41-A1: the bell carries REF's full v4 Button base + relative (the unread-badge context) with the svg's authored w-5 h-5 slate-600 (the base's size-4 guard renders 16px)", () => {
+    expect(sidebarNav42).toContain(
+      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+    );
+    expect(sidebarNav42).toMatch(/<Bell className="w-5 h-5 text-slate-600"/);
+  });
+
+  it("R41-A2: the moon carries the base + select-none with NO color classes (the icon inherits the sidebar-foreground token — zinc-700 light / zinc-100 dark)", () => {
+    expect(sidebarNav42).toContain(
+      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 select-none"
+    );
+    const moonIdx = sidebarNav42.indexOf('aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}');
+    const moonBlock = sidebarNav42.slice(moonIdx, moonIdx + 900);
+    expect(moonBlock).not.toContain("text-zinc-700");
+    expect(moonBlock).not.toContain("dark:text-zinc-100");
+  });
+
+  it("R41-A3: the عربي button carries REF's outline-variant string verbatim (whitespace-nowrap + the focus/disabled/svg members)", () => {
+    expect(sidebarNav42).toContain(
+      "justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-background shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs flex items-center gap-1.5 font-semibold text-slate-700 border-slate-300 hover:bg-slate-100 min-w-[64px]"
+    );
+    expect(sidebarNav42).toMatch(/<Languages className="w-4 h-4"/);
+  });
+
+  it("R41-A4: the user trigger carries REF's string (the disabled/svg guards; no stray outline-none member)", () => {
+    expect(sidebarNav42).toContain(
+      "inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 px-4 py-2 w-full justify-start gap-3 hover:bg-slate-100"
+    );
+  });
+
+  // --- B. the moon's conditional icon render ---
+
+  it("R41-B1: the moon renders ONE state-driven svg (REF's conditional moon/sun — NOT the two-svg class-driven pair)", () => {
+    expect(sidebarNav42).not.toContain("dark:hidden");
+    expect(sidebarNav42).not.toContain("hidden dark:block");
+    expect(sidebarNav42).toMatch(/\{dark \? <Sun className="w-5 h-5" aria-hidden="true" \/> : <Moon className="w-5 h-5" aria-hidden="true" \/>\}/);
+  });
+
+  // --- C. the user-menu items as plain Radix divs ---
+
+  it("R41-C1: the user-menu items are PLAIN DropdownMenu.Item divs (no asChild surfacing a/button tags — REF's items stretch the full 182px row); My Profile navigates via onSelect + router.push, Logout keeps the anti-prefetch location.href", () => {
+    const menuIdx = sidebarNav42.indexOf("function UserMenu(");
+    const block = sidebarNav42.slice(menuIdx);
+    expect(block).not.toContain("DropdownMenu.Item asChild");
+    expect(block).not.toContain("<Link");
+    expect(block).toMatch(/onSelect=\{\(\) => router\.push\("\/profile"\)\}/);
+    expect(block).toContain('window.location.href = "/logout"');
+  });
+
+  // --- D. the employees filter row ---
+
+  it("R41-D1: the search input is FIXED at md:w-64 (256px) with the md:flex-none wrapper (REF re-measured 256 at 1440 AND 768; the r17 shrink arrangement rendered 228)", () => {
+    expect(employees42).toContain('"relative flex-1 md:flex-none"');
+    expect(employees42).toContain('className="pl-10 w-full md:w-64"');
+    expect(employees42).not.toContain("md:max-w-64");
+    expect(employees42).not.toContain("md:flex-initial");
+  });
+
+  it("R41-D2: the status select DEFAULTS to active (REF's live default, measured on three fresh loads)", () => {
+    expect(employees42).toMatch(/useState[^\n]*"active"/);
+    expect(employees42).not.toMatch(/useState[^\n]*"all"/);
+  });
+
+  it("R41-D3: the select's background is the UA buttonface keyword (the v4 preflight trap — v3 kept the OS gray rgb(239,239,239), v4 resets transparent)", () => {
+    expect(employees42).toContain("bg-[buttonface]");
+  });
+
+  it("R41-D4/D5: the select carries REF's authored string verbatim — py-2 intrinsic height (no h-9) + the blue-500 focus ring pair", () => {
+    expect(employees42).toContain(
+      'className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[buttonface]"'
+    );
+    expect(employees42).not.toContain("focus:ring-1 focus:ring-ring");
+  });
+
+  // --- E. the shadcn Sidebar data-sidebar family ---
+
+  it("R41-E1: the shell carries REF's data-sidebar attribute family — header/content/group/group-label/group-content/menu/menu-button(13)/menu-item(5, the standalone links only)/footer", () => {
+    expect(sidebarNav42).toContain('data-sidebar="header"');
+    expect(sidebarNav42).toContain('data-sidebar="content"');
+    expect(sidebarNav42).toContain('data-sidebar="group"');
+    expect(sidebarNav42).toContain('data-sidebar="group-label"');
+    expect(sidebarNav42).toContain('data-sidebar="group-content"');
+    expect(sidebarNav42).toContain('data-sidebar="menu"');
+    expect(sidebarNav42).toContain('data-sidebar="menu-button"');
+    expect(sidebarNav42).toContain('data-sidebar="menu-item"');
+    expect(sidebarNav42).toContain('data-sidebar="footer"');
+    // the menu-item wraps ONLY the standalone links — the group toggles sit
+    // bare in the ul (REF's structure: 8 bare buttons + 5 wrapped links)
+    expect(sidebarNav42).toMatch(/<li key=\{item\.label\} data-sidebar="menu-item">/);
+    expect(sidebarNav42).not.toMatch(/<li key=\{item\.label\}>\s*\{item\.children/);
+  });
+
+  // --- T. the sidebar-foreground token ---
+
+  it("R41-T1: the light sidebar-foreground token is REF's zinc-700 (240 5.3% 26.1% — the moon's inherited color), not the app-foreground slate-800", () => {
+    expect(globals42).toMatch(/--sidebar-foreground: hsl\(240 5\.3% 26\.1%\)/);
   });
 });

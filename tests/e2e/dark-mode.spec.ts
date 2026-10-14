@@ -34,19 +34,22 @@ test.describe("dark mode (session 33, R32-A)", () => {
     expect(stored).toBe("true");
   });
 
-  test("the Sun replaces the Moon while dark (class-driven icon swap)", async ({ page }) => {
+  test("the Sun replaces the Moon while dark (the conditional single-icon swap)", async ({ page }) => {
     await page.goto("/dashboard");
     await page.getByRole("button", { name: "Switch to dark mode" }).click();
     await expect
       .poll(() => page.evaluate(() => document.documentElement.className))
       .toBe("dark");
 
-    // The swap is class-driven (dark:hidden / hidden dark:block), so the
-    // visible icon tracks the applied theme with zero state lag.
-    const moon = page.getByRole("button", { name: "Switch to light mode" }).locator("svg").first();
-    const sun = page.getByRole("button", { name: "Switch to light mode" }).locator("svg").nth(1);
-    await expect(moon).toBeHidden();
-    await expect(sun).toBeVisible();
+    // Session 43 (R41-B1): REF's build renders ONE state-driven glyph —
+    // the moon in light, the sun in dark (its DOM carries a single svg
+    // per theme; the old two-svg hidden pair rendered identically but
+    // kept a hidden extra node). The clone mirrors the conditional
+    // render: exactly one svg, and it is the Sun while dark.
+    const btn = page.getByRole("button", { name: "Switch to light mode" });
+    await expect(btn.locator("svg")).toHaveCount(1);
+    await expect(btn.locator("svg.lucide-sun")).toBeVisible();
+    await expect(btn.locator("svg.lucide-moon")).toHaveCount(0);
   });
 
   test("the theme survives a reload (the pre-paint boot applies it)", async ({ page }) => {

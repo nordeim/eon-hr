@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 636 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 180 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 648 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 185 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2198,3 +2198,78 @@ superset, the external superset resolving the seeded job); the
 zero-card family + the board + the login members MATCH; the standing
 audits 5/5; 8 screenshots (156-159) → **220 PNG captures**. DB
 pristine (users=1, employees=1, leaveBalances=2).
+
+## Session 42 — parity round 41 (the footer focus family + the native select)
+
+The redeploy watch went QUIET for the first time in five rounds (all
+four fingerprints unchanged), so the frontier came from the session-38
+named remainder: **the keyboard/focus flows in the popovers/menus** —
+round 37 walked the dialogs; the menu family never. The instrument
+(open → initial focus → Tab/Arrow sequence → Escape → restore, both
+apps) found the bell Popover and the user DropdownMenu structurally
+IDENTICAL (the bell's content renders `div role=dialog` 384×175 @
+(0,617), focus lands on the content and stays trapped through Tab ×8,
+Escape restores the trigger; the menu's ArrowDown/Up/Home/End walk and
+the restore match). The whole-shell Tab sweep verified every sidebar
+element renders the IDENTICAL blue-500 ring both sides — and exposed
+the round's findings on the surfaces BEYOND the sidebar
+(docs/remediation-plan-session42.md):
+
+- **R41-A — the footer ghost family's v4 Button base**: REF's bell /
+  moon / عربي / user-trigger carry the full base string; the clone's
+  hand-rolled twins rendered the BROWSER-DEFAULT outline under
+  keyboard focus (REF rings `rgb(10,10,10) 0 0 0 1px`). All four
+  adopted verbatim — the bell gains `relative` (the unread-badge
+  context), the moon `select-none`, عربي the outline-variant string,
+  the trigger the disabled/svg guards.
+- **R41-B — the moon's conditional glyph**: REF renders ONE
+  state-driven svg (moon in light / sun in dark, no color class — the
+  color INHERITS the sidebar-foreground token); the clone's two-svg
+  dark-hidden pair switched to the conditional render.
+- **R41-T — the sidebar-foreground token fix**: the clone's light value
+  was the app-foreground slate-800 `hsl(221 39% 11%)`; REF's is the
+  shadcn zinc-700 `240 5.3% 26.1%` (the moon's inheritance renders
+  #3F3F46 / #F4F4F5 — measured both themes both apps).
+- **R41-C — the user-menu items are plain Radix divs on REF** (182px
+  full-row stretch); the clone's asChild-wrapped a/button surfaced
+  their tags and the Logout button SHRANK to 96px (the highlight pill
+  covered half the row). Plain items now; My Profile navigates via
+  onSelect + router.push, Logout keeps the anti-prefetch location.href
+  (the R35-A6 contract — the handler, not the tag).
+- **R41-D — the employees filter row** (four independent gaps): the
+  search FIXED at `md:w-64` (256px — REF re-measured 256 at 1440 AND
+  768; the r17 flex-initial/max-w-64 arrangement silently rendered 228
+  after the round-39 input migration, leaving the select at x=541 vs
+  REF's 569); the select DEFAULTS to "active" (three fresh loads); the
+  select's bg is the UA `buttonface` (**a Tailwind v4 engine trap**:
+  v4's preflight resets native select backgrounds to transparent,
+  v3/REF keeps the OS gray rgb(239,239,239) — restored via
+  `bg-[buttonface]`, the system keyword tracks the browser theme); the
+  focus recipe `focus:ring-2 focus:ring-blue-500` (2px blue-500 — not
+  the token ring-1) + REF's authored order (py-2 intrinsic height, no
+  h-9).
+- **R41-E — the shadcn Sidebar data-sidebar family** (additive DOM
+  parity): REF's shell carries the component's full attribute map
+  (header/content/group/group-label/group-content/menu/menu-button ×13
+  /menu-item ×5 — the standalone links only, the group toggles sit
+  bare — /footer); the clone had only sidebar + trigger. All added;
+  the toggle lis dropped (bare Collapsible triggers like REF — the
+  ul's flex gap-1 spacing unchanged).
+
+**Pins**: 12 new (A1-A4, B1, C1, D1-D4/D5, E1, T1) + 6 amended (R15-B,
+R19-C/C2, R32-A5, R35-A5/A6 + the R8-E shell pin). Gates: lint 0/0 ·
+tsc ✓ · **648/648 unit** (+12) · build ✓ · **185/185 E2E** (+5 — the
+session42-footer-focus spec; one input-family tolerance flake in the
+first full run, stable on the single-spec re-run AND the full re-run).
+Live: verify-r41.mjs 5/6 raw MATCH — the footer family (svg classes +
+rendered sizes/colors) byte-identical incl. the authored `w-5 h-5`
+glyphs overridden to 16px by the base guard; the user-menu items (div +
+182×32); the employees row (256/569/36/"active"/rgb(239,239,239)); the
+data-sidebar map; the dark-mode moon (single sun glyph + inherited
+color). The 1 documented diff: the focus-walk probe's break condition
+(REF's bell carries no aria-label — the a11y superset — so the
+sequences start at different elements; every read on BOTH sides rings,
+and the outline solid/none split is the documented two-build non-gap).
+The standing audits 5/5 post-change (one transient toggle-race on the
+REF drawer, clean on re-run); 8 screenshots (160-163) → **228 PNG
+captures**. DB pristine (users=1, employees=1, leaveBalances=2).

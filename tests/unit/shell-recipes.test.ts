@@ -264,19 +264,20 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
   it("R8-E: employees filter card matches the reference structure", () => {
     // Reference: card bg-white rounded-xl shadow-sm border-slate-200 p-4
     // mb-6; interior flex-col md:flex-row gap-4 items-center justify-between;
-    // search wrapper flex-1 md:flex-initial with input w-full md:max-w-64
-    // bg-transparent (session 17 / R16-E: the search shrinks under
-    // constraint — at 768–815 the rigid md:w-64 overflowed the 448px
-    // content area); NATIVE select (h-9 px-3 py-2 border-slate-300
-    // rounded-lg text-sm, 125×36); toggles List + Grid3x3 at h-8 px-3.
+    // search wrapper flex-1 md:flex-none with input pl-10 w-full md:w-64
+    // (session 43 / R41-D1: FIXED 256px at md+ — REF re-measured 256 at
+    // 1440 AND 768; the r17 shrink arrangement rendered 228 after the
+    // round-39 input migration); NATIVE select (px-3 py-2 border-
+    // slate-300 rounded-lg text-sm + bg-[buttonface] + the blue-500
+    // focus pair, 125×36); toggles List + Grid3x3 at h-8 px-3.
     expect(employeesPage).toContain(
       "rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6"
     );
     expect(employeesPage).toContain(
       "flex flex-col gap-4 items-center justify-between md:flex-row"
     );
-    expect(employeesPage).toContain("relative flex-1 md:flex-initial");
-    expect(employeesPage).toMatch(/bg-transparent pl-10 md:max-w-64/);
+    expect(employeesPage).toContain("relative flex-1 md:flex-none");
+    expect(employeesPage).toMatch(/pl-10 w-full md:w-64/);
     expect(employeesPage).toMatch(/<select[^>]*className="[^"]*border-slate-300/);
     expect(employeesPage).toContain("Grid3x3");
     expect(employeesPage).not.toContain("LayoutGrid");

@@ -40,7 +40,7 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = React.useState<EmployeeRow[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState("");
-  const [status, setStatus] = React.useState("all");
+  const [status, setStatus] = React.useState("active");
   const [view, setView] = React.useState<"list" | "grid">("list");
 
   const [mode, setMode] = React.useState<"list" | "wizard">("list");
@@ -189,22 +189,30 @@ export default function EmployeesPage() {
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-6">
         <div className="flex flex-col gap-4 items-center justify-between md:flex-row">
           <div className="flex w-full gap-2 md:w-auto">
-            {/* Session 17 (R16-E): the search shrinks under constraint —
-                md:flex-initial (no grow, natural basis, shrink allowed) +
-                md:max-w-64 keeps the 256px render at 1440 while letting the
-                row fit the 448px content band at 768–815 (docW 796 → 768). */}
-            <div className="relative flex-1 md:flex-initial">
+            {/* Session 43 (R41-D1): the search is FIXED at md:w-64 (256px)
+                with the md:flex-none wrapper — REF re-measured 256 at
+                1440 AND 768 (the r17 flex-initial/max-w-64 arrangement
+                rendered 228 after the round-39 input migration changed
+                the intrinsic basis; the select starts x=569 on REF). */}
+            <div className="relative flex-1 md:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search employees..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-transparent pl-10 md:max-w-64"
+                className="pl-10 w-full md:w-64"
                 aria-label="Search employees"
               />
             </div>
+            {/* Session 43 (R41-D2/D3/D4/D5): REF's native select — the
+                DEFAULT is "active" (three fresh loads), the UA buttonface
+                fill (v4's preflight resets select backgrounds to
+                transparent — v3/REF keeps the OS gray rgb(239,239,239);
+                bg-[buttonface] tracks the browser theme like the UA
+                default), the py-2 intrinsic height (no h-9), and the
+                blue-500 focus ring pair (2px — not the token ring-1). */}
             <select
-              className="h-9 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[buttonface]"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               aria-label="Filter by status"

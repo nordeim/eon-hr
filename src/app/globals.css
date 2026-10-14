@@ -75,7 +75,12 @@
   --input: #e5e5e5;
   --ring: #0a0a0a;
   --sidebar: #fafafa;
-  --sidebar-foreground: hsl(221 39% 11%);
+  /* Session 43 (R41-T1): REF's sidebar-foreground is the shadcn zinc-700
+     (240 5.3% 26.1% — live-read off REF's documentElement; the old value
+     copied the app-foreground slate-800). The moon inherits it (REF's
+     footer moon carries no color class — measured rgb(63,63,70) light /
+     rgb(244,244,245) dark through the peer wrapper's chain). */
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
   --sidebar-accent: hsl(214 95% 93%);
   --sidebar-border: #e2e8f0;
   /* Session 19 (R18-C): the reference's sidebar focus ring — its
