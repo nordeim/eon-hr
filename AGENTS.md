@@ -1736,3 +1736,92 @@ a self-logout bug the whole test pyramid had sailed over.
   JS button — the navigation superset, geometry 123×38 equal). 16 new
   screenshots (128-135, ref+loc pairs) → 172 PNG captures. DB pristine
   (the E2E probes clean up after themselves).
+
+## Session 37 (parity round 36) — THE FORM-CONTRACT FAMILY: the empty-submit probe
+
+**Scope**: round 35 named the frontier ("form-error surfaces on the new
+dialogs"); the probe that opened it — empty-submit every dialog on REF
+and read the DOM — found something bigger than error text: REF's dialogs
+are real `<form>` documents with NATIVE validation, and the round-35
+rebuilds (built from geometry-only census data) shipped button-driven
+dialogs with invented inline-error Ps.
+
+- **The empty-submit probe (the round's method)**: click Create with
+  empty fields on REF → the dialog STAYS OPEN, no DOM error text, focus
+  jumps to the Name input — the browser's native `required` tooltip.
+  REF's contract on every dialog: DialogContent > (header, outside) +
+  (`<form class="space-y-4">` wrapping fields AND footer); required on
+  the primary fields; Cancel/Add Level etc. explicit `type="button"`;
+  Create `type="submit"`. An untyped `<button>` reports `type:"submit"`
+  in the DOM and submits the form it sits in — REF sets type="button"
+  explicitly on the non-primary actions. Radix renders its hidden
+  native `<select>` only when the Select participates in a form — its
+  absence on the clone was the missing-form symptom, not a Select
+  recipe drift.
+- **R36-A (the two settings dialogs)**: the Create Approval Workflow +
+  Add Shift dialogs converted to the form architecture (the invented
+  "Workflow/Shift name is required" inline Ps deleted — API failures
+  now surface via the page's toast pattern, the superset). Add Shift's
+  content diffs: Name/Start/End carry required, **Break defaults 60 and
+  Tolerance defaults 0** (the clone shipped empty strings), and the
+  Status row rides INSIDE the grid as the 7th cell (223px column + the
+  w-full trigger — the clone's hard-pinned w-[223px] full-width row
+  rendered the same but was the wrong recipe).
+- **R36-B (the Add Department rebuild)**: the dialog interior had never
+  been re-measured since its invention (round 35 took the tab body
+  only). REF: max-w-lg (512×372), three stacked space-y-2 fields —
+  **"Department Name \*"** (required, ph "e.g., Human Resources"),
+  **Description** (ph "Brief description"), **Manager Email**
+  (type=email, ph "manager@company.com") — footer flex justify-end
+  gap-3 with Cancel + **Create** (the clone's submit said "Add
+  Department"). The clone's Name+Code pair ("Sales"/"SLS"), max-w-md,
+  and bg-card inputs were all invented. The Department model + the
+  departments API gained description/managerEmail columns (db:push;
+  code stays in the API for compat — the wizard still reads it).
+- **R36-C (the asset dialog's text layer)**: the round-34 interior
+  audit measured geometry, not placeholder text — REF's Name ph is
+  "e.g., Macbook Air 2024" (clone: "e.g. MacBook Pro 16\""), the
+  Serial ph is EMPTY (clone: "Optional"), the option reads "Not
+  assigned" (clone: "Not Assigned"). The loans dialog re-probed CLEAN —
+  the round-34 loans rebuild was complete.
+- **THE v4 INLINE-LABEL RE-FIRE (the mt-2 amendment)**: the rebuilt
+  dialogs initially rendered the label→input gap at 4px vs REF's 12
+  (the departments dialog measured 348 vs REF's 372 — exactly 3×8px).
+  The verified asset-dialog recipe applied to all three: Input cells =
+  space-y-2 wrapper + `className="mt-2"` on the Input; Select cells =
+  BARE div (no space-y — the Radix native-select last-child trap) +
+  `className="mt-2"` on the trigger. Both recipes measure 12px on REF.
+- **The E2E flake cascade (three races, all live-debugged)**: (1) the
+  Add Department post-create assertion `getByText("E2E Probe
+  Department")` resolved to BOTH the list row AND the toast's
+  description ("…is ready.") — a strict-mode violation that raced the
+  toast's auto-dismiss; on failure the cleanup never ran and the
+  leftover broke the NEXT run's empty-recipes spec (the cascade). Fix:
+  `{ exact: true }` + a describe-level pre-clean + an ASSERTED cleanup
+  (the fire-and-forget delete had failed silently once). (2) 511 vs
+  512 — the zoom-in-95 enter animation's tail again (the round-35
+  precedent: ±1 tolerance). (3) the Logs test read mid-load
+  (hasEmptyLine=false, rowCount=0 — the counter renders before the
+  list settles): an expect.poll to the settled state, then one read.
+- **The verify-r36 script lessons (two)**: (1) multi-line evals through
+  execSync + JSON.stringify leave literal `\n` sequences that break
+  the CLI's JS parser — EVERY multi-line record before the fix was a
+  VACUOUS MATCH (both sides ERR → undefined === undefined). Flatten
+  newlines before stringify. (2) The round-35 `ref=` regex bug
+  re-introduced: `\[ref=` never matches `[expanded=false, ref=e…]`
+  attribute lines — REF's dialog triggers carry aria-expanded, so
+  every REF-side dialog click silently no-opped. `ref=(\w+)\]` without
+  the bracket requirement (the verify-r35 fix, re-applied).
+- **Pins**: 13 new (A1-A6, B1-B4, C1-C3). Gates: lint 0/0 · tsc ✓ ·
+  **569/569 unit** · build ✓ · **158/158 E2E** (+1: the Add
+  Department dialog spec with the pre-clean/asserted-cleanup pattern;
+  the workflow/shift specs gained the native-validation + defaults
+  assertions). Live: **22/22 pair MATCH** (verify-r36.mjs — the form
+  contracts, required attrs, defaults, button types, placeholders, the
+  status trigger, the department 512×372, the asset text layer) + the
+  empty-submit pair (both keep the dialog open, focus on Name) + the
+  standing audits (mobile nav/drawer byte-identical, navmap 13-item
+  byte-identical, bell 384×175 identical, Quick Actions
+  geometry-identical). No redeploy (login static build + app chunks
+  all unchanged); REF still zero-data. 8 new screenshots (136-139,
+  ref+loc pairs) → **180 PNG captures**. DB pristine.

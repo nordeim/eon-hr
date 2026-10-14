@@ -411,6 +411,12 @@ function UserMenu({ user, variant }: { user: ShellUser; variant: "desktop" | "mo
             <button
               type="button"
               onClick={() => {
+                // A FULL document navigation is intentional here: the
+                // /logout route handler clears the session cookie, and
+                // the hard load tears down every client-side cache and
+                // React tree with it (a router.push would leave the
+                // hydrated app state behind).
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                 window.location.href = "/logout";
               }}
               className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"

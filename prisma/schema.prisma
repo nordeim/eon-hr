@@ -56,12 +56,14 @@ model Company {
 }
 
 model Department {
-  id        String     @id @default(cuid())
-  name      String     @unique
-  code      String?
-  headId    String?
-  employees Employee[]
-  createdAt DateTime   @default(now())
+  id           String     @id @default(cuid())
+  name         String     @unique
+  code         String?
+  description  String?
+  managerEmail String?
+  headId       String?
+  employees    Employee[]
+  createdAt    DateTime   @default(now())
 }
 
 // ============================================================ Employees

@@ -117,6 +117,24 @@ test.describe("settings tab interiors (session 36)", () => {
     // matching empty/table state.
     await expect(page.getByText(/\d+ total logs/)).toBeVisible();
 
+    // Poll to the settled state — the counter renders before the list
+    // finishes loading, and a mid-load read finds neither the empty line
+    // nor the rows (the round-36 flake: hasEmptyLine=false, rowCount=0).
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const card = Array.from(document.querySelectorAll("main .rounded-xl")).find((c) =>
+              c.textContent?.includes("System Audit Logs")
+            );
+            if (!card) return false;
+            const emptyP = Array.from(card.querySelectorAll("p")).find((p) => /No logs found/.test(p.textContent!));
+            return !!emptyP || card.querySelectorAll("tbody tr").length > 0;
+          }),
+        { timeout: 10_000 },
+      )
+      .toBe(true);
+
     const geo = await page.evaluate(() => {
       const card = Array.from(document.querySelectorAll("main .rounded-xl")).find((c) =>
         c.textContent?.includes("System Audit Logs")
@@ -209,6 +227,14 @@ test.describe("settings tab actions (session 36, R35-F)", () => {
     await expect(dialog.getByPlaceholder("Delay (hours)")).toBeVisible();
     await expect(dialog.getByText("Mandatory")).toBeVisible();
 
+    // Session 37 (R36-A): REF's form contract — the Name input carries
+    // required; the empty submit is the NATIVE tooltip (no custom error
+    // text ever renders) and the dialog stays open.
+    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel("Workflow Name")).toBeFocused();
+    await expect(dialog.getByText("Workflow name is required")).toHaveCount(0);
+
     // Superset wiring: Create persists via the API, the list refreshes.
     await dialog.getByLabel("Workflow Name").fill("E2E Probe Workflow");
     await dialog.getByRole("button", { name: "Create", exact: true }).click();
@@ -244,6 +270,14 @@ test.describe("settings tab actions (session 36, R35-F)", () => {
     await expect(dialog.getByPlaceholder("0")).toBeVisible();
     await expect(dialog.getByText("Status")).toBeVisible();
 
+    // Session 37 (R36-A): REF's defaults — 60 and 0 (live-measured) — and
+    // the native-validation empty submit (Name required, no error text).
+    await expect(dialog.getByLabel("Break (minutes)")).toHaveValue("60");
+    await expect(dialog.getByLabel("Tolerance (minutes)")).toHaveValue("0");
+    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText("Shift name is required")).toHaveCount(0);
+
     await dialog.getByLabel("Shift Name").fill("E2E Probe Shift");
     await dialog.getByLabel("Code").fill("E");
     await dialog.getByRole("button", { name: "Create", exact: true }).click();
@@ -260,6 +294,91 @@ test.describe("settings tab actions (session 36, R35-F)", () => {
     await page.evaluate(async (id: string) => {
       await fetch(`/api/shifts?shiftId=${id}`, { method: "DELETE" });
     }, probe!.id);
+  });
+
+  test("Add Department opens REF's three-field form dialog and Create persists (session 37)", async ({ page }) => {
+    await page.goto("/settings");
+
+    // Pre-clean the persistent e2e DB (the round-31 pattern): a leftover
+    // probe from an interrupted run would break the empty-recipes spec AND
+    // this spec's create (the unique-name CONFLICT). Runs after the goto —
+    // a relative fetch needs the page on the app origin.
+    await page.evaluate(async () => {
+      const res = await fetch("/api/departments");
+      const json = await res.json();
+      if (!json.ok) return;
+      for (const d of json.data.departments as { id: string; name: string }[]) {
+        if (d.name === "E2E Probe Department") {
+          await fetch(`/api/departments?id=${d.id}`, { method: "DELETE" });
+        }
+      }
+    });
+    await page.getByRole("tab", { name: "Departments" }).click();
+    await page.getByRole("button", { name: "Add Department" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    // R36-B: REF's field contract — the three stacked fields with REF's
+    // placeholders (the Name+Code pair was invented; Manager Email is new).
+    await expect(dialog.getByLabel("Department Name *")).toBeVisible();
+    await expect(dialog.getByPlaceholder("e.g., Human Resources")).toBeVisible();
+    await expect(dialog.getByLabel("Description")).toBeVisible();
+    await expect(dialog.getByPlaceholder("Brief description")).toBeVisible();
+    await expect(dialog.getByLabel("Manager Email")).toBeVisible();
+    await expect(dialog.getByPlaceholder("manager@company.com")).toBeVisible();
+
+    // The dialog geometry: max-w-lg (512px at desktop). ±1 — the zoom-in-95
+    // enter animation's tail can read 511 mid-transform (the round-35
+    // loans/user-menu rounding precedent).
+    const geo = await dialog.evaluate((d: HTMLElement) => {
+      const r = d.getBoundingClientRect();
+      return { w: Math.round(r.width), h: Math.round(r.height) };
+    });
+    expect(Math.abs(geo.w - 512)).toBeLessThanOrEqual(1);
+
+    // The native-validation empty submit (Name required, no custom text).
+    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel("Department Name *")).toBeFocused();
+
+    // The form types: Create = submit (the form wrapper), Cancel = button.
+    const types = await dialog.evaluate((d: HTMLElement) =>
+      Array.from(d.querySelectorAll("button")).map((b) => ({
+        t: b.textContent?.trim().slice(0, 12) ?? "",
+        type: b.type,
+      })),
+    );
+    expect(types.find((b) => b.t === "Cancel")?.type).toBe("button");
+    expect(types.find((b) => b.t === "Create")?.type).toBe("submit");
+
+    // Superset wiring: Create persists (description + managerEmail ride
+    // the API), the list refreshes, then the cleanup keeps zero-data.
+    await dialog.getByLabel("Department Name *").fill("E2E Probe Department");
+    await dialog.getByLabel("Description").fill("Probe description");
+    await dialog.getByLabel("Manager Email").fill("probe@example.com");
+    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    // EXACT match — the success toast's description ("E2E Probe Department
+    // is ready.") also contains the name, and a substring getByText resolves
+    // to both (the strict-mode violation that raced the toast's dismissal
+    // and, on failure, skipped the cleanup — the leftover cascade).
+    await expect(page.getByText("E2E Probe Department", { exact: true })).toBeVisible();
+
+    const list = await page.evaluate(async () => {
+      const res = await fetch("/api/departments");
+      const json = await res.json();
+      return json.ok ? (json.data.departments as { id: string; name: string }[]) : [];
+    });
+    const probe = list.find((d) => d.name === "E2E Probe Department");
+    expect(probe).toBeDefined();
+    // Asserted cleanup (the round-36 lesson: a silent fire-and-forget
+    // delete once left the probe behind and broke the next run's
+    // empty-recipes spec).
+    const deleted = await page.evaluate(async (id: string) => {
+      const res = await fetch(`/api/departments?id=${id}`, { method: "DELETE" });
+      const json = await res.json();
+      return json.ok === true;
+    }, probe!.id);
+    expect(deleted).toBe(true);
   });
 
   test("the Quick Presets render REF's three cards and populate the color fields on click", async ({ page }) => {

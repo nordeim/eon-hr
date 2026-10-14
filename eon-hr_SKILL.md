@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.19.0 (session-36 remediation complete — the re-measure: the census's blind spots + the prefetch-logout bug) · **Last updated:**
+> **Version:** 3.20.0 (session-37 remediation complete — the form-contract family: the empty-submit probe) · **Last updated:** 2026-10-14
 > 2026-10-14 · **State:** 521 unit + 142 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2365,3 +2365,53 @@ shift with the seven fields); the Quick Presets cards; the Logs
 slate-50 island; the 404 min-h-screen wrapper + the Go Home icon; the
 user menu's FIXED w-48 + the 16px icon-to-text (mr-2 rides ON TOP of
 gap-2). Gates: 556/556 unit · 157/157 E2E. Live: 11/12 pair MATCH.
+
+## 49. Session-37 Recipe Layer — parity round 36 (the form-contract family: the empty-submit probe)
+
+**The method lesson — probe the ERROR STATE, not just the geometry**: a
+geometry-only census (round 35) ships dialogs that look right and behave
+wrong. The empty-submit probe (click the primary action with empty
+fields, read the DOM) reveals the true contract: REF's dialogs are real
+`<form class="space-y-4">` documents wrapping fields AND footer, with
+`required` on the primary inputs (the browser's NATIVE tooltip is the
+error surface — no custom error text ever renders), Cancel/secondary
+actions explicitly `type="button"`, and Create `type="submit"`. An
+untyped `<button>` reports `type:"submit"` in the DOM and submits any
+form it sits in. Radix renders its hidden native `<select>` only when
+the Select participates in a form — its absence is a missing-form
+symptom, not a Select recipe drift.
+
+**The v4 inline-label re-fire**: the rebuilt dialogs initially rendered
+the label→input gap at 4px vs REF's 12 (the departments dialog 348 vs
+372 — exactly 3×8px). The verified recipes (grounded on the round-34
+asset dialog, re-measured on both apps): Input cells = space-y-2
+wrapper + `mt-2` on the Input; Select cells = BARE div (no space-y —
+the Radix native-select last-child trap) + `mt-2` on the trigger. Both
+measure 12px on REF.
+
+**The E2E flake cascade**: a toast whose description repeats an entity
+name breaks substring `getByText` in strict mode (it resolves to the
+row AND the toast — racing the toast's auto-dismiss); on failure the
+cleanup never runs and the leftover breaks the NEXT run's empty-state
+spec. The stable pattern: `{ exact: true }` on the row text + a
+describe-level pre-clean + an ASSERTED cleanup (never fire-and-forget
+a delete). Two more races: the zoom-in-95 sub-pixel (511 vs 512 — ±1
+tolerance, the standing precedent) and the mid-load list read (the
+counter renders before the rows — expect.poll to the settled state,
+then one read).
+
+**The verify-script traps (both produced FALSE confidence)**: (1)
+multi-line evals through execSync + JSON.stringify leave literal `\n`
+that breaks the CLI's JS parser — every multi-line record was a
+VACUOUS MATCH (both sides ERR → undefined === undefined). Flatten
+newlines before stringify. (2) `\[ref=` never matches
+`[expanded=false, ref=e…]` — REF's dialog triggers carry aria-expanded;
+`ref=(\w+)\]` without the bracket requirement (re-learned from round
+35's own fix).
+
+Recipe pins added: the three settings dialogs' form contracts
+(required on Name; the shift 60/0 defaults; the Status-in-grid cell),
+the Add Department rebuild (max-w-lg, "Department Name \*",
+Description, Manager Email, Create submit), the asset text layer
+("e.g., Macbook Air 2024", the bare serial, "Not assigned"). Gates:
+569/569 unit · 158/158 E2E. Live: 22/22 pair MATCH.

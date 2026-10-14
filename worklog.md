@@ -1048,3 +1048,26 @@ Stage Summary:
 - Round 35 delivered: the settings surface completed against live-measured REF (the header actions, both dialogs with real persistence, the presets, the island, the 404 re-centering), the user menu's true contract pinned, and a critical self-logout bug eliminated (the Link-prefetch trap — the round's headline lesson, SKILL §48)
 - Gates: 556/556 unit (+35) · 157/157 E2E (+15) · 172 captures
 - Frontier after this round: with-data surfaces (still blocked on REF's zero-data state), the workflow dialog's with-data list rendering (superset-designed), form-error surfaces on the new dialogs, REF's next redeploy
+
+---
+Task ID: session-37
+Agent: main (Super Z)
+Task: eon-hr parity round 36 (session 37) — the form-contract family: census, TDD rebuilds, live verification, docs, push
+
+Work Log:
+- git pull (8d04a95 + the two log commits → f9363a4); docs re-read (session_71/72, the plan's completion record, the worklog tail); baseline gates ALL GREEN (lint · tsc · 556/556 unit · build · 157/157 E2E; the one lint warning = the round-35 logout button's intentional window.location.href)
+- Skills audit: agent-browser CLI + core guide, tdd, tailwind-patterns (the established round toolset)
+- Census: no redeploy (login static build + app chunks unchanged); REF still zero-data; standing audits green (mobile nav/drawer byte-identical, navmap 13-item byte-identical, bell identical, Quick Actions geometry-identical)
+- THE EMPTY-SUBMIT PROBE (the round's method): REF's dialogs are real <form class="space-y-4"> documents with NATIVE validation — required attrs, no custom error text, Cancel/secondary explicit type="button", Create type="submit"; an untyped button defaults to submit inside a form; Radix renders its hidden native select only in form context
+- TDD: 13 RED pins (A1-A6 the form contracts, B1-B4 the departments rebuild, C1-C3 the asset text) → GREEN 569/569; the Add Department dialog rebuilt (max-w-lg 512×372, "Department Name *" + Description + Manager Email, Create submit; the Department model + API gained description/managerEmail — db:push both DBs); both settings dialogs converted (required, the 60/0 defaults, the Status-in-grid cell, the inline-error Ps deleted → API failures toast)
+- THE mt-2 AMENDMENT: the first departments pair measured 348 vs REF 372 (3×8px — the v4 inline-label re-fire); the verified asset-dialog recipes applied (Input cells: space-y-2 + mt-2; Select cells: bare div + mt-2 — both 12px); all three pairs then byte-identical
+- THE E2E FLAKE CASCADE (three races, live-debugged via audit-log forensics): the toast-name strict-mode violation (getByText resolved to the row AND the toast description; on failure the cleanup never ran → the leftover broke the next run's empty-state spec) fixed with exact:true + a describe-level pre-clean + an ASSERTED cleanup; the 511/512 zoom-in-95 tail (±1, the round-35 precedent); the mid-load logs read (expect.poll to settled, then one read) — 10/10 stable after
+- THE VERIFY-SCRIPT TRAPS: multi-line evals through execSync+JSON.stringify = literal \n → SyntaxError → every multi-line record was a VACUOUS MATCH (fixed: flatten newlines); the round-35 \[ref= regex bug re-introduced (REF's dialog triggers carry aria-expanded → [expanded=false, ref=e…] never matched → every REF-side dialog click silently no-opped; fixed: ref=(\w+)\])
+- Gates: lint 0/0 (the logout eslint-disable justified) · tsc ✓ · 569/569 unit (+13) · build ✓ · 158/158 E2E (+1: the Add Department spec with pre-clean/asserted cleanup; the workflow/shift specs gained the native-validation + defaults assertions)
+- Live: verify-r36.mjs 22/22 MATCH (form contracts, required, defaults, button types, placeholders, the status trigger, the department 512×372, the asset options) + the manual empty-submit pair + 8 screenshots (136-139) → 180 PNG; DB pristine; .env.example re-verified
+- Docs: AGENTS session-37 layer, SKILL 3.20.0 + §49, PAD [S37], CLAUDE/README counts, docs/session_73.md, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 36 delivered: the dialog form-contract family rebuilt to live-measured REF (the empty-submit probe exposed what two geometry audits missed), the Add Department dialog rebuilt to its never-measured contract with real persistence, the asset text layer aligned, and three E2E race classes eliminated with the stable round-trip pattern
+- Gates: 569/569 unit (+13) · 158/158 E2E (+1) · 180 captures · 22/22 live pair MATCH
+- Frontier after this round: with-data surfaces (still blocked on REF's zero-data state), the remaining never-probed error surfaces (the toaster interior — unfireable on zero-data REF), REF's next redeploy (the /login static build re-diff)

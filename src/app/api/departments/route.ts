@@ -11,6 +11,9 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 const DepartmentInput = z.object({
   name: z.string().trim().min(1, "Department name is required").max(80),
   code: z.string().trim().max(20).optional().or(z.literal("")),
+  // Session 37 (R36-B): REF's dialog fields — persisted as the superset.
+  description: z.string().trim().max(200).optional().or(z.literal("")),
+  managerEmail: z.string().trim().email().optional().or(z.literal("")),
 });
 
 export async function GET() {
@@ -18,13 +21,15 @@ export async function GET() {
     await requireUser();
     const departments = await db.department.findMany({
       orderBy: { name: "asc" },
-      select: { id: true, name: true, code: true, _count: { select: { employees: true } } },
+      select: { id: true, name: true, code: true, description: true, managerEmail: true, _count: { select: { employees: true } } },
     });
     return ok({
       departments: departments.map((d) => ({
         id: d.id,
         name: d.name,
         code: d.code,
+        description: d.description,
+        managerEmail: d.managerEmail,
         employeeCount: d._count.employees,
       })),
     });
@@ -43,8 +48,13 @@ export async function POST(req: NextRequest) {
     if (dupe) return err("CONFLICT", "A department with this name already exists");
 
     const department = await db.department.create({
-      data: { name: data.name, code: data.code || null },
-      select: { id: true, name: true, code: true, _count: { select: { employees: true } } },
+      data: {
+        name: data.name,
+        code: data.code || null,
+        description: data.description || null,
+        managerEmail: data.managerEmail || null,
+      },
+      select: { id: true, name: true, code: true, description: true, managerEmail: true, _count: { select: { employees: true } } },
     });
     await db.auditLog.create({
       data: {

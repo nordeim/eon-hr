@@ -3356,3 +3356,142 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     expect(block).toContain('<FileText className="w-12 h-12 mx-auto mb-3 text-slate-300"');
   });
 });
+
+describe("session-37 dialog form contracts (parity round 36)", () => {
+  /* The round's census: the empty-submit probe on REF revealed the whole
+     dialog family is <form>-based with NATIVE validation (required attrs,
+     Create=submit, everything else type=button, no custom error text) —
+     the round-35 rebuilds shipped button-driven dialogs with invented
+     inline-error Ps. Plus the never-re-measured Add Department interior
+     and the asset dialog's text layer. All values REF-measured this
+     round — see docs/remediation-plan-session37.md. */
+
+  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+  const assetsPage = read("src", "app", "(app)", "assets", "page.tsx");
+  const departmentsApi = read("src", "app", "api", "departments", "route.ts");
+
+  const workflowBlock = () => {
+    const idx = settingsPage.indexOf("function CreateWorkflowDialog(");
+    return settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+  };
+  const shiftBlock = () => {
+    const idx = settingsPage.indexOf("function AddShiftDialog(");
+    return settingsPage.slice(idx, settingsPage.indexOf("// ------------------------------------------------------------ Departments"));
+  };
+  const deptBlock = () => {
+    const idx = settingsPage.indexOf("function DepartmentsTab(");
+    return settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+  };
+
+  it("R36-A1: the Create Approval Workflow dialog is a real form — the space-y-4 form wraps fields + footer and Create submits it (REF: hasForm, footer inside)", () => {
+    const block = workflowBlock();
+    expect(block).toMatch(/<form\s+className="space-y-4"\s+onSubmit=/);
+    expect(block).toMatch(/<\/form>\s*<\/DialogContent>/);
+  });
+
+  it("R36-A2: the workflow footer's non-primary actions are explicit type=\"button\" (REF: Add Level/Cancel=button, Create=submit — an untyped button defaults to submit inside a form)", () => {
+    const block = workflowBlock();
+    expect(block).toMatch(/<Button[^>]*type="button"[^>]*>\s*<Plus[\s\S]*?Add Level/);
+    expect(block).toMatch(/<Button variant="outline" type="button" onClick=/);
+    expect(block).toMatch(/<Button variant="dark" type="submit"[^>]*>\s*Create\s*<\/Button>/);
+  });
+
+  it("R36-A3: the workflow Name input is required — REF's empty-submit is the NATIVE tooltip, and NO custom inline error ever renders (the invented 'Workflow name is required' P dies)", () => {
+    const block = workflowBlock();
+    const nameIdx = block.indexOf('id="wf-name"');
+    const nameInput = block.slice(nameIdx, block.indexOf("/>", nameIdx));
+    expect(nameInput).toContain("required");
+    expect(block).not.toContain("Workflow name is required");
+    expect(block).not.toContain("setError");
+  });
+
+  it("R36-A4: the Add Shift dialog is the same form architecture with Name/Start/End required (REF live-measured: required on exactly those three)", () => {
+    const block = shiftBlock();
+    expect(block).toMatch(/<form\s+className="space-y-4"\s+onSubmit=/);
+    for (const id of ["shift-name", "shift-start", "shift-end"]) {
+      const idx = block.indexOf(`id="${id}"`);
+      const input = block.slice(idx, block.indexOf("/>", idx));
+      expect(input).toContain("required");
+    }
+    const codeIdx = block.indexOf('id="shift-code"');
+    const codeInput = block.slice(codeIdx, block.indexOf("/>", codeIdx));
+    expect(codeInput).not.toContain("required");
+  });
+
+  it("R36-A5: the shift break/tolerance inputs carry REF's DEFAULTS — 60 and 0 (the clone shipped empty strings; REF renders val=\"60\"/\"0\")", () => {
+    const block = shiftBlock();
+    expect(block).toMatch(/breakMinutes, setBreakMinutes\] = React\.useState\("60"\)/);
+    expect(block).toMatch(/toleranceMinutes, setToleranceMinutes\] = React\.useState\("0"\)/);
+  });
+
+  it("R36-A6: the shift Status row rides INSIDE the grid as the 7th cell with the w-full trigger (REF: 223px column + w-full; the clone's hard-pinned w-[223px] full-width row was the wrong recipe)", () => {
+    const block = shiftBlock();
+    expect(block).not.toContain("w-[223px]");
+    const gridIdx = block.indexOf('<div className="grid grid-cols-2 gap-4">');
+    const statusIdx = block.indexOf(">Status<");
+    const gridEnd = block.indexOf("</div>", statusIdx);
+    expect(gridIdx).toBeGreaterThan(-1);
+    expect(statusIdx).toBeGreaterThan(gridIdx);
+    expect(gridEnd).toBeGreaterThan(statusIdx);
+  });
+
+  it("R36-B1: the Add Department dialog is REF's max-w-lg form (512×372; the clone's max-w-md 448×290 was the invented size)", () => {
+    const block = deptBlock();
+    const titleIdx = block.indexOf("<DialogTitle>Add Department</DialogTitle>");
+    const openTag = block.lastIndexOf("<DialogContent", titleIdx);
+    const dlg = block.slice(openTag, titleIdx);
+    expect(dlg).toContain("max-w-lg");
+    const formEnd = block.indexOf("</form>", titleIdx);
+    expect(block.slice(titleIdx, formEnd)).toMatch(/<form\s+className="space-y-4"\s+onSubmit=/);
+  });
+
+  it("R36-B2: the department fields are REF's three — 'Department Name *' (required, ph 'e.g., Human Resources'), Description (ph 'Brief description'), Manager Email (type=email, ph 'manager@company.com') — the Name+Code pair was invented", () => {
+    const block = deptBlock();
+    const titleIdx = block.indexOf("<DialogTitle>Add Department</DialogTitle>");
+    const dlg = block.slice(titleIdx, block.indexOf("</form>", titleIdx));
+    expect(dlg).toContain("Department Name *");
+    expect(dlg).toContain('placeholder="e.g., Human Resources"');
+    expect(dlg).toContain(">Description<");
+    expect(dlg).toContain('placeholder="Brief description"');
+    expect(dlg).toContain(">Manager Email<");
+    expect(dlg).toMatch(/type="email"/);
+    expect(dlg).toContain('placeholder="manager@company.com"');
+    expect(dlg).not.toContain('placeholder="Sales"');
+    expect(dlg).not.toContain('placeholder="SLS"');
+  });
+
+  it("R36-B3: the department dialog footer is REF's — Create submit (not 'Add Department') + explicit button Cancel, justify-end gap-3 (the header action keeps its Add Department label)", () => {
+    const block = deptBlock();
+    const titleIdx = block.indexOf("<DialogTitle>Add Department</DialogTitle>");
+    const dlg = block.slice(titleIdx, block.indexOf("</form>", titleIdx));
+    expect(dlg).toContain('<div className="flex justify-end gap-3">');
+    expect(dlg).toMatch(/<Button type="button" variant="outline" onClick=/);
+    expect(dlg).toMatch(/<Button type="submit" variant="dark"[^>]*>[\s\S]*?Create[\s\S]*?<\/Button>/);
+    expect(dlg).not.toMatch(/>\s*Add Department\s*<\/Button>/);
+  });
+
+  it("R36-B4: the Department model + API persist REF's new fields (description + managerEmail columns; code stays for compat)", () => {
+    const deptModel = prismaSchema.slice(
+      prismaSchema.indexOf("model Department {"),
+      prismaSchema.indexOf("model Employee {"),
+    );
+    expect(deptModel).toContain("description");
+    expect(deptModel).toContain("managerEmail");
+    expect(departmentsApi).toContain("description");
+    expect(departmentsApi).toContain("managerEmail");
+  });
+
+  it("R36-C1: the asset dialog's Name placeholder is REF's 'e.g., Macbook Air 2024' (the clone had invented 'e.g. MacBook Pro 16\"')", () => {
+    expect(assetsPage).toContain('placeholder="e.g., Macbook Air 2024"');
+    expect(assetsPage).not.toContain("MacBook Pro 16");
+  });
+
+  it("R36-C2: the asset Serial placeholder is EMPTY (REF renders no placeholder; the clone's 'Optional' was invented — page-level: the only Optional placeholder was the serial's)", () => {
+    expect(assetsPage).not.toContain('placeholder="Optional"');
+  });
+
+  it("R36-C3: the assignment option reads 'Not assigned' (REF's casing; the clone had 'Not Assigned')", () => {
+    expect(assetsPage).toContain('<SelectItem value="none">Not assigned</SelectItem>');
+    expect(assetsPage).not.toContain("Not Assigned");
+  });
+});

@@ -253,7 +253,7 @@ function AssetDialog({
               className="mt-2"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="e.g. MacBook Pro 16&quot;"
+              placeholder="e.g., Macbook Air 2024"
               required
               maxLength={80}
             />
@@ -289,7 +289,6 @@ function AssetDialog({
                 className="mt-2"
                 value={form.serialNumber}
                 onChange={(e) => setForm((f) => ({ ...f, serialNumber: e.target.value }))}
-                placeholder="Optional"
                 maxLength={60}
               />
             </div>
@@ -301,7 +300,7 @@ function AssetDialog({
                 <SelectValue placeholder="Not assigned" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Not Assigned</SelectItem>
+                <SelectItem value="none">Not assigned</SelectItem>
                 {employees.map((emp) => (
                   <SelectItem key={emp.id} value={emp.id}>
                     {emp.firstName} {emp.lastName}

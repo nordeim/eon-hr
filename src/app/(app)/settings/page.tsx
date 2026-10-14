@@ -54,6 +54,8 @@ interface DepartmentRow {
   id: string;
   name: string;
   code: string | null;
+  description?: string | null;
+  managerEmail?: string | null;
   employeeCount: number;
 }
 
@@ -525,7 +527,6 @@ function CreateWorkflowDialog({
   const [type, setType] = React.useState<string>("leave");
   const [levels, setLevels] = React.useState<LevelDraft[]>([]);
   const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState("");
 
   function addLevel() {
     setLevels((ls) =>
@@ -538,12 +539,7 @@ function CreateWorkflowDialog({
   }
 
   async function create() {
-    if (!name.trim()) {
-      setError("Workflow name is required");
-      return;
-    }
     setSaving(true);
-    setError("");
     try {
       const res = await fetch("/api/approval-workflows", {
         method: "POST",
@@ -558,7 +554,7 @@ function CreateWorkflowDialog({
       });
       const json = await res.json();
       if (!json.ok) {
-        setError(json.error?.message || "Could not create the workflow");
+        toast.toast({ title: "Could not create the workflow", description: json.error?.message, variant: "error" });
         return;
       }
       onOpenChange(false);
@@ -568,7 +564,7 @@ function CreateWorkflowDialog({
       await onCreated();
       toast.toast({ title: "Workflow created", variant: "success" });
     } catch {
-      setError("Network error — try again");
+      toast.toast({ title: "Network error — try again", variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -580,55 +576,73 @@ function CreateWorkflowDialog({
         <DialogHeader>
           <DialogTitle>Create Approval Workflow</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="wf-name">Workflow Name</Label>
-            <Input
-              id="wf-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder=""
-            />
+        {/* Session 37 (R36-A): REF wraps the body in a real <form> — the
+            Name input carries required (REF's empty-submit is the NATIVE
+            tooltip, no custom error text) and Create is the submit. */}
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void create();
+          }}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="wf-name">Workflow Name</Label>
+              <Input
+                id="wf-name"
+                className="mt-2"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder=""
+                required
+              />
+            </div>
+            {/* No space-y here — Radix's hidden native select renders as
+                the LAST child, so v4's :not(:last-child) would put mb on
+                the TRIGGER (the session-35 phantom-8px trap). The trigger's
+                mt-2 carries the 12px label→control gap alone (the verified
+                asset-dialog recipe). */}
+            <div>
+              <Label>Type</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="leave">Leave</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="loan">Loan</SelectItem>
+                  <SelectItem value="payroll">Payroll</SelectItem>
+                  <SelectItem value="recruitment">Recruitment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="leave">Leave</SelectItem>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="loan">Loan</SelectItem>
-                <SelectItem value="payroll">Payroll</SelectItem>
-                <SelectItem value="recruitment">Recruitment</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <Label className="text-sm font-medium leading-none">Approval Levels</Label>
-            <Button variant="outline" size="sm" onClick={addLevel}>
-              <Plus className="mr-2" aria-hidden="true" />
-              Add Level
-            </Button>
-          </div>
-          {levels.map((level, i) => (
-            <Card key={i} className="p-4 border-slate-200">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-semibold">Level {i + 1}</h4>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-10"
-                    onClick={() => setLevels((ls) => ls.filter((_, idx) => idx !== i))}
-                    aria-label={`Remove level ${i + 1}`}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
-                  </Button>
-                </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label className="text-sm font-medium leading-none">Approval Levels</Label>
+              <Button variant="outline" size="sm" type="button" onClick={addLevel}>
+                <Plus className="mr-2" aria-hidden="true" />
+                Add Level
+              </Button>
+            </div>
+            {levels.map((level, i) => (
+              <Card key={i} className="p-4 border-slate-200">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-semibold">Level {i + 1}</h4>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-10"
+                      type="button"
+                      onClick={() => setLevels((ls) => ls.filter((_, idx) => idx !== i))}
+                      aria-label={`Remove level ${i + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
+                    </Button>
+                  </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     value={level.name}
@@ -663,16 +677,16 @@ function CreateWorkflowDialog({
               </div>
             </Card>
           ))}
-        </div>
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button variant="dark" onClick={create} disabled={saving}>
-            Create
-          </Button>
-        </DialogFooter>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button variant="dark" type="submit" disabled={saving}>
+              Create
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -777,19 +791,15 @@ function AddShiftDialog({
   const [code, setCode] = React.useState("");
   const [startTime, setStartTime] = React.useState("09:00");
   const [endTime, setEndTime] = React.useState("17:00");
-  const [breakMinutes, setBreakMinutes] = React.useState("");
-  const [toleranceMinutes, setToleranceMinutes] = React.useState("");
+  // Session 37 (R36-A5): REF's defaults are 60 and 0 (live-measured
+  // val="60"/"0"), not empty strings.
+  const [breakMinutes, setBreakMinutes] = React.useState("60");
+  const [toleranceMinutes, setToleranceMinutes] = React.useState("0");
   const [status, setStatus] = React.useState("active");
   const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState("");
 
   async function create() {
-    if (!name.trim()) {
-      setError("Shift name is required");
-      return;
-    }
     setSaving(true);
-    setError("");
     try {
       const res = await fetch("/api/shifts", {
         method: "POST",
@@ -806,7 +816,7 @@ function AddShiftDialog({
       });
       const json = await res.json();
       if (!json.ok) {
-        setError(json.error?.message || "Could not create the shift");
+        toast.toast({ title: "Could not create the shift", description: json.error?.message, variant: "error" });
         return;
       }
       onOpenChange(false);
@@ -814,13 +824,13 @@ function AddShiftDialog({
       setCode("");
       setStartTime("09:00");
       setEndTime("17:00");
-      setBreakMinutes("");
-      setToleranceMinutes("");
+      setBreakMinutes("60");
+      setToleranceMinutes("0");
       setStatus("active");
       await onCreated();
       toast.toast({ title: "Shift created", variant: "success" });
     } catch {
-      setError("Network error — try again");
+      toast.toast({ title: "Network error — try again", variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -832,79 +842,99 @@ function AddShiftDialog({
         <DialogHeader>
           <DialogTitle>Add Shift</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="shift-name">Shift Name</Label>
-            <Input id="shift-name" value={name} onChange={(e) => setName(e.target.value)} />
+        {/* Session 37 (R36-A): REF's form contract — Name/Start/End carry
+            required (native validation; no custom error text), and the
+            Status row rides INSIDE the grid as the 7th cell (a 223px
+            column with the w-full trigger). */}
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void create();
+          }}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="shift-name">Shift Name</Label>
+              <Input id="shift-name" className="mt-2" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shift-code">Code</Label>
+              <Input
+                id="shift-code"
+                className="mt-2"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="e.g., M, E, N"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shift-start">Start Time</Label>
+              <Input
+                id="shift-start"
+                className="mt-2"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shift-end">End Time</Label>
+              <Input
+                id="shift-end"
+                className="mt-2"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shift-break">Break (minutes)</Label>
+              <Input
+                id="shift-break"
+                className="mt-2"
+                type="number"
+                value={breakMinutes}
+                onChange={(e) => setBreakMinutes(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shift-tolerance">Tolerance (minutes)</Label>
+              <Input
+                id="shift-tolerance"
+                className="mt-2"
+                type="number"
+                value={toleranceMinutes}
+                onChange={(e) => setToleranceMinutes(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            {/* No space-y — the Radix last-child trap (see the workflow
+                dialog's Type cell). */}
+            <div>
+              <Label>Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="shift-code">Code</Label>
-            <Input
-              id="shift-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="e.g., M, E, N"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="shift-start">Start Time</Label>
-            <Input
-              id="shift-start"
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="shift-end">End Time</Label>
-            <Input
-              id="shift-end"
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="shift-break">Break (minutes)</Label>
-            <Input
-              id="shift-break"
-              type="number"
-              value={breakMinutes}
-              onChange={(e) => setBreakMinutes(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="shift-tolerance">Tolerance (minutes)</Label>
-            <Input
-              id="shift-tolerance"
-              type="number"
-              value={toleranceMinutes}
-              onChange={(e) => setToleranceMinutes(e.target.value)}
-              placeholder="0"
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label>Status</Label>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[223px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button variant="dark" onClick={create} disabled={saving}>
-            Create
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button variant="dark" type="submit" disabled={saving}>
+              Create
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -917,7 +947,10 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
   const [loading, setLoading] = React.useState(true);
   const [addOpen, setAddOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({ name: "", code: "" });
+  // Session 37 (R36-B): REF's dialog fields — Name + Description +
+  // Manager Email (the Name+Code pair was invented; code stays in the
+  // API for compat).
+  const [form, setForm] = React.useState({ name: "", description: "", managerEmail: "" });
 
   const load = React.useCallback(async () => {
     try {
@@ -937,16 +970,16 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
   }, [load]);
 
   async function onAdd() {
-    if (!form.name.trim()) {
-      toast.toast({ title: "Department name is required", variant: "info" });
-      return;
-    }
     setSaving(true);
     try {
       const res = await fetch("/api/departments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name.trim(), code: form.code.trim() }),
+        body: JSON.stringify({
+          name: form.name.trim(),
+          description: form.description.trim(),
+          managerEmail: form.managerEmail.trim(),
+        }),
       });
       const json = await res.json();
       if (!json.ok) {
@@ -955,7 +988,7 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
       }
       toast.toast({ title: "Department added", description: `${form.name.trim()} is ready.`, variant: "success" });
       setAddOpen(false);
-      setForm({ name: "", code: "" });
+      setForm({ name: "", description: "", managerEmail: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -1042,48 +1075,66 @@ function DepartmentsTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnTyp
         )}
       </CardContent>
 
+      {/* Session 37 (R36-B): REF's Add Department dialog — live-measured
+          contract: max-w-lg (512×372), the form space-y-4 with three stacked
+          space-y-2 fields ("Department Name *" required ph "e.g., Human
+          Resources" / Description ph "Brief description" / Manager Email
+          type=email ph "manager@company.com"), the footer's
+          flex justify-end gap-3 with Cancel (outline 81×36, button) +
+          Create (dark solid 79×36, submit). No DialogDescription. */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Department</DialogTitle>
-            <DialogDescription>Create a new department.</DialogDescription>
           </DialogHeader>
           <form
-            className="flex flex-col gap-4"
+            className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               void onAdd();
             }}
           >
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="dept-name">Name</Label>
+            <div className="space-y-2">
+              <Label htmlFor="dept-name">Department Name *</Label>
               <Input
                 id="dept-name"
+                className="mt-2"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Sales"
+                placeholder="e.g., Human Resources"
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="dept-code">Code</Label>
+            <div className="space-y-2">
+              <Label htmlFor="dept-description">Description</Label>
               <Input
-                id="dept-code"
-                value={form.code}
-                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                placeholder="SLS"
-                maxLength={20}
+                id="dept-description"
+                className="mt-2"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Brief description"
               />
             </div>
-            <DialogFooter>
+            <div className="space-y-2">
+              <Label htmlFor="dept-manager">Manager Email</Label>
+              <Input
+                id="dept-manager"
+                className="mt-2"
+                type="email"
+                value={form.managerEmail}
+                onChange={(e) => setForm({ ...form, managerEmail: e.target.value })}
+                placeholder="manager@company.com"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" variant="dark" disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Add Department
+                Create
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
