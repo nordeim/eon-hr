@@ -11,6 +11,8 @@ const JobInput = z.object({
   status: z.enum(["open", "paused", "closed"]).default("open"),
   openings: z.number().int().min(1, "At least one opening").max(99).default(1),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
+  company: z.string().trim().max(120).optional().or(z.literal("")),
+  salaryRange: z.string().trim().max(60).optional().or(z.literal("")),
 });
 
 // GET /api/jobs?status=
@@ -47,6 +49,8 @@ export async function POST(req: NextRequest) {
         status: data.status,
         openings: data.openings,
         description: data.description || null,
+        company: data.company || null,
+        salaryRange: data.salaryRange || null,
       },
       include: { _count: { select: { candidates: true } } },
     });
@@ -79,6 +83,8 @@ export async function PATCH(req: NextRequest) {
         ...(data.status !== undefined ? { status: data.status } : {}),
         ...(data.openings !== undefined ? { openings: data.openings } : {}),
         ...(data.description !== undefined ? { description: data.description || null } : {}),
+        ...(data.company !== undefined ? { company: data.company || null } : {}),
+        ...(data.salaryRange !== undefined ? { salaryRange: data.salaryRange || null } : {}),
       },
       include: { _count: { select: { candidates: true } } },
     });

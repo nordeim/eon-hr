@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 521 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 142 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 636 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 180 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2111,3 +2111,90 @@ cross-tenant careers data vs the clone's empty tenant); the shell tree
 pair byte-identical (peer/scroller/header/surface); the standing audits
 5/5; tenantsetup mobile byte-identical (card x=16 w=358, input 36). 16
 screenshots (148-155) → **212 PNG captures**. DB pristine.
+
+## Session 41 — parity round 40 (the careers family + the login button members)
+
+REF's login redeployed a FOURTH consecutive time — and for the first
+since round 35 the CSS changed too (JS `BIuE7r17` → `C-ulo5ek`; CSS
+`D0Q6-tUz` → `BIWjBcok`; the app chunks unchanged). The CSS delta is
+platform font-face infrastructure (Wix Madefor, Dazzed, Azeret Mono —
+the `.font-base44` utility's family) UNUSED by the Eon HR login: every
+login recipe re-measured byte-identical at desktop AND mobile (card
+x=16 y=16 w=358, docH 862, email h=44/16px, icons 85/85/98, links
+y=718/746); theme-inert re-verified. **The toaster frontier resolved**:
+REF's one fireable notification — the failed-login error — renders a
+shadcn Alert (role=alert, bg-red-50/70 border-red-200 rounded-xl, the
+red-700 description) INSIDE the form, and the clone's is byte-identical
+(class + rect x=536 y=738 w=368 h=54 + parent).
+
+**The round's core — the careers mobile pixel-diff** (round-39's
+deferred frontier): the hero geometry was byte-identical but the pair
+diffed 25.41%. The forensics decomposed it into the round's findings
+(docs/remediation-plan-session41.md):
+
+- **R40-A — the login Sign in button's base members**: REF's carries
+  the login build's `ring-offset-background` + the `[&_svg]` guards
+  (inert at rest; the ring stays the zinc-950 literal per the two-build
+  split). Added for DOM class parity.
+- **R40-B — the board content wrapper**: `max-w-6xl mx-auto px-4
+  py-12` on BOTH views (the clone's `p-4 md:p-8` started the content
+  32px high at mobile — a round-39 miss).
+- **R40-C — the zero-card family** (careers + external share it): the
+  Card carries `text-center py-12` itself (shadow from the base, the
+  DEFAULT border rgb(229,229,229) — no slate-200 override), the bare
+  `p-6 pt-0` CardContent, the briefcase `w-16 h-16 text-slate-300
+  mx-auto mb-4` (w-first), the h3 `…mb-2`, the `text-slate-600` line —
+  and the message is STATE-DEPENDENT: "Check back later for new
+  opportunities!" (the empty board AND the org view, both measured) vs
+  "No jobs match your search. Try different keywords." (the
+  search-filtered zero).
+- **R40-D — the count heading row**: `mb-4 flex items-center
+  justify-between` (a flex row ready for a right-side element), shared
+  by the board and the org view.
+- **R40-E — the job card** (REF's first measurable with-data card):
+  Card `shadow hover:shadow-lg transition-shadow` (no slate border);
+  the CardHeader's title row (`flex items-start justify-between mb-3`)
+  with the left block (`flex items-center gap-3` > the title div
+  `font-semibold tracking-tight text-xl` + the company `p.text-sm
+  text-slate-600`) and the right **Open badge — a DIV** (hand-rolled to
+  REF's full string: rounded-md border px-2.5 py-0.5 text-xs
+  font-semibold + focus rings + border-transparent + shadow +
+  hover:bg-primary/80 + bg-green-100 text-green-700); the meta stack
+  `space-y-2 text-sm text-slate-600` with FOUR icon rows (building2 /
+  map-pin / clock — the type LOWERCASE — / dollar-sign salary);
+  CardContent `p-6 pt-4` with the description `line-clamp-3 mb-4` and
+  the full-width "View Details & Apply" gradient CTA.
+- **R40-F — the apply flow**: the CTA navigates to
+  `/externaljobapplication?org=<company-slug>&job=<title-slug>`
+  (REF's capitalized-path artifact aside). REF's own target renders its
+  zero-state for the params — the clone's superset RESOLVES them (the
+  external page slug-filters its list; no match keeps the zero-state).
+- **R40-G — the org view structure**: the `div.mb-8` wraps the back
+  button (ghost + mb-4) + the org h2; the count row + list follow
+  unwrapped.
+- **R40-H — the model**: JobPosting + `company` + `salaryRange`
+  (nullable, additive; the jobs API's JobInput gains both). The chips
+  are built from `j.company` — REF's chips are COMPANIES (the clone's
+department-based chips were semantically wrong).
+- **R40-I — the external page**: the wrapper `max-w-6xl mx-auto` (no
+  space-y-12) + the header `text-center mb-12` with the h1 `mb-3` +
+  the card joining the R40-C family.
+
+**The hero pixel-diff closure**: after the fixes the residual is
+REF's DATA-DRIVEN horizontal overflow — a long whitespace-nowrap
+company chip forces its canvas to 569px at a 390 viewport, stretching
+the banner gradient (live-confirmed: REF's banner w=569 vs the clone's
+390, same sRGB endpoints); the clone with equivalent data behaves
+identically (the same flex semantics). The count-row rhythm rows
+(480-520) collapsed to zero post-fix.
+
+**Pins**: 17 new (A1, B1, C1-C2, D1, E1-E5, F1, G1, H1-H2, I1-I3) +
+1 amended (R31-C3's icon order `w-16 h-16`). Gates: lint 0/0 · tsc ✓ ·
+**636/636 unit** (+17) · build ✓ · **180/180 E2E** (+6; the workflow
+Add-Level width hit its documented tolerance flake once, stable on
+re-run). Live: verify-r40.mjs 3/6 raw MATCH — the 3 diffs documented
+(the trap-3 gradient class-string, the org-view data + cursor-pointer
+superset, the external superset resolving the seeded job); the
+zero-card family + the board + the login members MATCH; the standing
+audits 5/5; 8 screenshots (156-159) → **220 PNG captures**. DB
+pristine (users=1, employees=1, leaveBalances=2).

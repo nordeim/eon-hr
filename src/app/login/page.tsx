@@ -258,13 +258,18 @@ function LoginForm() {
               ) : null}
 
               <div className="space-y-3">
-                {/* Reference sign-in action (session-39): dark slate-900,
-                    the responsive 44/48px height, px-3 py-2, gap-1,
-                    inline-flex, transition-all 200ms — REF's exact recipe. */}
+                {/* Reference sign-in action (session-39, re-measured
+                    round-40): the dark slate block, the responsive
+                    44/48px height, the tight padding pair + row gap, and
+                    the 200ms all-props motion; round-40 added the login
+                    build's Button base members (the ring-offset
+                    background token + the svg guards — inert at rest)
+                    for DOM class parity. The ring color stays the
+                    zinc-950 literal (the two-build split). */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm h-11 sm:h-12 w-full px-3 py-2 rounded-xl bg-slate-900 text-white font-medium shadow-sm transition-all duration-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
                 >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                   Sign in

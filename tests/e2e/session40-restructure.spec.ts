@@ -84,9 +84,9 @@ const AUTHED = test.describe("session-40 shell + input + careers (authed)", () =
   });
 
   test("careers org view — chips navigate to ?org= with the org h2 + back button", async ({ page }) => {
-    // seed one open job with a department (company)
+    // seed one open job with a company (the chips' source since round 40)
     const post = await page.request.post("/api/jobs", {
-      data: { title: "Senior Test Engineer", department: "Acme Rockets", location: "Remote", type: "full_time", status: "open" },
+      data: { title: "Senior Test Engineer", company: "Acme Rockets", department: "Engineering", location: "Remote", type: "full_time", status: "open", salaryRange: "12000-15000" },
     });
     const json = await post.json();
     expect(json.ok).toBe(true);

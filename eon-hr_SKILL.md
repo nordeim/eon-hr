@@ -10,15 +10,17 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.23.0 (session-40 remediation complete — the shell restructure + the input migration + the careers org view) · **Last updated:** 2026-10-14
-> 2026-10-14 · **State:** 619 unit + 174 E2E tests green, lint/typecheck/build
+> **Version:** 3.24.0 (session-41 remediation complete — the careers family + the login button members) · **Last updated:** 2026-10-15
+> 2026-10-15 · **State:** 636 unit + 180 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
 > the hover/active-state taxonomy + the pressed-state taxonomy + the head/SEO
 > contract + the reduced-motion/keyboard-order/drag-drop supersets + the DnD-depth
 > supersets: within-column reorder + the recruitment pipeline drag-drop + the
-> shadcn peer-sidebar shell architecture with the overflow-auto scroll container).
+> shadcn peer-sidebar shell architecture with the overflow-auto scroll container +
+> the with-data careers family: the job card + the apply flow + the state-dependent
+> zero-card).
 
 ---
 
@@ -2617,3 +2619,75 @@ Recipe pins added: 21; predecessors amended: 12. Gates: 619/619 unit ·
 174/174 E2E. Live: the shell tree pair byte-identical; verify-r39.mjs
 4/7 raw MATCH with the 3 diffs all documented non-gaps; the standing
 audits 5/5; 16 screenshots (148-155) → 212 captures.
+
+## §53 Session 41 (parity round 40) — the careers family + the login button members
+
+The round opened with a pixel-diff and closed with a data model: the
+deferred careers mobile pixel-diff (25.41% pair delta) decomposed into
+the content wrapper's rhythm, the shared zero-card family, the first
+measurable with-data job card, the apply flow, and the company/salary
+model — while the fourth consecutive login redeploy proved
+rendering-neutral (the CSS delta was platform font-faces, unused).
+
+**The pixel-diff decomposition method** (the round's transferable
+lesson): a whole-region diff percentage is a SUM of independent causes —
+decompose it by row-bands against the element map before touching any
+code. The 25.41% split into (a) the count-row rhythm rows (480-520, the
+wrapper's py-12 vs p-4 — the real fix), (b) the banner gradient rows
+(80-320, REF's data-driven 569px canvas overflow — a non-gap, proven by
+sampling the computed gradient + width on both sides), and (c) the
+chips/zero region (data states). After the fix, band (a) collapsed to
+zero and the diff residual is fully attributed to (b) + (c).
+
+**The state-dependent zero-card**: REF's careers zero-card message
+differs by STATE — "Check back later for new opportunities!" for the
+empty board AND the org view (both live-measured) vs "No jobs match
+your search. Try different keywords." for the search-filtered zero.
+The card itself is ONE family shared with externaljobapplication: the
+Card carries `text-center py-12` itself, the DEFAULT border
+(rgb(229,229,229) — NOT slate-200; the base layer's `border-border`
+already supplies REF's neutral), the bare `p-6 pt-0` CardContent, the
+briefcase `w-16 h-16 text-slate-300 mx-auto mb-4` (self-centering, no
+wrapper row), and the h3's `mb-2`. Icon-over-line empty cards ride
+FIRST in the content — no heading-before-icon arrangement.
+
+**The with-data job card** (REF's first measurable card, via its
+cross-tenant demo board): the title row (`flex items-start
+justify-between mb-3`) holds the left block (`flex items-center gap-3`
+> the unclassed div > the title `font-semibold tracking-tight text-xl`
++ the company `p.text-sm.text-slate-600`) and the **Open badge — a
+DIV**, hand-rolled to REF's full string (rounded-md border px-2.5
+py-0.5 text-xs font-semibold + the focus rings + border-transparent +
+shadow + hover:bg-primary/80 + bg-green-100 text-green-700 — the
+taskmanager count-chip precedent; badge.tsx serves other pages). The
+meta stack is `space-y-2 text-sm text-slate-600` with four
+`flex items-center gap-2` icon rows (building2 / map-pin / clock — the
+type LOWERCASE, no capitalize — / dollar-sign over the salary range);
+the description clamps (`line-clamp-3 mb-4`); the full-width gradient
+CTA ("View Details & Apply") navigates to
+`/externaljobapplication?org=<company-slug>&job=<title-slug>`.
+
+**The company/salary model**: REF's chips are COMPANIES — the org
+dimension is the job's company, not its department. JobPosting gained
+nullable `company` + `salaryRange`; the chips, the org view, the card's
+second line, and the apply slug all read `company`. The apply-flow
+params are REF's own dead end (its page renders the zero-state for
+them) — the clone's superset slug-filters the external page's list,
+keeping the no-match shape at REF parity.
+
+**The login re-audit (the fourth consecutive login-scoped deploy)**:
+when the redeploy's CSS delta is platform infrastructure (font-faces
+for OTHER apps in the shared bundle), verify USAGE before re-auditing
+recipes — a computed-font sweep (`getComputedStyle(e).fontFamily` over
+leaf elements) proves the page never uses them, and the recipe re-read
+can be scoped to the class-string layer only (this round: the Sign in
+button's `ring-offset-background` + `[&_svg]` guards — inert members
+for DOM parity). **The toaster frontier closed by finding the fireable
+path**: REF's failed login renders the one measurable notification —
+a shadcn Alert inside the form, byte-identical on the clone.
+
+Recipe pins added: 17; predecessors amended: 1 (R31-C3's icon order).
+Gates: 636/636 unit · 180/180 E2E. Live: verify-r40 3/6 raw MATCH with
+the 3 diffs documented (the trap-3 gradient class-string, the org-view
+data + cursor-pointer superset, the external superset resolution); the
+standing audits 5/5; 8 screenshots (156-159) → 220 captures.

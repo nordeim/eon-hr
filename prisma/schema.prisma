@@ -297,16 +297,18 @@ model ExpenseClaim {
 // ============================================================ Recruitment
 
 model JobPosting {
-  id          String      @id @default(cuid())
-  title       String
-  department  String?
-  location    String?
-  type        String      @default("full_time")
-  status      String      @default("open") // open | paused | closed
-  description String?
-  openings    Int         @default(1)
-  postedAt    DateTime    @default(now())
-  candidates  Candidate[]
+  id           String      @id @default(cuid())
+  title        String
+  department   String?
+  location     String?
+  type         String      @default("full_time")
+  status       String      @default("open") // open | paused | closed
+  description  String?
+  openings     Int         @default(1)
+  company      String? // R40-H: the public board's chips + the card's second line (REF's chips are companies)
+  salaryRange  String? // R40-H: the card's fourth meta row ("12000-15000")
+  postedAt     DateTime    @default(now())
+  candidates   Candidate[]
 }
 
 model Candidate {

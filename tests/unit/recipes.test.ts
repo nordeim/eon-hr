@@ -2501,7 +2501,7 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     expect(src).toMatch(/>Job Opportunities<\/h1>/);
     expect(src).toContain("Join our team and make an impact");
     expect(src).toContain("Briefcase");
-    expect(src).toContain("h-16 w-16 text-slate-300");
+    expect(src).toContain("w-16 h-16 text-slate-300");
     expect(src).toContain("We don&apos;t have any open positions at the moment. Check back later!");
   });
 
@@ -3912,5 +3912,150 @@ describe("session-40 shell restructure + input migration + careers org-view (par
   it("R39-W1: the externaljobapplication content wrapper is REF's max-w-6xl (the clone's max-w-7xl rendered identically at 1440 but diverges ≥1536)", () => {
     expect(extjob40).toContain("max-w-6xl");
     expect(extjob40).not.toContain("max-w-7xl");
+  });
+});
+
+describe("session-41 careers family + login button members (parity round 40)", () => {
+  /* Round 40's census: REF's login redeployed a FOURTH consecutive time
+     (JS BIuE7r17→C-ulo5ek AND CSS D0Q6-tUz→BIWjBcok — the CSS delta is
+     platform font-faces, unused by the login; every login recipe
+     re-measured byte-identical, desktop + mobile). The round's core came
+     from the careers mobile pixel-diff (round-39's deferred frontier):
+     the 25.41% pair diff traced to the content wrapper's rhythm + opened
+     the careers family end to end — the zero-card icon family, the count
+     row, the first measurable with-data job card (the badge + the
+     company line + the 4-row meta stack + the line-clamp + the apply
+     CTA), the org view's section wrapper, the company/salary model, and
+     the external page's alignment. The toaster frontier resolved: REF's
+     failed-login Alert is byte-identical on the clone. */
+
+  const careers41 = read("src", "app", "(app)", "careers", "page.tsx");
+  const extjob41 = read("src", "app", "(app)", "externaljobapplication", "page.tsx");
+  const login41 = read("src", "app", "login", "page.tsx");
+  const schema41 = read("prisma", "schema.prisma");
+  const jobsApi41 = read("src", "app", "api", "jobs", "route.ts");
+
+  // --- A. the login: the Sign in button's base members ---
+
+  it("R40-A1: the Sign in button carries the login build's base members — ring-offset-background + the three svg guards (inert at rest; the ring color stays the literal per the two-build split; REF's offset renders white via the background token, the clone's via the default)", () => {
+    const btn = login41.match(/className=\"[^\"]*h-11 sm:h-12[^\"]*bg-slate-900[^\"]*\"/)?.[0] ?? "";
+    expect(btn).toContain("ring-offset-background");
+    expect(btn).toContain("[&_svg]:pointer-events-none");
+    expect(btn).toContain("[&_svg]:size-4");
+    expect(btn).toContain("[&_svg]:shrink-0");
+    expect(btn).toContain("focus-visible:ring-[#09090b]");
+    expect(btn).toContain("transition-all duration-200");
+  });
+
+  // --- B/C/D. the careers board: wrapper + zero-card + count row ---
+
+  it("R40-B1: the board content wrapper is REF's centered wide container with the tall rhythm (both the board and the org view — the clone's old edge-padding wrapper started the content 32px too high at mobile)", () => {
+    expect(careers41).toContain('className="max-w-6xl mx-auto px-4 py-12"');
+    expect(careers41).not.toContain("p-4 md:p-8");
+  });
+
+  it("R40-C1: the zero-card is the icon-over-line family — the Card carries the centered tall padding itself (the base supplies the shadow; NO slate border override), the inner is the bare CardContent, the briefcase rides first with the w-first order + auto centering, the h3 gains the tight bottom gap, the line is the darker gray", () => {
+    expect(careers41).toMatch(/<Card className="text-center py-12">/);
+    expect(careers41).not.toContain("border-slate-200 shadow");
+    expect(careers41).toContain("w-16 h-16 text-slate-300 mx-auto mb-4");
+    expect(careers41).toContain("text-xl font-semibold text-slate-900 mb-2");
+    expect(careers41).toContain('className="text-slate-600"');
+  });
+
+  it("R40-C2: the zero-card message is state-dependent — the recovery line for the empty board AND the org view, the search line for the filtered zero (both live-measured on REF)", () => {
+    expect(careers41).toContain("Check back later for new opportunities!");
+    expect(careers41).toContain("No jobs match your search. Try different keywords.");
+  });
+
+  it("R40-D1: the count heading row is REF's flex wrapper with the between alignment (ready for a right-side element; shared by the board and the org view — the plain margin-only wrapper retired)", () => {
+    expect(careers41).toContain('className="mb-4 flex items-center justify-between"');
+    expect(careers41).not.toContain("mb-6");
+  });
+
+  // --- E/F. the with-data job card + the apply flow ---
+
+  it("R40-E1: the job card shell — the Card base's shadow + the hover elevation + the transition, NO slate border override (REF's default border renders the neutral gray)", () => {
+    expect(careers41).toMatch(/<Card key=\{j\.id\} className="hover:shadow-lg transition-shadow">/);
+  });
+
+  it("R40-E2: the card header — the border-b CardHeader wraps the title row (start-aligned, between, tight bottom gap): the left block (the centered row wrapper > the title div in the bold tight large recipe + the company line) + the right badge", () => {
+    expect(careers41).toContain("flex items-start justify-between mb-3");
+    expect(careers41).toContain("flex items-center gap-3");
+    expect(careers41).toMatch(/font-semibold tracking-tight text-xl/);
+    expect(careers41).toContain('<p className="text-sm text-slate-600">{j.company}</p>');
+  });
+
+  it("R40-E3: the Open badge is hand-rolled as a DIV (REF's tag; the taskmanager count-chip precedent — badge.tsx serves other pages): REF's full string incl. the focus rings + the transparent border + the at-rest shadow + the hover wash + the green look", () => {
+    expect(careers41).toContain(
+      '<div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 bg-green-100 text-green-700">'
+    );
+  });
+
+  it("R40-E4: the meta stack — the tight stack in the small darker-gray recipe with the FOUR icon rows (office/map/clock/dollar, each the centered 2-gap row); the type renders lowercase (the capitalize retired)", () => {
+    expect(careers41).toContain("space-y-2 text-sm text-slate-600");
+    expect((careers41.match(/flex items-center gap-2/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    expect(careers41).toContain("Building2");
+    expect(careers41).toContain("MapPin");
+    expect(careers41).toContain("Clock");
+    expect(careers41).toContain("DollarSign");
+    expect(careers41).not.toContain("capitalize");
+  });
+
+  it("R40-E5: the card content — the tight-top padding, the description clamps at three lines with the bottom gap, and the apply CTA is full-width", () => {
+    expect(careers41).toContain('<CardContent className="p-6 pt-4">');
+    expect(careers41).toContain("text-slate-700 line-clamp-3 mb-4");
+    expect(careers41).toContain("View Details &amp; Apply");
+  });
+
+  it("R40-F1: the apply CTA navigates to the external application page carrying the org + job slugs (REF's contract, the clone's lowercase route; REF's own target resolves the params to nothing visible — a REF-side artifact the clone's superset fixes)", () => {
+    expect(careers41).toContain("externaljobapplication?org=");
+    expect(careers41).toMatch(/job=\$\{/);
+  });
+
+  // --- G. the org view structure ---
+
+  it("R40-G1: the org view wraps the back button + the org h2 in the tall-gap section (REF's chain: content > section > back(tight gap) + h2); the count row + the list follow unwrapped", () => {
+    expect(careers41).toContain('className="mb-8"');
+    expect(careers41).toMatch(/text-3xl font-bold text-slate-900/);
+    expect(careers41).not.toContain("mt-4");
+  });
+
+  // --- H. the data model + the API ---
+
+  it("R40-H1: the JobPosting model gains the company + salary fields (nullable, additive — REF's chips are COMPANIES, the card's fourth meta row is the salary range)", () => {
+    const job = schema41.slice(schema41.indexOf("model JobPosting"), schema41.indexOf("model Candidate"));
+    expect(job).toContain("company");
+    expect(job).toContain("salaryRange");
+  });
+
+  it("R40-H2: the jobs API accepts the two new fields, and the careers chips are built from the job's company (the department-based chips were semantically wrong vs REF's company chips)", () => {
+    expect(jobsApi41).toMatch(/company: z\.string\(\)/);
+    expect(jobsApi41).toMatch(/salaryRange: z\.string\(\)/);
+    expect(careers41).toMatch(/if \(j\.company\) set\.add\(j\.company\)/);
+    expect(careers41).not.toMatch(/set\.add\(j\.department\)/);
+  });
+
+  // --- I. the external application page ---
+
+  it("R40-I1: the external wrapper drops the stack spacing for REF's bare centered wide container; the header block gains the tall bottom gap with the h1 carrying the tight one (not the line's top gap)", () => {
+    expect(extjob41).toContain('className="max-w-6xl mx-auto"');
+    expect(extjob41).not.toContain("space-y-12");
+    expect(extjob41).toContain('className="text-center mb-12"');
+    expect(extjob41).toMatch(/text-4xl font-bold text-slate-900 mb-3/);
+    expect(extjob41).not.toContain("mt-3 text-lg");
+  });
+
+  it("R40-I2: the external card joins the icon-over-line family — the centered tall padding on the Card itself (no slate border override), the bare CardContent, the w-first briefcase + the tight h3 gap + the darker-gray line (the old pt-12 wrapper + justify-center icon row retired)", () => {
+    expect(extjob41).toMatch(/<Card className="text-center py-12">/);
+    expect(extjob41).not.toContain("border-slate-200");
+    expect(extjob41).toContain("w-16 h-16 text-slate-300 mx-auto mb-4");
+    expect(extjob41).toContain("text-xl font-semibold text-slate-900 mb-2");
+    expect(extjob41).not.toContain("flex justify-center");
+  });
+
+  it("R40-I3: the page reads the org/job query params and slug-filters its list (the superset; no match renders the zero-state — REF-parity for unresolvable params)", () => {
+    expect(extjob41).toContain("useSearchParams");
+    expect(extjob41).toMatch(/searchParams\.get\("org"\)/);
+    expect(extjob41).toMatch(/searchParams\.get\("job"\)/);
   });
 });
