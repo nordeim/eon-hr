@@ -197,7 +197,10 @@ test.describe("session-41 login button members (logged out)", () => {
     const cls = await btn.evaluate((el) => el.className);
     expect(cls).toContain("ring-offset-background");
     expect(cls).toContain("[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0");
-    expect(cls).toContain("focus-visible:ring-[#09090b]");
+    // session-43 amendment: the redeploy switched the member to the ring-ring
+    // TOKEN (resolves the login-scoped zinc-950 --ring on the root main)
+    expect(cls).toContain("focus-visible:ring-ring");
+    expect(cls).not.toContain("ring-[#09090b]");
     // the rendered recipe is unchanged: 48px at desktop, the slate block
     const box = await btn.evaluate((el) => {
       const r = el.getBoundingClientRect();

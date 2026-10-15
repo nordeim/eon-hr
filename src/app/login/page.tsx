@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -102,15 +101,19 @@ function LoginForm() {
 
   return (
     /* Reference login shell (session-4 re-measurement; session-39 re-audit
-       after REF's login redeploy): a <main> canvas with the slate-50 →
-       slate-100 sRGB gradient + p-4 + the login build's zinc-950 foreground
+       after REF's login redeploy; session-43 re-audit after the JS+CSS
+       redeploy): a <main> canvas with the slate-50 → slate-100 sRGB
+       gradient + p-4 + the login build's zinc-950 foreground
        (computed rgb(9,9,11) on the typed text — the login CSS build uses
-       the zinc palette, the app build the neutral one), glass card
-       (rounded-2xl, white/95, p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10),
-       top h-1 accent bar, the glow-wrapped circular logo, the responsive
-       44/48px inputs (rounded-xl, bg-slate-50/50, border-slate-200, pl-10,
-       16px→14px responsive font) and the responsive sign-in action. */
-    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b]">
+       the zinc palette, the app build the neutral one) and the login-scoped
+       zinc-950 --ring override (REF's login build sets it at :root; the
+       Sign in's ring-ring token resolves #09090b here while the app pages
+       keep the shared neutral token), glass card (rounded-2xl, white/95,
+       p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10), top h-1 accent bar, the
+       glow-wrapped circular logo, the responsive 44/48px inputs
+       (rounded-xl, bg-slate-50/50, border-slate-200, pl-10, 16px→14px
+       responsive font) and the responsive sign-in action. */
+    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b] [--ring:#09090b]">
       <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-[#09090b] shadow-2xl backdrop-blur-sm">
           {/* REF's card rides its login build's --card-foreground, which is
@@ -151,6 +154,12 @@ function LoginForm() {
             </div>
 
             <div className="w-full">
+            {/* REF's w-full column (session-43 re-measure): THREE direct
+                children — the social space-y-3 group (ONLY the three
+                buttons), the my-6 or-divider, and the form. The clone's
+                former single space-y-3 wrapper around all three retired
+                (render-neutral: the divider's my-6 owns the 24px gaps
+                either way). */}
             <div className="space-y-3">
             {/* REF's social buttons (session-40 re-measure): NO type attr
                 (the latest redeploy dropped it — REF renders type:null; they
@@ -186,6 +195,7 @@ function LoginForm() {
               </div>
               <span>Continue with Apple</span>
             </button>
+            </div>
 
             {/* REF's or-divider (session-39): one continuous 1px slate-200
                 line (absolutely positioned, vertically centered) with the
@@ -200,33 +210,45 @@ function LoginForm() {
             </div>
 
             {/* REF's form (round 33): space-y-4 sm:space-y-5 — two field
-                DIVs (each `space-y-1.5`: label + the iconed input), then
-                the alert, then the space-y-3 actions (button + links). */}
+                DIVs (each space-y-1.5, the label + the iconed input: the
+                session-43 re-measure adopted REF's wrapper with the
+                explicit mt-1.5 kept on the relative block — v4's space-y
+                lands on the inline label where vertical margins are
+                ignored, the trap-6 restoration), then the alert, then the
+                space-y-3 actions (button + links). */}
             <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
               <div className="space-y-3 sm:space-y-4">
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
-                  {/* Reference: envelope icon inline inside the field. The
-                      v3 space-y-1.5 put mt on this BLOCK (v4 would put mb on
-                      the inline label — ignored vertically; explicit mt-1.5). */}
+                  {/* Reference: envelope icon inline inside the field. */}
                   <div className="relative mt-1.5">
                     <Mail
                       className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                       aria-hidden="true"
                     />
-                    <Input
+                    {/* REF's login-build input verbatim (session-43): the
+                        ring-2/offset-2 base with the ring TOKEN in base
+                        (the page tail's PLAIN-focus slate-400 ring member
+                        survives the tailwind-merge — REF keeps both), the
+                        base-size font in base with the md member at
+                        base-end, and NO shadow/transition members (the
+                        round-39 two-build split counters retired — REF's
+                        new base ships neither). Hand-authored: the shared
+                        v4 Input cannot shed its base members through the
+                        merge. */}
+                    <input
                       id="email"
                       type="email"
                       autoComplete="email"
                       placeholder="you@example.com"
                       required
-                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400 shadow-none transition-none ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                 </div>
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
                   {/* Reference: lock icon inline inside the field. */}
                   <div className="relative mt-1.5">
@@ -234,13 +256,13 @@ function LoginForm() {
                       className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                       aria-hidden="true"
                     />
-                    <Input
+                    <input
                       id="password"
                       type="password"
                       autoComplete="current-password"
                       placeholder="••••••••"
                       required
-                      className="h-11 sm:h-12 text-base md:text-sm rounded-xl border-slate-200 bg-slate-50/50 py-2 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus-visible:ring-slate-400 shadow-none transition-none ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -259,17 +281,16 @@ function LoginForm() {
 
               <div className="space-y-3">
                 {/* Reference sign-in action (session-39, re-measured
-                    round-40): the dark slate block, the responsive
-                    44/48px height, the tight padding pair + row gap, and
-                    the 200ms all-props motion; round-40 added the login
-                    build's Button base members (the ring-offset
-                    background token + the svg guards — inert at rest)
-                    for DOM class parity. The ring color stays the
-                    zinc-950 literal (the two-build split). */}
+                    round-40, session-43 amendment): the dark slate block,
+                    the responsive 44/48px height, the tight padding pair +
+                    row gap, and the 200ms all-props motion; the ring member
+                    is REF's ring-ring TOKEN (the r38 hex pin retired) — it
+                    resolves the login-scoped zinc-950 --ring set on the
+                    root main. */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#09090b] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
                 >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                   Sign in
@@ -297,7 +318,6 @@ function LoginForm() {
                 </div>
               </div>
             </form>
-            </div>
             </div>
             </div>
           </div>

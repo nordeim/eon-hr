@@ -1486,21 +1486,16 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
     expect(shell).toContain("focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
   });
 
-  it("R18-E: login inputs carry REF's page-level slate-400 focus pair", () => {
-    // focus-visible:ring-slate-400 (NOT focus:) — same variant as the base's
-    // ring-ring so tailwind-merge deterministically dedups the color; the
-    // bare focus: variant loses the v4 cascade battle against the base.
-    expect(login).toContain("focus:border-slate-400 focus-visible:ring-slate-400");
-    expect(login.match(/focus-visible:ring-slate-400/g)?.length).toBe(2);
+  it("R18-E: login inputs carry REF's page-level slate-400 focus pair (session-43 amendment — the redeploy switched the ring member to the PLAIN focus: variant, un-killing the base's focus-visible:ring-ring in the merge)", () => {
+    expect(login).toContain("focus:border-slate-400 focus:ring-slate-400");
+    expect(login.match(/focus:ring-slate-400/g)?.length).toBe(2);
+    expect(login).not.toContain("focus-visible:ring-slate-400");
   });
 
-  it("R18-E: the login Sign in ring is REF's page-scoped zinc-950 (#09090B), NOT slate-400", () => {
-    /* Session-39 amendment (superseded session-40): the social buttons
-       DROPPED type="submit" in the latest redeploy (R39-A1) — the first
-       type="submit" is the Sign in again — but the disabled={loading}
-       anchor stays (unique to Sign in). */
+  it("R18-E: the login Sign in ring is REF's ring-ring TOKEN over the login-scoped zinc-950 --ring (session-43 amendment — the redeploy adopted the token; the hex pin retired)", () => {
     const submit = login.slice(login.indexOf("disabled={loading}"), login.indexOf("disabled={loading}") + 700);
-    expect(submit).toContain("focus-visible:ring-[#09090b]");
+    expect(submit).toContain("focus-visible:ring-ring");
+    expect(submit).not.toContain("ring-[#09090b]");
     expect(submit).not.toContain("ring-slate-400");
   });
 
@@ -3647,9 +3642,9 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
 
   const login39 = read("src", "app", "login", "page.tsx");
 
-  it("R38-G1: the login canvas root is REF's MAIN element with the pinned sRGB gradient + p-4 + the zinc-950 foreground (REF's login build uses the zinc palette — computed rgb(9,9,11) on the typed text; the app pages keep the pinned neutral-950 token)", () => {
+  it("R38-G1: the login canvas root is REF's MAIN element with the pinned sRGB gradient + p-4 + the zinc-950 foreground + the session-43 login-scoped zinc-950 --ring override (REF's login build uses the zinc palette — computed rgb(9,9,11) on the typed text; the app pages keep the pinned neutral-950 token)", () => {
     expect(login39).toMatch(
-      /<main className="flex min-h-screen items-center justify-center bg-\[linear-gradient\(to_bottom_right,#f8fafc,#f1f5f9\)\] p-4 text-\[#09090b\]">/
+      /<main className="flex min-h-screen items-center justify-center bg-\[linear-gradient\(to_bottom_right,#f8fafc,#f1f5f9\)\] p-4 text-\[#09090b\] \[--ring:#09090b\]">/
     );
     expect(login39).not.toMatch(/<div className="flex min-h-screen items-center justify-center bg-\[linear-gradient/);
   });
@@ -3658,16 +3653,21 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39.match(/h-11 sm:h-12/g)?.length).toBe(3);
   });
 
-  it("R38-A2: the login inputs are REF's responsive font — text-base md:text-sm (16px mobile / 14px ≥768px; the flat text-sm measured 14px at mobile vs REF's 16px)", () => {
-    expect(login39.match(/text-base md:text-sm/g)?.length).toBe(2);
+  it("R38-A2: the login inputs are REF's responsive font — text-base (base position) + md:text-sm (base-end) in the session-43 verbatim string (16px mobile / 14px ≥768px; the flat text-sm measured 14px at mobile vs REF's 16px)", () => {
+    expect(login39.match(/text-base/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(login39.match(/md:text-sm/g)?.length).toBe(2);
   });
 
   it("R38-B1: the login inputs render REF's placeholder slate-600 (rgb(71,85,105) — live-measured on both fields; NOT the base's muted-foreground slate-500 rgb(100,116,139))", () => {
     expect(login39.match(/placeholder:text-slate-600/g)?.length).toBe(2);
   });
 
-  it("R38-I1: the login inputs MUST carry shadow-none + transition-none (session-40 amendment — the migrated base now sets shadow-sm/transition-colors; REF's login build kept the pre-migration family with neither. shadow-none computes the transparent-zeros string vs REF's literal none — the accepted serialization non-gap, fully invisible)", () => {
-    expect(login39.match(/shadow-none transition-none/g)?.length).toBe(2);
+  it("R38-I1: the login inputs carry NO shadow/transition members (session-43 amendment — REF's new login base has neither shadow-sm nor transition-colors to counter; the two-build split counters RETIRED: shadow-none/transition-none appear nowhere on the page)", () => {
+    const loginInputsBlock = login39.slice(login39.indexOf('id="email"'), login39.indexOf('id="password"') + 900);
+    expect(loginInputsBlock).not.toContain("shadow-none");
+    expect(loginInputsBlock).not.toContain("transition-none");
+    expect(loginInputsBlock).not.toContain("shadow-sm");
+    expect(loginInputsBlock).not.toContain("transition-colors");
   });
 
   it("R38-D1: REF's sm:hidden spacer footnote below the card (mt-8 text-center text-xs text-slate-400 > p:&nbsp; — the invisible line pins the card to y=16 and scrolls the mobile page 18px: 862 vs the 844 viewport)", () => {
@@ -3797,10 +3797,10 @@ describe("session-40 shell restructure + input migration + careers org-view (par
     expect(boot.indexOf("/login")).toBeLessThan(boot.indexOf("app_lang"));
   });
 
-  it("R39-C1: the login inputs counter the migrated base — shadow-none + transition-none + ring-offset-background + focus-visible:ring-2/offset-2 keep REF's login-build recipe (the two-build split: REF's login inputs kept the pre-migration family — ring-2/offset-2, no shadow, no transition, live-measured)", () => {
-    expect(login40.match(/shadow-none transition-none/g)?.length).toBe(2);
-    expect(login40.match(/ring-offset-background/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(login40.match(/focus-visible:ring-2 focus-visible:ring-offset-2/g)?.length).toBe(2);
+  it("R39-C1: the login inputs carry the ring-2/offset-2 family IN BASE (session-43 amendment — the redeploy adopted the base; the retired counters' surviving members: ring-offset-background + the focus-visible ring triple, now inside the verbatim string; NO shadow/transition members anywhere on the inputs)", () => {
+    expect(login40.match(/ring-offset-background/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(login40.match(/focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2/g)?.length).toBe(3);
+    expect(login40).not.toContain("shadow-none transition-none");
   });
 
   // --- B. the base migration ---
@@ -3938,13 +3938,13 @@ describe("session-41 careers family + login button members (parity round 40)", (
 
   // --- A. the login: the Sign in button's base members ---
 
-  it("R40-A1: the Sign in button carries the login build's base members — ring-offset-background + the three svg guards (inert at rest; the ring color stays the literal per the two-build split; REF's offset renders white via the background token, the clone's via the default)", () => {
+  it("R40-A1: the Sign in button carries the login build's base members — ring-offset-background + the three svg guards (inert at rest; session-43 amendment: the ring member is the ring-ring TOKEN resolving the login-scoped zinc-950 --ring set on the root main; REF's offset renders white via the background token, the clone's via the default)", () => {
     const btn = login41.match(/className=\"[^\"]*h-11 sm:h-12[^\"]*bg-slate-900[^\"]*\"/)?.[0] ?? "";
     expect(btn).toContain("ring-offset-background");
     expect(btn).toContain("[&_svg]:pointer-events-none");
     expect(btn).toContain("[&_svg]:size-4");
     expect(btn).toContain("[&_svg]:shrink-0");
-    expect(btn).toContain("focus-visible:ring-[#09090b]");
+    expect(btn).toContain("focus-visible:ring-ring");
     expect(btn).toContain("transition-all duration-200");
   });
 
@@ -4164,5 +4164,111 @@ describe("session-42 footer focus family + employees row + sidebar attributes (p
 
   it("R41-T1: the light sidebar-foreground token is REF's zinc-700 (240 5.3% 26.1% — the moon's inherited color), not the app-foreground slate-800", () => {
     expect(globals42).toMatch(/--sidebar-foreground: hsl\(240 5\.3% 26\.1%\)/);
+  });
+});
+
+describe("session-43 login redeploy re-audit (parity round 42 — the input base migration)", () => {
+  /* REF redeployed BOTH login chunks (JS C-ulo5ek → DRs9_-5K, CSS
+     BIWjBcok → DPOrvWRk; the app chunks quiet). The rendered surface
+     stayed byte-identical on both bands — the redeploy changed the
+     AUTHORED recipes: the login build's input component adopted the
+     ring-2/offset-2 base (the round-39 two-build split counters
+     retired), the Sign in ring switched to the ring-ring token, the
+     w-full column flattened to three direct children, and the field
+     wrapper adopted space-y-1.5. All live-measured on both apps. */
+
+  const login43 = read("src", "app", "login", "page.tsx");
+
+  // REF's new login-build input string, measured verbatim on both fields.
+  const REF_INPUT_STRING =
+    "flex w-full border px-3 py-2 text-base ring-offset-background " +
+    "file:border-0 file:bg-transparent file:text-sm file:font-medium " +
+    "file:text-foreground focus-visible:outline-none focus-visible:ring-2 " +
+    "focus-visible:ring-ring focus-visible:ring-offset-2 " +
+    "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-11 " +
+    "sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 " +
+    "focus:ring-slate-400 rounded-xl placeholder:text-slate-600";
+
+  // --- A. the login inputs' authored-string migration ---
+
+  it("R42-A1: the email input carries REF's verbatim new-base string (the login build's own component — py-2 text-base + ring-offset-background + the focus-visible:ring-2 ring-ring ring-offset-2 triple in BASE position, md:text-sm at base-end, the pl-10 … slate-600 page tail)", () => {
+    const emailIdx = login43.indexOf('id="email"');
+    const emailBlock = login43.slice(emailIdx, emailIdx + 900);
+    expect(emailBlock).toContain(`className="${REF_INPUT_STRING}"`);
+  });
+
+  it("R42-A2: the password input carries the identical verbatim string (REF's two fields are byte-identical)", () => {
+    const pwIdx = login43.indexOf('id="password"');
+    const pwBlock = login43.slice(pwIdx, pwIdx + 900);
+    expect(pwBlock).toContain(`className="${REF_INPUT_STRING}"`);
+  });
+
+  it("R42-A3: the inputs are HAND-AUTHORED elements (not the shared v4 Input component — tailwind-merge cannot delete the shared base's shadow-sm/transition-colors, and REF's login build ships its own input component; the two-build split honored)", () => {
+    expect(login43).not.toMatch(/import \{ Input \} from "@\/components\/ui\/input"/);
+    const emailIdx = login43.indexOf('id="email"');
+    // the <input opening tag sits just BEFORE the id attribute
+    expect(login43.slice(emailIdx - 120, emailIdx)).toContain("<input");
+    expect(login43).not.toMatch(/<Input\s/);
+  });
+
+  it("R42-A4: the retired split members appear NOWHERE in the input blocks (shadow-none/transition-none were the round-39 counters for a base REF no longer ships)", () => {
+    const formIdx = login43.indexOf('id="email"');
+    const formBlock = login43.slice(formIdx - 400, login43.indexOf("Sign in</button>"));
+    expect(formBlock).not.toContain("shadow-none");
+    expect(formBlock).not.toContain("transition-none");
+  });
+
+  // --- B. the Sign in ring token + the login --ring override ---
+
+  it("R42-B1: the Sign in button carries focus-visible:ring-ring (REF's token member — the r38 hex pin retired)", () => {
+    const idx = login43.indexOf("disabled={loading}");
+    const btn = login43.slice(idx, idx + 800);
+    expect(btn).toContain("focus-visible:ring-ring");
+  });
+
+  it("R42-B2: the login root scopes the zinc-950 --ring override (REF's login build sets it at :root; the clone scopes it to the login subtree — the app pages keep the shared neutral token; full-value form per trap 1)", () => {
+    expect(login43).toMatch(/<main className="[^"]*\[--ring:#09090b\][^"]*"/);
+  });
+
+  // --- C. the w-full column restructure ---
+
+  it("R42-C1: the w-full column has THREE direct children — the social space-y-3 group (buttons only), the my-6 divider, the form (REF's live-counted shape; the clone's nested single space-y-3 wrapper retired)", () => {
+    // the social group (space-y-3) wraps ONLY the three buttons: the
+    // group's opening tag is the last space-y-3 before the Google label,
+    // and its closing tag lands right after the Apple button (before the
+    // divider + the form — both then direct children of the w-full column).
+    const googleIdx = login43.indexOf("Continue with Google");
+    const appleIdx = login43.indexOf("Continue with Apple");
+    const groupOpenIdx = login43.lastIndexOf('className="space-y-3"', googleIdx);
+    expect(groupOpenIdx).toBeGreaterThan(-1);
+    // the form tag must NOT sit between the group opening and the Apple
+    // button (the old nesting put the form INSIDE the group)
+    const groupSlice = login43.slice(groupOpenIdx, appleIdx);
+    expect(groupSlice).not.toContain("<form");
+    // after the Apple button: the divider (relative my-6) comes FIRST,
+    // then the form — both outside the group
+    const afterApple = login43.slice(appleIdx, appleIdx + 1600);
+    const dividerAt = afterApple.indexOf('className="relative my-6"');
+    const formAt = afterApple.indexOf("<form");
+    expect(dividerAt).toBeGreaterThan(-1);
+    expect(formAt).toBeGreaterThan(-1);
+    expect(dividerAt).toBeLessThan(formAt);
+  });
+
+  // --- D. the field wrapper adopts space-y-1.5 ---
+
+  it("R42-D1: the field DIV carries space-y-1.5 (REF's authored wrapper) with the explicit mt-1.5 kept on the relative wrapper (the trap-6 v4 restoration — v4's space-y lands on the inline label where vertical margins are ignored; the dashboard welcome-row pattern)", () => {
+    const emailFieldIdx = login43.indexOf('id="email"');
+    // lastIndexOf — the icon-comment between the wrapper and the input
+    // inflates the distance (comments never quote class strings)
+    const relIdx = login43.lastIndexOf('className="relative mt-1.5"', emailFieldIdx);
+    const fieldIdx = login43.lastIndexOf('className="space-y-1.5"', emailFieldIdx);
+    expect(relIdx).toBeGreaterThan(-1);
+    expect(fieldIdx).toBeGreaterThan(-1);
+    expect(fieldIdx).toBeLessThan(relIdx);
+    // BOTH fields carry the pair
+    const pwFieldIdx = login43.indexOf('id="password"');
+    expect(login43.lastIndexOf('className="space-y-1.5"', pwFieldIdx)).toBeGreaterThan(-1);
+    expect(login43.lastIndexOf('className="relative mt-1.5"', pwFieldIdx)).toBeGreaterThan(-1);
   });
 });

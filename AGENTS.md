@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 648 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 185 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 656 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 190 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2273,3 +2273,78 @@ and the outline solid/none split is the documented two-build non-gap).
 The standing audits 5/5 post-change (one transient toggle-race on the
 REF drawer, clean on re-run); 8 screenshots (160-163) → **228 PNG
 captures**. DB pristine (users=1, employees=1, leaveBalances=2).
+
+## Session 43 — parity round 42 (the login redeploy re-audit: the input base migration)
+
+REDEPLOY DETECTED — login-scoped, **JS + CSS both** (login JS
+`index-C-ulo5ek.js` → `index-DRs9_-5K.js`, login CSS `index-BIWjBcok.css`
+→ `index-DPOrvWRk.css`; both app fingerprints quiet — the first
+CSS-touching login deploy since round 38). The CSS delta is the same
+platform font-face batch round 40 documented (Wix Madefor/Dazzed/Azeret
+Mono + `.font-base44` — 0 consumers). The rendered surface stayed
+byte-identical on both bands (card/inputs/social/or-chip/links/title all
+MATCH; the failed-login Alert re-fired and byte-identical at 368×54
+@(536,738)); the redeploy changed the AUTHORED recipes
+(docs/remediation-plan-session43.md):
+
+- **R42-A — the login inputs' verbatim base migration**: REF's new
+  login-build input component carries the ring-2/offset-2 family IN BASE
+  (`py-2 text-base ring-offset-background … focus-visible:ring-2
+  focus-visible:ring-ring focus-visible:ring-offset-2 … md:text-sm`)
+  with the page tail `pl-10 h-11 sm:h-12 bg-slate-50/50
+  border-slate-200 focus:border-slate-400 focus:ring-slate-400
+  rounded-xl placeholder:text-slate-600` — the ring member switched to
+  the PLAIN focus: variant (tailwind-merge no longer dedups ring-ring),
+  and the round-39 two-build split counters (`shadow-none
+  transition-none`) are GONE (REF's new base ships no shadow/transition
+  members to counter). The clone CANNOT reach the string by overriding
+  the shared v4 Input (tailwind-merge overrides but never deletes) — the
+  login inputs are now HAND-AUTHORED elements carrying REF's verbatim
+  string (REF's own login build ships its own input component; the
+  two-build architecture honored). The shared Input stays for app pages.
+- **R42-B — the Sign in ring token + the login --ring override**: the
+  button's `focus-visible:ring-[#09090b]` (the r38 hex pin) →
+  `focus-visible:ring-ring` (REF's token member) over a login-scoped
+  `[--ring:#09090b]` on the root main (REF's login build sets
+  `--ring: 240 10% 3.9%` at :root — the two-build palette split; the
+  clone scopes it to the login subtree so app pages keep the shared
+  neutral token; full-value form per trap 1).
+- **R42-C — the w-full column restructure**: REF's column has THREE
+  direct children — the social `space-y-3` group (ONLY the three
+  buttons), the `relative my-6` divider, and the form; the clone's
+  nested single space-y-3 wrapper retired (render-neutral: the column
+  measures 522px both sides — the divider's my-6 owns the 24px gaps).
+- **R42-D — the field wrapper adopts space-y-1.5**: REF's field DIV
+  carries `space-y-1.5` with a BARE `relative` inner; the clone keeps
+  the explicit `mt-1.5` on the relative wrapper (the trap-6 v4
+  restoration — v4's `:where()` space-y lands on the INLINE label where
+  vertical margins are ignored; the dashboard welcome-row pattern).
+- **The keyboard/focus remainder CLOSED**: the Shift+Tab reverse walks
+  (the session-38 named remainder) read on both surfaces both apps —
+  the login walk (Sign in → password → email → Apple → Microsoft) and
+  the dashboard footer walk (عربي → moon → bell → Settings → AI HR
+  Assistant → Analytics → Communications) structurally IDENTICAL (the
+  only text diff is the clone's aria-label supersets).
+
+**The round's E2E lesson — the transition-settled ring read**: the Sign
+in's `transition-all duration-200` (the R38-E1 motion pin) TRANSITIONS
+the ring box-shadow in — a shadow read immediately after the Tab press
+lands mid-transition and shows the at-rest slots (the custom properties
+are already set; the box-shadow lags 200ms). Both apps behave
+identically; the spec waits past the window before reading.
+
+**Pins**: 8 new (A1-A4, B1-B2, C1, D1) + 5 amended (R18-E's input pair +
+Sign in pin, R38-G1/A2/I1, R39-C1, R40-A1). Gates: lint 0/0 · tsc ✓ ·
+**656/656 unit** (+8) · build ✓ · **190/190 E2E** (+5 — the
+session43-login-redeploy spec; one session40 input-family tolerance
+flake in the first full run, stable on the single-spec re-run AND the
+full re-run). Live: verify-r42 5/8 raw MATCH — the input DOM strings
+(sorted content — tw-merge reorders, content is the contract), the Sign
+in DOM string, the w-full column structure, and both bands' geometry
+MATCH; the focused Sign in ring renders IDENTICAL on both sides (white
+2px + rgb(9,9,11) 4px — the v4 transparent-zeros prefix the documented
+serialization non-gap); the field wrapper's `mt-1.5` is the documented
+trap-6 superset; `--ring` resolves 240 10% 3.9% vs #09090b (the trap-1
+two-build form split). The standing audits 5/5 post-change; 8
+screenshots (164-167) → **236 PNG captures**. DB pristine (users=1,
+employees=1, leaveBalances=2).

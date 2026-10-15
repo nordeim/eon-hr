@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.25.0 (session-42 remediation complete — the footer focus family + the native select) · **Last updated:** 2026-10-15
-> 2026-10-15 · **State:** 636 unit + 180 E2E tests green, lint/typecheck/build
+> **Version:** 3.26.0 (session-43 remediation complete — the login redeploy re-audit: the input base migration) · **Last updated:** 2026-10-16
+> 2026-10-15 · **State:** 656 unit + 190 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -2778,3 +2778,80 @@ lacks (the superset asymmetry shifts the walk's start element); (5)
 the focus-walk probe reads the transient hover state — move the
 mouse away (`agent-browser mouse move x y`) before reading rest-state
 backgrounds.
+
+## §55 Session 43 (parity round 42) — the login redeploy re-audit: the input base migration
+
+**The trigger**: REF redeployed BOTH login chunks — JS
+`index-C-ulo5ek.js` → `index-DRs9_-5K.js` AND CSS `index-BIWjBcok.css`
+→ `index-DPOrvWRk.css` (the app chunks quiet; the CSS delta = the same
+platform font-face batch round 40 documented, 0 consumers). The
+rendered surface stayed byte-identical on both bands — the redeploy
+changed the AUTHORED recipes. Four finding families
+(`docs/remediation-plan-session43.md`):
+
+1. **R42-A — the login inputs' verbatim base migration.** REF's new
+   login-build input component carries the ring-2/offset-2 family IN
+   BASE (`py-2 text-base ring-offset-background … focus-visible:ring-2
+   focus-visible:ring-ring focus-visible:ring-offset-2 … md:text-sm`)
+   and the page tail switched its ring member to the PLAIN `focus:`
+   variant (`focus:ring-slate-400`) — so tailwind-merge keeps BOTH the
+   base's ring-ring and the tail's slate-400 (the old
+   `focus-visible:ring-slate-400` variant CONFLICTED with the base's
+   ring-ring and the merge killed it). The round-39 split counters
+   (`shadow-none transition-none`) are gone — REF's new base ships no
+   shadow/transition members to counter.
+2. **The shared-component trap (the round's architectural lesson)**:
+   the clone could NOT reach REF's string by overriding the shared v4
+   `Input` — tailwind-merge OVERRIDES conflicting members but never
+   DELETES non-conflicting ones (the base's `shadow-sm` would survive
+   as a `shadow-none` counter REF no longer carries). Fix: hand-authored
+   `<input>` elements on the login page carrying REF's verbatim string —
+   mirroring REF's own architecture (its login build ships its own input
+   component; the two-build split honored). The shared Input stays for
+   app pages.
+3. **R42-B — the ring token + the scoped --ring override.** REF's Sign
+   in now carries `focus-visible:ring-ring` over the login build's
+   `:root { --ring: 240 10% 3.9% }` (zinc-950 — the app build's is
+   `0 0% 3.9%` neutral-950: the two-build palette split). The clone
+   swaps the r38 hex pin (`ring-[#09090b]`) for the token + a
+   login-scoped `[--ring:#09090b]` on the root main (full-value form —
+   trap 1; scoped so app pages keep the shared neutral token).
+4. **R42-C/D — the structural family**: the w-full column flattened to
+   THREE direct children (social `space-y-3` group / `relative my-6`
+   divider / the form — the clone's nested single wrapper retired,
+   render-neutral at 522px both sides); the field DIV adopted REF's
+   `space-y-1.5` with the explicit `mt-1.5` KEPT on the relative
+   wrapper (the trap-6 v4 restoration — v4's `:where()` space-y lands
+   on the INLINE label where vertical margins are ignored; the
+   dashboard welcome-row pattern).
+
+**The round's E2E lesson — the transition-settled ring read**: the
+Sign in's `transition-all duration-200` (the R38-E1 motion pin)
+TRANSITIONS the ring box-shadow in. A shadow read immediately after
+the Tab press lands mid-transition and shows the AT-REST slots — while
+`getComputedStyle(el).getPropertyValue('--tw-ring-shadow')` already
+reads the focused value (the custom properties set instantly; the
+box-shadow lags 200ms). The symptom looks like a CSS-var resolution
+failure (transparent ring) but is purely the transition window. Wait
+past it (~350ms) before asserting the rendered ring. Both apps behave
+identically.
+
+**Verification lenses added**: (1) sorted-content DOM-string
+comparison — `className.split(' ').sort().join(' ')` neutralizes the
+documented tailwind-merge reordering (content is the contract, order
+is the two-build artifact); (2) the scoped-token probe — read
+`getPropertyValue('--ring')` on the root + a consumer to verify the
+override resolves (REF `240 10% 3.9%` ≡ clone `#09090b` — the trap-1
+form split, same color); (3) the reverse-walk closure — the Shift+Tab
+walks (login + dashboard footer) read with `agent-browser press
+Shift+Tab` after arming focus via script: both surfaces structurally
+IDENTICAL both apps (the session-38 named remainder closed; the only
+text diff is the clone's aria-label supersets).
+
+**Standing notes re-verified**: the failed-login Alert re-fired on the
+new build — byte-identical (368×54 @(536,738), same class string; the
+lab()/rgba() serialization split the only diff). The login is still
+theme-inert. The app-build `--ring` serialization differs (`0 0% 3.9%`
+vs `#0a0a0a` — same color). The `comments-in-source` trap fired again
+(twice this round — a comment quoting the retired `md:text-sm` pair
+inflated a count pin; reworded to prose, per the standing rule).
