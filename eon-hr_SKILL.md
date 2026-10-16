@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.27.0 (session-44 remediation complete — the sidebar shadcn architecture + the desktop collapse) · **Last updated:** 2026-10-16
-> 2026-10-15 · **State:** 656 unit + 190 E2E tests green, lint/typecheck/build
+> **Version:** 3.28.0 (session-45 remediation complete — the login interior: the runtime-injected ring cascade + the icon color family) · **Last updated:** 2026-10-16
+> **State:** 681 unit + 203 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -19,8 +19,9 @@
 > contract + the reduced-motion/keyboard-order/drag-drop supersets + the DnD-depth
 > supersets: within-column reorder + the recruitment pipeline drag-drop + the
 > shadcn peer-sidebar shell architecture with the overflow-auto scroll container +
-> the with-data careers family: the job card + the apply flow + the state-dependent
-> zero-card).
+> the desktop icon-rail collapse + the with-data careers family: the job card + the
+> apply flow + the state-dependent zero-card + the login interior: the
+> runtime-injected ring cascade + the icon color family + the loading state).
 
 ---
 
@@ -2922,3 +2923,66 @@ triples stay as-is) — normalize both to rgb triples before comparing;
 blocks inside `@layer` group rules, so the unwrap must recurse through
 grouping rules (5 media blocks on the current build); REF (v3) needs
 no polyfill (its hovers apply directly).
+
+## §57 Session 45 (parity round 44) — the login interior: the runtime-injected ring cascade + the icon color family
+
+**The frontier**: two login redeploys mid-session (the 8th + 9th —
+JS + CSS both, each time) triggered the full login re-audit per the
+round-42 precedent. The rendered geometry matched everywhere; the
+vein was the dimensions 43 rounds never reached — the rendered
+COLORS (the icon strokes/fills, the focused ring) and the loading
+interior.
+
+**THE RUNTIME-INJECTED TAILWIND BLOCK (the round's headline
+mechanism)**: REF's login ships a SECOND Tailwind stylesheet as an
+inline `<style>` (199 rules, 17,813 bytes — a complete v3.4.17 build)
+injected by the platform runtime into the HEAD AFTER the linked
+stylesheet. Its two plain-`:focus` rules sit at equal specificity
+with but LATER IN DOCUMENT ORDER than the linked CSS's
+focus-visible ring rule — so they WIN: REF's keyboard-focused inputs
+render a SLATE-400 ring, not the token ring. The clone (v4 orders
+focus-visible after focus; the login-scoped `[--ring:#09090b]`
+resolves the token) rendered zinc-950. **The fix is pure cascade**: a
+plain `<style>` rendered IN PLACE inside the login's root main (no
+`precedence` prop — React 19 keeps it in the body, AFTER the head
+links, the same winning position REF's runtime achieves) carrying
+REF's two verbatim rules; the inputs' class strings stay untouched.
+Scope: the block is login-only on REF (the app pages carry no inline
+block) and `focus:ring-slate-400` appears nowhere else in the clone's
+source — the mirror is naturally scoped.
+
+**The icon color family**: (a) the field icons — REF's verbatim
+class carries `text-slate-500` (the clone authored slate-400 — the
+icons rendered LIGHTER) + the v3 `transform` member; the Mail GLYPH
+is the OLDER lucide revision (rect first + the `8.97 5.7 a1.94` arc —
+the current lucide-react ships path-first + the `8.991 5.727 a2`
+arc), so the lucide-react Mail/Lock imports retired in favor of
+hand-authored svgs with REF's verbatim glyphs + attrs + class (the
+Lock glyph already matched); `pointer-events-none` is the clone's
+superset — dropped for REF parity; (b) the Apple logo — REF authors
+`fill="#000000"` ON THE PATH (no svg-level fill → renders BLACK);
+the clone's svg-level `currentColor` rendered the button's slate-700;
+(c) the Microsoft squares — REF's own variant order red/blue/green/
+yellow (blue TR, green BL — NOT the real logo's green/blue); (d) the
+Google icon's paths serialize `d` before `fill`.
+
+**The loading state** (never census'd before — the specs assert the
+Alert, not the submit interior): REF's Sign in swaps to
+"Signing in..." + disables + renders the spinner
+`lucide-loader-circle mr-2 h-4 w-4 animate-spin` (the glyph matches
+the clone's Loader2; only the text swap + `mr-2` were missing). The
+state lasts <40ms on REF — the capture needs the state HELD: the E2E
+holds the login API open via route interception; the live probe took
+a same-tick snapshot.
+
+**Verification lenses added**: (1) the FULL-document cascade read —
+the linked stylesheet's byte order said focus-visible should win; a
+SECOND runtime-injected inline `<style>` after it is what flips the
+ring (enumerate every style-bearing node in the document, head AND
+body, before concluding anything from one file's byte order); (2) the
+held-state capture — transient UI states (<40ms) need route
+interception (E2E) or same-tick snapshots (live probes); (3) pixel
+proof before dismissing serialization splits — the `lab()`/`rgba()`
+split on `bg-slate-50/50` converts one red unit off the pinned hex
+via lab math but rasterizes PIXEL-identical on canvas ([247,249,251,
+128] both sides).

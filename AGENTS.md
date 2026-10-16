@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 670 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 198 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 681 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 203 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2450,3 +2450,120 @@ deeper is a legitimate way to keep its authored size; (3) Chrome's
 newer engines RESOLVE color-function-valued custom properties in
 getComputedStyle (the clone's `hsl(...)` tokens read back as hex;
 REF's raw triples stay as-is — normalize both to rgb before comparing).
+
+## Session 45 — parity round 44 (the login interior: the runtime-injected ring cascade + the icon color family)
+
+The redeploy watch fired TWICE mid-session (the 8th + 9th login
+deploys — login JS `DRs9_-5K → DsVpN8yE → CTDe-raE`, login CSS
+`0a_RfWl5 → NS4V-1t3`; the app fingerprints `C-IrDy5f`/`BGNH4KkS`
+quiet throughout). Per the round-42 precedent this triggers a full
+login re-audit; the census re-ran against the final live build and
+every finding held identically across BOTH new builds. The rendered
+geometry MATCHED everywhere (the second consecutive login redeploy
+that changed authored recipes, not rendered geometry) — the round's
+vein was the dimensions 43 rounds never reached: the rendered COLORS
+and the loading interior.
+
+- **R44-A — THE RUNTIME-INJECTED TAILWIND BLOCK (the headline
+  mechanism)**: REF's login ships a SECOND Tailwind stylesheet as an
+  inline `<style>` (199 rules, 17,813 bytes — a complete v3.4.17
+  build: preflight + the auth widget's JIT subset) injected by the
+  platform runtime into the HEAD AFTER the linked stylesheet. Its two
+  plain-`:focus` selectors (`.focus\:border-slate-400:focus` +
+  `.focus\:ring-slate-400:focus`) sit at equal specificity with but
+  LATER IN DOCUMENT ORDER than the linked CSS's
+  `.focus-visible\:ring-ring:focus-visible` — so they WIN the
+  cascade: REF's keyboard-focused email/password inputs render a
+  SLATE-400 ring (rgb(148,163,184) 4px, live-read under a real Tab on
+  both bands). The clone rendered the zinc-950 token ring (v4 orders
+  focus-visible after focus, and the login-scoped `[--ring:#09090b]`
+  resolves the token). The block's other 197 rules are same-value
+  re-declarations with no later-conflicting rules on the login
+  elements (the flip analysis isolated the ring pair as the only
+  cascade flip); the app pages carry NO inline block (login-only) and
+  `focus:ring-slate-400`/`focus:border-slate-400` appear nowhere else
+  in the clone's source — the fix is naturally scoped. **The fix**: a
+  `<style>` element rendered IN PLACE inside the login's root main (a
+  plain style tag — no `precedence` prop, so React 19 keeps it in the
+  body, after the head links — the same winning cascade position
+  REF's runtime achieves) carrying REF's two verbatim rules. The
+  inputs' class strings stay REF-verbatim — the fix is PURE CASCADE.
+- **R44-B — the field icon pair**: REF's login build ships the OLDER
+  lucide revision. The Mail glyph: the envelope rect renders FIRST +
+  the older flap arc (`m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7`);
+  the current lucide-react ships path-first + the `8.991 5.727 a2`
+  arc — so the lucide-react Mail/Lock imports RETIRED and both icons
+  became hand-authored svgs with REF's verbatim glyphs, the standard
+  lucide attr set (stroke-width 2, linecap/linejoin round), and the
+  verbatim class `lucide lucide-mail absolute left-3 top-1/2
+  transform -translate-y-1/2 h-4 w-4 text-slate-500` — THREE member
+  diffs vs the clone: **text-slate-500** (the clone authored
+  slate-400 — the icons rendered LIGHTER: rgb(100,116,139) vs
+  rgb(148,163,184)), the v3 **`transform`** member (present on REF,
+  absent on the clone), and `pointer-events-none` (the clone's a11y
+  superset — KEPT absent for REF parity, the icons sit above the
+  inputs' left padding not the click target). The Lock glyph matches
+  (rect + shackle path) — only its class string needed the migration.
+- **R44-C — the social icon family's fills** (three real color
+  diffs): C1 the **Apple logo** — REF authors `fill="#000000"` ON THE
+  PATH with NO svg-level fill → renders BLACK; the clone's
+  `fill="currentColor"` at the svg level rendered the button's
+  slate-700 (rgb(51,65,85)); C2 the **Microsoft squares** — REF's own
+  path order is red(TL) → **BLUE(TR)** → **GREEN(BL)** → yellow(BR),
+  NOT the real logo's green/blue arrangement the clone shipped; C3
+  the **Google icon's path attribute order** — REF serializes `d`
+  before `fill` (a DOM serialization parity item).
+- **R44-D — the loading state** (never census'd — the E2E specs
+  assert the Alert, not the submit interior): REF's Sign in swaps its
+  text to **"Signing in..."** + disables + renders the spinner
+  `lucide lucide-loader-circle mr-2 h-4 w-4 animate-spin` (the glyph
+  `M21 12a9 9 0 1 1-6.219-8.56` matches the clone's Loader2 — only
+  the text swap + the `mr-2` member were missing; the button's gap-1
+  stacks with it identically, both sides ship both).
+- **R44-E — the title/subtitle member order** (render-neutral
+  authored-recipe migration): REF authors
+  `text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight` +
+  `text-slate-500 text-sm sm:text-base font-medium`; the clone
+  authored the same sets in a different order.
+
+**Documented non-gaps re-verified this round**: the card's
+`text-[#09090b]` resolved-hex pin + the two trap-3 sRGB gradient
+pins; the `mt-1.5` trap-6 superset; the autoComplete attrs (the kept
+a11y superset); the `lab()`/`rgba()` serialization split on
+`bg-slate-50/50` — re-proven PIXEL-identical via canvas
+rasterization ([247,249,251,128] both sides) before dismissal; the
+action elements are BUTTONS on both apps (round-40's "links" records
+measured the pre-redeploy anchors — REF's login now renders "Forgot
+password?" + "Need an account? Sign up" as buttons, already migrated
+at round 38).
+
+**Pins**: 11 new (A1-A2, B1-B3, C1-C3, D1-D2, E1) + 2 amended
+(R19-H — the slice anchor, the button text became conditional;
+R38-M1 — the glyph contract widened, the fill semantics + square
+order + attr order moved to the R44-C pins). Gates: lint 0/0 · tsc ✓
+· **681/681 unit** (+11) · build ✓ · **203/203 E2E** (+5 — the
+session45-login-interior spec: the field icon colors + glyphs, the
+social fills, the keyboard-focused slate-400 ring (the real-Tab read,
+transition-settled), the loading-state interior via route
+interception, the title order). Live: verify-r44 **7/8 raw / 8/8
+semantic MATCH** — the one raw DIFF is the documented trap-1
+serialization split (`hsl(240 10% 3.9%)` ≡ `#09090b`); the matched
+pairs: the Tab-focused ring (slate-400 both apps — the cascade fix
+proven live), the icon rendered colors, the loading-state snapshot,
+the title classes, the at-rest regression set, the style block's
+document position. The standing audits 5/5 + the route sweep 12/12
+post-change; 8 screenshots (172-175) → **252 PNG captures**. DB
+pristine (users=1, employees=1, leaveBalances=2).
+
+**The round's transferable lessons**: (1) the cascade analysis
+required the FULL document — the linked stylesheet's byte order said
+focus-visible should win; the SECOND, runtime-injected inline
+`<style>` after it is what flips the ring color (head-vs-body
+position matters, not byte order within one file); (2) the
+loading-state capture needs the state HELD — the state lasts <40ms on
+REF (the E2E used route interception to hold the API open; the live
+probe used a same-tick snapshot); (3) serialization splits deserve
+pixel proof before dismissal — the `lab()`/`rgba()` split on
+`bg-slate-50/50` converted to [249,250,252] via lab math (one red
+unit off the pinned hex) but rasterized PIXEL-identical (the alpha
+path differs, the composite lands the same).

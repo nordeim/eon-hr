@@ -2,28 +2,31 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Mail, Lock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 function GoogleIcon() {
   return (
+    /* REF's glyph (session-39 pixel-diff forensics; session-45: the path
+       attrs authored in REF's order — the geometry data first, the fill
+       second). */
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
       <path
-        fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
       />
       <path
-        fill="#34A853"
         d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
       />
       <path
-        fill="#FBBC05"
         d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        fill="#FBBC05"
       />
       <path
-        fill="#EA4335"
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
       />
     </svg>
   );
@@ -31,12 +34,13 @@ function GoogleIcon() {
 
 function MicrosoftIcon() {
   return (
-    /* REF's glyph (session-39 pixel-diff forensics): the four squares in
-       the 24-box — NOT the clone's old 23-box (the ~4% scale drift). */
+    /* REF's glyph (session-39 pixel-diff forensics; session-45: REF's own
+       square variant — the blue square top-right, the green bottom-left,
+       NOT the real logo's arrangement). */
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
       <path fill="#F25022" d="M1 1h10v10H1z" />
-      <path fill="#7FBA00" d="M13 1h10v10H13z" />
-      <path fill="#00A4EF" d="M1 13h10v10H1z" />
+      <path fill="#00A4EF" d="M13 1h10v10H13z" />
+      <path fill="#7FBA00" d="M1 13h10v10H1z" />
       <path fill="#FFB900" d="M13 13h10v10H13z" />
     </svg>
   );
@@ -44,10 +48,61 @@ function MicrosoftIcon() {
 
 function AppleIcon() {
   return (
-    /* REF's glyph (session-39 pixel-diff forensics): the classic two-path
-       Apple logo — NOT the clone's old alternate glyph. */
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+    /* REF's glyph (session-39 pixel-diff forensics; session-45: the fill
+       lives ON THE PATH in explicit black — no svg-level fill, the logo
+       renders black regardless of the button's text color). */
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        fill="#000000"
+        d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+      />
+    </svg>
+  );
+}
+
+/* REF's field icons (session-45): the login build ships the OLDER lucide
+   revision — the envelope body rect renders BEFORE the flap path, and the
+   flap's arc is the older curve. The stroke attrs + the lucide prefix
+   classes + the v3 transform member mirror REF's serialization; the color
+   is REF's slate-500 (the icons sit darker than a slate-400 would render). */
+function MailFieldIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-mail absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500"
+      aria-hidden="true"
+    >
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
+function LockFieldIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500"
+      aria-hidden="true"
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
   );
 }
@@ -114,6 +169,17 @@ function LoginForm() {
        (rounded-xl, bg-slate-50/50, border-slate-200, pl-10, 16px→14px
        responsive font) and the responsive sign-in action. */
     <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b] [--ring:#09090b]">
+      {/* REF's runtime focus-cascade mirror (session-45): the platform
+          injects a second Tailwind stylesheet INLINE (after the linked
+          one) on the login — its two plain-focus rules sit at equal
+          specificity but later in document order than the linked
+          focus-visible ring rule, so they WIN: the keyboard-focused
+          inputs render the slate-400 ring, while the Sign in's token ring
+          is untouched (the button's tail carries no plain-focus ring
+          member). This element renders in place — a plain style tag (no
+          precedence prop, so React 19 keeps it in the body, after the
+          head links) — reproducing the same winning cascade position. */}
+      <style>{`.focus\\:border-slate-400:focus{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}.focus\\:ring-slate-400:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(148 163 184 / var(--tw-ring-opacity, 1))}`}</style>
       <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-[#09090b] shadow-2xl backdrop-blur-sm">
           {/* REF's card rides its login build's --card-foreground, which is
@@ -145,10 +211,10 @@ function LoginForm() {
               </span>
             </div>
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Welcome to Eon HR
               </h1>
-              <p className="text-sm font-medium text-slate-500 sm:text-base">
+              <p className="text-slate-500 text-sm sm:text-base font-medium">
                 Sign in to continue
               </p>
             </div>
@@ -222,10 +288,7 @@ function LoginForm() {
                   <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
                   {/* Reference: envelope icon inline inside the field. */}
                   <div className="relative mt-1.5">
-                    <Mail
-                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                      aria-hidden="true"
-                    />
+                    <MailFieldIcon />
                     {/* REF's login-build input verbatim (session-43): the
                         ring-2/offset-2 base with the ring TOKEN in base
                         (the page tail's PLAIN-focus slate-400 ring member
@@ -252,10 +315,7 @@ function LoginForm() {
                   <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
                   {/* Reference: lock icon inline inside the field. */}
                   <div className="relative mt-1.5">
-                    <Lock
-                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                      aria-hidden="true"
-                    />
+                    <LockFieldIcon />
                     <input
                       id="password"
                       type="password"
@@ -292,8 +352,8 @@ function LoginForm() {
                   disabled={loading}
                   className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                  Sign in
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
 
                 {/* REF's links row (session-39): flex-col at mobile (the

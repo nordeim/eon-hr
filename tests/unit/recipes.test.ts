@@ -1581,10 +1581,12 @@ describe("session-20 hover recipes (parity round 19)", () => {
   it("R19-H: login Sign in carries REF's shadow-sm (rgba(0,0,0,0.05) 0 1px 2px)", () => {
     /* Session-39 amendment (superseded session-40): the social buttons
        dropped type="submit" (R39-A1), so the first indexOf('type="submit"')
-       is the Sign in again — the disabled={loading} anchor stays anyway. */
+       is the Sign in again — the disabled={loading} anchor stays anyway.
+       Session-45 amendment: the text became conditional (the R44-D1 swap),
+       so the closing anchor is the conditional's tail. */
     const signinBlock = loginPage.slice(
       loginPage.indexOf("disabled={loading}"),
-      loginPage.indexOf("Sign in</button>")
+      loginPage.indexOf('"Sign in"}</button>')
     );
     expect(signinBlock).toContain("shadow-sm");
   });
@@ -3748,9 +3750,8 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39).not.toMatch(/<div className="w-full space-y-2 sm:space-y-3">/);
   });
 
-  it("R38-M1: the social icons are REF's exact glyphs (the pixel-diff forensics addendum — the Microsoft icon's viewBox is 0 0 24 24, NOT the clone's 0 0 23 23; the Apple icon is REF's classic two-path glyph, NOT the clone's alternate)", () => {
+  it("R38-M1: the social icons are REF's exact glyphs (the pixel-diff forensics addendum — the Microsoft icon's viewBox is 0 0 24 24, NOT the clone's 0 0 23 23; the Apple icon is REF's classic two-path glyph, NOT the clone's alternate; session-45 amendment: the fill semantics + square order moved to the R44-C pins)", () => {
     expect(login39).not.toContain('viewBox="0 0 23 23"');
-    expect(login39).toMatch(/<svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">/);
     // REF's Apple leaf path (the second path of the two-path glyph)
     expect(login39).toContain("M13 3.5c.73-.83 1.94-1.46 2.94-1.5");
     // REF's Microsoft squares live in the 24-box (M1 1h10v10H1z family × 4)
@@ -4393,5 +4394,137 @@ describe("session-44 sidebar shadcn architecture + desktop collapse (parity roun
     expect(appShell44).toContain('if (window.matchMedia("(min-width: 768px)").matches)');
     expect(appShell44).toContain("setCollapsed((c) => !c);");
     expect(appShell44).toContain("setMobileOpen(true);");
+  });
+});
+
+describe("session-45 login redeploy re-audit (parity round 44 — the icon colors + the runtime ring cascade)", () => {
+  /* Round 44's census: REF's login redeployed TWICE mid-session (the 8th
+     + 9th deploys) — the rendered surface at rest stayed byte-identical,
+     but the census reached the COLOR + INTERIOR dimensions 43 rounds never
+     measured: (1) the platform runtime injects a second Tailwind v3.4.17
+     stylesheet INLINE after the linked one, whose two plain-:focus rules
+     beat focus-visible:ring-ring in the cascade — the keyboard-focused
+     inputs render SLATE-400 on REF; (2) the field icons are slate-500 with
+     the v3 transform member (the clone rendered slate-400 lighter); (3)
+     the Apple logo is path-level BLACK (the clone's currentColor rendered
+     slate-700) and REF's Microsoft squares ship its own blue/green
+     variant; (4) the loading state swaps the text + carries the mr-2
+     spinner; (5) the title/subtitle member order. */
+
+  const loginPage45 = read("src", "app", "login", "page.tsx");
+
+  // --- A. the runtime-injected ring cascade ---
+
+  it("R44-A1: the login ships the runtime-mirror style block — REF's two verbatim focus rules, rendered IN PLACE (a plain style element lands after the head links — the same winning cascade position the platform's injected block occupies)", () => {
+    // the two rules verbatim from REF's runtime block (the escaped class
+    // selectors double-escaped for the template literal)
+    expect(loginPage45).toContain(
+      ".focus\\\\:border-slate-400:focus{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}"
+    );
+    expect(loginPage45).toContain(
+      ".focus\\\\:ring-slate-400:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(148 163 184 / var(--tw-ring-opacity, 1))}"
+    );
+    // a plain in-place style element (no precedence prop — React 19 only
+    // hoists styles that carry one)
+    expect(loginPage45).toMatch(/<style>\{`/);
+  });
+
+  it("R44-A2: the input class strings stay REF-verbatim (the fix is PURE CASCADE — no member changes on the inputs themselves; the ring-ring token appears on the two inputs AND the Sign in's base)", () => {
+    expect(loginPage45.match(/focus-visible:ring-ring/g)?.length).toBe(3);
+    expect(loginPage45.match(/focus:ring-slate-400/g)?.length).toBe(2);
+    expect(loginPage45.match(/focus:border-slate-400/g)?.length).toBe(2);
+  });
+
+  // --- B. the field icon pair ---
+
+  it("R44-B1: the Mail field icon is hand-authored with REF's older-lucide glyph (the envelope rect FIRST + the 1.94-arc flap) and the verbatim class — the v3 transform member + slate-500, NO pointer-events-none (the clone's slate-400 icons rendered lighter)", () => {
+    const i = loginPage45.indexOf("lucide lucide-mail");
+    expect(i).toBeGreaterThan(0);
+    const block = loginPage45.slice(i - 60, i + 800);
+    expect(block).toContain(
+      "lucide lucide-mail absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500"
+    );
+    expect(block).not.toContain("pointer-events-none");
+    expect(block).not.toContain("text-slate-400");
+    expect(block).toContain('<rect width="20" height="16" x="2" y="4" rx="2" />');
+    expect(block).toContain('d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"');
+  });
+
+  it("R44-B2: the Lock field icon carries the same verbatim class (slate-500 + the transform member) with REF's glyph (the ry-2 body rect + the shackle path)", () => {
+    const i = loginPage45.indexOf("lucide lucide-lock");
+    expect(i).toBeGreaterThan(0);
+    const block = loginPage45.slice(i - 60, i + 800);
+    expect(block).toContain(
+      "lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500"
+    );
+    expect(block).not.toContain("pointer-events-none");
+    expect(block).toContain('<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />');
+    expect(block).toContain('d="M7 11V7a5 5 0 0 1 10 0v4"');
+  });
+
+  it("R44-B3: the lucide-react Mail/Lock imports retire (the hand-authored svgs replace them — REF's glyphs are the older lucide revision the current package no longer ships)", () => {
+    expect(loginPage45).not.toMatch(/import \{[^}]*\bMail\b[^}]*\} from "lucide-react"/);
+    expect(loginPage45).not.toMatch(/import \{[^}]*\bLock\b[^}]*\} from "lucide-react"/);
+    // the old component usages (with props/whitespace after the tag name);
+    // the FieldIcon replacements do not match this form
+    expect(loginPage45).not.toMatch(/<Mail[\s/>]/);
+    expect(loginPage45).not.toMatch(/<Lock[\s/>]/);
+  });
+
+  // --- C. the social icon family ---
+
+  it("R44-C1: the Apple logo carries the path-level BLACK fill (REF authors fill on the path with NO svg-level fill — the clone's currentColor rendered the button's slate-700 gray)", () => {
+    const i = loginPage45.indexOf("function AppleIcon");
+    const block = loginPage45.slice(i, i + 1400);
+    expect(block).toContain('fill="#000000"');
+    expect(block).not.toContain('fill="currentColor"');
+    // REF's classic two-path leaf glyph stays
+    expect(block).toContain("M13 3.5c.73-.83 1.94-1.46 2.94-1.5");
+  });
+
+  it("R44-C2: the Microsoft squares ship REF's own variant order — red, BLUE top-right, GREEN bottom-left, yellow (NOT the real logo's red/green/blue/yellow the clone shipped)", () => {
+    const i = loginPage45.indexOf("function MicrosoftIcon");
+    const block = loginPage45.slice(i, i + 900);
+    const order = [
+      '#F25022" d="M1 1',
+      '#00A4EF" d="M13 1',
+      '#7FBA00" d="M1 13',
+      '#FFB900" d="M13 13',
+    ];
+    let last = -1;
+    for (const frag of order) {
+      const at = block.indexOf(frag);
+      expect(at).toBeGreaterThan(last);
+      last = at;
+    }
+  });
+
+  it("R44-C3: the Google icon's paths author d BEFORE fill (REF's serialization order — the clone's fill-first reordered the DOM attributes)", () => {
+    const i = loginPage45.indexOf("function GoogleIcon");
+    const block = loginPage45.slice(i, i + 1600);
+    // the geometry data first, the fill second (REF's attribute order)
+    expect(block).toMatch(/d="M22\.56[^"]*"\s*\n\s*fill="#4285F4"/);
+    expect(block).not.toMatch(/fill="#4285F4"\s*\n\s*d=/);
+  });
+
+  // --- D. the loading state ---
+
+  it("R44-D1: the Sign in text swaps to REF's loading copy while submitting (the button ALSO disables — the disabled anchor stays)", () => {
+    expect(loginPage45).toContain('disabled={loading}');
+    expect(loginPage45).toContain('{loading ? "Signing in..." : "Sign in"}');
+  });
+
+  it("R44-D2: the spinner carries REF's mr-2 member (the button's gap-1 stacks with it — identical by construction, both sides ship both)", () => {
+    expect(loginPage45).toContain('className="mr-2 h-4 w-4 animate-spin"');
+    expect(loginPage45).not.toContain('className="h-4 w-4 animate-spin"');
+  });
+
+  // --- E. the title/subtitle member order ---
+
+  it("R44-E1: the title + subtitle adopt REF's verbatim member order (render-neutral authored-recipe migration — same sets, REF's order)", () => {
+    expect(loginPage45).toContain('className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight"');
+    expect(loginPage45).toContain('className="text-slate-500 text-sm sm:text-base font-medium"');
+    expect(loginPage45).not.toContain('className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"');
+    expect(loginPage45).not.toContain('className="text-sm font-medium text-slate-500 sm:text-base"');
   });
 });
