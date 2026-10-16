@@ -1483,9 +1483,10 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
     expect(shell).toContain("focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
   });
 
-  it("R18-E: login inputs carry REF's page-level slate-400 focus pair (session-43 amendment — the redeploy switched the ring member to the PLAIN focus: variant, un-killing the base's focus-visible:ring-ring in the merge)", () => {
+  it("R18-E: login inputs carry REF's page-level slate-400 focus pair (session-43 amendment — the redeploy switched the ring member to the PLAIN focus: variant, un-killing the base's focus-visible:ring-ring in the merge; session-46 amendment — the hidden views' four sibling inputs also carry the pair, so the count anchors to the SIGN-IN form region)", () => {
+    const signinRegion = login.slice(login.indexOf('id="email"'), login.indexOf('flex flex-col sm:flex-row'));
     expect(login).toContain("focus:border-slate-400 focus:ring-slate-400");
-    expect(login.match(/focus:ring-slate-400/g)?.length).toBe(2);
+    expect(signinRegion.match(/focus:ring-slate-400/g)?.length).toBe(2);
     expect(login).not.toContain("focus-visible:ring-slate-400");
   });
 
@@ -3641,9 +3642,9 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
 
   const login39 = read("src", "app", "login", "page.tsx");
 
-  it("R38-G1: the login canvas root is REF's MAIN element with the pinned sRGB gradient + p-4 + the zinc-950 foreground + the session-43 login-scoped zinc-950 --ring override (REF's login build uses the zinc palette — computed rgb(9,9,11) on the typed text; the app pages keep the pinned neutral-950 token)", () => {
+  it("R38-G1: the login canvas root is REF's MAIN element with the pinned sRGB gradient + p-4 + the zinc-950 foreground + the session-43 login-scoped zinc-950 --ring override + the session-46 --foreground sibling (REF's login build uses the zinc palette — computed rgb(9,9,11) on the typed text AND on the Alert family's text-foreground; the app pages keep the pinned neutral-950 token)", () => {
     expect(login39).toMatch(
-      /<main className="flex min-h-screen items-center justify-center bg-\[linear-gradient\(to_bottom_right,#f8fafc,#f1f5f9\)\] p-4 text-\[#09090b\] \[--ring:#09090b\]">/
+      /<main className="flex min-h-screen items-center justify-center bg-\[linear-gradient\(to_bottom_right,#f8fafc,#f1f5f9\)\] p-4 text-\[#09090b\] \[--ring:#09090b\] \[--foreground:#09090b\]">/
     );
     expect(login39).not.toMatch(/<div className="flex min-h-screen items-center justify-center bg-\[linear-gradient/);
   });
@@ -3652,9 +3653,10 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39.match(/h-11 sm:h-12/g)?.length).toBe(3);
   });
 
-  it("R38-A2: the login inputs are REF's responsive font — text-base (base position) + md:text-sm (base-end) in the session-43 verbatim string (16px mobile / 14px ≥768px; the flat text-sm measured 14px at mobile vs REF's 16px)", () => {
-    expect(login39.match(/text-base/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(login39.match(/md:text-sm/g)?.length).toBe(2);
+  it("R38-A2: the login inputs are REF's responsive font — text-base (base position) + md:text-sm (base-end) in the session-43 verbatim string (16px mobile / 14px ≥768px; the flat text-sm measured 14px at mobile vs REF's 16px; session-46 amendment — the hidden views' sibling inputs carry the same md member, so the count anchors to the SIGN-IN form region)", () => {
+    const signinRegion = login39.slice(login39.indexOf('id="email"'), login39.indexOf('flex flex-col sm:flex-row'));
+    expect(signinRegion.match(/text-base/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(signinRegion.match(/md:text-sm/g)?.length).toBe(2);
   });
 
   it("R38-B1: the login inputs render REF's placeholder slate-600 (rgb(71,85,105) — live-measured on both fields; NOT the base's muted-foreground slate-500 rgb(100,116,139))", () => {
@@ -3795,9 +3797,10 @@ describe("session-40 shell restructure + input migration + careers org-view (par
     expect(boot.indexOf("/login")).toBeLessThan(boot.indexOf("app_lang"));
   });
 
-  it("R39-C1: the login inputs carry the ring-2/offset-2 family IN BASE (session-43 amendment — the redeploy adopted the base; the retired counters' surviving members: ring-offset-background + the focus-visible ring triple, now inside the verbatim string; NO shadow/transition members anywhere on the inputs)", () => {
+  it("R39-C1: the login inputs carry the ring-2/offset-2 family IN BASE (session-43 amendment — the redeploy adopted the base; the retired counters' surviving members: ring-offset-background + the focus-visible ring triple, now inside the verbatim string; NO shadow/transition members anywhere on the inputs; session-46 amendment — the hidden views' siblings carry the family too, so the count anchors to the SIGN-IN form region)", () => {
+    const signinRegion = login40.slice(login40.indexOf('id="email"'), login40.indexOf('flex flex-col sm:flex-row'));
     expect(login40.match(/ring-offset-background/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(login40.match(/focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2/g)?.length).toBe(3);
+    expect(signinRegion.match(/focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2/g)?.length).toBe(3);
     expect(login40).not.toContain("shadow-none transition-none");
   });
 
@@ -4429,10 +4432,11 @@ describe("session-45 login redeploy re-audit (parity round 44 — the icon color
     expect(loginPage45).toMatch(/<style>\{`/);
   });
 
-  it("R44-A2: the input class strings stay REF-verbatim (the fix is PURE CASCADE — no member changes on the inputs themselves; the ring-ring token appears on the two inputs AND the Sign in's base)", () => {
-    expect(loginPage45.match(/focus-visible:ring-ring/g)?.length).toBe(3);
-    expect(loginPage45.match(/focus:ring-slate-400/g)?.length).toBe(2);
-    expect(loginPage45.match(/focus:border-slate-400/g)?.length).toBe(2);
+  it("R44-A2: the input class strings stay REF-verbatim (the fix is PURE CASCADE — no member changes on the inputs themselves; the ring-ring token appears on the two inputs AND the Sign in's base; session-46 amendment — the hidden views' four sibling inputs + two CTAs carry the tokens too, so the counts anchor to the SIGN-IN form region)", () => {
+    const signinRegion = loginPage45.slice(loginPage45.indexOf('id="email"'), loginPage45.indexOf('flex flex-col sm:flex-row'));
+    expect(signinRegion.match(/focus-visible:ring-ring/g)?.length).toBe(3);
+    expect(signinRegion.match(/focus:ring-slate-400/g)?.length).toBe(2);
+    expect(signinRegion.match(/focus:border-slate-400/g)?.length).toBe(2);
   });
 
   // --- B. the field icon pair ---
@@ -4526,5 +4530,162 @@ describe("session-45 login redeploy re-audit (parity round 44 — the icon color
     expect(loginPage45).toContain('className="text-slate-500 text-sm sm:text-base font-medium"');
     expect(loginPage45).not.toContain('className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"');
     expect(loginPage45).not.toContain('className="text-sm font-medium text-slate-500 sm:text-base"');
+  });
+});
+
+describe("session-46 hidden login flows (parity round 45 — the password-reset + sign-up views)", () => {
+  /* Round 45's census (the 11th login deploy): the login card's w-full
+     column swaps its ENTIRE content when the sign-in action buttons are
+     clicked — two view-swapped flows 44 rounds never censused (they leave
+     no DOM trace until clicked). REF's password-reset flow: the back
+     button + title group + one-field form, the "Sending..." loading swap,
+     then the "Check your email" success view (the icon circle + the
+     green Alert + the submitted email span) with ANTI-ENUMERATION
+     verified live (a non-existent email renders the identical view).
+     REF's sign-up flow: a bare space-y-4 wrapper, the H2 direct (no
+     subtitle), the three-field form (the bare space-y-3 fields group),
+     the "Creating account..." swap, and the duplicate-email error with
+     REF's verbatim copy. The hidden views' inputs are a SIBLING family
+     (h-10 sm:h-11 + placeholder:text-slate-400; the sign-in pair ships
+     h-11 sm:h-12 + placeholder:text-slate-600) and their field icons sit
+     at slate-400 (the re-measured sign-in pair is slate-500). The
+     trap-6 restorations: the -mb-2 back buttons kill v4's :where space-y
+     margin, so the following elements author the mt members (the title
+     group mt-4 sm:mt-6 / the signup H2 mt-4); the field units' relative
+     wrappers author the r42 mt-1.5. */
+
+  const loginPage46 = read("src", "app", "login", "page.tsx");
+  const alertUi46 = read("src", "components", "ui", "alert.tsx");
+  let forgotRoute46 = "";
+  try { forgotRoute46 = read("src", "app", "api", "auth", "forgot-password", "route.ts"); } catch { /* RED until created */ }
+  let signupRoute46 = "";
+  try { signupRoute46 = read("src", "app", "api", "auth", "signup", "route.ts"); } catch { /* RED until created */ }
+
+  // --- A. the password-reset view ---
+
+  it("R45-A1: the login swaps views behind the action buttons (the card's w-full column unmounts the logo/title/social/divider entirely — the clone's former not-configured error Alerts retire)", () => {
+    expect(loginPage46).toMatch(/type LoginView = "signin" \| "reset" \| "reset-success" \| "signup";/);
+    expect(loginPage46).toMatch(/useState<LoginView>\("signin"\)/);
+    expect(loginPage46).not.toContain("Password reset is not configured");
+    expect(loginPage46).not.toContain("Sign up is disabled");
+    // the two action buttons swap views; the three back buttons return
+    expect(loginPage46).toMatch(/onClick=\{\(\) => \{ setView\("reset"\)/);
+    expect(loginPage46).toMatch(/onClick=\{\(\) => \{ setView\("signup"\)/);
+    expect(loginPage46.match(/onClick=\{backToSignin\}/g)?.length).toBe(3);
+  });
+
+  it("R45-A2: the back button is REF's verbatim recipe — the -mb-2 mb + the arrow-left glyph (m12 19-7-7 7-7 + M19 12H5) hand-authored", () => {
+    expect(loginPage46.match(/className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors -mb-2"/g)?.length).toBe(2);
+    expect(loginPage46).toContain('className="lucide lucide-arrow-left h-4 w-4"');
+    expect(loginPage46).toContain('d="m12 19-7-7 7-7"');
+    expect(loginPage46).toContain('d="M19 12H5"');
+  });
+
+  it("R45-A3: the reset title group is REF's recipe with the trap-6 restoration (text-center space-y-2 + the authored mt-4 sm:mt-6 — the -mb-2 kills v4's :where space-y mb, the member restores REF's v3-stacked 8/16px gap)", () => {
+    expect(loginPage46).toContain('className="text-center space-y-2 mt-4 sm:mt-6"');
+    expect(loginPage46).toContain('className="text-xl sm:text-2xl font-bold text-slate-900"');
+    expect(loginPage46).toContain("Reset your password");
+    expect(loginPage46).toContain('className="text-slate-600 text-sm sm:text-base"');
+    expect(loginPage46).toContain("Enter your email and we&apos;ll send you a link to reset your password");
+  });
+
+  it("R45-A4: the reset field unit is the sign-in's architecture with the sibling family — space-y-1.5 + the mt-1.5 relative wrapper + the slate-400 mail icon (the hidden views' icons sit LIGHTER than the sign-in pair's slate-500)", () => {
+    const i = loginPage46.indexOf("Reset your password");
+    const block = loginPage46.slice(i, i + 1600);
+    expect(block).toContain('className="space-y-1.5"');
+    expect(block).toContain('className="relative mt-1.5"');
+    expect(block).toContain("<MailFieldIconSlate400 />");
+    // the icon component's verbatim class (the hand-authored definition)
+    expect(loginPage46).toContain("lucide lucide-mail absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400");
+  });
+
+  it("R45-A5: the reset input is the SIBLING family verbatim (the shared base with h-10 sm:h-11 44px + placeholder:text-slate-400 — NOT the sign-in's h-11 sm:h-12 + slate-600; no autocomplete attr; the reset copy ends at the placeholder member while the signup trio appends the responsive font pair)", () => {
+    expect(loginPage46.match(/rounded-xl placeholder:text-slate-400"/g)?.length).toBe(1);
+    expect(loginPage46.match(/rounded-xl placeholder:text-slate-400 text-sm sm:text-base"/g)?.length).toBe(3);
+    expect(loginPage46).toContain('py-2 text-base ring-offset-background');
+    expect(loginPage46).toContain('placeholder="you@example.com"');
+  });
+
+  it("R45-A6: the reset CTA is REF's verbatim dark block with the loading swap (Send reset link → Sending... + the r44 mr-2 spinner family)", () => {
+    expect(loginPage46).toContain('className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"');
+    expect(loginPage46).toContain('{loading ? "Sending..." : "Send reset link"}');
+  });
+
+  // --- B. the sign-up view ---
+
+  it("R45-B1: the signup wrapper is BARE space-y-4 (16px both bands — the reset's sm:space-y-6 gives 24px desktop) with the H2 DIRECT (no title group, no subtitle) + the trap-6 mt-4 restoration", () => {
+    const i = loginPage46.indexOf("Create your account");
+    const block = loginPage46.slice(i - 700, i + 200);
+    expect(block).toContain('className="space-y-4"');
+    expect(loginPage46).toContain('className="text-xl sm:text-2xl font-bold text-slate-900 mt-4"');
+    expect(loginPage46.match(/Create your account[\s\S]{0,600}?text-slate-600/g)?.length ?? 0).toBe(0);
+  });
+
+  it("R45-B2: the signup form is space-y-3 sm:space-y-4 around a BARE space-y-3 fields group — three units with REF's ids + placeholders (email/password/confirmPassword) and the TAIL font pair the reset input lacks", () => {
+    const i = loginPage46.indexOf("Create your account");
+    const block = loginPage46.slice(i, i + 4200);
+    expect(block).toContain('className="space-y-3 sm:space-y-4"');
+    expect(block).toContain('className="space-y-3"');
+    expect(block.match(/className="space-y-1\.5"/g)?.length).toBe(3);
+    expect(block.match(/className="relative mt-1\.5"/g)?.length).toBe(3);
+    expect(loginPage46.match(/rounded-xl placeholder:text-slate-400 text-sm sm:text-base"/g)?.length).toBe(3);
+    expect(loginPage46).toContain('htmlFor="confirmPassword"');
+    expect(loginPage46).toContain('placeholder="Min. 8 characters"');
+    expect(loginPage46).toContain('placeholder="Re-enter password"');
+    // the two lock usages share ONE hand-authored definition (the class string exists once in the source)
+    expect(loginPage46.match(/<LockFieldIconSlate400 \/>/g)?.length).toBe(2);
+    expect(loginPage46).toContain("lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400");
+  });
+
+  it("R45-B3: the signup CTA swaps to REF's loading copy (Create account → Creating account... + the spinner)", () => {
+    expect(loginPage46).toContain('{loading ? "Creating account..." : "Create account"}');
+  });
+
+  it("R45-B4: the duplicate-email error renders INSIDE the form (between the fields group and the CTA) in the r33 error Alert family — the client also guards the confirm-mismatch path (the unmeasured superset)", () => {
+    const i = loginPage46.indexOf("onSignupSubmit");
+    const block = loginPage46.slice(loginPage46.indexOf('className="space-y-3 sm:space-y-4"', i), loginPage46.indexOf("Create account", i) + 60);
+    expect(block.indexOf("variant=\"error\"")).toBeGreaterThan(-1);
+    expect(loginPage46).toContain("Passwords do not match");
+  });
+
+  // --- C. the reset-success view ---
+
+  it("R45-C1: the success view's icon circle is REF's recipe (mx-auto w-14/h-14 sm:w-16/h-16 bg-slate-100 rounded-full) wrapping the older-lucide mail at slate-700 h-7/w-7 sm:h-8/w-8", () => {
+    expect(loginPage46).toContain('className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center"');
+    expect(loginPage46).toContain("lucide lucide-mail h-7 w-7 sm:h-8 sm:w-8 text-slate-700");
+  });
+
+  it("R45-C2: the success title group is the space-y-2 family with the P's two-line structure (the instruction line + the br + the font-medium slate-900 email span)", () => {
+    expect(loginPage46).toContain("Check your email");
+    expect(loginPage46).toContain("We&apos;ve sent password reset instructions to");
+    expect(loginPage46).toContain('<span className="font-medium text-slate-900">{resetEmail}</span>');
+  });
+
+  it("R45-C3: the green Alert is the success variant (the alert component ships bg-green-50/70 border-green-200 — the r33 error sibling) with REF's verbatim description copy + the bottom full-width back button", () => {
+    expect(alertUi46).toContain('success: "text-foreground bg-green-50/70 border-green-200 rounded-xl"');
+    expect(loginPage46).toContain('<Alert variant="success">');
+    expect(loginPage46).toContain("Please check your email for the password reset link. It may take a few minutes to arrive.");
+    expect(loginPage46).toContain('className="w-full flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"');
+  });
+
+  // --- D. the API seams ---
+
+  it("R45-D1: /api/auth/forgot-password is the anti-enumeration contract (zod-validated; ALWAYS ok — no account-existence signal in the response either way, the behavior verified live with a non-existent email)", () => {
+    expect(forgotRoute46).toContain("guard");
+    expect(forgotRoute46).toMatch(/findUnique|findFirst/);
+    expect(forgotRoute46).not.toMatch(/err\(/);
+  });
+
+  it("R45-D2: /api/auth/signup returns REF's verbatim duplicate copy + the auto-login superset (hashPassword + createSessionCookie on the new-email path)", () => {
+    expect(signupRoute46).toContain("A user with this email already exists");
+    expect(signupRoute46).toContain("hashPassword");
+    expect(signupRoute46).toContain("setSessionCookie");
+    expect(signupRoute46).toMatch(/role:\s*"employee"/);
+  });
+
+  // --- E. the foreground token ---
+
+  it("R45-E1: the login main gains the zinc-950 --foreground pin (the r42 --ring sibling — REF's login build sets 240 10% 3.9% at :root; the Alert family's text-foreground resolves rgb(9,9,11), the app pages keep the shared neutral token)", () => {
+    expect(loginPage46).toMatch(/\[--ring:#09090b\] \[--foreground:#09090b\]">/);
   });
 });

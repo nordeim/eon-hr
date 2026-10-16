@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
  * 12px radius, p-4, text-foreground) wrapping an AlertDescription
  * carrying `text-red-700 text-sm` — NO icon rendered on REF's
  * zero-data surface (the svg slot classes stay for future use).
+ * Session-46 (R45-C3): the reset-success flow ships the GREEN sibling
+ * (`bg-green-50/70 border-green-200` — measured rgba(240,253,244,.7) bg,
+ * green-200 border, same rounded-xl + p-4 family).
  */
 const alertVariants = cva(
   "relative w-full border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
@@ -23,6 +26,7 @@ const alertVariants = cva(
         destructive:
           "text-destructive [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
         error: "text-foreground bg-red-50/70 border-red-200 rounded-xl",
+        success: "text-foreground bg-green-50/70 border-green-200 rounded-xl",
       },
     },
     defaultVariants: {

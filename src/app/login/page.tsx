@@ -107,6 +107,96 @@ function LockFieldIcon() {
   );
 }
 
+/* Session-46: the hidden views' icon family — the password-reset and
+   sign-up fields ship the SAME older-lucide glyphs at slate-400 (the
+   lighter stop — the sign-in pair above is the re-measured slate-500),
+   and the flows' back buttons carry the arrow-left. */
+function MailFieldIconSlate400() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-mail absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"
+      aria-hidden="true"
+    >
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
+function LockFieldIconSlate400() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"
+      aria-hidden="true"
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function ArrowLeftIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-arrow-left h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
+    </svg>
+  );
+}
+
+/* The reset-success view's envelope — the same older-lucide mail glyph
+   at the large slate-700 cut inside the slate-100 circle. */
+function MailCircleIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-mail h-7 w-7 sm:h-8 sm:w-8 text-slate-700"
+      aria-hidden="true"
+    >
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
 export default function LoginPage() {
   return (
     <React.Suspense
@@ -121,6 +211,8 @@ export default function LoginPage() {
   );
 }
 
+type LoginView = "signin" | "reset" | "reset-success" | "signup";
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
@@ -128,6 +220,22 @@ function LoginForm() {
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  /* Session-46: the card's w-full column swaps its ENTIRE content behind
+     the action buttons (REF's two hidden flows — the logo, welcome title,
+     social row, and or-divider all unmount). Dedicated field state per
+     view: REF unmounts the fields on every swap, so values never persist
+     across views. */
+  const [view, setView] = React.useState<LoginView>("signin");
+  const [resetEmail, setResetEmail] = React.useState("");
+  const [signupEmail, setSignupEmail] = React.useState("");
+  const [signupPassword, setSignupPassword] = React.useState("");
+  const [signupConfirm, setSignupConfirm] = React.useState("");
+
+  function backToSignin() {
+    setView("signin");
+    setError(null);
+    setLoading(false);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -154,6 +262,61 @@ function LoginForm() {
     }
   }
 
+  async function onResetSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      /* Anti-enumeration: the endpoint acknowledges every address the
+         same way (REF renders the identical success view for existing
+         and non-existent emails — verified live). */
+      await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      setView("reset-success");
+    } catch {
+      setError("Network error — please try again");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onSignupSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    /* The confirm guard (the unmeasured superset — the path has no REF
+       contract, so the clone ships the sensible production guard). */
+    if (signupPassword !== signupConfirm) {
+      setError("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: signupEmail,
+          password: signupPassword,
+          confirmPassword: signupConfirm,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        setError(json.error?.message ?? "Sign up failed");
+        return;
+      }
+      router.replace("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Network error — please try again");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     /* Reference login shell (session-4 re-measurement; session-39 re-audit
        after REF's login redeploy; session-43 re-audit after the JS+CSS
@@ -168,7 +331,7 @@ function LoginForm() {
        glow-wrapped circular logo, the responsive 44/48px inputs
        (rounded-xl, bg-slate-50/50, border-slate-200, pl-10, 16px→14px
        responsive font) and the responsive sign-in action. */
-    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b] [--ring:#09090b]">
+    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b] [--ring:#09090b] [--foreground:#09090b]">
       {/* REF's runtime focus-cascade mirror (session-45): the platform
           injects a second Tailwind stylesheet INLINE (after the linked
           one) on the login — its two plain-focus rules sit at equal
@@ -200,6 +363,11 @@ function LoginForm() {
               space-y-3 + the my-6 or-divider + the form). */}
           <div className="p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10">
             <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
+            {/* Session-46: REF's hidden flows unmount the logo + welcome
+                title entirely — the flex-col's only child in the reset /
+                reset-success / signup views is the w-full column below. */}
+            {view === "signin" ? (
+            <>
             {/* Circular brand mark — REF's structure (session-39): a
                 relative group wrapper, the blur-xl slate gradient glow
                 (opacity-30 → 40 on hover), then the self-hosted logo copy
@@ -218,6 +386,8 @@ function LoginForm() {
                 Sign in to continue
               </p>
             </div>
+            </>
+            ) : null}
 
             <div className="w-full">
             {/* REF's w-full column (session-43 re-measure): THREE direct
@@ -225,7 +395,10 @@ function LoginForm() {
                 buttons), the my-6 or-divider, and the form. The clone's
                 former single space-y-3 wrapper around all three retired
                 (render-neutral: the divider's my-6 owns the 24px gaps
-                either way). */}
+                either way). Session-46: the column's content swaps per
+                view — the hidden flows replace the trio entirely. */}
+            {view === "signin" ? (
+            <>
             <div className="space-y-3">
             {/* REF's social buttons (session-40 re-measure): NO type attr
                 (the latest redeploy dropped it — REF renders type:null; they
@@ -364,20 +537,195 @@ function LoginForm() {
                   <button
                     type="button"
                     className="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"
-                    onClick={() => setError("Password reset is not configured on this deployment")}
+                    onClick={() => { setView("reset"); setError(null); }}
                   >
                     Forgot password?
                   </button>
                   <button
                     type="button"
                     className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
-                    onClick={() => setError("Sign up is disabled on this demo deployment")}
+                    onClick={() => { setView("signup"); setError(null); }}
                   >
                     Need an account? <span className="font-medium text-slate-700">Sign up</span>
                   </button>
                 </div>
               </div>
             </form>
+            </>
+            ) : view === "reset" ? (
+            /* REF's password-reset view (session-46 census): the wrapper's
+               -mb-2 back button + the title group + the one-field form.
+               The authored mt-4 sm:mt-6 on the title group is the trap-6
+               restoration — the button's -mb-2 beats v4's :where space-y
+               mb, so the member restores REF's v3-stacked 8/16px gap. */
+            <div className="space-y-4 sm:space-y-6">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors -mb-2"
+                onClick={backToSignin}
+              >
+                <ArrowLeftIcon />
+                Back to sign in
+              </button>
+              <div className="text-center space-y-2 mt-4 sm:mt-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                  Reset your password
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base">
+                  Enter your email and we&apos;ll send you a link to reset your password
+                </p>
+              </div>
+              <form onSubmit={onResetSubmit} className="space-y-4 sm:space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
+                  <div className="relative mt-1.5">
+                    <MailFieldIconSlate400 />
+                    {/* The sibling input family (session-46): the hidden
+                        views ship the SHORTER height pair with the lighter
+                        placeholder stop — NOT the sign-in pair's taller
+                        responsive pair with its darker placeholder. NO
+                        autocomplete (REF renders none on these fields). */}
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                      className="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-10 sm:h-11 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-400"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {error ? (
+                  <Alert variant="error">
+                    <AlertDescription className="text-red-700">{error}</AlertDescription>
+                  </Alert>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
+                >
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  {loading ? "Sending..." : "Send reset link"}
+                </button>
+              </form>
+            </div>
+            ) : view === "reset-success" ? (
+            /* REF's reset-success view (session-46 census): the icon circle
+               + the two-line P with the submitted email, the GREEN Alert,
+               and the full-width back button. The view renders identically
+               for existing and non-existent emails (anti-enumeration). */
+            <div className="space-y-4 sm:space-y-6">
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                  <MailCircleIcon />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                    Check your email
+                  </h2>
+                  <p className="text-slate-600 text-sm sm:text-base">
+                    We&apos;ve sent password reset instructions to<br />
+                    <span className="font-medium text-slate-900">{resetEmail}</span>
+                  </p>
+                </div>
+              </div>
+              <Alert variant="success">
+                <AlertDescription className="text-green-700">
+                  Please check your email for the password reset link. It may take a few minutes to arrive.
+                </AlertDescription>
+              </Alert>
+              <button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"
+                onClick={backToSignin}
+              >
+                <ArrowLeftIcon />
+                Back to sign in
+              </button>
+            </div>
+            ) : (
+            /* REF's sign-up view (session-46 census): a BARE space-y-4
+               wrapper (16px in both bands — the reset's sm:space-y-6 gives
+               24px desktop), the H2 direct with NO subtitle (the authored
+               mt-4 the trap-6 restoration), and the three-field form. */
+            <div className="space-y-4">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors -mb-2"
+                onClick={backToSignin}
+              >
+                <ArrowLeftIcon />
+                Back to sign in
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-4">
+                Create your account
+              </h2>
+              <form onSubmit={onSignupSubmit} className="space-y-3 sm:space-y-4">
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
+                    <div className="relative mt-1.5">
+                      <MailFieldIconSlate400 />
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        required
+                        className="flex w-full border px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-10 sm:h-11 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-400 text-sm sm:text-base"
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
+                    <div className="relative mt-1.5">
+                      <LockFieldIconSlate400 />
+                      <input
+                        id="password"
+                        type="password"
+                        placeholder="Min. 8 characters"
+                        required
+                        className="flex w-full border px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-10 sm:h-11 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-400 text-sm sm:text-base"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">Confirm Password</Label>
+                    <div className="relative mt-1.5">
+                      <LockFieldIconSlate400 />
+                      <input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="Re-enter password"
+                        required
+                        className="flex w-full border px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 h-10 sm:h-11 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-400 text-sm sm:text-base"
+                        value={signupConfirm}
+                        onChange={(e) => setSignupConfirm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {error ? (
+                  <Alert variant="error">
+                    <AlertDescription className="text-red-700">{error}</AlertDescription>
+                  </Alert>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 px-3 py-2 w-full h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
+                >
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  {loading ? "Creating account..." : "Create account"}
+                </button>
+              </form>
+            </div>
+            )}
             </div>
             </div>
           </div>

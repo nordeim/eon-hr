@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.28.0 (session-45 remediation complete — the login interior: the runtime-injected ring cascade + the icon color family) · **Last updated:** 2026-10-16
-> **State:** 681 unit + 203 E2E tests green, lint/typecheck/build
+> **Version:** 3.29.0 (session-46 remediation complete — the hidden view-swapped login flows: the password-reset + sign-up views) · **Last updated:** 2026-10-17
+> **State:** 697 unit + 209 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -21,7 +21,8 @@
 > shadcn peer-sidebar shell architecture with the overflow-auto scroll container +
 > the desktop icon-rail collapse + the with-data careers family: the job card + the
 > apply flow + the state-dependent zero-card + the login interior: the
-> runtime-injected ring cascade + the icon color family + the loading state).
+> runtime-injected ring cascade + the icon color family + the loading state + the
+> hidden view-swapped login flows: the password-reset + sign-up views).
 
 ---
 
@@ -2986,3 +2987,87 @@ proof before dismissing serialization splits — the `lab()`/`rgba()`
 split on `bg-slate-50/50` converts one red unit off the pinned hex
 via lab math but rasterizes PIXEL-identical on canvas ([247,249,251,
 128] both sides).
+
+## §58 Session 46 (parity round 45) — the hidden view-swapped login flows
+
+**The round's headline**: the census finally CLICKED the dead ends. Two
+complete flows hid behind the login's action buttons for 44 rounds —
+their failure mode (an error Alert on the pre-superset clone) looked
+terminal, so no probe ever fired them. On REF they are full
+view-swapped flows: the card's `w-full` column unmounts EVERYTHING
+(logo, welcome title, social row, or-divider) and renders:
+
+1. **The password-reset view** — the `-mb-2` back button (the
+   hand-authored arrow-left), the `text-center space-y-2` title group
+   ("Reset your password" + the instruction P), the one-field form
+   (`space-y-4 sm:space-y-5`), the "Send reset link" CTA swapping to
+   "Sending..." + the r44 mr-2 spinner, then the **success view**: the
+   slate-100 icon circle (the older-lucide mail at slate-700), the
+   "Check your email" H2, the two-line P with the
+   `font-medium text-slate-900` email span, the GREEN Alert
+   (`bg-green-50/70 border-green-200` + `text-green-700`), and the
+   full-width back button. **Anti-enumeration verified live** — a
+   non-existent email renders the identical view.
+2. **The sign-up view** — the BARE `space-y-4` wrapper (16px both
+   bands), the H2 DIRECT (no subtitle), the three-field form
+   (`space-y-3 sm:space-y-4` around a bare `space-y-3` fields group;
+   ids email/password/confirmPassword), the duplicate-email error with
+   REF's verbatim "A user with this email already exists" INSIDE the
+   form, and the "Creating account..." loading swap.
+
+**The sibling input family** (a per-view authored difference the
+sign-in pins would have masked): `h-10 sm:h-11` (44px) +
+`placeholder:text-slate-400` (the sign-in pair ships `h-11 sm:h-12` +
+`placeholder:text-slate-600`); the reset input carries `text-base`
+mid-string, the signup trio the `text-sm sm:text-base` tail pair; the
+field icons are the same older-lucide glyphs at **slate-400**; NO
+autocomplete attrs.
+
+**The trap-6 restorations** (the round's rhythm subtlety): REF's
+authored `-mb-2` on the back buttons beats v4's zero-specificity
+`:where` space-y margin-bottom, and v4's label margin is ignored on
+the inline label — so the clone authors the members REF's v3 runtime
+supplies invisibly: `mt-4 sm:mt-6` on the reset title group, `mt-4` on
+the signup H2, `mt-1.5` on the field units' relative wrappers (the r42
+pattern). The verify's rhythm comparison therefore drops the raw
+mt/mb values (v3 lands mt on FOLLOWING siblings, v4 mb on PRECEDING —
+the same rendered gaps via the other margin side) and contracts on the
+y/h geometry.
+
+**The `--foreground` fix**: REF's login build sets zinc-950
+(`240 10% 3.9%`) at `:root` — the r42 `--ring` precedent's sibling.
+The login main pins `[--foreground:#09090b]` so the Alert family's
+`text-foreground` resolves rgb(9,9,11) (the app pages keep the shared
+neutral token).
+
+**The API seams** (the functional superset): `POST
+/api/auth/forgot-password` — zod + the login-family rate limiter +
+ALWAYS ok (the anti-enumeration contract; no email transport wired);
+`POST /api/auth/signup` — the verbatim duplicate copy on 409, the
+new-email path creates the user + sets the session cookie (the
+auto-login redirect to the null-safe dashboard), the client guards
+the confirm-mismatch path.
+
+**Pins**: 16 new (A1-A6 the reset view, B1-B4 the signup view, C1-C3
+the success view, D1-D2 the API routes, E1 the foreground) + 5 amended
+(R38-G1 the foreground member; R18-E/R38-A2/R39-C1/R44-A2 — the four
+count pins re-anchored to the sign-in form region, the sibling input
+family now carries the same token members page-wide). Gates: lint 0/0
+· tsc ✓ · 697/697 unit (+16) · build ✓ · 209/209 E2E (+6). Live:
+verify-r45 **13/13 MATCH** (the duplicate Alert's bg canvas-rasterized
+**254,242,242,179 on both apps** — the lab() split pixel-proven);
+standing audits 5/5 + route sweep 12/12; 10 screenshots (176-179) →
+262 PNG; DB pristine.
+
+**The round's transferable lessons**: (1) census the dead ends — fire
+every button whose failure mode looks terminal; two full flows with
+complete contracts hid behind the login's action row; (2) probe
+finders must match accessible names by EITHER mechanism — REF silently
+dropped the sidebar trigger's aria-label (the name now rides the
+sr-only span; the drawer opens identically, the clone's extra attrs
+are kept supersets); (3) the v3/v4 space-y margin-side split makes
+raw mt/mb un-comparable across apps — the y/h geometry is the
+contract, and the authored restoration members must strip from class
+comparisons as documented supersets; (4) the DB pristine check earns
+its keep — the loading-state live probe fired a REAL signup (users=2);
+the throwaway user was caught + cleaned before the commit.

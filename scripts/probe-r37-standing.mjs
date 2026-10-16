@@ -19,7 +19,8 @@ const TABS = `(() => {
 })()`;
 
 const DRAWER_OPEN = `(() => {
-  const btn = [...document.querySelectorAll('button')].find(b => (b.getAttribute('aria-label') || '') === 'Toggle Sidebar');
+  /* session-46: REF's trigger dropped the aria-label (a silent redeploy) — the name rides the sr-only span now, so the finder matches either mechanism (the clone keeps the aria-label superset on top of the same span). */
+  const btn = [...document.querySelectorAll('button')].find(b => (b.getAttribute('aria-label') || '') === 'Toggle Sidebar' || (b.textContent || '').includes('Toggle Sidebar'));
   if (!btn) return {found:false};
   btn.click(); return {clicked:true};
 })()`;
@@ -79,10 +80,14 @@ async function mobilePass(label, session, base) {
   run(`agent-browser --session ${session} set viewport 390 844`);
   run(`agent-browser --session ${session} open ${base}/dashboard`);
   await new Promise(r => setTimeout(r, 3500));
-  return {
-    tabs: await evalOn(session, TABS),
-    drawer: (await evalOn(session, DRAWER_OPEN, 900), await evalOn(session, DRAWER_PANEL)),
-  };
+  const tabs = await evalOn(session, TABS);
+  await evalOn(session, DRAWER_OPEN);
+  // session-46 amendment: settle the drawer's slide-in before the panel
+  // read (the marginal CLI-overhead timing caught it mid-flight — or
+  // missed the data-state flip entirely — on loaded runs).
+  await new Promise(r => setTimeout(r, 1400));
+  const drawer = await evalOn(session, DRAWER_PANEL);
+  return { tabs, drawer };
 }
 
 // ---- desktop pass (1440x900) ----

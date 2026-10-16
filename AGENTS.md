@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 681 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 203 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 697 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 209 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2567,3 +2567,101 @@ pixel proof before dismissal — the `lab()`/`rgba()` split on
 `bg-slate-50/50` converted to [249,250,252] via lab math (one red
 unit off the pinned hex) but rasterized PIXEL-identical (the alpha
 path differs, the composite lands the same).
+
+## Session 46 (parity round 45) — the hidden view-swapped login flows
+
+**Context**: the workspace reset again (the round's code work from the
+interrupted prior window was lost uncommitted) — every contract
+re-derived from fresh live measurements. Baseline gates green at the
+cloned HEAD (681 unit · 203 E2E). **Redeploy watch: the 11th login
+deploy** (login JS `BerEzxez` → `CcAnCcTT`, login CSS `NS4V-1t3` →
+`BWytzgpi`, the app fingerprints quiet) — per the round-42 precedent a
+full login re-audit ran first: the r44 fixes ALL held on the new build
+(the icon family, the title/action row, the at-rest geometry, the
+failed-login Alert); the react-hot-toast block left the login's runtime
+style set (the sonner block remains — platform runtime, no login flow
+fires a toast).
+
+**The round's discovery — TWO hidden view-swapped flows behind the
+login's action buttons** (44 rounds never censused them: they leave no
+DOM trace until clicked). The card's `w-full` column swaps its ENTIRE
+content — the logo, the welcome title, the social row, and the
+or-divider all unmount:
+
+1. **The password-reset flow** ("Forgot password?"): the back button
+   (`-mb-2` + the hand-authored arrow-left) + the title group + the
+   one-field form (`space-y-4 sm:space-y-5`); the CTA swaps to
+   "Sending..." + the r44 mr-2 spinner family; the submit renders the
+   **"Check your email" success view** — the icon circle (the
+   older-lucide mail at slate-700 h-7/w-7 sm:h-8/w-8) + the two-line P
+   with the `font-medium text-slate-900` email span + the GREEN Alert
+   (`bg-green-50/70 border-green-200` + `text-green-700`) + the
+   full-width back button. **Anti-enumeration verified live** (a
+   non-existent email renders the identical view).
+2. **The sign-up flow** ("Sign up"): a BARE `space-y-4` wrapper (16px
+   both bands — the reset's `sm:space-y-6` gives 24px desktop), the H2
+   DIRECT (no title group, no subtitle), the three-field form
+   (`space-y-3 sm:space-y-4` around a bare `space-y-3` fields group —
+   ids email/password/confirmPassword, placeholders
+   "you@example.com"/"Min. 8 characters"/"Re-enter password"); the
+   duplicate-email error renders INSIDE the form with REF's verbatim
+   copy **"A user with this email already exists"**; the CTA swaps to
+   "Creating account...".
+
+**The sibling input family**: the hidden views' inputs ship the shared
+base with `h-10 sm:h-11` (44px) + `placeholder:text-slate-400` — NOT
+the sign-in pair's `h-11 sm:h-12` + `placeholder:text-slate-600`; the
+reset copy carries `text-base` mid-string, the signup trio carries the
+`text-sm sm:text-base` responsive pair at the tail. The field icons
+are the same older-lucide glyphs at **slate-400** (the sign-in pair is
+the re-measured slate-500). NO autocomplete attrs.
+
+**The trap-6 rhythm restorations** (v4's `:where` space-y mb loses to
+the authored `-mb-2`, and v4's label mb is ignored on the inline
+label): the reset title group authors `mt-4 sm:mt-6`, the signup H2
+authors `mt-4`, and the field units' relative wrappers author the r42
+`mt-1.5` — REF's v3 runtime supplies the same margins its DOM never
+carries.
+
+**The `--foreground` fix**: REF's login build sets zinc-950
+(`240 10% 3.9%`) at `:root` — the r42 `--ring` precedent's sibling.
+The login main now pins `[--foreground:#09090b]` (the Alert family's
+`text-foreground` resolves rgb(9,9,11); the app pages keep the shared
+neutral token).
+
+**The API seams** (the functional superset): `POST /api/auth/forgot-password` (zod + the login-family rate limiter; ALWAYS ok — the
+anti-enumeration contract, no account-existence signal either way) and
+`POST /api/auth/signup` (the verbatim duplicate copy on 409; the
+new-email path creates the user + sets the session cookie — the
+auto-login redirect to the null-safe dashboard; the client also guards
+the confirm-mismatch path with "Passwords do not match").
+
+**Pins**: 16 new (A1-A6, B1-B4, C1-C3, D1-D2, E1) + 5 amended (R38-G1
+the foreground member; R18-E + R38-A2 + R39-C1 + R44-A2 — the four
+count pins re-anchored to the sign-in form region now that the sibling
+input family exists). Gates: lint 0/0 · tsc ✓ · **697/697 unit** (+16)
+· build ✓ · **209/209 E2E** (+6 — the session46-login-flows spec).
+Live: **verify-r45 13/13 MATCH** — both views' rhythm both bands (the
+y/h geometry contract; the mt/mb mechanism split documented — v3 lands
+mt on following siblings, v4 mb on preceding, the same rendered gaps),
+the sibling input classes + the slate-400 icons, the success view, the
+duplicate Alert (canvas-rasterized bg 254,242,242,179 BOTH apps — the
+lab() split pixel-proven), both loading interiors, the `--foreground`
+resolution, the at-rest r44 regression, the view-swap behavior. The
+standing audits 5/5 + the route sweep 12/12 post-change; 10
+screenshots (176-179) → **262 PNG captures**. DB pristine (the
+loading-probe's throwaway signup caught + cleaned: users=1).
+
+**The round's transferable lessons**: (1) the census must CLICK the
+dead ends — two full flows with complete contracts (views, loading
+swaps, a success state, an error copy, an anti-enumeration contract)
+hid behind two buttons that 44 rounds of probing left unfired because
+their failure mode (an error Alert) looked terminal; (2) REF's silent
+aria-label drop on the sidebar trigger broke a 9-round-old probe
+finder — probe finders should match the accessible name by EITHER
+mechanism (the aria-label OR the sr-only text), and the clone's extra
+attrs are kept supersets; (3) the v3/v4 space-y margin-side split
+(mt-on-following vs mb-on-preceding) makes raw mt/mb values
+un-comparable across the apps — the y/h geometry is the contract; the
+authored restorations (mt-4/mt-4 sm:mt-6/mt-1.5) must be stripped from
+class comparisons as documented supersets.
