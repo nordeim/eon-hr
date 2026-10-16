@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 697 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 209 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 718 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 217 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2665,3 +2665,97 @@ attrs are kept supersets; (3) the v3/v4 space-y margin-side split
 un-comparable across the apps — the y/h geometry is the contract; the
 authored restorations (mt-4/mt-4 sm:mt-6/mt-1.5) must be stripped from
 class comparisons as documented supersets.
+
+## Session 47 (parity round 46) — the zero-state app-page interiors
+
+**Context**: workspace reset again — fresh clone at `36ae4c8`, env
+rebuilt, baseline gates green (697 unit · 209 E2E). **Redeploy watch: the
+12th login deploy** (login JS `CcAnCcTT` → `D3V2Rni1`, login CSS
+`BWytzgpi` → `bfirUl4Z`, app quiet) — visually quiet: verify-r45 13/13 on
+the new build, the failed-login Alert byte-identical, theme-inert holds,
+the runtime style-block census unchanged. **A 13th login deploy shipped
+MID-round** (`D3V2Rni1` → `Dwv9uuCD`, `bfirUl4Z` → `CpjiugAb`, app
+quiet) — re-audited: verify-r45 13/13 again.
+
+**The round's vein — the zero-state app-page interiors** (never censused:
+the route sweep pins h1s only). The method's unlock: a ZERO-TENANT
+scratch server (:3201, schema + the demo user ONLY — mirroring REF's
+0-employee tenant) so the zero-data pages compare like-for-like; the
+seeded :3200 stays the with-data superset reference. Census instruments:
+probe-r46-census-a..h.mjs.
+
+**The findings**:
+
+1. **The page-root families** (the 12-route map): REF wraps SEVEN pages
+   (dashboard, employees, payroll, taskmanager, leavemanagement,
+   expenses, loans) in a `relative overflow-hidden > touch-pan-y` pair —
+   the platform's page-level touch/clip container; attendance NESTS the
+   pair inside its gradient root (the only measured page that nests);
+   the third member (the absolute-top deco, opacity:0, the refresh-cw
+   scroll widget) is invisible platform runtime — non-clone. The
+   gradient pages ship v3 `bg-gradient-to-br from-X-50 to-Y-50` forms —
+   the clone rendered the SAME colors via arbitrary-value strings but
+   MISSED the `dark:` pairs (a real dark-mode diff on
+   taskmanager/attendance/profile). staffrequests is the bare
+   `p-4 md:p-8 max-w-7xl mx-auto space-y-6` wrapper. The page-root
+   `select-none` family LEFT REF (only the shell chrome — the bottom-nav
+   anchors + the footer ghost buttons — keeps it).
+2. **The CardTitle TAG is the div** — the session-6 comment already
+   called it "the Base44 title div" but the scaffold kept the h3; the
+   census reads 4 × `div.font-semibold tracking-tight text-base` on REF's
+   dashboard and zero tracking-tight h3s anywhere.
+3. **THE CENSUS CORRECTION** (the round's transferable lesson): the
+   first read "REF hides the payroll/recruitment stats at zero" was an
+   INSTRUMENT ARTIFACT — both the outline reader (h1-h4/p/button) and
+   the stat detector (P.text-3xl) were P-based, and REF renders its
+   standard/compact stat values + labels as DIVs. REF renders the stats
+   at ZERO (caught live during the verify's text-level read); the
+   conditionals were reverted and the REAL diffs fixed instead: the icon
+   families (payroll dollar-sign/trending-up/calendar + per-color tiles;
+   recruitment circle-check-big/trending-up + indigo/blue/green/purple
+   tiles + the compact slate-500 label; doctracker
+   file-text/circle-check-big/triangle-alert/circle-x) and the StatCard
+   per-variant element tags (standard + compact values → DIV, horizontal
+   label → P).
+4. **The dashboard zero-state**: REF renders the DEFAULT leave-balances
+   UI (Annual Leave 21/21 + the full bg-blue-500 bar; Sick Leave 30/30 +
+   bg-green-500) — not an empty state; the quick-action items are BARE
+   anchors wrapping the styled div (the clone styled the anchor itself);
+   the Customize button rides in a `flex items-center gap-3` wrapper.
+5. **The profile**: the hidden avatar file input (`id="avatar"
+   accept="image/*" class="hidden"` between the email line and the Change
+   Photo button), the input-id family (`full_name`/`email`/`phone`/
+   `job_title` — the pf-* set retired), and the audit-note line REMOVED
+   (REF renders none; the audit-logging superset stays backend-side).
+6. **The icon glyphs**: the employees Import-CSV upload is REF's
+   OLD-lucide revision (tray-first — the installed 0.525 ships the newer
+   arrow-first) → hand-authored; the search icon is circle-first
+   `text-slate-400` with the v3 `transform` member (the clone rendered
+   text-muted-foreground = slate-500); the taskmanager view toggle is
+   `Kanban` (the clone's KanbanSquare is the rect-first SquareKanban).
+7. **The training zero-state** renders message-only (no create button) —
+   the session-15 zero-state CTA retired; the with-data entry stays the
+   grid's dashed add-tile.
+
+**Kept supersets (documented)**: the attendance toolbar wrap + hero-row
+v4 splits (session-10 R9-E + session-16/17 — the fitting superset vs
+REF's own 1558px overflow), the StatCard tile architecture (h-12 w-12
+flex-centered vs REF's p-3 — same rendered 48px), the PageHeader
+badge/hero translations, the welcome-row `mt-8` (trap-6 restoration).
+
+**Pins**: 21 new (A1-A5, B1-B2 corrected, C1-C4, D1, E1-E3, F1-F3, G1-G2,
+H1) + 11 amended (the CardTitle, the kicker, the two icon pins, the
+training affordance, R23-B1/B2/B3..B8/B-scope, R37-A3). Gates: lint 0/0 ·
+tsc ✓ · **718/718 unit** (+21) · build ✓ · **217/217 E2E** (+8 — the
+session47-zerostate-interiors spec). Live: **verify-r46 25/25 MATCH**
+(the 12-route root map, the stat zones, the tags, the dashboard
+interior, the profile family, the glyphs, the dark pairs) + verify-r45
+13/13 (the 13th-deploy re-audit) + standing audits 5/5 + route sweep
+12/12. 8 screenshots (180-183) → **270 PNG**. DB pristine (the
+loading-probe user swept AGAIN — the notificationPref dependent found
+this time). The comments-in-source trap fired ONCE (a fresh comment
+quoting the retired select-none — reworded to prose). The probe-tooling
+lessons: the `//`-comment one-liner trap (re-fired from census-a —
+split-join collapses comments), the template-literal `\S` escape
+(`` `text-\S+` `` arrives at the browser as `text-S+` — write `\\S`),
+and the agent-browser screenshot CLI needs ABSOLUTE paths.

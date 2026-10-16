@@ -6,13 +6,15 @@ test.describe("dashboard", () => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: /Welcome back, sepnetflix2023!/ })).toBeVisible();
     await expect(page.getByText("Your personal employee portal.")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Quick Actions" })).toBeVisible();
+    /* Session 47 (R46-D1): REF's CardTitle is a DIV (not a heading role) —
+       the card titles locate by exact text now. */
+    await expect(page.getByText("Quick Actions", { exact: true })).toBeVisible();
     for (const action of ["My Portal", "Submit Request", "Claim Expense", "Request Leave"]) {
       await expect(page.getByRole("link", { name: action, exact: true })).toBeVisible();
     }
-    await expect(page.getByRole("heading", { name: "My Leave Balances" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "My Recent Requests" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "My Expense Claims" })).toBeVisible();
+    await expect(page.getByText("My Leave Balances", { exact: true })).toBeVisible();
+    await expect(page.getByText("My Recent Requests", { exact: true })).toBeVisible();
+    await expect(page.getByText("My Expense Claims", { exact: true })).toBeVisible();
   });
 
   test("leave balances show the seeded quotas", async ({ page }) => {
@@ -56,7 +58,9 @@ test.describe("dashboard", () => {
     await page.goto("/dashboard");
     // Reference: border-slate-200 chips with small inline blue-600 icons,
     // NOT icon tiles.
-    const chip = page.getByRole("link", { name: "My Portal", exact: true });
+    /* Session 47 (R46-E2): the anchor is BARE — the chip classes live on
+       the inner div (REF's a{} > div.flex structure). */
+    const chip = page.getByRole("link", { name: "My Portal", exact: true }).locator("div");
     await expect(chip).toHaveCSS("border-top-color", "rgb(226, 232, 240)");
     await expect(chip.locator("svg")).toHaveCSS("color", "rgb(37, 99, 235)");
     // Reference active-nav/primary blue is #1877F2.
@@ -94,7 +98,10 @@ test.describe("dashboard", () => {
     // Reference (live-measured): CardTitle 16px/600 with 24px line-height,
     // color #0A0A0A (the neutral foreground token); the leave-balances card
     // lands at y=160 h=222 with its 56px header and 217px content block.
-    const title = page.getByRole("heading", { name: "My Leave Balances" });
+    /* Session 47 (R46-D1): the title is the DIV (16px/600/24lh, #0A0A0A) —
+       the measured geometry (card y=160 h=222) unchanged by the PageCanvas
+       wrap (render-neutral flow). */
+    const title = page.getByText("My Leave Balances", { exact: true });
     await expect(title).toHaveCSS("font-size", "16px");
     await expect(title).toHaveCSS("font-weight", "600");
     await expect(title).toHaveCSS("line-height", "24px");
@@ -137,8 +144,11 @@ test.describe("dashboard", () => {
     // and 30px/700 values; the empty-state CTA is the dark shadcn default
     // (#171717).
     /* Session 40 (R39-N): the page canvas rides inside the scroll
-       container — one level deeper than main. */
-    const pageGrad = page.locator("main > div > div");
+       container — one level deeper than main.
+       Session 47 (R46-A2): the PageCanvas pair (relative overflow-hidden >
+       touch-pan-y) now sits between the scroller and the gradient root —
+       locate the gradient by its class. */
+    const pageGrad = page.locator("div[class*=from-green-50]");
     const img = await pageGrad.first().evaluate((el) => getComputedStyle(el).backgroundImage);
     expect(img).toContain("rgb(240, 253, 244)");
     expect(img).toContain("rgb(239, 246, 255)");
@@ -147,13 +157,19 @@ test.describe("dashboard", () => {
     expect(bg).toContain("rgb(22, 163, 74)");
     expect(bg).toContain("rgb(5, 150, 105)");
     expect(bg).not.toContain("in oklab");
-    // Session 17 (R16-D): the tile is flex-centered (h-12 w-12) — no p-3;
-    // still 48×48 bg-green-100 with a 24px green-600 icon.
-    const tile = page.locator(".text-3xl").first().locator("xpath=../..").locator("div[class*='h-12']");
-    await expect(tile).toHaveCSS("background-color", "rgb(220, 252, 231)");
-    const val = page.getByText("0 SAR");
-    await expect(val).toHaveCSS("font-size", "30px");
-    await expect(val).toHaveCSS("color", "rgb(15, 23, 42)");
+    /* Session 47 (R46-B1, corrected): the stats render at ZERO too —
+       REF's values + labels are DIVs, invisible to the round's first
+       P-based census read. The zone order is REF's verbatim
+       (grid md:grid-cols-4 gap-6); the icon family + tiles are pinned in
+       the unit suite. */
+    const statZone = page.locator("div[class*=md\\:grid-cols-4]").first();
+    await expect(page.getByText("Total This Month")).toBeVisible();
+    const statTags = await statZone.evaluate((zone) => {
+      const card = zone.children[0] as HTMLElement;
+      const value = card.querySelector("[class*=text-3xl]");
+      return { valueTag: value?.tagName };
+    });
+    expect(statTags.valueTag).toBe("DIV");
     // Session 12 (R11-H): the empty-state CTA remains the dark shadcn
     // default (#171717) — re-verified live — and the reference's new
     // toolbar card (search + month input) sits between the stats and the

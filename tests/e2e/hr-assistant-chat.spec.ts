@@ -21,7 +21,8 @@ test.describe("hr assistant chat empty states (session 31)", () => {
 
     // The left card: the 14px/600 title in a bordered CardHeader...
     // (text-sm's DEFAULT 20px line box — the 1px-overshoot lesson)
-    const activeChats = page.getByRole("heading", { name: "Active Chats" });
+    /* Session 47 (R46-D1): CardTitle is a DIV — locate by text. */
+    const activeChats = page.getByText("Active Chats", { exact: true });
     await expect(activeChats).toBeVisible();
     await expect(activeChats).toHaveClass(/font-semibold tracking-tight text-sm/);
 

@@ -134,7 +134,7 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Learning Management System"
@@ -188,23 +188,20 @@ export default function TrainingPage() {
               </div>
             ) : filtered.length === 0 ? (
               /* Reference simple empty state: p-12 text-center + 64px icon +
-                 ONE 16px slate-500 line — no h3, no description. The create
-                 affordance is the clone's superset: a loans-recipe CTA below
-                 the line (session 15, R14-B — replaces the h2-row button,
-                 which broke the measured 32px row height). */
+                 ONE 16px slate-500 line — no h3, no description, NO create
+                 button (session 47 re-measurement; the session-15 CTA
+                 retired — the with-data entry is the grid's dashed
+                 add-tile). */
               <div className="p-12 text-center">
                 <div className="flex justify-center">
                   <GraduationCap className="h-16 w-16 text-slate-300" aria-hidden="true" />
                 </div>
                 <p className="mt-3 text-slate-500">No training platforms available</p>
-                <div className="mt-4">
-                  <Button onClick={() => setDialogOpen(true)}>
-                    <Plus className="mr-2" aria-hidden="true" />
-                    New Platform
-                  </Button>
-                </div>
               </div>
             ) : (
+              /* Session 47 (R46-H1): REF's zero-state renders NO create
+                 button — the with-data entry is the session-15 dashed
+                 add-tile below (the create flow stays reachable). */
               <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map((platform) => (
                   <div key={platform.id} className="flex flex-col gap-4 rounded-xl border bg-secondary/30 p-5">

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Upload, Search, Grid3x3, List, Pencil, Trash2, Loader2, Check } from "lucide-react";
+import { Plus, Grid3x3, List, Pencil, Trash2, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
+
+/* Session 47 (R46-G1): REF's measured icons — the OLD-lucide revisions,
+   hand-authored verbatim (the installed lucide-react 0.525 ships the
+   newer glyphs: the arrow-first upload and the path-first search). */
+function UploadIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-upload w-4 h-4 mr-2"
+      aria-hidden="true"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, initials } from "@/lib/utils";
@@ -123,7 +170,11 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 select-none">
+    /* Session 47 (R46-A2): REF wraps the page in its touch/clip pair
+       (relative overflow-hidden > touch-pan-y); the page-root text-selection
+       lock family left REF (only the shell chrome keeps it). */
+    <PageCanvas>
+    <div className="p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col">
       {mode === "wizard" ? (
         /* Session 7 (R6-C): the reference renders the Add/Edit wizard as a
@@ -161,7 +212,7 @@ export default function EmployeesPage() {
                 })
               }
             >
-              <Upload className="mr-2" aria-hidden="true" />
+              <UploadIcon />
               Import CSV
             </Button>
             <Button
@@ -195,7 +246,7 @@ export default function EmployeesPage() {
                 rendered 228 after the round-39 input migration changed
                 the intrinsic basis; the select starts x=569 on REF). */}
             <div className="relative flex-1 md:flex-none">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <SearchIcon />
               <Input
                 placeholder="Search employees..."
                 value={search}
@@ -339,5 +390,6 @@ export default function EmployeesPage() {
       )}
     </div>
     </div>
+    </PageCanvas>
   );
 }

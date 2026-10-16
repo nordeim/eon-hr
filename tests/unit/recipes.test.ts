@@ -222,11 +222,11 @@ const dashboard = read("src", "app", "(app)", "dashboard", "page.tsx");
 const taskmanager = read("src", "app", "(app)", "taskmanager", "page.tsx");
 
 describe("card component recipe (session 6)", () => {
-  it("CardTitle renders text-base/600 with default leading (lh 24)", () => {
+  it("CardTitle renders text-base/600 with default leading (lh 24) — session 47 amendment: the TAG is the div and the class order is REF-verbatim", () => {
     // Reference card titles: div "font-semibold tracking-tight text-base"
     // — fs16/fw600/lh24, color #0A0A0A inherited. The shadcn leading-none
     // (lh 16) shrank every title row 8px and card 4px.
-    expect(card).toContain("text-base font-semibold tracking-tight");
+    expect(card).toContain("font-semibold tracking-tight text-base");
     expect(card).not.toContain("leading-none");
   });
 
@@ -965,9 +965,9 @@ describe("staffrequests trigger (session 13, R12-F)", () => {
 });
 
 describe("iconed button margins (session 14, R13-A)", () => {
-  it("employees Import CSV icon carries mr-2 (145px button)", () => {
+  it("employees Import CSV icon carries mr-2 (145px button) — session 47 amendment: the hand-authored UploadIcon (REF's old-lucide glyph, class lucide-upload w-4 h-4 mr-2)", () => {
     const page = read("src", "app", "(app)", "employees", "page.tsx");
-    expect(page).toMatch(/<Upload className="mr-2"/);
+    expect(page).toContain('className="lucide lucide-upload w-4 h-4 mr-2"');
   });
 
   it("payroll Reports & Export icon carries mr-2 (185px button)", () => {
@@ -983,7 +983,7 @@ describe("iconed button margins (session 14, R13-A)", () => {
   it("taskmanager New Project / Kanban / Projects icons carry mr-2", () => {
     const page = read("src", "app", "(app)", "taskmanager", "page.tsx");
     expect(page).toMatch(/<FolderKanban className="mr-2"/);
-    expect(page).toMatch(/<KanbanSquare className="mr-2"/);
+    expect(page).toMatch(/<Kanban className="mr-2"/); /* session 47: REF's kanban glyph (was KanbanSquare) */
     expect(page).toMatch(/<FolderIcon className="mr-2"/);
   });
 
@@ -1252,8 +1252,9 @@ describe("training section furniture (session 15, R14-B)", () => {
     expect(page).not.toContain("New Platform\n          </Button>");
   });
 
-  it("the create affordance lives in the empty state (loans-recipe CTA superset)", () => {
-    expect(page).toMatch(/No training platforms available[\s\S]{0,400}?<Button/);
+  it("the create affordance — session 47 amendment: the zero-state CTA retired (REF's zero page renders message only); the entry is the with-data dashed add-tile", () => {
+    expect(page).toMatch(/No training platforms available[\s\S]{0,400}?<\/div>/);
+    expect(page).not.toMatch(/No training platforms available[\s\S]{0,400}?<Button/);
   });
 
   it("the with-data grid carries a trailing dashed add-tile", () => {
@@ -1924,15 +1925,19 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
     expect(globalsCss).toMatch(/@layer base[\s\S]*?button \{[\s\S]*?cursor: pointer/);
   });
 
-  it("R23-B1: the dashboard page root carries select-none (REF wraps its 8 core-module pages in a user-select:none container — the touch-pan-y layer)", () => {
-    expect(dashPage).toContain('className="p-4 md:p-8 space-y-8 select-none"');
+  it("R23-B1: the dashboard page root — session 47 amendment: the select-none family LEFT REF (only the shell chrome keeps it); the page now renders inside REF's PageCanvas pair (relative overflow-hidden > touch-pan-y)", () => {
+    expect(dashPage).toContain("<PageCanvas>");
+    expect(dashPage).toContain('className="p-4 md:p-8 space-y-8"');
+    expect(dashPage).not.toContain("select-none");
   });
 
-  it("R23-B2: the employees page root carries select-none", () => {
-    expect(employeesPage).toContain('className="p-4 md:p-8 select-none"');
+  it("R23-B2: the employees page root — session 47 amendment: same family change as R23-B1", () => {
+    expect(employeesPage).toContain("<PageCanvas>");
+    expect(employeesPage).toContain('className="p-4 md:p-8"');
+    expect(employeesPage).not.toContain("select-none");
   });
 
-  it("R23-B3..B8: the six gradient-rooted core pages carry select-none (payroll, attendance, leavemanagement, expenses, loans, taskmanager — the REF-wrapped family)", () => {
+  it("R23-B3..B8: the six gradient-rooted core pages — session 47 amendment: select-none dropped + the v3 gradient forms + the PageCanvas trio (five wrap the gradient root; attendance nests its canvas inside)", () => {
     const roots: [string, string][] = [
       ["payroll", payrollPage],
       ["attendance", attendancePage],
@@ -1942,16 +1947,17 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
       ["taskmanager", taskPage],
     ];
     for (const [name, src] of roots) {
-      const m = src.match(/className="min-h-screen[^"]*"/);
+      const m = src.match(/className="min-h-screen bg-gradient-to-br[^"]*"/);
       expect(m, name).toBeTruthy();
-      expect(m?.[1] ?? m?.[0], name).toContain("select-none");
+      expect(src, name).not.toContain("select-none");
     }
   });
 
-  it("R23-B-scope: settings (the representative of the 38 unwrapped REF routes) stays selectable — REF renders its tabs directly in the page root with no touch-pan-y layer", () => {
-    const m = settingsPage.match(/className="min-h-screen[^"]*"/);
+  it("R23-B-scope: settings (the representative of the plain-gradient family) stays selectable — session 47: it adopts the v3 gradient form but no trio, no select-none", () => {
+    const m = settingsPage.match(/className="min-h-screen bg-gradient-to-br[^"]*"/);
     expect(m).toBeTruthy();
     expect(m?.[0]).not.toContain("select-none");
+    expect(settingsPage).not.toContain("<PageCanvas>");
   });
 });
 
@@ -3550,7 +3556,7 @@ describe("session-38 keyboard/focus contracts (parity round 37)", () => {
 
   it("R37-A3: the loans New Loan Request HEADER trigger is a DialogTrigger asChild with the page-level root lift (the empty-state CTA stays a plain button — REF's own has no aria contract)", () => {
     expect(loansPage38).toMatch(/actions=\{\s*<DialogTrigger asChild>\s*<Button>\s*<Plus className="mr-2" aria-hidden="true" \/>\s*New Loan Request\s*<\/Button>\s*<\/DialogTrigger>\s*\}/);
-    expect(loansPage38).toMatch(/return \(\s*\/\*[\s\S]*?<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*<div className="min-h-screen/);
+    expect(loansPage38).toMatch(/return \(\s*\/\*[\s\S]*?<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*<PageCanvas>\s*<div className="min-h-screen/);
     // the inline old root is gone — the Content renders under the page root
     expect(loansPage38).not.toMatch(/<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>\s*\{\/\*/);
   });
@@ -4687,5 +4693,226 @@ describe("session-46 hidden login flows (parity round 45 — the password-reset 
 
   it("R45-E1: the login main gains the zinc-950 --foreground pin (the r42 --ring sibling — REF's login build sets 240 10% 3.9% at :root; the Alert family's text-foreground resolves rgb(9,9,11), the app pages keep the shared neutral token)", () => {
     expect(loginPage46).toMatch(/\[--ring:#09090b\] \[--foreground:#09090b\]">/);
+  });
+});
+
+describe("session-47 zero-state app interiors (parity round 46 — the page-root families + the stat conditionals + the CardTitle tag)", () => {
+  /* Round 46's census (probe-r46-census-a..h.mjs, live @1440×900 with a
+     ZERO-TENANT scratch server on :3201 — schema + the demo user only,
+     mirroring REF's 0-employee tenant so the zero-data pages compare
+     like-for-like): the route sweep pins h1s only, so 45 rounds never
+     censused the page INTERIORS. The findings: (A) REF renders THREE
+     page-root families — a `relative overflow-hidden > touch-pan-y` pair
+     (7 pages + attendance's nested form; the pair's third member, the
+     absolute-top deco at opacity:0 with the refresh-cw scroll widget, is
+     invisible platform runtime — non-clone), the v3 `bg-gradient-to-br`
+     forms (the clone ships the same colors as arbitrary-value strings and
+     MISSES the dark: pairs on taskmanager/attendance/profile), and the
+     bare staffrequests wrapper; (B) the payroll + recruitment stat rows
+     render on the clone at ZERO data but not on REF (both stay as the
+     with-data superset); (C) REF's stat cards carry per-page element tags
+     (attendance's standard variant = div values + div labels; the
+     documenttracker horizontal = p values + p labels) while the clone
+     renders p values + div labels everywhere; (D) REF's CardTitle is a
+     DIV (`font-semibold tracking-tight text-base`) — the session-6
+     comment already called it "the Base44 title div" but the scaffold
+     kept the h3 tag; (E) REF's zero-tenant dashboard renders the DEFAULT
+     leave-balances UI (Annual 21/21 blue + Sick 30/30 green) where the
+     clone showed an empty state; (F) REF's profile renders a hidden
+     avatar file input + the full_name/email/phone/job_title id family.
+     The REF-side drop: the page-root select-none family (R23-B) left REF
+     — only the shell chrome (the bottom-nav anchors + the footer ghost
+     buttons) keeps it. */
+
+  const page = (...p: string[]) => read("src", "app", "(app)", ...p);
+  let pageCanvas47 = "";
+  try { pageCanvas47 = read("src", "components", "shared", "page-canvas.tsx"); } catch { /* RED until created */ }
+
+  // --- A. the page-root families ---
+
+  it("R46-A1: the PageCanvas component — REF's page-level pair (relative overflow-hidden > touch-pan-y; the invisible deco slot is documented non-clone)", () => {
+    expect(pageCanvas47).toContain('className="relative overflow-hidden"');
+    expect(pageCanvas47).toContain('className="touch-pan-y"');
+    expect(pageCanvas47).not.toContain("absolute top-0");
+  });
+
+  it("R46-A2: the seven TRIO pages render PageCanvas with their verbatim content roots (dashboard/employees bare; payroll/taskmanager/leavemanagement/expenses/loans gradients — the v3 form + the dark: pairs; NO select-none anywhere — REF dropped the page-root family, only the shell chrome keeps it)", () => {
+    const trio: [string, string, string][] = [
+      ["dashboard", "dashboard", 'className="p-4 md:p-8 space-y-8"'],
+      ["employees", "employees", 'className="p-4 md:p-8"'],
+      ["payroll", "payroll", 'className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8"'],
+      ["taskmanager", "taskmanager", 'className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8"'],
+      ["leavemanagement", "leavemanagement", 'className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8"'],
+      ["expenses", "expenses", 'className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-8"'],
+      ["loans", "loans", 'className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8"'],
+    ];
+    for (const [name, route, root] of trio) {
+      const src = page(route, "page.tsx");
+      expect(src, name).toContain("<PageCanvas>");
+      expect(src, name).toContain(root);
+      expect(src, name).not.toContain("select-none");
+      if (root.includes("min-h-screen")) {
+        const m = src.match(/className="min-h-screen[^"]*"/);
+        expect(m?.[0], name).not.toContain("bg-[linear-gradient");
+      }
+    }
+  });
+
+  it("R46-A3: attendance keeps its gradient root FIRST (the v3 form + the dark pair) and NESTS the PageCanvas around the max-w-7xl space-y-8 content (REF's inverted arrangement — the only measured page that nests)", () => {
+    const src = page("attendance", "page.tsx");
+    expect(src).toContain('className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8"');
+    expect(src).toContain("<PageCanvas>");
+    expect(src).toContain('className="max-w-7xl mx-auto space-y-8"');
+    expect(src).not.toContain("flex-col gap-8");
+    expect(src).not.toContain("select-none");
+  });
+
+  it("R46-A4: the five plain-gradient pages + staffrequests adopt REF's verbatim roots (recruitment indigo/blue, training purple/blue, documenttracker blue/indigo, profile slate/blue + dark, settings slate/blue; staffrequests the bare max-w-7xl space-y-6 wrapper)", () => {
+    const roots: [string, string][] = [
+      ["recruitment", 'className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 p-4 md:p-8"'],
+      ["training", 'className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8"'],
+      ["documenttracker", 'className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8"'],
+      ["profile", 'className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8"'],
+      ["settings", 'className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8"'],
+      ["staffrequests", 'className="p-4 md:p-8 max-w-7xl mx-auto space-y-6"'],
+    ];
+    for (const [name, root] of roots) {
+      const src = page(name, "page.tsx");
+      expect(src, name).toContain(root);
+      expect(src, name).not.toContain("select-none");
+      if (root.includes("min-h-screen")) {
+        const m = src.match(/className="min-h-screen[^"]*"/);
+        expect(m?.[0], name).not.toContain("bg-[linear-gradient");
+      }
+    }
+  });
+
+  it("R46-A5: the PageHeader kicker adopts REF's current verbatim (sticky top-0 z-20 + the dark: pair + safe-area-top — the session-9 rendered-truth note stays: the sticky is inert inside the r39 scroller stack)", () => {
+    expect(pageHeader).toContain("md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top");
+  });
+
+  // --- B. the stat-row conditionals ---
+
+  it("R46-B1 (corrected): payroll's stat grid renders at ZERO too — REF's values + labels are DIVs, invisible to the round's first P-based census read; the zone is REF's verbatim order + the measured icon family (dollar-sign/users/trending-up/calendar, per-color tiles)", () => {
+    const src = page("payroll", "page.tsx");
+    expect(src).toContain('className="grid md:grid-cols-4 gap-6"');
+    expect(src).not.toMatch(/records\.length > 0 &&/);
+    expect(src).toContain('icon={<DollarSign aria-hidden="true" />} tileClassName="bg-green-100 text-green-600"');
+    expect(src).toContain('icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600"');
+    expect(src).toContain('icon={<Calendar aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600"');
+  });
+
+  it("R46-B2 (corrected): recruitment's stat grid renders at ZERO too (the DIV-valued family the census missed) — the measured icon set (briefcase/users/circle-check-big/trending-up) with the per-color indigo/blue/green/purple tiles", () => {
+    const src = page("recruitment", "page.tsx");
+    expect(src).toContain("grid grid-cols-2 md:grid-cols-4 gap-4");
+    expect(src).not.toMatch(/jobs\.length > 0 \|\| candidates\.length > 0/);
+    expect(src).toContain('icon={<CircleCheckBig aria-hidden="true" />} tileClassName="bg-green-100 text-green-600"');
+    expect(src).toContain('icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600"');
+    expect(src).toContain('label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} tileClassName="bg-indigo-100 text-indigo-600"');
+  });
+
+  // --- C. the StatCard per-variant element tags ---
+
+  it("R46-C1: the standard + compact stat values render as DIVs (REF's zero-state rows measured: attendance's standard = div.text-3xl values + div labels; payroll's standard + recruitment's compact = the same div family — the round's first census missed them behind the P-based outline)", () => {
+    expect(statCard).toMatch(/standard:\s*"div"/);
+    expect(statCard).toMatch(/compact:\s*"div"/);
+  });
+
+  it("R46-C2: the horizontal stat label renders as a P (documenttracker measured: p values + p labels — 'Total Documents'/'Valid'/'Expiring ≤30 days'/'Expired')", () => {
+    expect(statCard).toMatch(/horizontal:\s*"p"/);
+  });
+
+  it("R46-C3: the compact stat label is text-slate-500 (recruitment's zero-state row measured: div.text-sm text-slate-500 — the standard family keeps slate-600)", () => {
+    expect(statCard).toMatch(/compact:\s*"text-slate-500"/);
+  });
+
+  it("R46-C4: documenttracker's stat icons are REF's measured family (file-text / circle-check-big / triangle-alert / circle-x — the clone's file-stack/file-check-2/file-clock/file-x-2 set retired)", () => {
+    const src = page("documenttracker", "page.tsx");
+    expect(src).toContain('label="Total Documents" value={stats.total} icon={<FileText');
+    expect(src).toContain('label="Valid" value={stats.valid} icon={<CircleCheckBig');
+    expect(src).toContain('label="Expiring ≤30 days" value={stats.expiring} icon={<TriangleAlert');
+    expect(src).toContain('label="Expired" value={stats.expired} icon={<CircleX');
+    expect(src).not.toContain("FileStack");
+  });
+
+  // --- D. the CardTitle tag ---
+
+  it("R46-D1: CardTitle renders REF's DIV (the session-6 comment already called it 'the Base44 title div' — 4 div.font-semibold tracking-tight text-base on the REF dashboard, 0 tracking-tight h3s on any sampled page) with REF's class order", () => {
+    expect(card).toContain('function CardTitle({ className, ...props }: React.ComponentProps<"div">');
+    expect(card).toContain('cn("font-semibold tracking-tight text-base", className)');
+    expect(card).not.toContain('ComponentProps<"h3">');
+  });
+
+  // --- E. the dashboard interior ---
+
+  it("R46-E1: the leave-balances card renders the DEFAULT UI at zero balances (REF's zero-tenant dashboard: Annual Leave 21/21 with the full bg-blue-500 bar + Sick Leave 30/30 with bg-green-500 — NOT an empty state)", () => {
+    const src = page("dashboard", "page.tsx");
+    expect(src).toContain("Annual Leave");
+    expect(src).toContain("remaining: 21, entitled: 21");
+    expect(src).toContain("Sick Leave");
+    expect(src).toContain("remaining: 30, entitled: 30");
+    expect(src).not.toContain("No leave balances yet");
+  });
+
+  it("R46-E2: the quick-action items are a BARE Link wrapping the styled inner div (REF: a{} > div.flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer)", () => {
+    const src = page("dashboard", "page.tsx");
+    expect(src).not.toMatch(/<Link[^>]*className="flex cursor-pointer/);
+    expect(src).toContain('className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer"');
+  });
+
+  it("R46-E3: the Customize button rides in a flex items-center gap-3 wrapper (REF's welcome-row right column)", () => {
+    const src = page("dashboard", "page.tsx");
+    expect(src).toMatch(/<div className="flex items-center gap-3">\s*<CustomizeButton/);
+  });
+
+  // --- F. the profile family ---
+
+  it("R46-F1: the identity header renders REF's hidden avatar file input between the email line and the Change Photo button (input type=file id=avatar accept=image/* class=hidden)", () => {
+    const src = page("profile", "page.tsx");
+    expect(src).toContain('<input type="file" id="avatar" accept="image/*" className="hidden" />');
+  });
+
+  it("R46-F2: the profile form input ids are REF's family (full_name/email/phone/job_title + the matching Label htmlFor pairs — the pf-* family retired)", () => {
+    const src = page("profile", "page.tsx");
+    expect(src).toContain('htmlFor="full_name"');
+    expect(src).toContain('id="full_name"');
+    expect(src).toContain('htmlFor="email"');
+    expect(src).toContain('id="phone"');
+    expect(src).toContain('id="job_title"');
+    expect(src).not.toContain("pf-name");
+    expect(src).not.toContain("pf-email");
+    expect(src).not.toContain("pf-phone");
+    expect(src).not.toContain("pf-title");
+  });
+
+  it("R46-F3: the audit-note line is gone (REF's profile renders no audit notice — the audit-logging superset stays backend-side)", () => {
+    const src = page("profile", "page.tsx");
+    expect(src).not.toContain("audited for security");
+  });
+
+  // --- G. the icon family (rendered diffs) ---
+
+  it("R46-G1: employees' Import CSV + search icons are hand-authored to REF's OLD-lucide glyphs (upload = the tray-first path + polyline + line, class w-4 h-4 mr-2; search = circle-first + the m21 21-4.3-4.3 tail, class absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 — the installed 0.525 ships the newer revisions and muted-foreground)", () => {
+    const src = page("employees", "page.tsx");
+    expect(src).toContain('lucide lucide-upload w-4 h-4 mr-2');
+    expect(src).toContain('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
+    expect(src).toContain('points="17 8 12 3 7 8"');
+    expect(src).toContain('lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400');
+    expect(src).toContain('m21 21-4.3-4.3');
+    expect(src).not.toContain("text-muted-foreground\" aria-hidden=\"true\" />\n            </div>");
+  });
+
+  it("R46-G2: taskmanager's view toggle uses the KANBAN glyph (REF: lucide-kanban M6 5v11 — the clone's KanbanSquare is the rect-first SquareKanban, a different icon)", () => {
+    const src = page("taskmanager", "page.tsx");
+    expect(src).not.toContain("KanbanSquare");
+    expect(src).toMatch(/<Kanban className="mr-2"/);
+  });
+
+  // --- H. the training create entry ---
+
+  it("R46-H1: training's zero-state renders NO create button (REF's zero-state page: message only — the session-15 CTA retired; the create flow stays reachable via the with-data grid's dashed Add Platform tile)", () => {
+    const src = page("training", "page.tsx");
+    expect(src).not.toContain("New Platform");
+    expect(src).toContain("Add Platform");
   });
 });

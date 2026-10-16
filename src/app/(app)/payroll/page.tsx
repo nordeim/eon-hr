@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, CalendarRange, Check, CheckCircle2, DollarSign, FileDown, Loader2, Pencil, Plus, Search, Trash2, Users, Wallet } from "lucide-react";
+import { Banknote, Calendar, Check, DollarSign, FileDown, Loader2, Pencil, Plus, Search, Trash2, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -196,7 +197,8 @@ export default function PayrollPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)] p-4 md:p-8 select-none">
+    <PageCanvas>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Payroll Management"
@@ -235,11 +237,16 @@ export default function PayrollPage() {
         }
       />
 
-      <div className="grid gap-6 md:grid-cols-4">
-        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
+      {/* Session 47 (R46-B1, corrected): the stats render at ZERO too —
+          the first census read missed them (REF's values + labels are
+          DIVs, invisible to the P-based outline). REF's verbatim zone
+          order + the measured icon family (dollar-sign / users /
+          trending-up / calendar) with the per-color tiles. */}
+      <div className="grid md:grid-cols-4 gap-6">
+        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<DollarSign aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
         <StatCard label="Employees" value={stats.people} icon={<Users aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Approved" value={stats.approved} icon={<CheckCircle2 aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
-        <StatCard label="Current Period" value={period} icon={<CalendarRange aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600" />
+        <StatCard label="Approved" value={stats.approved} icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
+        <StatCard label="Current Period" value={period} icon={<Calendar aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600" />
       </div>
 
       {/* Session 12 (R11-H): the reference renders a standalone p-6 toolbar
@@ -411,6 +418,7 @@ export default function PayrollPage() {
       />
     </div>
     </div>
+    </PageCanvas>
   );
 }
 

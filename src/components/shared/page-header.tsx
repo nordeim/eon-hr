@@ -167,7 +167,13 @@ export function PageHeader({
         // effectively sticky — its `sticky top-0` sits inside a non-scrolling
         // wrapper stack (measured: window scrolls, kicker scrolls away,
         // y=-89 at scrollY=178). Static bar matches the rendered truth.
-        <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3">
+        // Session 47 (R46-A5): the CLASS re-adopted verbatim — the live
+        // census reads REF's current kicker as `md:hidden sticky top-0
+        // z-20 bg-white dark:bg-slate-900 border-b border-slate-200
+        // dark:border-slate-800 px-4 py-3 safe-area-top` (the sticky stays
+        // inert inside the r39 scroller stack; the dark: pair + the
+        // safe-area-top member are the r39 shell families).
+        <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top">
           <div className="flex items-center gap-3">
             {mobileKickerBack ? (
               // Session 18 (R17-B): REF's back button — ghost h-9 w-9 with

@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -182,7 +183,8 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#faf5ff,#fdf2f8)] p-4 md:p-8 select-none">
+    <PageCanvas>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Expense Management"
@@ -419,5 +421,6 @@ export default function ExpensesPage() {
       </Dialog>
     </div>
     </div>
+    </PageCanvas>
   );
 }

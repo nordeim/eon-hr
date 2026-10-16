@@ -15,6 +15,13 @@ async function main(): Promise<void> {
     where: { email: { endsWith: "@eon-hr.test" } },
   });
   console.log(`[purge] removed ${removed.count} test employee(s)`);
+  // Session 47 (R46): the signup-superset E2E path creates employee-less
+  // USERS (e2e-zerodash-*@eon-hr.test) — sweep them too (no dependents:
+  // the signup route creates the User row only).
+  const goneUsers = await db.user.deleteMany({
+    where: { email: { startsWith: "e2e-zerodash-", endsWith: "@eon-hr.test" } },
+  });
+  console.log(`[purge] removed ${goneUsers.count} signup-test user(s)`);
 }
 
 main()

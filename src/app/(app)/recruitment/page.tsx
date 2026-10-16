@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Briefcase, Building2, FileSearch, Loader2, MapPin, Plus, Sparkles, Star, Trash2, UserPlus, Users } from "lucide-react";
+import { Briefcase, Building2, CircleCheckBig, FileSearch, Loader2, MapPin, Plus, Sparkles, Trash2, TrendingUp, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -300,7 +300,7 @@ export default function RecruitmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         rowBreakpoint="md"
@@ -318,11 +318,15 @@ export default function RecruitmentPage() {
         }
       />
 
+      {/* Session 47 (R46-B2, corrected): the stats render at ZERO too (the
+          first census read missed the DIV-valued cards). REF's measured
+          family: briefcase / users / circle-check-big / trending-up with
+          the per-color indigo/blue/green/purple tiles. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} />
-        <StatCard variant="compact" label="Total Applicants" value={stats.totalApplicants} icon={<Users aria-hidden="true" />} />
-        <StatCard variant="compact" label="Shortlisted" value={stats.shortlisted} icon={<Star aria-hidden="true" />} />
-        <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<Sparkles aria-hidden="true" />} />
+        <StatCard variant="compact" label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} tileClassName="bg-indigo-100 text-indigo-600" />
+        <StatCard variant="compact" label="Total Applicants" value={stats.totalApplicants} icon={<Users aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="compact" label="Shortlisted" value={stats.shortlisted} icon={<CircleCheckBig aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
+        <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
       </div>
 
       <Tabs defaultValue="applicants">

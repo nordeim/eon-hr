@@ -10,6 +10,7 @@ import { Briefcase, MessageSquare, Receipt, Calendar } from "lucide-react";
 import Link from "next/link";
 import { CustomizeButton } from "./customize-button";
 import { redirect } from "next/navigation";
+import { PageCanvas } from "@/components/shared/page-canvas";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,16 @@ const QUICK_ACTIONS = [
   { label: "Submit Request", href: "/staffrequests?new=1", icon: MessageSquare },
   { label: "Claim Expense", href: "/expenses?new=1", icon: Receipt },
   { label: "Request Leave", href: "/leavemanagement?new=1", icon: Calendar },
+];
+
+/* Session 47 (R46-E1): REF's zero-tenant dashboard renders the DEFAULT
+   leave-balances UI — Annual Leave 21/21 (the full bg-blue-500 bar) +
+   Sick Leave 30/30 (bg-green-500) — measured live on a 0-employee
+   tenant: the same values the seed writes. The empty state ("No leave
+   balances yet") never renders on REF. */
+const DEFAULT_BALANCES = [
+  { name: "Annual Leave", remaining: 21, entitled: 21, fill: "bg-blue-500" },
+  { name: "Sick Leave", remaining: 30, entitled: 30, fill: "bg-green-500" },
 ];
 
 export default async function DashboardPage() {
@@ -61,7 +72,13 @@ export default async function DashboardPage() {
   const totalExpense = expenses?._sum.amount ?? 0;
 
   return (
-    <div className="p-4 md:p-8 space-y-8 select-none">
+    /* Session 47 (R46-A2): REF wraps the page in its touch/clip pair
+       (relative overflow-hidden > touch-pan-y) — the platform's page-level
+       container; the pair's third member (the absolute-top deco, opacity:0)
+       is invisible platform runtime. The page-root text-selection lock
+       family left REF (only the shell chrome keeps it). */
+    <PageCanvas>
+    <div className="p-4 md:p-8 space-y-8">
       {/* Mobile page-title kicker (session-6 re-measurement; session 9
           R8-G re-pin): the reference renders `md:hidden … bg-white border-b
           border-slate-200 px-4 py-3` INSIDE its p-4 page wrapper (so the
@@ -89,7 +106,11 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold text-slate-900">Welcome back, {user.name}!</h1>
           <p className="mt-1 text-slate-500">Your personal employee portal.</p>
         </div>
-        <CustomizeButton />
+        {/* Session 47 (R46-E3): REF wraps the Customize button in a
+            flex items-center gap-3 column. */}
+        <div className="flex items-center gap-3">
+          <CustomizeButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -102,13 +123,15 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
               {QUICK_ACTIONS.map((action) => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                >
-                  <action.icon className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
-                  <span className="text-sm text-slate-700">{action.label}</span>
+                /* Session 47 (R46-E2): REF renders a BARE anchor wrapping
+                   the styled item div (a{} > div.flex items-center gap-2 p-3
+                   rounded-lg border border-slate-200 hover:border-blue-300
+                   hover:bg-blue-50 transition-colors cursor-pointer). */
+                <Link key={action.label} href={action.href}>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer">
+                    <action.icon className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
+                    <span className="text-sm text-slate-700">{action.label}</span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -127,10 +150,32 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {balances.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">No leave balances yet</p>
-            ) : (
-              balances.map((b) => {
+            {balances.length === 0
+              ? /* R46-E1: the zero-tenant default UI — see DEFAULT_BALANCES. */
+                DEFAULT_BALANCES.map((b) => (
+                  <div key={b.name}>
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span className="text-slate-600">{b.name}</span>
+                      {/* Session 6: value inherits --card-foreground #0A0A0A
+                          (reference measures rgb(10,10,10) — no slate-900). */}
+                      <span className="font-medium">
+                        {b.remaining} / {b.entitled} days
+                      </span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-200">
+                      <div
+                        className={"h-2 rounded-full " + b.fill}
+                        style={{ width: `${(b.remaining / b.entitled) * 100}%` }}
+                        role="progressbar"
+                        aria-valuenow={Math.round((b.remaining / b.entitled) * 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${b.name} balance`}
+                      />
+                    </div>
+                  </div>
+                ))
+              : balances.map((b) => {
                 const pct = b.entitled > 0 ? ((b.entitled - b.used) / b.entitled) * 100 : 0;
                 return (
                   <div key={b.leaveType.name}>
@@ -156,7 +201,7 @@ export default async function DashboardPage() {
                   </div>
                 );
               })
-            )}
+            }
           </CardContent>
         </Card>
 
@@ -215,5 +260,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
     </div>
+    </PageCanvas>
   );
 }

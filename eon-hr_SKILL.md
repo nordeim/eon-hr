@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.29.0 (session-46 remediation complete — the hidden view-swapped login flows: the password-reset + sign-up views) · **Last updated:** 2026-10-17
-> **State:** 697 unit + 209 E2E tests green, lint/typecheck/build
+> **Version:** 3.30.0 (session-47 remediation complete — the zero-state app-page interiors: the page-root families + the CardTitle div + the stat-tag correction) · **Last updated:** 2026-10-17
+> **State:** 718 unit + 217 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3071,3 +3071,50 @@ contract, and the authored restoration members must strip from class
 comparisons as documented supersets; (4) the DB pristine check earns
 its keep — the loading-state live probe fired a REAL signup (users=2);
 the throwaway user was caught + cleaned before the commit.
+
+## §59 Session 47 (parity round 46) — the zero-state app-page interiors
+
+**The round's unlock**: a ZERO-TENANT scratch server (a second standalone
+on :3201 against a user-only db — mirroring REF's 0-employee tenant) so
+the zero-data app pages compare like-for-like. 45 rounds censused the
+h1s (the route sweep); the INTERIORS at zero data were a blind spot.
+
+**The findings**: (1) the page-root families — a `relative overflow-hidden
+> touch-pan-y` pair on seven pages (attendance nests it inside its
+gradient root; the invisible absolute-top deco widget is non-clone), the
+v3 `bg-gradient-to-br` gradient forms (the clone rendered the same colors
+via arbitrary-value strings but MISSED the `dark:` pairs — a real
+dark-mode diff), the bare staffrequests wrapper; the page-root
+`select-none` family LEFT REF. (2) The CardTitle TAG is the div (the
+session-6 comment already said so; the scaffold kept the h3). (3) The
+dashboard's zero-state renders the DEFAULT leave-balances UI (Annual
+21/21 blue + Sick 30/30 green — not an empty state), the bare-anchor
+quick-action structure, the Customize wrapper. (4) The profile's hidden
+avatar input + the full_name/email/phone/job_title id family. (5) The
+icon glyphs: the old-lucide upload, the circle-first slate-400 search,
+the Kanban (not SquareKanban) toggle, the doctrtracker
+file-text/circle-check-big/triangle-alert/circle-x family.
+
+**THE CENSUS CORRECTION — the round's transferable lesson**: the first
+read claimed "REF hides the payroll/recruitment stats at zero" — an
+INSTRUMENT ARTIFACT. Both the outline reader (h1-h4/p/button) and the
+stat detector (P.text-3xl) were P-based; REF renders its standard/compact
+stat values + labels as DIVs. The verify's text-level read caught it
+live; the conditionals were reverted and the REAL diffs fixed (the icon
+families + the per-variant element tags: standard + compact values →
+DIV, the horizontal label → P, the compact label slate-500). **Never
+scope a structural census to a tag subset when the family's tag is
+itself unknown — dump all elements, or verify the negative with a
+text-level read.**
+
+**Probe-tooling lessons (the round's additions)**: the `//`-comment
+one-liner trap re-fired (split-join collapses template-literal comments —
+the session-46 lesson, now double-earned); the template-literal `\S`
+escape (`` `text-\S+` `` arrives at the browser as `text-S+` — the file
+needs `\\S`); the agent-browser screenshot CLI resolves RELATIVE paths
+against its own cwd — pass absolute paths.
+
+Gates: lint 0/0 · tsc ✓ · 718/718 unit (+21) · build ✓ · 217/217 E2E
+(+8). Live: verify-r46 25/25 + verify-r45 13/13 (the 13th login deploy,
+mid-round) + standing audits 5/5 + route sweep 12/12 · 270 PNG · DB
+pristine.

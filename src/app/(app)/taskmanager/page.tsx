@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, MoreHorizontal, Calendar, FolderKanban, Loader2, Trash2, KanbanSquare, FolderKanban as FolderIcon } from "lucide-react";
+import { Plus, MoreHorizontal, Calendar, FolderKanban, Loader2, Trash2, Kanban, FolderKanban as FolderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
@@ -273,7 +274,8 @@ export default function TaskManagerPage() {
   }, [projects]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8 select-none">
+    <PageCanvas>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Task Management"
@@ -308,7 +310,7 @@ export default function TaskManagerPage() {
           onClick={() => setView("kanban")}
           aria-pressed={view === "kanban"}
         >
-          <KanbanSquare className="mr-2" aria-hidden="true" />
+          <Kanban className="mr-2" aria-hidden="true" />
           Kanban
         </Button>
         <Button
@@ -562,6 +564,7 @@ export default function TaskManagerPage() {
       />
     </div>
     </div>
+    </PageCanvas>
   );
 }
 

@@ -38,6 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
@@ -196,7 +197,8 @@ export default function LoansPage() {
        context for the Radix trigger contract (aria-haspopup="dialog",
        focus-restore-on-close). Renders no DOM — layout untouched. */
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8 select-none">
+    <PageCanvas>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <PageHeader
         section="Loan Management"
@@ -506,6 +508,7 @@ export default function LoansPage() {
         </DialogContent>
     </div>
     </div>
+    </PageCanvas>
     </Dialog>
   );
 }

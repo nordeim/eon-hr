@@ -233,7 +233,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <PageHeader
         section="My Profile"
@@ -282,6 +282,10 @@ export default function ProfilePage() {
               <div className="min-w-0 flex-1">
                 <h2 className="text-2xl font-bold text-slate-900">{profile.name}</h2>
                 <p className="mb-3 truncate text-slate-600">{profile.email}</p>
+                {/* Session 47 (R46-F1): REF renders the hidden avatar file
+                    input here (id=avatar, accept=image/*) — the Change Photo
+                    button's real target on the reference. */}
+                <input type="file" id="avatar" accept="image/*" className="hidden" />
                 <Button
                   type="button"
                   variant="outline"
@@ -333,20 +337,20 @@ export default function ProfilePage() {
               >
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="pf-name">Full Name</Label>
+                    <Label htmlFor="full_name">Full Name</Label>
                     <Input
                       className="mt-2"
-                      id="pf-name"
+                      id="full_name"
                       required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pf-email">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       className="mt-2"
-                      id="pf-email"
+                      id="email"
                       type="email"
                       required
                       value={form.email}
@@ -354,20 +358,20 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pf-phone">Phone</Label>
+                    <Label htmlFor="phone">Phone</Label>
                     <Input
                       className="mt-2"
-                      id="pf-phone"
+                      id="phone"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="+65 87651230"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pf-title">Job Title</Label>
+                    <Label htmlFor="job_title">Job Title</Label>
                     <Input
                       className="mt-2"
-                      id="pf-title"
+                      id="job_title"
                       value={form.jobTitle}
                       onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
                       placeholder="Operations Manager"
@@ -600,7 +604,6 @@ export default function ProfilePage() {
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-        Changes to your profile are audited for security.
       </p>
     </div>
     </div>

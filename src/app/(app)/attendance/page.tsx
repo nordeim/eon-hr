@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -225,8 +226,9 @@ export default function StaffAttendancePage() {
   }, [reportType, records, summary, employees, stats]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8 select-none">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
+      <PageCanvas>
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         rowBreakpoint="md"
         section="Attendance Management"
@@ -537,6 +539,7 @@ export default function StaffAttendancePage() {
         />
       ) : null}
     </div>
+      </PageCanvas>
     </div>
   );
 }

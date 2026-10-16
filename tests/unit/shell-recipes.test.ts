@@ -68,11 +68,12 @@ describe("PageHeader mobile kicker props (session 7, R6-B)", () => {
     // Session 9 (R8-G): the redeployed reference's kicker is `sticky top-0`
     // inside a non-scrolling wrapper stack — it scrolls away with the
     // content (measured: kicker y=-89 at scrollY=178, window scrolls, no
-    // scrollable ancestor). The clone matches the rendered truth: a static
-    // md:hidden bar (bg-white border-b slate-200 px-4 py-3 + h1 text-lg
-    // font-bold text-slate-900 truncate).
+    // scrollable ancestor). The clone matches the rendered truth: the
+    // sticky is inert, the bar scrolls away.
+    // Session 47 (R46-A5): the CLASS re-adopted verbatim — REF's current
+    // kicker carries sticky top-0 z-20 + the dark: pair + safe-area-top.
     expect(pageHeader).not.toContain("sticky top-[73px]");
-    expect(pageHeader).toContain("md:hidden border-b border-slate-200 bg-white px-4 py-3");
+    expect(pageHeader).toContain("md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top");
     expect(pageHeader).toContain("text-lg font-bold text-slate-900 truncate");
   });
 

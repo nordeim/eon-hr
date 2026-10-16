@@ -72,6 +72,20 @@ const VARIANT_CONTENT: Record<StatCardVariant, string> = {
   "tile-right": "p-6",
 };
 
+/** Session 47 (R46-C): REF renders its stat families with PER-PAGE
+ *  element tags — the standard variant (live-measured on attendance's
+ *  zero-state row) renders div values + div labels; the horizontal
+ *  variant (documenttracker) renders p values + p labels. The other
+ *  variants are with-data-only on REF (unmeasurable on its zero-data
+ *  tenant) and keep the scaffold's p value + div label. */
+const VARIANT_VALUE_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
+  standard: "div",
+  compact: "div",
+};
+const VARIANT_LABEL_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
+  horizontal: "p",
+};
+
 const VARIANT_VALUE: Record<StatCardVariant, string> = {
   standard: "text-3xl font-bold text-slate-900 mb-1",
   compact: "text-2xl font-bold text-slate-900",
@@ -100,6 +114,10 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
 const VARIANT_LABEL: Partial<Record<StatCardVariant, string>> = {
   mini: "text-xs text-slate-500 mt-0.5",
   horizontal: "text-xs text-slate-500",
+  /* Session 47 (R46-C3): the compact label is text-slate-500 (measured on
+     recruitment's zero-state row: div.text-sm text-slate-500 — the
+     standard family keeps slate-600). */
+  compact: "text-slate-500",
 };
 
 /** Variants that render the icon tile (the reference's mini, mini-centered
@@ -153,10 +171,12 @@ export function StatCard({
     <div className={cn(tileClasses, tile)}>{icon}</div>
   ) : null;
 
+  const ValueTag = VARIANT_VALUE_TAG[variant] ?? "p";
+  const LabelTag = VARIANT_LABEL_TAG[variant] ?? "div";
   const textBlock = (
     <>
-      <p className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</p>
-      <div className={cn("text-sm text-slate-600", VARIANT_LABEL[variant], labelClassName)}>{label}</div>
+      <ValueTag className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</ValueTag>
+      <LabelTag className={cn("text-sm text-slate-600", VARIANT_LABEL[variant], labelClassName)}>{label}</LabelTag>
     </>
   );
 

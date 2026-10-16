@@ -214,7 +214,7 @@ export default function StaffRequestsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       <PageHeader
         rowBreakpoint="md"
         size="md"

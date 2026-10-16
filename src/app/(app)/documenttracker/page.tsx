@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BellRing, FileCheck2, FileClock, FileStack, FileText, FileX2, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { BellRing, CircleCheckBig, CircleX, FileText, Loader2, Pencil, Plus, Search, Trash2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -220,7 +220,7 @@ export default function DocumentTrackerPage() {
   }, [documents, filter, search]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#eef2ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <PageHeader
         rowBreakpoint="md"
@@ -245,10 +245,12 @@ export default function DocumentTrackerPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="horizontal" label="Total Documents" value={stats.total} icon={<FileStack className="h-4 w-4 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
-        <StatCard variant="horizontal" label="Valid" value={stats.valid} icon={<FileCheck2 className="h-4 w-4 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
-        <StatCard variant="horizontal" label="Expiring ≤30 days" value={stats.expiring} icon={<FileClock className="h-4 w-4 text-amber-600" aria-hidden="true" />} tileClassName="bg-amber-100" />
-        <StatCard variant="horizontal" label="Expired" value={stats.expired} icon={<FileX2 className="h-4 w-4 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
+        {/* Session 47 (R46-C4): REF's measured family — file-text /
+            circle-check-big / triangle-alert / circle-x. */}
+        <StatCard variant="horizontal" label="Total Documents" value={stats.total} icon={<FileText className="h-4 w-4 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="horizontal" label="Valid" value={stats.valid} icon={<CircleCheckBig className="h-4 w-4 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="horizontal" label="Expiring ≤30 days" value={stats.expiring} icon={<TriangleAlert className="h-4 w-4 text-amber-600" aria-hidden="true" />} tileClassName="bg-amber-100" />
+        <StatCard variant="horizontal" label="Expired" value={stats.expired} icon={<CircleX className="h-4 w-4 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
       </div>
 
       {/* Session 12 (R11-D): the reference's filter row — flex flex-wrap
