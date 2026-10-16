@@ -32,6 +32,18 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const pathname = usePathname();
 
+  /* Session 45 (R43-A1): REF's desktop collapse — the shadcn
+     collapsible=icon mode. The peer wrapper flips its data-collapsible
+     (empty ↔ icon) + data-state (expanded ↔ collapsed) attrs; every
+     s40 member already answers them (the spacer/wrap widths, the
+     content's overflow member, the group-label's rail members, the
+     nav buttons' important-prefixed size/padding pair — 47px rail,
+     32×32 buttons, REF-measured). The trigger lives in the md:hidden
+     mobile header on REF too (0×0 at desktop — reachable only
+     programmatically, dormant UI); the authored branch below is the
+     matchMedia split REF's own handler implements. */
+  const [collapsed, setCollapsed] = React.useState(false);
+
   // Close the drawer whenever the route changes.
   React.useEffect(() => {
     setMobileOpen(false);
@@ -154,7 +166,13 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
               offcanvas/icon group-data variants are REF's members —
               inert without a collapsible state, cloned for class
               parity. */}
-          <div className="group peer hidden text-sidebar-foreground md:block">
+          <div
+            className="group peer hidden text-sidebar-foreground md:block"
+            data-state={collapsed ? "collapsed" : "expanded"}
+            data-collapsible={collapsed ? "icon" : ""}
+            data-variant="sidebar"
+            data-side="left"
+          >
             <div className="relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-(--sidebar-width-icon)" />
             <div className="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
               <div data-sidebar="sidebar" className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow">
@@ -225,13 +243,24 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
                     type/aria-label/aria-expanded — the clone keeps them
                     (the documented a11y superset, invisible to
                     rendering; REF's own name comes from the sr-only
-                    span). */}
+                    span).
+                    Session 45 (R43-A2): the click branches on the 768px
+                    media — at desktop it toggles the icon-rail collapse
+                    (REF's dormant branch — the trigger is 0×0 in the
+                    collapsed mobile header, so only a programmatic click
+                    reaches it); below the boundary it opens the drawer. */}
                 <button
                   type="button"
                   aria-label="Toggle Sidebar"
                   aria-expanded={mobileOpen}
                   data-sidebar="trigger"
-                  onClick={() => setMobileOpen(true)}
+                  onClick={() => {
+                    if (window.matchMedia("(min-width: 768px)").matches) {
+                      setCollapsed((c) => !c);
+                    } else {
+                      setMobileOpen(true);
+                    }
+                  }}
                   className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-7 w-7 hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200"
                 >
                   <PanelLeft className="h-4 w-4" aria-hidden="true" />

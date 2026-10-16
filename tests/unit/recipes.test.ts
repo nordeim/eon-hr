@@ -69,26 +69,23 @@ const BADGE_PAGES: Record<
 };
 
 describe("sidebar-nav reference recipe (session 5)", () => {
-  it("leaf links use the measured px-3 py-2.5 gap-3 box with 16px icons", () => {
+  it("leaf links use the measured px-3 py-2.5 gap-3 box with 16px icons (session-44: the geometry rides the leaf tail over the shared shadcn base)", () => {
     expect(sidebarNav).toContain(
-      "flex h-8 items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+      "rounded-lg mb-1 text-slate-600 hover:custom-accent-bg flex items-center gap-3 px-3 py-2.5"
     );
-    expect(sidebarNav).toContain("mb-1");
   });
 
-  it("leaf link icons are 16px (h-4 w-4), not 20px", () => {
+  it("leaf link icons author w-5 h-5 — the base's [&>svg]:size-4 guard renders them 16px (session 44: REF's authored form; the direct-child svg gets the guard)", () => {
     const navLinkBlock = sidebarNav.slice(
       sidebarNav.indexOf("function NavLink"),
       sidebarNav.indexOf("function CollapsibleNavItem")
     );
-    expect(navLinkBlock).toContain("h-4 w-4");
-    expect(navLinkBlock).not.toContain("h-5 w-5");
+    expect(navLinkBlock).toContain('<Icon className="w-5 h-5" aria-hidden="true" />');
   });
 
-  it("leaf hover uses the sidebar tokens — zinc-100 bg + #18181B text + opacity-80 (session 20, R19-A)", () => {
-    expect(sidebarNav).toContain("hover:bg-[#f4f4f5] hover:text-[#18181b]");
-    expect(sidebarNav).toContain("hover:opacity-80");
-    expect(sidebarNav).toContain("transition-all duration-200");
+  it("leaf hover uses the sidebar tokens — zinc-100 bg + #18181B text + opacity-80 (session 20, R19-A; session 44: the token members replace the hex forms)", () => {
+    expect(sidebarNav).toContain("hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80");
+    expect(sidebarNav).not.toContain("hover:bg-[#f4f4f5]");
   });
 
   it("group triggers hover blue-50/blue-700 like the reference", () => {
@@ -96,8 +93,8 @@ describe("sidebar-nav reference recipe (session 5)", () => {
     expect(sidebarNav).toContain("hover:text-blue-700");
   });
 
-  it("sub-list has the measured 4px top gap (mt-1; the trailing side is the root wrapper's gap-1 only — session-30 re-measured, mb-1 removed)", () => {
-    expect(sidebarNav).toContain("mt-1 flex flex-col gap-1 pl-4");
+  it("sub-list is REF's no-ul submenu — div.pl-4.space-y-1 with direct li children (session 44; the 4px pitch rides space-y-1)", () => {
+    expect(sidebarNav).toContain('className="pl-4 space-y-1"');
   });
 
   it("brand header: p-6 column + row, 18px slate-900 h2, the truncate p sub (session-40: REF's flex-col gap-2 outer + the flex-1 min-w-0 text container)", () => {
@@ -1467,11 +1464,11 @@ describe("Focus-ring recipes (session 19, R18-A..G — the interaction-parity di
     expect(input.match(/focus-visible:ring-1 focus-visible:ring-ring/g)?.length).toBe(2);
   });
 
-  it("R18-C: sidebar leaf links, group buttons and sub-items focus in REF's sidebar-ring blue, NOT the dark ring token", () => {
-    expect(sidebarNav).toContain("focus-visible:ring-2 focus-visible:ring-sidebar-ring");
+  it("R18-C: sidebar leaf links, group buttons and sub-items focus in REF's sidebar-ring blue, NOT the dark ring token (session 44: the pair rides the shared menu-button base + the group-label)", () => {
+    expect(sidebarNav).toContain("ring-sidebar-ring focus-visible:ring-2");
     expect(sidebarNav).not.toContain("focus-visible:ring-2 focus-visible:ring-ring");
-    // three call sites: leaf, group, sub-item
-    expect(sidebarNav.match(/focus-visible:ring-sidebar-ring/g)?.length).toBe(3);
+    // two authored sites: the shared base const + the group-label
+    expect(sidebarNav.match(/ring-sidebar-ring/g)?.length).toBe(2);
   });
 
   it("R18-C: globals.css pins the sidebar-ring token to REF's blue-500 (#3B82F6 = 217.2 91.2% 59.8%)", () => {
@@ -1528,15 +1525,16 @@ describe("session-20 hover recipes (parity round 19)", () => {
   const loginPage = read("src", "app", "login", "page.tsx");
   const dropdownMenu = read("src", "components", "ui", "dropdown-menu.tsx");
 
-  it("R19-A: inactive leaf + sub-item hover = sidebar-accent zinc-100 bg + sidebar-accent-foreground text (NOT the stale #e4e6eb)", () => {
-    expect(sidebarNav).toContain("hover:bg-[#f4f4f5] hover:text-[#18181b]");
+  it("R19-A: inactive leaf + sub-item hover = sidebar-accent zinc-100 bg + sidebar-accent-foreground text (session 44: the token members; NOT the stale #e4e6eb, NOT the r19 hex forms)", () => {
+    expect(sidebarNav).toContain("hover:bg-sidebar-accent hover:text-sidebar-accent-foreground");
     expect(sidebarNav).not.toContain("hover:bg-[#e4e6eb]");
+    expect(sidebarNav).not.toContain("hover:bg-[#f4f4f5]");
     expect(sidebarNav).toContain("hover:opacity-80");
   });
 
-  it("R19-B: the ACTIVE leaf hover flips text to #18181b (bg stays primary; REF's custom-primary-bg beats its hover:bg-sidebar-accent; session 21 adds the active:text twin)", () => {
-    expect(sidebarNav).toMatch(
-      /"bg-primary font-medium text-white shadow-sm hover:text-\[#18181b\] active:text-\[#18181b\]"/
+  it("R19-B: the ACTIVE leaf carries the custom-primary-bg recipe (unlayered !important blue beats every layered hover) + text-white font-medium shadow-sm + the inline blue style (session 44)", () => {
+    expect(sidebarNav).toContain(
+      "rounded-lg mb-1 custom-primary-bg text-white font-medium shadow-sm flex items-center gap-3 px-3 py-2.5"
     );
   });
 
@@ -1633,34 +1631,33 @@ describe("session-20 hover recipes (parity round 19)", () => {
 });
 
 describe("session-21 pressed-state recipes (parity round 20 — the :active dimension)", () => {
-  it("R20-A: group button pressed = sidebar-accent zinc-100 + #18181B (active: beats the blue hover in rule order)", () => {
-    expect(sidebarNav).toMatch(
-      /text-slate-600 hover:bg-blue-50 hover:text-blue-700 active:bg-\[#f4f4f5\] active:text-\[#18181b\]/
-    );
-  });
-
-  it("R20-E: the EXPANDED group hovers GRAY — data-[state=open]:hover: sidebar tokens (NOT the blue collapsed hover)", () => {
+  it("R20-A: group button pressed = the base's active:bg-sidebar-accent pair (session 44: the hex forms retired; the pressed pair rides the shared base)", () => {
     expect(sidebarNav).toContain(
-      "data-[state=open]:hover:bg-[#f4f4f5] data-[state=open]:hover:text-[#18181b]"
+      "active:bg-sidebar-accent active:text-sidebar-accent-foreground"
     );
   });
 
-  it("R20-C: inactive leaf + sub-item carry the authored active: pair (desktop-pressed rides hover; the classes restore the recipe + the tap-press moment)", () => {
-    const inactive = 'font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]';
+  it("R20-E: the EXPANDED group hovers GRAY — data-[state=open]:hover: sidebar tokens (NOT the blue collapsed hover; session 44: the token members)", () => {
+    expect(sidebarNav).toContain(
+      "data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground"
+    );
+  });
+
+  it("R20-C: inactive leaf + sub-item carry text-slate-600 + the dead hover:custom-accent-bg member (session 44: the authored active: hex pair retired — the pressed pair rides the base)", () => {
+    const inactive = 'text-slate-600 hover:custom-accent-bg flex items-center gap-3';
     expect(sidebarNav).toContain(inactive);
     // both branches (NavLink leaf + sub-item) — the string appears twice
     expect(sidebarNav.split(inactive).length - 1).toBe(2);
   });
 
-  it("R20-D: the ACTIVE leaf pressed keeps the blue bg (v4: an active:bg utility would beat bg-primary — REF's unlayered custom class doesn't) and flips text to #18181B", () => {
-    const activeBranch = 'bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]';
+  it("R20-D: the ACTIVE leaf pressed keeps the blue bg (the unlayered custom-primary-bg !important) — the active branches carry custom-primary-bg text-white font-medium shadow-sm, the hex active: members are gone", () => {
+    const activeBranch = 'custom-primary-bg text-white font-medium shadow-sm flex items-center';
     expect(sidebarNav).toContain(activeBranch);
     expect(sidebarNav.split(activeBranch).length - 1).toBe(2);
-    // the documented deviation: active:bg appears ONLY on the 3 inactive
-    // surfaces (leaf, sub-item, group) — never on an active branch (the
-    // exact positive branch strings above cannot contain it)
-    expect(sidebarNav.split("active:bg-[").length - 1).toBe(3);
-    expect(sidebarNav).not.toContain("active:bg-sidebar-accent");
+    // the pressed pair rides the shared base (1×); the per-branch hex
+    // active: members are retired
+    expect(sidebarNav.split("active:bg-[").length - 1).toBe(0);
+    expect(sidebarNav).toContain("active:bg-sidebar-accent active:text-sidebar-accent-foreground");
   });
 
   it("R20-B: the active mobile bottom tab renders the bg-blue-50 pill (REF pixel-verified rgb(239,246,255))", () => {
@@ -1673,20 +1670,20 @@ describe("session-21 pressed-state recipes (parity round 20 — the :active dime
 });
 
 describe("session-22 transition + animation recipes (parity round 21 — the motion dimension)", () => {
-  it("R21-A: the group trigger transitions over 200ms like every REF nav item (measured settle ~269ms REF vs ~229ms clone at 150ms)", () => {
-    const trigIdx = sidebarNav.indexOf("flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2");
+  it("R21-A: the group trigger transitions over 200ms like every REF nav item (measured settle ~269ms REF vs ~229ms clone at 150ms; session 44: the motion rides the toggle tail)", () => {
+    const trigIdx = sidebarNav.indexOf('"h-8 text-sm hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg mb-1 text-slate-600"');
     expect(trigIdx).toBeGreaterThan(-1);
     const trigBlock = sidebarNav.slice(trigIdx, trigIdx + 320);
     expect(trigBlock).toContain("transition-all duration-200");
     expect(trigBlock).not.toContain("transition-colors");
   });
 
-  it("R21-D: the group chevron SNAPS (REF authors no chevron motion classes — computed all 0s; the swing was a clone extra)", () => {
-    const chevIdx = sidebarNav.indexOf('open && "rotate-90"');
+  it("R21-D: the group chevron is a GLYPH SWAP — chevron-down open, chevron-right collapsed (REF authors no chevron motion classes — computed all 0s; the swing was a clone extra)", () => {
+    const chevIdx = sidebarNav.indexOf('<ChevronDown className="w-4 h-4" aria-hidden="true" />');
     expect(chevIdx).toBeGreaterThan(-1);
-    const chevBlock = sidebarNav.slice(chevIdx - 220, chevIdx + 40);
+    const chevBlock = sidebarNav.slice(chevIdx - 260, chevIdx + 260);
     expect(chevBlock).not.toContain("transition-transform");
-    expect(chevBlock).not.toContain("duration-200");
+    expect(chevBlock).not.toContain("rotate-90");
   });
 
   it("R21-B1: globals.css carries the enter/exit keyframes + the v4 utility subset (the plugin classes generate real CSS)", () => {
@@ -1768,11 +1765,11 @@ describe("session-22 transition + animation recipes (parity round 21 — the mot
 });
 
 describe("session-23 scroll-dimension recipes (parity round 22 — the scroll dimension + the dialog surface)", () => {
-  it("R22-A1: the sidebar nav NEVER styles its scrollbar (REF authors zero scrollbar rules — computed auto everywhere; the nav scrolls live at 872>690 on expanded-group pages)", () => {
-    const navIdx = sidebarNav.indexOf('className="flex-1 overflow-y-auto');
+  it("R22-A1: the sidebar nav NEVER styles its scrollbar (REF authors zero scrollbar rules — computed auto everywhere; the nav scrolls live at 872>690 on expanded-group pages; session 44: the anchor is the content div)", () => {
+    const navIdx = sidebarNav.indexOf('data-sidebar="content" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto');
     expect(navIdx).toBeGreaterThan(-1);
-    const navBlock = sidebarNav.slice(navIdx, navIdx + 160);
-    expect(navBlock).toContain("overflow-y-auto");
+    const navBlock = sidebarNav.slice(navIdx, navIdx + 200);
+    expect(navBlock).toContain("overflow-auto");
     expect(navBlock).not.toContain("scrollbar-thin");
     // the whole file carries no scrollbar styling at all
     expect(sidebarNav).not.toContain("scrollbar-thin");
@@ -2321,9 +2318,9 @@ describe("session-29 DnD ordering depth + print recipes (parity round 28 — the
 });
 
 describe("session-30 sidebar leaf-gap + organogram DnD + print color recipes (parity round 29)", () => {
-  it("R29-A1: the leaf-list ul drops mb-1 — the trailing gap after an expanded group is the root wrapper's 4px gap-1 only (REF-measured: next root at +4, the session-5 over-generalized bottom margin removed)", () => {
-    expect(sidebarNav).toContain("mt-1 flex flex-col gap-1 pl-4");
-    expect(sidebarNav).not.toContain("mt-1 mb-1 flex flex-col gap-1 pl-4");
+  it("R29-A1: the submenu is the no-ul div.pl-4.space-y-1 (session 44) — the 4px pitch rides space-y-1, the trailing gap after an expanded group is the menu ul's gap-1 only", () => {
+    expect(sidebarNav).toContain('className="pl-4 space-y-1"');
+    expect(sidebarNav).not.toContain("mt-1 flex flex-col gap-1 pl-4");
   });
 
   it("R29-B1: the organogram page delegates the tree render to the client island (the page-folder convention) while keeping the server-side tree build", () => {
@@ -2982,7 +2979,7 @@ describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity r
   });
 
   it("R34-D1: REF's RTL shell — the in-flow transparent peer spacer reserves the column (mirrors with dir; session-40: the spacer is the shadcn peer wrapper's first child; REF authors no aria-hidden anywhere in the tree)", () => {
-    expect(appShell).toMatch(/<div className="group peer hidden text-sidebar-foreground md:block">/);
+    expect(appShell).toMatch(/<div\s+className="group peer hidden text-sidebar-foreground md:block"\s+data-state=/);
     expect(appShell).toMatch(/<div className="relative h-svh w-\(--sidebar-width\) bg-transparent transition-\[width\] duration-200 ease-linear/);
   });
 
@@ -4144,7 +4141,7 @@ describe("session-42 footer focus family + employees row + sidebar attributes (p
 
   // --- E. the shadcn Sidebar data-sidebar family ---
 
-  it("R41-E1: the shell carries REF's data-sidebar attribute family — header/content/group/group-label/group-content/menu/menu-button(13)/menu-item(5, the standalone links only)/footer", () => {
+  it("R41-E1 (session-44 amendment): the shell carries REF's data-sidebar attribute family — header/content/group/group-label/group-content/menu/menu-button/menu-item/footer — and the contract now covers the toggles (data-size + data-active) and the subleaf li (REF's reloaded build authors the full set; the r41 bare-toggle reading was pre-redeploy)", () => {
     expect(sidebarNav42).toContain('data-sidebar="header"');
     expect(sidebarNav42).toContain('data-sidebar="content"');
     expect(sidebarNav42).toContain('data-sidebar="group"');
@@ -4154,10 +4151,9 @@ describe("session-42 footer focus family + employees row + sidebar attributes (p
     expect(sidebarNav42).toContain('data-sidebar="menu-button"');
     expect(sidebarNav42).toContain('data-sidebar="menu-item"');
     expect(sidebarNav42).toContain('data-sidebar="footer"');
-    // the menu-item wraps ONLY the standalone links — the group toggles sit
-    // bare in the ul (REF's structure: 8 bare buttons + 5 wrapped links)
-    expect(sidebarNav42).toMatch(/<li key=\{item\.label\} data-sidebar="menu-item">/);
-    expect(sidebarNav42).not.toMatch(/<li key=\{item\.label\}>\s*\{item\.children/);
+    // the menu-item li carries the shadcn group class (standalone +
+    // subleaf); the group toggles sit in Radix Root divs
+    expect(sidebarNav42).toContain('data-sidebar="menu-item" className="group/menu-item relative"');
   });
 
   // --- T. the sidebar-foreground token ---
@@ -4270,5 +4266,132 @@ describe("session-43 login redeploy re-audit (parity round 42 — the input base
     const pwFieldIdx = login43.indexOf('id="password"');
     expect(login43.lastIndexOf('className="space-y-1.5"', pwFieldIdx)).toBeGreaterThan(-1);
     expect(login43.lastIndexOf('className="relative mt-1.5"', pwFieldIdx)).toBeGreaterThan(-1);
+  });
+});
+
+describe("session-44 sidebar shadcn architecture + desktop collapse (parity round 43)", () => {
+  const sidebarNav44 = read("src", "components", "layout", "sidebar-nav.tsx");
+  const appShell44 = read("src", "components", "layout", "app-shell.tsx");
+  const globals44 = read("src", "app", "globals.css");
+
+  // --- D. the token corrections + the custom rules ---
+
+  it("R43-D1: the light sidebar-accent family = REF's zinc-100/zinc-900 (the old --sidebar-accent was a wrong blue tint; the accent-foreground token was MISSING entirely), and the custom-class vars land at :root", () => {
+    expect(globals44).toContain("--sidebar-accent: hsl(240 4.8% 95.9%)");
+    expect(globals44).toContain("--sidebar-accent-foreground: hsl(240 5.9% 10%)");
+    expect(globals44).toContain("--primary-color: #1877f2");
+    expect(globals44).toContain("--accent-color: #e4e6eb");
+    // the blue tint is retired
+    expect(globals44).not.toContain("--sidebar-accent: hsl(214 95% 93%)");
+  });
+
+  it("R43-D2: the dark sidebar-accent family = REF's zinc-800/zinc-100", () => {
+    // slice the .dark block — the light values above must not mask a
+    // missing dark override
+    const darkAt = globals44.indexOf(".dark {");
+    const darkBlock = globals44.slice(darkAt, globals44.indexOf("}", globals44.indexOf("--sidebar-accent", darkAt)));
+    expect(darkBlock).toContain("--sidebar-accent: hsl(240 3.7% 15.9%)");
+    expect(darkBlock).toContain("--sidebar-accent-foreground: hsl(240 4.8% 95.9%)");
+  });
+
+  it("R43-D3: the unlayered custom rules, verbatim — the active nav tile's blue survives every layered utility (unlayered + !important)", () => {
+    expect(globals44).toContain(".custom-primary-bg {");
+    expect(globals44).toContain("background-color: var(--primary-color) !important;");
+    expect(globals44).toContain(".custom-accent-bg {");
+    expect(globals44).toContain("background-color: var(--accent-color) !important;");
+  });
+
+  // --- C. the SidebarNav shadcn restructure ---
+
+  it("R43-C1: the content wrapper is REF's SidebarContent div (the nav ELEMENT retires — the last nav in the tree is the bottom tab bar) with min-h-0 + the rail overflow member; the extra flex h-full wrapper is gone", () => {
+    expect(sidebarNav44).toContain(
+      'data-sidebar="content" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden p-3"'
+    );
+    expect(sidebarNav44).not.toContain("<nav");
+    expect(sidebarNav44).not.toContain('className="flex h-full flex-col"');
+  });
+
+  it("R43-C2: the group family — group p-2 wrapper, the group-label's rail members (transition-[margin,opacity] + -mt-8 + opacity-0), group-content w-full, menu ul w-full min-w-0", () => {
+    expect(sidebarNav44).toContain('data-sidebar="group" className="relative flex w-full min-w-0 flex-col p-2"');
+    expect(sidebarNav44).toContain("group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0");
+    expect(sidebarNav44).toContain("transition-[margin,opacity] duration-200 ease-linear");
+    expect(sidebarNav44).toContain('data-sidebar="group-content" className="w-full text-sm"');
+    expect(sidebarNav44).toContain('data-sidebar="menu" className="flex w-full min-w-0 flex-col gap-1"');
+    // the group-label authors slate-500, not the muted token
+    expect(sidebarNav44).toContain("text-slate-500 uppercase tracking-wider");
+  });
+
+  it("R43-C3: the shared shadcn menu-button base const — verbatim REF string with the !size-8/!p-2 rail members and the data-[active=true] dead-code family", () => {
+    expect(sidebarNav44).toContain(
+      'const MENU_BUTTON_BASE =\n  "peer/menu-button flex w-full items-center gap-2 overflow-hidden p-2 text-left outline-none ring-sidebar-ring focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0"'
+    );
+  });
+
+  it("R43-C4: every nav button carries the full attribute contract (menu-button + data-size=default + data-active=false — REF authors false even on the active link) and the active branches add the inline blue style", () => {
+    expect(sidebarNav44).toContain('data-sidebar="menu-button"\n      data-size="default"\n      data-active="false"');
+    expect(sidebarNav44).toContain('style={active ? { backgroundColor: "rgb(24, 119, 242)" } : undefined}');
+    expect(sidebarNav44).not.toContain('data-active="true"');
+  });
+
+  it("R43-C5: the leaf tails — inactive carries the sidebar-token hover pair + slate-600 + the dead hover:custom-accent-bg member; active replaces them with custom-primary-bg text-white font-medium shadow-sm (NO bg-primary)", () => {
+    expect(sidebarNav44).toContain(
+      '"hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg mb-1 text-slate-600 hover:custom-accent-bg flex items-center gap-3 px-3 py-2.5"'
+    );
+    expect(sidebarNav44).toContain(
+      '"hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg mb-1 custom-primary-bg text-white font-medium shadow-sm flex items-center gap-3 px-3 py-2.5"'
+    );
+    expect(sidebarNav44).not.toContain("bg-primary font-medium text-white");
+  });
+
+  it("R43-C6: the toggle tail does NOT carry the sidebar-accent hover pair (the split that keeps the toggle's blue hover alive) — hover:bg-blue-50 + text-blue-700 over the base only", () => {
+    expect(sidebarNav44).toContain(
+      '"h-8 text-sm hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg mb-1 text-slate-600"'
+    );
+    // the toggle interior: REF's justify-between wrapper + the gap-3 row
+    expect(sidebarNav44).toContain('className="flex items-center justify-between w-full px-3 py-2.5"');
+    expect(sidebarNav44).toContain('className="flex items-center gap-3"');
+  });
+
+  it("R43-C7: the chevron is a GLYPH SWAP (chevron-down open, chevron-right collapsed — no rotation, no motion classes)", () => {
+    expect(sidebarNav44).toContain('<ChevronDown className="w-4 h-4" aria-hidden="true" />');
+    expect(sidebarNav44).toContain('<ChevronRight className="w-4 h-4" aria-hidden="true" />');
+    expect(sidebarNav44).not.toContain("rotate-90");
+    expect(sidebarNav44).not.toContain("transition-transform");
+  });
+
+  it("R43-C8: the no-ul submenu — Collapsible.Content is div.pl-4.space-y-1 with DIRECT li menu-item children (group/menu-item relative); subleaf tails use px-3 py-2 with NO mb-1", () => {
+    expect(sidebarNav44).toMatch(/<Collapsible\.Content\s+id=\{contentId\}\s+className="pl-4 space-y-1">/);
+    expect(sidebarNav44).toContain('data-sidebar="menu-item" className="group/menu-item relative"');
+    expect(sidebarNav44).toContain(
+      '"hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg text-slate-600 hover:custom-accent-bg flex items-center gap-3 px-3 py-2"'
+    );
+    expect(sidebarNav44).toContain(
+      '"hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg custom-primary-bg text-white font-medium shadow-sm flex items-center gap-3 px-3 py-2"'
+    );
+    expect(sidebarNav44).not.toContain("mt-1 flex flex-col gap-1 pl-4");
+  });
+
+  it("R43-C9: label spans + icons mirror REF — leaf/toggle spans font-medium, subleaf spans text-sm; top-level icons author w-5 h-5 (the base guard renders 16px), subleaf icons w-4 h-4; NO icon color classes (inheritance)", () => {
+    expect(sidebarNav44).toContain('<span className="font-medium">{item.label}</span>');
+    expect(sidebarNav44).toContain('<span className="text-sm">{child.label}</span>');
+    expect(sidebarNav44).toContain('<Icon className="w-5 h-5" aria-hidden="true" />');
+    expect(sidebarNav44).toContain('<ChildIcon className="w-4 h-4" aria-hidden="true" />');
+    expect(sidebarNav44).not.toContain('className="h-4 w-4 shrink-0"');
+    expect(sidebarNav44).not.toContain('className="h-5 w-5 shrink-0 text-slate-600"');
+  });
+
+  // --- A. the desktop collapse ---
+
+  it("R43-A1: the peer wrapper carries REF's four data attrs and flips on the collapse state — the spacer/wrap/inner s40 members respond to data-collapsible=icon", () => {
+    expect(appShell44).toMatch(
+      /<div\s+className="group peer hidden text-sidebar-foreground md:block"\s+data-state=\{collapsed \? "collapsed" : "expanded"\}\s+data-collapsible=\{collapsed \? "icon" : ""\}\s+data-variant="sidebar"\s+data-side="left"\s+>/
+    );
+    expect(appShell44).toContain("const [collapsed, setCollapsed] = React.useState(false);");
+  });
+
+  it("R43-A2: the trigger's click branches on the 768px media — desktop toggles the icon-rail collapse, mobile opens the drawer (REF's authored branch; the trigger lives in the md:hidden header either way)", () => {
+    expect(appShell44).toContain('if (window.matchMedia("(min-width: 768px)").matches)');
+    expect(appShell44).toContain("setCollapsed((c) => !c);");
+    expect(appShell44).toContain("setMobileOpen(true);");
   });
 });

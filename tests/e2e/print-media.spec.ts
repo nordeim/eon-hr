@@ -28,8 +28,11 @@ test.describe("print media superset (session 29)", () => {
     const aside = page.locator('div[class*="sidebar-wrapper"]');
     await expect(aside).toHaveCSS("display", "none");
 
-    // The sidebar's inner nav (block by default at desktop) must hide.
-    await expect(page.locator("nav").first()).toHaveCSS("display", "none");
+    // Session 44: the sidebar's content is the data-sidebar div (the nav
+    // element retired) — it hides via the sidebar-wrapper subtree rule; a
+    // display:none ancestor's descendants still compute their own display
+    // (flex), so toBeHidden is the right read, not a display assertion.
+    await expect(page.locator('[data-sidebar="content"]')).toBeHidden();
 
     // The root drops min-h-screen (100vh would compute to the viewport
     // height; the print reset forces 0). Session 40: the shell gained

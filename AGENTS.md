@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 656 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 190 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 670 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 198 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2348,3 +2348,105 @@ trap-6 superset; `--ring` resolves 240 10% 3.9% vs #09090b (the trap-1
 two-build form split). The standing audits 5/5 post-change; 8
 screenshots (164-167) → **236 PNG captures**. DB pristine (users=1,
 employees=1, leaveBalances=2).
+
+## Session 44 — parity round 43 (the sidebar shadcn architecture + the desktop collapse)
+
+The redeploy watch was QUIET (all four build fingerprints matched the
+round-42 records) — the frontier came from the standing list: the s40
+shell restructure adopted REF's OUTER peer architecture, but the
+sidebar's INNER authored surface was never census'd beyond the r41
+attribute names. The round census'd it end to end (DOM tree + exact
+class strings + both collapse states + rendered geometry + hover
+renders) and found **REF's sidebar is the full shadcn Sidebar component
+architecture** — plus a genuine functional gap that survived 42 rounds
+(docs/remediation-plan-session44.md):
+
+- **THE FUNCTIONAL GAP — the desktop collapse**: REF's trigger
+  COLLAPSES the sidebar to a 47px icon rail (the shadcn
+  `collapsible=icon` mode — the peer flips `data-collapsible=""` ↔
+  `"icon"` + `data-state`; every s40 member already answered, only the
+  state was missing). REF's trigger lives in the same `md:hidden`
+  mobile header (0×0 at desktop — dormant UI, reachable only
+  programmatically); the clone reproduces the authored matchMedia
+  branch (≥768px toggles the collapse, below opens the drawer). Rail
+  geometry live-measured on both: 48px wrap, 47px inner (the border),
+  32×32 buttons (the `!size-8 !p-2` members — the v3 LEADING-!
+  important forms DO compile under the installed v4.3.3, verified
+  empirically before adopting), group-label opacity-0/-mt-8, brand h2
+  0-width, footer spill documented (overflow visible, scrollWidth 128).
+- **R43-C — the SidebarNav restructure** (verbatim REF strings): the
+  content is a `data-sidebar=content` DIV (the nav ELEMENT retires —
+  the print block's `nav` selector now covers only the bottom tabs),
+  `flex min-h-0 flex-1 flex-col gap-2 overflow-auto
+  group-data-[collapsible=icon]:overflow-hidden p-3`; the group p-2
+  wrapper, the group-label with its `transition-[margin,opacity]` +
+  rail members (authors slate-500, not the muted token), group-content
+  w-full, menu ul `flex w-full min-w-0 flex-col gap-1`; every nav
+  button carries the full shadcn `peer/menu-button` base + the
+  attribute contract `data-size="default" data-active="false"` (REF
+  authors the literal false on EVERY link — even the active one; the
+  base's `data-[active=true]:*` members are dead code on REF); the
+  toggle interior restructure (`div.flex.items-center.justify-between.
+  w-full.px-3.py-2.5` > `div.flex.items-center.gap-3` + chevron) with
+  the GLYPH SWAP (chevron-down open / chevron-right collapsed, no
+  rotation); the no-ul submenu (`div.pl-4.space-y-1` with direct
+  `li.group/menu-item.relative` children); leaf/subleaf/toggle tails
+  with the HOVER-PAIR SPLIT (only leaves carry
+  `hover:bg-sidebar-accent hover:text-sidebar-accent-foreground` —
+  that is how the toggle's blue-50/blue-700 hover survives) and the
+  dead `hover:custom-accent-bg` member (a hand-authored class — its
+  hover: variant generates nothing, mirrored for DOM parity).
+- **The toggle icon 20px puzzle**: the base's `[&>svg]:size-4` guard
+  is a DIRECT-child selector — the leaf icons sit at the top level
+  (authored w-5 h-5, rendered 16px) but the toggle's icon rides the
+  interior wrapper two levels deep (the guard misses it — the authored
+  20px renders, live-measured on both).
+- **Typography**: leaf/toggle label spans carry `font-medium` (500,
+  live-measured — the clone rendered 400, a real visual diff that
+  survived 42 rounds); subleaf spans carry `text-sm` (the active
+  subleaf's 500 inherits from its link's font-medium).
+- **The active recipe**: `custom-primary-bg text-white font-medium
+  shadow-sm` + the INLINE `style="background-color: rgb(24, 119,
+  242)"` (render-redundant with the class's unlayered !important — an
+  authored attribute mirrored), NOT `bg-primary`.
+- **R43-D — the token corrections**: light `--sidebar-accent` was a
+  WRONG blue tint (214 95% 93%) and `--sidebar-accent-foreground` was
+  missing entirely → REF's zinc-100/zinc-900 light + zinc-800/zinc-100
+  dark; the `--primary-color: #1877f2` / `--accent-color: #e4e6eb`
+  vars + the two UNLAYERED custom rules (`.custom-primary-bg` /
+  `.custom-accent-bg`, both `!important`) land in globals.css.
+
+**Pins**: 14 new (D1-D3, C1-C9, A1-A2) + 17 amended (session-5 ×4,
+R18-C, R19-A/B, R20-A/C/D/E, R21-A/D, R22-A1, R29-A1, R34-D1, R41-E1 —
+the hex hover/pressed forms retired to the token members, the chevron
+pin flipped to the glyph swap, the nav-anchor pins moved to the content
+div). Gates: lint 0/0 · tsc ✓ · **670/670 unit** (+14) · build ✓ ·
+**198/198 E2E** (+8 — the session44-sidebar-collapse spec: the peer
+attrs, the programmatic rail collapse + geometry, the label/brand
+collapse, the expand-back, the mobile matchMedia branch, the 19/11
+counts + attribute contract, the active recipe + inline style, the
+chevron glyph pair; one session40 input-family tolerance flake in the
+first full run, stable on the single-spec re-run AND the full re-run).
+Live: verify-r43 **9/9 MATCH** — the peer attrs, the family strings,
+the leaf/active/toggle authored sets (normalized — tw-merge dedupes
+flex/items-center and resolves gap-2/gap-3, both render gap-3; REF's
+raw concatenation keeps both, the stylesheet's numeric order makes
+gap-3 win there too), the submenu + counts, the rail geometry (both
+apps collapsed LIVE), the tokens both themes (Chrome resolves the
+clone's hsl() token form to hex — the resolver normalizes both to rgb
+triples), the hover renders (the v2 polyfill unwrapped 5 media blocks
+on LOC; REF applies directly — the leaf zinc-100 + the closed toggle
+blue-50 both MATCH), the short-viewport scroll. The standing audits
+5/5 + the route sweep 12/12 post-change; 8 screenshots (168-171) →
+**244 PNG captures**. DB pristine (users=1, employees=1,
+leaveBalances=2).
+
+**The round's transferable lessons**: (1) the v3 leading-`!` important
+forms still compile under Tailwind 4.3.3 (verified empirically with the
+repo's own @tailwindcss/postcss before adoption — don't assume the v4
+upgrade guide's "moved to the end" broke the legacy parse); (2) the
+`[&>svg]` guard is a direct-child selector — nesting an icon one level
+deeper is a legitimate way to keep its authored size; (3) Chrome's
+newer engines RESOLVE color-function-valued custom properties in
+getComputedStyle (the clone's `hsl(...)` tokens read back as hex;
+REF's raw triples stay as-is — normalize both to rgb before comparing).

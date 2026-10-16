@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronRight, Bell, Moon, Sun, Languages, LogOut, CircleUser, Briefcase } from "lucide-react";
+import { ChevronRight, ChevronDown, Bell, Moon, Sun, Languages, LogOut, CircleUser, Briefcase } from "lucide-react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -17,6 +17,42 @@ export interface ShellUser {
   role: string;
 }
 
+/* Session 45 (R43-C3): REF's shadcn SidebarMenuButton base, verbatim —
+   the full peer/menu-button string off its reloaded build. The rail
+   members (the important-prefixed size/padding pair) compile under v4
+   (verified against the installed 4.3.3 — the legacy leading-! form
+   still generates the important rule) and the data-active family is
+   dead code on REF too: it authors the literal false on every link
+   (even the active one — the active styling rides the tail classes +
+   the inline blue style), so the attribute-conditional members never
+   match. The svg guard is a DIRECT-child selector — the leaf/subleaf
+   icons sit at the top level (rendered 16px, authored 20px on REF) but
+   the toggle's icon rides the interior wrapper (two levels deep, the
+   guard misses it — the 20px authored size renders, REF-measured). */
+const MENU_BUTTON_BASE =
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden p-2 text-left outline-none ring-sidebar-ring focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0";
+
+/* Session 45 (R43-C5/C6/C8): the three tails. The leaf/subleaf tails
+   carry the sidebar-token hover pair; the toggle tail does NOT — the
+   split is what keeps the toggle's blue hover alive (without it the
+   zinc pair wins and the collapsed group hovers gray). The inactive
+   branches keep the dead hand-authored hover member REF ships; the
+   active branches swap it for the custom-primary-bg recipe + white
+   text + the shadow, and the active branch ALSO carries the inline
+   blue style (render-redundant with the unlayered class — an authored
+   attribute we mirror). Top-level geometry: mb-1 + py-2.5; subleaf
+   geometry: py-2, no bottom margin (the 4px pitch rides space-y-1). */
+const LEAF_TAIL_INACTIVE =
+  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg mb-1 text-slate-600 hover:custom-accent-bg flex items-center gap-3 px-3 py-2.5";
+const LEAF_TAIL_ACTIVE =
+  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg mb-1 custom-primary-bg text-white font-medium shadow-sm flex items-center gap-3 px-3 py-2.5";
+const TOGGLE_TAIL =
+  "h-8 text-sm hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg mb-1 text-slate-600";
+const SUBLEAF_TAIL_INACTIVE =
+  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg text-slate-600 hover:custom-accent-bg flex items-center gap-3 px-3 py-2";
+const SUBLEAF_TAIL_ACTIVE =
+  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm hover:opacity-80 transition-all duration-200 rounded-lg custom-primary-bg text-white font-medium shadow-sm flex items-center gap-3 px-3 py-2";
+
 /** The sidebar navigation tree — shared by desktop rail and mobile drawer. */
 export function SidebarNav({
   user,
@@ -28,31 +64,34 @@ export function SidebarNav({
   variant?: "desktop" | "mobile";
 }) {
   const pathname = usePathname();
+  /* Session 45 (R43-C1/C2): REF's shadcn SidebarContent/SidebarGroup
+     architecture, verbatim. The old element-based wrapper + the
+     extra flex column are gone — the header/content/footer become
+     direct children of the sidebar flex column, the content is the
+     min-h-0 flex-1 scroller (the short-viewport contract: the footer
+     stays pinned, the nav scrolls internally), and every wrapper
+     carries its data-sidebar contract with the rail members. The
+     group label's rail members (-mt-8 + opacity-0 + the margin/opacity
+     transition) collapse it into the icon state; the label authors
+     slate-500 (REF's literal, same render as the old muted token). */
   return (
-    <div className="flex h-full flex-col">
+    <>
       <SidebarHeader />
-      {/* Session 23 (R22-A): no scrollbar styling — REF authors zero scrollbar
-          rules (computed auto everywhere); the nav scrolls 872>690 on
-          expanded-group pages with the browser-default scrollbar.
-          Session 43 (R41-E1): the shadcn Sidebar attribute family — the
-          nav carries data-sidebar=content, the group wrapper + label +
-          group-content + menu mirror REF's component contract (REF-counted:
-          content 1, group 1, group-label 1, group-content 1, menu 1,
-          menu-button 13, menu-item 5 — the standalone links only, the
-          group toggles sit bare). The wrappers are layout-neutral (no
-          padding — the clone's px-5 nav rhythm stays). */}
-      <nav className="flex-1 overflow-y-auto px-5 pb-4 pt-5" data-sidebar="content">
-        <div className="flex flex-col" data-sidebar="group">
-          <div className="flex h-8 shrink-0 items-center px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground" data-sidebar="group-label">
+      <div data-sidebar="content" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden p-3">
+        <div data-sidebar="group" className="relative flex w-full min-w-0 flex-col p-2">
+          <div
+            data-sidebar="group-label"
+            className="flex h-8 shrink-0 items-center rounded-md outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2"
+          >
             Main Menu
           </div>
-          <div className="text-sm" data-sidebar="group-content">
-            <ul className="flex flex-col gap-1" data-sidebar="menu">
+          <div data-sidebar="group-content" className="w-full text-sm">
+            <ul data-sidebar="menu" className="flex w-full min-w-0 flex-col gap-1">
               {NAV_ITEMS.map((item) => (
                 item.children ? (
                   <CollapsibleNavItem key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} />
                 ) : (
-                  <li key={item.label} data-sidebar="menu-item">
+                  <li key={item.label} data-sidebar="menu-item" className="group/menu-item relative">
                     <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
                   </li>
                 )
@@ -60,9 +99,9 @@ export function SidebarNav({
             </ul>
           </div>
         </div>
-      </nav>
+      </div>
       <SidebarFooter user={user} variant={variant} />
-    </div>
+    </>
   );
 }
 
@@ -114,39 +153,29 @@ function NavLink({
 }) {
   const active = pathname === item.href;
   const Icon = item.icon;
+  /* Session 45 (R43-C4): REF authors the full attribute contract on
+     every nav surface — the shadcn size marker + the literal-false
+     active flag (even on the active link; the base's conditional
+     members never match — the active styling rides the tail classes +
+     the inline blue style, mirroring REF's authored attributes). The
+     icon carries no color class (inherits the link color — slate-600
+     inactive, white active, REF-measured) and authors the 20px form;
+     the base's direct-child svg guard renders it 16px. The label span
+     carries the medium weight REF renders (500, live-measured — the
+     old 400 was a 42-round survivor). */
   return (
     <Link
       href={item.href!}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       data-sidebar="menu-button"
-      className={cn(
-        // Reference leaf-link recipe (session-5 live measurement): the
-        // Base44 app renders leaf links at px-3 py-2.5 gap-3 with 16px
-        // icons and mb-1 (40px list pitch) — while its GROUP buttons use
-        // p-2/gap-2 with 20px icons. Session 20 (R19-A/B): hover = the
-        // sidebar tokens — bg zinc-100 #F4F4F5 + text #18181B + opacity-80
-        // (REF's hover:bg-sidebar-accent hover:text-sidebar-accent-foreground,
-        // settled-measured; the #e4e6eb pin was stale).
-        "flex h-8 items-center gap-3 rounded-lg px-3 py-2.5 text-sm mb-1 outline-none transition-all duration-200 hover:opacity-80",
-        // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
-        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
-        // measured rgb(59,130,246) on leaf links AND group buttons), not
-        // the dark global ring token.
-        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-        /* Session 21 (R20-D): REF's active leaf carries the full pressed
-           pair, but its unlayered custom-primary-bg keeps the blue under
-           press. The clone's bg-primary is a v4 UTILITY — an active:bg
-           variant would win specificity ((0,2,0) vs (0,1,0)) and wrongly
-           gray the tile — so only the TEXT flip is mirrored (REF's
-           measured pressed text = #18181B, bg stays #1877F2). */
-        active
-          ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]"
-          : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]"
-      )}
+      data-size="default"
+      data-active="false"
+      style={active ? { backgroundColor: "rgb(24, 119, 242)" } : undefined}
+      className={cn(MENU_BUTTON_BASE, active ? LEAF_TAIL_ACTIVE : LEAF_TAIL_INACTIVE)}
     >
-      <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
-      <span className="truncate">{item.label}</span>
+      <Icon className="w-5 h-5" aria-hidden="true" />
+      <span className="font-medium">{item.label}</span>
     </Link>
   );
 }
@@ -166,89 +195,75 @@ function CollapsibleNavItem({
     if (childActive) setOpen(true);
   }, [childActive]);
   const Icon = item.icon;
-  /* Session 25 (R24-A): REF's group toggles carry aria-controls in BOTH
-     states (its older Radix sets it unconditionally — measured radix-:rh:
-     etc. on every collapsed group). The clone's Radix only authors it when
-     the content is mounted, so a stable useId is passed to BOTH sides;
-     user props spread after Radix's own in the v1.1.x source, so the
-     override holds collapsed AND matches the mounted content id open. */
+  /* Session 25 (R24-A): REF's group toggles carry the content id in BOTH
+     states (its older Radix sets it unconditionally). The clone's Radix
+     only authors it when the content is mounted, so a stable useId is
+     passed to BOTH sides; user props spread after Radix's own in the
+     v1.1.x source, so the override holds collapsed AND matches the
+     mounted content id open. */
   const contentId = React.useId();
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
       <Collapsible.Trigger
         aria-controls={contentId}
         data-sidebar="menu-button"
-        className={cn(
-          // Reference group-button recipe: p-2/gap-2 geometry with a 20px
-          // leading icon (session-5: measured distinctly from leaf links),
-          // hover bg-blue-50 + text-blue-700, mb-1 for the 40px pitch.
-          // Session 22 (R21-A): REF's group buttons carry the SAME motion
-          // recipe as every nav item (settled-measured ~269ms vs the old
-          // color-only 150ms ~229ms) — transition-all over 200ms.
-          "flex h-8 w-full items-center gap-2 rounded-lg px-2 py-2 text-sm mb-1 outline-none transition-all duration-200",
-          // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
-        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
-        // measured rgb(59,130,246) on leaf links AND group buttons), not
-        // the dark global ring token.
-        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-          /* Session 21 (R20-A/E): pressed = the sidebar tokens — REF's
-             pressed-pair utilities (sidebar-accent bg + foreground text)
-             beat its blue hover in v3 rule order (measured settled under
-             hold). The EXPANDED group hovers the same gray via
-             data-[state=open]:hover: (a second hover recipe the r19 audit
-             missed — it probed the group only collapsed). */
-          "text-slate-600 hover:bg-blue-50 hover:text-blue-700 active:bg-[#f4f4f5] active:text-[#18181b] data-[state=open]:hover:bg-[#f4f4f5] data-[state=open]:hover:text-[#18181b]"
-        )}
+        data-size="default"
+        data-active="false"
+        className={cn(MENU_BUTTON_BASE, TOGGLE_TAIL)}
         aria-expanded={open}
       >
-        <Icon className="h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
-        <span className="flex-1 truncate text-left">{item.label}</span>
-        <ChevronRight
-          /* Session 22 (R21-D): REF's chevron carries NO motion classes
-             (computed all 0s) — the rotation snaps instantly. The old
-             200ms swing was a clone extra; removed for authored parity. */
-          className={cn("h-4 w-4 shrink-0 text-slate-600", open && "rotate-90")}
-          aria-hidden="true"
-        />
+        {/* Session 45 (R43-C6): REF's toggle interior — the justify-between
+            wrapper (px-3 py-2.5, clipped by the button's overflow-hidden at
+            the 32px height — the row centers) around the gap-3 icon+label
+            row and the chevron. The icon rides the wrapper (two levels deep
+            — the base's svg guard misses it, so the authored 20px renders,
+            REF-measured). The chevron is a GLYPH SWAP: the down glyph when
+            open, the right glyph when collapsed — no rotation (the old
+            90-degree swing was a clone extra; REF's own icons never
+            carried motion classes). */}
+        <div className="flex items-center justify-between w-full px-3 py-2.5">
+          <div className="flex items-center gap-3">
+            <Icon className="w-5 h-5" aria-hidden="true" />
+            <span className="font-medium">{item.label}</span>
+          </div>
+          {open ? (
+            <ChevronDown className="w-4 h-4" aria-hidden="true" />
+          ) : (
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          )}
+        </div>
       </Collapsible.Trigger>
-      <Collapsible.Content id={contentId}>
-        <ul className="mt-1 flex flex-col gap-1 pl-4">
-          {item.children?.map((child: NavChild) => {
-            const active = pathname === child.href;
-            const ChildIcon = child.icon;
-            return (
-              <li key={`${item.label}-${child.label}-${child.href}`}>
-                <Link
-                  href={child.href}
-                  onClick={onNavigate}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    // Reference sub-item recipe (byte-verified session 4,
-                    // re-verified session 5): h-8 px-3 py-2 gap-3, 16px
-                    // icons, 36px pitch. Session 20 (R19-A/B): hover = the
-                    // sidebar tokens — zinc-100 bg + #18181B text + opacity.
-                    "flex h-8 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:opacity-80",
-                    // Session 19 (R18-C): REF's sidebar focus ring is the SIDEBAR-RING
-        // token #3B82F6 (blue-500, --sidebar-ring 217.2 91.2% 59.8% —
-        // measured rgb(59,130,246) on leaf links AND group buttons), not
-        // the dark global ring token.
-        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-                    active
-                      ? "bg-primary font-medium text-white shadow-sm hover:text-[#18181b] active:text-[#18181b]"
-                      : "font-normal text-slate-600 hover:bg-[#f4f4f5] hover:text-[#18181b] active:bg-[#f4f4f5] active:text-[#18181b]"
-                  )}
-                >
-                  {ChildIcon ? (
-                    <ChildIcon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-600")} aria-hidden="true" />
-                  ) : (
-                    <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-white" : "bg-border")} aria-hidden="true" />
-                  )}
-                  <span className="truncate">{child.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      {/* Session 45 (R43-C8): REF's submenu is the no-ul structure — the
+          content element is the padded space-y-1 container with DIRECT
+          li menu-item children (the 4px pitch rides space-y; the old
+          element list with its top margin retired). The subleaves carry
+          the same attribute contract as every other nav surface. */}
+      <Collapsible.Content id={contentId} className="pl-4 space-y-1">
+        {item.children?.map((child: NavChild) => {
+          const active = pathname === child.href;
+          const ChildIcon = child.icon;
+          return (
+            <li key={`${item.label}-${child.label}-${child.href}`} data-sidebar="menu-item" className="group/menu-item relative">
+              <Link
+                href={child.href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                data-sidebar="menu-button"
+                data-size="default"
+                data-active="false"
+                style={active ? { backgroundColor: "rgb(24, 119, 242)" } : undefined}
+                className={cn(MENU_BUTTON_BASE, active ? SUBLEAF_TAIL_ACTIVE : SUBLEAF_TAIL_INACTIVE)}
+              >
+                {ChildIcon ? (
+                  <ChildIcon className="w-4 h-4" aria-hidden="true" />
+                ) : (
+                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-white" : "bg-border")} aria-hidden="true" />
+                )}
+                <span className="text-sm">{child.label}</span>
+              </Link>
+            </li>
+          );
+        })}
       </Collapsible.Content>
     </Collapsible.Root>
   );

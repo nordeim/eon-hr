@@ -81,7 +81,18 @@
      footer moon carries no color class — measured rgb(63,63,70) light /
      rgb(244,244,245) dark through the peer wrapper's chain). */
   --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-accent: hsl(214 95% 93%);
+  /* Session 45 (R43-D1): REF's sidebar-accent family, live-read off its
+     documentElement — zinc-100 (240 4.8% 95.9% = #f4f4f5, the r20-
+     measured hover bg) + zinc-900 (240 5.9% 10% = #18181b, the hover
+     text). The old --sidebar-accent was a wrong blue tint (214 95% 93%)
+     that the r19 hex-pin workaround masked; the accent-foreground token
+     was missing entirely. R43-D3: the hand-authored custom classes
+     (the active nav tile's custom-primary-bg + the inert hover member)
+     resolve through these vars. */
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --primary-color: #1877f2;
+  --accent-color: #e4e6eb;
   --sidebar-border: #e2e8f0;
   /* Session 19 (R18-C): the reference's sidebar focus ring — its
      --sidebar-ring token (hsl 217.2 91.2% 59.8%) renders blue-500
@@ -120,7 +131,10 @@
   --ring: #d4d4d4; /* 0 0% 83.1% */
   --sidebar: #18181b; /* 240 5.9% 10% = rgb(24,24,27) — the drawer flip */
   --sidebar-foreground: hsl(240 4.8% 95.9%);
+  /* Session 45 (R43-D2): REF's dark sidebar-accent family — zinc-800 /
+     zinc-100 (live-read off its .dark documentElement). */
   --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
 }
 
@@ -273,6 +287,22 @@
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
 
+/* Session 45 (R43-D3): REF's hand-authored custom classes, verbatim.
+   The active nav tile's blue rides .custom-primary-bg — UNLAYERED and
+   !important, it beats every layered utility (a v4 active:bg variant
+   would otherwise win specificity and gray the pressed tile — the r20
+   lesson). The .custom-accent-bg rule backs the nav tails' inert
+   hover:custom-accent-bg member (a hand-authored class, not a utility —
+   Tailwind generates nothing for its hover: variant; REF ships the same
+   dead member, mirrored for DOM parity). Both resolve through the
+   --primary-color / --accent-color runtime vars (R43-D1). */
+.custom-primary-bg {
+  background-color: var(--primary-color) !important;
+}
+.custom-accent-bg {
+  background-color: var(--accent-color) !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -413,14 +443,16 @@
    supersedes on the print axis instead of replicating the defect (the
    same category as the round-26 reduced-motion superset).
 
-   The recipe: hide the shell chrome — the desktop sidebar (the app
-   shell's <aside> is the ONLY aside in the tree; the sidebar-nav's inner
-   <nav> lives inside it), the mobile topbar (<header>) and the bottom
-   tabs (<nav>) — plus the Radix portal layer (an open drawer, dialog or
-   toast must not print over the page). Reset the tab-bar padding reserve
-   (pb-20) and the min-h-screen root so short pages do not force a blank
-   trailing page. Cards (.rounded-xl — the card recipe class) and table
-   rows do not split across page boundaries.
+   The recipe: hide the shell chrome — the desktop sidebar (the
+   sidebar-wrapper class selector hides the whole peer subtree — the
+   transparent RTL spacer + the fixed painting panel; session 44: the
+   inner content is a data-sidebar div, no nav element left inside), the
+   mobile topbar (<header>) and the bottom tabs (<nav> — the only nav
+   left in the tree) — plus the Radix portal layer (an open drawer,
+   dialog or toast must not print over the page). Reset the tab-bar
+   padding reserve (pb-20) and the min-h-screen root so short pages do
+   not force a blank trailing page. Cards (.rounded-xl — the card recipe
+   class) and table rows do not split across page boundaries.
 
    Like the reduced-motion block: deliberately UNLAYERED and !important —
    an unlayered important rule beats every v4 cascade layer. Under SCREEN

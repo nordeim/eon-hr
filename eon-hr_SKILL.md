@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.26.0 (session-43 remediation complete — the login redeploy re-audit: the input base migration) · **Last updated:** 2026-10-16
+> **Version:** 3.27.0 (session-44 remediation complete — the sidebar shadcn architecture + the desktop collapse) · **Last updated:** 2026-10-16
 > 2026-10-15 · **State:** 656 unit + 190 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -2855,3 +2855,70 @@ theme-inert. The app-build `--ring` serialization differs (`0 0% 3.9%`
 vs `#0a0a0a` — same color). The `comments-in-source` trap fired again
 (twice this round — a comment quoting the retired `md:text-sm` pair
 inflated a count pin; reworded to prose, per the standing rule).
+
+## §56 Session 44 (parity round 43) — the sidebar shadcn architecture + the desktop collapse
+
+**The frontier**: the s40 shell restructure adopted REF's OUTER peer
+architecture but the sidebar's INNER authored surface was never
+census'd beyond the r41 attribute names. The round census'd it end to
+end and found REF's sidebar is the full shadcn Sidebar component
+architecture — plus a genuine functional gap that survived 42 rounds:
+**the desktop collapse** (REF's trigger collapses the sidebar to a
+47px icon rail — the shadcn `collapsible=icon` mode; the peer flips
+`data-collapsible=""` ↔ `"icon"` + `data-state`; every s40 member
+already answered, only the state + the matchMedia branch were missing;
+REF's own trigger lives in the md:hidden mobile header — 0×0 at
+desktop, dormant UI reachable only programmatically).
+
+**The restructure (verbatim REF strings — all pinned in the session-44
+block)**: the content is a `data-sidebar=content` DIV (`flex min-h-0
+flex-1 flex-col gap-2 overflow-auto
+group-data-[collapsible=icon]:overflow-hidden p-3` — the nav ELEMENT
+retires); the group p-2 wrapper + the group-label with its
+`transition-[margin,opacity]` rail members (authors slate-500) +
+group-content w-full + menu ul `flex w-full min-w-0 flex-col gap-1`;
+every nav button carries the shared `MENU_BUTTON_BASE` const (the full
+`peer/menu-button` string with `!size-8 !p-2` rail members) + the
+attribute contract `data-size="default" data-active="false"` (the
+literal false on EVERY link — even the active one; the base's
+`data-[active=true]:*` members are dead code on REF); the toggle
+interior `div.flex.items-center.justify-between.w-full.px-3.py-2.5` >
+`div.flex.items-center.gap-3` + the chevron GLYPH SWAP (chevron-down
+open / chevron-right collapsed — no rotation); the no-ul submenu
+(`div.pl-4.space-y-1` with direct `li.group/menu-item.relative`
+children); the HOVER-PAIR SPLIT (only leaves/subleaves carry
+`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground` — that
+is how the toggle's blue hover survives) + the dead
+`hover:custom-accent-bg` member; the active recipe
+`custom-primary-bg text-white font-medium shadow-sm` + the inline
+`background-color: rgb(24, 119, 242)` style (NOT bg-primary); the
+token corrections (light sidebar-accent was a wrong blue tint,
+accent-foreground was missing → zinc-100/zinc-900 light +
+zinc-800/zinc-100 dark; the `--primary-color`/`--accent-color` vars +
+the two UNLAYERED `.custom-*` !important rules).
+
+**The tailwind-merge contract**: REF's raw concatenation keeps
+duplicate `flex`/`items-center` and both `gap-2`+`gap-3` in the leaf
+strings; the clone's `cn()` dedupes/resolves them — the RENDERED result
+is identical (the stylesheet's numeric order makes gap-3 win on REF
+too, and the subset-axis rule keeps p-2 alongside px-3 py-2.5 on both).
+Verification compares sorted, deduped sets with the gap-2→gap-3
+resolution applied to both sides.
+
+**Verification lenses added**: (1) the v3 leading-`!` compile probe —
+Tailwind 4.3.3 still parses the legacy leading-`!` important forms
+(verified empirically with the repo's own @tailwindcss/postcss:
+`group-data-[collapsible=icon]:!size-8` compiles to the important rule
+— don't assume the upgrade guide's "moved to the end" broke the legacy
+parse); (2) the direct-child svg guard read — `[&>svg]:size-4` is a
+`.class > svg` selector, so a leaf's top-level icon renders 16px
+(authored w-5 h-5) while the toggle's interior-nested icon keeps its
+authored 20px (the guard misses it — live-measured on both apps); (3)
+the custom-property resolver — Chrome's newer engines RESOLVE
+color-function-valued custom properties in getComputedStyle (the
+clone's `hsl(240 4.8% 95.9%)` reads back as `#f4f4f5`; REF's raw
+triples stay as-is) — normalize both to rgb triples before comparing;
+(4) the recursive hover polyfill — v4 nests the `@media (hover:hover)`
+blocks inside `@layer` group rules, so the unwrap must recurse through
+grouping rules (5 media blocks on the current build); REF (v3) needs
+no polyfill (its hovers apply directly).

@@ -20,7 +20,7 @@ test.describe("sidebar navigation", () => {
       "AI HR Assistant",
       "Settings",
     ]) {
-      await expect(page.locator("nav").getByText(item, { exact: true })).toBeVisible();
+      await expect(page.locator('[data-sidebar="content"]').getByText(item, { exact: true })).toBeVisible();
     }
   });
 
@@ -35,7 +35,7 @@ test.describe("sidebar navigation", () => {
 
   test("the active route is highlighted in the sidebar", async ({ page }) => {
     await page.goto("/employees");
-    const active = page.locator('[data-sidebar="sidebar"] nav a[aria-current="page"]');
+    const active = page.locator('[data-sidebar="sidebar"] a[aria-current="page"]');
     await expect(active).toHaveAttribute("href", "/employees");
     // Reference active treatment: solid #1877F2 with white text (also for
     // sub-items, not a tinted pill).

@@ -60,7 +60,7 @@ test.describe("dashboard", () => {
     await expect(chip).toHaveCSS("border-top-color", "rgb(226, 232, 240)");
     await expect(chip.locator("svg")).toHaveCSS("color", "rgb(37, 99, 235)");
     // Reference active-nav/primary blue is #1877F2.
-    await expect(page.locator('[data-sidebar="sidebar"] nav a[aria-current="page"]')).toHaveCSS(
+    await expect(page.locator('[data-sidebar="sidebar"] a[aria-current="page"]')).toHaveCSS(
       "background-color",
       "rgb(24, 119, 242)"
     );

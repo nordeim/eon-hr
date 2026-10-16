@@ -97,8 +97,10 @@ test.describe("mobile navigation", () => {
   test("sidebar nav items use the reference 32px rhythm (session 5)", async ({ page }) => {
     // Reference (re-measured session 5): every nav row is h-8 (32px).
     // LEAF links carry 16px icons (px-3 py-2.5 gap-3, mb-1 → 40px pitch);
-    // GROUP triggers carry 20px icons (p-2 gap-2); both font-normal 400
-    // inactive. docs/remediation-plan-session5.md §S1/S2.
+    // GROUP triggers carry 20px icons (p-2 gap-2); both render the
+    // font-medium 500 label (session 44: REF's authored span weight,
+    // live-measured — the old 400 was a pre-redeploy reading).
+    // docs/remediation-plan-session5.md §S1/S2.
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
     const panel = page.getByRole("dialog", { name: "Navigation menu" });
     await expect(panel).toBeVisible();
@@ -110,7 +112,7 @@ test.describe("mobile navigation", () => {
     const employees = panel.getByRole("button", { name: "Employees", exact: true });
     await expect(employees).toHaveCSS("height", "32px");
     await expect(employees.locator("svg").first()).toHaveCSS("height", "20px");
-    await expect(employees.locator("span").first()).toHaveCSS("font-weight", "400");
+    await expect(employees.locator("span").first()).toHaveCSS("font-weight", "500");
     await page.keyboard.press("Escape");
   });
 
