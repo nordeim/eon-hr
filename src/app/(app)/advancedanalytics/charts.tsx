@@ -45,7 +45,7 @@ export function HeadcountTrendLine({ data }: { data: HeadcountPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -59,7 +59,7 @@ export function DepartmentDistributionBar({ data }: { data: DeptCount[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -77,7 +77,7 @@ export function PayrollTrendLine({ data }: { data: PayrollPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
         <YAxis
           width={72}

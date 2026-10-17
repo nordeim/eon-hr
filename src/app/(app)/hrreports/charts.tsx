@@ -56,7 +56,7 @@ export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportCh
     return (
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
           <YAxis allowDecimals={false} width={36} />
           <Tooltip />
@@ -69,7 +69,7 @@ export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportCh
   return (
     <ResponsiveContainer width="100%" height={320}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />

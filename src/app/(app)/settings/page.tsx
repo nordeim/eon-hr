@@ -118,6 +118,10 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="System Settings"
         layout="flat36"
         iconClassName="text-blue-600"

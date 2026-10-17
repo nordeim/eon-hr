@@ -35,7 +35,7 @@ export function SentimentDistributionBar({ data }: { data: SentimentSlice[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -53,7 +53,7 @@ export function SentimentTrendLine({ data }: { data: TrendPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" tick={{ fontSize: 11 }} />
         <YAxis domain={[-100, 100]} width={48} />
         <Tooltip />
@@ -75,7 +75,7 @@ export function SurveyComparisonBar({ data }: { data: SurveyPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
         <YAxis yAxisId="count" allowDecimals={false} width={36} />
         <YAxis yAxisId="sentiment" orientation="right" domain={[-100, 100]} width={48} />

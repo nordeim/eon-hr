@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Inbox, Loader2, Package, Plus } from "lucide-react";
+import { Inbox, Laptop, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -139,15 +139,19 @@ export default function LegacyAssetsPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <PageHeader
-          /* Session 31 (R30-C): REF's always-row header — the class trio
-              forces row+between+start at EVERY width (measured side-by-side
-              at 390px); rowBreakpoint stays sm for the cluster wrap. */
-          className="flex-row justify-between items-start"
-          rowBreakpoint="sm"
+          /* Session 31 (R30-C) → Session 49 (R48-A3/G2): REF's header is
+           *  the UNPREFIXED always-row `flex justify-between items-start`
+           *  with the single Add Asset action rendered DIRECTLY in the
+           *  row (no cluster wrapper) and the badge glyph Laptop at
+           *  text-green-600 (live-measured @1440×900 this round —
+           *  replacing the r30 class-trio translation). */
+          alwaysRow
+          actionsUnwrapped
           layout="flat36"
           actionsStart
           section="Asset Management"
-          sectionIcon={<Package aria-hidden="true" />}
+          iconClassName="text-green-600"
+          sectionIcon={<Laptop aria-hidden="true" />}
           title="Assets"
           subtitle="Track and manage company assets"
           actions={

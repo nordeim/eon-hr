@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, CheckCircle2, Loader2, Shield, ShieldCheck } from "lucide-react";
+import { CircleAlert, CircleCheckBig, Loader2, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageHeader } from "@/components/shared/page-header";
@@ -100,6 +99,10 @@ export default function SecuritySettingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="Security Configuration"
         layout="flat36"
         iconClassName="text-blue-600"
@@ -115,16 +118,19 @@ export default function SecuritySettingsPage() {
       ) : (
         <>
           {bannerVisible ? (
-            /* Session 12 (R11-S): the reference's alert — border-2
-               border-orange-500 bg-orange-50, p-6, flex items-center gap-4
-               with a 48px bare orange icon (no tile). */
+            /* Session 12 (R11-S) → Session 49 (R48-C2): the reference's
+               alert — border-2 border-orange-500 bg-orange-50, p-6, flex
+               items-center gap-4 with the 48px circle-alert glyph at
+               text-orange-600 (NOT shrink-0), the H3 text-lg
+               font-semibold text-orange-900 title + P text-sm
+               text-orange-700 — re-measured live @1440×900. */
             <div className="rounded-xl text-card-foreground shadow border-2 border-orange-500 bg-orange-50">
               <div className="p-6">
                 <div className="flex items-center gap-4">
-                  <AlertTriangle className="h-12 w-12 shrink-0 text-orange-500" aria-hidden="true" />
+                  <CircleAlert className="h-12 w-12 text-orange-600" aria-hidden="true" />
                   <div>
-                    <p className="font-semibold text-orange-700">Security Configuration Required</p>
-                    <p className="text-sm text-orange-600">
+                    <h3 className="text-lg font-semibold text-orange-900">Security Configuration Required</h3>
+                    <p className="text-sm text-orange-700">
                       Please enable all required security features to publish your app.
                     </p>
                   </div>
@@ -167,9 +173,20 @@ export default function SecuritySettingsPage() {
                           {row.label}
                         </label>
                       </div>
-                      <Badge variant={settings[row.key] ? "success" : "secondary"}>
+                      {/* Session 49 (R48-C2): REF's badge is a DIV (not
+                          the span Badge) — rounded-md border px-2.5 py-0.5
+                          text-xs font-semibold + the focus members; the
+                          zero-state pair is the slate Disabled form
+                          (live-measured), Enabled keeps the green pair. */}
+                      <div
+                        className={
+                          settings[row.key]
+                            ? "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-100 text-green-700"
+                            : "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-slate-100 text-slate-700"
+                        }
+                      >
                         {settings[row.key] ? "Enabled" : "Disabled"}
-                      </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -194,7 +211,9 @@ export default function SecuritySettingsPage() {
               <div className="space-y-3 text-sm text-slate-600">
                 {RECOMMENDATIONS.map((r) => (
                   <div key={r.title} className="flex gap-3">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+                    {/* Session 49 (R48-C2): REF's glyph — circle-check-big
+                        at w-3 h-3 mr-1 (live-measured), no shrink-0. */}
+                    <CircleCheckBig className="h-3 w-3 mr-1" aria-hidden="true" />
                     <p>
                       <strong>{r.title}:</strong> {r.text.slice(r.title.length + 2)}
                     </p>

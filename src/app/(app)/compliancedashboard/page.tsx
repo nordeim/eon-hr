@@ -218,6 +218,10 @@ export default function ComplianceDashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+
+        /* Session 49 (R48-A3): the always-row family — REF renders the
+         *  UNPREFIXED always-row (measured @1440×900 this round). */
+        alwaysRow
         section="Compliance Monitor"
         layout="flat36-sm"
         actionsStart

@@ -93,6 +93,11 @@ export function PageHeader({
   centered = false,
   actionsStart = false,
   rowBreakpoint = "sm",
+  bare = false,
+  alwaysRow = false,
+  heroClassName,
+  actionsBare = false,
+  actionsUnwrapped = false,
 }: {
   section?: string;
   sectionIcon?: React.ReactNode;
@@ -157,6 +162,32 @@ export function PageHeader({
    *  allleaverequests, workflowautomation, loans, advancedanalytics).
    *  Measured row classes: `flex justify-between items-start`. */
   actionsStart?: boolean;
+  /** Session 49 (R48-A2): the BARE family — REF renders the hero block
+   *  as a DIRECT child of the content wrapper with NO hero row at all
+   *  (organogram/companywall/evaluations/training/hrassistant →
+   *  DIV[text-center]; reports/interviewassistant/securitysettings/
+   *  communications/settings/profile/analytics/notificationpreferences/
+   *  announcements → classless DIV; hrassistantchat → DIV[mb-6] via
+   *  heroClassName). Measured on REF @1440×900 this round. */
+  bare?: boolean;
+  /** Session 49 (R48-A3): the always-row families — REF renders the
+   *  UNPREFIXED always-row (`flex justify-between items-start` on
+   *  offboarding/compliance/performance/workflowautomation/
+   *  allleaverequests/payrollai/assets/advancedanalytics;
+   *  `flex items-center justify-between` on hrreports/requestreports,
+   *  templates `…mb-8`, workflowconfigpage `…mb-6` via className).
+   *  No responsive collapse, no recipe.row offset. */
+  alwaysRow?: boolean;
+  /** Session 49 (R48-A2): per-page hero-block class override for the
+   *  bare family (hrassistantchat's `mb-6` block). */
+  heroClassName?: string;
+  /** Session 49 (R48-A5): hrreports/requestreports' cluster is the BARE
+   *  `flex gap-2` — no flex-wrap, no items-center, no gap-3. */
+  actionsBare?: boolean;
+  /** Session 49 (R48-A5): REF renders SINGLE actions DIRECTLY in the
+   *  row (leavemanagement, assets, payrollreports' WhatsApp) — no
+   *  wrapper div at all. */
+  actionsUnwrapped?: boolean;
 }) {
   const hasBadge = Boolean(section);
   const recipe = HEADER_LAYOUTS[layout];
@@ -181,7 +212,9 @@ export function PageHeader({
               // navigates to /Dashboard (its casing quirk); the clone links
               // to the casing-fixed /dashboard (documented deviation) and
               // carries an aria-label REF lacks (a11y superset).
-              <Button variant="ghost" className="h-9 w-9" asChild>
+              // Session 49 (R48-C3): REF's kicker back button carries
+              // select-none too (measured on payrollreports' kicker).
+              <Button variant="ghost" className="h-9 w-9 select-none" asChild>
                 <Link href="/dashboard" aria-label="Back to dashboard">
                   <ArrowLeft className="h-5 w-5" aria-hidden="true" />
                 </Link>
@@ -197,6 +230,44 @@ export function PageHeader({
           </div>
         </div>
       ) : null}
+      {bare ? (
+        // Session 49 (R48-A2): the bare family — the hero block as a
+        // DIRECT child of the content wrapper, no row at all. REF renders
+        // the block classless (or text-center on the centered pages,
+        // mb-6 on hrassistantchat via heroClassName). Pages that keep a
+        // header-level action (announcements' non-zero New Announcement)
+        // render it as the block's trailing sibling — the zero-state
+        // parity surface is untouched (actions absent at zero).
+        <div className={cn(centered && "text-center", heroClassName) || undefined}>
+          <HeroBlock
+            hasBadge={hasBadge}
+            recipe={recipe}
+            size={size}
+            section={section}
+            sectionIcon={sectionIcon}
+            iconClassName={iconClassName}
+            centered={centered}
+            title={title}
+            titleClassName={titleClassName}
+            subtitle={subtitle}
+            subtitleClassName={subtitleClassName}
+          />
+          {actions ? (
+            actionsUnwrapped ? (
+              actions
+            ) : (
+              <div
+                className={cn(
+                  actionsBare ? "flex gap-2" : "flex flex-wrap items-center gap-3",
+                  actionsClassName
+                )}
+              >
+                {actions}
+              </div>
+            )
+          ) : null}
+        </div>
+      ) : (
       <div
         className={cn(
           // Session 9 (R8-A): the reference centers the actions cluster in
@@ -211,81 +282,159 @@ export function PageHeader({
           // default family switches at md, the always-row pages keep sm.
           // Session 48 (R47-C1): REF's md-family rows carry the UNPREFIXED
           // members too — `flex flex-col md:flex-row justify-between
-          // items-start md:items-center gap-4` (measured on payroll,
-          // leavemanagement, assetmanagement, shiftcalendar, surveys,
-          // analyticsdashboard, attendancedashboard, surveyanalytics,
-          // payrollmodule, payrollengine, hrletters, shiftswap,
-          // recruitmentkanban). The base members apply to mobile's
-          // flex-col cross-axis (render-neutral there) and the
+          // items-start md:items-center gap-4`. The base members apply to
+          // mobile's flex-col cross-axis (render-neutral there) and the
           // justify-between on the column main-axis is inert at auto
           // heights — exactly REF's own member set.
-          "flex flex-col gap-4",
-          rowBreakpoint === "md" && "justify-between items-start",
-          `${rowBreakpoint}:flex-row`,
-          rowBreakpoint === "sm" && `${rowBreakpoint}:justify-between`,
-          actionsStart
-            ? `${rowBreakpoint}:items-start`
-            : `${rowBreakpoint}:items-center`,
+          // Session 49 (R48-A3): the alwaysRow families render the
+          // UNPREFIXED always-row — `flex justify-between items-start`
+          // (the always-start eight) or `flex items-center justify-between`
+          // (hrreports/requestreports + the mb-variants via className).
+          // No recipe.row: every measured alwaysRow page rides a flat
+          // recipe (the raised mt-8 never appears on the always-rows).
+          alwaysRow
+            ? cn(
+                "flex justify-between",
+                actionsStart ? "items-start" : "items-center"
+              )
+            : cn(
+                "flex flex-col gap-4",
+                rowBreakpoint === "md" && "justify-between items-start",
+                `${rowBreakpoint}:flex-row`,
+                rowBreakpoint === "sm" && `${rowBreakpoint}:justify-between`,
+                actionsStart
+                  ? `${rowBreakpoint}:items-start`
+                  : `${rowBreakpoint}:items-center`
+              ),
           // The raised offset belongs to BADGE pages only — the reference's
           // bare-page rows (employees, analytics, templates…) start at y=32.
-          hasBadge && recipe.row,
+          !alwaysRow && hasBadge && recipe.row,
           mobileHeader === "hidden" && "hidden md:flex",
           className
         )}
       >
-      {/* Session 10 (R9-A): centered headers must fill the row — the
-          reference's centered pages wrap the header in a FULL-WIDTH
-          text-center block directly under the content wrapper, so the
-          badge/h1 center at the content center (848 at 1440). A
-          shrink-to-fit flex child centered the text at 521-696 instead. */}
-      <div className={cn("min-w-0", centered && "flex-1 text-center")}>
-        {hasBadge ? (
-          <div
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm",
-              recipe.badge
-            )}
-          >
-            {sectionIcon ? (
-              <span
-                className={cn("inline-flex shrink-0 [&_svg]:h-4 [&_svg]:w-4", iconClassName)}
-                aria-hidden="true"
-              >
-                {sectionIcon}
-              </span>
-            ) : null}
-            <span className="text-sm font-medium leading-5 text-slate-700">{section}</span>
-          </div>
-        ) : null}
-        <h1
-          className={cn(
-            "font-bold text-slate-900",
-            hasBadge ? recipe.h1 : size === "md" ? "text-2xl" : "text-3xl",
-            titleClassName
-          )}
-        >
-          {title}
-        </h1>
-        {subtitle ? (
-          <p
-            className={cn(
-              hasBadge ? recipe.sub : "mt-1 text-slate-500",
-              !hasBadge && size === "md" && "text-sm",
-              subtitleClassName
-            )}
-          >
-            {subtitle}
-          </p>
-        ) : null}
+      {/* Session 49 (R48-A1): the hero block INSIDE the row — classless
+          (or text-center), exactly REF's row > DIV[] > badge/h1/p
+          nesting. The r47 form wrapped it in min-w-0 (+ flex-1 when
+          centered) — retired this round. */}
+      <div className={centered ? "text-center" : undefined}>
+        <HeroBlock
+          hasBadge={hasBadge}
+          recipe={recipe}
+          size={size}
+          section={section}
+          sectionIcon={sectionIcon}
+          iconClassName={iconClassName}
+          centered={centered}
+          title={title}
+          titleClassName={titleClassName}
+          subtitle={subtitle}
+          subtitleClassName={subtitleClassName}
+        />
       </div>
       {/* Session 16 (R15-C): NO shrink-0 on the cluster — a shrink-0 flex
           child keeps its 911px natural width inside the wrapping header row
           and overflows the page at mid viewports (attendance docW 1199 at
           1100) instead of letting the cluster's own flex-wrap wrap its
           buttons. Shrinking only engages under constraint, so pages whose
-          cluster fits its row render identically. */}
-      {actions ? <div className={cn("flex flex-wrap items-center gap-3", actionsClassName)}>{actions}</div> : null}
+          cluster fits its row render identically.
+          Session 49 (R48-A5): REF's own clusters are the bare `flex gap-2`
+          (hrreports/requestreports) or NOTHING — single actions render
+          directly in the row (leavemanagement, assets, payrollreports).
+          The wrap family stays the default for the responsive rows. */}
+      {actions ? (
+        actionsUnwrapped ? (
+          actions
+        ) : (
+          <div
+            className={cn(
+              actionsBare ? "flex gap-2" : "flex flex-wrap items-center gap-3",
+              actionsClassName
+            )}
+          >
+            {actions}
+          </div>
+        )
+      ) : null}
       </div>
+      )}
+    </>
+  );
+}
+
+/** Session 49 (R48-A1): the hero block — REF renders it CLASSLESS on
+ *  every measured page (the clone's min-w-0 + flex-1 wrapper was a
+ *  universal divergence, retired this round). The centered variant
+ *  carries `text-center` ONLY — every measured centered page is
+ *  row-less, so the r9 fill-the-row rationale never applies. */
+function HeroBlock({
+  hasBadge,
+  recipe,
+  size,
+  section,
+  sectionIcon,
+  iconClassName,
+  centered,
+  title,
+  titleClassName,
+  subtitle,
+  subtitleClassName,
+}: {
+  hasBadge: boolean;
+  recipe: (typeof HEADER_LAYOUTS)[HeaderLayout];
+  size: "lg" | "md";
+  section?: string;
+  sectionIcon?: React.ReactNode;
+  iconClassName: string;
+  centered: boolean;
+  title: string;
+  titleClassName?: string;
+  subtitle?: string;
+  subtitleClassName?: string;
+}) {
+  return (
+    <>
+      {/* Session 10 (R9-A): centered headers center the badge/h1/sub —
+          the block-level text-center carries down (inline-flex badge,
+          h1, p all center). */}
+      {hasBadge ? (
+        <div
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm",
+            recipe.badge
+          )}
+        >
+          {sectionIcon ? (
+            <span
+              className={cn("inline-flex shrink-0 [&_svg]:h-4 [&_svg]:w-4", iconClassName)}
+              aria-hidden="true"
+            >
+              {sectionIcon}
+            </span>
+          ) : null}
+          <span className="text-sm font-medium leading-5 text-slate-700">{section}</span>
+        </div>
+      ) : null}
+      <h1
+        className={cn(
+          "font-bold text-slate-900",
+          hasBadge ? recipe.h1 : size === "md" ? "text-2xl" : "text-3xl",
+          titleClassName
+        )}
+      >
+        {title}
+      </h1>
+      {subtitle ? (
+        <p
+          className={cn(
+            hasBadge ? recipe.sub : "mt-1 text-slate-500",
+            !hasBadge && size === "md" && "text-sm",
+            subtitleClassName
+          )}
+        >
+          {subtitle}
+        </p>
+      ) : null}
     </>
   );
 }

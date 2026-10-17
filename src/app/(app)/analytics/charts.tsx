@@ -55,7 +55,7 @@ export function DepartmentCompletionBar({ data }: { data: DeptCompletion[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
         <YAxis domain={[0, 100]} tickFormatter={(v: number) => `${v}%`} width={44} />
         <Tooltip formatter={(value) => [`${value}%`, "Completion"]} />

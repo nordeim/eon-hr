@@ -54,7 +54,7 @@ export function HiringTrendArea({ data }: { data: MonthPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -68,7 +68,7 @@ export function AttendanceVsLeaveBar({ data }: { data: MonthPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -84,7 +84,7 @@ export function ExpenseTrendLine({ data }: { data: MonthPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis width={72} tickFormatter={(v: number) => (v >= 100000 ? `${Math.round(v / 100000)}k` : `${Math.round(v / 100)}`)} />
         <Tooltip formatter={(value) => [formatSar(Number(value)), "Expenses"]} />

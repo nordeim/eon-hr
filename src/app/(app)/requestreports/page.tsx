@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, FileDown, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, DollarSign, FileDown, FileText, Loader2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/shared/stat-card";
 import { useToast } from "@/components/ui/toast";
 import {
   Select,
@@ -113,16 +114,23 @@ export default function RequestReportsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => history.back()}>
-              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-              Back
-            </Button>
-            <div className="flex-1 text-center">
-              <h1 className="text-2xl font-bold text-slate-900">Request Reports</h1>
-              <p className="text-sm text-slate-500">Analytics and reporting by area and period</p>
+          {/* Session 49 (R48-C7): the header re-measured — the always-row
+              `flex items-center justify-between` carrying the hero
+              (`flex items-center gap-3`: the Back ghost h-8 px-3 text-xs
+              + the CLASSLESS h1/p block) and the BARE `flex gap-2`
+              actions cluster. Live-measured @1440×900. */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" className="h-8 rounded-md px-3 text-xs" onClick={() => history.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Request Reports</h1>
+                <p className="text-slate-500 text-sm">Analytics and reporting by area and period</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <Select defaultValue="monthly">
                 <SelectTrigger className="w-[144px]">
                   <SelectValue placeholder="Monthly" />
@@ -140,22 +148,16 @@ export default function RequestReportsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {[
-              { label: "Total Requests", value: stats.total },
-              { label: "Approved", value: stats.approved },
-              { label: "Pending", value: stats.pending },
-              { label: "Total Amount (SAR)", value: stats.amount / 100 },
-            ].map((s) => (
-              <Card key={s.label}>
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{loading ? "…" : s.value}</p>
-                    <p className="text-xs text-slate-500">{s.label}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Session 49 (R48-C7): the HORIZONTAL-BARE stat row — Card
+              `rounded-xl border bg-card text-card-foreground shadow` >
+              `p-4 flex items-center gap-3` > the 40×40 rounded-LG tile
+              (icon classes on the svg, w-5 h-5) + the CLASSLESS div with
+              P text-2xl / P text-xs text-slate-500 (live-measured). */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard variant="horizontal-bare" label="Total Requests" value={loading ? "…" : stats.total} icon={<FileText className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+            <StatCard variant="horizontal-bare" label="Approved" value={loading ? "…" : stats.approved} icon={<TrendingUp className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+            <StatCard variant="horizontal-bare" label="Pending" value={loading ? "…" : stats.pending} icon={<Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" />} tileClassName="bg-yellow-100" />
+            <StatCard variant="horizontal-bare" label="Total Amount (SAR)" value={loading ? "…" : stats.amount / 100} icon={<DollarSign className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
           </div>
 
           {/* REF's 2×2 section grid */}
@@ -250,16 +252,19 @@ export default function RequestReportsPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
+                  {/* Session 49 (R48-C7): REF's th forms — the BARE
+                      pb-2 pr-4 family (last column pb-2 only),
+                      live-measured this round. */}
                   <table className="w-full text-sm">
                     <thead>
                       <tr>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Ref #</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Employee</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Category</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Title</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Amount</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Status</th>
-                        <th className="px-4 py-3 text-left font-medium text-slate-600">Date</th>
+                        <th className="pb-2 pr-4">Ref #</th>
+                        <th className="pb-2 pr-4">Employee</th>
+                        <th className="pb-2 pr-4">Category</th>
+                        <th className="pb-2 pr-4">Title</th>
+                        <th className="pb-2 pr-4">Amount</th>
+                        <th className="pb-2 pr-4">Status</th>
+                        <th className="pb-2">Date</th>
                       </tr>
                     </thead>
                     <tbody>

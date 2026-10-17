@@ -121,6 +121,10 @@ export default function AnnouncementsPage() {
   return (
     <div className="p-4 md:p-8 space-y-6">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         title="Company Announcements"
         size="md"
         subtitle="Stay informed with the latest updates"

@@ -148,6 +148,10 @@ export default function AllLeaveRequestsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+
+        /* Session 49 (R48-A3): the always-row family — REF renders the
+         *  UNPREFIXED always-row (measured @1440×900 this round). */
+        alwaysRow
         section="Leave Management"
         layout="flat36"
         actionsStart

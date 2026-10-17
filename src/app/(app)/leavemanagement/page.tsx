@@ -133,6 +133,13 @@ export default function LeaveManagementPage() {
         section="Leave Management"
         mobileKicker
         mobileHeader="hidden"
+        /* Session 49 (R48-A4/A5): REF's desktop row is the hidden md:flex
+         *  RESPONSIVE md family (`hidden md:flex flex-col md:flex-row
+         *  justify-between items-start md:items-center gap-4`) and the
+         *  single New Leave Request action renders DIRECTLY in the row
+         *  (live-measured @1440×900 this round). */
+        rowBreakpoint="md"
+        actionsUnwrapped
         layout="raised-48"
         iconClassName="text-blue-600"
         sectionIcon={<Plane aria-hidden="true" />}

@@ -55,3 +55,6 @@ research/
 
 # reference captures (not part of the repo)
 reference/
+
+# npm side-effect lockfile (the repo pins with bun.lock; local npm installs are ephemeral)
+package-lock.json

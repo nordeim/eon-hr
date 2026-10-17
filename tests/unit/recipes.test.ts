@@ -1351,7 +1351,10 @@ describe("sidebar footer colors (session 16 R15-B; hover re-measured session 20;
 
 describe("page-header actions cluster fitting (session 16, R15-C)", () => {
   it("the default actions cluster carries no shrink-0 — the documented wrap-to-second-row fitting must engage at mid viewports", () => {
-    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3", actionsClassName');
+    // Session 49 (R48-A5): the cluster family grew — actionsBare (`flex
+    // gap-2`) + actionsUnwrapped ride alongside the wrap default; the
+    // no-shrink-0 fitting rationale is unchanged for the wrap family.
+    expect(pageHeader).toContain('actionsBare ? "flex gap-2" : "flex flex-wrap items-center gap-3"');
     expect(pageHeader).not.toContain("flex flex-wrap items-center gap-3 shrink-0");
   });
 });
@@ -2429,11 +2432,19 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
 
   it("R30-C1: the legacy /assets route — flat36 header with the always-row actions (green→blue canvas, bg-slate-50 card header, p-12 centered empty)", () => {
     const src = read("src", "app", "(app)", "assets", "page.tsx");
+    /* Session 49 (R48-A3/G2) amendment: the r30 class-trio translation
+       retired — the header is now the UNPREFIXED alwaysRow + the single
+       action rendered DIRECTLY in the row + the badge glyph Laptop at
+       text-green-600 (all live-measured this round). */
     expect(src).toContain('layout="flat36"');
+    expect(src).toContain('alwaysRow');
+    expect(src).toContain('actionsUnwrapped');
     expect(src).toContain('section="Asset Management"');
     expect(src).toContain('title="Assets"');
     expect(src).toContain("Track and manage company assets");
-    expect(src).toContain("flex-row justify-between items-start");
+    expect(src).toContain('iconClassName="text-green-600"');
+    expect(src).toContain('<Laptop aria-hidden="true" />');
+    expect(src).not.toContain('className="flex-row justify-between items-start"');
     expect(src).toContain("bg-gradient-to-br from-green-50 to-blue-50");
     expect(src).toContain("border-b bg-slate-50");
     expect(src).toContain("leading-none");
@@ -2540,20 +2551,21 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
     expect(src).toContain("text-green-500");
   });
 
-  it("R31-C6: /payrollreports — the raised header + green WhatsApp CTA, the filter card, the 4-trigger tab list, the summary card (evolved round 33: the body rebuilt to the live-measured REF structure)", () => {
+  it("R31-C6: /payrollreports — the kicker + short hidden always-row + green WhatsApp CTA, the filter card, the 4-trigger tab list, the summary card (evolved round 48: the header rebuilt to PageHeader + the Radix TabsContent panels)", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
     /* Session 33 baseline fix: round-31's live-verification rebuilt this
-       header by hand (badge+CTA row y=56, h1 y=108, sub y=156 — distinct
-       from the standard raised-36) but the pin still expected the PageHeader
-       prop pattern; the final unit re-run was skipped, so the pushed HEAD
-       carried the stale pin. Pinned to the raw h1 like R31-C7/C8.
-       Session 34 (R33-A): the round-31 body below the header drifted from
-       REF (stats above the filter, 3 dark-active tabs, no month input, no
-       table) — rebuilt and re-pinned here; the detailed contracts live in
-       the session-34 block below. */
-    expect(src).toMatch(/>Payroll Reports<\/h1>/);
+       header by hand; session 49 (R48-C3) rebuilt it AGAIN to the fresh
+       census — the mobile kicker (back button) + the SHORT hidden desktop
+       row via PageHeader (alwaysRow + actionsStart + actionsUnwrapped +
+       flat36-sm), the WhatsApp CTA DIRECT in the row + the full-width
+       mobile copy in a md:hidden div. */
+    expect(src).toContain('title="Payroll Reports"');
+    expect(src).toContain('layout="flat36-sm"');
+    expect(src).toContain('mobileKickerBack');
     expect(src).toContain("Send Payslips via WhatsApp");
     expect(src).toContain("bg-green-600");
+    expect(src).toContain("text-white");
+    expect(src).toContain('<div className="md:hidden">');
     expect(src).toContain("Total Earnings");
     expect(src).toContain("Net Payroll");
     expect(src).toContain("Filter by Employee");
@@ -2814,10 +2826,14 @@ describe("session-34 pins (parity round 33)", () => {
     expect(src).not.toContain("rounded-lg bg-red-50 px-3 py-2");
   });
 
-  it("R33-A1: /payrollreports — the slate→blue sRGB canvas + the white-pill kicker + the green MessageCircle CTA", () => {
+  it("R33-A1: /payrollreports — the slate→blue sRGB canvas + the chart-column badge kicker family + the green MessageCircle CTA", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
+    /* Session 49 (R48-C3) amendment: the badge now rides PageHeader —
+       the section + ChartColumn glyph pin replaces the raw class
+       string (the badge classes live in the component). */
     expect(src).toContain("bg-gradient-to-br from-blue-50 to-indigo-50");
-    expect(src).toContain("bg-white rounded-full shadow-sm mb-4");
+    expect(src).toContain('section="Payroll Reporting Suite"');
+    expect(src).toContain('<ChartColumn aria-hidden="true" />');
     expect(src).toContain("bg-green-600");
     expect(src).toContain("MessageCircle");
     expect(src).not.toContain("bg-[linear-gradient");
@@ -3033,21 +3049,24 @@ describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity r
 
   it("R34-E2: the Tax & Deductions card — the per-employee breakdown on REF's card grammar", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
-    expect(src).toContain('tab === "tax"');
+    /* Session 49 (R48-C3) amendment: the conditional render retired —
+       all four cards ride Radix TabsContent panels (REF mounts all
+       four; the aggregates stay the wired superset). */
+    expect(src).toContain('<TabsContent value="tax"');
     expect(src).toContain("Tax & Deductions");
     expect(src).toContain("Effective Rate");
   });
 
   it("R34-E3: the History card — the processed-periods table", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
-    expect(src).toContain('tab === "history"');
+    expect(src).toContain('<TabsContent value="history"');
     expect(src).toContain("Payroll History");
     expect(src).toContain("No payroll history yet");
   });
 
   it("R34-E4: the Custom card — the from/to range form + the filtered table", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
-    expect(src).toContain('tab === "custom"');
+    expect(src).toContain('<TabsContent value="custom"');
     expect(src).toContain("Custom Report");
     expect(src).toContain("Generate Report");
   });
@@ -4885,9 +4904,17 @@ describe("session-47 zero-state app interiors (parity round 46 — the page-root
 
   // --- F. the profile family ---
 
-  it("R46-F1: the identity header renders REF's hidden avatar file input between the email line and the Change Photo button (input type=file id=avatar accept=image/* class=hidden)", () => {
+  it("R46-F1: the identity header renders REF's hidden avatar file input between the email line and the Change Photo button (r48: the ref + onChange wiring — the WORKING upload)", () => {
     const src = page("profile", "page.tsx");
-    expect(src).toContain('<input type="file" id="avatar" accept="image/*" className="hidden" />');
+    /* Session 49 (R48-F1) amendment: the input carries the ref + the
+       onChange (the canvas downscale + POST flow); the id/accept/
+       hidden contract is unchanged. */
+    expect(src).toContain('ref={avatarInputRef}');
+    expect(src).toContain('type="file"');
+    expect(src).toContain('id="avatar"');
+    expect(src).toContain('accept="image/*"');
+    expect(src).toContain('onChange={(e) => void onPickAvatar(e.target.files?.[0])}');
+    expect(src).toContain('avatarInputRef.current?.click()');
   });
 
   it("R46-F2: the profile form input ids are REF's family (full_name/email/phone/job_title + the matching Label htmlFor pairs — the pf-* family retired)", () => {
@@ -5133,9 +5160,12 @@ describe("session-48 unmapped-route interiors (parity round 47 — the rootmap f
     expect(statCard).toContain("labelTag?:");
   });
 
-  it("R47-D1b: the no-tile rewrite — label-TOP p + value-BELOW p mt-1 + the BARE per-color icon + the card WITHOUT border-slate-200 (corrects the session-14 R13-I contract; value-in-tile KEEPS the border — REF evaluations card measured this round)", () => {
+  it("R47-D1b: the no-tile rewrite — label-TOP p + value-BELOW p mt-1 + the BARE per-color icon + the card WITHOUT border-slate-200 (corrects the session-14 R13-I contract; value-in-tile KEEPS the border — r48: horizontal-bare + mini-centered are bare too)", () => {
     const statCard = read("src", "components", "shared", "stat-card.tsx");
-    expect(statCard).toMatch(/variant === "no-tile"\s*\?\s*""\s*:\s*"border-slate-200"/);
+    /* Session 49 (R48-C5/C7) amendment: the bare-card branch grew —
+       horizontal-bare (requestreports) + mini-centered (hrreports +
+       notificationpreferences) joined no-tile this round. */
+    expect(statCard).toMatch(/variant === "no-tile" \|\| variant === "horizontal-bare" \|\| variant === "mini-centered"\s*\?\s*""\s*:\s*"border-slate-200"/);
     expect(statCard).toMatch(/"no-tile": "p"/);
     expect(statCard).toContain('"text-3xl font-bold text-slate-900 mt-1"');
   });
@@ -5243,13 +5273,262 @@ describe("session-48 unmapped-route interiors (parity round 47 — the rootmap f
 
   it("R47-F2: requestreports' Total Amount stat renders the raw division (REF: integer 0 at zero), not toFixed(2) — the with-data table keeps its decimals", () => {
     const src = page("requestreports", "page.tsx");
-    expect(src).toContain('{ label: "Total Amount (SAR)", value: stats.amount / 100 }');
+    /* Session 49 (R48-C7) amendment: the stat row rides the StatCard
+       horizontal-bare variant now — the raw division contract is
+       unchanged. */
+    expect(src).toContain('label="Total Amount (SAR)" value={loading ? "…" : stats.amount / 100}');
     expect(src).not.toContain("value: (stats.amount / 100).toFixed(2)");
+    expect(src).not.toContain(".toFixed(2) }");
   });
 
   it("R47-F3: recruitmentkanban's stage-count chips are REF's badge-form DIVs (rounded-md, the focus ring family, bg-slate-200 text-slate-700 — the census's DIV-vs-SPAN catch, the full class form measured this round)", () => {
     const src = page("recruitmentkanban", "page.tsx");
     expect(src).toMatch(/<div className="inline-flex items-center rounded-md border px-2\.5 py-0\.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary\/80 text-xs bg-slate-200 text-slate-700">/);
     expect(src).not.toMatch(/h-\[22px\]/);
+  });
+});
+
+describe("session-49 bare interiors + header architecture (parity round 48 — the BARE family + the always-rows + the C-page contracts + the avatar superset)", () => {
+  /* Round 48's census (probe-r49-*.mjs + r49-boot-loc0.mjs, live
+     @1440×900 REF vs the zero-tenant :3201 clone): the hero-block
+     architecture re-measured — REF renders the block CLASSLESS on every
+     page (the clone's min-w-0/flex-1 wrapper retired), the BARE family
+     (15 pages) renders NO hero row at all, the always-row families are
+     UNPREFIXED, the actions clusters are bare (`flex gap-2`) or
+     unwrapped (single actions direct), the chart family renders
+     DUAL-direction gridlines, and the C pages carry fresh per-page
+     contracts. The round also ships the WORKING avatar upload (the
+     functional superset over REF's inert button). */
+
+  const page = (...p: string[]) => read("src", "app", "(app)", ...p);
+
+  // --- A. the hero-block architecture ---
+
+  it("R48-A1: the hero block renders CLASSLESS (or text-center) — the min-w-0/flex-1 wrapper retired (REF renders DIV[] / DIV[text-center] on every measured page)", () => {
+    expect(pageHeader).toContain("function HeroBlock(");
+    expect(pageHeader).not.toMatch(/cn\("min-w-0"/);
+    expect(pageHeader).not.toContain("flex-1 text-center");
+  });
+
+  it("R48-A2: the bare prop — the hero block as a DIRECT child of the content wrapper (no row)", () => {
+    expect(pageHeader).toContain("bare?: boolean");
+    expect(pageHeader).toMatch(/\{bare \? \(/);
+    expect(pageHeader).toContain('cn(centered && "text-center", heroClassName) || undefined');
+  });
+
+  it("R48-A2b: the BARE-15 family passes (organogram/companywall/evaluations/training/hrassistant centered; reports/interviewassistant/securitysettings/communications/settings/profile/analytics/notificationpreferences/announcements classless; hrassistantchat mb-6)", () => {
+    for (const r of ["organogram", "companywall", "evaluations", "training", "interviewassistant", "securitysettings", "communications", "settings", "profile", "analytics", "notificationpreferences", "announcements"]) {
+      const src = page(r, "page.tsx");
+      expect(src.includes("\n        bare\n") || src.includes("\n          bare\n")).toBe(true);
+    }
+    const rb = page("reports", "reports-browser.tsx");
+    expect(rb).toContain("\n        bare\n");
+    const ia = page("hrassistantchat", "page.tsx");
+    expect(ia).toContain("\n        bare\n");
+    expect(ia).toContain('heroClassName="mb-6"');
+    const ha = page("hrassistant", "page.tsx");
+    expect(ha).toContain("\n        bare\n");
+  });
+
+  it("R48-A3: the alwaysRow prop — the UNPREFIXED always-row (no responsive collapse, no recipe.row)", () => {
+    expect(pageHeader).toContain("alwaysRow?: boolean");
+    expect(pageHeader).toMatch(/alwaysRow\s*\?\s*cn\(\s*"flex justify-between"/);
+    expect(pageHeader).toContain("!alwaysRow && hasBadge && recipe.row");
+  });
+
+  it("R48-A3b: the always-start eight + the center family + the mb-variants pass alwaysRow", () => {
+    for (const r of ["offboarding", "compliancedashboard", "performancemanagement", "workflowautomation", "allleaverequests", "payrollai", "advancedanalytics"]) {
+      const src = page(r, "page.tsx");
+      expect(src).toContain("alwaysRow");
+      expect(src).toContain("actionsStart");
+    }
+    const hr = page("hrreports", "page.tsx");
+    expect(hr).toContain("alwaysRow");
+    expect(hr).toContain("actionsBare");
+    expect(hr).not.toContain('actionsClassName="flex gap-2"');
+    const wfc = page("workflowconfigpage", "page.tsx");
+    expect(wfc).toContain('alwaysRow');
+    expect(wfc).toContain('className="mb-6"');
+    const tm = read("src", "app", "(app)", "templates", "page.tsx");
+    expect(tm).toContain("flex items-center justify-between mb-8");
+  });
+
+  it("R48-A4: the md-family passes (taskmanager/leavemanagement/expenses switch at md; loans keeps the short hidden always-row)", () => {
+    for (const r of ["taskmanager", "leavemanagement", "expenses"]) {
+      const src = page(r, "page.tsx");
+      expect(src).toContain('rowBreakpoint="md"');
+    }
+    const loans = read("src", "app", "(app)", "loans", "page.tsx");
+    expect(loans).toContain("alwaysRow");
+    expect(loans).toContain('mobileHeader="hidden"');
+  });
+
+  it("R48-A5: actionsUnwrapped — the single-action pages render DIRECTLY in the row (leavemanagement, assets, payrollreports)", () => {
+    expect(pageHeader).toContain("actionsUnwrapped?: boolean");
+    expect(pageHeader).toMatch(/actionsUnwrapped \? \(\s*actions/);
+    for (const r of ["leavemanagement", "assets", "payrollreports"]) {
+      const src = page(r, "page.tsx");
+      expect(src).toContain("actionsUnwrapped");
+    }
+  });
+
+  // --- B. the C-page contracts ---
+
+  it("R48-C1: interviewassistant — REF's two-card grid (`grid lg:grid-cols-2 gap-6`) with the Select Candidate + Interview Notes cards (labels: Candidate / Notes; the clone's AI Analysis rides column one as the superset)", () => {
+    const src = page("interviewassistant", "page.tsx");
+    expect(src).toContain('className="grid lg:grid-cols-2 gap-6"');
+    expect(src).toContain(">Select Candidate</CardTitle>");
+    expect(src).toContain(">Interview Notes</CardTitle>");
+    expect(src).toContain(">Candidate</Label>");
+    expect(src).toContain(">Notes</Label>");
+    expect(src).not.toContain('<form onSubmit={onAnalyze}');
+    expect(src).toContain("AI Analysis");
+  });
+
+  it("R48-C2: securitysettings — the circle-alert alert (H3 text-lg font-semibold text-orange-900 + P text-sm text-orange-700) + the DIV badges (rounded-md font-semibold, slate/green pairs) + the circle-check-big recommendation glyphs", () => {
+    const src = page("securitysettings", "page.tsx");
+    expect(src).toContain('<CircleAlert className="h-12 w-12 text-orange-600"');
+    expect(src).toMatch(/<h3 className="text-lg font-semibold text-orange-900">/);
+    expect(src).toContain('className="text-sm text-orange-700"');
+    expect(src).toContain("inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-slate-100 text-slate-700");
+    expect(src).toContain('<CircleCheckBig className="h-3 w-3 mr-1"');
+    expect(src).not.toContain("<Badge");
+  });
+
+  it("R48-C2b: the checkbox component — the FIRST live-measured REF form (border-primary + shadow + ring-1; NO data-[state=checked]:border-primary, NO cursor-pointer)", () => {
+    const cb = read("src", "components", "ui", "checkbox.tsx");
+    expect(cb).toContain("border border-primary shadow focus-visible:outline-none focus-visible:ring-1");
+    expect(cb).not.toContain("data-[state=checked]:border-primary");
+    expect(cb).not.toContain("cursor-pointer");
+    expect(cb).toContain("dark:data-[state=checked]:text-white");
+  });
+
+  it("R48-C3: payrollreports — the Radix-verbatim tabs (4 TabsContent panels + the old-shadcn trigger pass) + the BARE Monthly th family + the md:hidden mobile WhatsApp copy", () => {
+    const src = page("payrollreports", "page.tsx");
+    expect(src).toContain('<TabsList className="grid grid-cols-4 w-full md:w-auto">');
+    expect(src.match(/<TabsContent value="/g)?.length).toBe(4);
+    expect(src).toContain('className="ring-offset-background text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow"');
+    expect(src).toContain('className="px-4 py-3 text-left"');
+    expect(src).toContain('className="px-4 py-3 text-right hidden md:table-cell"');
+    expect(src).toContain('className="px-4 py-3 text-right font-bold"');
+    /* The Monthly table's th family is the bare r48 form (the Allowances
+       column retired its uppercase member); the tax/history/custom
+       cards keep the r33 form — REF-unmeasured superset panels. */
+    expect(src).not.toContain('className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Allowances');
+  });
+
+  it("R48-C3b: the WhatsApp CTA — text-white (NOT text-primary-foreground) + the shadow h-9 px-4 py-2 green form", () => {
+    const src = page("payrollreports", "page.tsx");
+    expect(src).toContain("bg-green-600 hover:bg-none hover:bg-green-700 text-white");
+    expect(src).not.toContain("text-primary-foreground");
+  });
+
+  it("R48-C5: hrreports — the form labels ride the Label component (text-xs text-slate-500 — the hand-rolled font-medium labels retired)", () => {
+    const src = page("hrreports", "page.tsx");
+    expect(src.match(/<Label htmlFor="hr-[a-z]+" className="text-xs text-slate-500">/g)?.length).toBeGreaterThanOrEqual(5);
+    expect(src).not.toContain('className="text-xs text-slate-500 font-medium"');
+    expect(src).toContain('className="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase"');
+  });
+
+  it("R48-C6: evaluations — the value-in-tile stats + the Radix-verbatim panels (ring-offset-background + space-y-6)", () => {
+    const src = page("evaluations", "page.tsx");
+    expect(src.match(/variant="value-in-tile"/g)?.length).toBe(4);
+    expect(src.match(/TabsContent value="[a-z0-9]+" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"/g)?.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("R48-C7: requestreports — the always-row header (Back ghost h-8 px-3 text-xs + classless h1/p block + the bare flex gap-2 cluster) + the horizontal-bare stats + the pb-2 pr-4 th family", () => {
+    const src = page("requestreports", "page.tsx");
+    expect(src).toContain('<div className="flex items-center justify-between">');
+    expect(src).toContain('className="h-8 rounded-md px-3 text-xs"');
+    expect(src).toContain('<div className="flex gap-2">');
+    expect(src.match(/variant="horizontal-bare"/g)?.length).toBe(4);
+    expect(src).toContain('<th className="pb-2 pr-4">');
+    expect(src).toContain('<th className="pb-2">');
+    expect(src).not.toContain("px-4 py-3 text-left font-medium");
+  });
+
+  it("R48-C7b: the stat-card horizontal-bare variant — the 40×40 rounded-LG tile (no svg guard) + the classless text div + P/P tags + the DEFAULT bordered card", () => {
+    const sc = read("src", "components", "shared", "stat-card.tsx");
+    expect(sc).toContain('"horizontal-bare": "p-4 flex items-center gap-3"');
+    expect(sc).toContain('"w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100"');
+    expect(sc).toMatch(/variant === "horizontal-bare" \? \([\s\S]*?<div>\{textBlock\}<\/div>/);
+    expect(sc).toContain('"horizontal-bare": "p"');
+    expect(sc).toContain('"horizontal-bare": "text-2xl font-bold text-slate-900"');
+    expect(sc).toContain('"horizontal-bare": "text-xs text-slate-500"');
+  });
+
+  it("R48-C8: analytics — the BARE root (p-4 md:p-8 only, no gradient canvas) + the verbatim max-w-7xl mx-auto space-y-8 wrapper (the trap-4 mitigation wrapper retired)", () => {
+    const src = page("analytics", "page.tsx");
+    expect(src).toContain('<div className="p-4 md:p-8">');
+    expect(src).toContain('className="max-w-7xl mx-auto space-y-8"');
+    expect(src).not.toMatch(/className="[^"]*min-h-screen/);
+    expect(src).not.toContain("flex w-full max-w-7xl flex-col gap-8");
+  });
+
+  it("R48-C9: recruitmentkanban — the md-family row + the classless hero ride PageHeader (rowBreakpoint md + size md, unchanged from r47 — the block rewrite lands the classless hero)", () => {
+    const src = page("recruitmentkanban", "page.tsx");
+    expect(src).toContain('rowBreakpoint="md"');
+    expect(src).toContain('title="Recruitment Pipeline"');
+  });
+
+  // --- E. the chart gridline family ---
+
+  it("R48-E: the chart family renders DUAL-direction CartesianGrids (REF renders both on every chart page — the vertical={false} pins retired)", () => {
+    for (const r of ["hrreports", "attendancedashboard", "advancedanalytics", "analytics", "analyticsdashboard", "surveyanalytics"]) {
+      const src = page(r, "charts.tsx");
+      expect(src).toContain('<CartesianGrid strokeDasharray="3 3" />');
+      expect(src).not.toContain("vertical={false}");
+    }
+  });
+
+  // --- F. the avatar module (functional superset) ---
+
+  it("R48-F1: the avatar API route — guard/requireUser/parseBody + the data-URL validation + the audit log", () => {
+    const route = read("src", "app", "api", "profile", "avatar", "route.ts");
+    expect(route).toContain("guard(async () => {");
+    expect(route).toContain("requireUser()");
+    expect(route).toContain("parseBody(req, AvatarInput)");
+    expect(route).toContain("data: { avatarUrl: data.avatar }");
+    expect(route).toContain("profile.avatar_changed");
+  });
+
+  it("R48-F1b: the profile page — the canvas downscale (96×96 center-crop) + the POST + the optimistic swap", () => {
+    const src = page("profile", "page.tsx");
+    expect(src).toContain("const SIZE = 96;");
+    expect(src).toContain('fetch("/api/profile/avatar"');
+    expect(src).toContain("setProfile({ ...profile, avatarUrl: json.data.avatarUrl })");
+    expect(src).toContain('canvas.toDataURL("image/jpeg", 0.85)');
+  });
+
+  it("R48-F2: the purge script resets user avatars (the E2E pristine contract — the seed's upsert never touches avatarUrl)", () => {
+    const purge = read("tests", "e2e", "purge-test-data.ts");
+    expect(purge).toContain("avatarUrl: { not: null }");
+    expect(purge).toContain("avatarUrl: null");
+  });
+
+  // --- G. the quick fixes ---
+
+  it("R48-G1: profile's stray wrap-level footer P (the icon-only CheckCircle2 cruft) is GONE", () => {
+    const src = page("profile", "page.tsx");
+    expect(src).not.toMatch(/<p className="flex items-center gap-1\.5 text-xs text-muted-foreground">\s*<CheckCircle2/);
+  });
+
+  it("R48-G2: the badge glyph colors — hrassistant's Bot at text-blue-600 (NOT purple), assets' Laptop at text-green-600", () => {
+    const ha = page("hrassistant", "page.tsx");
+    expect(ha).toContain('iconClassName="text-blue-600"');
+    expect(ha).toContain("<Bot aria-hidden=\"true\" />");
+    expect(ha).not.toContain('iconClassName="text-purple-600"');
+    const as = page("assets", "page.tsx");
+    expect(as).toContain('iconClassName="text-green-600"');
+  });
+
+  it("R48-G5: the Button base carries NO cursor-pointer (REF's buttons carry none)", () => {
+    const btn = read("src", "components", "ui", "button.tsx");
+    expect(btn).not.toMatch(/shrink-0 cursor-pointer/);
+    expect(btn).not.toMatch(/cursor-pointer",/);
+  });
+
+  it("R48-G6: the kicker back button carries select-none (REF payrollreports' kicker, live-measured)", () => {
+    expect(pageHeader).toContain('className="h-9 w-9 select-none"');
   });
 });

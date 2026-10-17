@@ -63,6 +63,12 @@ export default function ProfilePage() {
   const toast = useToast();
   const [profile, setProfile] = React.useState<ProfileInfo | null>(null);
   const [loading, setLoading] = React.useState(true);
+  /* Session 49 (R48-F1): the WORKING avatar upload — REF renders the same
+   *  Change Photo button + hidden input (R46-F1) but the clone's flow
+   *  actually persists: click → file → 96×96 canvas downscale → POST
+   *  /api/profile/avatar → optimistic swap (the functional superset). */
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const [savingAvatar, setSavingAvatar] = React.useState(false);
   const [form, setForm] = React.useState({ name: "", email: "", phone: "", jobTitle: "" });
   const [savingProfile, setSavingProfile] = React.useState(false);
   const [language, setLanguage] = React.useState("English");
@@ -98,6 +104,69 @@ export default function ProfilePage() {
       }
     })();
   }, []);
+
+  /* Session 49 (R48-F1): the avatar flow — read the picked file, draw it
+   *  onto a 96×96 canvas (center-cropped square, JPEG 0.85 — a few KiB),
+   *  POST the data URL, and swap the avatar OPTIMISTICALLY on success.
+   *  Rejects non-images + files that fail to decode. */
+  const onPickAvatar = React.useCallback(
+    async (file: File | undefined) => {
+      if (!file || !profile) return;
+      if (!file.type.startsWith("image/")) {
+        toast.toast({ title: "Change Photo", description: "Please choose an image file.", variant: "error" });
+        return;
+      }
+      setSavingAvatar(true);
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            try {
+              const SIZE = 96;
+              const canvas = document.createElement("canvas");
+              canvas.width = SIZE;
+              canvas.height = SIZE;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) throw new Error("no 2d context");
+              const side = Math.min(img.naturalWidth, img.naturalHeight);
+              const sx = (img.naturalWidth - side) / 2;
+              const sy = (img.naturalHeight - side) / 2;
+              ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+              URL.revokeObjectURL(url);
+              resolve(canvas.toDataURL("image/jpeg", 0.85));
+            } catch (e) {
+              URL.revokeObjectURL(url);
+              reject(e);
+            }
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("decode failed"));
+          };
+          img.src = url;
+        });
+        const res = await fetch("/api/profile/avatar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatar: dataUrl }),
+        });
+        const json = await res.json();
+        if (json.ok) {
+          setProfile({ ...profile, avatarUrl: json.data.avatarUrl });
+          toast.toast({ title: "Photo updated", variant: "success" });
+        } else {
+          toast.toast({ title: "Change Photo", description: json.error?.message, variant: "error" });
+        }
+      } catch {
+        toast.toast({ title: "Change Photo", description: "Could not read that image.", variant: "error" });
+      } finally {
+        setSavingAvatar(false);
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
+      }
+    },
+    [profile, toast]
+  );
 
   React.useEffect(() => {
     void (async () => {
@@ -236,6 +305,10 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="My Profile"
         mobileKicker
         mobileKickerTitle="Profile"
@@ -284,16 +357,25 @@ export default function ProfilePage() {
                 <p className="mb-3 truncate text-slate-600">{profile.email}</p>
                 {/* Session 47 (R46-F1): REF renders the hidden avatar file
                     input here (id=avatar, accept=image/*) — the Change Photo
-                    button's real target on the reference. */}
-                <input type="file" id="avatar" accept="image/*" className="hidden" />
+                    button's real target on the reference.
+                    Session 49 (R48-F1): the clone's flow WORKS — the ref +
+                    the click + the canvas downscale + the POST + the
+                    optimistic swap (functional superset). */}
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  id="avatar"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => void onPickAvatar(e.target.files?.[0])}
+                />
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    toast.toast({ title: "Change Photo", description: "Photo uploads are coming soon.", variant: "info" })
-                  }
+                  disabled={savingAvatar}
+                  onClick={() => avatarInputRef.current?.click()}
                 >
-                  <Camera className="mr-2" aria-hidden="true" />
+                  {savingAvatar ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Camera className="mr-2" aria-hidden="true" />}
                   Change Photo
                 </Button>
               </div>
@@ -601,10 +683,9 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-      </p>
+      {/* Session 49 (R48-G1): the stray wrap-level footer P (an icon-only
+          CheckCircle2 with no text — cruft REF lacks, live-measured this
+          round) — removed. */}
     </div>
     </div>
   );

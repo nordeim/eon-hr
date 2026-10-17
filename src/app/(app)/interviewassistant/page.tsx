@@ -56,8 +56,10 @@ export default function InterviewAssistantPage() {
       .finally(() => setLoading(false));
   }, [toast]);
 
-  async function onAnalyze(e: React.FormEvent) {
-    e.preventDefault();
+  /* Session 49 (R48-C1): the form element retired (REF renders the grid
+   *  as a DIV) — the Analyze button calls the handler directly. */
+  async function onAnalyze(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!notes.trim()) return;
     setAnalyzing(true);
     setAnalysis(null);
@@ -93,6 +95,10 @@ export default function InterviewAssistantPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="AI-Powered Interviews"
         layout="flat36"
         iconClassName="text-purple-600"
@@ -101,23 +107,28 @@ export default function InterviewAssistantPage() {
         subtitle="AI-powered interview preparation and analysis"
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="p-5 pb-0">
-            <CardTitle>Interview Notes</CardTitle>
-            <CardDescription>
-              Pick a candidate and paste your interview notes — the analysis runs locally with deterministic heuristics.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-              </div>
-            ) : (
-              <form onSubmit={onAnalyze} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="ia-candidate">Select Candidate</Label>
+      {/* Session 49 (R48-C1): REF's two-card form — the grid carries two
+          space-y-6 columns: “Select Candidate” (label: Candidate, the
+          h-9 select) + “Interview Notes” (label: Notes, the textarea, the
+          Analyze button); the clone's AI Analysis rides column one as
+          the functional superset (REF's analyze is a documented no-op).
+          Live-measured @1440×900: card headers p-6 border-b
+          border-slate-200 + DIV CardTitle leading-none, bodies
+          p-6 space-y-4 > space-y-2 label groups. */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-200">
+              <CardTitle className="leading-none">Select Candidate</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="ia-candidate">Candidate</Label>
                   <Select value={candidateId} onValueChange={setCandidateId}>
                     <SelectTrigger id="ia-candidate">
                       <SelectValue placeholder={candidates.length === 0 ? "No candidates yet" : "Select candidate"} />
@@ -137,38 +148,21 @@ export default function InterviewAssistantPage() {
                     </p>
                   ) : null}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="ia-notes">Interview Notes</Label>
-                  <Textarea
-                    id="ia-notes"
-                    rows={10}
-                    required
-                    placeholder="e.g. Led the redesign project, delivered ahead of schedule. Excellent communication — confident presenter. Concern: depth in testing…"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
-                </div>
-                <Button variant="green" type="submit" disabled={analyzing || !notes.trim()}>
-                  {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
-                  Analyze Interview
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="p-5 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
-              AI Analysis
-            </CardTitle>
-            <CardDescription>
-              {analyzedFor ? `Analysis for ${analyzedFor}` : "Strengths, weaknesses and follow-up questions."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+                AI Analysis
+              </CardTitle>
+              <CardDescription>
+                {analyzedFor ? `Analysis for ${analyzedFor}` : "Strengths, weaknesses and follow-up questions."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5">
             {analysis ? (
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between gap-4 rounded-lg border bg-secondary/30 p-4">
@@ -245,6 +239,38 @@ export default function InterviewAssistantPage() {
             )}
           </CardContent>
         </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-200">
+              <CardTitle className="leading-none">Interview Notes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="ia-notes">Notes</Label>
+                  <Textarea
+                    id="ia-notes"
+                    rows={10}
+                    placeholder="e.g. Led the redesign project, delivered ahead of schedule. Excellent communication — confident presenter. Concern: depth in testing…"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
+                  <Button variant="green" type="button" disabled={analyzing || !notes.trim()} onClick={() => void onAnalyze()}>
+                    {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+                    Analyze Interview
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
     </div>

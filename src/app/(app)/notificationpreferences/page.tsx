@@ -147,6 +147,10 @@ export default function NotificationPreferencesPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         size="md"
         title="Notification Settings"
         subtitle="Manage how and when you receive notifications"

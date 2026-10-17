@@ -190,6 +190,9 @@ export default function ExpensesPage() {
         section="Expense Management"
         mobileKicker
         mobileHeader="hidden"
+        /* Session 49 (R48-A4): REF's desktop row is the hidden md:flex
+         *  RESPONSIVE md family (live-measured @1440×900 this round). */
+        rowBreakpoint="md"
         layout="raised-48"
         iconClassName="text-purple-600"
         sectionIcon={<Receipt aria-hidden="true" />}

@@ -135,11 +135,15 @@ export default function HrAssistantPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <PageHeader
-          className="text-center"
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row;
+         *  the centered variant carries text-center ONLY).
+         *  Live-measured @1440×900 this round. */
+        bare
           section="AI HR Assistant"
           layout="flat36"
-          iconClassName="text-purple-600"
-          sectionIcon={<Target aria-hidden="true" />}
+          iconClassName="text-blue-600"
+          sectionIcon={<Bot aria-hidden="true" />}
           title="HR Assistant"
           subtitle="Ask me anything about HR policies, leave, payroll, and more"
           centered

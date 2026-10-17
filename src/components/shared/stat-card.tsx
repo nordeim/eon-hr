@@ -19,6 +19,11 @@ import { Card, CardContent } from "@/components/ui/card";
  *     p-4 text-center, no tile, text-3xl value — 86-90px card
  *   horizontal (documenttracker):
  *     p-4 flex items-center gap-3, 44×44 tile left — 80px card
+ *   horizontal-bare (requestreports — session 49, R48-C7):
+ *     p-4 flex items-center gap-3, 40×40 rounded-LG tile (icon classes
+ *     on the svg itself, w-5 h-5), the P text-2xl value + P text-xs
+ *     slate-500 label inside a CLASSLESS div; the default bordered
+ *     Card (no border-slate-200) — live-measured @1440×900.
  *   value-in-tile (evaluations — session 12, R11-N):
  *     p-4 flex items-center gap-3, the VALUE inside a 40px slate-100
  *     tile (SPAN text-lg font-bold text-slate-700), label right — 74px
@@ -34,6 +39,7 @@ type StatCardVariant =
   | "mini"
   | "mini-centered"
   | "horizontal"
+  | "horizontal-bare"
   | "value-in-tile"
   | "no-tile"
   | "tile-right";
@@ -76,6 +82,9 @@ const VARIANT_CONTENT: Record<StatCardVariant, string> = {
   // Session 12 (R11-D): the reference's horizontal card is border-0 with
   // shadow-sm (documenttracker, 80px) — live-measured.
   horizontal: "p-4 flex items-center gap-3",
+  // Session 49 (R48-C7): requestreports' horizontal-bare — same content
+  // row contract, live-measured fresh this round.
+  "horizontal-bare": "p-4 flex items-center gap-3",
   "value-in-tile": "p-4 flex items-center gap-3",
   "no-tile": "p-6",
   "tile-right": "p-6",
@@ -97,6 +106,7 @@ const VARIANT_VALUE_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
 };
 const VARIANT_LABEL_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
   horizontal: "p",
+  "horizontal-bare": "p",
   "no-tile": "p",
   "tile-right": "p",
   mini: "p",
@@ -114,6 +124,9 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   mini: "text-2xl font-bold",
   "mini-centered": "text-3xl font-bold text-slate-900",
   horizontal: "text-2xl font-bold text-slate-900",
+  // Session 49 (R48-C7): the horizontal-bare value (requestreports' P
+  // text-2xl font-bold text-slate-900, live-measured).
+  "horizontal-bare": "text-2xl font-bold text-slate-900",
   "value-in-tile": "text-lg font-bold text-slate-700",
   /* Session 48 (R47-D1b): the no-tile value carries mt-1 and renders
    * BELOW its label — REF's text stack (live-measured on
@@ -137,6 +150,9 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
 const VARIANT_LABEL: Partial<Record<StatCardVariant, string>> = {
   mini: "text-xs text-slate-500 mt-0.5",
   horizontal: "text-xs text-slate-500",
+  // Session 49 (R48-C7): the horizontal-bare label (requestreports' P
+  // text-xs text-slate-500).
+  "horizontal-bare": "text-xs text-slate-500",
   /* Session 47 (R46-C3): the compact label is text-slate-500 (measured on
      recruitment's zero-state row: div.text-sm text-slate-500 — the
      standard family keeps slate-600). */
@@ -150,6 +166,7 @@ const TILED: readonly StatCardVariant[] = [
   "compact",
   "compact-s",
   "horizontal",
+  "horizontal-bare",
   "tile-right",
 ];
 
@@ -194,7 +211,12 @@ export function StatCard({
       ? "w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-blue-100"
       : variant === "horizontal"
         ? "flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
-        : "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100";
+        : variant === "horizontal-bare"
+          ? /* Session 49 (R48-C7): requestreports' tile — 40×40 rounded-LG
+             * with BG only; the icon size + color ride the svg's own
+             * classes (w-5 h-5 text-{c}-600, NO guard — live-measured). */
+            "w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100"
+          : "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100";
 
   const tileElement = tiled ? (
     /* Session 17 (R16-D): NO shrink-0 — the reference's tile flex-shrinks
@@ -235,9 +257,13 @@ export function StatCard({
         // (REF performancemanagement: rounded-xl border bg-card
         // text-card-foreground shadow); value-in-tile KEEPS it (REF
         // evaluations card measured this round).
+        // Session 49 (R48-C7): the horizontal-bare card is the DEFAULT
+        // bordered form too (REF requestreports). Session 49 (R48-C5):
+        // the mini-centered card is bare as well (REF hrreports +
+        // notificationpreferences, measured this round).
         variant === "horizontal"
           ? "border-0 shadow-sm"
-          : variant === "no-tile"
+          : variant === "no-tile" || variant === "horizontal-bare" || variant === "mini-centered"
             ? ""
             : "border-slate-200",
         className
@@ -275,6 +301,14 @@ export function StatCard({
           <>
             {tileElement}
             <div className="min-w-0">{textBlock}</div>
+          </>
+        ) : variant === "horizontal-bare" ? (
+          /* Session 49 (R48-C7): the text pair rides a CLASSLESS div (REF
+           * requestreports: DIV{} > P text-2xl + P text-xs — not the
+           * min-w-0 block the documenttracker form carries). */
+          <>
+            {tileElement}
+            <div>{textBlock}</div>
           </>
         ) : variant === "tile-right" ? (
           /* Session 13 (R12-E): the reference's stacked stat tile — label

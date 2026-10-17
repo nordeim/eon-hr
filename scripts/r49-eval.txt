@@ -1,0 +1,22 @@
+(() => {
+  const main = document.querySelector('main');
+  const sc = main ? (main.querySelector('div.overflow-auto, div.overflow-y-auto') || main) : null;
+  const root = sc.querySelector('[class*=min-h-screen]') || sc;
+  const wrap = root.querySelector('[class*=max-w-]') || root;
+  const grids = [...wrap.querySelectorAll(':scope div.grid, div.grid')].filter(g => {
+    const kids = [...g.children];
+    return kids.length >= 3 && kids.every(k => (k.className || '').includes('rounded-xl'));
+  });
+  const out = [];
+  if (grids.length) {
+    const g = grids[0];
+    out.push('GRID: ' + g.className);
+    for (const c of [...g.children].slice(0, 4)) {
+      out.push('CARD: ' + (c.className || '').replace(/\s+/g, ' '));
+      const p = [...c.querySelectorAll('p')].map(x => (x.className || '').replace(/\s+/g, ' ') + ' :: ' + x.textContent.trim().slice(0, 16));
+      out.push('  P: ' + JSON.stringify(p));
+    }
+  }
+  const ths = [...sc.querySelectorAll('th')].slice(0, 3).map(t => (t.className || 'NO-CLS').slice(0, 120));
+  return { out, ths };
+})()

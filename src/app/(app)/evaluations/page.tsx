@@ -199,6 +199,10 @@ export default function EvaluationsPage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="Performance Management"
         layout="flat48"
         centered
@@ -235,7 +239,7 @@ export default function EvaluationsPage() {
             containing the 4× 74px value-in-tile stat row, the row header
             and the empty one-liner / cycle list. Stats live INSIDE the
             tab on the reference (below the pill, y=264). */}
-        <TabsContent value="workflows" className="mt-6 space-y-6">
+        <TabsContent value="workflows" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard variant="value-in-tile" label="Total Reviews" value={stats.total} />
             <StatCard variant="value-in-tile" label="Completed" value={stats.completed} />
@@ -338,7 +342,7 @@ export default function EvaluationsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="eval360" className="mt-6 flex flex-col gap-4">
+        <TabsContent value="eval360" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -396,7 +400,7 @@ export default function EvaluationsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="training" className="mt-6 flex flex-col gap-4">
+        <TabsContent value="training" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

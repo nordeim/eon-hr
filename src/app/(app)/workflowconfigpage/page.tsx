@@ -168,6 +168,13 @@ export default function WorkflowConfigPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <PageHeader
+
+        /* Session 49 (R48-A3): the always-row family — REF renders the
+         *  UNPREFIXED always-row (measured @1440×900 this round), with
+         *  the block's mb-6 spacing member on the row (REF:
+         *  `flex items-center justify-between mb-6`). */
+        alwaysRow
+        className="mb-6"
         size="md"
         title="Approval Workflow Engine"
         subtitle="Configure multi-level approval hierarchies for requests and expenses"

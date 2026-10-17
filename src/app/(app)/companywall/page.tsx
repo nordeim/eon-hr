@@ -167,6 +167,10 @@ export default function CompanyWallPage() {
           1120px gap-8 layout. */}
       <div className="max-w-3xl mx-auto space-y-6">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         section="Company Wall"
         layout="flat48"
         centered

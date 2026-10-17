@@ -29,7 +29,7 @@ export function DailyAttendanceTrend({ data }: { data: DayPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={0} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
@@ -46,7 +46,7 @@ export function ClockInDistribution({ data }: { data: HourBucket[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="hour" tick={{ fontSize: 11 }} interval={0} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />

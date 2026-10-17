@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Calendar, FileSpreadsheet, FileText, Loader2, MessageCircle } from "lucide-react";
+import { Calendar, ChartColumn, FileSpreadsheet, FileText, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageCanvas } from "@/components/shared/page-canvas";
+import { PageHeader } from "@/components/shared/page-header";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -14,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 
 interface PayrollRow {
@@ -43,7 +44,7 @@ interface PayrollRow {
  * text-blue-600 + title/sub | the w-40 month input + CSV + PDF) with
  * the stats INSIDE (text-xs slate-500 labels + font-bold text-lg
  * values colored blue-700/red-600/green-700/slate-700) and the 8-col
- * table (thead bg-slate-50, th text-xs font-bold uppercase text-slate-600;
+ * table (thead bg-slate-50; the Monthly th family is the r48 BARE px-4 py-3 form;
  * Employee left · Basic/Allowances/Overtime/Deductions/Net Salary
  * right · Status/Payslip center) + the colspan "No records for
  * {YYYY-MM}" TD (py-12 text-center text-slate-400).
@@ -181,29 +182,53 @@ export default function PayrollReportsPage() {
     <PageCanvas>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* REF's header (round 33 re-measure): the pill + the CTA ride a
-            row at y=56 (items-start; the pill's mb-4 spaces the 36px h1
-            at y=108, mb-2 lands the sub at y=156) — one wrapper so the
-            container's space-y-6 doesn't add margins inside. */}
-        <div className="mt-6">
-          <div className="flex items-start justify-between">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4">
-              <BarChart3 className="h-4 w-4 text-blue-600" aria-hidden="true" />
-              <span className="text-sm font-medium">Payroll Reporting Suite</span>
-            </span>
+        {/* Session 49 (R48-C3): the header REBUILT to the fresh census —
+            the mobile kicker (back button h-9 w-9 select-none + the
+            standard kicker classes) + the SHORT hidden desktop row
+            `hidden md:flex justify-between items-start` carrying the
+            classless hero block (badge: chart-column w-4 h-4
+            text-blue-600 + "Payroll Reporting Suite"; H1 text-4xl mb-2;
+            P text-slate-600) with the WhatsApp CTA rendered DIRECTLY in
+            the row (actionsUnwrapped), and the mobile full-width copy
+            in a md:hidden div below. Live-measured @1440×900. */}
+        <PageHeader
+          mobileKicker
+          mobileKickerBack
+          mobileKickerTitle="Payroll Reports"
+          mobileHeader="hidden"
+          alwaysRow
+          actionsStart
+          actionsUnwrapped
+          layout="flat36-sm"
+          section="Payroll Reporting Suite"
+          iconClassName="text-blue-600"
+          sectionIcon={<ChartColumn aria-hidden="true" />}
+          title="Payroll Reports"
+          subtitle="Generate, export and distribute payroll reports"
+          actions={
             <Button
-              /* REF's CTA (round-33 measure): SOLID green-600 — no
-                 gradient (bgImage: none). bg-none suppresses the default
-                 variant's blue CTA gradient (the bg-image group). */
-              className="bg-none bg-green-600 hover:bg-none hover:bg-green-700"
+              /* REF's CTA (live-measured): shadow h-9 px-4 py-2
+                 bg-green-600 hover:bg-green-700 TEXT-WHITE gap-2 — no
+                 gradient (bgImage: none; bg-none suppresses the default
+                 variant's blue CTA gradient — the documented mitigation). */
+              className="bg-none shadow h-9 px-4 py-2 bg-green-600 hover:bg-none hover:bg-green-700 text-white"
               onClick={() => toast.toast({ title: "Payslips queued", description: "WhatsApp dispatch logged.", variant: "success" })}
             >
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
               Send Payslips via WhatsApp
             </Button>
-          </div>
-          <h1 className="mb-2 text-4xl font-bold text-slate-900">Payroll Reports</h1>
-          <p className="text-base text-slate-600">Generate, export and distribute payroll reports</p>
+          }
+        />
+        {/* Session 49 (R48-C3): REF's mobile copy — a md:hidden div
+            carrying the FULL-WIDTH WhatsApp button. */}
+        <div className="md:hidden">
+          <Button
+            className="bg-none shadow h-9 px-4 py-2 w-full bg-green-600 hover:bg-none hover:bg-green-700 text-white"
+            onClick={() => toast.toast({ title: "Payslips queued", description: "WhatsApp dispatch logged.", variant: "success" })}
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+            Send Payslips via WhatsApp
+          </Button>
         </div>
 
         {/* REF's filter card: the Label above the w-full select */}
@@ -211,7 +236,9 @@ export default function PayrollReportsPage() {
           <CardContent className="p-4">
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-1 flex-1 min-w-[180px]">
-                <Label className="text-xs">Filter by Employee</Label>
+                {/* Session 49 (R48-C3): REF's label pair — text-xs
+                    text-slate-500 (live-measured). */}
+                <Label className="text-xs text-slate-500">Filter by Employee</Label>
                 <Select value={employee} onValueChange={setEmployee}>
                   {/* v3's space-y-1 put mt on this BLOCK (v4 puts mb on the
                       inline label — ignored; explicit mt-1, the login fix). */}
@@ -228,7 +255,7 @@ export default function PayrollReportsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <span className="text-sm text-muted-foreground">{visible.length} total records</span>
+              <span className="text-sm text-slate-500 self-center">{visible.length} total records</span>
             </div>
           </CardContent>
         </Card>
@@ -241,16 +268,21 @@ export default function PayrollReportsPage() {
             aggregates (controlled; the sibling cards below swap by tab,
             the Tabs component keeps rendering only the list — the
             at-rest Monthly DOM is byte-identical). */}
+        {/* Session 49 (R48-C3): REF's tabs — the TabsList `grid
+            grid-cols-4 w-full md:w-auto` + the OLD-shadcn trigger form
+            (ring-offset-background + data-[state=active]:bg-background/
+            shadow + text-xs md:text-sm — live-measured) and ALL FOUR
+            panels mounted as Radix TabsContent (`… space-y-4 mt-4`);
+            Session 35 (R34-E) keeps the wired aggregates as the
+            functional superset (REF's triggers are inert). */}
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="tax">Tax &amp; Deductions</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="custom">Custom</TabsTrigger>
+          <TabsList className="grid grid-cols-4 w-full md:w-auto">
+            <TabsTrigger value="monthly" className="ring-offset-background text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow">Monthly</TabsTrigger>
+            <TabsTrigger value="tax" className="ring-offset-background text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow">Tax &amp; Deductions</TabsTrigger>
+            <TabsTrigger value="history" className="ring-offset-background text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow">History</TabsTrigger>
+            <TabsTrigger value="custom" className="ring-offset-background text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow">Custom</TabsTrigger>
           </TabsList>
-        </Tabs>
-
-        {tab === "monthly" && (
+          <TabsContent value="monthly" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
           {/* REF's card header (round 33): `flex flex-col md:flex-row
               justify-between gap-3` — the bare left block (title DIV with
@@ -315,17 +347,21 @@ export default function PayrollReportsPage() {
                   </div>
                 </div>
                 <div className="overflow-x-auto">
+                  {/* Session 49 (R48-C3): REF's th forms re-measured —
+                      the BARE px-4 py-3 family (+ alignment, the
+                      hidden md:table-cell pair on Allowances/Overtime,
+                      font-bold on Net Salary). */}
                   <table className="w-full text-sm">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Employee</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Basic</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Allowances</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Overtime</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net Salary</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold uppercase text-slate-600">Status</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold uppercase text-slate-600">Payslip</th>
+                        <th className="px-4 py-3 text-left">Employee</th>
+                        <th className="px-4 py-3 text-right">Basic</th>
+                        <th className="px-4 py-3 text-right hidden md:table-cell">Allowances</th>
+                        <th className="px-4 py-3 text-right hidden md:table-cell">Overtime</th>
+                        <th className="px-4 py-3 text-right">Deductions</th>
+                        <th className="px-4 py-3 text-right font-bold">Net Salary</th>
+                        <th className="px-4 py-3 text-center">Status</th>
+                        <th className="px-4 py-3 text-center">Payslip</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -362,12 +398,12 @@ export default function PayrollReportsPage() {
             )}
           </CardContent>
         </Card>
-        )}
+        </TabsContent>
 
         {/* R34-E: the Tax & Deductions card — the per-employee breakdown
             on REF's card grammar (border-slate-200, the p-6 pb-3 border-b
             header, the bg-slate-50 uppercase thead, the py-12 empty TD). */}
-        {tab === "tax" && (
+        <TabsContent value="tax" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
           <CardHeader className="border-b p-6 pb-3">
             <div>
@@ -410,11 +446,11 @@ export default function PayrollReportsPage() {
             </div>
           </CardContent>
         </Card>
-        )}
+        </TabsContent>
 
         {/* R34-E: the History card — every processed period with its
             totals, newest first. */}
-        {tab === "history" && (
+        <TabsContent value="history" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
           <CardHeader className="border-b p-6 pb-3">
             <div>
@@ -457,11 +493,11 @@ export default function PayrollReportsPage() {
             </div>
           </CardContent>
         </Card>
-        )}
+        </TabsContent>
 
         {/* R34-E: the Custom card — the from/to + employee range form and
             the generated table. */}
-        {tab === "custom" && (
+        <TabsContent value="custom" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
           <CardHeader className="border-b p-6 pb-3">
             <div>
@@ -546,7 +582,8 @@ export default function PayrollReportsPage() {
             </div>
           </CardContent>
         </Card>
-        )}
+        </TabsContent>
+        </Tabs>
         </div>
       </div>
     </div>

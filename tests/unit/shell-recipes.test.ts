@@ -238,8 +238,10 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
   it("R8-A: actions cluster uses the reference's gap-3 (12px)", () => {
     // Reference: `flex gap-3` (Import CSV 145 + 12 + Add Employee 165 = 322).
     // Session 13 (R12-D): the cluster is now parameterized — the DEFAULT
-    // stays gap-3; hrreports overrides to `flex gap-2` per REF measurement.
-    expect(pageHeader).toContain('"flex flex-wrap items-center gap-3", actionsClassName');
+    // stays gap-3. Session 49 (R48-A5): the cluster gained actionsBare
+    // (`flex gap-2` — hrreports/requestreports) + actionsUnwrapped (single
+    // actions render directly in the row); the wrap family stays default.
+    expect(pageHeader).toContain('actionsBare ? "flex gap-2" : "flex flex-wrap items-center gap-3"');
   });
 
   it("R8-B: PageHeader declares the centered prop for text-center headers", () => {
@@ -303,14 +305,18 @@ describe("session-10 parity round 9 — centered headers, companywall, training,
   // All values measured live against the reference
   // (docs/remediation-plan-session10.md).
 
-  it("R9-A: centered title block fills the row (flex-1) so text centers at the content center", () => {
-    // Reference centered pages wrap the header in a FULL-WIDTH text-center
-    // block directly under the content wrapper — badge + h1 center at 848
-    // (content center at 1440). The clone's shrink-to-fit flex child
-    // centered the text at 521-696 instead. flex-1 on the title block
-    // restores the reference geometry.
-    expect(pageHeader).toMatch(/centered && "flex-1/);
-    expect(pageHeader).toMatch(/min-w-0[^)]*centered && "flex-1 text-center"/);
+  it("R9-A: centered title block — the r48 rewrite (text-center ONLY, no flex-1: every measured centered page is row-less)", () => {
+    // Reference centered pages wrap the header in a text-center block
+    // directly under the content wrapper — badge + h1 center at 848
+    // (content center at 1440). Session 49 (R48-A1): the fresh census
+    // reads REF's block as `DIV[text-center]` with NO min-w-0 and NO
+    // flex-1 (every measured centered page is BARE — row-less — so the
+    // r9 fill-the-row rationale never applies; the r47 'documented
+    // translation' is retired). The KICKER's own min-w-0 flex-1 text
+    // block stays (REF's kicker carries it).
+    expect(pageHeader).toMatch(/centered && "text-center"/);
+    expect(pageHeader).not.toMatch(/min-w-0", centered/);
+    expect(pageHeader).not.toMatch(/flex-1 text-center/);
   });
 
   it("R9-B: companywall renders the narrow centered feed (max-w-3xl, space-y-6)", () => {

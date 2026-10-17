@@ -4,6 +4,7 @@ import * as React from "react";
 import { Download, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -159,11 +160,15 @@ export default function HRReportsPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <PageHeader
+        /* Session 49 (R48-A3/C5): REF's header is the UNPREFIXED center
+         *  always-row `flex items-center justify-between` with the bare
+         *  `flex gap-2` actions cluster (live-measured @1440×900). */
+        alwaysRow
+        actionsBare
         size="md"
         title="HR Reports & Analytics"
         subtitle="Create custom charts and export data for management reviews"
         subtitleClassName="mt-0 text-slate-500"
-        actionsClassName="flex gap-2"
         actions={
           <>
             <Button variant="outline" onClick={exportCsv}>
@@ -190,7 +195,7 @@ export default function HRReportsPage() {
         <CardContent className="p-5">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
-              <label htmlFor="hr-source" className="text-xs text-slate-500 font-medium">Data Source</label>
+              <Label htmlFor="hr-source" className="text-xs text-slate-500">Data Source</Label>
               <Select value={source} onValueChange={setSource}>
                 <SelectTrigger id="hr-source" className="mt-1 w-full">
                   <SelectValue />
@@ -201,15 +206,15 @@ export default function HRReportsPage() {
               </Select>
             </div>
             <div>
-              <label htmlFor="hr-from" className="text-xs text-slate-500 font-medium">From Date</label>
+              <Label htmlFor="hr-from" className="text-xs text-slate-500">From Date</Label>
               <Input id="hr-from" type="date" className="mt-1" value={from} onChange={(e) => setFrom(e.target.value)} />
             </div>
             <div>
-              <label htmlFor="hr-to" className="text-xs text-slate-500 font-medium">To Date</label>
+              <Label htmlFor="hr-to" className="text-xs text-slate-500">To Date</Label>
               <Input id="hr-to" type="date" className="mt-1" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
             <div>
-              <label htmlFor="hr-group" className="text-xs text-slate-500 font-medium">Group By</label>
+              <Label htmlFor="hr-group" className="text-xs text-slate-500">Group By</Label>
               <Select value={groupBy} onValueChange={setGroupBy}>
                 <SelectTrigger id="hr-group" className="mt-1 w-full">
                   <SelectValue placeholder="" />
@@ -224,7 +229,7 @@ export default function HRReportsPage() {
               </Select>
             </div>
             <div>
-              <label htmlFor="hr-chart" className="text-xs text-slate-500 font-medium">Chart Type</label>
+              <Label htmlFor="hr-chart" className="text-xs text-slate-500">Chart Type</Label>
               <Select value={chartType} onValueChange={(v) => setChartType(v as ReportChartType)}>
                 <SelectTrigger id="hr-chart" className="mt-1 w-full">
                   <SelectValue />
@@ -239,7 +244,7 @@ export default function HRReportsPage() {
               </Select>
             </div>
             <div>
-              <label htmlFor="hr-status" className="text-xs text-slate-500 font-medium">Status Filter</label>
+              <Label htmlFor="hr-status" className="text-xs text-slate-500">Status Filter</Label>
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger id="hr-status" className="mt-1 w-full">
                   <SelectValue />

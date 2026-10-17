@@ -150,7 +150,12 @@ export default function HrAssistantChatPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
       <PageHeader
-        className="mb-6"
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. The block carries REF's
+         *  mb-6 (measured: DIV[mb-6] under the max-w-7xl wrap). */
+        bare
+        heroClassName="mb-6"
         section="AI HR Assistant"
         layout="flat36"
         iconClassName="text-purple-600"

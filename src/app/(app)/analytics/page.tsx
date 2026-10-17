@@ -105,8 +105,19 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      {/* Session 49 (R48-C8): REF's verbatim content wrapper — `max-w-7xl
+       *  mx-auto space-y-8` directly under the BARE root (a plain p-4
+       *  md:p-8 padding wrapper — the gradient + the full-height canvas
+       *  are gone — live-measured @1440×900 this round). Replaces the
+       *  trap-4 mitigation wrapper (flex-col gap-8); trap audit clean —
+       *  no authored mt/mb on the direct children, no hidden first
+       *  sibling (the bare hero block is the first child). */}
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        /* Session 49 (R48-A2): the bare family — REF renders the hero
+         *  block as a DIRECT child of the content wrapper (no hero row).
+         *  Live-measured @1440×900 this round. */
+        bare
         title="Analytics Dashboard"
         size="lg"
         subtitle="Track your onboarding performance and metrics"

@@ -22,6 +22,16 @@ async function main(): Promise<void> {
     where: { email: { startsWith: "e2e-zerodash-", endsWith: "@eon-hr.test" } },
   });
   console.log(`[purge] removed ${goneUsers.count} signup-test user(s)`);
+  // Session 49 (R48-F2): the avatar spec uploads a data-URL avatar onto
+  // the demo user — reset it so every run starts from the seed's
+  // avatarless state (the seed's upsert does NOT touch avatarUrl).
+  const resetAvatars = await db.user.updateMany({
+    where: { avatarUrl: { not: null } },
+    data: { avatarUrl: null },
+  });
+  if (resetAvatars.count > 0) {
+    console.log(`[purge] reset ${resetAvatars.count} user avatar(s)`);
+  }
 }
 
 main()
