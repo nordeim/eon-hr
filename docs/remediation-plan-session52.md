@@ -134,3 +134,39 @@ lint 0/0 · tsc ✓ · unit (791 + the round-52 pins = 793) · build ✓ · E2E
 13/13 (done) · the nav-registry + drawer-group census records (done,
 pinned) · DB pristine (the loading-probe user swept) · `.env.example`
 verified.
+
+---
+
+## Completion record (session 52, delivered)
+
+- **Gates**: lint 0/0 · tsc ✓ · **793/793 unit** (+2: R52-A1 the
+  ordered 44-href registry tripwire, R52-A2 the BOTTOM_NAV 5-tab set) ·
+  build ✓ · **256/256 E2E** (+1 — R52-B: the expanded drawer group's
+  sub-item computed family — gap 12px, display flex, 32px rows).
+- **Live verification**: verify-r45 **13/13** on the 19TH login deploy
+  (`ChN8O3_i`→`CimHfPLG`, standalone) + standing audits **5/5** + route
+  sweep **12/12** + **verify-r49 13/13** (the confirmation ladder) +
+  the **nav-registry drift check 44/44** (all 8 REF groups expanded
+  live, the complete tree diffed against NAV_ITEMS — zero drift) + the
+  **drawer-group computed-truth pair MATCH** (the Employees + Analytics
+  sub-item families: gap/display/padding/geometry identical both sides;
+  the `gap-2 gap-3` cls member delta = the documented cn()-merge
+  allowance).
+- **Screenshots**: 3 pairs (236-238 — the drawer's expanded Employees
+  group, the expanded Analytics group, the desktop fully-expanded
+  sidebar registry surface) → **380 files in docs/screenshots/** (374
+  PNG + 6 evidence HTML). DB pristine (the loading-probe user swept —
+  the per-window trap re-fired). `.env.example` verified.
+- **The push protocol held**: the code batch committed + pushed at the
+  FIRST green stack (`5f29e1e` via the ssh wrapper + the paramiko shim
+  + the explicit `--remote git@github.com:nordeim/eon-hr.git`), the
+  screenshots/docs layer after.
+- **Tooling lessons**: the agent-browser long-eval flake re-hit (~1.2k
+  chars, both apps, clean standalone — the retry guard + split reads
+  are the standing fix; the r52 evalOn pattern parses the
+  pretty-printed object output directly and unwraps quoted scalars);
+  the computed-truth census method made explicit (pin the computed
+  cascade result when the platforms differ in class-list construction);
+  the workspace-reap pattern (every orchestrator boots its own :3200 —
+  the sandbox reaps detached processes between calls; the
+  agent-browser daemon survives by self-daemonizing).
