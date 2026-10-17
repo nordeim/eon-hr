@@ -218,8 +218,8 @@ export default function ShiftCalendarPage() {
   }, [data, departmentFilter, shiftById]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f5f3ff,#eef2ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 to-indigo-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
       <PageHeader
         rowBreakpoint="md"
         section="Shift Management"
@@ -310,22 +310,22 @@ export default function ShiftCalendarPage() {
               border-0 + shadow-sm with per-card colored values
               (blue/violet/emerald/amber-600) and text-xs slate-500 labels. */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard variant="mini" className="border-0 shadow-sm"
+            <StatCard variant="mini" labelTag="p" className="border-0 shadow-sm"
               label="Total Employees"
               value={data.stats.totalEmployees}
               valueClassName="text-blue-600"
             />
-            <StatCard variant="mini" className="border-0 shadow-sm"
+            <StatCard variant="mini" labelTag="p" className="border-0 shadow-sm"
               label="Shifts Defined"
               value={data.stats.shiftsDefined}
               valueClassName="text-violet-600"
             />
-            <StatCard variant="mini" className="border-0 shadow-sm"
+            <StatCard variant="mini" labelTag="p" className="border-0 shadow-sm"
               label="Assignments This Month"
               value={data.stats.assignmentsThisMonth}
               valueClassName="text-emerald-600"
             />
-            <StatCard variant="mini" className="border-0 shadow-sm"
+            <StatCard variant="mini" labelTag="p" className="border-0 shadow-sm"
               label="Unassigned Days"
               value={data.stats.unassignedDays}
               valueClassName="text-amber-600"

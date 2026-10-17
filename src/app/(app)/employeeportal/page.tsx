@@ -53,7 +53,7 @@ export default async function EmployeePortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="max-w-md w-full border-slate-200 shadow-xl">
         <CardContent className="p-8 text-center">
           {!employee || !process ? (

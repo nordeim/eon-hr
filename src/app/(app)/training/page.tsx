@@ -135,7 +135,7 @@ export default function TrainingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Learning Management System"
         layout="flat48"

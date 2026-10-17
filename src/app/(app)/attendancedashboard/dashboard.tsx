@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, CheckCircle2, Clock, Download, Users } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CircleCheckBig, Clock, Download, TriangleAlert, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -166,8 +166,7 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#ecfeff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
       <PageHeader
         rowBreakpoint="md"
         title="Attendance Dashboard"
@@ -199,10 +198,10 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
         {/* Session 12 (R11-T): the reference's 146px compact cards WITH 40px
             icon tiles — CheckCircle2 green, AlertTriangle red, Clock
             yellow, Users blue (live-measured). */}
-        <StatCard variant="compact" label="Present Days" value={presentDays} icon={<CheckCircle2 className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
-        <StatCard variant="compact" label="Absent Days" value={absentDays} icon={<AlertTriangle className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-red-100 text-red-600" />
-        <StatCard variant="compact" label="Late Arrivals" value={lateArrivals} icon={<Clock className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-yellow-100 text-yellow-600" />
-        <StatCard variant="compact" label="Attendance Rate" value={`${attendanceRate}%`} icon={<Users className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Present Days" value={presentDays} icon={<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Absent Days" value={absentDays} icon={<TriangleAlert className="w-5 h-5 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Late Arrivals" value={lateArrivals} icon={<Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" />} tileClassName="bg-yellow-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Attendance Rate" value={`${attendanceRate}%`} icon={<Users className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -286,7 +285,6 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
           ) : null}
         </CardContent>
       </Card>
-    </div>
     </div>
   );
 }

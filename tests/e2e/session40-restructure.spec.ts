@@ -118,7 +118,8 @@ const AUTHED = test.describe("session-40 shell + input + careers (authed)", () =
   test("tenantsetup mobile — the p-4 canvas insets the card (x=16 at 390)", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/tenantsetup");
-    await expect(page.getByRole("heading", { name: "Welcome to EonHR" })).toBeVisible();
+    // Session 48 (R47-B6): REF renders a DIV (not an h2) — getByText.
+    await expect(page.getByText("Welcome to EonHR")).toBeVisible();
 
     const card = await page.evaluate(() => {
       const el = [...document.querySelectorAll("div")].find(

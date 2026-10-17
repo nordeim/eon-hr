@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Clock3, ListChecks, Loader2, Plane, Plus, X } from "lucide-react";
+import { Calendar, Check, CircleCheckBig, Clock3, ListChecks, Loader2, Plane, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -145,8 +145,8 @@ export default function AllLeaveRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eff6ff,#eef2ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Leave Management"
         layout="flat36"
@@ -167,17 +167,32 @@ export default function AllLeaveRequestsPage() {
         <StatCard
           label="Pending Approvals"
           value={stats.pending}
-          icon={<Clock3 className="h-4 w-4" aria-hidden="true" />}
+          valueTag="p"
+          labelTag="p"
+          valueClassName="mt-4 mb-0"
+          tileRowClassName=""
+          icon={<Calendar className="w-6 h-6 text-yellow-600" aria-hidden="true" />}
+          tileClassName="bg-yellow-100"
         />
         <StatCard
           label="Approved"
           value={stats.approved}
-          icon={<Check className="h-4 w-4" aria-hidden="true" />}
+          valueTag="p"
+          labelTag="p"
+          valueClassName="mt-4 mb-0"
+          tileRowClassName=""
+          icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />}
+          tileClassName="bg-green-100"
         />
         <StatCard
           label="Total Requests"
           value={stats.total}
-          icon={<ListChecks className="h-4 w-4" aria-hidden="true" />}
+          valueTag="p"
+          labelTag="p"
+          valueClassName="mt-4 mb-0"
+          tileRowClassName=""
+          icon={<Plane className="w-6 h-6 text-blue-600" aria-hidden="true" />}
+          tileClassName="bg-blue-100"
         />
       </div>
 

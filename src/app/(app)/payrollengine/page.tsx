@@ -143,9 +143,10 @@ export default function PayrollEnginePage() {
   const infoMonth = monthLabel(month);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#ecfdf5,#f0fdfa)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
       <PageHeader
+        rowBreakpoint="md"
         section="Payroll Engine"
         layout="flat-tight"
         iconClassName="text-emerald-600"

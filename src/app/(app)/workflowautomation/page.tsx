@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ListChecks, Loader2, Play, Plus, Sparkles, Trash2, Workflow as WorkflowIcon, Zap } from "lucide-react";
+import { Loader2, Play, Plus, Sparkles, SquareCheckBig, Trash2, Workflow as WorkflowIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -191,8 +191,8 @@ export default function WorkflowAutomationPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#faf5ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Workflow Automation"
         layout="flat36"
@@ -210,9 +210,9 @@ export default function WorkflowAutomationPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-3">
-        <StatCard variant="no-tile" label="Total Workflows" value={stats.total} icon={<WorkflowIcon className="h-4 w-4 text-purple-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Active" value={stats.active} icon={<Zap className="h-4 w-4 text-green-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Total Executions" value={stats.executions} icon={<ListChecks className="h-4 w-4 text-blue-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Total Workflows" value={stats.total} icon={<Zap className="w-10 h-10 text-purple-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Active" value={stats.active} valueClassName="text-green-600" icon={<Play className="w-10 h-10 text-green-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Total Executions" value={stats.executions} valueClassName="text-blue-600" icon={<SquareCheckBig className="w-10 h-10 text-blue-500" aria-hidden="true" />} />
       </div>
 
       {/* Session 17 (R16-B): the reference renders NOTHING below the stat

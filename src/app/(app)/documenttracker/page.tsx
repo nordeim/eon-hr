@@ -221,7 +221,7 @@ export default function DocumentTrackerPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      <div className="max-w-7xl mx-auto space-y-6">
       <PageHeader
         rowBreakpoint="md"
         section="Document Management"

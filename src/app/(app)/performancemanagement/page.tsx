@@ -213,11 +213,12 @@ export default function PerformanceManagementPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eef2ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Performance Management"
         layout="flat36"
+        actionsStart
         iconClassName="text-indigo-600"
         sectionIcon={<Target aria-hidden="true" />}
         title="Goals & Reviews"
@@ -225,10 +226,10 @@ export default function PerformanceManagementPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="h-4 w-4 text-blue-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Completed" value={stats.completed} icon={<Target className="h-4 w-4 text-green-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} icon={<Target className="h-4 w-4 text-orange-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} icon={<Star className="h-4 w-4 text-purple-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="w-10 h-10 text-blue-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Completed" value={stats.completed} valueClassName="text-green-600" icon={<Target className="w-10 h-10 text-green-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} valueClassName="text-orange-600" icon={<Target className="w-10 h-10 text-orange-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} valueClassName="text-purple-600" icon={<Star className="w-10 h-10 text-purple-500" aria-hidden="true" />} />
       </div>
 
       <Tabs defaultValue="goals">
@@ -240,11 +241,19 @@ export default function PerformanceManagementPage() {
           <TabsTrigger value="reviews">Performance Reviews</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="goals" className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-muted-foreground">
-              {goals.length} goal{goals.length === 1 ? "" : "s"} across the team
-            </p>
+        {/* Session 48 (R47-E4): REF's panel carries the Radix ring family
+            + space-y-6; the count line renders only WITH data (REF's
+            zero-state toolbar is justify-end + the button alone). */}
+        <TabsContent
+          value="goals"
+          className="ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"
+        >
+          <div className={goals.length > 0 ? "flex items-center justify-between gap-2" : "flex justify-end"}>
+            {goals.length > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {goals.length} goal{goals.length === 1 ? "" : "s"} across the team
+              </p>
+            ) : null}
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2" aria-hidden="true" />
               Set New Goal
@@ -255,21 +264,10 @@ export default function PerformanceManagementPage() {
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
-          ) : goals.length === 0 ? (
-            <div className="rounded-xl border bg-card shadow-sm">
-              <EmptyState
-                icon={<Target className="h-6 w-6" />}
-                title="No goals set yet"
-                description="Set the first goal to start tracking performance"
-                action={
-                  <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                    <Plus className="mr-2" aria-hidden="true" />
-                    Set New Goal
-                  </Button>
-                }
-              />
-            </div>
           ) : (
+            /* Session 48 (R47-E4): REF's zero state renders an EMPTY grid
+               — no empty-state card (the r46 training precedent; the
+               Set New Goal row above stays the entry). */
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {goals.map((goal) => (
                 <Card key={goal.id}>

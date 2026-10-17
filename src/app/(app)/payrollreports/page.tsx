@@ -5,6 +5,7 @@ import { BarChart3, Calendar, FileSpreadsheet, FileText, Loader2, MessageCircle 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageCanvas } from "@/components/shared/page-canvas";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -177,8 +178,9 @@ export default function PayrollReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <PageCanvas>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* REF's header (round 33 re-measure): the pill + the CTA ride a
             row at y=56 (items-start; the pill's mb-4 spaces the 36px h1
             at y=108, mb-2 lands the sub at y=156) — one wrapper so the
@@ -548,5 +550,6 @@ export default function PayrollReportsPage() {
         </div>
       </div>
     </div>
+    </PageCanvas>
   );
 }

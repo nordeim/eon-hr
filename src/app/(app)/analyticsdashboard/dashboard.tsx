@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText, Printer, Users } from "lucide-react";
+import { Calendar, DollarSign, Download, FileText, Printer, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -134,9 +134,9 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
     // Session 9 (R8-D): the page root this route was missing (session-6 S2
     // codemod miss) — reference: p-4 md:p-8 space-y-8 min-h-screen
     // bg-gradient-to-br from-slate-50 to-blue-50 (sRGB, trap 3).
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <PageHeader
+        rowBreakpoint="md"
         title="Analytics Dashboard"
         subtitle="Visual overview of key HR metrics and trends"
         actions={
@@ -166,27 +166,31 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact"
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600"
           label="Active Employees"
           value={stats.activeEmployees}
           hint={`${stats.totalEmployees} total`}
-          icon={<Users aria-hidden="true" />}
+          icon={<Users className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100"
         />
-        <StatCard variant="compact"
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600"
           label="Total Payroll"
           value={formatSar(stats.payrollTotal)}
           hint={`${stats.payrollRecords} records`}
-          icon={<FileText aria-hidden="true" />}
+          icon={<DollarSign className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100"
         />
-        <StatCard variant="compact"
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600"
           label="Leave Requests"
           value={stats.leaveRequests}
           hint={`${stats.pendingRequests} pending`}
+          icon={<Calendar className="w-5 h-5 text-yellow-600" aria-hidden="true" />}
+          tileClassName="bg-yellow-100"
         />
-        <StatCard variant="compact"
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600"
           label="Total Expenses"
           value={formatSar(stats.expensesTotal)}
           hint={`${stats.expensesApproved} approved`}
+          icon={<TrendingUp className="w-5 h-5 text-purple-600" aria-hidden="true" />}
+          tileClassName="bg-purple-100"
         />
       </div>
 
@@ -279,7 +283,6 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
             </div>
           </CardContent>
         </Card>
-      </div>
       </div>
     </div>
   );

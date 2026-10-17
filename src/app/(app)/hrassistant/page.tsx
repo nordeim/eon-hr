@@ -133,7 +133,7 @@ export default function HrAssistantPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <PageHeader
           className="text-center"
           section="AI HR Assistant"
@@ -153,11 +153,11 @@ export default function HrAssistantPage() {
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
+                /* Session 48 (R47-E5): REF's zero chat renders the icon
+                   only — no suggestion line (the r46 census; the clone's
+                   copy line retires with the training precedent). */
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <Sparkles className="mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
-                  <p className="text-sm text-muted-foreground">
-                    Ask about leave, payroll, letters or company policy
-                  </p>
                 </div>
               ) : (
                 messages.map((m) => {

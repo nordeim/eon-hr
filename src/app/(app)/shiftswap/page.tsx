@@ -145,9 +145,10 @@ export default function ShiftSwapPage() {
   const visible = tab === "mine" ? swaps : swaps.filter((s) => s.status === "pending");
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f5f3ff,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 to-blue-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         <PageHeader
+        rowBreakpoint="md"
           section="Shift Management"
           layout="flat36"
           iconClassName="text-violet-600"

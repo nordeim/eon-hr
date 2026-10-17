@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 718 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 217 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 745 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 228 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2759,3 +2759,110 @@ lessons: the `//`-comment one-liner trap (re-fired from census-a —
 split-join collapses comments), the template-literal `\S` escape
 (`` `text-\S+` `` arrives at the browser as `text-S+` — write `\\S`),
 and the agent-browser screenshot CLI needs ABSOLUTE paths.
+
+## Session 48 (parity round 47) — the unmapped-route interiors
+
+**Context**: fresh pull to `def9974` (docs-only delta), env intact,
+baseline gates green (718 unit · 217 E2E). **Redeploy watch: the 14th
+login deploy** (login JS `Dwv9uuCD` → `CSVhrsEz`, CSS `CpjiugAb` quiet,
+app quiet) — visually quiet: verify-r45 13/13. **A 15th login deploy
+shipped at round end** (`CSVhrsEz` → `DCDf2KCA`, CSS + app quiet) —
+re-audited: verify-r45 13/13 again. The login build stays under ACTIVE
+development — the watch stays armed.
+
+**The round's vein — the unmapped-route interiors**: r46 covered 12
+canonical routes; this round censused the REMAINING ~46 (three census
+batches + the rows/stats/rootmap/zone readers + the svg-class probe —
+svg.className is an SVGAnimatedString, invisible to class-string
+readers; read via getAttribute). All live REF @1440×900 vs the
+zero-tenant :3201.
+
+**THE INSTRUMENT CORRECTION (the round's transferable lesson)**: the
+census/zone readers JOIN adjacent child text nodes with `' '` — JSX
+interpolation (`Peer Approval ({count})`) produces phantom spaces
+(`Peer Approval ( 0 )`). Raw-textContent verification DISSOLVED the
+entire suspected "space-in-template" family (shiftswap, surveys,
+analytics, securitysettings, hrreports, the dashboard welcome — all
+byte-identical renders). **A text-outline instrument may never be
+trusted for spacing claims — compare raw `textContent` only** (the r46
+lesson extended).
+
+**The findings + fixes**:
+
+1. **The kicker family**: every clone kicker h1 missed REF's
+   `dark:text-white` pair (a REAL dark-mode diff — component fix) + the
+   dashboard's hand-rolled kicker was the pre-r46 form (the r46 A5 fix
+   updated PageHeader but missed the copy — the aliases inherit via
+   re-export).
+2. **The rootmap (48 routes)**: 27 pages still shipped the arbitrary
+   `bg-[linear-gradient]` forms → the v3 `bg-gradient-to-br` swaps; the
+   `mx-auto flex w-full max-w-Nxl flex-col gap-N` wrappers → REF's
+   `max-w-Nxl mx-auto space-y-N` verbatim (organogram = `max-w-FULL`,
+   chat/hrassistantchat/employees = NO space member, hrreports/
+   workflowconfigpage/notificationpreferences = the p-6 family); the
+   merged-root five (assetmanagement/analyticsdashboard/
+   attendancedashboard/surveyanalytics/payrollmodule) carry `p-4
+   md:p-8 space-y-8` + the gradient ON the root with NO inner max-w
+   wrapper; the bare roots (announcements/recruitmentkanban
+   `p-4 md:p-8 space-y-6`; requestreports/requestsettings the verbatim
+   root + the extra gradient wrapper dropped); payrollreports gained
+   the PageCanvas trio; employeeportal += `p-4`; the stubs — /home is
+   literally `<div></div>`, /employeedetail is the centered CSS
+   spinner, /employeeselfservice mirrors REF's centered loader for the
+   suspense phase (the resolved no-profile state stays the informative
+   superset — the DOCUMENTED divergence).
+3. **The header-row family**: REF's md rows carry the UNPREFIXED
+   `justify-between items-start` members (base) + `md:flex-row
+   md:items-center`; six pages gained `rowBreakpoint="md"`
+   (analyticsdashboard, surveyanalytics, payrollengine, hrletters,
+   shiftswap, surveys); performancemanagement gained `actionsStart`.
+4. **The stat family (the biggest)**: StatCard gained per-call-site
+   `valueTag`/`labelTag` overrides + `tileRowClassName`; the no-tile
+   rewrite CORRECTED the session-14 R13-I contract (REF renders
+   label-TOP p + value-BELOW p mt-1 + the BARE per-color svg — the
+   session-14 reader mis-attributed the order); the TILE family: REF's
+   tiles carry GEOMETRY + BG only, the icon size + color ride the svg's
+   own classes (compact `w-10 h-10 … mb-3` rendered DIRECTLY — no flex
+   wrapper; standard/tile-right `w-12 h-12`); 13 pages' call sites
+   updated (the icon names too: compliance circle-x/triangle-alert/
+   circle-check-big/shield, assetmanagement package/laptop/
+   circle-check-big/wrench, attendance users/circle-check-big/
+   circle-x/clock/trending-up, payrollmodule dollar-sign ×4,
+   surveyanalytics minus, expenses circle-check-big/dollar-sign,
+   surveys message-square/eye/users/trending-up); the four analytics
+   compacts pass p/p + slate-600 labels; advancedanalytics/payrollai/
+   allleaverequests pass p/p + mt-4 values (REF's tile row has no mb)
+   + advancedanalytics' REAL label diffs ("Avg Tenure (months)", "At
+   Risk (AI Prediction)").
+5. **The zero-state affordances** (the r46 training precedent
+   extended): announcements (no button + the bare DIV empty),
+   hrletters (the bare-svg empty + NO button), templates (the
+   duplicate empty-state button deduped to the row CTA + REF's
+   always-row header hand-rolled), performancemanagement (no count
+   line + no empty card at zero + the REF tab-panel classes), and
+   hrassistant (no suggestion line). The create flows ride WITH-DATA
+   header actions where REF's zero state has no entry.
+6. **The quick hits**: compliance's At-Risk card header
+   (`bg-slate-50 py-3 px-4` + the flex gap-2 title + the classless
+   empty P), requestreports' integer stat value, and
+   recruitmentkanban's stage chips = REF's badge-form DIVs
+   (`bg-slate-200 text-slate-700` + the focus ring family — NOT the
+   h-[22px] badge the census's tag-only read implied).
+
+**Pins**: 27 new (A1-A2, B1-B7, C1-C3, D1a-D2d, E1-E5, F1-F3) + 20
+amended (the dashboard/kicker/row/48px-tile/r46-icon/R30-C1/R31-C5..
+D1/R33-A1/R8-D/R8-F/R10-F/R10-H/R10-J pins + 2 E2E: the kicker
+position contract, the tenantsetup heading). Gates: lint 0/0 · tsc ✓ ·
+**745/745 unit** (+27) · build ✓ · **228/228 E2E** (+11 — the
+session48-unmapped-interiors spec). Live: **verify-r47 24/24 MATCH**
+(the 48-route rootmap, the stat zones with the tile contracts, the
+kicker dark pair, the affordances, the stubs, the quick hits —
+normalized for the documented render-neutral splits: class order via
+sorted members, the mb-0 restoration strip, the React suspense
+comment markers) + verify-r46 25/25 + verify-r45 13/13 (the 15th
+deploy) + standing audits 5/5 + route sweep 12/12. 18 screenshots
+(184-192 REF + zero-tenant pairs) → **294 PNG**. DB pristine (the
+loading-probe user swept again — the verify-r45 trap re-fires every
+window). The tooling lessons: the Next standalone server does NOT load
+`.env` — pass DATABASE_URL inline on restart; the agent-browser evals
+flake under sustained load (the verify's evalOn retries once).

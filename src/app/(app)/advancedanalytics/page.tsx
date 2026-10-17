@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CalendarClock, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { Calendar, CalendarClock, TrendingUp, Users } from "lucide-react";
 import {
   DepartmentDistributionBar,
   HeadcountTrendLine,
@@ -111,8 +111,8 @@ export default async function AdvancedAnalyticsPage() {
   const hasPayroll = payrollRecords.length > 0;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Advanced Analytics"
         layout="flat36"
@@ -125,14 +125,19 @@ export default async function AdvancedAnalyticsPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard label="Total Headcount" value={total} icon={<Users aria-hidden="true" />} />
+        <StatCard label="Total Headcount" value={total} valueTag="p" labelTag="p" valueClassName="mt-4 mb-0" tileRowClassName="" icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
         <StatCard
           label="Turnover Rate"
           value={`${turnoverRate}%`}
-          icon={<TrendingDown aria-hidden="true" />}
+          valueTag="p"
+          labelTag="p"
+          valueClassName="mt-4 mb-0"
+          tileRowClassName=""
+          icon={<TrendingUp className="w-6 h-6 text-red-600" aria-hidden="true" />}
+          tileClassName="bg-red-100"
         />
-        <StatCard label="Avg Tenure" value={avgTenure} icon={<CalendarClock aria-hidden="true" />} />
-        <StatCard label="At Risk" value={atRisk} icon={<AlertTriangle aria-hidden="true" />} />
+        <StatCard label="Avg Tenure (months)" value={avgTenure} valueTag="p" labelTag="p" valueClassName="mt-4 mb-0" tileRowClassName="" icon={<Calendar className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+        <StatCard label="At Risk (AI Prediction)" value={atRisk} valueTag="p" labelTag="p" valueClassName="mt-4 mb-0" tileRowClassName="" icon={<TrendingUp className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" />
       </div>
 
       {/* Session 12 (R11-U): the reference's 2×2 chart grid — charts

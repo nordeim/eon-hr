@@ -80,17 +80,19 @@ export default async function DashboardPage() {
     <PageCanvas>
     <div className="p-4 md:p-8 space-y-8">
       {/* Mobile page-title kicker (session-6 re-measurement; session 9
-          R8-G re-pin): the reference renders `md:hidden … bg-white border-b
-          border-slate-200 px-4 py-3` INSIDE its p-4 page wrapper (so the
-          bar is inset 16px — NOT full-bleed — and the title lands at
-          x=32/y=101, 18px/700 slate-900, truncate). After the reference's
-          redeploy its `sticky top-0` became inert (non-scrolling wrapper
-          stack; measured: the kicker scrolls away, window scrolls) — the
-          clone matches the rendered truth with a static bar. */}
-      <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3">
+          R8-G re-pin): the reference renders its kicker INSIDE the p-4
+          page wrapper (so the bar is inset 16px — NOT full-bleed — and
+          the title lands at x=32/y=101, 18px/700 slate-900, truncate).
+          Session 48 (R47-A2): the CLASS re-adopted verbatim (the r46
+          A5 fix updated the PageHeader component but missed this
+          hand-rolled copy) — REF's current kicker carries sticky top-0
+          z-20 + the dark: pairs + safe-area-top (the sticky stays inert
+          inside the r39 scroller stack), and the h1 carries the dark
+          pair (R47-A1). */}
+      <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold text-slate-900 truncate">Dashboard</h1>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate">Dashboard</h1>
           </div>
         </div>
       </div>

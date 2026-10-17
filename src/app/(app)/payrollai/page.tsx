@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle, CircleCheckBig, Loader2, Sparkles } from "lucide-react";
+import { CheckCircle, CircleCheckBig, DollarSign, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatCard } from "@/components/shared/stat-card";
@@ -62,8 +62,8 @@ export default function PayrollAiPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         <PageHeader
           section="AI Payroll Assistant"
           layout="flat36"
@@ -84,20 +84,32 @@ export default function PayrollAiPage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <StatCard
-            icon={<Sparkles className="h-6 w-6" aria-hidden="true" />}
-            iconClassName="bg-blue-50 text-blue-600"
+            valueTag="p"
+            labelTag="p"
+            valueClassName="mt-4 mb-0"
+            tileRowClassName=""
+            icon={<Sparkles className="w-6 h-6 text-blue-600" aria-hidden="true" />}
+            tileClassName="bg-blue-100"
             value={loading ? "…" : String(stats.pending)}
             label="Pending Suggestions"
           />
           <StatCard
-            icon={<CheckCircle className="h-6 w-6" aria-hidden="true" />}
-            iconClassName="bg-green-50 text-green-600"
+            valueTag="p"
+            labelTag="p"
+            valueClassName="mt-4 mb-0"
+            tileRowClassName=""
+            icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />}
+            tileClassName="bg-green-100"
             value={loading ? "…" : String(stats.accepted)}
             label="Accepted"
           />
           <StatCard
-            icon={<CheckCircle className="h-6 w-6" aria-hidden="true" />}
-            iconClassName="bg-orange-50 text-orange-600"
+            valueTag="p"
+            labelTag="p"
+            valueClassName="mt-4 mb-0"
+            tileRowClassName=""
+            icon={<DollarSign className="w-6 h-6 text-purple-600" aria-hidden="true" />}
+            tileClassName="bg-purple-100"
             value={loading ? "…" : `${stats.totalAdjustments / 100} SAR`}
             label="Total Adjustments"
           />

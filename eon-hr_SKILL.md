@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.30.0 (session-47 remediation complete — the zero-state app-page interiors: the page-root families + the CardTitle div + the stat-tag correction) · **Last updated:** 2026-10-17
+> **Version:** 3.31.0 (session-48 remediation complete — the unmapped-route interiors: the rootmap families + the per-page stat contracts + the tile/icon architecture) · **Last updated:** 2026-10-17
 > **State:** 718 unit + 217 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -3118,3 +3118,68 @@ Gates: lint 0/0 · tsc ✓ · 718/718 unit (+21) · build ✓ · 217/217 E2E
 (+8). Live: verify-r46 25/25 + verify-r45 13/13 (the 13th login deploy,
 mid-round) + standing audits 5/5 + route sweep 12/12 · 270 PNG · DB
 pristine.
+
+## §60 Session 48 (parity round 47) — the unmapped-route interiors
+
+The 46-route interior census (r46 covered 12 canonical routes; the
+remaining ~46 censused with three batch instruments + the rows/stats/
+rootmap/zone readers + the svg-class probe — svg.className is an
+SVGAnimatedString, invisible to class-string readers). THE INSTRUMENT
+CORRECTION (the round's transferable lesson): the census/zone readers
+JOIN adjacent child text nodes with ' ' — JSX interpolation produces
+phantom spaces; raw-textContent verification DISSOLVED the entire
+suspected "space-in-template" family (only advancedanalytics' two
+label texts were real: "Avg Tenure (months)" / "At Risk (AI
+Prediction)"). A text-outline instrument may never be trusted for
+spacing claims.
+
+(1) THE KICKER FAMILY: every clone kicker h1 missed REF's
+dark:text-white (a real dark-mode diff) + the dashboard's hand-rolled
+kicker was the pre-r46 form (the r46 A5 fix updated the component but
+missed the copy). (2) THE ROOTMAP: 27 arbitrary bg-[linear-gradient]
+swaps → the v3 forms; the flex-col gap wrappers → REF's max-w-Nxl
+mx-auto space-y-N verbatim (organogram max-w-FULL; chat/
+hrassistantchat/employees no space member; the p-6 family on
+hrreports/workflowconfigpage/notificationpreferences); the merged-root
+five (p-4 md:p-8 space-y-8 + gradient ON the root, NO inner wrapper);
+the bare roots (announcements/recruitmentkanban/requestreports/
+requestsettings); payrollreports' PageCanvas trio; employeeportal's
+p-4; the stubs (/home = an empty div; /employeedetail = the centered
+CSS spinner; /employeeselfservice mirrors REF's centered loader for
+the suspense phase — the resolved no-profile state stays the
+informative superset, the documented divergence). (3) THE HEADER-ROW
+FAMILY: REF's md rows carry the UNPREFIXED justify-between +
+items-start members; six rowBreakpoint="md" passes;
+performancemanagement actionsStart. (4) THE STAT FAMILY (the
+biggest): valueTag/labelTag call-site overrides; the no-tile rewrite
+(label-TOP p + value-BELOW p mt-1 + the BARE per-color svg —
+correcting the session-14 R13-I mis-attribution); THE TILE
+ARCHITECTURE: REF's tiles carry geometry + bg only, the icon size +
+color ride the svg's own classes (compact w-10 h-10 … mb-3 rendered
+DIRECTLY, no flex wrapper; standard/tile-right w-12 h-12); 13 pages'
+call sites updated with the icon-name corrections (compliance
+circle-x/triangle-alert/circle-check-big/shield; assetmanagement
+package/laptop/circle-check-big/wrench; attendance users/
+circle-check-big/circle-x/clock/trending-up; payrollmodule
+dollar-sign ×4; surveyanalytics minus; expenses circle-check-big/
+dollar-sign; surveys message-square/eye/users/trending-up); the four
+analytics compacts p/p + slate-600; advancedanalytics/payrollai/
+allleaverequests p/p + mt-4. (5) THE ZERO-STATE AFFORDANCES (the r46
+training precedent extended): announcements/hrletters/templates/
+performancemanagement/hrassistant — the zero-state CTAs retire; the
+create flows ride with-data header actions. (6) THE QUICK HITS:
+compliance's At-Risk card header (bg-slate-50 py-3 px-4 + the flex
+gap-2 title + the classless empty P); requestreports' integer stat;
+recruitmentkanban's chips = REF's badge-form DIVs (bg-slate-200
+text-slate-700 + the focus ring family).
+
+Pins: 27 new + 20 amended (+2 E2E contracts). Gates: lint 0/0 · tsc ✓
+· 745/745 unit (+27) · build ✓ · 228/228 E2E (+11). Live: verify-r47
+24/24 (the 48-route rootmap + the stat/tile zones + the kicker + the
+affordances + the stubs — normalized for the render-neutral splits:
+sorted class members, the mb-0 strip, the suspense comment markers) +
+verify-r46 25/25 + verify-r45 13/13 (the 15th login deploy) + standing
+audits 5/5 + route sweep 12/12. 18 screenshots (184-192) → 294 PNG.
+DB pristine. Tooling: the Next standalone server does NOT load .env —
+pass DATABASE_URL inline; the agent-browser evals flake under
+sustained load (verify-r47's evalOn retries once).

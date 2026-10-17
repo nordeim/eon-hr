@@ -112,9 +112,7 @@ export default function RequestReportsPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="w-full p-4 md:p-8">
-        <div className="mx-auto max-w-7xl space-y-6">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => history.back()}>
               <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -147,7 +145,7 @@ export default function RequestReportsPage() {
               { label: "Total Requests", value: stats.total },
               { label: "Approved", value: stats.approved },
               { label: "Pending", value: stats.pending },
-              { label: "Total Amount (SAR)", value: (stats.amount / 100).toFixed(2) },
+              { label: "Total Amount (SAR)", value: stats.amount / 100 },
             ].map((s) => (
               <Card key={s.label}>
                 <CardContent className="flex items-center gap-3 p-4">
@@ -288,8 +286,6 @@ export default function RequestReportsPage() {
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
     </div>
   );
 }

@@ -165,8 +165,12 @@ test.describe("mobile page kicker (session 6, re-pinned session 9)", () => {
     await expect(h1).toHaveCSS("font-weight", "700");
     await expect(h1).toHaveCSS("color", "rgb(15, 23, 42)");
     // scroll: the kicker scrolls away with the content (reference behavior
-    // after its redeploy — the 73px top bar is the only sticky chrome)
-    await expect(kicker).toHaveCSS("position", "static");
+    // after its redeploy — the 73px top bar is the only sticky chrome).
+    // Session 48 (R47-A2): the CLASS is REF's verbatim (sticky top-0 —
+    // the r46 A5 re-adoption, now on this hand-rolled copy too); the
+    // sticky stays INERT inside the r39 scroller stack — the scroll-away
+    // boundingBox check below pins the rendered truth.
+    await expect(kicker).toHaveCSS("position", "sticky");
     await page.evaluate(() => window.scrollTo(0, 400));
     const scrolled = await kicker.boundingBox();
     expect(scrolled).not.toBeNull();

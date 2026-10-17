@@ -157,15 +157,22 @@ export default function HRLettersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#eef2ff,#faf5ff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        rowBreakpoint="md"
         section="HR Letters & Documents"
         layout="flat48"
         iconClassName="text-indigo-600"
         sectionIcon={<FileText aria-hidden="true" />}
         title="HR Letters"
         subtitle="Request and manage official HR documents"
+        actions={!loading && letters.length > 0 ? (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2" aria-hidden="true" />
+            New Request
+          </Button>
+        ) : undefined}
       />
 
       {/* Session 11 (R10-F): the reference's card — CardHeader = title only
@@ -186,17 +193,17 @@ export default function HRLettersPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : letters.length === 0 ? (
-            <EmptyState
-              icon={<FileText className="h-6 w-6" />}
-              title="No letter requests yet"
-              description="Request your first HR letter to get started"
-              action={
-                <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                  <Plus className="mr-2" aria-hidden="true" />
-                  New Request
-                </Button>
-              }
-            />
+            /* Session 48 (R47-E2): REF's zero state is the BARE icon form
+               (lucide-file-text w-16 h-16 mx-auto mb-4 text-slate-300 —
+               classes on the svg, no wrapper divs) + the h3 + the
+               mb-4-free p.text-slate-500; the zero-state New Request CTA
+               retires (the r46 training precedent) — the create flow
+               rides the with-data header action instead. */
+            <div className="p-12 text-center">
+              <FileText className="h-16 w-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No letter requests yet</h3>
+              <p className="text-slate-500">Request your first HR letter to get started</p>
+            </div>
           ) : (
             <Table>
               <TableHeader>

@@ -253,7 +253,7 @@ export default function RecruitmentKanbanPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 space-y-6">
       {/* Session 11 (R10-K): the reference renders this page FULL-WIDTH —
           no max-w container (content spans 1344px at 1440). Header carries
           only the Add Applicant CTA; below it a `flex flex-col sm:flex-row
@@ -349,9 +349,9 @@ export default function RecruitmentKanbanPage() {
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
-                  <span className="inline-flex h-[22px] items-center rounded-md border px-2.5 text-xs font-semibold text-muted-foreground">
+                  <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs bg-slate-200 text-slate-700">
                     {colCandidates.length}
-                  </span>
+                  </div>
                 </div>
                 <div className="flex min-h-32 flex-col gap-2 rounded-md transition-colors">
                   {colCandidates.map((candidate) => (

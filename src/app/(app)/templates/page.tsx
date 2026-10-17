@@ -23,8 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
 
@@ -178,18 +176,22 @@ export default function TemplatesPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader
-        title="Onboarding Templates"
-        size="lg"
-        subtitle={`${templates.length} template${templates.length === 1 ? "" : "s"} available`}
-        actions={
-          <Button variant="indigo" onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
-            Create Template
-          </Button>
-        }
-      />
+      <div className="max-w-7xl mx-auto">
+      {/* Session 48 (R47-E3): REF's row is the always-row form — flex
+          items-center justify-between mb-8 with the hero wrapped in
+          flex items-center gap-4; the button rides the row directly. */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Onboarding Templates</h1>
+            <p className="text-slate-500 mt-1">{templates.length} template{templates.length === 1 ? "" : "s"} available</p>
+          </div>
+        </div>
+        <Button variant="indigo" onClick={() => setCreateOpen(true)}>
+          <Plus className="mr-2" aria-hidden="true" />
+          Create Template
+        </Button>
+      </div>
 
       {/* Session 10 (R9-D): the reference renders NO stat row on
           /templates — the live count lives in the page subtitle. */}
@@ -199,22 +201,20 @@ export default function TemplatesPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : templates.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
-          {/* Session 12 (R11-C): the reference's iconChip empty — a 64px
-              slate-100 circle with a 32px slate-400 FileText icon
-              (live-measured), the h3 + P, then the CTA superset. */}
-          <EmptyState
-            iconChip
-            icon={<FileText aria-hidden="true" />}
-            title="No templates yet"
-            description="Create your first onboarding template to get started"
-            action={
-              <Button variant="dark" onClick={() => setCreateOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                Create Template
-              </Button>
-            }
-          />
+        /* Session 48 (R47-E3): REF's verbatim empty card — rounded-xl
+            border bg-card text-card-foreground border-slate-200
+            shadow-sm, the 64px slate-100 circle (w-8 h-8 slate-400
+            file-text), the h3, and the mb-4 P; the duplicate empty-state
+            CTA retires (the header button is the single entry — the
+            r46 training precedent). */
+        <div className="rounded-xl border bg-card text-card-foreground border-slate-200 shadow-sm">
+          <div className="p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-slate-400" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No templates yet</h3>
+            <p className="text-slate-500 mb-4">Create your first onboarding template to get started</p>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

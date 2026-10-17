@@ -142,8 +142,7 @@ export default function RequestSettingsPage() {
   const approversFor = (lvl: number) => configs.filter((c) => c.level === lvl);
 
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
         {/* REF's header: Back + the title block, LEFT-aligned (gap-3) */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => history.back()}>
@@ -296,7 +295,6 @@ export default function RequestSettingsPage() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
           </div>
         ) : null}
-      </div>
     </div>
   );
 }

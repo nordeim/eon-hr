@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Wand2, Pencil, Trash2, Banknote, Loader2, Search, Wallet, Coins, CheckCircle2, FileEdit } from "lucide-react";
+import { Banknote, DollarSign, Loader2, Pencil, Plus, Search, Trash2, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -229,8 +229,7 @@ export default function PayrollModulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#ecfdf5)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       <PageHeader
         rowBreakpoint="md"
         title="Payroll Module"
@@ -263,10 +262,10 @@ export default function PayrollModulePage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact-s" label="Total Payroll" value={formatSar(stats.total)} icon={<Wallet aria-hidden="true" />} />
-        <StatCard variant="compact-s" label="Basic Salaries" value={formatSar(stats.basic)} icon={<Coins aria-hidden="true" />} />
-        <StatCard variant="compact-s" label="Paid" value={stats.paid} icon={<CheckCircle2 aria-hidden="true" />} />
-        <StatCard variant="compact-s" label="Draft" value={stats.draft} icon={<FileEdit aria-hidden="true" />} />
+        <StatCard variant="compact-s" labelTag="p" label="Total Payroll" value={formatSar(stats.total)} icon={<DollarSign className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="compact-s" labelTag="p" label="Basic Salaries" value={formatSar(stats.basic)} icon={<DollarSign className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="compact-s" labelTag="p" label="Paid" value={stats.paid} icon={<DollarSign className="w-5 h-5 text-emerald-600" aria-hidden="true" />} tileClassName="bg-emerald-100" />
+        <StatCard variant="compact-s" labelTag="p" label="Draft" value={stats.draft} icon={<DollarSign className="w-5 h-5 text-yellow-600" aria-hidden="true" />} tileClassName="bg-yellow-100" />
       </div>
 
       {/* Session 12 (R11-I): the reference's standalone search — a relative
@@ -400,7 +399,6 @@ export default function PayrollModulePage() {
         }}
         onSave={onSave}
       />
-    </div>
     </div>
   );
 }

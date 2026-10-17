@@ -116,35 +116,35 @@ export default async function AnalyticsPage() {
           (label on top, 30px value mt-2, text-xs hint mt-2, 48×48 tile
           top-right; 138px cards), `grid md:grid-cols-4 gap-6`. */}
       <div className="grid md:grid-cols-4 gap-6">
-        <StatCard variant="tile-right"
+        <StatCard variant="tile-right" labelTag="p"
           label="Total Employees"
           value={employeeCount}
           hint={`${templateCount} templates`}
-          icon={<Users aria-hidden="true" />}
+          icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100"
           iconClassName="h-12 w-12 rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard variant="tile-right"
+        <StatCard variant="tile-right" labelTag="p"
           label="Avg. Completion"
           value={avgCompletionDays}
           hint="days"
-          icon={<Calendar aria-hidden="true" />}
+          icon={<Calendar className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100"
           iconClassName="h-12 w-12 rounded-xl bg-purple-100 text-purple-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard variant="tile-right"
+        <StatCard variant="tile-right" labelTag="p"
           label="Task Completion"
           value={`${taskCompletionPct}%`}
           hint={`${tasksDone} / ${tasksTotal}`}
-          icon={<CircleCheckBig aria-hidden="true" />}
+          icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100"
           iconClassName="h-12 w-12 rounded-xl bg-green-100 text-green-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />
-        <StatCard variant="tile-right"
+        <StatCard variant="tile-right" labelTag="p"
           label="Active Onboarding"
           value={activeOnboarding}
           hint="in progress"
-          icon={<Clock aria-hidden="true" />}
+          icon={<Clock className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100"
           iconClassName="h-12 w-12 rounded-xl bg-orange-100 text-orange-600 [&_svg]:h-6 [&_svg]:w-6"
           valueClassName="text-3xl"
         />

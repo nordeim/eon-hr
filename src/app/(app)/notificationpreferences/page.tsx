@@ -145,7 +145,7 @@ export default function NotificationPreferencesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
       <PageHeader
         size="md"
         title="Notification Settings"
@@ -156,8 +156,8 @@ export default function NotificationPreferencesPage() {
           (16px line, 86px tiles) with per-tile value colors (Unread
           red-500, Total blue-600) + the Mark All Read button card. */}
       <div className="grid grid-cols-3 gap-4">
-        <StatCard variant="mini-centered" label="Unread" value={unread} labelClassName="text-xs text-slate-500" valueClassName="text-red-500" />
-        <StatCard variant="mini-centered" label="Total" value={total} labelClassName="text-xs text-slate-500" valueClassName="text-blue-600" />
+        <StatCard variant="mini-centered" labelTag="p" label="Unread" value={unread} labelClassName="text-xs text-slate-500" valueClassName="text-red-500" />
+        <StatCard variant="mini-centered" labelTag="p" label="Total" value={total} labelClassName="text-xs text-slate-500" valueClassName="text-blue-600" />
         <Card>
           <CardContent className="flex items-center justify-center p-4">
             <Button variant="outline" size="sm" onClick={onMarkAllRead} disabled={marking || unread === 0}>

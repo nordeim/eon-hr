@@ -301,7 +301,7 @@ export default function RecruitmentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         rowBreakpoint="md"
         section="AI-Powered Recruitment"
@@ -323,10 +323,10 @@ export default function RecruitmentPage() {
           family: briefcase / users / circle-check-big / trending-up with
           the per-color indigo/blue/green/purple tiles. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} tileClassName="bg-indigo-100 text-indigo-600" />
-        <StatCard variant="compact" label="Total Applicants" value={stats.totalApplicants} icon={<Users aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
-        <StatCard variant="compact" label="Shortlisted" value={stats.shortlisted} icon={<CircleCheckBig aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
-        <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
+        <StatCard variant="compact" label="Active Jobs" value={stats.activeJobs} icon={<Briefcase className="w-5 h-5 text-indigo-600" aria-hidden="true" />} tileClassName="bg-indigo-100" />
+        <StatCard variant="compact" label="Total Applicants" value={stats.totalApplicants} icon={<Users className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="compact" label="Shortlisted" value={stats.shortlisted} icon={<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<TrendingUp className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
       </div>
 
       <Tabs defaultValue="applicants">

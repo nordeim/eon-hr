@@ -119,12 +119,17 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="p-4 md:p-8 space-y-6">
       <PageHeader
         title="Company Announcements"
         size="md"
         subtitle="Stay informed with the latest updates"
+        actions={canPost && announcements.length > 0 ? (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2" aria-hidden="true" />
+            New Announcement
+          </Button>
+        ) : undefined}
       />
 
       {loading ? (
@@ -134,20 +139,14 @@ export default function AnnouncementsPage() {
       ) : announcements.length === 0 ? (
         /* Session 11 (R10-H): the reference's bare empty state — a plain
            centered `py-16 text-slate-400` line inside a space-y-3 wrapper,
-           NO card, no icon (measured 1120x152). The working New
-           Announcement dialog keeps ONE entry for posting roles: a small
-           centered CTA below the reference's own text (the training-slot
-           pattern — a superset button riding the reference's furniture). */
+           NO card, no icon (measured 1120x152).
+           Session 48 (R47-E1): the empty line is a DIV with DIRECT text
+           (REF rootmap census) and the zero-state New Announcement CTA is
+           RETIRED (the r46 training precedent — REF's zero state carries
+           no create affordance); the create flow rides the with-data
+           header action instead (the functional superset). */
         <div className="space-y-3">
-          <p className="py-16 text-center text-slate-400">No announcements at this time</p>
-          {canPost ? (
-            <div className="flex justify-center pb-4">
-              <Button variant="outline" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" aria-hidden="true" />
-                New Announcement
-              </Button>
-            </div>
-          ) : null}
+          <div className="text-center py-16 text-slate-400">No announcements at this time</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -237,7 +236,6 @@ export default function AnnouncementsPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
     </div>
   );
 }

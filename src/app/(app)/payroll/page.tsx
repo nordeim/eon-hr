@@ -199,7 +199,7 @@ export default function PayrollPage() {
   return (
     <PageCanvas>
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Payroll Management"
         mobileKicker
@@ -243,10 +243,10 @@ export default function PayrollPage() {
           order + the measured icon family (dollar-sign / users /
           trending-up / calendar) with the per-color tiles. */}
       <div className="grid md:grid-cols-4 gap-6">
-        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<DollarSign aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
-        <StatCard label="Employees" value={stats.people} icon={<Users aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Approved" value={stats.approved} icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
-        <StatCard label="Current Period" value={period} icon={<Calendar aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600" />
+        <StatCard label="Total This Month" value={formatSar(stats.total)} icon={<DollarSign className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard label="Employees" value={stats.people} icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard label="Approved" value={stats.approved} icon={<TrendingUp className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+        <StatCard label="Current Period" value={period} icon={<Calendar className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" />
       </div>
 
       {/* Session 12 (R11-H): the reference renders a standalone p-6 toolbar

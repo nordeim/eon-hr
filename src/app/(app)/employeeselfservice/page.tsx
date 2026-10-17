@@ -21,14 +21,20 @@ import {
 } from "lucide-react";
 import { formatDate, formatSar, initials, timeAgo } from "@/lib/utils";
 
-function LoadingCard() {
+/* Session 48 (R47-B7): REF's loading phase is the centered CSS spinner
+   (live-measured: flex items-center justify-center min-h-screen >
+   text-center > the w-16 h-16 border spinner + p.text-slate-600 "Loading
+   your profile...") — NOT a Card frame. The clone renders it verbatim
+   for the suspense phase; the resolved no-profile state keeps the
+   informative EmptyState superset. */
+function PortalLoader() {
   return (
-    <Card>
-      <CardContent className="flex items-center justify-center gap-3 py-20">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
-        <p className="text-sm text-muted-foreground">Loading your profile...</p>
-      </CardContent>
-    </Card>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-slate-600">Loading your profile...</p>
+      </div>
+    </div>
   );
 }
 
@@ -327,15 +333,21 @@ async function SelfServiceContent() {
   );
 }
 
-export default function EmployeeSelfServicePage() {
+function PortalShell() {
   return (
     <div className="p-4 md:p-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <PageHeader title="My Portal" subtitle="Your employee self-service portal" />
-      <React.Suspense fallback={<LoadingCard />}>
+        <PageHeader title="My Portal" subtitle="Your employee self-service portal" />
         <SelfServiceContent />
-      </React.Suspense>
+      </div>
     </div>
-    </div>
+  );
+}
+
+export default function EmployeeSelfServicePage() {
+  return (
+    <React.Suspense fallback={<PortalLoader />}>
+      <PortalShell />
+    </React.Suspense>
   );
 }

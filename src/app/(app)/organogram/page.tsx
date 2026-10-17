@@ -85,8 +85,8 @@ export default async function OrganogramPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdfa,#f0fdf4)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-green-50 p-4 md:p-8">
+      <div className="max-w-full mx-auto space-y-8">
       <PageHeader
         section="Organization Structure"
         layout="flat36"

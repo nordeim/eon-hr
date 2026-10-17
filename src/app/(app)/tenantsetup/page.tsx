@@ -56,7 +56,7 @@ export default function TenantSetupPage() {
           <div className="mx-auto mb-[22px] flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
             <Users className="h-8 w-8 text-blue-600" aria-hidden="true" />
           </div>
-          <h2 className="font-semibold tracking-tight text-2xl">Welcome to EonHR</h2>
+          <div className="font-semibold tracking-tight text-2xl">Welcome to EonHR</div>
           <p className="text-slate-600">Let&apos;s set up your HR management workspace</p>
         </CardHeader>
         <CardContent className="p-6">

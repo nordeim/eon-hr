@@ -136,8 +136,8 @@ export default function LegacyAssetsPage() {
        onClick button, which dropped focus to BODY on close). The root
        renders no DOM — layout untouched. */
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)] p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         <PageHeader
           /* Session 31 (R30-C): REF's always-row header — the class trio
               forces row+between+start at EVERY width (measured side-by-side

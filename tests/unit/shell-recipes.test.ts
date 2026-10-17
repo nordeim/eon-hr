@@ -74,7 +74,8 @@ describe("PageHeader mobile kicker props (session 7, R6-B)", () => {
     // kicker carries sticky top-0 z-20 + the dark: pair + safe-area-top.
     expect(pageHeader).not.toContain("sticky top-[73px]");
     expect(pageHeader).toContain("md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top");
-    expect(pageHeader).toContain("text-lg font-bold text-slate-900 truncate");
+    // Session 48 (R47-A1): REF's kicker h1 carries the dark pair.
+    expect(pageHeader).toContain("text-lg font-bold text-slate-900 dark:text-white truncate");
   });
 
   it("hides the desktop header block below md when mobileHeader=hidden", () => {
@@ -223,7 +224,11 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
     // Session 18 (R17-A): the row breakpoint is templated (rowBreakpoint,
     // default sm) — the default renders byte-identical sm: classes.
     expect(pageHeader).toContain('rowBreakpoint = "sm"');
-    expect(pageHeader).toContain("`${rowBreakpoint}:flex-row ${rowBreakpoint}:justify-between`");
+    // Session 48 (R47-C1): the md family carries the UNPREFIXED
+    // justify-between (REF's member set); the sm family keeps the
+    // prefixed pair.
+    expect(pageHeader).toContain("`${rowBreakpoint}:flex-row`");
+    expect(pageHeader).toContain('rowBreakpoint === "sm" && `${rowBreakpoint}:justify-between`');
     expect(pageHeader).toMatch(/actionsStart\s*\?\s*`\$\{rowBreakpoint\}:items-start`\s*:\s*`\$\{rowBreakpoint\}:items-center`/);
     // The raised mt-8 offset applies to BADGE pages only — bare-page rows
     // (employees, analytics, templates) start at y=32 like the reference.
@@ -257,8 +262,10 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
     // at y=0). Reference root: p-4 md:p-8 space-y-8 min-h-screen
     // bg-gradient-to-br from-slate-50 to-blue-50 (sRGB).
     const src = read("src", "app", "(app)", "analyticsdashboard", "dashboard.tsx");
+    // Session 48 (R47-B3): the merged-root form — REF carries p-4 md:p-8
+    // space-y-8 + the gradient ON the root, no inner max-w wrapper.
     expect(src).toContain(
-      'min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8'
+      'p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50'
     );
   });
 
@@ -286,7 +293,9 @@ describe("session-9 parity round 8 — header recipes & actions alignment", () =
 
   it("R8-F: templates subtitle is the live count (reference: '0 templates available')", () => {
     const src = read("src", "app", "(app)", "templates", "page.tsx");
-    expect(src).toMatch(/\$\{templates\.length\} template\$\{templates\.length === 1 \? "" : "s"\} available/);
+    // Session 48 (R47-E3): the header is hand-rolled (REF's always-row
+    // form) — the count line renders as JSX expressions now.
+    expect(src).toMatch(/\{templates\.length\} template\{templates\.length === 1 \? "" : "s"\} available/);
   });
 });
 
@@ -490,12 +499,15 @@ describe("session-11 parity round 10 — header actions alignment taxonomy (R10-
 });
 
 describe("session-11 parity round 10 — read-only reference headers (R10-F..I)", () => {
-  it("R10-F: hrletters has no header action, no count description, REF empty state + CTA", () => {
+  it("R10-F: hrletters has no count description; the zero state is REF's bare-icon form", () => {
     const src = read("src", "app", "(app)", "hrletters", "page.tsx");
-    expect(src).not.toMatch(/actions=\{/);
+    // Session 48 (R47-E2): the ZERO state carries no CTA (REF renders the
+    // bare svg + h3 + p); the create flow rides the WITH-DATA header
+    // action instead (the functional superset, the r46 training pattern).
     expect(src).not.toMatch(/\} request\{|CardDescription/);
     expect(src).toContain("No letter requests yet");
     expect(src).toContain("Request your first HR letter to get started");
+    expect(src).toMatch(/!loading && letters\.length > 0/);
   });
 
   it("R10-G: surveys has no header action; empty state rides the grid", () => {
@@ -504,9 +516,11 @@ describe("session-11 parity round 10 — read-only reference headers (R10-F..I)"
     expect(src).toContain("md:grid-cols-2");
   });
 
-  it("R10-H: announcements has no header action; bare-text empty state", () => {
+  it("R10-H: announcements zero state is the bare-text DIV; the create flow rides the with-data action", () => {
     const src = read("src", "app", "(app)", "announcements", "page.tsx");
-    expect(src).not.toMatch(/actions=\{/);
+    // Session 48 (R47-E1): the zero-state CTA retired (the r46 training
+    // precedent); the with-data header action keeps the flow reachable.
+    expect(src).toMatch(/canPost && announcements\.length > 0/);
     expect(src).toMatch(/py-16[^"]*text-slate-400|text-slate-400[^"]*py-16/);
   });
 
@@ -529,7 +543,7 @@ describe("session-11 parity round 10 — page restructures (R10-J..R)", () => {
 
   it("R10-J: shiftcalendar mini stats are border-0 shadow-sm with colored values + xs labels", () => {
     const src = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
-    expect(src).toMatch(/variant="mini" className="border-0 shadow-sm"/);
+    expect(src).toMatch(/variant="mini" labelTag="p" className="border-0 shadow-sm"/);
     for (const color of ["text-blue-600", "text-violet-600", "text-emerald-600", "text-amber-600"]) {
       expect(src).toContain(color);
     }

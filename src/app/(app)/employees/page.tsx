@@ -175,7 +175,7 @@ export default function EmployeesPage() {
        lock family left REF (only the shell chrome keeps it). */
     <PageCanvas>
     <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col">
+      <div className="max-w-7xl mx-auto">
       {mode === "wizard" ? (
         /* Session 7 (R6-C): the reference renders the Add/Edit wizard as a
            page-replacing INLINE view — back button + h1 + max-w-4xl card —

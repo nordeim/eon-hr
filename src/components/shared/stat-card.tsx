@@ -55,6 +55,15 @@ interface StatCardProps {
   labelClassName?: string;
   /** Reference variant (session-10 map) — default "standard". */
   variant?: StatCardVariant;
+  /** Session 48 (R47-D1): per-page tag overrides — REF's stat tags vary
+   *  per page within a variant (the four analytics compacts render p/p
+   *  where recruitment/compliance render div/div). */
+  valueTag?: "p" | "div";
+  labelTag?: "p" | "div";
+  /** Session 48 (R47-D2c): the standard variant's tile-row class —
+   *  advancedanalytics/payrollai/allleaverequests render the tile row
+   *  WITHOUT the mb-3 (the value's mt-4 supplies the stack instead). */
+  tileRowClassName?: string;
   className?: string;
 }
 
@@ -75,15 +84,24 @@ const VARIANT_CONTENT: Record<StatCardVariant, string> = {
 /** Session 47 (R46-C): REF renders its stat families with PER-PAGE
  *  element tags — the standard variant (live-measured on attendance's
  *  zero-state row) renders div values + div labels; the horizontal
- *  variant (documenttracker) renders p values + p labels. The other
- *  variants are with-data-only on REF (unmeasurable on its zero-data
- *  tenant) and keep the scaffold's p value + div label. */
+ *  variant (documenttracker) renders p values + p labels.
+ *  Session 48 (R47-D1): the tags vary PER PAGE within a variant too —
+ *  the four analytics compacts render p/p + a slate-600 label while
+ *  recruitment/compliance keep div/div + slate-500; the no-tile pages
+ *  render label-TOP p + value-BELOW p; tile-right/mini/mini-centered/
+ *  compact-s labels are p. The per-call-site valueTag/labelTag props
+ *  override the variant defaults. */
 const VARIANT_VALUE_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
   standard: "div",
   compact: "div",
 };
 const VARIANT_LABEL_TAG: Partial<Record<StatCardVariant, "p" | "div">> = {
   horizontal: "p",
+  "no-tile": "p",
+  "tile-right": "p",
+  mini: "p",
+  "mini-centered": "p",
+  "compact-s": "p",
 };
 
 const VARIANT_VALUE: Record<StatCardVariant, string> = {
@@ -97,9 +115,14 @@ const VARIANT_VALUE: Record<StatCardVariant, string> = {
   "mini-centered": "text-3xl font-bold text-slate-900",
   horizontal: "text-2xl font-bold text-slate-900",
   "value-in-tile": "text-lg font-bold text-slate-700",
-  // Session 14 (R13-I): no-tile value carries mb-1 — the reference's
-  // text stack is 60px (36 + 4 + 20).
-  "no-tile": "text-3xl font-bold text-slate-900 mb-1",
+  /* Session 48 (R47-D1b): the no-tile value carries mt-1 and renders
+   * BELOW its label — REF's text stack (live-measured on
+   * performancemanagement + workflowautomation at zero):
+   * p.text-sm text-slate-600 (label, TOP) + p.text-3xl … mt-1 (value).
+   * This CORRECTS the session-14 R13-I contract (value-first + mb-1) —
+   * the session-14 reader mis-attributed the order (the r46 instrument
+   * lesson: full-tree reads only). */
+  "no-tile": "text-3xl font-bold text-slate-900 mt-1",
   // Session 13 (R12-E): the stacked tile-right value carries mt-2 (the
   // label sits above it — measured on /analytics, 138px tiles).
   "tile-right": "text-3xl font-bold text-slate-900 mt-2",
@@ -142,6 +165,9 @@ export function StatCard({
    *  notificationpreferences tiles use text-xs slate-500 (16px line,
    *  86px tiles) while hrreports keeps text-sm slate-500 (20px, 90px). */
   labelClassName,
+  valueTag,
+  labelTag,
+  tileRowClassName,
   variant = "standard",
   className,
 }: StatCardProps) {
@@ -155,12 +181,20 @@ export function StatCard({
   // 40×40 (w-10 h-10 + 20px icon), horizontal = 44×44 (w-11 h-11 + 20px
   // icon — session 12 R11-D: the icon is 20px w-5 h-5 with a per-color
   // text class from the call site, not 24px).
+  /* Session 48 (R47-D1): REF's tiles carry GEOMETRY + BG only — the icon
+   * size + color ride the svg's own classes (w-5 h-5 text-{c}-600 on the
+   * compacts, w-6 h-6 on the 48px tiles — live-measured on recruitment,
+   * attendancedashboard, surveyanalytics, analyticsdashboard,
+   * assetmanagement, compliance, payrollmodule, analytics,
+   * advancedanalytics). The compact tile carries mb-3 DIRECTLY (no flex
+   * wrapper). The horizontal tile keeps the r46-measured guard form
+   * (documenttracker's own contract). */
   const tileClasses =
     variant === "compact" || variant === "compact-s"
-      ? "flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
+      ? "w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-blue-100"
       : variant === "horizontal"
         ? "flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-5 [&_svg]:w-5"
-        : "flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 [&_svg]:h-6 [&_svg]:w-6";
+        : "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100";
 
   const tileElement = tiled ? (
     /* Session 17 (R16-D): NO shrink-0 — the reference's tile flex-shrinks
@@ -171,12 +205,24 @@ export function StatCard({
     <div className={cn(tileClasses, tile)}>{icon}</div>
   ) : null;
 
-  const ValueTag = VARIANT_VALUE_TAG[variant] ?? "p";
-  const LabelTag = VARIANT_LABEL_TAG[variant] ?? "div";
+  const ValueTag = valueTag ?? VARIANT_VALUE_TAG[variant] ?? "p";
+  const LabelTag = labelTag ?? VARIANT_LABEL_TAG[variant] ?? "div";
+  /* Session 48 (R47-D1b): the no-tile text stack is label-TOP /
+   * value-BELOW (REF's measured order) — the shared textBlock renders
+   * value-first, so no-tile builds its own pair. */
   const textBlock = (
     <>
-      <ValueTag className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</ValueTag>
-      <LabelTag className={cn("text-sm text-slate-600", VARIANT_LABEL[variant], labelClassName)}>{label}</LabelTag>
+      {variant === "no-tile" ? (
+        <>
+          <LabelTag className={cn("text-sm text-slate-600", labelClassName)}>{label}</LabelTag>
+          <ValueTag className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</ValueTag>
+        </>
+      ) : (
+        <>
+          <ValueTag className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</ValueTag>
+          <LabelTag className={cn("text-sm text-slate-600", VARIANT_LABEL[variant], labelClassName)}>{label}</LabelTag>
+        </>
+      )}
     </>
   );
 
@@ -185,7 +231,15 @@ export function StatCard({
       className={cn(
         // Session 12 (R11-D): the horizontal variant renders border-0 with
         // shadow-sm on the reference (documenttracker 80px cards).
-        variant === "horizontal" ? "border-0 shadow-sm" : "border-slate-200",
+        // Session 48 (R47-D1b): the no-tile card drops border-slate-200
+        // (REF performancemanagement: rounded-xl border bg-card
+        // text-card-foreground shadow); value-in-tile KEEPS it (REF
+        // evaluations card measured this round).
+        variant === "horizontal"
+          ? "border-0 shadow-sm"
+          : variant === "no-tile"
+            ? ""
+            : "border-slate-200",
         className
       )}
     >
@@ -202,17 +256,17 @@ export function StatCard({
           </>
         ) : tileElement == null ? (
           variant === "no-tile" ? (
-            /* Session 14 (R13-I): the reference's no-tile stat card is a
-               flex row — the text stack (text-3xl value, text-sm label)
-               on the LEFT, a bare 40×40 icon on the RIGHT. 108px card,
-               measured on /performancemanagement and /workflowautomation. */
+            /* Session 48 (R47-D1b): the reference's no-tile stat card is a
+               flex row — the text stack (label p TOP, value p mt-1 BELOW)
+               on the LEFT, a BARE 40×40 icon on the RIGHT (classes on the
+               svg itself, e.g. lucide-target w-10 h-10 text-blue-500 — no
+               wrapper div). Live-measured at zero on
+               /performancemanagement + /workflowautomation; this CORRECTS
+               the session-14 R13-I contract (the session-14 reader
+               mis-attributed the order — full-tree reads only). */
             <div className="flex items-center justify-between">
               <div>{textBlock}</div>
-              {icon != null ? (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center [&_svg]:h-10 [&_svg]:w-10">
-                  {icon}
-                </div>
-              ) : null}
+              {icon != null ? icon : null}
             </div>
           ) : (
             textBlock
@@ -226,18 +280,26 @@ export function StatCard({
           /* Session 13 (R12-E): the reference's stacked stat tile — label
              (text-sm slate-500) on TOP, value (text-3xl bold mt-2) below,
              delta (text-xs slate-500 mt-2) under it; the 48×48 tile rides
-             top-right. 138px card, measured on /analytics. */
+             top-right. 138px card, measured on /analytics.
+             Session 48 (R47-D1c): the label + value are P on REF. */
           <div className="flex items-start justify-between">
             <div>
-              <div className={cn("text-sm text-slate-500", labelClassName)}>{label}</div>
-              <p className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</p>
+              <LabelTag className={cn("text-sm text-slate-500", labelClassName)}>{label}</LabelTag>
+              <ValueTag className={cn(VARIANT_VALUE[variant], valueClassName)}>{value}</ValueTag>
               {hint ? <p className="mt-2 text-xs text-slate-500">{hint}</p> : null}
             </div>
             {tileElement}
           </div>
         ) : (
           <>
-            <div className="mb-3 flex items-start justify-between">{tileElement}</div>
+            {variant === "compact" || variant === "compact-s" ? (
+              /* Session 48 (R47-D1): the compact family renders the tile
+                 DIRECTLY — mb-3 on the tile itself, no flex wrapper (REF
+                 live-measured: w-10 h-10 … mb-3). */
+              tileElement
+            ) : (
+              <div className={cn("mb-3 flex items-start justify-between", tileRowClassName)}>{tileElement}</div>
+            )}
             {textBlock}
           </>
         )}

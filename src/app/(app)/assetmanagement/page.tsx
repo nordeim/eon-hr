@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Download, Pencil, Trash2, UserPlus, UserMinus, Loader2, Search, Package } from "lucide-react";
+import { CircleCheckBig, Download, Laptop, Loader2, Package, Pencil, Plus, Search, Trash2, UserMinus, UserPlus, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -251,8 +251,7 @@ export default function AssetManagementPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <PageHeader
         rowBreakpoint="md"
         title="Asset Management"
@@ -277,10 +276,10 @@ export default function AssetManagementPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Total Assets" value={stats.total} icon={<Package className="h-4 w-4" />} />
-        <StatCard variant="compact" label="Assigned" value={stats.assigned} icon={<Package className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard variant="compact" label="Available" value={stats.available} icon={<Package className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard variant="compact" label="In Repair" value={stats.repair} icon={<Package className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Total Assets" value={stats.total} icon={<Package className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Assigned" value={stats.assigned} icon={<Laptop className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Available" value={stats.available} icon={<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="In Repair" value={stats.repair} icon={<Wrench className="w-5 h-5 text-yellow-600" aria-hidden="true" />} tileClassName="bg-yellow-100" />
       </div>
 
       {/* Session 12 (R11-J): the reference's filter row — flex flex-wrap
@@ -442,7 +441,6 @@ export default function AssetManagementPage() {
           {assignTarget ? <AssignForm asset={assignTarget} employees={employees} busy={busy === assignTarget.id + "assign"} onAssign={onAssign} /> : null}
         </DialogContent>
       </Dialog>
-    </div>
     </div>
   );
 }

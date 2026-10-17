@@ -241,12 +241,14 @@ describe("stat-card recipe (session 6)", () => {
     // Reference: Card(border-slate-2xx) > p-6 > [tile p-3 rounded-xl,
     // text-3xl font-bold text-slate-900 mb-1, text-sm text-slate-600].
     expect(statCard).toContain("p-6");
-    expect(statCard).toContain("p-3 rounded-xl");
     expect(statCard).toContain("text-3xl font-bold text-slate-900 mb-1");
     expect(statCard).toContain("text-sm text-slate-600");
     expect(statCard).toContain("border-slate-200");
-    // 24px icons inside the 48px tile
-    expect(statCard).toContain("[&_svg]:h-6 [&_svg]:w-6");
+    // Session 48 (R47-D1): the tile carries GEOMETRY + BG only — the icon
+    // size + color ride the svg's own classes (w-6 h-6 text-{c}-600,
+    // live-measured on advancedanalytics/analytics); the horizontal tile
+    // keeps the r46 guard form (documenttracker's own contract).
+    expect(statCard).toContain("w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100");
   });
 });
 
@@ -321,8 +323,11 @@ describe("dashboard card recipes (session 6)", () => {
     // (non-scrolling wrapper stack — the kicker scrolls away); the clone
     // matches the rendered truth with a static bar.
     expect(dashboard).not.toContain("sticky top-[73px]");
-    expect(dashboard).toContain("md:hidden border-b border-slate-200 bg-white px-4 py-3");
-    expect(dashboard).toMatch(/text-lg font-bold text-slate-900 truncate/);
+    // Session 48 (R47-A2): the verbatim re-adopted on the hand-rolled copy
+    // (sticky/z-20 + the dark: pairs + safe-area-top — the r46 PageHeader
+    // fix missed this one) + the h1's dark pair (R47-A1).
+    expect(dashboard).toContain("md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top");
+    expect(dashboard).toMatch(/text-lg font-bold text-slate-900 dark:text-white truncate/);
   });
 
   it("dashboard root is the reference full-width p-4 md:p-8 wrapper", () => {
@@ -820,8 +825,11 @@ describe("templates iconChip empty (session 12, R11-C)", () => {
   const src = read("src", "app", "(app)", "templates", "page.tsx");
 
   it("empty state uses the iconChip variant with the FileText icon", () => {
-    expect(src).toContain("iconChip");
-    expect(src).toContain("<FileText");
+    // Session 48 (R47-E3): the page hand-rolls REF's verbatim empty zone
+    // (the 64px slate-100 circle + the w-8 h-8 slate-400 file-text icon)
+    // — the shared EmptyState is no longer used here.
+    expect(src).toContain("w-16 h-16 bg-slate-100 rounded-full mx-auto mb-4 flex items-center justify-center");
+    expect(src).toContain('FileText className="w-8 h-8 text-slate-400"');
   });
 });
 
@@ -2426,7 +2434,7 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     expect(src).toContain('title="Assets"');
     expect(src).toContain("Track and manage company assets");
     expect(src).toContain("flex-row justify-between items-start");
-    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)]");
+    expect(src).toContain("bg-gradient-to-br from-green-50 to-blue-50");
     expect(src).toContain("border-b bg-slate-50");
     expect(src).toContain("leading-none");
     expect(src).toContain("p-12 text-center");
@@ -2522,7 +2530,7 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
 
   it("R31-C5: /payrollai — the green→blue canvas (the /assets twin), the Run AI Analysis gradient header button, the 3-tile stat row, the green CheckCircle empty", () => {
     const src = read("src", "app", "(app)", "payrollai", "page.tsx");
-    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f0fdf4,#eff6ff)]");
+    expect(src).toContain("bg-gradient-to-br from-green-50 to-blue-50");
     expect(src).toMatch(/title="Payroll AI Suggestions"/);
     expect(src).toContain("AI-powered payroll analysis and recommendations");
     expect(src).toContain("Run AI Analysis");
@@ -2556,7 +2564,7 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
 
   it("R31-C7: /requestreports — the slate→blue canvas, the centered 24px header + Back ghost button, the documenttracker-recipe 4-tile row", () => {
     const src = read("src", "app", "(app)", "requestreports", "page.tsx");
-    expect(src).toContain("from-slate-50 to-blue-50");
+    expect(src).toContain('className="p-4 md:p-8 max-w-7xl mx-auto space-y-6"');
     expect(src).toMatch(/>Request Reports<\/h1>/);
     expect(src).toContain("Analytics and reporting by area and period");
     expect(src).toContain("Back");
@@ -2567,7 +2575,7 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
 
   it("R31-C8: /requestsettings — the LEFT-aligned 24px header + Back ghost, the max-w-5xl Approval Workflow + Request Limits cards, the None-set lines (evolved round 33: REF's structure re-measured)", () => {
     const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
-    expect(src).toContain("from-slate-50 to-blue-50");
+    expect(src).toContain('className="p-4 md:p-8 max-w-5xl mx-auto space-y-6"');
     expect(src).toMatch(/>Request Settings<\/h1>/);
     expect(src).toContain("Configure approvers and request limits");
     expect(src).toContain("Approval Workflow");
@@ -2581,7 +2589,7 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
 
   it("R31-C9: /shiftswap — the violet→blue canvas, the 4-tile stat row, the violet My Requests tab + ghost Peer Approval pill, the ArrowLeft empty", () => {
     const src = read("src", "app", "(app)", "shiftswap", "page.tsx");
-    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f5f3ff,#eff6ff)]");
+    expect(src).toContain("bg-gradient-to-br from-violet-50 to-blue-50");
     expect(src).toMatch(/title="Shift Swap"/);
     expect(src).toContain("Request, approve, and manage shift swaps");
     expect(src).toContain("My Requests");
@@ -2617,8 +2625,13 @@ describe("session-32 orphan-route hunt recipes (parity round 31 — 14 new route
   it("R31-D1: the blank stubs — /home + /employeedetail render null content with mechanical titles", () => {
     for (const r of ["home", "employeedetail"]) {
       const src = read("src", "app", "(app)", r, "page.tsx");
-      expect(src).toMatch(/return null/);
+      expect(src).not.toMatch(/return null/);
     }
+    // Session 48 (R47-B7): the r47 rootmap re-measured the stubs — /home
+    // renders an empty div, /employeedetail renders the centered CSS
+    // spinner (the r31 "blank" read was an instrument artifact).
+    expect(read("src", "app", "(app)", "home", "page.tsx")).toContain("return <div></div>;");
+    expect(read("src", "app", "(app)", "employeedetail", "page.tsx")).toContain("animate-spin");
   });
 
   it("R31-S1: the ShiftSwap model — requester, shift date, notes, the 5-status flow", () => {
@@ -2803,11 +2816,11 @@ describe("session-34 pins (parity round 33)", () => {
 
   it("R33-A1: /payrollreports — the slate→blue sRGB canvas + the white-pill kicker + the green MessageCircle CTA", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
-    expect(src).toContain("bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)]");
+    expect(src).toContain("bg-gradient-to-br from-blue-50 to-indigo-50");
     expect(src).toContain("bg-white rounded-full shadow-sm mb-4");
     expect(src).toContain("bg-green-600");
     expect(src).toContain("MessageCircle");
-    expect(src).not.toContain("from-blue-50 to-indigo-50");
+    expect(src).not.toContain("bg-[linear-gradient");
   });
 
   it("R33-A2: /payrollreports — the filter card (Label above the w-full select, records right) + the 4-col grid tab list with the Custom trigger", () => {
@@ -4797,18 +4810,23 @@ describe("session-47 zero-state app interiors (parity round 46 — the page-root
     const src = page("payroll", "page.tsx");
     expect(src).toContain('className="grid md:grid-cols-4 gap-6"');
     expect(src).not.toMatch(/records\.length > 0 &&/);
-    expect(src).toContain('icon={<DollarSign aria-hidden="true" />} tileClassName="bg-green-100 text-green-600"');
-    expect(src).toContain('icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600"');
-    expect(src).toContain('icon={<Calendar aria-hidden="true" />} tileClassName="bg-orange-100 text-orange-600"');
+    /* Session 48 (R47-D1): the icon classes moved onto the svg
+       (w-6 h-6 text-{c}-600) + the tile carries bg only — REF's
+       live-measured tile form. */
+    expect(src).toContain('icon={<DollarSign className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100"');
+    expect(src).toContain('icon={<TrendingUp className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100"');
+    expect(src).toContain('icon={<Calendar className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100"');
   });
 
   it("R46-B2 (corrected): recruitment's stat grid renders at ZERO too (the DIV-valued family the census missed) — the measured icon set (briefcase/users/circle-check-big/trending-up) with the per-color indigo/blue/green/purple tiles", () => {
     const src = page("recruitment", "page.tsx");
     expect(src).toContain("grid grid-cols-2 md:grid-cols-4 gap-4");
     expect(src).not.toMatch(/jobs\.length > 0 \|\| candidates\.length > 0/);
-    expect(src).toContain('icon={<CircleCheckBig aria-hidden="true" />} tileClassName="bg-green-100 text-green-600"');
-    expect(src).toContain('icon={<TrendingUp aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600"');
-    expect(src).toContain('label="Active Jobs" value={stats.activeJobs} icon={<Briefcase aria-hidden="true" />} tileClassName="bg-indigo-100 text-indigo-600"');
+    /* Session 48 (R47-D1): the compact tile renders DIRECTLY (mb-3 on
+       the tile, no wrapper) + the icon classes on the svg. */
+    expect(src).toContain('icon={<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100"');
+    expect(src).toContain('icon={<TrendingUp className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100"');
+    expect(src).toContain('label="Active Jobs" value={stats.activeJobs} icon={<Briefcase className="w-5 h-5 text-indigo-600" aria-hidden="true" />} tileClassName="bg-indigo-100"');
   });
 
   // --- C. the StatCard per-variant element tags ---
@@ -4914,5 +4932,324 @@ describe("session-47 zero-state app interiors (parity round 46 — the page-root
     const src = page("training", "page.tsx");
     expect(src).not.toContain("New Platform");
     expect(src).toContain("Add Platform");
+  });
+});
+
+describe("session-48 unmapped-route interiors (parity round 47 — the rootmap families + the per-page stat tags + the kicker dark pair)", () => {
+  /* Round 47's census (probe-r48-census-a/b2.mjs + the rows/rootmap/zone
+     readers, live @1440×900 REF vs the zero-tenant :3201 clone): r46
+     covered 12 canonical routes; this round censused the REMAINING ~46.
+     THE INSTRUMENT CORRECTION (the round's transferable lesson): the
+     census/zone readers JOIN adjacent child text nodes with ' ' — JSX
+     interpolation produces phantom spaces; raw-textContent verification
+     DISSOLVED the entire suspected "space-in-template" family (the only
+     real text diffs: advancedanalytics' two stat labels). The findings:
+     (A) every clone kicker h1 misses REF's dark:text-white pair + the
+     dashboard's hand-rolled kicker is the pre-r46 form; (B) 27 pages
+     still ship the arbitrary bg-[linear-gradient] form + the flex-col
+     gap-N wrappers where REF ships the v3 gradient classes + space-y-N
+     (plus the merged-root five, the bare roots, the payrollreports trio,
+     and the stubs); (C) REF's md-family header rows carry the UNPREFIXED
+     justify-between + items-start members; (D) REF's stat cards carry
+     per-page value/label tags (P on the analytics families) and the
+     no-tile variant is label-TOP with a mt-1 value + a BARE per-color
+     svg — correcting the session-14 R13-I contract (the r46 instrument
+     lesson again); (E) the zero-state affordances (announcements /
+     hrletters / templates / performancemanagement / hrossistant render
+     create buttons and empty-state blocks on the clone that REF's
+     zero-state pages do not carry). */
+
+  const page = (...p: string[]) => read("src", "app", "(app)", ...p);
+
+  // --- A. the kicker family ---
+
+  it("R47-A1: PageHeader's kicker h1 carries REF's dark:text-white pair (a REAL dark-mode diff — measured on every REF kicker)", () => {
+    expect(pageHeader).toContain("text-lg font-bold text-slate-900 dark:text-white truncate");
+  });
+
+  it("R47-A2: the dashboard's hand-rolled kicker adopts the r46 verbatim (sticky/z-20 + the dark: pairs + safe-area-top) + the dark h1", () => {
+    const dashboard = page("dashboard", "page.tsx");
+    expect(dashboard).toContain("md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top");
+    expect(dashboard).toContain("text-lg font-bold text-slate-900 dark:text-white truncate");
+    expect(dashboard).not.toContain('className="md:hidden border-b border-slate-200 bg-white px-4 py-3"');
+  });
+
+  // --- B. the page-root families (the rootmap) ---
+
+  it("R47-B1: the 27 v3 gradient swaps (REF's bg-gradient-to-br class forms replace the arbitrary-value strings)", () => {
+    const MAP: Record<string, [string, string]> = {
+      compliancedashboard: ["page.tsx", "from-red-50 to-orange-50"],
+      performancemanagement: ["page.tsx", "from-slate-50 to-indigo-50"],
+      organogram: ["page.tsx", "from-teal-50 to-green-50"],
+      surveys: ["page.tsx", "from-teal-50 to-cyan-50"],
+      companywall: ["page.tsx", "from-slate-50 to-blue-50"],
+      chat: ["page.tsx", "from-slate-50 to-blue-50"],
+      evaluations: ["page.tsx", "from-indigo-50 to-purple-50"],
+      shiftcalendar: ["page.tsx", "from-violet-50 to-indigo-50"],
+      hrletters: ["page.tsx", "from-indigo-50 to-purple-50"],
+      offboarding: ["page.tsx", "from-slate-50 to-blue-50"],
+      analyticsdashboard: ["dashboard.tsx", "from-slate-50 to-blue-50"],
+      attendancedashboard: ["dashboard.tsx", "from-blue-50 to-cyan-50"],
+      surveyanalytics: ["analytics.tsx", "from-teal-50 to-slate-50"],
+      advancedanalytics: ["page.tsx", "from-slate-50 to-blue-50"],
+      reports: ["reports-browser.tsx", "from-slate-50 to-blue-50"],
+      payrollreports: ["page.tsx", "from-blue-50 to-indigo-50"],
+      payrollai: ["page.tsx", "from-green-50 to-blue-50"],
+      payrollengine: ["page.tsx", "from-emerald-50 to-teal-50"],
+      payrollmodule: ["page.tsx", "from-green-50 to-emerald-50"],
+      interviewassistant: ["page.tsx", "from-purple-50 to-indigo-50"],
+      workflowautomation: ["page.tsx", "from-slate-50 to-purple-50"],
+      hrassistantchat: ["page.tsx", "from-purple-50 to-blue-50"],
+      securitysettings: ["page.tsx", "from-slate-50 to-blue-50"],
+      shiftswap: ["page.tsx", "from-violet-50 to-blue-50"],
+      allleaverequests: ["page.tsx", "from-blue-50 to-indigo-50"],
+      communications: ["page.tsx", "from-purple-50 to-blue-50"],
+      assets: ["page.tsx", "from-green-50 to-blue-50"],
+    };
+    for (const [route, [file, grad]] of Object.entries(MAP)) {
+      const src = page(route, file);
+      expect(src, route).toContain(`bg-gradient-to-br ${grad}`);
+      expect(src, route).not.toContain("bg-[linear-gradient(to_right_bottom");
+    }
+  });
+
+  it("R47-B2: the space-y content wrappers (REF's verbatim max-w-Nxl mx-auto space-y-N forms)", () => {
+    const MAP: Record<string, [string, string]> = {
+      compliancedashboard: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      performancemanagement: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      organogram: ["page.tsx", "max-w-full mx-auto space-y-8"],
+      surveys: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      companywall: ["page.tsx", "max-w-3xl mx-auto space-y-6"],
+      evaluations: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      shiftcalendar: ["page.tsx", "max-w-7xl mx-auto space-y-6"],
+      hrletters: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      offboarding: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      advancedanalytics: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      reports: ["reports-browser.tsx", "max-w-7xl mx-auto space-y-8"],
+      payrollreports: ["page.tsx", "max-w-7xl mx-auto space-y-6"],
+      payrollai: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      payrollengine: ["page.tsx", "max-w-7xl mx-auto space-y-6"],
+      interviewassistant: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      workflowautomation: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      securitysettings: ["page.tsx", "max-w-4xl mx-auto space-y-8"],
+      shiftswap: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      allleaverequests: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      communications: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      assets: ["page.tsx", "max-w-7xl mx-auto space-y-8"],
+      hrreports: ["page.tsx", "p-6 space-y-6 max-w-7xl mx-auto"],
+      workflowconfigpage: ["page.tsx", "p-6 max-w-5xl mx-auto"],
+      notificationpreferences: ["page.tsx", "p-6 max-w-3xl mx-auto space-y-6"],
+    };
+    for (const [route, [file, wrapper]] of Object.entries(MAP)) {
+      expect(page(route, file), route).toContain(wrapper);
+    }
+    // chat + hrassistantchat: NO space member (bare max-w-7xl mx-auto)
+    for (const route of ["chat", "hrassistantchat"]) {
+      const src = page(route, "page.tsx");
+      expect(src, route).toContain("max-w-7xl mx-auto");
+      expect(src, route).not.toContain("max-w-7xl mx-auto space-y");
+    }
+  });
+
+  it("R47-B3: the merged-root five — p-4 md:p-8 space-y-8 + gradient ON the root, NO inner max-w wrapper (REF renders full-width content)", () => {
+    const MAP: Record<string, [string, string]> = {
+      assetmanagement: ["page.tsx", "from-slate-50 to-blue-50"],
+      analyticsdashboard: ["dashboard.tsx", "from-slate-50 to-blue-50"],
+      attendancedashboard: ["dashboard.tsx", "from-blue-50 to-cyan-50"],
+      surveyanalytics: ["analytics.tsx", "from-teal-50 to-slate-50"],
+      payrollmodule: ["page.tsx", "from-green-50 to-emerald-50"],
+    };
+    for (const [route, [file, grad]] of Object.entries(MAP)) {
+      const src = page(route, file);
+      expect(src, route).toContain(`p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br ${grad}`);
+      expect(src, route).not.toContain("max-w-7xl");
+    }
+  });
+
+  it("R47-B4: the bare roots — no gradient, no min-h, REF's verbatim root strings (announcements + recruitmentkanban drop the max-w wrapper; requestreports + requestsettings drop the extra gradient level)", () => {
+    expect(page("announcements", "page.tsx")).toContain('className="p-4 md:p-8 space-y-6"');
+    expect(page("announcements", "page.tsx")).not.toContain("max-w-7xl");
+    expect(page("recruitmentkanban", "page.tsx")).toContain('className="p-4 md:p-8 space-y-6"');
+    expect(page("recruitmentkanban", "page.tsx")).not.toContain("max-w-7xl");
+    expect(page("requestreports", "page.tsx")).toContain('className="p-4 md:p-8 max-w-7xl mx-auto space-y-6"');
+    expect(page("requestreports", "page.tsx")).not.toContain("bg-gradient-to-br from-slate-50 to-blue-50 flex min-h-screen");
+    expect(page("requestsettings", "page.tsx")).toContain('className="p-4 md:p-8 max-w-5xl mx-auto space-y-6"');
+    expect(page("requestsettings", "page.tsx")).not.toContain("flex min-h-screen");
+  });
+
+  it("R47-B5: payrollreports carries the PageCanvas trio (REF: relative overflow-hidden > touch-pan-y)", () => {
+    const src = page("payrollreports", "page.tsx");
+    expect(src).toMatch(/<PageCanvas>/);
+  });
+
+  it("R47-B6: the small-root fixes — employeeportal's p-4, tenantsetup's DIV welcome, hrassistant's REF member order", () => {
+    expect(page("employeeportal", "page.tsx")).toContain("from-blue-50 to-indigo-100 flex items-center justify-center p-4");
+    const ts = page("tenantsetup", "page.tsx");
+    expect(ts).not.toContain("<h2");
+    expect(ts).toMatch(/<div[^>]*>\s*Welcome to EonHR/);
+    expect(page("hrassistant", "page.tsx")).toContain("max-w-4xl mx-auto space-y-6");
+  });
+
+  it("R47-B7: the stubs — /home renders REF's empty div, /employeedetail renders the centered CSS spinner, /employeeselfservice renders the centered loader during fetch", () => {
+    const home = page("home", "page.tsx");
+    expect(home).toMatch(/<div\s*\/>|<div><\/div>/);
+    const ed = page("employeedetail", "page.tsx");
+    expect(ed).toContain("flex items-center justify-center min-h-screen");
+    expect(ed).toContain("w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin");
+    const ess = page("employeeselfservice", "page.tsx");
+    expect(ess).toContain("flex items-center justify-center min-h-screen");
+    expect(ess).toContain("Loading your profile...");
+  });
+
+  // --- C. the header-row family ---
+
+  it("R47-C1: the md-family rows carry REF's UNPREFIXED members (justify-between + items-start — they apply at mobile's flex-col, md:items-center at desktop)", () => {
+    expect(pageHeader).toMatch(/rowBreakpoint === "md" && "justify-between items-start"/);
+  });
+
+  it("R47-C2: the rowBreakpoint=md passes (REF switches flex-col → flex-row at md on these six; the clone still defaulted to sm)", () => {
+    const FILES: Record<string, string> = {
+      analyticsdashboard: "dashboard.tsx",
+      surveyanalytics: "analytics.tsx",
+      payrollengine: "page.tsx",
+      hrletters: "page.tsx",
+      shiftswap: "page.tsx",
+      surveys: "page.tsx",
+    };
+    for (const [route, file] of Object.entries(FILES)) {
+      expect(page(route, file), route).toContain('rowBreakpoint="md"');
+    }
+  });
+
+  it("R47-C3: performancemanagement is an actionsStart page (REF: flex justify-between items-start — the clone rendered items-center)", () => {
+    expect(page("performancemanagement", "page.tsx")).toContain("actionsStart");
+  });
+
+  // --- D. the stat family ---
+
+  it("R47-D1a: StatCard declares the per-page valueTag/labelTag overrides (REF's tags vary per page within a variant)", () => {
+    const statCard = read("src", "components", "shared", "stat-card.tsx");
+    expect(statCard).toContain("valueTag?:");
+    expect(statCard).toContain("labelTag?:");
+  });
+
+  it("R47-D1b: the no-tile rewrite — label-TOP p + value-BELOW p mt-1 + the BARE per-color icon + the card WITHOUT border-slate-200 (corrects the session-14 R13-I contract; value-in-tile KEEPS the border — REF evaluations card measured this round)", () => {
+    const statCard = read("src", "components", "shared", "stat-card.tsx");
+    expect(statCard).toMatch(/variant === "no-tile"\s*\?\s*""\s*:\s*"border-slate-200"/);
+    expect(statCard).toMatch(/"no-tile": "p"/);
+    expect(statCard).toContain('"text-3xl font-bold text-slate-900 mt-1"');
+  });
+
+  it("R47-D1c: the tile-right / mini / mini-centered / compact-s label tags are P on REF (analytics, shiftcalendar, notificationpreferences, payrollmodule)", () => {
+    const statCard = read("src", "components", "shared", "stat-card.tsx");
+    expect(statCard).toMatch(/"tile-right": "p"/);
+    expect(statCard).toMatch(/(?<![-"])mini: "p"/);
+    expect(statCard).toMatch(/"mini-centered": "p"/);
+    expect(statCard).toMatch(/"compact-s": "p"/);
+  });
+
+  it("R47-D2a: the four analytics compacts pass p/p tags + the slate-600 label (recruitment + compliance keep the r46 DIV/DIV + slate-500 contract)", () => {
+    const FILES: Record<string, string> = {
+      analyticsdashboard: "dashboard.tsx",
+      attendancedashboard: "dashboard.tsx",
+      surveyanalytics: "analytics.tsx",
+      assetmanagement: "page.tsx",
+    };
+    for (const [route, file] of Object.entries(FILES)) {
+      const src = page(route, file);
+      expect(src, route).toContain('valueTag="p"');
+      expect(src, route).toContain('labelTag="p"');
+      expect(src, route).toContain('labelClassName="text-slate-600"');
+    }
+    expect(page("recruitment", "page.tsx")).not.toContain("valueTag");
+    expect(page("compliancedashboard", "page.tsx")).not.toContain("valueTag");
+  });
+
+  it("R47-D2b: performancemanagement + workflowautomation render the per-color no-tile values (slate/green/orange/purple + slate/green/blue)", () => {
+    const pm = page("performancemanagement", "page.tsx");
+    expect(pm).toContain("text-green-600");
+    expect(pm).toContain("text-orange-600");
+    expect(pm).toContain("text-purple-600");
+    const wa = page("workflowautomation", "page.tsx");
+    expect(wa).toContain("text-green-600");
+    expect(wa).toContain("text-blue-600");
+  });
+
+  it("R47-D2c: advancedanalytics + payrollai + allleaverequests pass p/p + the mt-4 value + the no-mb tile row + REF's label texts on advancedanalytics", () => {
+    for (const route of ["advancedanalytics", "payrollai", "allleaverequests"]) {
+      const src = page(route, "page.tsx");
+      expect(src, route).toContain('valueTag="p"');
+      expect(src, route).toContain('labelTag="p"');
+      expect(src, route).toContain("mt-4");
+    }
+    const aa = page("advancedanalytics", "page.tsx");
+    expect(aa).toContain("Avg Tenure (months)");
+    expect(aa).toContain("At Risk (AI Prediction)");
+  });
+
+  it("R47-D2d: shiftcalendar + notificationpreferences + payrollmodule + analytics pass the P label", () => {
+    expect(page("shiftcalendar", "page.tsx")).toContain('labelTag="p"');
+    expect(page("notificationpreferences", "page.tsx")).toContain('labelTag="p"');
+    expect(page("payrollmodule", "page.tsx")).toContain('labelTag="p"');
+    expect(page("analytics", "page.tsx")).toContain('labelTag="p"');
+  });
+
+  // --- E. the zero-state affordances ---
+
+  it("R47-E1: announcements' zero state — NO New Announcement button, the bare DIV empty (direct text), REF's bare root", () => {
+    const src = page("announcements", "page.tsx");
+    expect(src).not.toContain("flex justify-center pb-4");
+    expect(src).toMatch(/canPost && announcements\.length > 0/);
+    expect(src).toMatch(/<div className="text-center py-16 text-slate-400">No announcements at this time<\/div>/);
+  });
+
+  it("R47-E2: hrletters' zero state — the bare svg (classes ON the icon, no wrapper divs), the mb-4-free P, NO empty-state button", () => {
+    const src = page("hrletters", "page.tsx");
+    expect(src).not.toContain('<EmptyState');
+    expect(src).toMatch(/!loading && letters\.length > 0/);
+    expect(src).toMatch(/<FileText className="h-16 w-16 mx-auto mb-4 text-slate-300"/);
+  });
+
+  it("R47-E3: templates renders ONE Create Template button (the row CTA) + REF's card classes + the mb-8 row", () => {
+    const src = page("templates", "page.tsx");
+    expect(src.match(/<Plus className="mr-2" aria-hidden="true" \/>\s*\n?\s*Create Template/g) ?? []).toHaveLength(1);
+    expect(src).not.toContain("<EmptyState");
+    expect(src).toContain("rounded-xl border bg-card text-card-foreground border-slate-200 shadow-sm");
+    expect(src).toContain("flex items-center justify-between mb-8");
+  });
+
+  it("R47-E4: performancemanagement's zero state renders NO count line + NO empty-state card (REF: the Set New Goal row + an empty grid) + the REF tab classes", () => {
+    const src = page("performancemanagement", "page.tsx");
+    expect(src).toMatch(/goals\.length > 0|goals\.length === 0\s*\?|hasGoals/);
+    expect(src).not.toContain("No goals set yet\" },{");
+    expect(src).toContain("bg-white border border-slate-200");
+    expect(src).toMatch(/focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6/);
+    expect(src).not.toContain("No goals set yet");
+  });
+
+  it("R47-E5: hrassistant renders no zero-state suggestion line (REF's zero chat: the input only)", () => {
+    const src = page("hrassistant", "page.tsx");
+    expect(src).not.toContain("Ask about leave, payroll, letters or company policy");
+  });
+
+  // --- F. page-specific contracts ---
+
+  it("R47-F1: compliance's At-Risk card header carries REF's bg-slate-50 py-3 + the flex gap-2 title; the empty P has NO class", () => {
+    const src = page("compliancedashboard", "page.tsx");
+    expect(src).toContain("bg-slate-50 py-3");
+    expect(src).toContain("tracking-tight text-sm font-semibold text-slate-700 flex items-center gap-2");
+    expect(src).toMatch(/<p>\s*No documents at risk/);
+  });
+
+  it("R47-F2: requestreports' Total Amount stat renders the raw division (REF: integer 0 at zero), not toFixed(2) — the with-data table keeps its decimals", () => {
+    const src = page("requestreports", "page.tsx");
+    expect(src).toContain('{ label: "Total Amount (SAR)", value: stats.amount / 100 }');
+    expect(src).not.toContain("value: (stats.amount / 100).toFixed(2)");
+  });
+
+  it("R47-F3: recruitmentkanban's stage-count chips are REF's badge-form DIVs (rounded-md, the focus ring family, bg-slate-200 text-slate-700 — the census's DIV-vs-SPAN catch, the full class form measured this round)", () => {
+    const src = page("recruitmentkanban", "page.tsx");
+    expect(src).toMatch(/<div className="inline-flex items-center rounded-md border px-2\.5 py-0\.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary\/80 text-xs bg-slate-200 text-slate-700">/);
+    expect(src).not.toMatch(/h-\[22px\]/);
   });
 });

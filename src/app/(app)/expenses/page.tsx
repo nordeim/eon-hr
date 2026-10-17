@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Check, X, Trash2, Banknote, Loader2, Clock, CheckCircle2, Receipt, FileText } from "lucide-react";
+import { Banknote, Check, CircleCheckBig, Clock, DollarSign, FileText, Loader2, Plus, Receipt, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -185,7 +185,7 @@ export default function ExpensesPage() {
   return (
     <PageCanvas>
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Expense Management"
         mobileKicker
@@ -204,10 +204,10 @@ export default function ExpensesPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard label="Pending" value={formatSar(stats.pending)} icon={<Clock aria-hidden="true" />} />
-        <StatCard label="Approved" value={formatSar(stats.approved)} icon={<CheckCircle2 aria-hidden="true" />} />
-        <StatCard label="Reimbursed" value={formatSar(stats.reimbursed)} icon={<Banknote aria-hidden="true" />} />
-        <StatCard label="Total Claims" value={stats.total} icon={<Receipt aria-hidden="true" />} />
+        <StatCard label="Pending" value={formatSar(stats.pending)} icon={<Clock className="w-6 h-6 text-yellow-600" aria-hidden="true" />} tileClassName="bg-yellow-100" />
+        <StatCard label="Approved" value={formatSar(stats.approved)} icon={<CircleCheckBig className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard label="Reimbursed" value={formatSar(stats.reimbursed)} icon={<DollarSign className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard label="Total Claims" value={stats.total} icon={<Receipt className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
       </div>
 
       {/* Session 12 (R11-E): the reference renders a border-b CardHeader

@@ -157,7 +157,7 @@ export default function HRReportsPage() {
   const groupLabel = GROUP_OPTIONS.find((g) => g.value === groupBy)?.label ?? "Status";
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <PageHeader
         size="md"
         title="HR Reports & Analytics"

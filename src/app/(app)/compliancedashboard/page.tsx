@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Activity, AlertTriangle, Bell, CheckCircle2, FileText, FileWarning, Loader2, Search, ShieldAlert, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Bell, CircleCheckBig, CircleX, FileText, FileWarning, Loader2, Search, Shield, ShieldCheck, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -215,8 +215,8 @@ export default function ComplianceDashboardPage() {
   }, [filtered]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#fef2f2,#fff7ed)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         section="Compliance Monitor"
         layout="flat36-sm"
@@ -235,10 +235,10 @@ export default function ComplianceDashboardPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard variant="compact" label="Critical Alerts" value={stats.critical} icon={<ShieldAlert className="h-4 w-4" />} iconClassName="bg-red-100 text-red-600" />
-        <StatCard variant="compact" label="High Priority" value={stats.high} icon={<AlertTriangle className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
-        <StatCard variant="compact" label="Resolved" value={stats.resolved} icon={<CheckCircle2 className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard variant="compact" label="Active Alerts" value={stats.active} icon={<Activity className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
+        <StatCard variant="compact" label="Critical Alerts" value={stats.critical} icon={<CircleX className="w-5 h-5 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
+        <StatCard variant="compact" label="High Priority" value={stats.high} icon={<TriangleAlert className="w-5 h-5 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" />
+        <StatCard variant="compact" label="Resolved" value={stats.resolved} icon={<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+        <StatCard variant="compact" label="Active Alerts" value={stats.active} icon={<Shield className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
       </div>
 
       {loading ? (
@@ -329,17 +329,26 @@ export default function ComplianceDashboardPage() {
                 </div>
 
                 <Card>
-                  <CardHeader className="p-3">
+                  {/* Session 48 (R47-F1): REF's At-Risk card header —
+                      flex flex-col space-y-1.5 p-6 border-b border-slate-200
+                      bg-slate-50 py-3 with the title tracking-tight
+                      text-sm font-semibold text-slate-700 flex items-center
+                      gap-2 (live-measured; the icon rides the title row). */}
+                  <CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200 bg-slate-50 py-3 px-4">
                     {/* Session 23 (R22-D): the monitor tab's table card title
                         is REF's "At-Risk Employees" (the clone had retitled
                         it "Document Expiry Monitor"). */}
-                    <div className="text-sm font-semibold tracking-tight">At-Risk Employees</div>
+                    <div className="tracking-tight text-sm font-semibold text-slate-700 flex items-center gap-2">
+                      <FileWarning className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                      At-Risk Employees
+                    </div>
                   </CardHeader>
                   <CardContent className="p-0">
               {filtered.length === 0 ? (
-                <div className="py-12 text-center text-slate-400">
+                <div className="text-center py-12 text-slate-400">
                   <FileWarning className="mx-auto h-16 w-16" aria-hidden="true" />
-                  <p className="text-sm">No documents at risk in this filter</p>
+                  {/* Session 48 (R47-F1): REF's empty P carries NO class. */}
+                  <p>No documents at risk in this filter</p>
                 </div>
               ) : (
                 <div className="divide-y">

@@ -188,7 +188,10 @@ export function PageHeader({
               </Button>
             ) : null}
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-bold text-slate-900 truncate">{mobileKickerTitle ?? title}</h1>
+              {/* Session 48 (R47-A1): REF's kicker h1 carries the dark pair
+                (measured on every REF kicker — text-lg font-bold
+                text-slate-900 dark:text-white truncate). */}
+              <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate">{mobileKickerTitle ?? title}</h1>
               {mobileKickerSubtitle ? <p className="text-xs text-slate-500 truncate">{mobileKickerSubtitle}</p> : null}
             </div>
           </div>
@@ -206,8 +209,20 @@ export function PageHeader({
           // loans/advancedanalytics — measured `justify-between items-start`).
           // Session 18 (R17-A): the row breakpoint is templated — REF's
           // default family switches at md, the always-row pages keep sm.
+          // Session 48 (R47-C1): REF's md-family rows carry the UNPREFIXED
+          // members too — `flex flex-col md:flex-row justify-between
+          // items-start md:items-center gap-4` (measured on payroll,
+          // leavemanagement, assetmanagement, shiftcalendar, surveys,
+          // analyticsdashboard, attendancedashboard, surveyanalytics,
+          // payrollmodule, payrollengine, hrletters, shiftswap,
+          // recruitmentkanban). The base members apply to mobile's
+          // flex-col cross-axis (render-neutral there) and the
+          // justify-between on the column main-axis is inert at auto
+          // heights — exactly REF's own member set.
           "flex flex-col gap-4",
-          `${rowBreakpoint}:flex-row ${rowBreakpoint}:justify-between`,
+          rowBreakpoint === "md" && "justify-between items-start",
+          `${rowBreakpoint}:flex-row`,
+          rowBreakpoint === "sm" && `${rowBreakpoint}:justify-between`,
           actionsStart
             ? `${rowBreakpoint}:items-start`
             : `${rowBreakpoint}:items-center`,

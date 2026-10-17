@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, Eye, Loader2, MessageSquare, Play, Plus, Square, Trash2, X } from "lucide-react";
+import { Eye, Loader2, MessageSquare, Play, Plus, Square, Trash2, TrendingUp, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -189,9 +189,10 @@ export default function SurveysPage() {
   }, [surveys]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdfa,#ecfeff)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        rowBreakpoint="md"
         section="Employee Engagement"
         layout="flat48"
         iconClassName="text-teal-600"
@@ -201,10 +202,10 @@ export default function SurveysPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
-        <StatCard label="Total Surveys" value={stats.total} icon={<ClipboardList className="h-4 w-4" />} />
-        <StatCard label="Active Surveys" value={stats.active} icon={<Play className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600" />
-        <StatCard label="Total Responses" value={stats.totalResponses} icon={<Eye className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600" />
-        <StatCard label="Avg Sentiment" value={stats.total ? `${stats.avg}%` : "0%"} icon={<ClipboardList className="h-4 w-4" />} iconClassName="bg-amber-100 text-amber-600" />
+        <StatCard label="Total Surveys" value={stats.total} icon={<MessageSquare className="w-6 h-6 text-teal-600" aria-hidden="true" />} tileClassName="bg-teal-100" />
+        <StatCard label="Active Surveys" value={stats.active} icon={<Eye className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard label="Total Responses" value={stats.totalResponses} icon={<Users className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+        <StatCard label="Avg Sentiment" value={stats.total ? `${stats.avg}%` : "0%"} icon={<TrendingUp className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
       </div>
 
       {/* Session 11 (R10-G): the reference renders a `grid md:grid-cols-2

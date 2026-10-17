@@ -234,7 +234,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="max-w-5xl mx-auto space-y-8">
       <PageHeader
         section="My Profile"
         mobileKicker

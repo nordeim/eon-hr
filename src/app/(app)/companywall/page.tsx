@@ -161,11 +161,11 @@ export default function CompanyWallPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f8fafc,#eff6ff)] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       {/* Session 10 (R9-B): the reference renders a narrow centered feed —
           max-w-3xl (768px) with space-y-6 rhythm, not the full-width
           1120px gap-8 layout. */}
-      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
       <PageHeader
         section="Company Wall"
         layout="flat48"

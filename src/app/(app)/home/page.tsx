@@ -9,5 +9,8 @@
  * replicates the blank render — the shell chrome still paints around it.
  */
 export default function HomePage() {
-  return null;
+  /* Session 48 (R47-B7): REF's scroller holds a single EMPTY div (the
+     round-47 rootmap: els 1/0 — re-measured live; the r31 blank-stub
+     note read the shell-only frame). */
+  return <div></div>;
 }

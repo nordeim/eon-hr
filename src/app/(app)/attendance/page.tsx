@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, CalendarCheck, Clock3, FileSpreadsheet, FileText, Gauge, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, UserCheck, Users, UserX, Workflow } from "lucide-react";
+import { Calendar, CalendarCheck, CircleCheckBig, CircleX, Clock, FileSpreadsheet, FileText, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, TrendingUp, Users, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -333,11 +333,11 @@ export default function StaffAttendancePage() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-            <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<UserCheck className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard label={reportStats.third.label} value={reportStats.third.value} icon={<UserX className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard label={reportStats.fourth.label} value={reportStats.fourth.value} icon={<Clock3 className="h-4 w-4" aria-hidden="true" />} />
-            <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<Gauge className="h-4 w-4" aria-hidden="true" />} />
+            <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+            <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
+            <StatCard label={reportStats.third.label} value={reportStats.third.value} icon={<CircleX className="w-6 h-6 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
+            <StatCard label={reportStats.fourth.label} value={reportStats.fourth.value} icon={<Clock className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" />
+            <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<TrendingUp className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
           </div>
 
           {/* Session 14 (R13-D): the reference's stat-tab block — the

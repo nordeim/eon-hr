@@ -200,9 +200,9 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
   const latest = [...responses].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)).slice(0, 1)[0];
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_right_bottom,#f0fdfa,#f8fafc)] p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-teal-50 to-slate-50">
       <PageHeader
+        rowBreakpoint="md"
         title="Survey Analytics"
         subtitle="AI-powered employee engagement insights"
         actions={
@@ -240,15 +240,15 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
         {/* Session 12 (R11-T): the reference's 146px compact cards WITH 40px
             icon tiles — MessageSquare blue, Minus yellow, Users purple,
             TrendingUp green (live-measured). */}
-        <StatCard variant="compact" label="Total Responses" value={responses.length} icon={<MessageSquare className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-blue-100 text-blue-600" />
-        <StatCard variant="compact"
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Total Responses" value={responses.length} icon={<MessageSquare className="w-5 h-5 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600"
           label="Avg Sentiment"
           value={avgSentiment === null ? "0%" : `${avgSentiment > 0 ? "+" : ""}${avgSentiment}%`}
-          icon={<Minus className="h-4 w-4" aria-hidden="true" />}
+          icon={<Minus className="w-5 h-5 text-yellow-600" aria-hidden="true" />}
           tileClassName="bg-yellow-100 text-yellow-600"
         />
-        <StatCard variant="compact" label="Active Surveys" value={activeSurveys} icon={<Users className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-purple-100 text-purple-600" />
-        <StatCard variant="compact" label="Positive Rate" value={`${positiveRate}%`} icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />} tileClassName="bg-green-100 text-green-600" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Active Surveys" value={activeSurveys} icon={<Users className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+        <StatCard variant="compact" valueTag="p" labelTag="p" labelClassName="text-slate-600" label="Positive Rate" value={`${positiveRate}%`} icon={<TrendingUp className="w-5 h-5 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
       </div>
 
       {insights ? (
@@ -319,7 +319,6 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
           </div>
         </>
       )}
-    </div>
     </div>
   );
 }
