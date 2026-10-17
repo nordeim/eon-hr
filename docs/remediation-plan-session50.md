@@ -191,3 +191,47 @@ lint 0/0 · tsc ✓ · unit (771 + the round-50 pins) · build ✓ · E2E
 (243 + ~8) · verify-r49 (the census pairs, member-set normalized) ·
 verify-r45 (the 16th login deploy re-audit) · standing audits + route
 sweep · DB pristine · `.env.example` verified.
+
+---
+
+## Completion record (session 50, delivered)
+
+- **Gates**: lint 0/0 · tsc ✓ · **789/789 unit** (+18: A1-A8, B1-B8 +
+  B4b/B4c; 5 amended predecessors — the R12-F trigger, the R13-A
+  payrollmodule/surveyanalytics icon pins, the R14-D pill wrapper, the
+  R15-E pill surface) · build ✓ · **252/252 E2E** (+10 — the session-50
+  deep-interiors spec: the glyph families, shiftswap's stats/pills/
+  empty, staffrequests' Radix Tabs form + panel-direct zero state,
+  payrollmodule's search/th, payrollengine's flats, npref's switch
+  family, employeeportal's direct briefcase, requestsettings' cards).
+- **Live verification**: **verify-r49 13/13 pairs MATCH** — the census
+  routes, member-set + COMPUTED-STYLE normalized (the round's
+  instrument upgrade: svg reads carry `16x16/rgb(...)` computed
+  geometry, subsuming the guard-size translation family and catching
+  real color drift; the documented computed pairs: #fafafa≡#fff on the
+  CTA text, the lab() serialization on yellow-600, the recharts mount
+  order) + standing audits 5/5 + route sweep 12/12 + **verify-r45
+  13/13 ×2** (the 16TH login deploy `DCDf2KCA`→`BBQoN-vG` mid-round +
+  a 17TH `BBQoN-vG`→`DJGK9Qoy` at round end — visually quiet through
+  both).
+- **The census's verified-matching set** (spec-pinned for regression):
+  payrollmodule's stat family/th/CardTitle, surveyanalytics' icon
+  stats, surveys' DIV/DIV stats + tight "0%", payrollai end-to-end,
+  requestsettings' CardTitle/level forms, the careers/
+  externaljobapplication heroes, the R31-B1 alias pins, the ess
+  superset.
+- **Screenshots**: 13 pairs (219-231) → **366 PNG**. DB pristine
+  (users=1 — the verify-r45 loading-probe user swept, the known
+  per-window trap; employees=1, balances=2, avatarUrl=null).
+  `.env.example` verified.
+- **The push protocol held**: the code committed + pushed at the FIRST
+  green stack (`7c363b5` via the ssh wrapper + the paramiko shim + the
+  explicit `--remote` — the wrapper's DEFAULT_REMOTE is the
+  task-management repo, a trap this round documented), the
+  verify/screenshots/docs after.
+- **Tooling lessons**: the SVG className trap (SVGAnimatedString —
+  read via getAttribute); the childNodes phantom-space artifact (React
+  SSR `<!-- -->` separators — textContent is tight; verify with a raw
+  probe before pinning any "spaced text" diff); the wrapper's
+  default-remote trap; the orchestrator's outer run() must exceed
+  verify-r45's full runtime.

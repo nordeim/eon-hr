@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 771 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 243 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 789 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 252 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2971,3 +2971,90 @@ before every boot; the PageHeader rewrite's fragment-block bug (the
 HeroBlock fragment attached the h1 DIRECTLY to the row, losing REF's
 row > DIV[] nesting) was caught by the spec's parentElement walk —
 TDD catching the component rewrite, exactly as designed.
+
+
+## Session 50 (parity round 49) — the never-deep-measured interiors
+
+Fresh clone to `c2ed36e` (the owner's session_100 journal — the round-48
+re-execution narrative, docs-only). The baseline held (771/771 unit ·
+243/243 E2E at the landed round-48 state); the window ran the
+**deep-interior census of the ~15 never-measured routes** — the last
+frontier vein — with payrollmodule's slow-load finally solved (an 11s
+settle; every prior round's eval timed out on that page).
+
+**The census** (`scripts/r50-eval.txt` — the shared deep reader, via
+`probe-r50-deep.mjs` REF-side + `r50-boot-loc0.mjs` zero-tenant LOC):
+the never-measured interiors hid a whole **glyph family** —
+payrollmodule's Generate All carried Wand2 where REF renders
+`calculator`; payrollengine's Generate Payroll carried Cog (REF:
+calculator); surveyanalytics' Run AI Analysis carried Sparkles (REF:
+brain); notificationpreferences' Mark All Read carried CheckCheck (REF:
+check) with the switch rows' whole icon set wrong (REF: mail / bell /
+check / bell / smartphone / bell, all `w-4 h-4 text-slate-600` — the
+clone had CheckCircle2/UserPlus/XCircle/Megaphone/Info) and the Recent
+zero state rendering FileText where REF renders `bell … opacity-30`;
+employeeportal's zero card rendered a 64px rounded-full chip +
+ClipboardList where REF renders the `briefcase w-8 h-8 text-blue-600`
+DIRECT; shiftswap's badge + zero glyphs were CalendarDays/ArrowLeft
+(REF: arrow-left-right both).
+
+**The structures**: shiftswap's stat cards carried no icons at all (REF:
+the inline family — users blue-600 / clock yellow-600 / calendar
+orange-600 / circle-check-big green-600, `w-5 h-5`) on border-slate-200
+shadow-sm cards (REF: the plain Card); the pills were h-9 (REF: py-2)
+with hover:bg-slate-100 (REF: slate-50); the empty card was p-6 +
+py-10 wrapper (REF: p-12 text-center + the glyph direct + the mt-less
+slate-500 line). **staffrequests' toggle was a hand-rolled chip — REF
+renders the RADIX TABS form** (TabsList + a single trigger + TabsContent
+mt-2 with the zero state DIRECT in the panel — no Card wrapper; the
+CTA's mt-4 rides the button itself); the search icon's muted token and
+the file-text's slate-400 became REF's slate-400/slate-300 literals.
+payrollmodule's search icon dropped pointer-events-none for REF's
+slate-400 literal, and the shared Table wrapper's inert `w-full` retired
+(REF: bare `overflow-x-auto` — the r11 contract, finally literal).
+payrollengine's two flat cards gained REF's `shadow-sm`.
+requestsettings' cards went plain with `p-6 space-y-4` interiors +
+slate-500 subtitles + mr-1 Plus glyphs. hrletters' CardTitle keeps the
+leading-none pass (REF's plain form differs only by the base's inert
+text-base — both 16px — the documented byte-parity backlog pair).
+
+**The verified-matching census routes** (pinned for regression in the
+spec): payrollmodule's dollar-sign stat family + bare th + the
+`Payslips — October 2026` CardTitle; surveyanalytics' icon-stat family
++ recharts surfaces; surveys' DIV/DIV stats + "0%" tight text; payrollai
+end-to-end; requestsettings' CardTitle/level-approver forms; the
+careers/externaljobapplication heroes; the organizationsetup +
+dynamicdashboard alias pins (R31-B1) and the ess superset hold.
+
+**Pins**: 18 new (A1-A8, B1-B8 + B4b/B4c) + 5 amended predecessors (the
+R12-F trigger, the R13-A payrollmodule/surveyanalytics icon pins, the
+R14-D pill wrapper, the R15-E pill surface — all evolved to the Tabs
+form or the new glyphs). Gates: lint 0/0 · tsc ✓ · **789/789 unit**
+(+18) · build ✓ · **252/252 E2E** (+10 — the session-50 deep-interiors
+spec). Live: **verify-r49 13/13 pairs MATCH** (the census routes,
+member-set + COMPUTED-STYLE normalized — the round's instrument upgrade:
+svg reads now carry `16x16/rgb(...)` computed geometry, which subsumes
+the guard-size translation family and catches REAL color drift; the
+documented pairs: #fafafa≡#fff on the CTA text, the lab() serialization
+on yellow-600, the recharts mount order) + standing audits 5/5 + route
+sweep 12/12 + **verify-r45 13/13 ×2** (the 16TH login deploy
+`DCDf2KCA`→`BBQoN-vG` mid-round and a 17TH `BBQoN-vG`→`DJGK9Qoy` at
+round end — the login surface visually quiet through both). 26
+screenshots (219-231 pairs + the numbering check) → **366 PNG**. DB
+pristine (users=1 — the verify-r45 loading-probe user swept AGAIN, the
+known per-window trap; employees=1, balances=2, avatarUrl=null).
+`.env.example` verified.
+
+**The tooling lessons**: the SVG census trap — `el.className` on SVG
+elements is an SVGAnimatedString, not a string (`.replace` throws);
+every reader must go through `getAttribute('class')`; the
+agent-browser childNodes phantom-space artifact — React SSR inserts
+`<!-- -->` separators between adjacent text children, and a childNodes
+walk shows them as `" "` text entries (textContent itself is tight —
+verify with a raw read before pinning any "spaced text" diff); the
+paramiko shim's wrapper needs the explicit `--remote
+git@github.com:nordeim/eon-hr.git` (its DEFAULT_REMOTE is the
+task-management repo — a dry-run against the default fails
+non-fast-forward against an unrelated history); the orchestrator's
+outer run() must exceed verify-r45's full runtime (a 120s cap
+ETIMEDOUT the whole audit — the buffered output is lost on timeout).\n

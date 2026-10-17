@@ -1348,3 +1348,25 @@ Stage Summary:
 - Round 48 delivered (re-executed): the bare hero architecture — the classless hero block everywhere, the BARE-15 row-less family, the unprefixed always-rows, the bare/unwrapped actions clusters, the fresh C-page contracts (interviewassistant/securitysettings/payrollreports/hrreports/evaluations/requestreports/analytics), the dual-direction chart grids, and the WORKING avatar upload (the functional superset)
 - Gates: 771/771 unit (+26) · 243/243 E2E (+16) · 320 captures · verify-r48 29/29 · standing audits 5/5 · route sweep 12/12 · pushed at 5eda040
 - Frontier after this round: the login build watch stays armed; the byte-parity backlog (the badge span member-order, the CardTitle per-page forms, REF's hover no-ops); the chart line-count parity (Recharts internals); the tax/history/custom superset panels stay REF-unmeasured; payrollmodule's slow-load census; ~15 never-deep-measured routes remain
+
+---
+Task ID: session-50
+Agent: main (Super Z)
+Task: eon-hr parity round 49 (session 50) — the never-deep-measured interiors: census, TDD fixes, live verification, docs, push
+
+Work Log:
+- Workspace RESET again → fresh clone to c2ed36e (the owner's session_100.md — the round-48 re-execution narrative, docs-only on the landed 7274edb). Environment rebuilt (bun install, .env, db push+seed, playwright chromium); baseline gates ALL GREEN: lint 0/0 · tsc ✓ · 771/771 unit · build ✓
+- Skills audit of the round-48 delta (the avatar route — guard/requireUser/parseBody + the zod data-URL regex + the audit log — clean; the page-header rewrite — additive props, the bare-branch `cn(...)||undefined` classless DIV correct); cursor-pointer/vertical={false} sweeps clean
+- Redeploy watch: the 16TH login deploy (JS DCDf2KCA→BBQoN-vG, CSS quiet) + a 17TH at round end (BBQoN-vG→DJGK9Qoy) — verify-r45 re-audited 13/13 through BOTH
+- THE CENSUS (scripts/r50-eval.txt the shared deep reader + probe-r50-deep.mjs + r50-boot-loc0.mjs + probe-r50-zone.mjs targeted reads): 15 never-deep-measured routes both sides — the glyph family (Wand2/Cog→calculator ×2, Sparkles→brain, CheckCheck→check, the npref switch set mail/bell/check/bell/smartphone/bell + the opacity-30 zero bell, ClipboardList→briefcase direct, CalendarDays/ArrowLeft→arrow-left-right ×2); shiftswap's missing stat icon family + plain cards + py-2 pills + p-12 empty; staffrequests' chip→the RADIX TABS form with the panel-direct zero state; payrollmodule's search/th/overflow forms (payrollmodule's slow-load SOLVED — an 11s settle); payrollengine's shadow-sm flats; requestsettings' plain cards + space-y-4 + slate-500 + mr-1; hrletters' CardTitle pair documented
+- THE INSTRUMENT UPGRADE: verify-r49's svg reads carry COMPUTED geometry (`16x16/rgb(...)`) — subsumes the guard-size family, catches real color drift; the documented computed pairs: #fafafa≡#fff (the CTA text), lab()≡rgb(202,138,4) (yellow-600), the recharts mount order
+- Plan saved (docs/remediation-plan-session50.md). TDD: 18 RED pins → the GREEN batch (9 files: payrollmodule, payrollengine, surveyanalytics, notificationpreferences, employeeportal, shiftswap, staffrequests, requestsettings, table.tsx; hrletters net-zero — the leading-none pass restored after the E2E caught the wrong-direction first edit) + 5 predecessor amendments + 10 E2E tests (2 loading-race hardenings + the badge-selector fix)
+- Gates: lint 0/0 · tsc ✓ · 789/789 unit (+18) · build ✓ · 252/252 E2E (+10)
+- COMMITTED + PUSHED at the first green stack (7c363b5 via the ssh wrapper + the paramiko shim + the EXPLICIT --remote — the wrapper's DEFAULT_REMOTE is the task-management repo, the trap this round documented), then the verify/screenshots/docs phase
+- Live: verify-r49 13/13 pairs MATCH + standing audits 5/5 + route sweep 12/12 + verify-r45 13/13 ×2 (both new deploys); 26 screenshots (219-231) → 366 PNG; DB pristine (the verify-r45 loading-probe user swept — the known per-window trap); .env.example verified
+- Docs: AGENTS session-50 layer + the Commands counts (789/252), SKILL 3.33.0, README/CLAUDE counts (1041-spec pyramid), docs/session_101.md, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 49 delivered: every app route now has a deep-measured interior (the r45-r49 arc complete) — the glyph family corrected across 7 pages, shiftswap's stat/pill/empty contracts, staffrequests' Radix Tabs form, the shared Table wrapper's bare form, and the census's verified-matching set spec-pinned
+- Gates: 789/789 unit (+18) · 252/252 E2E (+10) · 366 captures · verify-r49 13/13 · verify-r45 13/13 ×2 (the 16th+17th deploys) · standing 5/5 · sweep 12/12 · pushed at 7c363b5
+- Frontier after this round: the login watch stays armed (17 deploys); the byte-parity backlog (CardTitle forms, badge leading-5, #fafafa/#fff, chart line counts); the with-data superset surfaces stay REF-unmeasurable at the demo's zero state
