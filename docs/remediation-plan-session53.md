@@ -126,3 +126,44 @@ lint 0/0 · tsc ✓ · unit 793 (unchanged) · build ✓ · E2E 256 + R53-A =
 registry-drift + active-state-family census records (done, R53-A
 pinned) · DB pristine (the loading-probe user swept) · `.env.example`
 verified.
+
+---
+
+## Completion record (session 53, delivered)
+
+- **Gates**: lint 0/0 · tsc ✓ · **793/793 unit** (unchanged) · build ✓ ·
+  **257/257 E2E** (+1 — R53-A: the route-walking bottom-nav active-state
+  family — each of the four unpaired tab routes asserts its own tab's
+  active computed pair + an inactive sibling; the one session-40
+  input-family flake re-verified green in isolation, the documented
+  dialog-animation read under load).
+- **Live verification**: verify-r45 **13/13** on the 20TH login deploy
+  (JS `CimHfPLG`→`C2ujlke6` + CSS `CpjiugAb`→`D5oCh2kx` — the first
+  both-chunks deploy in ~15, standalone) + standing audits **5/5** +
+  route sweep **12/12** + **verify-r49 13/13** (the confirmation
+  ladder) + the **nav-registry drift re-check** (both sides' complete
+  trees re-read live — 52 entries each, 10 triggers + 44 leaves,
+  labels+hrefs+order MATCH, zero drift) + the **bottom-nav
+  active-state family** (all five tab routes paired at 390×844 — the
+  active tab computes rgb(37,99,235) on rgb(239,246,255), siblings
+  rgb(71,85,105) on transparent, icons tracking labels — identical
+  both sides).
+- **Screenshots**: 3 pairs (239-241 — the bottom-nav active states on
+  /employees + /profile at 390×844, the desktop fully-expanded sidebar
+  registry surface) → **392 files in docs/screenshots/** (386 PNG + 6
+  evidence HTML). DB pristine (the loading-probe user swept — the
+  per-window trap re-fired; the raw-PrismaClient sweep needs the
+  inline `DATABASE_URL="file:../db/custom.db"`, the documented
+  env-loading rule). `.env.example` verified.
+- **The push protocol held**: the code batch committed + pushed at the
+  FIRST green stack (`dc2201c` via the ssh wrapper + the paramiko shim
+  + the explicit `--remote git@github.com:nordeim/eon-hr.git`), the
+  screenshots/docs layer after.
+- **Tooling lessons**: the per-route state-family census (§63 — a
+  route-dependent state recipe must be censused across every route
+  that exhibits it, then pinned as a route-walking E2E test guarding
+  the active-matching logic per-route); the both-chunks deploy lesson
+  (a login deploy that changes JS + CSS justifies re-reading every
+  registry-shaped surface even when the app-side fingerprints are
+  quiet); the sweep script's env rule (tsx does not auto-load .env —
+  pass the DATABASE_URL inline for raw PrismaClient scripts).
