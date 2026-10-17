@@ -22,6 +22,19 @@ const nextConfig: NextConfig = {
     "preview-chat-5bfe59f5-c893-4b45-a3ea-ad5caa2ef1af.space-z.ai",
     "*.space-z.ai",
   ],
+  // Session 51 (R51-A): the /Dashboard route-casing alias. REF's platform
+  // serves routes case-insensitively — its canonical dashboard URL is the
+  // CAPITAL /Dashboard (its own /organizationsetup + /dynamicdashboard
+  // redirects land there) while its internal links use the lowercase
+  // form. Next.js on a case-sensitive FS serves only /dashboard, so the
+  // capital form 404'd. The rewrite serves the dashboard at /Dashboard
+  // with the URL bar UNCHANGED (exactly like REF — not a redirect), the
+  // content/metadata/auth-guard riding the real lowercase route. Scope:
+  // the canonical form only — a re-export DIRECTORY (Dashboard/ beside
+  // dashboard/) would collide on case-insensitive checkouts (macOS).
+  async rewrites() {
+    return [{ source: "/Dashboard", destination: "/dashboard" }];
+  },
 };
 
 export default nextConfig;

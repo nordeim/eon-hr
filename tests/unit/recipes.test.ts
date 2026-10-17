@@ -5691,3 +5691,28 @@ describe("session-50: the deep-interior contracts (round 49)", () => {
     expect(src).not.toMatch(/CardTitle className="text-base leading-none"/);
   });
 });
+
+describe("session-51: the route-casing alias + the mobile-nav census record (round 50)", () => {
+  it("R51-A1: the /Dashboard route-casing rewrite — REF's canonical capital form serves the dashboard (the platform is case-insensitive; Next is not)", () => {
+    // Session 51 (R51-A): REF serves BOTH /Dashboard (its canonical form
+    // — its own /organizationsetup + /dynamicdashboard redirects land
+    // there) and /dashboard (its internal links). The clone 404'd on the
+    // capital form. The rewrite keeps the URL bar at /Dashboard (exactly
+    // like REF — no redirect) while the content/metadata/auth-guard ride
+    // the real lowercase route. Chosen over an R31-B1-style re-export
+    // directory because Dashboard/ beside dashboard/ collides on
+    // case-insensitive checkouts (macOS).
+    const cfg = read("next.config.ts");
+    expect(cfg).toContain('source: "/Dashboard"');
+    expect(cfg).toContain('destination: "/dashboard"');
+    expect(cfg).toMatch(/rewrites/);
+  });
+
+  it("R51-A2: the rewrite scope — the canonical /Dashboard only (no wildcard-case aliasing; REF's other internal links are all lowercase)", () => {
+    const cfg = read("next.config.ts");
+    // exactly ONE rewrite entry — no case-wildcard family
+    expect((cfg.match(/source: "\/Dashboard"/g) || []).length).toBe(1);
+    const upperSources = cfg.match(/source: "\/[^"]*"/g) || [];
+    expect(upperSources).toEqual(['source: "/Dashboard"']);
+  });
+});

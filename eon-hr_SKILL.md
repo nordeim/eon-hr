@@ -11,7 +11,7 @@
 > specific file or command — the file paths are authoritative.
 >
 > **Version:** 3.33.0 (session-50 remediation complete — the never-deep-measured interiors: the glyph family corrections across 7 pages + shiftswap's stat icons/pills/empty contracts + staffrequests' Radix Tabs form + the bare table/search forms) · **Last updated:** 2026-10-17
-> **State:** 718 unit + 217 E2E tests green, lint/typecheck/build
+> **State:** 791 unit + 255 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
