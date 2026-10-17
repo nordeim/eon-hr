@@ -198,6 +198,7 @@ export default function WorkflowAutomationPage() {
         /* Session 49 (R48-A3): the always-row family — REF renders the
          *  UNPREFIXED always-row (measured @1440×900 this round). */
         alwaysRow
+        actionsUnwrapped
         section="Workflow Automation"
         layout="flat36"
         actionsStart

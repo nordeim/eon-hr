@@ -3573,7 +3573,9 @@ describe("session-38 keyboard/focus contracts (parity round 37)", () => {
   const loansPage38 = read("src", "app", "(app)", "loans", "page.tsx");
 
   it("R37-A1: the assets Add Asset trigger is a DialogTrigger asChild (REF: aria-haspopup=dialog, aria-expanded, focus-restore) — the plain onClick pattern dies", () => {
-    expect(assetsPage38).toMatch(/<DialogTrigger asChild>\s*<Button>\s*<Plus className="mr-2" aria-hidden="true" \/>\s*Add Asset\s*<\/Button>\s*<\/DialogTrigger>/);
+    /* Session 49 (R48-G2b) amendment: the Button carries the r48-measured
+       green utility gradient pass — the asChild/focus contract unchanged. */
+    expect(assetsPage38).toMatch(/<DialogTrigger asChild>[\s\S]*?<Button[^>]*>\s*<Plus className="mr-2" aria-hidden="true" \/>\s*Add Asset\s*<\/Button>\s*<\/DialogTrigger>/);
     expect(assetsPage38).not.toMatch(/onClick=\{\(\) => setDialogOpen\(true\)\}/);
     expect(assetsPage38).toContain("DialogTrigger");
   });

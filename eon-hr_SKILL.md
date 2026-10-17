@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.31.0 (session-48 remediation complete — the unmapped-route interiors: the rootmap families + the per-page stat contracts + the tile/icon architecture) · **Last updated:** 2026-10-17
+> **Version:** 3.32.0 (session-49 remediation complete — the bare hero architecture: the classless hero block + the BARE-15 family + the always-rows + the actions clusters + the C-page contracts + the dual-grid charts + the working avatar superset) · **Last updated:** 2026-10-17
 > **State:** 718 unit + 217 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +

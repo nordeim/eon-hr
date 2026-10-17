@@ -156,7 +156,12 @@ export default function LegacyAssetsPage() {
           subtitle="Track and manage company assets"
           actions={
             <DialogTrigger asChild>
-              <Button>
+              {/* Session 49 (R48-G2b): REF's CTA is the UTILITY-form green
+                 gradient (bg-gradient-to-r from-green-600 to-emerald-600,
+                 hover:bg-primary/90 — live-measured this round; the
+                 endpoints match the r6-measured #16A34A→#059669 sRGB
+                 pair; the hover is REF's overlay, not a gradient swap). */}
+              <Button className="bg-none bg-gradient-to-r from-green-600 to-emerald-600 hover:bg-none hover:bg-primary/90">
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Asset
               </Button>

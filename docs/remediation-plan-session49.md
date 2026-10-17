@@ -185,3 +185,50 @@ lint 0/0 · tsc ✓ · unit (745 + round-48 pins, amended predecessors
 green) · build ✓ · E2E (228 + ~14) · verify-r48 (the round pairs,
 sort-normalized for member order) · standing audits + route sweep ·
 DB pristine · `.env.example` verified.
+
+---
+
+## Completion record (session 49, delivered — re-executed)
+
+- **Gates**: lint 0/0 · tsc ✓ · **771/771 unit** (+26: A1-A5, C1-C9 +
+  the b-pins, E, F1-F2, G1-G6; 13 predecessor amendments — R8-A,
+  R9-A, R15-C, R30-C1, R31-C6, R33-A1, R34-E2/E3/E4, R37-A1, R46-F1,
+  R47-D1b, R47-F2) · build ✓ · **243/243 E2E** (+16 — the
+  session-49 bare-interiors spec: the bare heroes, the always-rows,
+  the unwrapped actions, the two-card form, the checkbox, the
+  payroll kicker/panels/th, the label form, the value-in-tile, the
+  horizontal-bare stats, the bare root, the dual grids, the stray
+  footer, the WORKING avatar upload).
+- **Live verification**: **verify-r48 29/29 pairs MATCH** — the
+  BARE-13 hero pairs, the always-row/center pairs (hrreports,
+  requestreports, assets, offboarding, advancedanalytics,
+  workflowconfigpage), the md-rows (taskmanager, leavemanagement,
+  expenses), the short hidden row (loans), the C3 payrollreports
+  rebuild, C9/C4 conformance, the four chart pages (direction
+  parity). Member-set normalized: class order, the dark: superset
+  pairs, the guard-span icon translation, the tab token pair, the
+  mt-8/space-y margin collapse, the hover token aliases, the
+  Recharts direction-parity. + standing audits 5/5 + route sweep
+  12/12.
+- **The verify-found fixes (the census→GREEN→verify loop)**: the
+  HeroBlock fragment-block bug (the row lost its classless hero
+  wrapper — caught by the E2E parentElement walk); the always-start
+  family's single actions ALL render direct (offboarding, compliance,
+  workflowautomation, allleaverequests, payrollai, advancedanalytics
+  gained actionsUnwrapped after the REF action-tag sweep); assets' CTA
+  re-pinned to REF's utility-form green gradient + hover overlay;
+  the mini-centered cards joined the bare-card family (hrreports +
+  nprefs measured fresh).
+- **Screenshots**: 26 pairs (193-218) → **320 PNG**. DB pristine
+  (users=1, employees=1, balances=2, avatarUrl=null). `.env.example`
+  verified.
+- **The push protocol change**: the code committed + pushed at the
+  FIRST green gate stack (`5eda040`), the verify/screenshots/docs
+  after — the lost-work lesson (the original round-48 window died
+  between its local commit and the push).
+- **Tooling lessons**: the `$Abcd1234` double-quote shell expansion
+  (the empty-password login bounce to `/login?`); the stale-server
+  trap (pkill never matches `next-server (v16.4.0)` — kill by
+  port-derived PID; a stale :3201 serves dead chunk names → no
+  hydration → the native form submit); the reader-template `//`
+  one-liner trap (still true — reader files stay comment-free).

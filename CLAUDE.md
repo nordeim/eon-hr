@@ -4,7 +4,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 # Eon HR
 
-A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 61 routes (REF's complete page registry — the session-32 orphan-route hunt), 51 API endpoints, 47 data models, HMAC cookie auth, and a 973-spec test pyramid (745 unit + 228 E2E).
+A full-stack HR management platform (Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + Prisma/SQLite) with 61 routes (REF's complete page registry — the session-32 orphan-route hunt), 51 API endpoints, 47 data models, HMAC cookie auth, and a 1014-spec test pyramid (771 unit + 243 E2E).
 
 **Tech Stack:** Next.js 16 (App Router, standalone output) · React 19 · TypeScript 5 (strict) · Tailwind CSS 4 (CSS-first) · Radix UI primitives · Prisma 6 + SQLite · Zod 4 · Recharts 2 · Vitest 5 · Playwright 1.63
 

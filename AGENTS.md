@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 745 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 228 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 771 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 243 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -2866,3 +2866,108 @@ loading-probe user swept again — the verify-r45 trap re-fires every
 window). The tooling lessons: the Next standalone server does NOT load
 `.env` — pass DATABASE_URL inline on restart; the agent-browser evals
 flake under sustained load (the verify's evalOn retries once).
+
+## Session 49 (parity round 48, re-executed) — the bare hero architecture
+
+**Context**: the original round-48 window completed its GREEN body but
+was LOST to a workspace reset before the push landed (the local commit
+never reached the remote). This session re-ran the round from a FRESH
+census (`scripts/probe-r49-*.mjs` — headers/path/zone/sub/eval — plus
+`scripts/r49-boot-loc0.mjs`, the one-call zero-tenant orchestrator:
+fresh zero.db + :3201 boot + loc0 re-auth, everything inside one
+process tree) and pushed at the FIRST green gate stack
+(`5eda040`), then verified/documented after — the lost-work lesson
+institutionalized.
+
+**The round's vein — the hero-block architecture, re-measured**: REF
+renders the hero block CLASSLESS (`DIV[]`) on EVERY measured page
+(taskmanager and leavemanagement included) — the clone's `min-w-0` +
+`flex-1` wrapper retired universally (the r47 "documented translation"
+flipped). The findings: (A) the BARE-15 family — no hero row at all
+(organogram/companywall/evaluations/training/hrassistant text-center;
+reports/interviewassistant/securitysettings/communications/settings/
+profile/analytics/notificationpreferences/announcements classless;
+hrassistantchat `mb-6`) → the new `bare` prop; (B) the always-row
+families are UNPREFIXED (`flex justify-between items-start` on the
+always-start eight; `flex items-center justify-between` on
+hrreports/requestreports + the mb-variants) → the new `alwaysRow`
+prop; (C) the md-family passes (taskmanager/leavemanagement/expenses)
++ loans joins payrollreports' SHORT hidden row; (D) the actions
+clusters — bare `flex gap-2` (hrreports/requestreports,
+actionsBare) or SINGLE actions rendered DIRECTLY in the row (nine
+pages, actionsUnwrapped — REF wraps only MULTI-button clusters); (E)
+the chart family renders DUAL-direction CartesianGrids (all 14
+`vertical={false}` pins retired across the 6 charts.tsx files — the
+line counts stay Recharts internals, direction parity is the
+contract).
+
+**The C pages**: interviewassistant's TWO-CARD grid (Select Candidate
++ Interview Notes, the short Candidate/Notes labels, the clone's AI
+Analysis riding column one as the superset); securitysettings' alert
+(H3 `text-lg font-semibold text-orange-900` + circle-alert
+`w-12 h-12 text-orange-600` + P text-sm text-orange-700) + the slate
+DIV badges (rounded-md font-semibold + the focus members) +
+circle-check-big `w-3 h-3 mr-1` + the FIRST live-measured checkbox
+(the OLD shadcn form: `border border-primary shadow … ring-1`, no
+checked-border, no cursor-pointer); payrollreports REBUILT (the
+mobile kicker with the h-9 w-9 select-none back button + the SHORT
+hidden always-row + the classless flat36-sm hero + the WhatsApp CTA
+DIRECT in the row with `text-white` (not the #fafafa token) + the
+full-width mobile copy in a md:hidden div + the Radix-verbatim tabs
+with ALL FOUR panels mounted + the bare `px-4 py-3` Monthly th family
+— the tax/history/custom cards stay the REF-unmeasured superset);
+hrreports' form labels on the Label component (`text-xs
+text-slate-500` — twMerge collapses leading-none under the later
+text-xs; member-wise assertions only); evaluations' Radix-verbatim
+panels (`ring-offset-background … space-y-6`); requestreports'
+HORIZONTAL-BARE stats (the 40×40 rounded-lg tile with the svg's own
+w-5 h-5 classes + the P text-2xl/P text-xs pair inside a CLASSLESS
+div + the DEFAULT bordered card — a new stat-card variant) + the
+pb-2 pr-4 th family + the always-row header (the Back ghost `h-8
+px-3 text-xs` + the classless h1/p block + the bare flex gap-2
+cluster); analytics' BARE root (`p-4 md:p-8` only — no gradient
+canvas, no full-height wrapper — plus the verbatim `max-w-7xl mx-auto
+space-y-8` content wrapper, the trap-4 audit clean);
+recruitmentkanban + chat + templates confirmed conforming.
+
+**The F module — the WORKING avatar upload (the functional
+superset)**: REF's Change Photo button + hidden input now WORK — the
+96×96 center-crop canvas downscale (JPEG 0.85, a few KiB) → `POST
+/api/profile/avatar` (the guard/requireUser/parseBody convention + a
+256 KiB data-URL cap + the profile.avatar_changed audit log) → the
+optimistic swap; the purge script resets user avatars (the seed's
+upsert never touches avatarUrl). E2E-pinned with a real PNG upload.
+
+**The G fixes**: profile's stray wrap-level icon-only footer P (cruft
+REF lacks) removed; hrassistant's badge glyph Bot at text-blue-600
+(was purple); assets' Laptop at text-green-600 (was blue) + the CTA
+re-pinned to REF's UTILITY-form green gradient
+(`bg-gradient-to-r from-green-600 to-emerald-600` +
+`hover:bg-primary/90` — the endpoints match the r6 sRGB pair); the
+Button base's cursor-pointer retired; the kicker back button carries
+REF's select-none.
+
+**Pins**: 26 new (A1-A5, C1-C9 + C2b/C3b/C7b, E, F1-F2, G1-G6) + 13
+amended predecessors (R8-A, R9-A, R15-C, R30-C1, R31-C6, R33-A1,
+R34-E2/E3/E4, R37-A1, R46-F1, R47-D1b, R47-F2). Gates: lint 0/0 ·
+tsc ✓ · **771/771 unit** (+26) · build ✓ · **243/243 E2E** (+16 —
+the session-49 bare-interiors spec). Live: **verify-r48 29/29 pairs
+MATCH** (member-set normalized: the class-order variance, the dark:
+superset pairs, the guard-span icon translation, the tab token pair,
+the mt-8/space-y margin collapse, the hover token aliases, the
+Recharts direction-parity) + standing audits 5/5 + route sweep 12/12.
+26 screenshots (193-218, REF + zero-tenant pairs) → **320 PNG**. DB
+pristine (users=1, employees=1, balances=2, avatarUrl=null).
+`.env.example` verified.
+
+**The tooling lessons**: the demo password `$Abcd1234` inside DOUBLE
+quotes gets shell-expanded — the browser fills an EMPTY password and
+the login silently bounces to `/login?` (single-quote it); the
+stale-server trap re-learned — `pkill -f "standalone/server"` NEVER
+matches (Next renames to `next-server (v16.4.0)`), and a stale
+:3201 holder serves DEAD chunk names (500s → no hydration → the
+login form's NATIVE submit) — kill by port-derived PID (`ss -tlnp`)
+before every boot; the PageHeader rewrite's fragment-block bug (the
+HeroBlock fragment attached the h1 DIRECTLY to the row, losing REF's
+row > DIV[] nesting) was caught by the spec's parentElement walk —
+TDD catching the component rewrite, exactly as designed.

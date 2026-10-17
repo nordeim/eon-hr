@@ -69,6 +69,7 @@ export default function PayrollAiPage() {
         /* Session 49 (R48-A3): the always-row family — REF renders the
          *  UNPREFIXED always-row (measured @1440×900 this round). */
         alwaysRow
+        actionsUnwrapped
           section="AI Payroll Assistant"
           layout="flat36"
           iconClassName="text-green-600"
