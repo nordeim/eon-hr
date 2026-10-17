@@ -167,6 +167,39 @@ test.describe("mobile navigation", () => {
     await expect(home.locator("span")).toHaveCSS("font-weight", "500");
   });
 
+  test("each bottom-nav tab route highlights its own tab (session 53, R53-A)", async ({ page }) => {
+    // Session 53 (R53-A): the round-52 paired-live census of the bottom
+    // bar's ACTIVE-STATE family — all FIVE tab routes measured at
+    // 390×844 on REF vs the seeded LOC standalone. Each route
+    // highlights exactly its own tab: the active tab computes the
+    // blue-600 label + icon family (rgb(37,99,235)) on the blue-50
+    // pill (rgb(239,246,255)); the siblings compute slate-600
+    // (rgb(71,85,105)) on transparent. The session-5/21 pins covered
+    // /dashboard only (Home active, Staff inactive); this pin walks
+    // the four unpaired routes so a nav-config active-matching
+    // regression (pathname === href is exact — a prefix route would
+    // break it) or a Tailwind engine change cannot silently drift the
+    // state family.
+    const bar = page.getByRole("navigation", { name: "Bottom navigation" });
+    const cases = [
+      { route: "/employees", active: "Staff" },
+      { route: "/taskmanager", active: "Tasks" },
+      { route: "/attendance", active: "Attendance" },
+      { route: "/profile", active: "Profile" },
+    ] as const;
+    for (const c of cases) {
+      await page.goto(c.route);
+      const active = bar.getByRole("link", { name: c.active, exact: true });
+      await expect(active).toHaveCSS("color", "rgb(37, 99, 235)");
+      await expect(active).toHaveCSS("background-color", "rgb(239, 246, 255)");
+      // the icon tracks the label color (currentColor — census-verified)
+      await expect(active.locator("svg").first()).toHaveCSS("color", "rgb(37, 99, 235)");
+      const home = bar.getByRole("link", { name: "Home", exact: true });
+      await expect(home).toHaveCSS("color", "rgb(71, 85, 105)");
+      await expect(home).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    }
+  });
+
   test("the desktop sidebar is hidden on mobile; the drawer is hidden on desktop", async ({ page }) => {
     // Mobile: no persistent sidebar
     await expect(page.locator('[data-sidebar="sidebar"]')).toBeHidden();

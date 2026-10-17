@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.35.0 (session-52 remediation complete — the nav-registry drift check 44/44 + the mobile drawer's expanded-group census verified-matching + the 19th-deploy login re-audit + the doc-count refresh) · **Last updated:** 2026-10-18
-> **State:** 793 unit + 256 E2E tests green, lint/typecheck/build
+> **Version:** 3.36.0 (session-53 remediation complete — the 20th-deploy login re-audit + the nav-registry drift re-check 44/44 + the bottom-nav active-state family censused + pinned) · **Last updated:** 2026-10-18
+> **State:** 793 unit + 257 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3296,3 +3296,38 @@ as an eval failure. The workspace-reap pattern: the sandbox reaps
 detached processes between tool calls — every orchestrator boots its
 own :3200 server (kill-by-port first), while the agent-browser daemon
 survives because it self-daemonizes.
+
+## §63 Session 53 (parity round 52) — the per-route state-family census
+
+The round's transferable lesson extends §62's computed-truth method:
+when a state recipe is ROUTE-DEPENDENT — the same component renders
+different state per route (the bottom bar's active tab, a per-page
+active nav item, a route-conditioned badge) — censusing the recipe on
+ONE route proves the recipe, not the family. Rounds 50/51 measured the
+active tab on /dashboard only; this round paired all FIVE tab routes
+(390×844, both apps) and found the family identical — each route
+highlights exactly its own tab (blue-600 `rgb(37,99,235)` on the
+blue-50 `rgb(239,246,255)` pill; siblings slate-600 on transparent;
+icons tracking labels via currentColor).
+
+**The method**: (1) enumerate every route that exhibits the state
+(the 5 BOTTOM_NAV hrefs); (2) pair each one live, reading the COMPUTED
+family (color/background/font-weight/icon-color) — not the class
+bytes; (3) pin the family as a route-walking E2E test (`for (const c
+of cases) { goto; expect(active computed pair); expect(inactive
+sibling) }`) so the ACTIVE-MATCHING LOGIC is guarded per-route, not
+per-recipe. The clone's bottom bar matches with `pathname === tab.href`
+(exact equality) — a future prefix route or a startsWith regression
+breaks exactly one case, and the pin names the route.
+
+**The round's deploy lesson**: a login-build deploy that changes BOTH
+chunks (JS + CSS — the 20th, the first CSS churn in ~15 deploys)
+justifies re-reading every registry-shaped surface the deploy could
+touch (the nav tree), even when the app-side fingerprints are quiet —
+the registry re-check read both sides' complete trees (52 entries: 10
+group triggers + 44 leaves) and found zero drift, converting a
+hash-change scare into a census record. The 20th deploy also confirms
+the standing watch pattern: verify-r45 standalone (13/13) + the app
+side's confirmation ladder (standing 5/5 + sweep 12/12 + verify-r49
+13/13) — the app-side instruments re-run through every login deploy
+because the two builds deploy independently.

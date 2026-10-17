@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 793 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 256 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 257 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3192,3 +3192,52 @@ display/padding), never the class bytes; the workspace-reap pattern
 (boot the :3200 server inside every orchestrator call — the sandbox
 reaps detached processes between calls; the agent-browser daemon
 survives because it self-daemonizes).
+
+## Session 53 (parity round 52) — the 20th-deploy re-audit + the bottom-nav active-state family
+
+Fresh clone to `da2abaf` (the owner's session_106 journal — the
+session-52 process log, docs-only on the landed round-51 `17182a9`);
+baseline gates ALL GREEN (793/793 unit · 256/256 E2E, no flakes). The
+census re-armed the live edges through the round's deploy event and
+completed the called-out surface's state family.
+
+**The 20TH login deploy — the first to change BOTH chunks** (JS
+`CimHfPLG` → `C2ujlke6`, CSS `CpjiugAb` → `D5oCh2kx`; app
+fingerprints `C-IrDy5f`/`BGNH4KkS` unchanged) — verify-r45 re-audited
+standalone: **13/13 MATCH**. App side quiet through the deploy:
+standing audits **5/5** + route sweep **12/12** + **verify-r49 13/13**
+(the confirmation ladder).
+
+**THE NAV-REGISTRY DRIFT RE-CHECK**: both chunks of the login build
+churned — the strongest re-read justification yet. BOTH sides'
+complete desktop trees re-read live (all groups expanded, 1440×900):
+**52 entries each — 10 group triggers + 44 leaves — labels, hrefs,
+and order all MATCH**. Zero drift through the 20th deploy; the
+R52-A1/A2 tripwires remain the standing guard.
+
+**THE BOTTOM-NAV ACTIVE-STATE FAMILY** (the user-called-out surface's
+last state gap — rounds 50/51 censused the active tab on /dashboard
+only): all FIVE tab routes paired live at 390×844 — each route
+highlights exactly its own tab (Home/Staff/Tasks/Attendance/Profile),
+the active tab computing `rgb(37,99,235)` on the `rgb(239,246,255)`
+pill, the siblings `rgb(71,85,105)` on transparent, icons tracking
+their labels — identical both sides on all five routes. **Pinned**
+(R53-A): the E2E test walking the four unpaired tab routes asserting
+each tab's active computed styles + an inactive sibling — a
+nav-config active-matching regression (pathname === href is exact) or
+a Tailwind engine change now surfaces as a RED pin immediately.
+
+**The audit's small fix**: the vitest.config.ts header comment still
+carried another project's domain list ("router, clarify questions,
+plan sanitizer, check-in mapping" — the task-management heritage);
+aligned to the real unit seams (db-path, auth, utils, tokens,
+validation, the recipe pins). No behavior change.
+
+**Pins**: 1 E2E (R53-A). Gates: lint 0/0 · tsc ✓ · **793/793 unit**
+(unchanged) · build ✓ · **257/257 E2E** (+1).
+
+**The round's instrument lesson**: the per-route state-family census
+— when a state recipe (the active tab) is route-dependent, census
+the family across EVERY route that exhibits it, not just the first
+(/dashboard); the E2E pin then walks the same family so the
+active-matching logic is guarded per-route, not per-recipe.
