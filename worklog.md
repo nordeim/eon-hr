@@ -1370,3 +1370,26 @@ Stage Summary:
 - Round 49 delivered: every app route now has a deep-measured interior (the r45-r49 arc complete) — the glyph family corrected across 7 pages, shiftswap's stat/pill/empty contracts, staffrequests' Radix Tabs form, the shared Table wrapper's bare form, and the census's verified-matching set spec-pinned
 - Gates: 789/789 unit (+18) · 252/252 E2E (+10) · 366 captures · verify-r49 13/13 · verify-r45 13/13 ×2 (the 16th+17th deploys) · standing 5/5 · sweep 12/12 · pushed at 7c363b5
 - Frontier after this round: the login watch stays armed (17 deploys); the byte-parity backlog (CardTitle forms, badge leading-5, #fafafa/#fff, chart line counts); the with-data superset surfaces stay REF-unmeasurable at the demo's zero state
+
+---
+Task ID: session-51
+Agent: main (Super Z)
+Task: eon-hr parity round 50 (session 51) — the route-casing alias + the mobile-nav census: audit, TDD fix, live verification, docs, push
+
+Work Log:
+- Pulled to f228a08 (the owner's session_102 journal — docs-only on the landed round-49 c1c44e7; the workspace SURVIVED this time, no re-clone). Phase-1 docs re-read (AGENTS/CLAUDE/README/PAD/SKILL + session_101/remediation-plan-session50/worklog/session_102); baseline gates ALL GREEN: lint 0/0 · tsc ✓ · 789/789 unit · build ✓ · 252/252 E2E
+- Skills audit of the round-49 delta (staffrequests' Tabs refactor, the shared Table wrapper, shiftswap/npref/employeeportal/payrollengine/payrollmodule/requestsettings/surveyanalytics) — clean; the TW-v4 skill cross-check (bare-border currentColor risk, hidden-attr priority) — no findings; two stale doc counts found (the SKILL State line 718/217, the CLAUDE pyramid table 656/190)
+- Redeploy watch: the 18TH login deploy (JS DJGK9Qoy→ChN8O3_i, CSS CpjiugAb quiet) — verify-r45 standalone 13/13 MATCH (the standing-run orchestrator's embedded copy ETIMEDOUT under load — the documented cap-trap); app side quiet: standing audits 5/5 + route sweep 12/12; scandihaven (the tech-stack model) unchanged since Oct 4
+- THE MOBILE-NAV CENSUS (the called-out surface, paired live at 390×844, probe-r51-mobile.mjs + probe-r51-zone.mjs): the kicker EXACT (class/h=53/y=89/scroll-away, scrollY 178 both), the header EXACT, the bottom bar + 5 tabs render-equal (member-order + the pb-[env(safe-area-inset-bottom)] superset member; the active tab computes rgb(37,99,235)/rgb(239,246,255) both), the drawer render-equal (w=288, borderR #e5e5e5, bg #fafafa, 500/300ms slides; REF's 13 footer buttons = the clone's 12 + REF's own hidden sheet-Close; REF's 2 unlabeled = the clone's aria-label supersets; overlay rgba(0,0,0,0.8) both)
+- THE FINDING — THE /DASHBOARD ROUTE-CASING GAP: REF's platform serves case-insensitively (its canonical capital /Dashboard — the redirect target — AND the lowercase form both render); the clone 404'd on the capital form (found because the zone-probe's kicker read came back null — the 404-masquerade lesson). Fix: the next.config.ts rewrite /Dashboard→/dashboard (URL unchanged like REF; the re-export-directory alternative would collide on macOS checkouts)
+- Plan saved (docs/remediation-plan-session51.md) + validated against the codebase. TDD: 2 RED pins (R51-A1/A2) → GREEN (the rewrite) + the session-51 casing spec (3 E2E: URL-unchanged serve + plain title, the lowercase regression guard, the auth-guard ride-through) + the live paired read MATCH (path/h1/title/widgets)
+- The byte-backlog assessed: the CardTitle text-base/leading-none pair, the badge leading-5 no-op, #fafafa/#fff, the chart line-count/mount-order — all documented render-equal allowances, none actioned
+- Gates: lint 0/0 · tsc ✓ · 791/791 unit (+2) · build ✓ · 255/255 E2E (+3)
+- COMMITTED + PUSHED at the first green stack (3acfc72 via the ssh wrapper + the paramiko shim + the EXPLICIT --remote; remote verified == HEAD; the operator key shredded), then the screenshots/docs phase
+- 8 screenshots (232-235 pairs — the mobile at-rest chrome, the drawer open, the casing alias desktop + mobile) → 380 PNG; DB pristine (the loading-probe user swept — scripts/sweep-loading-probe.ts persisted for the per-window trap); .env.example verified
+- Docs: AGENTS session-51 layer + the Commands counts (791/255), SKILL 3.34.0 + §61 + the State-line fix, CLAUDE line-7 + the pyramid-table refresh (both had drifted), README counts + the session-51 E2E tail, docs/session_103.md, the plan's completion record, this worklog
+
+Stage Summary:
+- Round 50 delivered: the /Dashboard route-casing alias (the real functional gap found by the mobile-nav census — closed with the next.config rewrite, pinned unit+E2E+live), the mobile navigation menu verified paired-live at 390×844 (the kicker/header EXACT, the bar/tabs/drawer render-equal through the documented allowances), the 18th login deploy re-audited 13/13, the byte-backlog assessed as documented allowances, and the doc counts refreshed to 791/255
+- Gates: 791/791 unit (+2) · 255/255 E2E (+3) · verify-r45 13/13 (the 18th deploy) · standing 5/5 · sweep 12/12 · 380 captures · pushed at 3acfc72 (+ the docs layer)
+- Frontier after this round: the login watch stays armed (18 deploys); the with-data superset surfaces stay REF-unmeasurable at the demo's zero state; the byte-backlog stays documented-allowance territory

@@ -3058,3 +3058,70 @@ task-management repo — a dry-run against the default fails
 non-fast-forward against an unrelated history); the orchestrator's
 outer run() must exceed verify-r45's full runtime (a 120s cap
 ETIMEDOUT the whole audit — the buffered output is lost on timeout).\n
+## Session 51 (parity round 50) — the route-casing alias + the mobile-nav census
+
+Pulled to `f228a08` (the owner's session_102 journal — docs-only on the
+landed round-49 `c1c44e7`); the baseline held (789/789 unit · 252/252
+E2E). The round's census re-verified the frontier's live edges and found
+one real functional gap.
+
+**The 18TH login deploy** (JS `DJGK9Qoy` → `ChN8O3_i`, CSS quiet) —
+verify-r45 re-audited standalone: **13/13 MATCH** (the standing-run
+orchestrator's embedded copy ETIMEDOUT under load — the documented
+cap-trap; the standalone run is authoritative). App side quiet through
+the deploy: standing audits **5/5** + route sweep **12/12**.
+
+**THE FINDING — the /Dashboard route-casing gap**: REF's platform
+serves routes case-insensitively (both `/Dashboard` — its canonical
+form, the target of its own /organizationsetup + /dynamicdashboard
+redirects — and `/dashboard`, its internal-link form, render the
+dashboard; the lowercase URL stays lowercase). The clone 404'd on the
+capital form. **The fix**: a `next.config.ts` rewrite
+`/Dashboard → /dashboard` — the URL bar keeps `/Dashboard` exactly like
+REF (a rewrite, not a redirect), the content/metadata/auth-guard riding
+the real lowercase route. Chosen over an R31-B1-style re-export
+DIRECTORY because `Dashboard/` beside `dashboard/` collides on
+case-insensitive checkouts (macOS). Scope: the canonical form only.
+Pinned by R51-A1/A2 (unit) + the session-51 casing spec (3 E2E: the
+URL-unchanged serve, the lowercase regression guard, the auth-guard
+ride-through) + a live paired read (path/h1/title/widgets MATCH).
+
+**The mobile navigation census** (the round's called-out surface, paired
+live at 390×844 on /dashboard): the kicker EXACT (`md:hidden sticky
+top-0 z-20 … px-4 py-3 safe-area-top`, h=53, y=89, the scroll-away
+truth — scrollY 178 both sides); the header EXACT; the bottom bar +
+five tabs render-equal (member-order-only variances + the clone's
+`pb-[env(safe-area-inset-bottom)]` safe-area superset member; the
+active tab computes identically — rgb(37,99,235) on rgb(239,246,255));
+the drawer render-equal (w=288, borderR 1px #e5e5e5, bg #fafafa, the
+500ms/300ms slide timings — REF authors `data-[state=*]:duration-*`,
+the clone the explicit `[animation-duration:*]` utilities; the footer
+census: REF's 13 = the clone's 12 + REF's sheet-Close which REF itself
+hides via `[&>button]:hidden`; REF's 2 unlabeled buttons = the clone's
+aria-label supersets; the overlay computes rgba(0,0,0,0.8) both sides).
+
+**The byte-parity backlog assessed**: the CardTitle text-base/
+leading-none per-page pair (the DIV base matches REF's default form;
+the leading-none pages' text-base is inert — a DIV inherits 16px), the
+badge-span leading-5 no-op (text-sm's default IS leading-5), the
+#fafafa/#fff CTA-text pair (REF per-button inconsistent, computed
+equal), the chart line-count/mount-order pairs — all documented
+render-equal allowances, no action.
+
+**Pins**: 2 new (R51-A1/A2) + the session-51 casing spec (3). Gates:
+lint 0/0 · tsc ✓ · **791/791 unit** (+2) · build ✓ · **255/255 E2E**
+(+3). 8 screenshots (232-235 pairs — the mobile at-rest chrome, the
+drawer open, the casing alias desktop + mobile) → **380 PNG**. DB
+pristine (the verify-r45 loading-probe user swept AGAIN — the known
+per-window trap; sweep-loading-probe.ts persisted). The doc-count
+refresh: CLAUDE/README/AGENTS/SKILL aligned to 791/255 (the CLAUDE
+table and the SKILL State line had drifted sessions behind).
+
+**The round's instrument lessons**: the agent-browser eval flakes on
+long one-shot reads (split the drawer panel/footer reads — the
+zone-probe's combined eval failed both sides while the split reads
+worked); a `div.md\:hidden`-sticky filter on a 404 page finds nothing —
+always confirm the page rendered before reading interiors (the casing
+gap masqueraded as a missing kicker for one probe iteration); the
+`:3200` standalone server SURVIVES the orchestrator's process exit
+(sometimes) — always kill-by-port before rebooting on a new build.

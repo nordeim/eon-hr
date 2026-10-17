@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.33.0 (session-50 remediation complete — the never-deep-measured interiors: the glyph family corrections across 7 pages + shiftswap's stat icons/pills/empty contracts + staffrequests' Radix Tabs form + the bare table/search forms) · **Last updated:** 2026-10-17
+> **Version:** 3.34.0 (session-51 remediation complete — the /Dashboard route-casing rewrite + the mobile-nav census verified-matching + the byte-backlog assessment + the doc-count refresh) · **Last updated:** 2026-10-17
 > **State:** 791 unit + 255 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -3183,3 +3183,75 @@ audits 5/5 + route sweep 12/12. 18 screenshots (184-192) → 294 PNG.
 DB pristine. Tooling: the Next standalone server does NOT load .env —
 pass DATABASE_URL inline; the agent-browser evals flake under
 sustained load (verify-r47's evalOn retries once).
+
+## §61 Session 51 (parity round 50) — the route-casing alias + the mobile-nav census
+
+The frontier after §60: every app route's interior was deep-measured
+(rounds 45-49); the remaining veins were the login redeploy watch, the
+byte-parity backlog, and the live edges. This round's census re-verified
+them and found one real functional gap.
+
+**THE ROUTE-CASING GAP (the round's fix)**: REF's Base44 platform serves
+routes case-INSENSITIVELY — its canonical dashboard URL is the capital
+`/Dashboard` (the target of its own /organizationsetup +
+/dynamicdashboard redirects) while its internal links use the lowercase
+form (which stays lowercase in the URL bar — no redirect). The clone's
+Next.js on a case-sensitive FS served only `/dashboard` — the capital
+form 404'd (a user following any REF-emitted /Dashboard URL or bookmark
+hit the clone's 404). **The instrument decision (transferable)**: the
+fix is a `next.config.ts` rewrite (`{ source: "/Dashboard", destination:
+"/dashboard" }`) — the URL bar keeps /Dashboard exactly like REF (a
+rewrite, not a redirect), and the content/metadata/auth-guard ride the
+REAL lowercase route (no duplication). The alternative — an R31-B1-style
+re-export DIRECTORY (`Dashboard/page.tsx` beside `dashboard/page.tsx`)
+— collides on case-insensitive checkouts (macOS) and duplicates the
+metadata wiring; the rewrite carries none of that risk. Scope: the one
+canonical capital form only (REF's other internal links are all
+lowercase; wildcard-case aliasing is not a real surface). Pinned by
+R51-A1/A2 + the session-51 casing spec (the URL-unchanged serve, the
+lowercase regression guard, the auth-guard ride-through — a rewrite maps
+into the (app) route stack, so the layout guard applies).
+
+**THE MOBILE-NAV CENSUS (the round's called-out surface, paired live at
+390×844)**: the kicker EXACT byte-for-byte (`md:hidden sticky top-0
+z-20 bg-white dark:bg-slate-900 border-b border-slate-200
+dark:border-slate-800 px-4 py-3 safe-area-top`, h=53, y=89 — and the
+scroll-away truth: the sticky never engages inside the scroller stack,
+the bar scrolls 1:1 with content, scrollY 178 both sides); the 73px
+header EXACT; the bottom bar + five tabs render-equal (member-order-only
+class variances — cn() merge order; the clone's
+`pb-[env(safe-area-inset-bottom)]` safe-area superset member renders
+0px unnotched; the active tab computes identically — text rgb(37,99,235)
+on bg rgb(239,246,255)); the drawer render-equal (w=288, borderR 1px
+#e5e5e5 — the default border token, distinct from the desktop sidebar's
+slate-200 — bg #fafafa, the 500ms/300ms slide timings: REF authors
+`data-[state=*]:duration-*`, the clone the explicit
+`[animation-duration:*]` utilities; the footer census: REF's 13 buttons
+= the clone's 12 + REF's own sheet-Close which REF HIDES via
+`[&>button]:hidden`; REF's 2 unlabeled buttons = the clone's aria-label
+supersets; the overlay computes rgba(0,0,0,0.8) both sides).
+
+**THE BYTE-PARITY BACKLOG (assessed — all documented render-equal
+allowances)**: the CardTitle text-base/leading-none per-page pair (the
+DIV base matches REF's default form; on the leading-none pages the
+text-base member is inert — a DIV inherits 16px from body), the
+badge-span leading-5 no-op (text-sm's default line-height IS leading-5),
+the #fafafa/#fff CTA-text pair (REF per-button inconsistent; computed
+equal), the chart line-count/recharts-mount-order pairs. None actioned —
+changing them would break verified pins for zero rendered difference.
+
+**The instrument lessons**: agent-browser evals flake on LONG one-shot
+reads (the zone-probe's combined drawer panel+footer eval failed both
+sides; the split reads worked first try); a `div.md\:hidden`-sticky
+interior filter finds nothing on a 404 page — always verify the page
+actually rendered before reading interiors (the casing gap masqueraded
+as a missing kicker for one probe iteration); the :3200 standalone
+server sometimes SURVIVES its orchestrator's exit — kill-by-port before
+rebooting on a new build.
+
+Pins: 2 new (R51-A1/A2) + the session-51 casing spec (3). Gates: lint
+0/0 · tsc ✓ · 791/791 unit (+2) · build ✓ · 255/255 E2E (+3). Live:
+verify-r45 13/13 (the 18TH login deploy `DJGK9Qoy`→`ChN8O3_i`) +
+standing audits 5/5 + route sweep 12/12 + the /Dashboard live pair
+MATCH. 8 screenshots (232-235) → 380 PNG. DB pristine (the
+loading-probe user swept — scripts/sweep-loading-probe.ts persisted).

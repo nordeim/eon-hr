@@ -126,3 +126,34 @@ lint 0/0 · tsc ✓ · unit (789 + the round-51 pins) · build ✓ · E2E
 · standing audits 5/5 + route sweep 12/12 (done) · the live /Dashboard
 pair (REF vs LOC after the rewrite) · DB pristine (the loading-probe
 user swept — it re-fired this window) · `.env.example` verified.
+
+---
+
+## Completion record (session 51, delivered)
+
+- **Gates**: lint 0/0 · tsc ✓ · **791/791 unit** (+2: R51-A1 the
+  rewrite contract, R51-A2 the scope lock) · build ✓ · **255/255 E2E**
+  (+3 — the session-51 casing spec: the /Dashboard URL-unchanged serve
+  + plain title, the /dashboard lowercase regression guard, the
+  auth-guard ride-through).
+- **Live verification**: verify-r45 **13/13** on the 18TH login deploy
+  (`DJGK9Qoy`→`ChN8O3_i`, standalone) + standing audits **5/5** + route
+  sweep **12/12** + the **/Dashboard live pair MATCH** (path/h1/title/
+  widgets both sides).
+- **The mobile-nav census record**: the kicker EXACT, the header EXACT,
+  the bottom bar/tabs render-equal (member-order + the safe-area
+  superset member), the drawer render-equal (geometry + timings + the
+  hidden-close/aria-label footer census) — §B above, pinned in
+  SKILL §61.
+- **Screenshots**: 4 pairs (232-235: the mobile at-rest chrome, the
+  drawer open, the casing alias desktop + mobile) → **380 PNG**. DB
+  pristine (the loading-probe user swept — `scripts/sweep-loading-probe.ts`
+  persisted). `.env.example` verified.
+- **The push protocol held**: the code batch committed + pushed at the
+  FIRST green stack (`3acfc72` via the ssh wrapper + the paramiko shim
+  + the explicit `--remote git@github.com:nordeim/eon-hr.git`), the
+  screenshots/docs layer after.
+- **Tooling lessons**: the agent-browser long-eval flake (split the
+  reads); the 404-masquerade (verify the page rendered before reading
+  interiors); the surviving :3200 server (kill-by-port before
+  rebuilding).
