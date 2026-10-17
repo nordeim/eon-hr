@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.34.0 (session-51 remediation complete — the /Dashboard route-casing rewrite + the mobile-nav census verified-matching + the byte-backlog assessment + the doc-count refresh) · **Last updated:** 2026-10-17
-> **State:** 791 unit + 255 E2E tests green, lint/typecheck/build
+> **Version:** 3.35.0 (session-52 remediation complete — the nav-registry drift check 44/44 + the mobile drawer's expanded-group census verified-matching + the 19th-deploy login re-audit + the doc-count refresh) · **Last updated:** 2026-10-18
+> **State:** 793 unit + 256 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3255,3 +3255,44 @@ verify-r45 13/13 (the 18TH login deploy `DJGK9Qoy`→`ChN8O3_i`) +
 standing audits 5/5 + route sweep 12/12 + the /Dashboard live pair
 MATCH. 8 screenshots (232-235) → 380 PNG. DB pristine (the
 loading-probe user swept — scripts/sweep-loading-probe.ts persisted).
+
+## §62 Session 52 (parity round 51) — the nav-registry drift check + the computed-truth census method
+
+The round's two new measurements, both transferable:
+
+**The nav-registry drift check.** REF's login build is under ACTIVE
+development (19 deploys at this census); the clone's 61-route registry
+was fixed at the session-32 census. The drift check: expand ALL 8 REF
+groups live (`[data-sidebar="sidebar"]` + the chevron buttons), read
+the complete nav tree (`a[href]` href+label+order), and diff against
+`NAV_ITEMS`. Result: 44/44 links match — no new REF modules. The pin
+(R52-A1/A2 in `tests/unit/recipes.test.ts`): the ordered 44-href
+registry tripwire + the 5-tab BOTTOM_NAV set — a future REF module or a
+clone nav refactor both surface as an immediate RED. Run this census
+whenever the deploy watch fires; the pin catches the clone side between
+censuses.
+
+**The computed-truth census method.** When the two platforms differ in
+class-list CONSTRUCTION — REF's runtime CONCATENATES the shadcn base
+with per-item extensions (yielding `gap-2 gap-3` + a duplicated `flex`
+in one attribute), the clone's `cn()`/tailwind-merge DEDUPES to the
+winner (`gap-3`) — the class BYTES can never match, but the rendered
+result can. The method: read the COMPUTED cascade result
+(`getComputedStyle`: gap, display, padding) + geometry, and pin THAT
+(R52-B in `tests/e2e/mobile-navigation.spec.ts`). Byte-comparing class
+strings across construction-different platforms produces false diffs;
+comparing computed styles produces ground truth. The same method
+settled the round-50 tab member-order family and the byte-backlog
+allowances — this round made it explicit and E2E-pinned.
+
+**The instrument lessons.** The agent-browser long-eval flake re-hit at
+~1.2k chars (failed under rapid sequencing on BOTH apps; the identical
+eval ran clean standalone) — the standing fix: keep one-shot evals
+small, split composite reads, and retry once on command failure. The
+r52 `evalOn` pattern: parse agent-browser's pretty-printed object
+output directly (it is NOT quote-wrapped for objects; scalar strings
+ARE — unwrap them), and never let a scalar's parse failure masquerade
+as an eval failure. The workspace-reap pattern: the sandbox reaps
+detached processes between tool calls — every orchestrator boots its
+own :3200 server (kill-by-port first), while the agent-browser daemon
+survives because it self-daemonizes.

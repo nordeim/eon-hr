@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 791 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 255 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 793 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 256 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3125,3 +3125,70 @@ always confirm the page rendered before reading interiors (the casing
 gap masqueraded as a missing kicker for one probe iteration); the
 `:3200` standalone server SURVIVES the orchestrator's process exit
 (sometimes) — always kill-by-port before rebooting on a new build.
+
+## Session 52 (parity round 51) — the nav-registry drift check + the drawer-group census
+
+Fresh clone to `6a39a75` (the owner's session_104 journal —
+docs-only on the landed round-50 `01c4c2d`); baseline gates ALL
+GREEN (791/791 unit · 255/255 E2E — the one session-40 input-family
+flake re-verified green isolated, the documented dialog-animation read
+under load). The census re-armed the frontier's live edges and extended
+them with two new measurements.
+
+**The 19TH login deploy** (JS `ChN8O3_i` → `CimHfPLG`, CSS `CpjiugAb`
+quiet, app fingerprints `C-IrDy5f`/`BGNH4KkS` unchanged) — verify-r45
+re-audited standalone: **13/13 MATCH**. App side quiet through the
+deploy: standing audits **5/5** + route sweep **12/12** + **verify-r49
+13/13** (the newest deep-interior instrument re-run as the confirmation
+ladder).
+
+**THE NAV-REGISTRY DRIFT CHECK** (a new census — REF's login build is
+under ACTIVE development; its nav tree could have grown modules the
+clone lacks): all 8 REF groups expanded live, the complete tree read,
+and compared against the clone's `NAV_ITEMS` — **44/44 links match**
+(same hrefs, labels, order; the 5 bottom tabs + the dashboard's
+in-page links all present in the clone's 61-route registry). No new
+REF modules. **Pinned** (R52-A1/A2): the ordered 44-href registry
+tripwire — any future drift on EITHER side surfaces as a RED pin
+immediately.
+
+**The mobile drawer's EXPANDED-GROUP interior** (the user-called-out
+surface's last unpaired zone — round 50 pinned the at-rest chrome +
+panel/footer; the expanded groups' interiors were E2E-covered but
+never paired-live): the Employees + Analytics groups paired at
+390×844 — the group trigger heads member-set MATCH; the sub-item
+family **computed-truth MATCH** (gap 12px, display flex, padding, 32px
+rows, 16px icons, rgb(71,85,105)). The one cls delta: REF's sub-item
+class lists carry `gap-2 gap-3` + a duplicated `flex` (its runtime
+CONCATENATES the shadcn base with the per-item extensions) while the
+clone's `cn()` dedupes to `gap-3` — the computed cascade resolves both
+to the same rendered family (the round-50 tab member-order allowance's
+sibling). **Pinned** (R52-B): the E2E computed-contract — the expanded
+group's sub-items compute gap 12px / display flex / 32px rows — so a
+Tailwind engine change or a nav refactor cannot silently drift the
+drawer's interior.
+
+**The doc-count refresh** (the census's codebase validation surfaced
+stale structural counts — the test counts were current but the
+route/API/model counts had drifted): CLAUDE (51→54 API endpoints,
+60→61 routes, the stale "47 routes render" E2E claim → the 61-route
+registry, 793/256 + the session-52 tails), README (45→47 models ×3,
+49→54 handlers, 46→61 (app) routes, 255→256), PAD (45→47 models ×3,
+the 748-line schema). Historical session layers stay untouched (the
+r51 precedent).
+
+**Pins**: 2 unit (R52-A1/A2) + 1 E2E (R52-B). Gates: lint 0/0 ·
+tsc ✓ · **793/793 unit** (+2) · build ✓ · **256/256 E2E** (+1).
+
+**The round's instrument lessons**: the agent-browser long-eval flake
+re-hit (a ~1.2k-char one-shot failed under rapid sequencing on BOTH
+apps while the same eval ran clean standalone — the retry guard +
+the split reads are the standing fix; the r52 evalOn pattern: parse
+agent-browser's pretty-printed object output directly, unwrap quoted
+scalars, retry once on command failure); the computed-truth census
+method — when the platforms differ in class-list CONSTRUCTION
+(concatenation vs merge), pin the computed cascade result (gap/
+display/padding), never the class bytes; the workspace-reap pattern
+(boot the :3200 server inside every orchestrator call — the sandbox
+reaps detached processes between calls; the agent-browser daemon
+survives because it self-daemonizes).

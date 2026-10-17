@@ -116,6 +116,38 @@ test.describe("mobile navigation", () => {
     await page.keyboard.press("Escape");
   });
 
+  test("the expanded drawer group's sub-items render the computed family (session 52, R52-B)", async ({ page }) => {
+    // Session 52 (R52-B): the round-51 paired-live census of the mobile
+    // drawer's EXPANDED-GROUP interior (390x844, Employees + Analytics
+    // groups, REF vs the seeded LOC standalone). REF's class lists carry
+    // gap-2 gap-3 + a duplicated flex (its runtime CONCATENATES the shadcn
+    // base with the per-item extensions) while the clone's cn() dedupes to
+    // gap-3 — the computed cascade resolves both to the SAME rendered
+    // family. This pin holds the computed truth (not the class bytes) so
+    // a Tailwind engine change or a nav-config refactor cannot silently
+    // drift the mobile drawer's interior.
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const panel = page.getByRole("dialog", { name: "Navigation menu" });
+    await panel.getByRole("button", { name: "Employees", exact: true }).click();
+    const allEmployees = panel.getByRole("link", { name: "All Employees" });
+    await expect(allEmployees).toBeVisible();
+    // the computed family (live-measured identical on both apps):
+    await expect(allEmployees).toHaveCSS("display", "flex");
+    await expect(allEmployees).toHaveCSS("row-gap", "12px");
+    await expect(allEmployees).toHaveCSS("column-gap", "12px");
+    await expect(allEmployees).toHaveCSS("height", "32px");
+    await expect(allEmployees).toHaveCSS("padding-left", "12px");
+    await expect(allEmployees).toHaveCSS("padding-top", "8px");
+    await expect(allEmployees).toHaveCSS("font-size", "14px");
+    await expect(allEmployees).toHaveCSS("color", "rgb(71, 85, 105)");
+    await expect(allEmployees.locator("svg").first()).toHaveCSS("width", "16px");
+    // the group's siblings render the same family (the census read all 6)
+    const leave = panel.getByRole("link", { name: "Leave Requests" });
+    await expect(leave).toHaveCSS("row-gap", "12px");
+    await expect(leave).toHaveCSS("height", "32px");
+    await page.keyboard.press("Escape");
+  });
+
   test("bottom tab bar highlights the active tab blue (session 5; bg pill session 21)", async ({ page }) => {
     // Re-measured session 5: the reference renders the ACTIVE tab in
     // blue-600 #2563EB (icon + label) — the session-4 "no highlight" note

@@ -5716,3 +5716,71 @@ describe("session-51: the route-casing alias + the mobile-nav census record (rou
     expect(upperSources).toEqual(['source: "/Dashboard"']);
   });
 });
+
+describe("session-52: the nav-registry tripwire + the drawer-group census record (round 51)", () => {
+  it("R52-A1: NAV_ITEMS is REF's verified 44-link registry, in order — the drift tripwire (the round-51 live census: all 8 groups expanded on REF, 44/44 links matched)", () => {
+    // Session 52 (R52-A): REF's login build is under ACTIVE development
+    // (19 deploys at this census). The session-32 orphan-route hunt fixed
+    // the clone's registry at REF's 61-page census; this pin trips if
+    // EITHER side drifts — a REF-side module addition caught by the next
+    // live census, or a clone-side nav-config refactor caught immediately
+    // by this RED pin. The hrefs below are the live-verified order (REF
+    // @1440x900, all groups expanded, agent-browser DOM read).
+    const src = read("src", "lib", "nav-config.ts");
+    const navBlock = src.split("export const BOTTOM_NAV")[0];
+    const hrefs = [...navBlock.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs).toEqual([
+      "/dashboard",
+      "/employees",
+      "/taskmanager",
+      "/allleaverequests",
+      "/attendance",
+      "/shiftcalendar",
+      "/documenttracker",
+      "/payroll",
+      "/payrollmodule",
+      "/payrollengine",
+      "/loans",
+      "/expenses",
+      "/recruitment",
+      "/recruitmentkanban",
+      "/interviewassistant",
+      "/templates",
+      "/offboarding",
+      "/training",
+      "/compliancedashboard",
+      "/hrletters",
+      "/surveys",
+      "/templates",
+      "/performancemanagement",
+      "/evaluations",
+      "/workflowautomation",
+      "/assetmanagement",
+      "/staffrequests",
+      "/companywall",
+      "/chat",
+      "/announcements",
+      "/notificationpreferences",
+      "/communications",
+      "/analytics",
+      "/advancedanalytics",
+      "/analyticsdashboard",
+      "/surveyanalytics",
+      "/attendancedashboard",
+      "/hrreports",
+      "/reports",
+      "/organogram",
+      "/hrassistantchat",
+      "/settings",
+      "/securitysettings",
+      "/workflowconfigpage",
+    ]);
+  });
+
+  it("R52-A2: BOTTOM_NAV is the five-tab primary bar (REF's bottom bar census, round 50 + this round)", () => {
+    const src = read("src", "lib", "nav-config.ts");
+    const bottomBlock = src.split("export const BOTTOM_NAV")[1] ?? "";
+    const hrefs = [...bottomBlock.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs).toEqual(["/dashboard", "/employees", "/taskmanager", "/attendance", "/profile"]);
+  });
+});

@@ -204,7 +204,7 @@ Dependency direction: L0 → L1 → L2 → L3; L3 never imports upward.
 ```text
 eon-hr/
 ├── prisma/
-│   ├── schema.prisma            ← 45 models; single DDL source
+│   ├── schema.prisma            ← 47 models; single DDL source
 │   └── seed.ts                  ← idempotent demo seed (natural-key upserts)
 ├── db/                          ← SQLite files (gitignored); db-path contract target
 ├── src/
@@ -303,7 +303,7 @@ export default async function Page() {
 
 ### 4.1 Database Schema
 
-45 models in one `schema.prisma`. Domain map (Mermaid ER, simplified to core relations):
+47 models in one `schema.prisma`. Domain map (Mermaid ER, simplified to core relations):
 
 ```mermaid
 erDiagram
@@ -564,7 +564,7 @@ Full stack verification: `curl http://localhost:3000/api/health` → `{"status":
 
 | File | Lines (~) | Purpose |
 |---|---|---|
-| `prisma/schema.prisma` | 760 | 45-model DDL source |
+| `prisma/schema.prisma` | 748 | 47-model DDL source |
 | `prisma/seed.ts` | 120 | Idempotent demo seed |
 | `src/app/globals.css` | 120 | Tailwind 4 theme + all six trap pins |
 | `src/lib/db-path.ts` | 107 | Schema-relative SQLite URL resolution (the portability seam) |
