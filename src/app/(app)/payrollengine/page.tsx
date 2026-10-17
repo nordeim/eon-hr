@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Calculator, CalendarDays, CheckCircle2, Clock4, Cog, Loader2, TrendingDown, Users } from "lucide-react";
+import { Calculator, CalendarDays, CheckCircle2, Clock4, Loader2, TrendingDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -162,7 +162,7 @@ export default function PayrollEnginePage() {
           button (180x36, icon mr-2 — measured rgb(5,150,105)); hint line
           text-xs text-slate-500 mt-3 below. The clone's working engine
           state rides the reference's own furniture. */}
-      <Card className="border-0">
+      <Card className="border-0 shadow-sm">
         <CardContent className="p-5">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-2 leading-5">
@@ -196,7 +196,7 @@ export default function PayrollEnginePage() {
               disabled={generating}
               className="bg-emerald-600 text-primary-foreground shadow hover:bg-[#047857]"
             >
-              {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Cog className="mr-2" aria-hidden="true" />}
+              {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Calculator className="mr-2" aria-hidden="true" />}
               Generate Payroll
             </Button>
           </div>
@@ -300,7 +300,7 @@ export default function PayrollEnginePage() {
            card, p-6 py-20 text-center, with the 56px slate-200 Calculator
            icon, an 18px/500 slate-500 line and a 14px slate-400 line
            (measured y=408/480/512). */
-        <Card className="border-0">
+        <Card className="border-0 shadow-sm">
           <CardContent className="p-6 py-20 text-center">
             <Calculator className="mx-auto mb-4 h-14 w-14 text-slate-200" aria-hidden="true" />
             <p className="text-lg font-medium text-slate-500">Select a month and click &quot;Generate Payroll&quot;</p>

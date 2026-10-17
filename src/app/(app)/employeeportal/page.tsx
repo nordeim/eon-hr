@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardList } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -58,11 +58,13 @@ export default async function EmployeePortalPage() {
         <CardContent className="p-8 text-center">
           {!employee || !process ? (
             <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                <ClipboardList className="h-8 w-8 text-blue-600" aria-hidden="true" />
-              </div>
-              <h2 className="text-xl font-bold text-slate-900">No Onboarding Found</h2>
-              <p className="mt-2 text-slate-600">
+              {/* Session 50 (R49-A7): REF renders the briefcase glyph
+                  DIRECT (w-8 h-8 text-blue-600, inline — centered by the
+                  p-8 text-center; no chip wrapper), H2 mb-2, the P
+                  mt-less — live-measured. */}
+              <Briefcase className="w-8 h-8 text-blue-600" aria-hidden="true" />
+              <h2 className="text-xl font-bold text-slate-900 mb-2">No Onboarding Found</h2>
+              <p className="text-slate-600">
                 You don&apos;t have an active onboarding process yet. Please contact your HR team.
               </p>
             </>

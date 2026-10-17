@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, CheckCheck, FileText, Info, Loader2, Mail, Megaphone, Save, UserPlus, XCircle } from "lucide-react";
+import { Bell, Check, CheckCircle2, Info, Loader2, Mail, Megaphone, Save, Smartphone, UserPlus, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -28,13 +28,18 @@ interface Preferences {
   announcements: boolean;
 }
 
+/* Session 50 (R49-A5): REF's switch-row glyph family, live-measured —
+   mail / bell / check / bell / smartphone / bell, each `w-4 h-4
+   text-slate-600` (the old CheckCircle2/UserPlus/XCircle/Megaphone/Info
+   set was the never-measured guess; iconForType below keeps the
+   with-data superset glyphs — REF's list state is unmeasured). */
 const PREF_ROWS: { key: keyof Preferences; label: string; description: string; icon: React.ReactNode }[] = [
-  { key: "emailEnabled", label: "Email Notifications", description: "Receive notifications via email", icon: <Mail className="h-4 w-4" aria-hidden="true" /> },
-  { key: "inAppEnabled", label: "In-App Notifications", description: "Show notification bell in the app", icon: <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> },
-  { key: "approvals", label: "Approval Decisions", description: "When your request is approved or rejected", icon: <UserPlus className="h-4 w-4" aria-hidden="true" /> },
-  { key: "rejections", label: "Rejection Alerts", description: "Specific alert when a request is rejected", icon: <XCircle className="h-4 w-4" aria-hidden="true" /> },
-  { key: "assignments", label: "Task Assignments", description: "When a task or request is assigned to you", icon: <Megaphone className="h-4 w-4" aria-hidden="true" /> },
-  { key: "announcements", label: "Announcements", description: "Company-wide announcements and notices", icon: <Info className="h-4 w-4" aria-hidden="true" /> },
+  { key: "emailEnabled", label: "Email Notifications", description: "Receive notifications via email", icon: <Mail className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
+  { key: "inAppEnabled", label: "In-App Notifications", description: "Show notification bell in the app", icon: <Bell className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
+  { key: "approvals", label: "Approval Decisions", description: "When your request is approved or rejected", icon: <Check className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
+  { key: "rejections", label: "Rejection Alerts", description: "Specific alert when a request is rejected", icon: <Bell className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
+  { key: "assignments", label: "Task Assignments", description: "When a task or request is assigned to you", icon: <Smartphone className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
+  { key: "announcements", label: "Announcements", description: "Company-wide announcements and notices", icon: <Bell className="w-4 h-4 text-slate-600" aria-hidden="true" /> },
 ];
 
 function iconForType(type: string) {
@@ -165,7 +170,7 @@ export default function NotificationPreferencesPage() {
         <Card>
           <CardContent className="flex items-center justify-center p-4">
             <Button variant="outline" size="sm" onClick={onMarkAllRead} disabled={marking || unread === 0}>
-              <CheckCheck className="mr-1" aria-hidden="true" />
+              <Check className="mr-1" aria-hidden="true" />
               Mark All Read
             </Button>
           </CardContent>
@@ -226,7 +231,7 @@ export default function NotificationPreferencesPage() {
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-8 text-slate-400">
-              <FileText className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
+              <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" aria-hidden="true" />
               <p className="text-sm">No notifications yet</p>
             </div>
           ) : (

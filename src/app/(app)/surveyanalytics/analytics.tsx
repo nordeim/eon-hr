@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, Loader2, MessageSquare, Minus, Sparkles, TrendingUp, Users } from "lucide-react";
+import { Brain, Download, Loader2, MessageSquare, Minus, Sparkles, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -228,7 +228,7 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
               {analyzing ? (
                 <Loader2 className="animate-spin" aria-hidden="true" />
               ) : (
-                <Sparkles className="mr-2" aria-hidden="true" />
+                <Brain className="mr-2" aria-hidden="true" />
               )}
               Run AI Analysis
             </Button>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, CalendarDays, Loader2, Plus } from "lucide-react";
+import { ArrowLeftRight, CircleCheckBig, Clock, Loader2, Plus, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -152,20 +152,26 @@ export default function ShiftSwapPage() {
           section="Shift Management"
           layout="flat36"
           iconClassName="text-violet-600"
-          sectionIcon={<CalendarDays aria-hidden="true" />}
+          sectionIcon={<ArrowLeftRight aria-hidden="true" />}
           title="Shift Swap"
           subtitle="Request, approve, and manage shift swaps"
         />
 
+        {/* Session 50 (R49-B1): REF's stat cards — the PLAIN Card (no
+            border-slate-200/shadow-sm) with the INLINE icon family
+            before each P/P pair (users blue-600, clock yellow-600,
+            calendar orange-600, circle-check-big green-600, all
+            w-5 h-5 — live-measured this round). */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { label: "My Requests", value: counts.myRequests },
-            { label: "Peer Approval Needed", value: counts.peerApproval },
-            { label: "Manager Review", value: counts.managerReview },
-            { label: "Approved", value: counts.approved },
+            { label: "My Requests", value: counts.myRequests, icon: <Users className="w-5 h-5 text-blue-600" aria-hidden="true" /> },
+            { label: "Peer Approval Needed", value: counts.peerApproval, icon: <Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" /> },
+            { label: "Manager Review", value: counts.managerReview, icon: <Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" /> },
+            { label: "Approved", value: counts.approved, icon: <CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" /> },
           ].map((s) => (
-            <Card key={s.label} className="border-slate-200 shadow-sm">
-              <CardContent className="flex items-center gap-3 p-4">
+            <Card key={s.label}>
+              <CardContent className="p-4 flex items-center gap-3">
+                {s.icon}
                 <div>
                   <p className="text-2xl font-bold text-slate-900">{loading ? "…" : s.value}</p>
                   <p className="text-xs text-slate-500">{s.label}</p>
@@ -179,12 +185,14 @@ export default function ShiftSwapPage() {
             `flex gap-1 bg-white border border-slate-200 p-1 rounded-xl`
             container (the pill lands x=293 y=315). */}
         <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-xl w-fit">
+          {/* Session 50 (R49-B2): REF's pill form — py-2 (not h-9) +
+              hover:bg-slate-50 (live-measured). */}
           <button
             type="button"
             onClick={() => setTab("mine")}
             className={cn(
-              "h-9 rounded-lg px-4 text-sm font-medium transition-colors",
-              tab === "mine" ? "bg-violet-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+              tab === "mine" ? "bg-violet-600 text-white" : "text-slate-600 hover:bg-slate-50"
             )}
           >
             My Requests
@@ -193,27 +201,29 @@ export default function ShiftSwapPage() {
             type="button"
             onClick={() => setTab("peer")}
             className={cn(
-              "h-9 rounded-lg px-4 text-sm font-medium transition-colors",
-              tab === "peer" ? "bg-violet-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+              tab === "peer" ? "bg-violet-600 text-white" : "text-slate-600 hover:bg-slate-50"
             )}
           >
             Peer Approval ({counts.peerApproval})
           </button>
         </div>
 
-        <Card className="border-slate-200">
-          <CardContent className="p-6">
+        {/* Session 50 (R49-B3): REF's empty card — the PLAIN Card, the
+            p-12 text-center interior, the arrow-left-right glyph DIRECT
+            (w-12 h-12 mx-auto mb-3 text-slate-300), and the mt-less
+            slate-500 line (live-measured). */}
+        <Card>
+          <CardContent className="p-12 text-center">
             {loading ? (
               <div className="flex h-24 items-center justify-center">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : visible.length === 0 ? (
-              <div className="py-10 text-center">
-                <div className="mb-3 flex justify-center">
-                  <ArrowLeft className="h-12 w-12 text-slate-300" aria-hidden="true" />
-                </div>
-                <p className="text-sm text-slate-500">No swap requests in this category</p>
-              </div>
+              <>
+                <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+                <p className="text-slate-500">No swap requests in this category</p>
+              </>
             ) : (
               <div className="divide-y">
                 {visible.map((s) => (

@@ -155,7 +155,7 @@ export default function RequestSettingsPage() {
           </div>
         </div>
 
-        <Card className="border-slate-200">
+        <Card>
           <CardHeader className="flex flex-col space-y-1.5 border-b p-6">
             {/* REF (round 33): the heads carry icons — Shield blue-600 /
                 Users purple-600, w-5 h-5 (the head renders h=20). */}
@@ -163,9 +163,11 @@ export default function RequestSettingsPage() {
               <Shield className="w-5 h-5 text-blue-600" aria-hidden="true" />
               Approval Workflow
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Set up to 3 approval levels per request category</p>
+            <p className="text-sm text-slate-500">Set up to 3 approval levels per request category</p>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 space-y-4">
+            {/* Session 50 (R49-B7): REF's interior — p-6 space-y-4
+                (live-measured); the card itself is the PLAIN Card. */}
             {/* REF's 4-col row (round 33): name + email + level + Add;
                 mb-4 spaces the level rows (REF: 16 then 12s). */}
             <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -182,7 +184,7 @@ export default function RequestSettingsPage() {
                 </SelectContent>
               </Select>
               <Button variant="dark" onClick={() => void onAdd()} disabled={adding}>
-                {adding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="mr-2" aria-hidden="true" />}
+                {adding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="mr-1" aria-hidden="true" />}
                 Add
               </Button>
             </div>
@@ -219,17 +221,17 @@ export default function RequestSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200">
+        <Card>
           <CardHeader className="flex flex-col space-y-1.5 border-b p-6">
             <CardTitle className="flex items-center gap-2 font-semibold leading-none tracking-tight">
               <Users className="w-5 h-5 text-purple-600" aria-hidden="true" />
               Request Limits
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-slate-500">
               Set max request counts or financial limits per period (petty cash, fuel, etc.)
             </p>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 space-y-4">
             {/* REF's 3-row limits grid */}
             <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
               <Input placeholder="Limit name (e.g. Petty Cash Monthly)" value={limitName} onChange={(e) => setLimitName(e.target.value)} aria-label="Limit name" />
@@ -268,7 +270,7 @@ export default function RequestSettingsPage() {
                 </SelectContent>
               </Select>
               <Button variant="dark" onClick={onAddLimit}>
-                <Plus className="mr-2" aria-hidden="true" />
+                <Plus className="mr-1" aria-hidden="true" />
                 Add Limit
               </Button>
             </div>

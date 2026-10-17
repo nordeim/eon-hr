@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, DollarSign, Loader2, Pencil, Plus, Search, Trash2, Wand2 } from "lucide-react";
+import { Banknote, Calculator, DollarSign, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -245,7 +245,7 @@ export default function PayrollModulePage() {
               aria-label="Payslip period"
             />
             <Button variant="outline" onClick={onGenerateAll} disabled={generating || loading}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Wand2 className="mr-2" aria-hidden="true" />}
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Calculator className="mr-2" aria-hidden="true" />}
               Generate All
             </Button>
             <Button variant="green"
@@ -272,7 +272,7 @@ export default function PayrollModulePage() {
           max-w-sm (384px) wrapper with a 16px Search icon and an h-9 input
           ("Search employees...") between the stats and the table card. */}
       <div className="relative max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
         <Input
           type="text"
           placeholder="Search employees..."

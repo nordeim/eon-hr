@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -239,7 +240,7 @@ export default function StaffRequestsPage() {
           207x36 CTA — measured y=280/340/380). */}
       <div className="flex flex-wrap gap-3">
         <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
           <Input
             aria-label="Search requests"
             placeholder="Search requests..."
@@ -274,49 +275,45 @@ export default function StaffRequestsPage() {
         </Select>
       </div>
 
-      {/* Session 15 (R14-D): a PLAIN block wrapper — the pill must NOT be a
-          direct child of a flex-col (cross-axis align-items:stretch stretches
-          the inline-flex pill to 1120px and justify-center centers the
-          trigger at x=779 instead of the reference's 145px left pill at
-          x=288 with the trigger at x=292). The reference's pill sits inside
-          the Radix Tabs root — an unclassed BLOCK div. */}
-      <div>
-      {/* Session 16 (R15-E): the pill renders the SECONDARY surface
-          (#F5F5F5 — the reference's rgb(245,245,245)) with the neutral-500
-          inactive color (the reference's muted-foreground token, R15-A). */}
-      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-neutral-500">
-        <button
-          type="button"
-          aria-pressed={scope === "mine"}
-          onClick={() => setScope(scope === "mine" ? "all" : "mine")}
-          className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-            scope === "mine" ? "bg-background text-foreground shadow" : "hover:text-foreground"
-          )}
-        >
-          My Requests ({mineCount})
-        </button>
-      </div>
-
-      <Card className="mt-2">
-        <CardContent className="p-0">
-          {/* the card rides mt-2 under the toggle (8px, measured 208→216) */}
+      {/* Session 50 (R49-B4): the reference's toggle is the RADIX TABS
+          form — TabsList (inline-flex h-9 … bg-secondary p-1
+          text-neutral-500, the r15-A token pair ≡ REF's bg-muted
+          text-muted-foreground) with a SINGLE TabsTrigger (the Radix
+          data-[state=active] variants) + TabsContent mt-2 carrying the
+          zero state DIRECT (no Card — live-measured). The scope toggle
+          (the mine/all superset filter) rides the trigger's onClick;
+          the with-data Table stays the clone's superset in its own
+          Card (REF is at zero — with-data unverifiable). */}
+      <Tabs defaultValue="mine">
+        <TabsList>
+          <TabsTrigger
+            value="mine"
+            onClick={() => setScope(scope === "mine" ? "all" : "mine")}
+          >
+            My Requests ({mineCount})
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="mine" className="mt-2">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : visible.length === 0 ? (
-            <div className="py-16 text-center">
-              <FileText className="mx-auto mb-3 h-12 w-12 text-slate-400" aria-hidden="true" />
+            <div className="text-center py-16">
+              {/* Session 50 (R49-B4c): REF's literals — the w-12 h-12
+                  slate-300 file-text (NOT the muted token) + the
+                  slate-400 search glyph; the CTA's mt-4 rides the button
+                  itself (no wrapper div — live-measured). */}
+              <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" />
               <p className="text-slate-500">No requests found</p>
-              <div className="mt-4">
-                <Button variant="dark" onClick={() => setDialogOpen(true)}>
-                  Submit your first request
-                </Button>
-              </div>
+              <Button variant="dark" className="mt-4" onClick={() => setDialogOpen(true)}>
+                Submit your first request
+              </Button>
             </div>
           ) : (
-            <Table>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Request</TableHead>
@@ -413,11 +410,12 @@ export default function StaffRequestsPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+                </Table>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <NewRequestDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onSubmitRequest} />
 

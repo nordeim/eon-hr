@@ -1,0 +1,43 @@
+(() => {
+  const main = document.querySelector('main');
+  const sc = main ? (main.querySelector('div.overflow-auto, div.overflow-y-auto') || main) : null;
+  if (!sc) return { gone: true, path: location.pathname };
+  const gc = (el) => (el && el.getAttribute && el.getAttribute('class')) || '';
+  const norm = (c) => String(c || '').replace(/\s+/g, ' ').trim();
+  const root = sc.querySelector('[class*=min-h-screen]') || sc;
+  const out = { path: location.pathname, rootCls: norm(gc(root)).slice(0, 130) };
+  const titles = [];
+  for (const t of root.querySelectorAll('h1, h2, h3')) {
+    titles.push(t.tagName + '[' + norm(gc(t)).slice(0, 80) + ']:' + t.textContent.trim().replace(/\s+/g, ' ').slice(0, 44));
+    if (titles.length >= 12) break;
+  }
+  out.titles = titles;
+  const outline = [];
+  const walk = (el, d) => {
+    if (outline.length >= 42 || d > 6) return;
+    const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(' ').replace(/\s+/g, ' ').trim();
+    if (own || (el.tagName !== 'DIV' && el.tagName !== 'SPAN')) outline.push(' '.repeat(d) + el.tagName + '[' + norm(gc(el)).slice(0, 88) + ']' + (own ? ':' + own.slice(0, 34) : ''));
+    for (const c of el.children) walk(c, d + 1);
+  };
+  walk(root, 0);
+  out.outline = outline;
+  const cards = [...root.querySelectorAll('[class*="rounded-xl"]')].filter(e => /border|shadow/.test(gc(e))).slice(0, 6).map(e => ({
+    cls: norm(gc(e)).slice(0, 110),
+    kids: [...e.children].slice(0, 4).map(k => k.tagName + '[' + norm(gc(k)).slice(0, 66) + ']')
+  }));
+  out.cards = cards;
+  const tbl = root.querySelector('table');
+  if (tbl) {
+    const ths = [...tbl.querySelectorAll('thead th')].slice(0, 8).map(th => norm(gc(th)).slice(0, 68) + ':' + th.textContent.trim().slice(0, 18));
+    const firstRow = tbl.querySelector('tbody tr');
+    const tds = firstRow ? [...firstRow.children].slice(0, 8).map(td => td.tagName + '[' + norm(gc(td)).slice(0, 38) + ']' + td.textContent.trim().slice(0, 16)) : [];
+    out.table = { ths, tds };
+  }
+  const tablist = root.querySelector('[role=tablist]');
+  if (tablist) out.tabs = { cls: norm(gc(tablist)).slice(0, 110), items: [...tablist.querySelectorAll('[role=tab]')].slice(0, 8).map(t => norm(gc(t)).slice(0, 58) + ':' + t.textContent.trim().slice(0, 16)) };
+  const btns = [...root.querySelectorAll('button')].slice(0, 10).map(b => norm(gc(b)).slice(0, 84) + ':' + (b.textContent.trim().replace(/\s+/g, ' ').slice(0, 20) || b.getAttribute('aria-label') || ''));
+  out.btns = btns;
+  const svgs = [...root.querySelectorAll('svg')].slice(0, 10).map(s => (s.getAttribute('class') || '').slice(0, 66));
+  out.svgs = svgs;
+  return out;
+})()

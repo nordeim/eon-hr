@@ -959,12 +959,14 @@ describe("StatCard stacked variant (session 13, R12-E)", () => {
   });
 });
 
-describe("staffrequests trigger (session 13, R12-F)", () => {
+describe("staffrequests trigger (session 13, R12-F — session 50 amendment: the toggle is now REF's RADIX TABS form; the px-3 py-1 trigger classes live in the tabs.tsx base)", () => {
   const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
 
-  it("tab trigger is px-3 py-1 (137px, not h-7 px-4)", () => {
+  it("tab trigger is px-3 py-1 (137px, not h-7 px-4 — via the TabsTrigger component base)", () => {
     expect(page).not.toContain("h-7 px-4");
-    expect(page).toMatch(/rounded-md px-3 py-1/);
+    const tabsBase = read("src", "components", "ui", "tabs.tsx");
+    expect(tabsBase).toMatch(/rounded-md px-3 py-1/);
+    expect(page).toMatch(/<TabsTrigger[\s\S]{0,120}value="mine"/);
   });
 
   it("pill drops self-start (reference parent is bare)", () => {
@@ -983,9 +985,9 @@ describe("iconed button margins (session 14, R13-A)", () => {
     expect(page).toMatch(/<FileDown className="mr-2"/);
   });
 
-  it("payrollmodule Generate All icon carries mr-2 (153px button)", () => {
+  it("payrollmodule Generate All icon carries mr-2 (153px button — session 50 amendment: REF's calculator glyph, was Wand2)", () => {
     const page = read("src", "app", "(app)", "payrollmodule", "page.tsx");
-    expect(page).toMatch(/<Wand2 className="mr-2"/);
+    expect(page).toMatch(/<Calculator className="mr-2"/);
   });
 
   it("taskmanager New Project / Kanban / Projects icons carry mr-2", () => {
@@ -1000,9 +1002,9 @@ describe("iconed button margins (session 14, R13-A)", () => {
     expect(page).toMatch(/<BellRing className="mr-2"/);
   });
 
-  it("surveyanalytics Run AI Analysis icon carries mr-2 (171px button)", () => {
+  it("surveyanalytics Run AI Analysis icon carries mr-2 (171px button — session 50 amendment: REF's brain glyph, was Sparkles)", () => {
     const page = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
-    expect(page).toMatch(/<Sparkles className="mr-2"/);
+    expect(page).toMatch(/<Brain className="mr-2"/);
   });
 
   it("analyticsdashboard Export CSV/PDF icons carry mr-2 (145/144px)", () => {
@@ -1282,9 +1284,9 @@ describe("performancemanagement tab pill (session 15, R14-C)", () => {
 describe("staffrequests pill wrapper (session 15, R14-D)", () => {
   const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
 
-  it("the pill sits in a plain block wrapper (no flex-col stretch — 145px left pill)", () => {
-    expect(page).not.toMatch(/<div className="flex flex-col">[\s\S]{0,80}<div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary/);
-    expect(page).toMatch(/<div>[\s\S]{0,400}?<div className="inline-flex h-9 items-center justify-center rounded-lg bg-secondary/);
+  it("the pill sits in a plain block wrapper (no flex-col stretch — 145px left pill; session 50 amendment: the wrapper is now REF's RADIX TABS root — an unclassed block div, via the Tabs component)", () => {
+    expect(page).not.toMatch(/<div className="flex flex-col">[\s\S]{0,80}<TabsList>/);
+    expect(page).toMatch(/<Tabs defaultValue="mine">[\s\S]{0,200}?<TabsList>/);
   });
 });
 
@@ -1382,9 +1384,11 @@ describe("organogram bare card + simple empty (session 16, R15-D)", () => {
 describe("staffrequests pill recipe + default scope (session 16, R15-E)", () => {
   const page = read("src", "app", "(app)", "staffrequests", "page.tsx");
 
-  it("the pill renders the secondary surface (#F5F5F5) with the neutral-500 inactive color", () => {
-    expect(page).toMatch(/rounded-lg bg-secondary p-1 text-neutral-500/);
-    expect(page).not.toMatch(/bg-muted p-1 text-muted-foreground/);
+  it("the pill renders the secondary surface (#F5F5F5) with the neutral-500 inactive color (session 50 amendment: the pill is now the TabsList component — the token pair lives in the tabs.tsx base)", () => {
+    const tabsBase = read("src", "components", "ui", "tabs.tsx");
+    expect(tabsBase).toMatch(/rounded-lg bg-secondary p-1 text-neutral-500/);
+    expect(tabsBase).not.toMatch(/bg-muted p-1 text-muted-foreground/);
+    expect(page).toMatch(/<TabsList>/);
   });
 
   it("the default scope is \"mine\" — the trigger renders the reference's selected look at load", () => {
@@ -5532,5 +5536,158 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
 
   it("R48-G6: the kicker back button carries select-none (REF payrollreports' kicker, live-measured)", () => {
     expect(pageHeader).toContain('className="h-9 w-9 select-none"');
+  });
+});
+
+// --- session 50 / parity round 49: the never-deep-measured interiors ---
+// (docs/remediation-plan-session50.md — every contract live-measured this
+// round: REF @1440×900 vs zero-tenant LOC :3201, scripts/r50-eval.txt)
+
+describe("session-50: the deep-interior contracts (round 49)", () => {
+  const page = (route: string, file = "page.tsx") =>
+    read("src", "app", "(app)", route, file);
+
+  // --- A. the glyph corrections ---
+
+  it("R50-A1: payrollmodule's Generate All carries the calculator glyph (Wand2 retired)", () => {
+    const src = page("payrollmodule", "page.tsx");
+    expect(src).toMatch(/<Calculator className="mr-2" aria-hidden="true" \/>/);
+    expect(src).not.toContain("<Wand2");
+  });
+
+  it("R50-A2: payrollengine's Generate Payroll carries the calculator glyph (Cog retired)", () => {
+    const src = page("payrollengine", "page.tsx");
+    expect(src).toMatch(/: <Calculator className="mr-2" aria-hidden="true" \/>/);
+    expect(src).not.toContain("<Cog");
+  });
+
+  it("R50-A3: surveyanalytics' Run AI Analysis carries the brain glyph", () => {
+    const src = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
+    expect(src).toMatch(/<Brain className="mr-2" aria-hidden="true" \/>/);
+  });
+
+  it("R50-A4: notificationpreferences' Mark All Read carries the check glyph (CheckCheck retired)", () => {
+    const src = page("notificationpreferences", "page.tsx");
+    expect(src).toMatch(/<Check className="mr-1" aria-hidden="true" \/>/);
+    expect(src).not.toContain("<CheckCheck");
+  });
+
+  it("R50-A5: the switch-row glyph family — mail/bell/check/bell/smartphone/bell, all w-4 h-4 text-slate-600", () => {
+    const src = page("notificationpreferences", "page.tsx");
+    const rows = src.slice(src.indexOf("PREF_ROWS"), src.indexOf("function iconForType"));
+    expect(rows).toContain('<Mail className="w-4 h-4 text-slate-600" aria-hidden="true" />');
+    expect((rows.match(/<Bell className="w-4 h-4 text-slate-600"/g) || []).length).toBe(3);
+    expect(rows).toContain('<Check className="w-4 h-4 text-slate-600" aria-hidden="true" />');
+    expect(rows).toContain('<Smartphone className="w-4 h-4 text-slate-600" aria-hidden="true" />');
+    expect(rows).not.toContain("CheckCircle2");
+    expect(rows).not.toContain("UserPlus");
+    expect(rows).not.toContain("XCircle");
+    expect(rows).not.toContain("Megaphone");
+    expect(rows).not.toMatch(/<Info /);
+  });
+
+  it("R50-A6: notificationpreferences' Recent zero state — the bell glyph at opacity-30", () => {
+    const src = page("notificationpreferences", "page.tsx");
+    expect(src).toMatch(/<Bell className="w-8 h-8 mx-auto mb-2 opacity-30" aria-hidden="true" \/>/);
+    expect(src).not.toMatch(/<FileText className="mx-auto/);
+  });
+
+  it("R50-A7: employeeportal's zero card — the briefcase glyph DIRECT (no chip wrapper) + H2 mb-2 + the mt-less P", () => {
+    const src = page("employeeportal", "page.tsx");
+    expect(src).toMatch(/<Briefcase className="w-8 h-8 text-blue-600" aria-hidden="true" \/>/);
+    expect(src).not.toContain("<ClipboardList");
+    expect(src).not.toMatch(/rounded-full bg-blue-100/);
+    expect(src).toMatch(/<h2 className="text-xl font-bold text-slate-900 mb-2">/);
+    expect(src).toMatch(/<p className="text-slate-600">/);
+  });
+
+  it("R50-A8: shiftswap's glyphs — the badge ArrowLeftRight + the zero-state ArrowLeftRight", () => {
+    const src = page("shiftswap", "page.tsx");
+    expect(src).toContain("<ArrowLeftRight aria-hidden=\"true\" />");
+    expect(src).not.toContain("<ArrowLeft ");
+    expect(src).not.toContain("<CalendarDays");
+    expect(src).toMatch(/<ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" \/>/);
+  });
+
+  // --- B. the structure/class fixes ---
+
+  it("R50-B1: shiftswap's stat cards — the inline icon family (users/clock/calendar/circle-check-big) on the PLAIN card", () => {
+    const src = page("shiftswap", "page.tsx");
+    expect(src).toMatch(/<Users className="w-5 h-5 text-blue-600" aria-hidden="true" \/>/);
+    expect(src).toMatch(/<Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" \/>/);
+    expect(src).toMatch(/<Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" \/>/);
+    expect(src).toMatch(/<CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" \/>/);
+    expect(src).not.toMatch(/border-slate-200 shadow-sm/);
+  });
+
+  it("R50-B2: shiftswap's tab pills — py-2 (not h-9) + hover:bg-slate-50", () => {
+    const src = page("shiftswap", "page.tsx");
+    expect(src).toContain('"px-4 py-2 text-sm font-medium rounded-lg transition-colors"');
+    expect(src).not.toMatch(/"h-9 rounded-lg px-4/);
+    expect(src).toContain('"text-slate-600 hover:bg-slate-50"');
+    expect(src).not.toContain("hover:bg-slate-100");
+  });
+
+  it("R50-B3: shiftswap's empty card — p-12 text-center + the mt-less slate-500 line", () => {
+    const src = page("shiftswap", "page.tsx");
+    expect(src).toMatch(/<CardContent className="p-12 text-center">/);
+    expect(src).toMatch(/<p className="text-slate-500">No swap requests in this category<\/p>/);
+    expect(src).not.toMatch(/text-sm text-slate-500">No swap requests/);
+    expect(src).not.toMatch(/mb-3 flex justify-center/);
+  });
+
+  it("R50-B4: staffrequests — the Radix Tabs form (TabsList + trigger + the mt-2 panel; the chip + the wrapping Card retired)", () => {
+    const src = page("staffrequests", "page.tsx");
+    expect(src).toContain('import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";');
+    expect(src).toMatch(/<Tabs defaultValue="mine">/);
+    expect(src).toMatch(/<TabsList>/);
+    expect(src).toMatch(/<TabsTrigger\n?\s+value="mine"/);
+    expect(src).toMatch(/<TabsContent value="mine" className="mt-2">/);
+    expect(src).not.toMatch(/aria-pressed=\{scope/);
+    expect(src).not.toMatch(/<Card className="mt-2">/);
+  });
+
+  it("R50-B4b: staffrequests' zero state — direct in the panel, the CTA's mt-4 on the button itself", () => {
+    const src = page("staffrequests", "page.tsx");
+    expect(src).toMatch(/<div className="text-center py-16">/);
+    expect(src).toMatch(/<Button variant="dark" className="mt-4" onClick=\{[^}]*\}>/);
+    expect(src).not.toMatch(/<div className="mt-4">/);
+  });
+
+  it("R50-B4c: staffrequests' icon literals — search slate-400 + file-text slate-300 (the r15 token retired here)", () => {
+    const src = page("staffrequests", "page.tsx");
+    expect(src).toContain('className="absolute left-3 top-2.5 h-4 w-4 text-slate-400"');
+    expect(src).toMatch(/<FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" aria-hidden="true" \/>/);
+    expect(src).not.toMatch(/file-text[\s\S]{0,80}text-slate-400/);
+  });
+
+  it("R50-B5: payrollmodule's search icon — the slate-400 literal, no pointer-events-none; the bare overflow wrapper", () => {
+    const src = page("payrollmodule", "page.tsx");
+    expect(src).toContain('className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"');
+    expect(src).not.toMatch(/pointer-events-none absolute left-3/);
+    const tbl = read("src", "components", "ui", "table.tsx");
+    expect(tbl).toContain('<div className="overflow-x-auto">');
+    expect(tbl).not.toContain('"w-full overflow-x-auto"');
+  });
+
+  it("R50-B6: payrollengine's two cards carry border-0 shadow-sm (the base shadow is REF's shadow-sm)", () => {
+    const src = page("payrollengine", "page.tsx");
+    expect((src.match(/<Card className="border-0 shadow-sm">/g) || []).length).toBe(2);
+    expect(src).not.toContain('<Card className="border-0">');
+  });
+
+  it("R50-B7: requestsettings — plain cards + p-6 space-y-4 interiors + slate-500 subtitles + mr-1 Plus glyphs", () => {
+    const src = page("requestsettings", "page.tsx");
+    expect(src).not.toContain('<Card className="border-slate-200">');
+    expect(src).toMatch(/<CardContent className="p-6 space-y-4">/);
+    expect(src).not.toMatch(/text-sm text-muted-foreground">Set (up|max)/);
+    expect((src.match(/<Plus className="mr-1"/g) || []).length).toBeGreaterThanOrEqual(2);
+    expect(src).not.toContain('<Plus className="mr-2"');
+  });
+
+  it("R50-B8: hrletters' CardTitle — REF's leading-none form (the pass stays; the base's text-base is the documented inert member — inherited 16px ≡ text-base 16px, leading-none wins the line-height)", () => {
+    const src = page("hrletters", "page.tsx");
+    expect(src).toContain('<CardTitle className="leading-none">Letter Requests</CardTitle>');
+    expect(src).not.toMatch(/CardTitle className="text-base leading-none"/);
   });
 });

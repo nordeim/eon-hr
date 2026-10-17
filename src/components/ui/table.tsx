@@ -4,8 +4,11 @@ import { cn } from "@/lib/utils";
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     // Session 12 (R11-V): reference table wrapper — a bare overflow-x-auto
-    // div (no relative/scrollbar-thin) around table.w-full.text-sm.
-    <div className="w-full overflow-x-auto">
+    // div (no relative/scrollbar-thin/w-full) around table.w-full.text-sm.
+    // Session 50 (R49-B5): the w-full member retired — live-measured on
+    // payrollmodule's wrapper (REF = DIV[overflow-x-auto] only; a block
+    // div is full-width anyway — the member was inert).
+    <div className="overflow-x-auto">
       <table className={cn("w-full text-sm", className)} {...props} />
     </div>
   );
