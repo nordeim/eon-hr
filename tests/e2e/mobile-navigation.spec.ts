@@ -39,6 +39,41 @@ test.describe("mobile navigation", () => {
     }
   });
 
+  test("the drawer opens with every nav group collapsed by default (session 54, R54-A)", async ({ page }) => {
+    // Session 54 (R54-A): the interaction-walk census paired the drawer's
+    // DEFAULT group-state map live at 390×844 — all 8 nav group triggers
+    // (plus the footer bell) render aria-expanded="false" at first open on
+    // BOTH apps. The full-menu pin above asserts the 13 top-level labels
+    // render but NOT the collapsed-default contract: a nav refactor that
+    // pre-expands groups (or a Collapsible defaultOpen drift) would pass
+    // every standing pin while changing the drawer's at-rest interior.
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const drawer = page.getByRole("dialog", { name: "Navigation menu" });
+    await expect(drawer).toBeVisible();
+    for (const group of [
+      "Employees",
+      "Payroll",
+      "Recruitment",
+      "Compliance",
+      "Performance",
+      "Communications",
+      "Analytics",
+      "Settings",
+    ]) {
+      await expect(drawer.getByRole("button", { name: group, exact: true })).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      );
+    }
+    // the collapsed groups keep their sub-item leaves hidden at first open
+    await expect(drawer.getByRole("link", { name: "Payroll Module" })).toBeHidden();
+    // the footer bell rides the same closed default (aria-expanded=false)
+    await expect(drawer.getByRole("button", { name: "Notifications" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+  });
+
   test("drawer navigation closes the drawer and lands on the target", async ({ page }) => {
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
     await page.getByRole("dialog", { name: "Navigation menu" }).getByRole("link", { name: "Training LMS" }).click();
@@ -80,7 +115,11 @@ test.describe("mobile navigation", () => {
 
   test("drawer geometry and overlay match the reference", async ({ page }) => {
     // Reference: 288px sheet, bg-black/80 overlay, NO X close button
-    // (closing happens via overlay tap / Esc / navigation).
+    // (closing happens via overlay tap / Esc — and, on the CLONE only,
+    // navigation: the clone's drawer auto-closes on route change, the
+    // documented superset over REF's session-10 regression where the
+    // reference's drawer stays open after a leaf tap; re-verified live
+    // at session 54 — see docs/remediation-plan-session54.md §E).
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
     const panel = page.getByRole("dialog", { name: "Navigation menu" });
     await expect(panel).toBeVisible();
