@@ -23,6 +23,11 @@ model User {
   avatarUrl    String?
   phone        String?
   jobTitle     String?
+  // social profile URLs (session 57, R57-D — REF's Connected Accounts form)
+  linkedinUrl  String?
+  twitterUrl   String?
+  githubUrl    String?
+  facebookUrl  String?
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -688,12 +693,24 @@ model NotificationPreference {
   userId        String  @unique
   emailEnabled  Boolean @default(true)
   inAppEnabled  Boolean @default(true)
+  pushEnabled   Boolean @default(true)
   approvals     Boolean @default(true)
   rejections    Boolean @default(true)
   assignments   Boolean @default(true)
   announcements Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Integration {
+  id          String   @id @default(cuid())
+  provider    String   @unique // whatsapp | sms | zkt | email
+  apiKey      String?
+  phoneNumber String?
+  webhookUrl  String?
+  status      String   @default("disconnected") // connected | disconnected
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model AuditLog {

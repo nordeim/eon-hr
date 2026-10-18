@@ -247,9 +247,20 @@
   --color-orange-600: #ea580c;
 
   --color-red-50: #fef2f2;
+  --color-red-200: #fecaca;
+  --color-red-400: #f87171;
   --color-red-500: #ef4444;
   --color-red-600: #dc2626;
   --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+  --color-red-900: #7f1d1d;
+
+  /* sky family (session 57, R57-p): the profile's Twitter tile —
+     bg-sky-100/text-sky-600 were UNPINNED and v4's oklch default drifted
+     them into lab() (trap 2 — the computed style serializes as lab()
+     instead of rgb()). */
+  --color-sky-100: #e0f2fe;
+  --color-sky-600: #0284c7;
 
   --color-amber-50: #fffbeb;
   --color-amber-500: #f59e0b;

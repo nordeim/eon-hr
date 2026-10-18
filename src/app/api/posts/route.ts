@@ -1,11 +1,17 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { ok, err, guard, requireUser, parseBody } from "@/lib/api";
 
 // /api/posts — company wall feed.
 // GET    → visible posts (audience filtered) with author info
-// POST   → create a post
+// POST   → create a post — JSON { content, audience } OR multipart
+//          FormData (content, audience, file) with an attached image/video
+//          (session 57, R57-B — the media superset: the file lands in
+//          db/uploads/<random>.<ext> and the post carries mediaUrl)
 // PATCH  → ?id= like/unlike { liked: boolean }
 
 const PostInput = z.object({
@@ -16,6 +22,21 @@ const PostInput = z.object({
 const LikeInput = z.object({ liked: z.boolean() });
 
 const MANAGER_ROLES = ["admin", "hr", "manager"];
+
+// the media contract: images + videos, 10 MB cap (the wall's attach
+// affordance rides the same accept="image/*,video/*" pair as REF's
+// hidden #media-upload input)
+const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
+const MEDIA_EXTENSIONS: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
+};
+const UPLOADS_DIR = path.join(process.cwd(), "db", "uploads");
 
 export async function GET() {
   return guard(async () => {
@@ -38,6 +59,7 @@ export async function GET() {
         audience: true,
         likes: true,
         createdAt: true,
+        mediaUrl: true,
         userId: true,
         user: {
           select: {
@@ -69,6 +91,7 @@ export async function GET() {
         audience: p.audience,
         likes: p.likes,
         createdAt: p.createdAt,
+        mediaUrl: p.mediaUrl,
         author: { id: p.user.id, name: p.user.name, role: p.user.role, avatarUrl: p.user.avatarUrl },
       })),
     });
@@ -80,21 +103,55 @@ export async function POST(req: NextRequest) {
     const { user, response } = await requireUser();
     if (!user) return response;
 
-    const { data, response: bad } = await parseBody(req, PostInput);
-    if (!data) return bad;
+    // multipart (content + audience + file) or plain JSON — one handler
+    const contentType = req.headers.get("content-type") ?? "";
+    let content = "";
+    let audience = "all";
+    let mediaUrl: string | null = null;
+
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      content = String(form.get("content") ?? "").trim();
+      const audienceRaw = String(form.get("audience") ?? "all");
+      if (!["all", "managers", "department"].includes(audienceRaw)) {
+        return err("VALIDATION", "Invalid audience");
+      }
+      audience = audienceRaw;
+
+      const file = form.get("file");
+      if (file instanceof File && file.size > 0) {
+        if (file.size > MAX_MEDIA_BYTES) {
+          return err("VALIDATION", "Media file exceeds the 10 MB limit");
+        }
+        const ext = MEDIA_EXTENSIONS[file.type];
+        if (!ext) return err("VALIDATION", "Unsupported media type");
+        await mkdir(UPLOADS_DIR, { recursive: true });
+        const fileName = `${Date.now().toString(36)}-${randomBytes(6).toString("hex")}${ext}`;
+        await writeFile(path.join(UPLOADS_DIR, fileName), Buffer.from(await file.arrayBuffer()));
+        mediaUrl = `/api/media/${fileName}`;
+      }
+    } else {
+      const { data, response: bad } = await parseBody(req, PostInput);
+      if (!data) return bad;
+      content = data.content;
+      audience = data.audience;
+    }
+
+    if (!content) return err("VALIDATION", "Post content is required");
 
     const post = await db.post.create({
-      data: { userId: user.id, content: data.content, audience: data.audience },
-      select: { id: true, createdAt: true },
+      data: { userId: user.id, content, audience, ...(mediaUrl ? { mediaUrl } : {}) },
+      select: { id: true, createdAt: true, mediaUrl: true },
     });
 
     return ok({
       post: {
         id: post.id,
-        content: data.content,
-        audience: data.audience,
+        content,
+        audience,
         likes: 0,
         createdAt: post.createdAt,
+        mediaUrl: post.mediaUrl,
         author: { id: user.id, name: user.name, role: user.role, avatarUrl: user.avatarUrl },
       },
     });

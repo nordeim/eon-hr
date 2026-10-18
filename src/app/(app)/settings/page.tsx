@@ -36,6 +36,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WhatsappDialog } from "@/components/shared/whatsapp-dialog";
 import { useToast } from "@/components/ui/toast";
 import { formatDateTime } from "@/lib/utils";
 
@@ -1183,7 +1184,11 @@ function IntegrationsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
      BioTime Cloud, each with a 48px text-initials chip (w-12 h-12
      {color}-100 rounded-lg + {color}-700 font-bold text-lg) and an
      outline Connect/Configure action — Email carries the Active badge
-     instead. The clone's previous icon-chip tile set was invented. */
+     instead. The clone's previous icon-chip tile set was invented.
+     Session 57 (R57-C): the WhatsApp Connect opens REF's real
+     "Configure WhatsApp API" dialog (live-measured — the only tile
+     whose action is live on REF; SMS Gateway "Configure" and ZKT
+     "Connect" are no-ops on REF too, measured this round). */
   const integrations = [
     {
       name: "WhatsApp Integration",
@@ -1244,6 +1249,11 @@ function IntegrationsTab({ toast }: { toast: ReturnType<typeof useToast> }) {
                 <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700 border-transparent">
                   Active
                 </span>
+              ) : i.name === "WhatsApp Integration" ? (
+                /* R57-C: REF's real dialog behind the WhatsApp Connect */
+                <WhatsappDialog>
+                  <Button variant="outline">{i.action}</Button>
+                </WhatsappDialog>
               ) : (
                 <Button
                   variant="outline"

@@ -22,28 +22,6 @@ import { PageCanvas } from "@/components/shared/page-canvas";
 /* Session 47 (R46-G1): REF's measured icons — the OLD-lucide revisions,
    hand-authored verbatim (the installed lucide-react 0.525 ships the
    newer glyphs: the arrow-first upload and the path-first search). */
-function UploadIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="lucide lucide-upload w-4 h-4 mr-2"
-      aria-hidden="true"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" x2="12" y1="3" y2="15" />
-    </svg>
-  );
-}
-
 function SearchIcon() {
   return (
     <svg
@@ -66,6 +44,7 @@ function SearchIcon() {
 }
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
+import { BulkImportDialog } from "@/components/shared/bulk-import-dialog";
 import { formatDate, initials } from "@/lib/utils";
 import { EmployeeWizard, type WizardEmployee } from "./employee-wizard";
 
@@ -201,20 +180,10 @@ export default function EmployeesPage() {
         subtitle={`Manage your ${counts.total} employees`}
         actions={
           <>
-            <Button
-              variant="outline"
-              className="border-blue-300 text-blue-700 hover:bg-blue-50"
-              onClick={() =>
-                toast.toast({
-                  title: "CSV import",
-                  description: "Drop a CSV with columns: firstName, lastName, email, jobTitle, employmentStatus",
-                  variant: "info",
-                })
-              }
-            >
-              <UploadIcon />
-              Import CSV
-            </Button>
+            {/* Session 57 (R57-A): REF's real "Bulk Import Employees"
+                dialog (live-measured — the old info-toast stub was never
+                REF behavior; the working import flow is the superset). */}
+            <BulkImportDialog onImported={() => void load()} />
             <Button
               className="shadow-lg"
               onClick={() => {

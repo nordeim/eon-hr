@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Camera, CheckCircle2, CircleUser, Globe, KeyRound, Loader2, Lock, Plug, Save, SlidersHorizontal, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Camera, CircleUser, Facebook, Github, Globe, KeyRound, Linkedin, Loader2, Lock, Save, SlidersHorizontal, Trash2, Twitter, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
@@ -30,37 +30,21 @@ interface ProfileInfo {
   avatarUrl: string | null;
   role: string;
   createdAt: string;
-}
-
-interface FormPreferences {
-  language?: string;
-  timezone?: string;
+  linkedinUrl?: string | null;
+  twitterUrl?: string | null;
+  githubUrl?: string | null;
+  facebookUrl?: string | null;
 }
 
 interface NotificationPrefs {
   emailEnabled: boolean;
   inAppEnabled: boolean;
+  pushEnabled: boolean;
 }
-
-const LANGUAGES = ["English", "العربية (Arabic)", "Français", "Español", "Deutsch"];
-
-const TIMEZONES = [
-  "Asia/Riyadh",
-  "Asia/Dubai",
-  "Asia/Singapore",
-  "Asia/Tokyo",
-  "Europe/London",
-  "Europe/Berlin",
-  "America/New_York",
-  "America/Los_Angeles",
-  "UTC",
-];
-
-const LANG_KEY = "eon.profile.language";
-const TZ_KEY = "eon.profile.timezone";
 
 export default function ProfilePage() {
   const toast = useToast();
+  const router = useRouter();
   const [profile, setProfile] = React.useState<ProfileInfo | null>(null);
   const [loading, setLoading] = React.useState(true);
   /* Session 49 (R48-F1): the WORKING avatar upload — REF renders the same
@@ -71,12 +55,18 @@ export default function ProfilePage() {
   const [savingAvatar, setSavingAvatar] = React.useState(false);
   const [form, setForm] = React.useState({ name: "", email: "", phone: "", jobTitle: "" });
   const [savingProfile, setSavingProfile] = React.useState(false);
-  const [language, setLanguage] = React.useState("English");
-  const [timezone, setTimezone] = React.useState("Asia/Riyadh");
-  const [savingPrefs, setSavingPrefs] = React.useState(false);
+  /* Session 57 (R57-D): the Connected Accounts form — REF's four URL
+   * fields, persisted to the User record via PATCH /api/profile. */
+  const [socialForm, setSocialForm] = React.useState({ linkedinUrl: "", twitterUrl: "", githubUrl: "", facebookUrl: "" });
+  const [savingSocial, setSavingSocial] = React.useState(false);
+  /* Session 57 (R57-E): the Danger Zone's DELETE-typed confirmation. */
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [deleteConfirm, setDeleteConfirm] = React.useState("");
+  const [deleting, setDeleting] = React.useState(false);
   const [pwForm, setPwForm] = React.useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [savingPw, setSavingPw] = React.useState(false);
   const [notifPrefs, setNotifPrefs] = React.useState<NotificationPrefs | null>(null);
+  const [savingNotifPrefs, setSavingNotifPrefs] = React.useState(false);
 
   React.useEffect(() => {
     void (async () => {
@@ -91,9 +81,12 @@ export default function ProfilePage() {
             phone: json.data.profile.phone ?? "",
             jobTitle: json.data.profile.jobTitle ?? "",
           });
-          const prefs: FormPreferences = json.data.preferences ?? {};
-          setLanguage(prefs.language ?? window.localStorage.getItem(LANG_KEY) ?? "English");
-          setTimezone(prefs.timezone ?? window.localStorage.getItem(TZ_KEY) ?? "Asia/Riyadh");
+          setSocialForm({
+            linkedinUrl: json.data.profile.linkedinUrl ?? "",
+            twitterUrl: json.data.profile.twitterUrl ?? "",
+            githubUrl: json.data.profile.githubUrl ?? "",
+            facebookUrl: json.data.profile.facebookUrl ?? "",
+          });
         } else {
           toast.toast({ title: "Failed to load profile", description: json.error?.message, variant: "error" });
         }
@@ -177,6 +170,7 @@ export default function ProfilePage() {
           setNotifPrefs({
             emailEnabled: json.data.preferences.emailEnabled,
             inAppEnabled: json.data.preferences.inAppEnabled,
+            pushEnabled: json.data.preferences.pushEnabled,
           });
         }
       } catch {
@@ -220,27 +214,84 @@ export default function ProfilePage() {
     }
   }
 
-  async function onSavePreferences() {
-    setSavingPrefs(true);
+  /* Session 57 (R57-D): Save Accounts — the four URLs persist to the
+   * User record (REF renders the form; the clone makes it stick). */
+  async function onSaveAccounts() {
+    setSavingSocial(true);
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ preferences: { language, timezone } }),
+        body: JSON.stringify({
+          linkedinUrl: socialForm.linkedinUrl.trim(),
+          twitterUrl: socialForm.twitterUrl.trim(),
+          githubUrl: socialForm.githubUrl.trim(),
+          facebookUrl: socialForm.facebookUrl.trim(),
+        }),
       });
       const json = await res.json();
       if (!json.ok) {
         toast.toast({ title: "Save failed", description: json.error?.message, variant: "error" });
         return;
       }
-      window.localStorage.setItem(LANG_KEY, language);
-      window.localStorage.setItem(TZ_KEY, timezone);
-      toast.toast({ title: "Preferences saved", description: "Language and timezone updated.", variant: "success" });
+      setProfile(json.data.profile);
+      toast.toast({ title: "Accounts saved", description: "Your social profiles are up to date.", variant: "success" });
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
     } finally {
-      setSavingPrefs(false);
+      setSavingSocial(false);
     }
+  }
+
+  /* Session 57 (R57-E): Save Preferences — the two notification rows
+   * persist as one PATCH (REF's submit affordance, made to stick). */
+  async function onSaveNotificationPrefs() {
+    if (!notifPrefs) return;
+    setSavingNotifPrefs(true);
+    try {
+      const res = await fetch("/api/notification-preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailEnabled: notifPrefs.emailEnabled,
+          pushEnabled: notifPrefs.pushEnabled,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        toast.toast({ title: "Save failed", description: json.error?.message, variant: "error" });
+        return;
+      }
+      toast.toast({ title: "Preferences saved", description: "Your notification settings are up to date.", variant: "success" });
+    } catch {
+      toast.toast({ title: "Network error", variant: "error" });
+    } finally {
+      setSavingNotifPrefs(false);
+    }
+  }
+
+  /* Session 57 (R57-E): the account deletion — the DELETE-typed gate,
+   * the API walk, then the sign-out + the login redirect. */
+  function onDeleteAccount() {
+    if (deleteConfirm !== "DELETE") return;
+    setDeleting(true);
+    void (async () => {
+      try {
+        const res = await fetch("/api/profile", { method: "DELETE" });
+        const json = await res.json();
+        if (!json.ok) {
+          toast.toast({ title: "Delete failed", description: json.error?.message, variant: "error" });
+          setDeleting(false);
+          return;
+        }
+        await fetch("/api/auth/logout", { method: "POST" });
+        router.push("/login");
+        router.refresh();
+      } catch {
+        toast.toast({ title: "Network error", variant: "error" });
+        setDeleting(false);
+      }
+    })();
   }
 
   async function onChangePassword() {
@@ -277,27 +328,6 @@ export default function ProfilePage() {
       toast.toast({ title: "Network error", variant: "error" });
     } finally {
       setSavingPw(false);
-    }
-  }
-
-  async function onToggleNotif(key: keyof NotificationPrefs, value: boolean) {
-    if (!notifPrefs) return;
-    const next = { ...notifPrefs, [key]: value };
-    setNotifPrefs(next);
-    try {
-      const res = await fetch("/api/notification-preferences", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(next),
-      });
-      const json = await res.json();
-      if (!json.ok) {
-        setNotifPrefs(notifPrefs);
-        toast.toast({ title: "Save failed", description: json.error?.message, variant: "error" });
-      }
-    } catch {
-      setNotifPrefs(notifPrefs);
-      toast.toast({ title: "Network error", variant: "error" });
     }
   }
 
@@ -481,63 +511,138 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
 
-        {/* Preferences tab (session 15, R14-E): this card was mistakenly
-            mounted under value="general" — a copy-paste bug from the R13-C
-            rebuild that stacked it below the personal-information form and
-            left the real "preferences" tab empty. */}
-        <TabsContent value="preferences" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>Language and timezone used across the app.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pf-language">Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="pf-language">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map((l) => (
-                        <SelectItem key={l} value={l}>
-                          {l}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        {/* Session 57 (R57-E): the Preferences tab — REF's verbatim
+            two-card recipe (live-measured): the Notification Preferences
+            card (the two bg-slate-50 toggle rows + Save Preferences) and
+            the Danger Zone card (the red frame + Delete My Account → the
+            DELETE-typed confirmation dialog). The old language/timezone
+            "General Settings" card was the R14-E copy-paste artifact —
+            REF has no language/timezone card anywhere on /profile —
+            removed this round (the duplicate value="preferences"
+            structural fix). */}
+        <TabsContent value="preferences" className="mt-0 space-y-6">
+            <Card>
+              <CardHeader>
+                {/* R57-E: REF's verbatim title recipe for this panel — a
+                    plain div, font-semibold leading-none tracking-tight
+                    (NOT the app-wide CardTitle text-base pattern; the
+                    live-measured class string). */}
+                <div className="font-semibold leading-none tracking-tight">Notification Preferences</div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <form
+                  className="space-y-6"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void onSaveNotificationPrefs();
+                  }}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-slate-900">Email Notifications</h4>
+                        <p className="text-sm text-slate-500">Receive notifications via email</p>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.emailEnabled ?? true}
+                        onCheckedChange={(v) =>
+                          notifPrefs && setNotifPrefs({ ...notifPrefs, emailEnabled: v })
+                        }
+                        aria-label="Email notifications"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-slate-900">Push Notifications</h4>
+                        <p className="text-sm text-slate-500">Receive push notifications in browser</p>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.pushEnabled ?? true}
+                        onCheckedChange={(v) =>
+                          notifPrefs && setNotifPrefs({ ...notifPrefs, pushEnabled: v })
+                        }
+                        aria-label="Push notifications"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={savingNotifPrefs}>
+                      {savingNotifPrefs ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" aria-hidden="true" />
+                      )}
+                      Save Preferences
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card className="border-red-200 dark:border-red-900">
+              <CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-red-200 dark:border-red-900">
+                {/* R57-E: REF's verbatim Danger Zone header — the plain-div
+                    title with the red pair, NO description line. */}
+                <div className="font-semibold leading-none tracking-tight text-red-600 dark:text-red-400">Danger Zone</div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-slate-900 dark:text-white mb-2">Delete Account</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+                      <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
+                      Delete My Account
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pf-timezone">Timezone</Label>
-                  <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger id="pf-timezone">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TIMEZONES.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              </CardContent>
+            </Card>
+
+          {/* R57-E: REF's DELETE-typed confirmation dialog (verbatim). */}
+          <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="tracking-tight text-red-600">Delete Account</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div
+                  role="alert"
+                  className="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
+                  <div className="text-sm [&_p]:leading-relaxed text-red-800 dark:text-red-400">
+                    <p>This action cannot be undone. This will permanently delete your account and remove your data from our servers.</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="delete-confirm">Type &quot;DELETE&quot; to confirm</Label>
+                  <Input
+                    id="delete-confirm"
+                    placeholder="DELETE"
+                    value={deleteConfirm}
+                    onChange={(e) => setDeleteConfirm(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                  <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={onDeleteAccount}
+                    disabled={deleteConfirm !== "DELETE" || deleting}
+                  >
+                    {deleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> : null}
+                    Delete Account
+                  </Button>
                 </div>
               </div>
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-                Saved to your account and this browser.
-              </p>
-            </CardContent>
-            <CardContent className="p-6 pt-0">
-              <div className="flex justify-end">
-                <Button onClick={onSavePreferences} disabled={savingPrefs}>
-                  {savingPrefs ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
-                  Save General Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* Security tab */}
@@ -606,92 +711,106 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
 
-        {/* Social accounts tab */}
+        {/* Session 57 (R57-D): the Social Accounts tab — REF's verbatim
+            "Connected Accounts" card (live-measured): the four
+            icon-tile/label/input rows and the Save Accounts footer. The
+            old Google/Microsoft/Slack "Connect" row list was invented
+            (never REF-measured) — removed. The save persists the URLs to
+            the User record (the superset). */}
         <TabsContent value="social" className="mt-0">
           <Card>
             <CardHeader>
-              <CardTitle>Social Accounts</CardTitle>
-              <CardDescription>Connect third-party accounts for one-click sign-in.</CardDescription>
+              {/* R57-D: REF's verbatim header — the plain-div title
+                  (font-semibold leading-none tracking-tight), NO
+                  description line. */}
+              <div className="font-semibold leading-none tracking-tight">Connected Accounts</div>
             </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {[
-                { name: "Google", detail: "sepnetflix2023@outlook.com" },
-                { name: "Microsoft", detail: "Not connected" },
-                { name: "Slack", detail: "Not connected" },
-              ].map((acct) => (
-                <div
-                  key={acct.name}
-                  className="flex items-center justify-between gap-4 rounded-lg border p-4"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-                      <Plug className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">{acct.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{acct.detail}</p>
+            <CardContent className="p-6">
+              <form
+                className="space-y-6"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void onSaveAccounts();
+                }}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Linkedin className="w-6 h-6 text-blue-600" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="social-linkedin">LinkedIn Profile</Label>
+                      <Input
+                        id="social-linkedin"
+                        placeholder="https://linkedin.com/in/yourprofile"
+                        value={socialForm.linkedinUrl}
+                        onChange={(e) => setSocialForm({ ...socialForm, linkedinUrl: e.target.value })}
+                        maxLength={300}
+                      />
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      toast.toast({
-                        title: "Social sign-in coming soon",
-                        description: `${acct.name} sign-in arrives in a future update.`,
-                        variant: "info",
-                      })
-                    }
-                  >
-                    Connect
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center">
+                      <Twitter className="w-6 h-6 text-sky-600" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="social-twitter">Twitter Profile</Label>
+                      <Input
+                        id="social-twitter"
+                        placeholder="https://twitter.com/yourusername"
+                        value={socialForm.twitterUrl}
+                        onChange={(e) => setSocialForm({ ...socialForm, twitterUrl: e.target.value })}
+                        maxLength={300}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <Github className="w-6 h-6 text-slate-700" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="social-github">GitHub Profile</Label>
+                      <Input
+                        id="social-github"
+                        placeholder="https://github.com/yourusername"
+                        value={socialForm.githubUrl}
+                        onChange={(e) => setSocialForm({ ...socialForm, githubUrl: e.target.value })}
+                        maxLength={300}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Facebook className="w-6 h-6 text-blue-700" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="social-facebook">Facebook Profile</Label>
+                      <Input
+                        id="social-facebook"
+                        placeholder="https://facebook.com/yourprofile"
+                        value={socialForm.facebookUrl}
+                        onChange={(e) => setSocialForm({ ...socialForm, facebookUrl: e.target.value })}
+                        maxLength={300}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={savingSocial}>
+                    {savingSocial ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" aria-hidden="true" />
+                    )}
+                    Save Accounts
                   </Button>
                 </div>
-              ))}
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Preferences tab */}
-        <TabsContent value="preferences" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Quick toggles for how we reach you.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-1">
-              {notifPrefs === null ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between gap-4 rounded-lg px-3 py-3 hover:bg-secondary/40">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">Email Notifications</p>
-                      <p className="text-xs text-muted-foreground">Receive notifications via email</p>
-                    </div>
-                    <Switch
-                      checked={notifPrefs.emailEnabled}
-                      onCheckedChange={(v) => void onToggleNotif("emailEnabled", v)}
-                      aria-label="Email notifications"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 rounded-lg px-3 py-3 hover:bg-secondary/40">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">In-App Notifications</p>
-                      <p className="text-xs text-muted-foreground">Show notification bell in the app</p>
-                    </div>
-                    <Switch
-                      checked={notifPrefs.inAppEnabled}
-                      onCheckedChange={(v) => void onToggleNotif("inAppEnabled", v)}
-                      aria-label="In-app notifications"
-                    />
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Preferences tab — R57-E above */}
       </Tabs>
       {/* Session 49 (R48-G1): the stray wrap-level footer P (an icon-only
           CheckCircle2 with no text — cruft REF lacks, live-measured this

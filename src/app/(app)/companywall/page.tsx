@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Heart, House, Image as ImageIcon, Loader2, Send, Video } from "lucide-react";
+import { Heart, House, Image as ImageIcon, Loader2, Send, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ interface PostItem {
   audience: string;
   likes: number;
   createdAt: string;
+  mediaUrl?: string | null;
   author: PostAuthor;
 }
 
@@ -59,6 +60,15 @@ export default function CompanyWallPage() {
   // Session 10 (R9-B): the reference's composer renders the author's 40px
   // initials avatar beside the textarea.
   const [userName, setUserName] = React.useState("");
+  // Session 57 (R57-B): the attach affordance — REF's hidden
+  // #media-upload input (accept="image/*,video/*", class hidden),
+  // triggered by BOTH the Photo and the Video buttons (REF
+  // live-measured: one shared input). The picked file previews above the
+  // action row and rides the post as multipart FormData (the superset
+  // — REF exposes the input; the clone completes the flow).
+  const [mediaFile, setMediaFile] = React.useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -101,11 +111,22 @@ export default function CompanyWallPage() {
     }
     setPosting(true);
     try {
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: trimmed, audience }),
-      });
+      // R57-B: media rides the post as multipart FormData; a text-only post
+      // keeps the JSON path (both shapes answer the same envelope)
+      let res: Response;
+      if (mediaFile) {
+        const form = new FormData();
+        form.set("content", trimmed);
+        form.set("audience", audience);
+        form.set("file", mediaFile);
+        res = await fetch("/api/posts", { method: "POST", body: form });
+      } else {
+        res = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: trimmed, audience }),
+        });
+      }
       const json = await res.json();
       if (!json.ok) {
         toast.toast({ title: "Post failed", description: json.error?.message, variant: "error" });
@@ -113,12 +134,38 @@ export default function CompanyWallPage() {
       }
       setPosts((prev) => [json.data.post, ...prev]);
       setContent("");
+      clearMedia();
       toast.toast({ title: "Posted", description: "Your update is live on the wall.", variant: "success" });
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
     } finally {
       setPosting(false);
     }
+  }
+
+  function clearMedia() {
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(null);
+    setMediaPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function onMediaPicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = e.target.files?.[0] ?? null;
+    if (!picked) return;
+    if (!/^(image|video)\//.test(picked.type)) {
+      toast.toast({ title: "Unsupported file", description: "Pick an image or a video.", variant: "error" });
+      e.target.value = "";
+      return;
+    }
+    if (picked.size > 10 * 1024 * 1024) {
+      toast.toast({ title: "File too large", description: "Media is capped at 10 MB.", variant: "error" });
+      e.target.value = "";
+      return;
+    }
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(picked);
+    setMediaPreview(URL.createObjectURL(picked));
   }
 
   function onToggleLike(post: PostItem) {
@@ -221,12 +268,43 @@ export default function CompanyWallPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {/* R57-B: the preview of the picked media (with the remove
+                  affordance) above the action row */}
+              {mediaPreview && mediaFile ? (
+                <div className="relative rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  {mediaFile.type.startsWith("image/") ? (
+                    <img src={mediaPreview} alt="Attached media preview" className="max-h-64 w-full rounded-md object-contain" />
+                  ) : (
+                    <video src={mediaPreview} controls className="max-h-64 w-full rounded-md" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="iconSm"
+                    aria-label="Remove attachment"
+                    className="absolute right-2 top-2 h-7 w-7 rounded-full bg-white/90 shadow"
+                    onClick={clearMedia}
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                  <p className="truncate px-2 pb-1 pt-2 text-xs text-muted-foreground">{mediaFile.name}</p>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                  {/* R57-B: REF's hidden shared media input — both buttons
+                      trigger it (click → input.click()) */}
+                  <input
+                    id="media-upload"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={onMediaPicked}
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => toast.toast({ title: "Attach coming soon", description: "Photo uploads land in a future update.", variant: "info" })}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     <ImageIcon className="mr-2" aria-hidden="true" />
                     Photo
@@ -234,7 +312,7 @@ export default function CompanyWallPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => toast.toast({ title: "Attach coming soon", description: "Video uploads land in a future update.", variant: "info" })}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     <Video className="mr-2" aria-hidden="true" />
                     Video
@@ -289,6 +367,15 @@ export default function CompanyWallPage() {
                     {post.audience !== "all" ? <Badge variant="secondary">{AUDIENCE_LABEL[post.audience]}</Badge> : null}
                   </div>
                   <p className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+                  {/* R57-B: the post's attached media (served from
+                      /api/media/<name>) */}
+                  {post.mediaUrl ? (
+                    post.mediaUrl.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+                      <video src={post.mediaUrl} controls className="w-full rounded-lg" />
+                    ) : (
+                      <img src={post.mediaUrl} alt="Post media" className="w-full rounded-lg" />
+                    )
+                  ) : null}
                   <div className="flex items-center gap-1 border-t pt-3">
                     <Button
                       variant="ghost"

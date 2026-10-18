@@ -14,6 +14,10 @@ import { describe, expect, it } from "vitest";
 const read = (...p: string[]) =>
   readFileSync(join(process.cwd(), ...p), "utf8");
 
+/** Soft read: returns "" while a GREEN-step file doesn't exist yet (RED
+ *  must fail per-test, not break collection). */
+const soft = (fn: () => string): string => { try { return fn(); } catch { return ""; } };
+
 const sidebarNav = read("src", "components", "layout", "sidebar-nav.tsx");
 const appShell = read("src", "components", "layout", "app-shell.tsx");
 const pageHeader = read("src", "components", "shared", "page-header.tsx");
@@ -976,7 +980,10 @@ describe("staffrequests trigger (session 13, R12-F — session 50 amendment: the
 
 describe("iconed button margins (session 14, R13-A)", () => {
   it("employees Import CSV icon carries mr-2 (145px button) — session 47 amendment: the hand-authored UploadIcon (REF's old-lucide glyph, class lucide-upload w-4 h-4 mr-2)", () => {
-    const page = read("src", "app", "(app)", "employees", "page.tsx");
+    /* Session 57 (R57-A): the UploadIcon moved into the BulkImportDialog
+       (the real dialog behind the old toast stub) — the glyph + class
+       are unchanged, the read follows them home. */
+    const page = read("src", "components", "shared", "bulk-import-dialog.tsx");
     expect(page).toContain('className="lucide lucide-upload w-4 h-4 mr-2"');
   });
 
@@ -1293,12 +1300,21 @@ describe("staffrequests pill wrapper (session 15, R14-D)", () => {
 describe("profile preferences tab content (session 15, R14-E)", () => {
   const page = read("src", "app", "(app)", "profile", "page.tsx");
 
-  it("the language/timezone card renders under the preferences tab (not general)", () => {
+  it("the language/timezone card is GONE from the preferences tab — session 57 (R57-E): the R14-E artifact removed, REF-verified", () => {
+    /* Session 15 (R14-E) mounted the language/timezone card under
+       value="preferences" as a copy-paste fix — but never REF-verified
+       the interior. The r57 census (phase E, live-measured) found REF's
+       Preferences tab is the two-card recipe (Notification Preferences +
+       Danger Zone) with NO language/timezone card anywhere on /profile.
+       The artifact is removed; the single preferences panel carries
+       REF's recipe. */
     expect(page).not.toMatch(/TabsContent value="general"[\s\S]{0,80}General Settings/);
-    expect(page).toMatch(/TabsContent value="preferences"/);
-    const prefBlock = page.match(/TabsContent value="preferences"[\s\S]{0,5000}?<\/TabsContent>/)?.[0] ?? "";
-    expect(prefBlock).toMatch(/pf-language/);
-    expect(prefBlock).toMatch(/pf-timezone/);
+    expect((page.match(/TabsContent value="preferences"/g) || []).length).toBe(1);
+    const prefBlock = page.match(/TabsContent value="preferences"[\s\S]{0,12000}?<\/TabsContent>/)?.[0] ?? "";
+    expect(prefBlock).not.toMatch(/pf-language/);
+    expect(prefBlock).not.toMatch(/pf-timezone/);
+    expect(prefBlock).toMatch(/Notification Preferences/);
+    expect(prefBlock).toMatch(/Danger Zone/);
   });
 
   it("the general tab keeps exactly the four reference fields", () => {
@@ -1581,9 +1597,15 @@ describe("session-20 hover recipes (parity round 19)", () => {
   });
 
   it("R19-F: Import CSV = outline + border-blue-300 + text-blue-700 + hover:bg-blue-50 (REF's blue-tinted outline)", () => {
-    const csvBlock = employeesPage.slice(
-      employeesPage.indexOf("Import CSV") - 600,
-      employeesPage.indexOf("Import CSV")
+    /* Session 57 (R57-A): the trigger button moved into the
+       BulkImportDialog component (the real dialog behind the old toast
+       stub) — the pin follows the recipe to its new home; the window
+       widens to 900 because the hand-authored old-lucide glyph (R46-G1)
+       rides between the className and the label. Assertions unchanged. */
+    const importSrc = read("src", "components", "shared", "bulk-import-dialog.tsx");
+    const csvBlock = importSrc.slice(
+      importSrc.indexOf("Import CSV") - 900,
+      importSrc.indexOf("Import CSV")
     );
     expect(csvBlock).toContain("text-blue-700");
     expect(csvBlock).toContain("border-blue-300");
@@ -1932,7 +1954,7 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
   const leavePage = read("src", "app", "(app)", "leavemanagement", "page.tsx");
   const expensesPage = read("src", "app", "(app)", "expenses", "page.tsx");
   const taskPage = read("src", "app", "(app)", "taskmanager", "page.tsx");
-  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+  const settingsPage = () => soft(() => read("src", "app", "(app)", "settings", "page.tsx"));
 
   it("R23-A: the base layer re-authors the v3 preflight button cursor (v4 removed button{cursor:pointer}; REF computes pointer on 100% of measured buttons — group toggles, header chrome, dialogs, login)", () => {
     /* Session 33: the base block grew (the runtime-var body comment), so
@@ -1969,10 +1991,10 @@ describe("session-24 cursor + selection recipes (parity round 23 — the cursor 
   });
 
   it("R23-B-scope: settings (the representative of the plain-gradient family) stays selectable — session 47: it adopts the v3 gradient form but no trio, no select-none", () => {
-    const m = settingsPage.match(/className="min-h-screen bg-gradient-to-br[^"]*"/);
+    const m = settingsPage().match(/className="min-h-screen bg-gradient-to-br[^"]*"/);
     expect(m).toBeTruthy();
     expect(m?.[0]).not.toContain("select-none");
-    expect(settingsPage).not.toContain("<PageCanvas>");
+    expect(settingsPage()).not.toContain("<PageCanvas>");
   });
 });
 
@@ -3086,7 +3108,7 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
      docs/remediation-plan-session36.md. */
 
   const dropdownUi = read("src", "components", "ui", "dropdown-menu.tsx");
-  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+  const settingsPage = () => soft(() => read("src", "app", "(app)", "settings", "page.tsx"));
   const notFoundPage = read("src", "app", "not-found.tsx");
   const documentsApi = read("src", "app", "api", "documents", "route.ts");
 
@@ -3203,17 +3225,17 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
 
   it("R35-E1: the settings tab headers are the title-only 16px leading-none recipe (no CardDescription on the non-Company tabs)", () => {
     for (const title of ["Approval Workflows", "Work Shifts", "Departments", "System Integrations", "Theme &amp; Layout Settings", "System Audit Logs"]) {
-      expect(settingsPage).toContain(`font-semibold leading-none tracking-tight">${title}`);
+      expect(settingsPage()).toContain(`font-semibold leading-none tracking-tight">${title}`);
     }
-    expect(settingsPage).not.toContain("Multi-level approval hierarchies");
-    expect(settingsPage).not.toContain("Shift templates used by the shift calendar");
-    expect(settingsPage).not.toContain("Organize employees into departments");
-    expect(settingsPage).not.toContain("Audit trail of recent system actions");
+    expect(settingsPage()).not.toContain("Multi-level approval hierarchies");
+    expect(settingsPage()).not.toContain("Shift templates used by the shift calendar");
+    expect(settingsPage()).not.toContain("Organize employees into departments");
+    expect(settingsPage()).not.toContain("Audit trail of recent system actions");
   });
 
   it("R35-E2: the Departments tab — h-9 Add (default variant, 180×36) + the 48px slate-300 empty icon + the P-based two-line empty", () => {
-    const idx = settingsPage.indexOf("function DepartmentsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function IntegrationsTab("));
+    const idx = settingsPage().indexOf("function DepartmentsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function IntegrationsTab("));
     expect(block).not.toContain('size="sm"');
     expect(block).toContain("No departments yet");
     expect(block).toContain('Click &quot;Add Department&quot; to create your first department.');
@@ -3222,16 +3244,16 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-E3: the Workflows tab empty — CircleCheckBig 48px slate-300 + the single P 'No workflows configured'", () => {
-    const idx = settingsPage.indexOf("function WorkflowsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    const idx = settingsPage().indexOf("function WorkflowsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function ShiftsTab("));
     expect(block).toContain("No workflows configured");
     expect(block).not.toContain("Set up a workflow in the Approval Workflow Engine");
     expect(block).toContain('<CircleCheckBig className="w-12 h-12 mx-auto mb-3 text-slate-300"');
   });
 
   it("R35-E4: the Shifts tab — the 'Work Shifts' title + the single P 'No shifts configured' + the Clock 48px", () => {
-    const idx = settingsPage.indexOf("function ShiftsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    const idx = settingsPage().indexOf("function ShiftsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function DepartmentsTab("));
     expect(block).toContain(">Work Shifts<");
     expect(block).toContain("No shifts configured");
     expect(block).not.toContain("Create shifts to build the shift calendar");
@@ -3239,8 +3261,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-E5: the Integrations tab — REF's four text-chip tiles (WhatsApp/SMS/Email/ZKT) with the Active badge", () => {
-    const idx = settingsPage.indexOf("function IntegrationsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+    const idx = settingsPage().indexOf("function IntegrationsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function ThemeTab("));
     for (const name of ["WhatsApp Integration", "SMS Gateway", "Email Service", "ZKT BioTime Cloud"]) {
       expect(block).toContain(name);
     }
@@ -3257,8 +3279,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-E6: the Theme tab — REF's real form (three color fields + Preview + Menu Position + the two collapse checkboxes + Save Theme)", () => {
-    const idx = settingsPage.indexOf("function ThemeTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    const idx = settingsPage().indexOf("function ThemeTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function LogsTab("));
     expect(block).toContain("Save Theme");
     expect(block).toContain(">Colors<");
     expect(block).toContain("Primary Color");
@@ -3276,8 +3298,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-E7: the System Logs tab — the filter shell (Search/User/Action/From/To + Clear Filters) + the P empty line", () => {
-    const idx = settingsPage.indexOf("function LogsTab(");
-    const block = settingsPage.slice(idx);
+    const idx = settingsPage().indexOf("function LogsTab(");
+    const block = settingsPage().slice(idx);
     expect(block).toContain("total logs");
     expect(block).toContain("All Users");
     expect(block).toContain("All Actions");
@@ -3290,8 +3312,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
      the Quick Presets + the w-full selects + the button COLOR family) ---- */
 
   it("R35-F1: the Workflows tab header carries the Add Workflow action (REF: 160×36, dark solid + Plus — the census missed the button entirely)", () => {
-    const idx = settingsPage.indexOf("function WorkflowsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    const idx = settingsPage().indexOf("function WorkflowsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function ShiftsTab("));
     expect(block).toContain("flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6");
     expect(block).toContain("Add Workflow");
     expect(block).toMatch(/<Plus className="mr-2"/);
@@ -3299,8 +3321,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F2: the Create Approval Workflow dialog — REF's contract (max-w-3xl, Name | Type select with the five types, Approval Levels + Add Level + Mandatory, Cancel/Create)", () => {
-    const idx = settingsPage.indexOf("function WorkflowsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    const idx = settingsPage().indexOf("function WorkflowsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function ShiftsTab("));
     expect(block).toContain("Create Approval Workflow");
     expect(block).toContain("max-w-3xl");
     expect(block).toContain("Workflow Name");
@@ -3324,8 +3346,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F4: the Shifts tab header carries the Add Shift action (REF: 127×36, dark solid + Plus)", () => {
-    const idx = settingsPage.indexOf("function ShiftsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    const idx = settingsPage().indexOf("function ShiftsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function DepartmentsTab("));
     expect(block).toContain("flex flex-row items-center justify-between space-y-0 border-b border-slate-200 p-6");
     expect(block).toContain("Add Shift");
     expect(block).toMatch(/<Plus className="mr-2"/);
@@ -3333,8 +3355,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F5: the Add Shift dialog — REF's contract (max-w-lg, the seven fields with REF's placeholders, Status select, Cancel/Create)", () => {
-    const idx = settingsPage.indexOf("function ShiftsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function DepartmentsTab("));
+    const idx = settingsPage().indexOf("function ShiftsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function DepartmentsTab("));
     expect(block).toContain("Add Shift");
     expect(block).toContain("max-w-lg");
     expect(block).toContain("Shift Name");
@@ -3365,16 +3387,16 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F7: Save Theme is REF's dark solid with the Save icon (REF: 151×36 bg rgb(23,23,23) + lucide-save mr-2 — NOT the blue gradient CTA)", () => {
-    const idx = settingsPage.indexOf("function ThemeTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    const idx = settingsPage().indexOf("function ThemeTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function LogsTab("));
     expect(block).toContain('<Button variant="dark" onClick={saveTheme}>');
     expect(block).toContain('<Save className="mr-2"');
     expect(block).not.toContain("linear-gradient");
   });
 
   it("R35-F8: the Quick Presets section — REF's three outline cards (h-auto p-4 flex-col items-start gap-2, three w-6 h-6 rounded swatches; click populates the color fields)", () => {
-    const idx = settingsPage.indexOf("function ThemeTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function LogsTab("));
+    const idx = settingsPage().indexOf("function ThemeTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function LogsTab("));
     expect(block).toContain("Quick Presets");
     expect(block).toContain("Facebook (Default)");
     expect(block).toContain("Professional Blue");
@@ -3390,14 +3412,14 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F9: the Logs filter selects carry REF's w-full (REF: the triggers fill their grid columns at 195px; the clone's content-sized renders were 201)", () => {
-    const idx = settingsPage.indexOf("function LogsTab(");
-    const block = settingsPage.slice(idx);
+    const idx = settingsPage().indexOf("function LogsTab(");
+    const block = settingsPage().slice(idx);
     expect(block.match(/<SelectTrigger className="w-full">/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
   it("R35-F10: the Departments Add button is REF's dark solid too (bg rgb(23,23,23) + white text — the live pair caught the gradient CTA on all four header actions; session-38 amendment: the button now rides inside DialogTrigger asChild — R37-A)", () => {
-    const idx = settingsPage.indexOf("function DepartmentsTab(");
-    const block = settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+    const idx = settingsPage().indexOf("function DepartmentsTab(");
+    const block = settingsPage().slice(idx, settingsPage().indexOf("function ThemeTab("));
     expect(block).toMatch(/<Button variant="dark">\s*<Plus className="mr-2" aria-hidden="true" \/>\s*Add Department/);
     expect(block).not.toContain("linear-gradient");
   });
@@ -3413,8 +3435,8 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
   });
 
   it("R35-F13: the Logs empty carries REF's 48px FileText slate-300 icon above the line (live-measured; the census had recorded \"no icon\")", () => {
-    const idx = settingsPage.indexOf("function LogsTab(");
-    const block = settingsPage.slice(idx);
+    const idx = settingsPage().indexOf("function LogsTab(");
+    const block = settingsPage().slice(idx);
     expect(block).toContain('<FileText className="w-12 h-12 mx-auto mb-3 text-slate-300"');
   });
 });
@@ -3428,21 +3450,21 @@ describe("session-37 dialog form contracts (parity round 36)", () => {
      and the asset dialog's text layer. All values REF-measured this
      round — see docs/remediation-plan-session37.md. */
 
-  const settingsPage = read("src", "app", "(app)", "settings", "page.tsx");
+  const settingsPage = () => soft(() => read("src", "app", "(app)", "settings", "page.tsx"));
   const assetsPage = read("src", "app", "(app)", "assets", "page.tsx");
   const departmentsApi = read("src", "app", "api", "departments", "route.ts");
 
   const workflowBlock = () => {
-    const idx = settingsPage.indexOf("function CreateWorkflowDialog(");
-    return settingsPage.slice(idx, settingsPage.indexOf("function ShiftsTab("));
+    const idx = settingsPage().indexOf("function CreateWorkflowDialog(");
+    return settingsPage().slice(idx, settingsPage().indexOf("function ShiftsTab("));
   };
   const shiftBlock = () => {
-    const idx = settingsPage.indexOf("function AddShiftDialog(");
-    return settingsPage.slice(idx, settingsPage.indexOf("// ------------------------------------------------------------ Departments"));
+    const idx = settingsPage().indexOf("function AddShiftDialog(");
+    return settingsPage().slice(idx, settingsPage().indexOf("// ------------------------------------------------------------ Departments"));
   };
   const deptBlock = () => {
-    const idx = settingsPage.indexOf("function DepartmentsTab(");
-    return settingsPage.slice(idx, settingsPage.indexOf("function ThemeTab("));
+    const idx = settingsPage().indexOf("function DepartmentsTab(");
+    return settingsPage().slice(idx, settingsPage().indexOf("function ThemeTab("));
   };
 
   it("R36-A1: the Create Approval Workflow dialog is a real form — the space-y-4 form wraps fields + footer and Create submits it (REF: hasForm, footer inside)", () => {
@@ -4944,10 +4966,13 @@ describe("session-47 zero-state app interiors (parity round 46 — the page-root
   // --- G. the icon family (rendered diffs) ---
 
   it("R46-G1: employees' Import CSV + search icons are hand-authored to REF's OLD-lucide glyphs (upload = the tray-first path + polyline + line, class w-4 h-4 mr-2; search = circle-first + the m21 21-4.3-4.3 tail, class absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 — the installed 0.525 ships the newer revisions and muted-foreground)", () => {
+    /* Session 57 (R57-A): the upload glyph rides the BulkImportDialog's
+       trigger now (the search stays on the employees page). */
     const src = page("employees", "page.tsx");
-    expect(src).toContain('lucide lucide-upload w-4 h-4 mr-2');
-    expect(src).toContain('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
-    expect(src).toContain('points="17 8 12 3 7 8"');
+    const importSrc = read("src", "components", "shared", "bulk-import-dialog.tsx");
+    expect(importSrc).toContain('lucide lucide-upload w-4 h-4 mr-2');
+    expect(importSrc).toContain('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
+    expect(importSrc).toContain('points="17 8 12 3 7 8"');
     expect(src).toContain('lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400');
     expect(src).toContain('m21 21-4.3-4.3');
     expect(src).not.toContain("text-muted-foreground\" aria-hidden=\"true\" />\n            </div>");
@@ -5830,5 +5855,168 @@ describe("read-only surface family (session 56, R56-A..D — REF's bg-slate-50 r
     // the header row must NOT ride the shadcn TableRow hover family (REF's
     // thead row is inert — live-measured: no transition, no hover tint)
     expect(src).not.toMatch(/<TableRow>\s*<TableHead/);
+  });
+});
+
+describe("affordance-stub family (session 57, R57-A..E — REF's real dialogs behind the toast stubs)", () => {
+  /* The r57 census (scripts/r57-census.mjs, phases A-E, pre-fix 0/6):
+     five affordances the clone stubs with info toasts (or invented
+     interiors) where REF opens real dialogs / hidden file inputs. All
+     recipes live-measured this round; the superset layers (a working
+     import, working media upload, a persisted WhatsApp config, a real
+     account deletion) ride the same at-rest recipes. */
+
+  /* lazy reads: the new files land with the GREEN step — a module-level
+     read would break collection while they don't exist (RED must fail
+     per-test, not per-file); soft() is the module-level helper above */
+  const importDialog = () => soft(() => read("src", "components", "shared", "bulk-import-dialog.tsx"));
+  const importApi = () => soft(() => read("src", "app", "api", "employees", "import", "route.ts"));
+  const wallPage = () => soft(() => read("src", "app", "(app)", "companywall", "page.tsx"));
+  const postsApi = () => soft(() => read("src", "app", "api", "posts", "route.ts"));
+  const mediaApi = () => soft(() => read("src", "app", "api", "media", "[name]", "route.ts"));
+  const whatsappDialog = () => soft(() => read("src", "components", "shared", "whatsapp-dialog.tsx"));
+  const whatsappApi = () => soft(() => read("src", "app", "api", "integrations", "whatsapp", "route.ts"));
+  const settingsPage = () => soft(() => read("src", "app", "(app)", "settings", "page.tsx"));
+  const profilePage = () => soft(() => read("src", "app", "(app)", "profile", "page.tsx"));
+  const profileApi = () => soft(() => read("src", "app", "api", "profile", "route.ts"));
+
+  it("R57-A1: the employees Import CSV opens REF's Bulk Import Employees dialog (the verbatim recipe + the working superset states)", () => {
+    // REF's title + icon contract (the lucide-react component renders the
+    // lucide lucide-file-spreadsheet prefix at runtime; the source pins the
+    // component + the measured className)
+    expect(importDialog()).toContain('"tracking-tight text-2xl flex items-center gap-2"');
+    expect(importDialog()).toContain("Bulk Import Employees");
+    expect(importDialog()).toMatch(/<FileSpreadsheet className="w-6 h-6 text-blue-600"/);
+    // the info alert + the 4-step ordered list (REF's texts verbatim)
+    expect(importDialog()).toContain('"font-medium"');
+    expect(importDialog()).toContain("How to import employees:");
+    expect(importDialog()).toContain('"list-decimal list-inside space-y-1 text-sm"');
+    expect(importDialog()).toContain("Fill in employee information (required: full_name, email, job_title, start_date)");
+    // the w-full template button + REF's 7-column template blob
+    expect(importDialog()).toContain('"w-full"');
+    expect(importDialog()).toContain("Download CSV Template");
+    expect(importDialog()).toContain("full_name,email,job_title,start_date,phone,department_id,template_id");
+    // the dropzone recipe (REF's verbatim class string)
+    expect(importDialog()).toContain('"border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-slate-400 transition-colors"');
+    expect(importDialog()).toContain("Click to upload CSV file");
+    expect(importDialog()).toContain("or drag and drop your CSV file here");
+    // REF's post-upload states: the filename swap + Process File → Processing...
+    expect(importDialog()).toContain("Process File");
+    expect(importDialog()).toContain("Processing...");
+    // REF's validation-error surface (the destructive alert)
+    expect(importDialog()).toContain("Validation Errors:");
+    // the footer + Cancel
+    expect(importDialog()).toContain('"flex justify-end gap-3 pt-4 border-t border-slate-200"');
+    // the wired trigger: the employees page opens the dialog (no toast stub)
+    const employeesPage = read("src", "app", "(app)", "employees", "page.tsx");
+    expect(employeesPage).toContain("BulkImportDialog");
+    expect(employeesPage).not.toContain('title: "CSV import"');
+  });
+
+  it("R57-A2: the bulk import API enforces the employees contract (admin/hr gate, full_name split, required columns)", () => {
+    expect(importApi()).toContain('requireRole(["admin", "hr"])');
+    expect(importApi()).toContain("firstName");
+    expect(importApi()).toContain("full_name");
+    expect(importApi()).toContain("start_date");
+    // per-row validation surfaces the row number + the field (the superset
+    // review contract — REF's own parser is broken, measured live)
+    expect(importApi()).toMatch(/row|Row/);
+  });
+
+  it("R57-B: the company wall Photo/Video trigger REF's hidden media-upload input and the post rides multipart", () => {
+    // REF's hidden input contract: id, accept, hidden
+    expect(wallPage()).toContain('id="media-upload"');
+    expect(wallPage()).toContain('accept="image/*,video/*"');
+    expect(wallPage()).toMatch(/className="hidden"/);
+    // no more toast stubs on the attach affordances
+    expect(wallPage()).not.toContain("Attach coming soon");
+    // the posts API takes multipart FormData (the media rides the post)
+    expect(postsApi()).toMatch(/formData\(\)/);
+    // the media serving route exists (serve-by-extension, path-guarded)
+    expect(mediaApi()).toBeTruthy();
+    expect(mediaApi()).toMatch(/Content-Type|contentType/);
+  });
+
+  it("R57-C: the WhatsApp Connect opens REF's Configure WhatsApp API dialog and the save persists", () => {
+    // REF's dialog recipe: the 3 labels + placeholders + the button pair
+    expect(whatsappDialog()).toContain("Configure WhatsApp API");
+    expect(whatsappDialog()).toContain("API Key");
+    expect(whatsappDialog()).toContain("Phone Number (with country code)");
+    expect(whatsappDialog()).toContain("Webhook URL (Optional)");
+    expect(whatsappDialog()).toContain('placeholder="Enter your WhatsApp API key"');
+    expect(whatsappDialog()).toContain('placeholder="+966XXXXXXXXX"');
+    expect(whatsappDialog()).toContain('placeholder="https://your-webhook.com"');
+    expect(whatsappDialog()).toContain("Cancel");
+    expect(whatsappDialog()).toContain("Save Configuration");
+    // the settings page wires the WhatsApp tile to the dialog (SMS/ZKT keep
+    // the REF-parity no-op stubs)
+    expect(settingsPage()).toContain("WhatsappDialog");
+    // the persistence seam: the Integration model (48) + the API route
+    const schema = read("prisma", "schema.prisma");
+    expect(schema).toMatch(/^model Integration \{/m);
+    expect(whatsappApi()).toContain("requireRole");
+  });
+
+  it("R57-D: the profile Social Accounts tab is REF's Connected Accounts 4-field URL form (persisted)", () => {
+    // REF's card + rows: the icon tiles, labels, placeholders, the save
+    expect(profilePage()).toContain("Connected Accounts");
+    expect(profilePage()).toContain("LinkedIn Profile");
+    expect(profilePage()).toContain("Twitter Profile");
+    expect(profilePage()).toContain("GitHub Profile");
+    expect(profilePage()).toContain("Facebook Profile");
+    expect(profilePage()).toContain('placeholder="https://linkedin.com/in/yourprofile"');
+    expect(profilePage()).toContain('placeholder="https://twitter.com/yourusername"');
+    expect(profilePage()).toContain('placeholder="https://github.com/yourusername"');
+    expect(profilePage()).toContain('placeholder="https://facebook.com/yourprofile"');
+    expect(profilePage()).toContain("Save Accounts");
+    // the invented Google/Microsoft/Slack list is gone
+    expect(profilePage()).not.toContain("Social sign-in coming soon");
+    expect(profilePage()).not.toMatch(/name: "Google"/);
+    // the persistence: the User schema fields + the profile API PATCH
+    const schema = read("prisma", "schema.prisma");
+    expect(schema).toMatch(/linkedinUrl\s+String\?/);
+    expect(schema).toMatch(/twitterUrl\s+String\?/);
+    expect(schema).toMatch(/githubUrl\s+String\?/);
+    expect(schema).toMatch(/facebookUrl\s+String\?/);
+    expect(profileApi()).toContain("linkedinUrl");
+  });
+
+  it("R57-E: the profile Preferences tab is REF's two-card recipe (notification rows + Danger Zone + the DELETE confirmation)", () => {
+    // the notification card: REF's row recipe + both rows + Save Preferences
+    expect(profilePage()).toContain('"flex items-center justify-between p-4 bg-slate-50 rounded-lg"');
+    expect(profilePage()).toContain("Email Notifications");
+    expect(profilePage()).toContain("Push Notifications");
+    expect(profilePage()).toContain("Receive push notifications in browser");
+    expect(profilePage()).toContain("Save Preferences");
+    // the Danger Zone card + the destructive delete affordance
+    expect(profilePage()).toContain("Danger Zone");
+    expect(profilePage()).toContain("Once you delete your account, there is no going back. Please be certain.");
+    expect(profilePage()).toContain("Delete My Account");
+    // the confirmation dialog: the alert + the DELETE-typed gate
+    expect(profilePage()).toContain("This action cannot be undone. This will permanently delete your account and remove your data from our servers.");
+    expect(profilePage()).toContain('placeholder="DELETE"');
+    // the language/timezone artifact is GONE (the duplicate value=
+    // "preferences" structural bug — REF has no language/timezone card)
+    expect(profilePage()).not.toContain('value="language"');
+    expect(profilePage()).not.toMatch(/LANGUAGES\s*=/);
+    expect(profilePage()).not.toMatch(/TIMEZONES\s*=/);
+    // the single preferences panel: exactly ONE value="preferences" mount
+    expect((profilePage().match(/TabsContent value="preferences"/g) || []).length).toBe(1);
+    // the persistence + deletion seams
+    const schema = read("prisma", "schema.prisma");
+    expect(schema).toMatch(/pushEnabled\s+Boolean @default\(true\)/);
+    expect(profileApi()).toContain("export async function DELETE");
+  });
+
+  it("R57-p: the palette pins cover the new surfaces (the sky family + the red Danger Zone frame)", () => {
+    // the sky family was UNPINNED (bg-sky-100/text-sky-600 rendered in
+    // lab() — the v4 oklch drift trap, trap 2)
+    expect(globalsCss).toContain("--color-sky-100: #e0f2fe");
+    expect(globalsCss).toContain("--color-sky-600: #0284c7");
+    // the Danger Zone frame: red-200/400/800/900
+    expect(globalsCss).toContain("--color-red-200: #fecaca");
+    expect(globalsCss).toContain("--color-red-400: #f87171");
+    expect(globalsCss).toContain("--color-red-800: #991b1b");
+    expect(globalsCss).toContain("--color-red-900: #7f1d1d");
   });
 });

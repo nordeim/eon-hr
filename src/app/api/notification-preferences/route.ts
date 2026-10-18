@@ -10,6 +10,8 @@ import { ok, guard, requireUser, parseBody } from "@/lib/api";
 const PreferenceInput = z.object({
   emailEnabled: z.boolean().optional(),
   inAppEnabled: z.boolean().optional(),
+  // session 57, R57-E: REF's Preferences tab carries the Push row
+  pushEnabled: z.boolean().optional(),
   approvals: z.boolean().optional(),
   rejections: z.boolean().optional(),
   assignments: z.boolean().optional(),

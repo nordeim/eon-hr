@@ -32,6 +32,26 @@ async function main(): Promise<void> {
   if (resetAvatars.count > 0) {
     console.log(`[purge] reset ${resetAvatars.count} user avatar(s)`);
   }
+  // Session 57 (R57-A2): the import spec creates employees from
+  // e2e-import-@eon-hr.test rows — the employee sweep above already
+  // covers them (endsWith @eon-hr.test).
+  // Session 57 (R57-E2): the deletion round-trip signs up
+  // e2e-delete-*@eon-hr.test users — sweep any that failed mid-way (the
+  // successful round-trip deletes itself).
+  const goneDeleteUsers = await db.user.deleteMany({
+    where: { email: { startsWith: "e2e-delete-", endsWith: "@eon-hr.test" } },
+  });
+  if (goneDeleteUsers.count > 0) {
+    console.log(`[purge] removed ${goneDeleteUsers.count} delete-test user(s)`);
+  }
+  // Session 57 (R57-B): the wall media spec posts with attachments —
+  // sweep the posts and orphaned db/uploads files.
+  const gonePosts = await db.post.deleteMany({
+    where: { OR: [{ content: { contains: "e2e-media-post" } }, { mediaUrl: { not: null } }] },
+  });
+  if (gonePosts.count > 0) {
+    console.log(`[purge] removed ${gonePosts.count} media-test post(s)`);
+  }
 }
 
 main()
