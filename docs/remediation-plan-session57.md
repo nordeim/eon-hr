@@ -142,6 +142,65 @@ to REF.
 - Post-fix: the full gate stack (lint → tsc → 806+ unit → build → 269+
   E2E) + the census re-run (expected 6/6 MATCH) + the DB pristine check.
 
-## Completion record (pending — filled at the round's end)
+## Completion record (2026-10-18, end of session 57)
 
-To be completed.
+All five fix-target findings closed with TDD (RED → GREEN — 7 unit
+pins RED-first at 806 → 813 GREEN), the full gate stack green, and
+the post-fix census at the target:
+
+- **R57-A ✓** — the Bulk Import Employees dialog
+  (`src/components/shared/bulk-import-dialog.tsx`): REF's verbatim
+  at-rest recipe + the working superset flow (the template blob,
+  the filename swap + Process File → "Processing..." states, the
+  client-side parse, per-row validation with the destructive
+  "Validation Errors:" alert, the review table, the Import →
+  `POST /api/employees/import` round-trip). Census (A) MATCH; the
+  E2E round-trip pins the whole flow.
+- **R57-B ✓** — the wall's hidden `#media-upload` input (the
+  shared Photo/Video trigger) + the preview, the multipart post,
+  `db/uploads/` storage, the path-guarded `/api/media/[name]`
+  serve-by-extension route, and the media on the post card. Census
+  (B) MATCH; the E2E round-trip pins the served content-type.
+- **R57-C ✓** — the Configure WhatsApp API dialog
+  (`src/components/shared/whatsapp-dialog.tsx`): REF's verbatim
+  recipe (with `tracking-tight` on the title — REF's measured class
+  string) + the persistence to the new `Integration` model (48
+  models) + the success toast. Census (C) MATCH.
+- **R57-D ✓** — the Connected Accounts card: the 4 icon-tile rows
+  with REF's labels/placeholders + the Save Accounts footer; the
+  invented Google/Microsoft/Slack list removed; the save persists
+  to the 4 new User fields. Census (D) MATCH (the computed sky tile
+  rgb(224, 242, 254) — the R57-p pin).
+- **R57-E ✓** — the two-card Preferences recipe (the 2
+  bg-slate-50 toggle rows + Save Preferences; the red-framed Danger
+  Zone + the DELETE-typed confirmation dialog) + the superset
+  (pushEnabled, `DELETE /api/profile` with the explicit relation
+  walk, the full deletion round-trip). The language/timezone
+  artifact REMOVED (the duplicate-`value=` structural fix; the
+  R14-E pin inverted to the REF-verified truth). Census (E) + (E-d)
+  MATCH — including the plain-div title recipe (REF's profile-tab
+  cards carry `font-semibold leading-none tracking-tight`, not the
+  app-wide CardTitle pattern, and NO description line).
+- **R57-p ✓** — the sky family + red-200/400/800/900 palette pins
+  (the oklch-drift trap — bg-sky-100 computed rgb(224, 242, 254)).
+
+Gates at completion: lint 0/0 · tsc ✓ · **813/813 unit** (+7) ·
+build ✓ · **276/276 E2E** (+7 — no flakes) · post-fix census
+**6/6 MATCH** · DB pristine (1/1/2) · 428 screenshot files (+10) ·
+`.env.example` verified (keys match the codebase — unchanged this
+round: only DATABASE_URL + AUTH_SECRET are read). Code batch pushed
+at the first green stack (`2a636d9` via the ssh wrapper + the
+paramiko shim + the EXPLICIT `--remote git@github.com:nordeim/
+eon-hr.git`; remote verified == HEAD; the operator key shredded);
+this docs layer rides the follow-up commit.
+
+Accuracy notes for the record: (1) the round was executed twice —
+the prior session's identical-named work was lost uncommitted in a
+workspace reset; every recipe above was re-measured live this
+window (no measurement was trusted from the lost session). (2) The
+census needed three instrument fixes before its pre-fix 0/6 was
+trustworthy (the Radix pointer-event lesson, the eval-comment
+lesson, the two-parse state-read lesson — see §session_115). (3)
+REF's own import Process File and the WhatsApp Save are broken /
+silent live — both recorded as the measured baseline for the
+superset decisions.

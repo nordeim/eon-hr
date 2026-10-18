@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.39.0 (session-56 remediation complete — the history journey walk + the read-only surface family: REF's bg-slate-50 recipe restored on 4 surfaces + the Next.js 16.4.0 history-stack corruption root-caused and recorded) · **Last updated:** 2026-10-18
-> **State:** 806 unit + 269 E2E tests green, lint/typecheck/build
+> **Version:** 3.40.0 (session-57 remediation complete — the affordance-stub family: REF's real dialogs behind the toast stubs — the bulk import, the WhatsApp config, the wall's hidden media input, the Social/Preferences tab interiors — with the working superset flows: the import, the media upload, the persisted config/links, the account deletion) · **Last updated:** 2026-10-18
+> **State:** 813 unit + 276 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3570,3 +3570,72 @@ computed truth diverges, because the pin asserted the container and
 never the contents. When a divergence hides below the measurement
 threshold, the fix is the computed-truth method applied one level
 deeper — not a new census family.
+
+## 67. The affordance-stub family (session 57, parity round 56)
+
+**The layer this round censused:** the click behavior of the
+affordances every census SEES but never presses — buttons that fire
+info toasts in the clone where REF opens real dialogs / hidden file
+inputs, plus two invented profile tab interiors. Pre-fix
+**0/6 MATCH** (`scripts/r57-census.mjs`, five paired phases);
+post-fix **6/6**. The instrument lessons: (1) a bare eval `.click()`
+on a Radix TabsTrigger fires no `pointerdown` — the tab never
+activates; use the REAL browser click (snapshot ref →
+`agent-browser click`); (2) `//` comments inside eval templates
+swallow the expression when the newlines collapse to the one-line
+shell command; (3) the two-parse `ev()` ERR-wraps bare-string
+returns — state reads must return JSON; (4) the exported
+`DATABASE_URL` trap re-fires per tool-call — prefix every
+db-touching command with `unset DATABASE_URL`.
+
+- **The import superset** (`src/components/shared/bulk-import-dialog.tsx`
+  + `src/app/api/employees/import/route.ts`): REF's verbatim
+  Bulk Import Employees recipe (max-w-5xl — the file-spreadsheet
+  icon title, the 4-step info alert, the w-full template button, the
+  dashed dropzone with the filename swap + Process File →
+  "Processing..." states, the destructive "Validation Errors:"
+  alert, the Cancel/X footer) + the WORKING flow REF lacks (REF's
+  own Process File fails on its own template's format — measured
+  live): the exact 7-column template blob, the client-side parse,
+  per-row validation, the review table, the Import POST (admin/hr
+  gate, full_name split, duplicate-email skip, the honest
+  created/skipped summary).
+- **The media superset** (`src/app/(app)/companywall/page.tsx` +
+  `src/app/api/posts/route.ts` + `src/app/api/media/[name]/route.ts`):
+  REF's hidden `#media-upload` input contract (one shared input,
+  `accept="image/*,video/*"`, class `hidden`) + the composer
+  preview, the multipart post, `db/uploads/` storage, the
+  path-guarded serve-by-extension route (name regex + no `..` +
+  extension allowlist), and the media rendered on the post card.
+- **The WhatsApp config** (`src/components/shared/whatsapp-dialog.tsx`
+  + `src/app/api/integrations/whatsapp/route.ts` + the `Integration`
+  model): REF's verbatim Configure WhatsApp API dialog (max-w-lg,
+  the 3 fields + placeholders + required pair, the Cancel/Save
+  Configuration footer, `tracking-tight` on the title) + the
+  persistence REF lacks (REF's save closes silently — measured).
+  SMS/ZKT stay the REF-parity no-op stubs (measured: no dialog on
+  REF either).
+- **The profile tab rebuilds** (`src/app/(app)/profile/page.tsx`):
+  the Social tab = REF's Connected Accounts card (the 4 icon-tile
+  rows — LinkedIn `bg-blue-100`/`text-blue-600`, Twitter
+  `bg-sky-100`/`text-sky-600`, GitHub, Facebook — with the URL
+  inputs + Save Accounts; persists to the 4 new User fields); the
+  Preferences tab = REF's two-card recipe (the 2 `p-4 bg-slate-50`
+  toggle rows + Save Preferences; the red-framed Danger Zone + the
+  DELETE-typed confirmation dialog) with `pushEnabled` persisted and
+  `DELETE /api/profile` walking the relations explicitly (SQLite
+  has no ON DELETE CASCADE). **The profile-tab cards use the
+  plain-div title recipe** (`font-semibold leading-none
+  tracking-tight`, NO CardTitle/CardDescription pattern, no
+  description line) — REF's measured classes on this surface.
+- **The palette pins** (`src/app/globals.css`): the sky family
+  (bg-sky-100/text-sky-600 — v4's oklch default rendered them in
+  lab()) + red-200/400/800/900 (the Danger Zone frame) — the
+  standing rule: pin every family a new surface uses, or the
+  computed styles serialize as lab().
+- **The pins**: 7 unit (the R57-A..p recipe family,
+  RED-first) + 7 E2E (computed truth + the three superset
+  round-trips: import, media, deletion). Four legacy pins followed
+  their recipes to new homes (R19-F/R46-G1/session-47 — the
+  trigger button moved into the dialog component; R14-E inverted to
+  the artifact's REF-verified absence).

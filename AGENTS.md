@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 806 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 269 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 813 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 276 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3459,3 +3459,112 @@ eval wrapper — agent-browser returns raw objects unquoted and
 string values quoted, so the census's `ev()` ERR-wraps half its
 returns (the string-equality comparison still holds — compare the
 RAW forms, not extracted fields).
+
+## Session 57 (parity round 56) — the affordance-stub family
+
+Workspace re-cloned from `a43972e` (the prior session's R57 work was
+lost uncommitted in a workspace reset — this round REDID it from the
+landed round-55 state). Baseline gates ALL GREEN (806/806 unit ·
+269/269 E2E, 1 dialog-interiors R37-C timing flake green in
+isolation). The census took the interaction dimension to the layer
+every census SEES but never presses — **the affordance-stub family**
+(buttons that fire info toasts in the clone where REF opens real
+dialogs / hidden file inputs, plus two invented profile tab interiors).
+
+**The deploy watch: the login side deployed again** — login JS
+`C2ujlke6` → `DEszsFDJ` (CSS `D5oCh2kx` unchanged, the app side
+`C-IrDy5f`/`BGNH4KkS` unchanged; the login deploys keep rolling).
+Per protocol the login re-audit ran: **verify-r45 13/13 MATCH — the
+deploy is a non-visual rebuild**. The confirmation ladder green after
+the REF session re-auth (the stale-session DIFF pattern of the r56
+record): standing **5/5** + sweep **12/12** + **verify-r49 13/13**.
+
+**THE AFFORDANCE-STUB CENSUS** (`scripts/r57-census.mjs`, five paired
+phases at 1440×900 — pre-fix **0/6 MATCH**, post-fix **6/6**):
+
+- **R57-A — the employees Import CSV**: REF opens the real **"Bulk
+  Import Employees"** dialog (`max-w-5xl max-h-[90vh]` — the
+  file-spreadsheet icon title, the 4-step info alert, the `w-full`
+  template button, the `border-2 border-dashed` dropzone with the
+  filename swap + Process File → "Processing..." states, the
+  Cancel/X footer). REF's own **Process File is broken live** (fails
+  "Failed to parse CSV file" on its own template's format) — the
+  clone ships the WORKING superset: the exact template blob
+  (7 columns, live-captured), the client-side parse, per-row
+  validation (REF's destructive "Validation Errors:" alert), the
+  review table, and `POST /api/employees/import` (admin/hr gate,
+  full_name split, duplicate-email skip, the honest
+  created/skipped summary).
+- **R57-B — the wall Photo/Video**: REF triggers a hidden
+  `#media-upload` input (`accept="image/*,video/*"`, class `hidden`,
+  ONE shared input for both buttons). The clone completes the flow
+  (the superset): the picked file previews in the composer, rides
+  the post as multipart FormData, lands in `db/uploads/`, is served
+  by `GET /api/media/[name]` (serve-by-extension, strict
+  name-guarded), and renders on the post card.
+- **R57-C — the settings WhatsApp Connect**: REF opens the real
+  **"Configure WhatsApp API"** dialog (`max-w-lg` — the 3 fields
+  with REF's placeholders + required pair, the Cancel / Save
+  Configuration footer). REF's Save closes silently (nothing
+  stored, no tile change — measured); the clone persists to the new
+  **`Integration` model (schema at 48 models)** + a success toast.
+  **SMS Gateway "Configure" and ZKT "Connect" are no-ops on REF
+  too** (measured: no dialog) — the clone's info toasts there are
+  the REF-parity stubs, unchanged.
+- **R57-D — the profile Social Accounts tab**: REF renders the
+  **"Connected Accounts"** card — the 4 `flex items-center gap-4`
+  rows (the 48px icon tiles: LinkedIn `bg-blue-100`/`text-blue-600`,
+  Twitter `bg-sky-100`/`text-sky-600`, GitHub
+  `bg-slate-100`/`text-slate-700`, Facebook
+  `bg-blue-100`/`text-blue-700`) + label + URL input (REF's
+  placeholders) + the "Save Accounts" footer. The clone's tab was
+  INVENTED (the Google/Microsoft/Slack "Connect" list) — rebuilt
+  verbatim; the save persists to the 4 new User fields
+  (linkedinUrl/twitterUrl/githubUrl/facebookUrl).
+- **R57-E — the profile Preferences tab**: REF renders the TWO-card
+  recipe — the **Notification Preferences** card (2
+  `p-4 bg-slate-50 rounded-lg` toggle rows: Email + Push, both
+  checked + the submit "Save Preferences") and the **Danger Zone**
+  card (`border-red-200 dark:border-red-900` frame, the
+  `text-red-600` plain-div title — NO CardTitle/CardDescription
+  pattern, the destructive "Delete My Account" → the DELETE-typed
+  confirmation dialog: the destructive alert, the PH "DELETE"
+  input, the col-reverse footer, the destructive button disabled
+  until the exact word). The clone's tab was the
+  duplicate-`value="preferences"` structural bug (the session-15
+  language/timezone artifact — REF has no language/timezone card
+  anywhere on /profile) — rebuilt verbatim; the superset:
+  `pushEnabled` persisted, `DELETE /api/profile` with the explicit
+  relation walk, the full deletion round-trip (signup → delete →
+  /login).
+- **R57-p — the palette pins**: the **sky** family (bg-sky-100 /
+  text-sky-600 — UNPINNED, v4's oklch default rendered them in
+  lab()) + **red-200/400/800/900** (the Danger Zone frame) added to
+  the `@theme` pins.
+
+**Pinned**: 7 unit (the R57-A..p recipe family in
+`tests/unit/recipes.test.ts`, RED-first) + 7 E2E
+(`tests/e2e/session57-affordance-stubs.spec.ts` — computed truth:
+the dialog recipes, the import round-trip, the media round-trip +
+the served content-type, the sky/red computed colors, the
+DELETE-typed gate + the full deletion round-trip). Four legacy pins
+followed their recipes to the new homes (R19-F / R46-G1 / the
+session-47 mr-2 amendment → `bulk-import-dialog.tsx`; the R14-E pin
+inverted to the REF-verified truth — the artifact's ABSENCE).
+Gates: lint 0/0 · tsc ✓ · **813/813 unit** (+7) · build ✓ ·
+**276/276 E2E** (+7, no flakes) · post-fix census **6/6 MATCH** ·
+DB pristine (1/1/2).
+
+**The round's instrument lessons**: (1) a bare eval `.click()` on a
+Radix TabsTrigger fires no `pointerdown` and the tab NEVER
+activates — the paired-phase tab interactions must use the
+browser's REAL click path (snapshot ref → `agent-browser click`);
+(2) `//` comments inside a census eval template swallow the rest of
+the expression when the newlines collapse to spaces (the
+one-line join) — keep eval templates comment-free; (3) the
+two-parse `ev()` wrapper ERR-wraps bare-string returns — every
+state read must return JSON (the session-56 §instrument lesson,
+re-learned); (4) the exported-`DATABASE_URL` trap re-fires per
+tool-call (the shell is not persistent for unsets) — prefix every
+db-touching command with `unset DATABASE_URL` or
+`env -u DATABASE_URL`.
