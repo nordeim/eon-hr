@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { resolveFromUrl } from "@/lib/login-redirect";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -252,8 +253,15 @@ function LoginForm() {
         setError(json.error?.message ?? "Sign in failed");
         return;
       }
-      const from = params.get("from_url");
-      router.replace(from && from.startsWith("/") ? from : "/dashboard");
+      /* Session 55 (R55-A/E): REF's post-login landing is the ROOT `/`
+         (the r55 census phase A — `/` serves the dashboard via the root
+         rewrite), and its guard/logout pass the FULL ABSOLUTE URL as
+         from_url (phases D/F). The resolver accepts both the path-form
+         and the same-origin absolute form — foreign or malformed values
+         (the open-redirect family) resolve to null and the root takes
+         over. The clone's historic default was /dashboard and its
+         startsWith("/") check silently dropped REF-format params. */
+      router.replace(resolveFromUrl(params.get("from_url"), window.location.origin) ?? "/");
       router.refresh();
     } catch {
       setError("Network error — please try again");
@@ -308,7 +316,11 @@ function LoginForm() {
         setError(json.error?.message ?? "Sign up failed");
         return;
       }
-      router.replace("/dashboard");
+      /* Session 55 (R55-A): the sign-up flow rides the same landing
+         contract as sign-in — the from_url round-trip when present, the
+         ROOT default otherwise (the view-swapped login shares one URL,
+         so the guard's param applies to both entries). */
+      router.replace(resolveFromUrl(params.get("from_url"), window.location.origin) ?? "/");
       router.refresh();
     } catch {
       setError("Network error — please try again");

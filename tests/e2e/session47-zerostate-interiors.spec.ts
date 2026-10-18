@@ -126,7 +126,11 @@ test.describe("session-47 zero-state interiors", () => {
     await page.getByLabel("Password", { exact: true }).fill("Superset123!");
     await page.getByLabel("Confirm Password").fill("Superset123!");
     await page.getByRole("button", { name: "Create account" }).click();
-    await page.waitForURL("**/dashboard");
+    // Session 55 (R55-A): the signup's auto-login lands on the ROOT now —
+    // REF's post-authentication landing (the root rewrite serves the
+    // dashboard there; the sign-up flow rides the same contract as the
+    // sign-in flow — the view-swapped login shares one URL).
+    await page.waitForURL(/\/$/);
     await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
 
     const rows = await page.evaluate(() => {

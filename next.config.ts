@@ -32,8 +32,21 @@ const nextConfig: NextConfig = {
   // content/metadata/auth-guard riding the real lowercase route. Scope:
   // the canonical form only — a re-export DIRECTORY (Dashboard/ beside
   // dashboard/) would collide on case-insensitive checkouts (macOS).
+  //
+  // Session 55 (R55-B): the ROOT serve — the same URL-unchanged-rewrite
+  // pattern for `/`. REF's SPA maps its index route to the dashboard:
+  // `/` renders the dashboard content with the URL staying at `/` (the
+  // r55 census phase B), and its post-login redirect lands there (phase
+  // A). The clone's root was a server REDIRECT to /dashboard (the URL
+  // bar changed — src/app/page.tsx, now removed: beforeFiles rewrites
+  // precede the filesystem, so the page was dead code). Logged-out `/`
+  // is guarded by the edge proxy (src/proxy.ts) before the rewrite
+  // ever runs.
   async rewrites() {
-    return [{ source: "/Dashboard", destination: "/dashboard" }];
+    return [
+      { source: "/Dashboard", destination: "/dashboard" },
+      { source: "/", destination: "/dashboard" },
+    ];
   },
 };
 

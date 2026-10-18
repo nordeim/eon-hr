@@ -5708,12 +5708,16 @@ describe("session-51: the route-casing alias + the mobile-nav census record (rou
     expect(cfg).toMatch(/rewrites/);
   });
 
-  it("R51-A2: the rewrite scope — the canonical /Dashboard only (no wildcard-case aliasing; REF's other internal links are all lowercase)", () => {
+  it("R51-A2: the rewrite scope — the canonical /Dashboard + the root serve only (no wildcard-case aliasing; REF's other internal links are all lowercase)", () => {
     const cfg = read("next.config.ts");
-    // exactly ONE rewrite entry — no case-wildcard family
+    // exactly ONE /Dashboard entry — no case-wildcard family
     expect((cfg.match(/source: "\/Dashboard"/g) || []).length).toBe(1);
-    const upperSources = cfg.match(/source: "\/[^"]*"/g) || [];
-    expect(upperSources).toEqual(['source: "/Dashboard"']);
+    // Session 55 (R55-B): the root serve joined the rewrite family (REF
+    // serves the dashboard at `/` URL-unchanged — the r55 census phase B;
+    // the session-51 URL-unchanged-serve pattern's sibling). The scope
+    // stays closed: the canonical capital form + the root, nothing else.
+    const sources = cfg.match(/source: "\/[^"]*"/g) || [];
+    expect(sources).toEqual(['source: "/Dashboard"', 'source: "/"']);
   });
 });
 
