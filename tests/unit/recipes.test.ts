@@ -5788,3 +5788,47 @@ describe("session-52: the nav-registry tripwire + the drawer-group census record
     expect(hrefs).toEqual(["/dashboard", "/employees", "/taskmanager", "/attendance", "/profile"]);
   });
 });
+
+describe("read-only surface family (session 56, R56-A..D — REF's bg-slate-50 recipe)", () => {
+  /* The r56 census (scripts/r56-census.mjs, phases H/I/J): REF renders
+     its read-only surfaces with the authored bg-slate-50 family — the
+     settings Company tiles (p-4 bg-slate-50 rounded-lg + the Address
+     tile's UNPREFIXED col-span-2 that forces the implicit 2-col grid at
+     every width), the profile identity Email (disabled + bg-slate-50),
+     and the hrreports thead row (border-b bg-slate-50). The clone
+     rendered all four plain — the longest-lived gaps of the family
+     (the R13-B pin covered the grid + labels, never the tile
+     interiors; no pin covered the placeholders or the thead row). */
+
+  it("R56-A: the settings Company tiles render REF's read-only recipe (p-4 bg-slate-50 rounded-lg; the Address tile's always-on col-span-2)", () => {
+    const src = read("src", "app", "(app)", "settings", "page.tsx");
+    // the tile family: every COMPANY_FIELDS tile carries the slate recipe
+    expect(src).toContain('"p-4 bg-slate-50 rounded-lg"');
+    // the Address tile's UNPREFIXED span — the always-on col-span-2 that
+    // forces the 2-track implicit grid below md (REF live-measured: the
+    // 390px grid computes 2 content-sized tracks, not the stacked column)
+    expect(src).toContain("p-4 bg-slate-50 rounded-lg col-span-2");
+    // the span rides the address field (the 7th of the 9-tile grid)
+    expect(src).toMatch(/key === "address"/);
+  });
+
+  it("R56-B: the profile General Email input is REF's read-only identity field (disabled + bg-slate-50)", () => {
+    const src = read("src", "app", "(app)", "profile", "page.tsx");
+    expect(src).toMatch(/<Input[^>]*className="mt-2 bg-slate-50"[^>]*id="email"/);
+    expect(src).toMatch(/<Input[^>]*id="email"[^>]*\bdisabled\b/);
+  });
+
+  it("R56-C: the profile General Phone/Job Title fields carry NO authored placeholders (REF renders both empty)", () => {
+    const src = read("src", "app", "(app)", "profile", "page.tsx");
+    expect(src).not.toContain('placeholder="+65 87651230"');
+    expect(src).not.toContain('placeholder="Operations Manager"');
+  });
+
+  it("R56-D: the hrreports thead row carries REF's slate header (border-b bg-slate-50, no hover tint)", () => {
+    const src = read("src", "app", "(app)", "hrreports", "page.tsx");
+    expect(src).toMatch(/<tr className="border-b bg-slate-50">/);
+    // the header row must NOT ride the shadcn TableRow hover family (REF's
+    // thead row is inert — live-measured: no transition, no hover tint)
+    expect(src).not.toMatch(/<TableRow>\s*<TableHead/);
+  });
+});

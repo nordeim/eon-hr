@@ -430,33 +430,43 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
+                    {/* Session 56 (R56-B): REF renders the identity email
+                        as a READ-ONLY field — a disabled input with an
+                        authored bg-slate-50 (live-measured: disabled +
+                        computed rgb(248,250,252)); the profile save still
+                        carries the unchanged value, matching REF's
+                        behavior (the identity email never edits here). */}
                     <Input
-                      className="mt-2"
+                      className="mt-2 bg-slate-50"
                       id="email"
                       type="email"
                       required
+                      disabled
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
+                    {/* Session 56 (R56-C): no authored placeholder — REF
+                        renders the empty phone field bare (live-measured:
+                        value "" + placeholder ""). */}
                     <Input
                       className="mt-2"
                       id="phone"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+65 87651230"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="job_title">Job Title</Label>
+                    {/* Session 56 (R56-C): no authored placeholder — REF
+                        renders the empty job-title field bare. */}
                     <Input
                       className="mt-2"
                       id="job_title"
                       value={form.jobTitle}
                       onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
-                      placeholder="Operations Manager"
                     />
                   </div>
                 </div>

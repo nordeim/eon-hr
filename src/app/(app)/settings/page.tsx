@@ -272,8 +272,14 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
        `flex justify-between items-center` (title-only DIV
        `font-semibold leading-none tracking-tight` + the iconed h-9
        Edit); the content is `p-6` > `space-y-6` > `grid
-       md:grid-cols-2 gap-6` of read-only p-4 tiles (label
-       text-sm slate-500 mb-1 + value font-medium). 631px card. */
+       md:grid-cols-2 gap-6` of read-only p-4 bg-slate-50 rounded-lg
+       tiles (label text-sm slate-500 mb-1 + value font-medium).
+       631px card. Session 56 (R56-A): the tile interiors re-measured
+       live — every tile carries bg-slate-50 + rounded-lg (computed
+       rgb(248,250,252) + 8px) and the ADDRESS tile rides an
+       UNPREFIXED col-span-2 (the always-on span that forces the
+       2-track implicit grid below md — REF at 390px computes 2
+       content-sized tracks, not a stacked column). */
     <Card className="border-slate-200">
       <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
         <div className="flex items-center justify-between">
@@ -290,7 +296,7 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {COMPANY_FIELDS.map((f) => (
-              <div key={f.key} className="p-4">
+              <div key={f.key} className={f.key === "address" ? "p-4 bg-slate-50 rounded-lg col-span-2" : "p-4 bg-slate-50 rounded-lg"}>
                 <p className="text-sm text-slate-500 mb-1">{f.label}</p>
                 <p className="font-medium text-slate-900">
                   {company ? company[f.key] || "Not set" : "Not set"}
