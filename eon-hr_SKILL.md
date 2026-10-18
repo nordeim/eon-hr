@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.37.0 (session-54 remediation complete — the mobile-nav interaction walk censused + the R54-A default-group-map pin + the drawer auto-close deviation re-verified) · **Last updated:** 2026-10-18
-> **State:** 793 unit + 258 E2E tests green, lint/typecheck/build
+> **Version:** 3.38.0 (session-55 remediation complete — the auth-boundary navigation walk censused + 6 functional gaps closed: the root-serve rewrite, the edge proxy, the from_url resolver, the logout carry + the R55-A..E pins) · **Last updated:** 2026-10-18
+> **State:** 802 unit + 264 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -22,7 +22,10 @@
 > the desktop icon-rail collapse + the with-data careers family: the job card + the
 > apply flow + the state-dependent zero-card + the login interior: the
 > runtime-injected ring cascade + the icon color family + the loading state + the
-> hidden view-swapped login flows: the password-reset + sign-up views).
+> hidden view-swapped login flows: the password-reset + sign-up views +
+> the auth-boundary navigation family: the post-login root landing, the
+> deep-link from_url round-trip, the logout carry, and the
+> open-redirect-guarded resolver).
 
 ---
 
@@ -3393,3 +3396,85 @@ interaction family is also where the documented-deviation re-verification
 lives: a reference regression recorded 43 rounds ago still reproduces
 today, and the re-verification is itself census value (the deviation
 list stays current without a new investigation).
+
+## §65 Session 55 (parity round 54) — the auth-boundary navigation walk
+
+**The frontier problem**: every prior census round signs in and signs
+out to REACH its surface — the boundary journeys themselves (the
+post-login landing, the logged-out guard, the logout carry, the
+from_url round-trip) were never the measured object. The §64 lesson
+generalizes past a single surface: the JOURNEYS BETWEEN surfaces are
+themselves a parity family, and URL-level contracts diverge just as
+silently as pixel-level ones.
+
+**The walk** (`scripts/r55-census.mjs`, seven paired phases, both
+apps at desktop): the post-login landing (no from_url) · the root
+serve · the root guard · the deep-route logged-out guard · the
+from_url round-trip · the logout walk (user menu → Logout) · the
+authed /login stay. **1/7 MATCH — six real functional gaps, one
+family**: REF's post-login landing is the ROOT `/` (its index route
+serves the dashboard, URL-unchanged) while the clone landed at
+`/dashboard`; REF's guard carries the REQUESTED absolute URL as
+`from_url` while the clone's (app) layout hardcoded `/dashboard`
+(App Router layouts receive no pathname); REF's logout carries the
+CURRENT page; REF's from_url is the full absolute URL. The deep-link
+round-trip (share a URL → sign in → land where you meant to go)
+worked on REF and broke on the clone — a genuine functional-parity
+gap, not an allowance.
+
+**The fixes** (all closed, post-fix census **7/7 MATCH**):
+
+- **The root rewrite** (`next.config.ts`): `{ source: "/",
+  destination: "/dashboard" }` — the session-51 URL-unchanged-serve
+  pattern's sibling. REF serves the dashboard AT the root; the clone
+  now does too. `src/app/page.tsx` removed (beforeFiles rewrites
+  precede the filesystem — the page was dead code).
+- **The edge proxy** (`src/proxy.ts`): Next 16's `proxy.ts`
+  convention (`middleware.ts` is the deprecated name — both work,
+  the regexp constants live in `next/dist/lib/constants.js`). A
+  cookie-PRESENCE guard at the edge carrying
+  `from_url=<the request's absolute URL>`; the (app) layout's full
+  HMAC + DB verify stays as defense-in-depth for present-but-invalid
+  cookies. Two-tier by design: the edge check is cheap and
+  path-aware; the layout check is authoritative but path-blind.
+- **The resolver** (`src/lib/login-redirect.ts`):
+  `resolveFromUrl(from, origin)` — the open-redirect guard. Path-form
+  (leading `/`, not `//` or `/\`) passes; same-origin absolute URLs
+  extract pathname + search; everything else → null → the root
+  default. REF's absolute format and the clone's historic path format
+  both honor; the foreign-origin forms never redirect.
+- **The logout carry** (`src/app/logout/route.ts`): the same-origin
+  Referer rides as `from_url` — the user-menu logout navigates via
+  `window.location.href` (the R35-A6 anti-prefetch contract), so the
+  browser attaches the current page as Referer.
+
+**The pins**: R55-A..E + G (6 E2E) + the 9-form resolver unit table
++ the R51-A2 rewrite-scope pin extended (the root joined the closed
+rewrite family) + the session-47 signup-landing pin re-targeted (the
+signup rides the same landing contract — the view-swapped login
+shares one URL).
+
+**The instrument rules**:
+
+- **The in-place sign-in rule**: a capture that re-opens `/login`
+  fresh WIPES the guard's from_url param — the round-trip evidence
+  requires signing in AT the guard's landing URL. Same class as the
+  §64 visible-link rule: the instrument's navigation must preserve
+  the state it is about to measure.
+- **The oneLine eval rule re-hit**: multi-line eval expressions fail
+  on the literal `\n` between JS tokens ("Invalid or unexpected
+  token") — one-line every expression before `JSON.stringify`.
+- **The Host-header authority rule**: in standalone mode,
+  `req.nextUrl`'s re-derived origin can spell the host differently
+  than the browser (`localhost` vs `127.0.0.1`) — build redirect
+  targets and from_url params on the REQUEST's Host header (the
+  browser's actual authority), or the login's same-origin resolver
+  silently rejects the round-trip.
+
+**The lesson**: when a surface's static and interaction families are
+all pinned, the next frontier is the boundary journeys — sign-in,
+guard, logout — because every census passes THROUGH them and none
+ever measures them. URL-level parity is functional parity: the
+deep-link round-trip is a user-visible behavior, and its fix (the
+proxy + the resolver) is also the security surface (the open-redirect
+guard) — the parity fix and the hardening land together.

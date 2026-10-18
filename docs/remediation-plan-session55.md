@@ -180,10 +180,40 @@ DB pristine · `.env.example` verified.
 
 ---
 
-## Completion record (session 55, delivered — to be filled at the round's end)
+## Completion record (session 55, delivered)
 
-- **Gates**: (pending)
-- **Live verification**: (pending — the post-fix census re-run)
-- **Screenshots**: (pending)
-- **The push protocol**: (pending)
-- **Tooling lessons**: (pending)
+- **Gates**: lint 0/0 · tsc ✓ · **802/802 unit** (+9 — the resolver
+  table, RED-first) · build ✓ · **264/264 E2E** (+6 — R55-A..E + G;
+  the one session-40 input-family flake re-verified green isolated,
+  the documented dialog-animation read under load).
+- **Live verification**: the auth-boundary census re-run post-fix —
+  **7/7 MATCH** (the pre-fix record: 1/7, the six DIFFs all closed:
+  the root landing, the root serve, the root guard, the deep-route
+  guard, the from_url round-trip, the logout carry) + standing
+  audits **5/5** + route sweep **12/12** + **verify-r49 13/13** +
+  **verify-r45 13/13** + both deploy sides QUIET (login
+  `C2ujlke6`/`D5oCh2kx`, app `C-IrDy5f`/`BGNH4KkS` — no 21st login
+  deploy this window).
+- **The pin updates riding the fix**: the R51-A2 rewrite-scope pin
+  extended (the root joined the closed rewrite family — the pin's
+  no-wildcard intent intact), the session-47 signup-landing pin
+  re-targeted to the root (the signup rides the same landing
+  contract).
+- **Screenshots**: 8 captures (the 246–249 pairs — the post-login
+  root landing, the deep-link round-trip landing on /settings, the
+  logout-carry login, the authed-/login stays) → 408 files in
+  `docs/screenshots/`.
+- **The push protocol held**: the code batch committed + pushed at
+  the FIRST green stack (`a556781` via the ssh wrapper + the
+  paramiko shim 5.0.0 on python3.13 + the explicit `--remote
+  git@github.com:nordeim/eon-hr.git`; remote verified == HEAD; the
+  operator key shredded), the screenshots/docs layer after.
+- **Tooling lessons**: the auth-boundary walk (§65 — the journeys
+  between surfaces are themselves a parity family); the in-place
+  sign-in rule (a capture that re-opens /login fresh wipes the
+  guard's from_url param — sign in AT the guard's landing when the
+  round-trip is the evidence); the Host-header authority rule
+  (standalone mode can spell the host differently in req.nextUrl
+  than the browser requested — build the from_url on the Host
+  header or the same-origin resolver silently rejects the
+  round-trip); the oneLine eval rule re-hit.

@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 793 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 258 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 802 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 264 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3298,3 +3298,71 @@ reads must settle for the same delay after their dispatches (the
 mid-exit read is a false DIFF). The Radix overlay rule: the
 outside-close contract listens for pointerdown/up, not bare
 click() — synthetic overlay taps need the full pointer sequence.
+
+## Session 55 (parity round 54) — the auth-boundary navigation walk
+
+Workspace continued from `dcf2f22` (the owner's session_110 journal,
+docs-only on the landed round-53 `7207390`); baseline gates ALL GREEN
+(793/793 unit · 258/258 E2E, no flakes). The census took the §64
+lesson to the surface every prior round passed THROUGH but never
+measured: the URL-level user journey at the session boundary.
+
+**The deploy watch: both sides QUIET** — login `C2ujlke6`/`D5oCh2kx`
+unchanged (no 21st deploy), app `C-IrDy5f`/`BGNH4KkS` unchanged.
+The confirmation ladder green: standing audits **5/5** + route sweep
+**12/12** + **verify-r49 13/13** + **verify-r45 13/13**.
+
+**THE AUTH-BOUNDARY NAVIGATION WALK** (`scripts/r55-census.mjs`,
+seven paired phases, desktop 1440×900): **1/7 MATCH — six real
+functional gaps, one family.** REF's post-login landing is the ROOT
+`/` (which serves the dashboard URL-unchanged); the clone landed at
+`/dashboard`. REF's logged-out guard carries the REQUESTED absolute
+URL as `from_url`; the clone's (app) layout hardcoded
+`from_url=/dashboard` for every route (App Router layouts receive no
+pathname). REF's logout carries the CURRENT page as `from_url`; the
+clone's `/logout` dropped the context. REF's from_url is the FULL
+ABSOLUTE URL; the clone's login only honored path-form params. The
+deep-link round-trip (share a URL → sign in → land where you meant
+to go) worked on REF and broke on the clone.
+
+**The fixes** (all closed, post-fix census **7/7 MATCH**):
+
+- **The root rewrite** (`next.config.ts`, `{ source: "/",
+  destination: "/dashboard" }` — the session-51 URL-unchanged-serve
+  pattern's sibling): the dashboard serves AT the root like REF's
+  index route; `src/app/page.tsx` removed (dead code under a
+  beforeFiles rewrite).
+- **The edge proxy** (`src/proxy.ts` — Next 16's proxy.ts convention,
+  middleware.ts being the deprecated name): cookie-presence guard at
+  the edge carrying `from_url=<the request's absolute URL>` (built on
+  the Host header — the browser's actual authority; `req.nextUrl`'s
+  re-derived origin spells the host differently in standalone mode).
+  The (app) layout's full HMAC + DB verify stays as defense-in-depth
+  for present-but-invalid cookies.
+- **The resolver** (`src/lib/login-redirect.ts`):
+  `resolveFromUrl(from, origin)` accepts path-form AND same-origin
+  absolute URLs; foreign origins, `//`, and `/\` are rejected (the
+  open-redirect guard) — the login's default replace target became
+  the ROOT.
+- **The logout carry** (`src/app/logout/route.ts`): the same-origin
+  Referer rides as `from_url` (the user-menu logout navigates via
+  `window.location.href` — the browser attaches the current page).
+
+**Pinned**: R55-A..E (6 E2E — the root landing, the root-serve
+rewrite, the deep-link round-trip, the logout carry, the open-redirect
+guard, the authed-/login stays) + the 9-form resolver unit table +
+the R51-A2 rewrite-scope pin updated for the root entry + the
+session-47 signup-landing pin updated to the root landing. Gates:
+lint 0/0 · tsc ✓ · **802/802 unit** (+9) · build ✓ · **264/264 E2E**
+(+6; the one session-40 input-family flake re-verified green isolated
+— the documented dialog-animation read under load).
+
+**The round's instrument lessons**: the auth-boundary walk — the
+census frontier is not just surfaces; the JOURNEYS BETWEEN surfaces
+(sign-in, guard, logout) are themselves a parity family, and every
+prior round passed through them unmeasured; the in-place sign-in
+rule (a capture that re-opens `/login` fresh wipes the guard's
+from_url param — sign in AT the guard's landing when the round-trip
+is the evidence); the oneLine eval rule re-hit (multi-line eval
+expressions fail on the literal `\n` between tokens — one-line every
+expression before stringify).
