@@ -311,7 +311,11 @@ export default function RecruitmentPage() {
         title="Recruitment"
         subtitle="AI-assisted CV parsing, scoring & applicant tracking"
         actions={
-          <Button onClick={() => setJobDialogOpen(true)}>
+          /* Session 58 (R58-16): REF's Post New Job is the REVERSED blue
+             gradient — from-indigo-600 to-blue-600 (#4F46E5→#2563EB,
+             the endpoints swapped vs the default CTA — live-measured,
+             the CTA-fill census). */
+          <Button variant="indigoBlue" onClick={() => setJobDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Post New Job
           </Button>

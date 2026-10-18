@@ -318,7 +318,10 @@ export default function CompanyWallPage() {
                     Video
                   </Button>
                 </div>
-                <Button onClick={onPost} disabled={posting}>
+                {/* Session 58 (R58-1): REF's Post is the DARK solid
+                    (bg-primary #171717, h-9) — NOT the gradient CTA
+                    (live-measured, the CTA-fill census). */}
+                <Button variant="dark" onClick={onPost} disabled={posting}>
                   {posting ? <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" /> : <Send className="mr-2" aria-hidden="true" />}
                   Post
                 </Button>

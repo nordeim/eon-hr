@@ -500,8 +500,12 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+                {/* Session 58 (R58-2): REF's profile action buttons are the
+                    DARK solid (bg-primary #171717, h-9) on every tab —
+                    Save Changes / Save Accounts / Save Preferences /
+                    Update Password (live-measured, the CTA-fill census). */}
                 <div className="flex justify-end">
-                  <Button type="submit" form="profile-form" disabled={savingProfile || loading}>
+                  <Button type="submit" variant="dark" form="profile-form" disabled={savingProfile || loading}>
                     {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
                     Save Changes
                   </Button>
@@ -566,7 +570,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button type="submit" disabled={savingNotifPrefs}>
+                    <Button type="submit" variant="dark" disabled={savingNotifPrefs}>
                       {savingNotifPrefs ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                       ) : (
@@ -702,7 +706,7 @@ export default function ProfilePage() {
             </CardContent>
             <CardContent className="p-6 pt-0">
               <div className="flex justify-end">
-                <Button type="submit" form="password-form" disabled={savingPw}>
+                <Button type="submit" variant="dark" form="password-form" disabled={savingPw}>
                   {savingPw ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <KeyRound className="mr-2" aria-hidden="true" />}
                   Update Password
                 </Button>
@@ -796,7 +800,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button type="submit" disabled={savingSocial}>
+                  <Button type="submit" variant="dark" disabled={savingSocial}>
                     {savingSocial ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                     ) : (

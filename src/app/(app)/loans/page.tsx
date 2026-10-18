@@ -245,7 +245,10 @@ export default function LoansPage() {
               title="No loans yet"
               description="Create your first loan request"
               action={
-                <Button onClick={() => setDialogOpen(true)}>
+                /* Session 58 (R58-3): REF's empty-state CTA is the DARK
+                   solid — joining the other four dark empty-state CTAs
+                   (the documented session-6 recipe, re-measured). */
+                <Button variant="dark" onClick={() => setDialogOpen(true)}>
                   <Plus className="mr-2" aria-hidden="true" />
                   New Loan Request
                 </Button>

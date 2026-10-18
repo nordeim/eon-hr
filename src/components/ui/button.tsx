@@ -46,6 +46,18 @@ const buttonVariants = cva(
           "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#4338CA,#7E22CE)] bg-[linear-gradient(to_right,#4F46E5,#9333EA)]",
         pink:
           "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#7E22CE,#BE185D)] bg-[linear-gradient(to_right,#9333EA,#DB2777)]",
+        // Session 58 (R58-v): REF's SOLID fill recipes — live-measured this
+        // round (scripts/r58-fills-final.mjs, the CTA-fill census). REF
+        // maintains solid bg-blue-600 / bg-indigo-600 / bg-teal-600 CTAs
+        // alongside the gradients; the palette families are pinned (trap 2),
+        // so the utilities render the exact sRGB values.
+        blue: "text-primary-foreground shadow bg-blue-600 hover:bg-blue-700",
+        solidIndigo: "text-primary-foreground shadow bg-indigo-600 hover:bg-indigo-700",
+        teal: "text-white shadow bg-teal-600 hover:bg-teal-700",
+        // R58-16: REF's REVERSED blue gradient — recruitment's Post New Job
+        // is from-indigo-600 to-blue-600 (the endpoints swapped vs default).
+        indigoBlue:
+          "text-primary-foreground shadow hover:bg-[linear-gradient(to_right,#4338CA,#1D4ED8)] bg-[linear-gradient(to_right,#4F46E5,#2563EB)]",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         // Reference outline (session-6 class capture): border border-input
         // bg-background shadow-sm hover:bg-accent hover:text-accent-foreground.

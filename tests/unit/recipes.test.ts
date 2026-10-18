@@ -6020,3 +6020,133 @@ describe("affordance-stub family (session 57, R57-A..E — REF's real dialogs be
     expect(globalsCss).toContain("--color-red-900: #7f1d1d");
   });
 });
+
+describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs the clone's gradient convergence)", () => {
+  /* The r58 census (scripts/r58-fills-final.mjs, all 50 routes, paired
+     live): REF maintains FIVE fill recipes — the blue gradient CTA, the
+     DARK solid (bg-primary #171717), the BLUE-600 solid, the INDIGO-600
+     solid, and the TEAL-600 solid — plus two one-off gradients (the
+     REVERSED indigo→blue on recruitment, the purple→pink on expenses).
+     The clone had converged on the gradient default at nearly every
+     site; the switch/checkbox checked fills resolve bg-primary to the
+     Facebook blue (--color-primary) where REF renders the dark neutral.
+     All recipes live-measured this round. */
+
+  const buttonUi = () => soft(() => read("src", "components", "ui", "button.tsx"));
+  const switchUi = () => soft(() => read("src", "components", "ui", "switch.tsx"));
+  const checkboxUi = () => soft(() => read("src", "components", "ui", "checkbox.tsx"));
+  const globals = () => soft(() => read("src", "app", "globals.css"));
+  const wallPage = () => soft(() => read("src", "app", "(app)", "companywall", "page.tsx"));
+  const profilePageR58 = () => soft(() => read("src", "app", "(app)", "profile", "page.tsx"));
+  const loansPageR58 = () => soft(() => read("src", "app", "(app)", "loans", "page.tsx"));
+  const tenantPage = () => soft(() => read("src", "app", "(app)", "tenantsetup", "page.tsx"));
+  const secPage = () => soft(() => read("src", "app", "(app)", "securitysettings", "page.tsx"));
+  const hrPage = () => soft(() => read("src", "app", "(app)", "hrassistant", "page.tsx"));
+  const empPage = () => soft(() => read("src", "app", "(app)", "employees", "page.tsx"));
+  const staffPage = () => soft(() => read("src", "app", "(app)", "staffrequests", "page.tsx"));
+  const docPage = () => soft(() => read("src", "app", "(app)", "documenttracker", "page.tsx"));
+  const wfPage = () => soft(() => read("src", "app", "(app)", "workflowconfigpage", "page.tsx"));
+  const kanbanPage = () => soft(() => read("src", "app", "(app)", "recruitmentkanban", "page.tsx"));
+  const notifPage = () => soft(() => read("src", "app", "(app)", "notificationpreferences", "page.tsx"));
+  const evalPage = () => soft(() => read("src", "app", "(app)", "evaluations", "page.tsx"));
+  const perfPage = () => soft(() => read("src", "app", "(app)", "performancemanagement", "page.tsx"));
+  const surveyPage = () => soft(() => read("src", "app", "(app)", "surveyanalytics", "analytics.tsx"));
+  const recruitPage = () => soft(() => read("src", "app", "(app)", "recruitment", "page.tsx"));
+  const expPage = () => soft(() => read("src", "app", "(app)", "expenses", "page.tsx"));
+  const assetsPage = () => soft(() => read("src", "app", "(app)", "assets", "page.tsx"));
+  const iaPage = () => soft(() => read("src", "app", "(app)", "interviewassistant", "page.tsx"));
+  const profileApi = () => soft(() => read("src", "app", "api", "profile", "route.ts"));
+  const postsApi = () => soft(() => read("src", "app", "api", "posts", "route.ts"));
+
+  it("R58-v: button.tsx gains the four REF fill variants + the teal-700 palette pin", () => {
+    // REF's solid blue-600 recipe (staffrequests New Request et al.)
+    expect(buttonUi()).toContain('blue: "text-primary-foreground shadow bg-blue-600 hover:bg-blue-700"');
+    // REF's solid indigo-600 recipe (evaluations New Review et al.)
+    expect(buttonUi()).toContain('solidIndigo: "text-primary-foreground shadow bg-indigo-600 hover:bg-indigo-700"');
+    // REF's solid teal-600 recipe (surveyanalytics Run AI Analysis)
+    expect(buttonUi()).toContain('teal: "text-white shadow bg-teal-600 hover:bg-teal-700"');
+    // REF's REVERSED blue gradient (recruitment Post New Job — from-indigo-600 to-blue-600)
+    expect(buttonUi()).toContain("bg-[linear-gradient(to_right,#4F46E5,#2563EB)]");
+    // teal-700 was UNPINNED (v4 oklch drift — trap 2)
+    expect(globals()).toContain("--color-teal-700: #0f766e");
+  });
+
+  it("R58-1..6: the DARK-solid sites — the wall Post, the profile saves, the loans empty CTA, tenantsetup, securitysettings, hrassistant send", () => {
+    // the wall's Post: REF bg-primary solid (the dark recipe)
+    expect(wallPage()).toContain('<Button variant="dark" onClick={onPost} disabled={posting}>');
+    // the profile's four saves (Save Changes / Save Preferences / Update Password / Save Accounts)
+    expect((profilePageR58().match(/<Button type="submit"[^>]*variant="dark"/g) || []).length).toBeGreaterThanOrEqual(4);
+    // the loans empty-state CTA joins the other four dark empty-state CTAs
+    expect(loansPageR58()).toContain('<Button variant="dark" onClick={() => setDialogOpen(true)}>');
+    // tenantsetup Continue
+    expect(tenantPage()).toContain('<Button type="submit" variant="dark" disabled={saving}>');
+    // securitysettings Save + REF's Lock glyph (lucide-lock w-4 h-4 mr-2)
+    expect(secPage()).toContain('<Button variant="dark" onClick={onSave} disabled={saving || settings === null}>');
+    expect(secPage()).toMatch(/<Lock className="h-4 w-4 mr-2"/);
+    // the hrassistant send: REF's 48x36 default-size icon-only dark button
+    expect(hrPage()).toContain('<Button type="button" variant="dark" onClick={() => void onSend()}');
+    expect(hrPage()).not.toContain('size="icon" className="h-12 w-12"');
+  });
+
+  it("R58-7: the employees view-toggle pair is the dark+sm recipe, LIST FIRST (REF's order, re-measured live)", () => {
+    // REF renders List first, Grid second (the session-14 "Grid first"
+    // order flipped in one of the deploys — re-measured live this round:
+    // list@1301, grid@1349)
+    expect(empPage()).toMatch(/<Button variant=\{view === "list" \? "dark" : "outline"\} size="sm" aria-label="List view"[\s\S]*?<List aria-hidden="true" \/>[\s\S]*?<Button variant=\{view === "grid" \? "dark" : "outline"\} size="sm" aria-label="Grid view"/);
+    // the old default-variant toggle + the custom h-8 px-3 className are gone
+    expect(empPage()).not.toContain('variant={view === "grid" ? "default" : "outline"}');
+    expect(empPage()).not.toContain('variant={view === "list" ? "default" : "outline"}');
+  });
+
+  it("R58-8..12: the BLUE-600 sites — staffrequests, documenttracker, workflowconfigpage x2, recruitmentkanban, notificationpreferences", () => {
+    expect(staffPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
+    expect(docPage()).toContain('<Button variant="blue" onClick={openNewDialog}>');
+    expect(wfPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
+    expect(wfPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
+    expect(wfPage()).not.toContain('className="bg-blue-600 text-white hover:bg-blue-700"');
+    expect(kanbanPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
+    expect(notifPage()).toContain('<Button variant="blue" onClick={onSavePreferences}');
+  });
+
+  it("R58-13..15: the INDIGO-600 and TEAL-600 sites", () => {
+    // evaluations New Review: solidIndigo + sm (125x32, text-xs)
+    expect(evalPage()).toContain('<Button size="sm" variant="solidIndigo" onClick={() => setDialogOpen(true)}>');
+    // performancemanagement Set New Goal: solidIndigo default size
+    expect(perfPage()).toContain('<Button variant="solidIndigo" onClick={() => setDialogOpen(true)}>');
+    // surveyanalytics Run AI Analysis: teal
+    expect(surveyPage()).toContain('<Button variant="teal" onClick={runAnalysis} disabled={analyzing}>');
+  });
+
+  it("R58-16..18: the gradient one-offs — recruitment REVERSED, expenses pink, assets green (the bg-none bug)", () => {
+    // recruitment Post New Job: from-indigo-600 to-blue-600 (the REVERSED endpoints)
+    expect(recruitPage()).toMatch(/<Button variant="indigoBlue" onClick=\{\(\) => setJobDialogOpen\(true\)\}>/);
+    // expenses New Expense: REF's purple-600 to pink-600 (the existing pink variant)
+    expect(expPage()).toContain('<Button variant="pink" onClick={() => setDialogOpen(true)}>');
+    // assets Add Asset: the green variant — the bg-none/v3-utilities authoring
+    // (which renders NO fill in v4: background-image none wins) is GONE
+    expect(assetsPage()).toContain('<Button variant="green">');
+    expect(assetsPage()).not.toContain("bg-none bg-gradient-to-r");
+  });
+
+  it("R58-19..20: the switch + checkbox checked fills pin the dark neutral (not the --color-primary Facebook blue)", () => {
+    expect(switchUi()).toContain('data-[state=checked]:bg-[#171717] dark:data-[state=checked]:bg-[#fafafa]');
+    expect(checkboxUi()).toContain('data-[state=checked]:bg-[#171717]');
+  });
+
+  it("R58-21: the interviewassistant Analyze Interview is REF's w-full direct child of the card body", () => {
+    expect(iaPage()).toContain('<Button variant="green" className="w-full" type="button"');
+  });
+
+  it("R58-22: the profile DELETE walk clears the three missing non-cascade relations (the P2003 fix)", () => {
+    // Asset.assignedToId (optional, no cascade) — detach
+    expect(profileApi()).toContain('db.asset.updateMany({ where: { assignedToId: employee.id }, data: { assignedToId: null } })');
+    // Review.reviewerId (required, no cascade) — the reviewer's pending reviews go
+    expect(profileApi()).toContain('db.review.deleteMany({ where: { reviewerId: employee.id } })');
+    // SurveyResponse.employeeId (required, no cascade) — the responses go
+    expect(profileApi()).toContain('db.surveyResponse.deleteMany({ where: { employeeId: employee.id } })');
+  });
+
+  it("R58-23: the posts multipart path enforces the same content cap as the JSON path", () => {
+    expect(postsApi()).toContain('content.length > 2000');
+  });
+});

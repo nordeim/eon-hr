@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CircleAlert, CircleCheckBig, Loader2, Shield, ShieldCheck } from "lucide-react";
+import { CircleAlert, CircleCheckBig, Loader2, Lock, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -192,8 +192,11 @@ export default function SecuritySettingsPage() {
                 </div>
               )}
               <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-200">
-                <Button onClick={onSave} disabled={saving || settings === null}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ShieldCheck aria-hidden="true" />}
+                {/* Session 58 (R58-5): REF's Save is the DARK solid with
+                    the LOCK glyph (lucide-lock w-4 h-4 mr-2 → 222px) —
+                    live-measured, the CTA-fill census. */}
+                <Button variant="dark" onClick={onSave} disabled={saving || settings === null}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Lock className="h-4 w-4 mr-2" aria-hidden="true" />}
                   Save Security Settings
                 </Button>
               </div>

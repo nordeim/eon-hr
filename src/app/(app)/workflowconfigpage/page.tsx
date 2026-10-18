@@ -179,7 +179,9 @@ export default function WorkflowConfigPage() {
         title="Approval Workflow Engine"
         subtitle="Configure multi-level approval hierarchies for requests and expenses"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
+          /* Session 58 (R58-10): REF's New Workflow is the SOLID
+             blue-600 — live-measured, the CTA-fill census. */
+          <Button variant="blue" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Workflow
           </Button>
@@ -200,7 +202,11 @@ export default function WorkflowConfigPage() {
           <Settings2 className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
           <p className="text-slate-500">No workflows configured yet.</p>
           <div className="mt-4">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => setDialogOpen(true)}>
+            {/* Session 58 (R58-10): the Create First Workflow joins the
+                blue variant — the inline bg-blue-600 className hack
+                (which the gradient default painted over: background-image
+                wins over background-color) is retired. */}
+            <Button variant="blue" onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2" aria-hidden="true" />
               Create First Workflow
             </Button>

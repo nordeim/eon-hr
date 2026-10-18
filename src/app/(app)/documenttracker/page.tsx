@@ -236,7 +236,9 @@ export default function DocumentTrackerPage() {
               {checking ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <BellRing className="mr-2" aria-hidden="true" />}
               Run Alert Check
             </Button>
-            <Button onClick={openNewDialog}>
+            {/* Session 58 (R58-9): REF's Add Document is the SOLID
+                blue-600 — live-measured, the CTA-fill census. */}
+            <Button variant="blue" onClick={openNewDialog}>
               <Plus className="mr-2" aria-hidden="true" />
               Add Document
             </Button>

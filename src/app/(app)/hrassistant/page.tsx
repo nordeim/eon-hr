@@ -202,7 +202,11 @@ export default function HrAssistantPage() {
                 placeholder="Ask me anything about HR..."
                 className="min-h-[48px] flex-1 resize-none"
               />
-              <Button type="button" size="icon" className="h-12 w-12" onClick={() => void onSend()} disabled={thinking || !draft.trim()}>
+              {/* Session 58 (R58-6): REF's send is the DARK solid at the
+                  DEFAULT size (h-9 px-4 py-2, icon-only → 48x36) — not
+                  the 48x48 icon square (live-measured, the CTA-fill
+                  census). */}
+              <Button type="button" variant="dark" onClick={() => void onSend()} disabled={thinking || !draft.trim()}>
                 {thinking ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (

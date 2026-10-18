@@ -15,12 +15,14 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
         // newer border-input/shadow-sm/ring-2 form); the checked-border
         // member + the pointer member are retired (REF carries neither).
         "peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-        // Session 33 (R32-A): the checked checkmark keeps white text in
-        // dark (the primary-foreground token would flip to #171717 on the
-        // unchanged blue — REF's zero-data surfaces never render a
-        // checkbox in dark, so this is the documented readability
-        // superset; light rendering is untouched).
-        "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:text-white",
+        // Session 58 (R58-20): REF's checked fill is the DARK neutral
+        // #171717 (its shadcn --primary, measured live on the
+        // securitysettings checkboxes) — pinned literal, not the token
+        // (--color-primary carries the Facebook blue for the nav). In
+        // dark the fill stays #171717 with the white checkmark — REF's
+        // zero-data surfaces never render a checkbox in dark, so the
+        // readable pairing is the documented superset.
+        "data-[state=checked]:bg-[#171717] data-[state=checked]:text-primary-foreground dark:data-[state=checked]:text-white",
         className
       )}
       {...props}

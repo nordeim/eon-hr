@@ -83,7 +83,10 @@ export default function TenantSetupPage() {
               />
             </div>
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={saving}>
+              {/* Session 58 (R58-4): REF's Continue is the DARK solid
+                  (bg-primary #171717) — live-measured, the CTA-fill
+                  census. */}
+              <Button type="submit" variant="dark" disabled={saving}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Continue
               </Button>

@@ -224,7 +224,10 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
               <Download className="mr-2" aria-hidden="true" />
               Export
             </Button>
-            <Button onClick={runAnalysis} disabled={analyzing}>
+            {/* Session 58 (R58-15): REF's Run AI Analysis is the SOLID
+                teal-600 (#0D9488, hover #0F766E) — live-measured, the
+                CTA-fill census. */}
+            <Button variant="teal" onClick={runAnalysis} disabled={analyzing}>
               {analyzing ? (
                 <Loader2 className="animate-spin" aria-hidden="true" />
               ) : (

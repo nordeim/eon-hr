@@ -273,7 +273,9 @@ export default function RecruitmentKanbanPage() {
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
+          /* Session 58 (R58-11): REF's Add Applicant is the SOLID
+             blue-600 — live-measured, the CTA-fill census. */
+          <Button variant="blue" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Add Applicant
           </Button>

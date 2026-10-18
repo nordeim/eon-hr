@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 813 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 276 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 823 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 286 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3555,7 +3555,113 @@ Gates: lint 0/0 · tsc ✓ · **813/813 unit** (+7) · build ✓ ·
 **276/276 E2E** (+7, no flakes) · post-fix census **6/6 MATCH** ·
 DB pristine (1/1/2).
 
-**The round's instrument lessons**: (1) a bare eval `.click()` on a
+## Session 58 (parity round 57) — the CTA-fill recipe family
+
+Workspace re-cloned from `4648058` (the round-56 landing; the repo
+moved to `/home/z/eon-hr` — the standing scripts' hardcoded absolute
+paths patched to derive the repo from the script location,
+`verify-r49.mjs`). Baseline gates ALL GREEN (813/813 unit · 276/276
+E2E, 1 session-40 flake green in isolation). The census took the fill
+dimension to the computed background of every primary action — **the
+CTA-fill recipe family** (`scripts/r58-fills-final.mjs`, all 50
+routes, paired live).
+
+**The deploy watch: the login side deployed again (the 22nd)** —
+login JS `DEszsFDJ` → `DclSb8FG`, login CSS `D5oCh2kx` → `V5v1Fmok`
+(BOTH rolled; the app side quiet). Login re-audit: **verify-r45 13/13
+MATCH — a non-visual rebuild**. Ladder green after the REF re-auth:
+standing **5/5** + sweep **12/12** + **verify-r49 13/13**.
+
+**REF maintains FIVE fill recipes; the clone had converged on one
+gradient.** The taxonomy (all live-measured):
+
+1. **The blue gradient CTA** (pinned session-4) — the clone matches
+   everywhere REF uses it (employees, attendance, payroll, loans'
+   header, offboarding, templates, workflowautomation, compliancedashboard,
+   assetmanagement, leavemanagement, allleaverequests, payrollai,
+   advancedanalytics, hrassistantchat, careers…).
+2. **The DARK solid** — `bg-primary` **#171717** (hover /90, dark
+   #fafafa). Drift sites closed (R58-1..7): the wall Post, the
+   profile's four saves, the loans empty-state CTA, tenantsetup
+   Continue, securitysettings Save (REF's LOCK glyph, not
+   ShieldCheck), the hrassistant send (**48×36** default-size
+   icon-only — not a 48×48 square), the employees view-toggle pair
+   (dark + `size="sm"`).
+3. **The BLUE-600 solid** — `bg-blue-600 hover:bg-blue-700`
+   (#2563EB→#1D4ED8, palette-pinned). Sites (R58-8..12): staffrequests
+   New Request, documenttracker Add Document, workflowconfigpage ×2
+   (the inline `className="bg-blue-600"` hack painted over by the
+   gradient default — background-image wins over background-color —
+   retired for the variant), recruitmentkanban Add Applicant,
+   notificationpreferences Save Preferences.
+4. **The INDIGO-600 solid** (R58-13..14): evaluations New Review
+   (size sm, 125×32), performancemanagement Set New Goal.
+5. **The TEAL-600 solid** (R58-15): surveyanalytics Run AI Analysis
+   (teal-700 `#0f766e` added to the `@theme` pins — it was
+   unpinned).
+
+Plus: **R58-16** — REF's REVERSED gradient on recruitment's Post New
+Job (`from-indigo-600 to-blue-600` — the `indigoBlue` variant);
+**R58-17** — expenses' New Expense is REF's purple→pink (the existing
+`pink` variant); **R58-18 (P1)** — the assets' Add Asset rendered NO
+fill at all (the `bg-none` + v3-utility authoring: background-image:
+none sorts AFTER the gradient utilities in v4's single cascade layer
+— near-white text on transparent, effectively invisible); now
+`variant="green"`.
+
+**R58-19..20 — the form-control checked fills**: the shared Switch +
+Checkbox resolved `data-[state=checked]:bg-primary` against
+`--color-primary` (#1877F2 — the Facebook blue the theme deliberately
+carries for the active-nav custom classes) — every checked control
+rendered the Facebook blue where REF renders the dark #171717
+(verified on the profile Preferences pair, the six notif-prefs
+switches, the four securitysettings checkboxes). Both components pin
+the literals (#171717, dark #fafafa); the token stays for the nav.
+
+**R58-24 — the toggle order + gap re-measure**: REF renders the
+employees view-toggle pair **LIST FIRST** (x=1301), GRID second
+(x=1349), `flex gap-2` (8px) — the session-14 "Grid first" order
+flipped in one of the 22 deploys since (and the clone's gap-1
+measured 4px). Post-fix the pair reads byte-identical both sides.
+
+**R58-21** — the interviewassistant Analyze Interview is `w-full` as
+a direct child of the `p-6 space-y-4` card body (not nested in the
+notes' `space-y-2` div).
+
+**R58-22 — the profile DELETE walk's three missing non-cascade
+relations** (the Phase-2 audit, live-verified `P2003` on a throwaway
+db copy): `Asset.assignedToId` (detach), `Review.reviewerId`
+(required — the reviewer's pending reviews go),
+`SurveyResponse.employeeId` (required — the responses go). Any
+account whose employee held any of them could NOT be deleted (the
+r57 round-trip only exercised a fresh signup user). The walk clears
+all three; the E2E guard plants all three rows on a fresh user and
+deletes cleanly. **R58-23** — the posts multipart path now enforces
+the JSON path's content `max(2000)`.
+
+**Pinned**: 10 unit (the R58 family in `tests/unit/recipes.test.ts`,
+RED-first) + 10 E2E (`tests/e2e/session58-cta-fills.spec.ts` —
+computed truth: the fills per route, the switch/checkbox colors, the
+toggle geometry + round-trip, the send geometry, the w-full CTA, the
+multipart cap, the with-data deletion round-trip). Gates: lint 0/0 ·
+tsc ✓ · **823/823 unit** (+10) · build ✓ · **286/286 E2E** (+10, no
+flakes) · post-fix census **16/16 fills MATCH** · DB pristine (1/1/2).
+
+**The round's instrument lessons**: (1) a bash `$(...)` substitution
+mangles the nested template strings — the census verification loop
+produced false MATCHes until the reads moved into the node `evalOn`
+path; (2) hover states contaminate computed-color reads (the parked
+mouse holds `:hover` — Chromium serializes the `/90` color-mix as
+`lab()`/`oklab()`), move the mouse away before at-rest reads; (3) the
+fill census reader must classify "any non-plain fill", not the
+expected set — the first reader MISSED REF's indigo/teal solids; (4)
+`to right` vs `90deg` is Chromium's serialization equivalence, not a
+drift; (5) JSX attribute expressions take plain `/* */` comments —
+`{/* */}` inside `actions={…}` is a parse error.
+
+## Session 57 instrument lessons (carry-over, from the round-56 record)
+
+**The r57 lessons**: (1) a bare eval `.click()` on a
 Radix TabsTrigger fires no `pointerdown` and the tab NEVER
 activates — the paired-phase tab interactions must use the
 browser's REAL click path (snapshot ref → `agent-browser click`);

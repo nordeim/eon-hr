@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.40.0 (session-57 remediation complete — the affordance-stub family: REF's real dialogs behind the toast stubs — the bulk import, the WhatsApp config, the wall's hidden media input, the Social/Preferences tab interiors — with the working superset flows: the import, the media upload, the persisted config/links, the account deletion) · **Last updated:** 2026-10-18
-> **State:** 813 unit + 276 E2E tests green, lint/typecheck/build
+> **Version:** 3.41.0 (session-58 remediation complete — the CTA-fill recipe family: REF's five fill recipes carried (the DARK solid, the BLUE-600/INDIGO-600/TEAL-600 solids, the two one-off gradients), the P1 assets bg-none fix, the form-control checked fills pinned to the dark neutral, the employees toggle order re-measured, the profile DELETE walk's three missing non-cascade relations cleared, the posts multipart cap) · **Last updated:** 2026-10-19
+> **State:** 823 unit + 286 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3639,3 +3639,72 @@ db-touching command with `unset DATABASE_URL`.
   their recipes to new homes (R19-F/R46-G1/session-47 — the
   trigger button moved into the dialog component; R14-E inverted to
   the artifact's REF-verified absence).
+
+## §68 Session 58 (parity round 57) — the CTA-fill recipe family
+
+The round's census read the computed background fill of every
+primary action across all 50 routes (`scripts/r58-fills-final.mjs`)
+— **REF maintains five fill recipes where the clone had converged
+on one gradient**:
+
+1. **The blue gradient CTA** (session-4, unchanged) — the clone
+   matches everywhere REF uses it.
+2. **The DARK solid** — `bg-primary` #171717 (hover /90, dark
+   #fafafa; the `dark` Button variant): the wall Post, the four
+   profile saves, the loans empty-state CTA, tenantsetup Continue,
+   securitysettings Save (REF's LOCK glyph), the hrassistant send
+   (48×36 default-size icon-only), the employees view-toggle pair
+   (dark + `size="sm"`).
+3. **The BLUE-600 solid** — `bg-blue-600 hover:bg-blue-700`
+   (palette-pinned): staffrequests New Request, documenttracker
+   Add Document, workflowconfigpage ×2, recruitmentkanban Add
+   Applicant, notificationpreferences Save Preferences (the new
+   `blue` variant).
+4. **The INDIGO-600 solid** (the `solidIndigo` variant):
+   evaluations New Review (sm, 125×32), performancemanagement Set
+   New Goal.
+5. **The TEAL-600 solid** (the `teal` variant, teal-700 pinned):
+   surveyanalytics Run AI Analysis.
+
+One-offs: the REVERSED indigo→blue gradient on recruitment's Post
+New Job (the `indigoBlue` variant); expenses' New Expense = REF's
+purple→pink (the existing `pink` variant); **the P1 assets fix** —
+the `bg-none` + v3-utility authoring rendered NO fill at all in
+v4's cascade (background-image: none sorts AFTER the gradient
+utilities — near-white text on transparent); now `variant="green"`.
+
+**The form-control checked fills** (`switch.tsx` + `checkbox.tsx`):
+`data-[state=checked]:bg-primary` resolved against
+`--color-primary` (#1877F2 — the Facebook blue the theme carries
+for the active-nav custom classes) — every checked control rendered
+the blue where REF renders the dark #171717. Both components now
+pin the literals; the token stays for the nav.
+
+**The employees view-toggle re-measure**: REF renders LIST FIRST
+(x=1301), GRID second (x=1349), `flex gap-2` (8px) — the
+session-14 "Grid first" order flipped in one of the deploys;
+post-fix the pair reads byte-identical both sides.
+
+**The profile DELETE walk's three missing non-cascade relations**
+(live-verified P2003 on a throwaway db copy): Asset.assignedToId
+(detach), Review.reviewerId (delete), SurveyResponse.employeeId
+(delete) — accounts with any of them could NOT be deleted before.
+The E2E regression guard plants all three rows on a fresh user and
+deletes cleanly. Plus: the posts multipart path now enforces the
+content `max(2000)`.
+
+**The pins**: 10 unit (the R58 family, RED-first) + 10 E2E
+(computed truth). Gates: lint 0/0 · tsc ✓ · **823/823 unit** ·
+build ✓ · **286/286 E2E** · post-fix census **16/16 fills MATCH**.
+
+**Instrument lessons**: (1) bash `$(...)` substitution mangles the
+nested template strings — census reads must run through the node
+`evalOn` path (false MATCHes otherwise); (2) hover states
+contaminate computed-color reads — the parked mouse holds `:hover`
+(Chromium serializes `/90` color-mixes as lab()/oklab()); move the
+mouse away before at-rest reads; (3) classify fills as "any
+non-plain fill", not the expected set (the first reader missed
+REF's indigo/teal solids); (4) `to right` vs `90deg` is
+Chromium's serialization equivalence, not a drift; (5) JSX
+attribute expressions take plain `/* */` comments — `{/* */}`
+inside `actions={…}` is a parse error.

@@ -244,14 +244,22 @@ export default function EmployeesPage() {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-1">
-            {/* Session 14 (R13): the reference renders Grid first (42px),
-                List second (40px, active) — order measured live. */}
-            <Button variant={view === "grid" ? "default" : "outline"} className="h-8 px-3" aria-label="Grid view" onClick={() => setView("grid")}>
-              <Grid3x3 aria-hidden="true" />
-            </Button>
-            <Button variant={view === "list" ? "default" : "outline"} className="h-8 px-3" aria-label="List view" onClick={() => setView("list")}>
+          {/* R58-24: REF's toggle wrapper is flex gap-2 (8px — the clone's
+              gap-1 measured 4px live) */}
+          <div className="flex items-center gap-2">
+            {/* Session 58 (R58-7 + R58-24): REF's toggle pair re-measured
+                live — LIST renders FIRST (left), GRID second, in both
+                modes (the session-14 "Grid first" order flipped in one of
+                the 22 deploys since; the DOM order + x-positions are the
+                ground truth: list@1301, grid@1349 at 1440). REF's ACTIVE
+                toggle is the DARK solid at size sm (bg-primary #171717,
+                h-8 rounded-md px-3 text-xs — 40px wide, the 1px outline
+                borders make the inactive 42px). */}
+            <Button variant={view === "list" ? "dark" : "outline"} size="sm" aria-label="List view" onClick={() => setView("list")}>
               <List aria-hidden="true" />
+            </Button>
+            <Button variant={view === "grid" ? "dark" : "outline"} size="sm" aria-label="Grid view" onClick={() => setView("grid")}>
+              <Grid3x3 aria-hidden="true" />
             </Button>
           </div>
         </div>

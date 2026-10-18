@@ -175,6 +175,17 @@ export async function DELETE() {
       await db.leaveRequest.deleteMany({ where: { employeeId: employee.id } });
       await db.expenseClaim.deleteMany({ where: { employeeId: employee.id } });
       await db.goal.deleteMany({ where: { employeeId: employee.id } });
+      // session 58 (R58-22): the three non-cascade relations the walk
+      // missed (found by the full FK map of prisma/schema.prisma vs the
+      // walk — any of them aborts the delete with P2003):
+      // (a) SurveyResponse.employeeId (required, no cascade)
+      await db.surveyResponse.deleteMany({ where: { employeeId: employee.id } });
+      // (b) Review.reviewerId (required, no cascade) — the reviews this
+      // employee was assigned to WRITE go with them
+      await db.review.deleteMany({ where: { reviewerId: employee.id } });
+      // (c) Asset.assignedToId (optional, no cascade) — detach, the asset
+      // returns to the pool
+      await db.asset.updateMany({ where: { assignedToId: employee.id }, data: { assignedToId: null } });
       // reports pointing at this employee as manager → detach (set null is
       // not declared; clear the pointer row-by-row)
       await db.employee.updateMany({ where: { managerId: employee.id }, data: { managerId: null } });

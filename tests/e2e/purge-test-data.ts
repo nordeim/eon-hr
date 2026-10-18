@@ -44,6 +44,18 @@ async function main(): Promise<void> {
   if (goneDeleteUsers.count > 0) {
     console.log(`[purge] removed ${goneDeleteUsers.count} delete-test user(s)`);
   }
+  // Session 58 (R58-22): the with-data deletion round-trip signs up
+  // e2e-fill-delete-* users and plants the E2E Fill Laptop / Cycle /
+  // Survey rows — sweep the users and the orphaned fixture rows.
+  const goneFillDeleteUsers = await db.user.deleteMany({
+    where: { email: { startsWith: "e2e-fill-delete-", endsWith: "@eon-hr.test" } },
+  });
+  if (goneFillDeleteUsers.count > 0) {
+    console.log(`[purge] removed ${goneFillDeleteUsers.count} fill-delete-test user(s)`);
+  }
+  await db.asset.deleteMany({ where: { name: "E2E Fill Laptop" } });
+  await db.reviewCycle.deleteMany({ where: { name: "E2E Fill Cycle" } });
+  await db.survey.deleteMany({ where: { title: "E2E Fill Survey" } });
   // Session 57 (R57-B): the wall media spec posts with attachments —
   // sweep the posts and orphaned db/uploads files.
   const gonePosts = await db.post.deleteMany({

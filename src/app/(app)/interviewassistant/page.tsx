@@ -252,21 +252,27 @@ export default function InterviewAssistantPage() {
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="ia-notes">Notes</Label>
-                  <Textarea
-                    id="ia-notes"
-                    rows={10}
-                    placeholder="e.g. Led the redesign project, delivered ahead of schedule. Excellent communication — confident presenter. Concern: depth in testing…"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
-                  <Button variant="green" type="button" disabled={analyzing || !notes.trim()} onClick={() => void onAnalyze()}>
-                    {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
-                    Analyze Interview
-                  </Button>
-                </div>
+                <>
+              {/* Session 58 (R58-21): REF's Analyze Interview is w-full and
+                  a DIRECT child of the p-6 space-y-4 card body (498px),
+                  not nested in the notes' space-y-2 div — live-measured,
+                  the CTA-fill census. */}
+              <div className="space-y-2">
+                <Label htmlFor="ia-notes">Notes</Label>
+                <Textarea
+                  id="ia-notes"
+                  rows={10}
+                  placeholder="e.g. Led the redesign project, delivered ahead of schedule. Excellent communication — confident presenter. Concern: depth in testing…"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
+              </div>
+              <Button variant="green" className="w-full" type="button" disabled={analyzing || !notes.trim()} onClick={() => void onAnalyze()}>
+                {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+                Analyze Interview
+              </Button>
+                </>
               )}
             </CardContent>
           </Card>

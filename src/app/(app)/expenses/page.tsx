@@ -199,7 +199,10 @@ export default function ExpensesPage() {
         title="Expense Claims"
         subtitle="Submit and manage expense reimbursements"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
+          /* Session 58 (R58-17): REF's New Expense is the purple→pink
+             gradient (from-purple-600 to-pink-600 = #9333EA→#DB2777 —
+             the existing pink variant, live-measured this round). */
+          <Button variant="pink" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Expense
           </Button>

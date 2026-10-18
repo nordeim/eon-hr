@@ -252,7 +252,10 @@ export default function EvaluationsPage() {
               h-8 New Review button (125×32). */}
           <div className="flex justify-between items-center">
             <h3 className="font-semibold text-slate-800 flex items-center gap-2"><Users className="h-4 w-4" aria-hidden="true" />Review Cycles</h3>
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
+            {/* Session 58 (R58-13): REF's New Review is the SOLID
+                indigo-600 (#4F46E5) at size sm — 125x32, text-xs
+                (live-measured, the CTA-fill census). */}
+            <Button size="sm" variant="solidIndigo" onClick={() => setDialogOpen(true)}>
               <Plus className="mr-1 h-3 w-3" aria-hidden="true" />
               New Review
             </Button>

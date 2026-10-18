@@ -112,6 +112,10 @@ export async function POST(req: NextRequest) {
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       content = String(form.get("content") ?? "").trim();
+      // session 58 (R58-23): the multipart path enforces the same content
+      // cap as the JSON path's PostInput (max 2000) — the gap let
+      // multipart posts store arbitrarily long content
+      if (content.length > 2000) return err("VALIDATION", "Post is too long");
       const audienceRaw = String(form.get("audience") ?? "all");
       if (!["all", "managers", "department"].includes(audienceRaw)) {
         return err("VALIDATION", "Invalid audience");

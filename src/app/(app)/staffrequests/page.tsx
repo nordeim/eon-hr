@@ -222,7 +222,10 @@ export default function StaffRequestsPage() {
         title="Staff Requests"
         subtitle="Submit and manage requests across departments"
         actions={
-          <Button onClick={() => setDialogOpen(true)}>
+          /* Session 58 (R58-8): REF's New Request is the SOLID blue-600
+             (#2563EB, hover #1D4ED8) — live-measured, the CTA-fill
+             census. */
+          <Button variant="blue" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Request
           </Button>

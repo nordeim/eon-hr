@@ -258,7 +258,10 @@ export default function PerformanceManagementPage() {
                 {goals.length} goal{goals.length === 1 ? "" : "s"} across the team
               </p>
             ) : null}
-            <Button onClick={() => setDialogOpen(true)}>
+            {/* Session 58 (R58-14): REF's Set New Goal is the SOLID
+                indigo-600 (#4F46E5) — live-measured, the CTA-fill
+                census. */}
+            <Button variant="solidIndigo" onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2" aria-hidden="true" />
               Set New Goal
             </Button>

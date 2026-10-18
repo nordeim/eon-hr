@@ -156,12 +156,15 @@ export default function LegacyAssetsPage() {
           subtitle="Track and manage company assets"
           actions={
             <DialogTrigger asChild>
-              {/* Session 49 (R48-G2b): REF's CTA is the UTILITY-form green
-                 gradient (bg-gradient-to-r from-green-600 to-emerald-600,
-                 hover:bg-primary/90 — live-measured this round; the
-                 endpoints match the r6-measured #16A34A→#059669 sRGB
-                 pair; the hover is REF's overlay, not a gradient swap). */}
-              <Button className="bg-none bg-gradient-to-r from-green-600 to-emerald-600 hover:bg-none hover:bg-primary/90">
+              {/* Session 58 (R58-18): REF's Add Asset is the green→emerald
+                  gradient (#16A34A→#059669, sRGB — the green variant; the
+                  r48 utility-form authoring is retired). The old authoring
+                  (a bg-none utility prefixed ahead of the v3-style
+                  gradient classes) rendered NO fill at all: bg-none
+                  (background-image: none) sorts after the gradient
+                  utilities in v4's single cascade layer and killed them —
+                  near-white text on a transparent button. */}
+              <Button variant="green">
                 <Plus className="mr-2" aria-hidden="true" />
                 Add Asset
               </Button>

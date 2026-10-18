@@ -10,11 +10,14 @@
 // Button-guard icon sizes ([&_svg]:size-4 ≡ w-4 h-4).
 // Usage: node scripts/verify-r49.mjs
 import { execSync, spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 function run(cmd) { try { return execSync(cmd, { stdio: "pipe", timeout: 60000 }).toString(); } catch (e) { return "ERR:" + String(e).slice(0, 140); } }
 async function evalOn(session, expr, ms = 0) { if (ms) await new Promise(r => setTimeout(r, ms)); const oneLine = expr.split("\n").join(" "); const out = run(`agent-browser --session ${session} eval ${JSON.stringify(oneLine)}`); const t = out.trim(); try { return JSON.parse(t); } catch {} try { return JSON.parse(t.replace(/^"|"$/g, "").replace(/\\"/g, '"').replace(/\\n/g, " ")); } catch { return { error: out.slice(0, 300) }; } }
 
-const repo = "/home/z/my-project/eon-hr";
+// repo root derived from this script's location (workspace-resilient)
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 run(`PID=$(ss -tlnp 2>/dev/null | awk '$4 ~ /:3201$/ {print $NF}' | grep -oP 'pid=\\K[0-9]+' | head -1); [ -n "$PID" ] && kill -9 $PID; true`);
 run(`rm -f ${repo}/db/zero.db ${repo}/db/zero.db-journal`);
