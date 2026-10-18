@@ -171,3 +171,44 @@ contracts).
   264+ E2E) + the census re-run (expected: (H)/(H-m)/(I)/(J) →
   MATCH; (C) stays the recorded framework-bug DIFF; (G) stays the
   documented deviation).
+
+## Completion record (2026-10-18, end of session 56)
+
+All four fix-target findings closed with TDD (RED → GREEN), the full
+gate stack green, and the post-fix census re-run at the target:
+
+- **R56-A ✓** — the settings Company tiles: `p-4 bg-slate-50
+  rounded-lg` on all 9 tiles + the Address tile's always-on
+  `col-span-2` (`src/app/(app)/settings/page.tsx`). The desktop
+  computed truth now matches REF (bg rgb(248,250,252), 8px radius,
+  the span map `------SPAN--`), and the mobile grid computes 2
+  content-sized tracks at 390 (the census (H) + (H-m) MATCH).
+- **R56-B ✓** — the profile identity Email: `disabled` +
+  `className="mt-2 bg-slate-50"` (census (I) MATCH).
+- **R56-C ✓** — the Phone/Job Title placeholders removed (census (I)
+  MATCH).
+- **R56-D ✓** — the hrreports thead: the plain
+  `<tr className="border-b bg-slate-50">` (census (J) MATCH; the
+  R22-E pin's 500-char window accommodated by shortening the code
+  comment, not by weakening the pin).
+- **R56-E — RECORDED, not fixed (by design)**: the Next.js 16.4.0
+  history-stack corruption stands documented (§B above + the AGENTS
+  session-56 layer + the census record); the E2E pins the correct
+  one-click back contract (which holds —
+  `tests/e2e/session56-readonly-family.spec.ts` R56-E), and
+  `scripts/r56-probe8.mjs` remains the standing detector for the
+  upstream fix (the Next upgrade watch). One accuracy note for the
+  record: the corruption reproduced 5/5 in the isolated probe shape
+  and in 2 of 3 pre-fix census runs, but the post-fix census's (C)
+  phase happened to walk clean (the trigger is
+  navigation-timing-dependent inside the router commit) — the bug is
+  real, deterministic in its isolated shape, and intermittent under
+  census cadence; the recorded contract stands.
+
+Gates at completion: lint 0/0 · tsc ✓ · **806/806 unit** (+4 — the
+R56-A..D recipe pins, RED-first) · build ✓ · **269/269 E2E** (+5 —
+the R56-A..E computed-truth spec) · post-fix census **10/11 MATCH**
+(the one DIFF = the documented session-10 drawer deviation) · DB
+pristine · `.env.example` verified. Code batch pushed at `41313c3`
+(ssh wrapper, remote verified, operator key shredded); this docs
+layer rides the follow-up commit.

@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 802 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 264 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 806 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 269 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3366,3 +3366,96 @@ from_url param — sign in AT the guard's landing when the round-trip
 is the evidence); the oneLine eval rule re-hit (multi-line eval
 expressions fail on the literal `\n` between tokens — one-line every
 expression before stringify).
+
+## Session 56 (parity round 55) — the history journey walk + the read-only surface family
+
+Workspace continued from `a720c84` (git pull brought the owner's
+session_112 journal — docs-only on the landed round-54). Baseline
+gates ALL GREEN (802/802 unit · 264/264 E2E, no flakes). The census
+took the §65 lesson to the next journey layer: the **history
+stack's walks** — back, forward, scroll restore, the drawer journey,
+the tab journey (the layer every census passes THROUGH after
+sign-in, never measured as the object) — plus the **read-only
+surface family** the mobile-grid reconnaissance surfaced.
+
+**The deploy watch: both sides QUIET** — login `C2ujlke6`/`D5oCh2kx`
+unchanged (no 21st deploy), app `C-IrDy5f`/`BGNH4KkS` unchanged.
+The confirmation ladder green: standing audits **5/5** + route sweep
+**12/12** + **verify-r49 13/13** + **verify-r45 13/13**.
+
+**THE HISTORY JOURNEY WALK** (`scripts/r56-census.mjs`, seven
+paired phases at 1440×900 + the mobile drawer phase at 390×844):
+the simple back + forward restore + the two-deep chain + the scroll
+restoration + the settings tab journey + the /Dashboard casing +
+the mobile drawer journey — 6/7 walk contracts MATCH; the mobile
+drawer journey is the documented session-10 deviation re-verified
+through its back-navigation extension (REF keeps the drawer open
+through the leaf tap AND the back; the clone closes — the superset).
+The scroll-restoration note: both apps restore in steady state;
+REF's FIRST popstate after a fresh load can reset to top (the SPA
+initial-mount race — non-deterministic, [0,40,40] across 3 runs) —
+not a contract, no change.
+
+**THE READ-ONLY SURFACE FAMILY** (the supplementary census — four
+real visual gaps in REF's `bg-slate-50` read-only recipe, ALL
+closed):
+
+- **R56-A — the settings Company Information tiles**: REF renders
+  the 9 read-only tiles as `p-4 bg-slate-50 rounded-lg` (computed
+  `rgb(248,250,252)` + 8px) with the **Address tile's UNPREFIXED
+  `col-span-2`** — the always-on span that forces the 2-track
+  implicit grid below md (at 390px REF computes 2 content-sized
+  tracks; the clone rendered plain `p-4` tiles with a single
+  stacked 921px column). The longest-lived gap of the family: the
+  R13-B pin covered the grid + label classes, never the tile
+  interiors.
+- **R56-B — the profile identity Email**: REF renders it as a
+  **disabled input with an authored `bg-slate-50`**; the clone
+  rendered it fully editable.
+- **R56-C — the profile Phone/Job Title placeholders**: REF renders
+  both empty fields bare; the clone carried authored placeholders
+  (an early-build authoring, never REF-verified).
+- **R56-D — the hrreports thead row**: REF's header row carries
+  `border-b bg-slate-50` (computed `rgb(248,250,252)`, 33px,
+  inert — no hover tint); the clone rode the shadcn TableRow default
+  (transparent + hover tint).
+
+**R56-E — THE HISTORY-STACK CORRUPTION (recorded, not fixed)**: the
+census's two-deep chain found the clone's back-back landing on the
+pre-load page — root-caused with the Navigation API entry dumps
+(`scripts/r56-probe8.mjs`, 5/5 deterministic in the isolated repro,
+generic across routes; the beforeFiles rewrite is INNOCENT,
+verified with plain routes): after a **full document load of any
+(app) route**, the **second client-side navigation** replaces the
+fresh-loaded entry's URL with a duplicate of the entry below it —
+`["/profile", "/"]` → click → `["/profile", "/", "/staffrequests"]`
+→ click → `["/profile", "/profile", "/staffrequests", "/training"]`.
+The user loses the page they landed on (back-back skips it). The
+clone's own code performs no history manipulation — a **Next.js
+16.4.0 App Router framework bug**. Not fixable in-app without
+hand-patching framework internals; the E2E pins the CORRECT
+one-click back contract (which holds), the repro script stays the
+standing detector, and the follow-up is the Next upgrade watch.
+See `docs/remediation-plan-session56.md` §B for the evidence trail.
+
+**Pinned**: R56-A..E (5 E2E in
+`tests/e2e/session56-readonly-family.spec.ts` — computed-truth: the
+tiles' bg/radius/span map, the mobile 2-track grid, the Email
+disabled+bg, the absent placeholders, the thead bg, the one-click
+back) + 4 unit pins (the R56-A..D recipe family in
+`tests/unit/recipes.test.ts`). Gates: lint 0/0 · tsc ✓ ·
+**806/806 unit** (+4) · build ✓ · **269/269 E2E** (+5). The
+post-fix census re-run: **10/11 MATCH** (the one DIFF = the
+documented drawer deviation).
+
+**The round's instrument lessons**: the Navigation API
+(`navigation.entries()`) is the ground truth for history-stack
+forensics — the URL bar and `history.length` cannot distinguish a
+replaced entry from a truncated one; the `agent-browser set
+viewport` must be verified with `window.innerWidth` in the SAME
+session before mobile-grid measurements (the default viewport is
+~1280 and `set viewport` failures are silent); and the two-parse
+eval wrapper — agent-browser returns raw objects unquoted and
+string values quoted, so the census's `ev()` ERR-wraps half its
+returns (the string-equality comparison still holds — compare the
+RAW forms, not extracted fields).

@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.38.0 (session-55 remediation complete — the auth-boundary navigation walk censused + 6 functional gaps closed: the root-serve rewrite, the edge proxy, the from_url resolver, the logout carry + the R55-A..E pins) · **Last updated:** 2026-10-18
-> **State:** 802 unit + 264 E2E tests green, lint/typecheck/build
+> **Version:** 3.39.0 (session-56 remediation complete — the history journey walk + the read-only surface family: REF's bg-slate-50 recipe restored on 4 surfaces + the Next.js 16.4.0 history-stack corruption root-caused and recorded) · **Last updated:** 2026-10-18
+> **State:** 806 unit + 269 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -25,7 +25,11 @@
 > hidden view-swapped login flows: the password-reset + sign-up views +
 > the auth-boundary navigation family: the post-login root landing, the
 > deep-link from_url round-trip, the logout carry, and the
-> open-redirect-guarded resolver).
+> open-redirect-guarded resolver + the history journey walk: the
+> back/forward/scroll-restore/drawer/tab walks + the read-only surface
+> family: the settings Company tiles (bg-slate-50 + the Address
+> col-span-2 implicit grid), the profile identity email's disabled
+> state, and the hrreports slate thead).
 
 ---
 
@@ -3478,3 +3482,91 @@ ever measures them. URL-level parity is functional parity: the
 deep-link round-trip is a user-visible behavior, and its fix (the
 proxy + the resolver) is also the security surface (the open-redirect
 guard) — the parity fix and the hardening land together.
+
+## 66. The history journey walk + the read-only surface family (session 56, parity round 55)
+
+**The frontier problem**: round 54 censused the AUTH boundary's
+journeys; this round took the §65 lesson one layer deeper — the
+**history stack's walks** (back, forward, scroll restore, the drawer
+journey, the tab journey): every census signs in and clicks through
+routes, but the back button's URL/content/active-leaf contracts were
+never the measured object. And the mobile-grid reconnaissance
+surfaced a second never-measured family: **REF's `bg-slate-50`
+read-only recipe** — the gray-filled, inert surfaces (tiles, the
+identity email, the table headers) whose interiors sat below every
+prior census's measurement threshold.
+
+**The walk** (`scripts/r56-census.mjs`, seven paired phases at
+1440×900 + the mobile drawer phase at 390×844): the simple back ·
+the forward restore · the two-deep chain · the scroll restoration ·
+the settings tab journey · the /Dashboard casing · the mobile drawer
+journey. **6/7 walk contracts MATCH** (the scroll family in steady
+state; REF's FIRST popstate after a fresh load can reset to top —
+the SPA initial-mount race, non-deterministic [0,40,40], not a
+contract). The drawer journey is the documented session-10 deviation
+re-verified through its back extension.
+
+**The read-only surface family** (the supplementary census — four
+real visual gaps, ALL closed):
+
+- **R56-A — the settings Company tiles**: `p-4 bg-slate-50
+  rounded-lg` + the Address tile's UNPREFIXED `col-span-2` — the
+  always-on span that forces the 2-track implicit grid below md (REF
+  at 390px computes 2 content-sized tracks; the clone had a stacked
+  921px column). The R13-B pin had covered the grid + labels, never
+  the tile interiors — the longest-lived gap of the family.
+- **R56-B — the profile identity Email**: disabled +
+  `bg-slate-50` (REF live-measured; the clone rendered it editable).
+- **R56-C — the profile Phone/Job Title placeholders**: removed
+  (REF renders both empty fields bare; the placeholders were an
+  early-build authoring, never REF-verified).
+- **R56-D — the hrreports thead row**: a plain
+  `<tr className="border-b bg-slate-50">` (REF's computed
+  rgb(248,250,252) 33px inert header; the clone rode the shadcn
+  hover-tinted TableRow default).
+
+**R56-E — the history-stack corruption (RECORDED, a Next.js 16.4.0
+framework bug)**: after a full document load of ANY (app) route, the
+SECOND client-side navigation replaces the fresh-loaded entry's URL
+with a duplicate of the entry below it — the Navigation API entry
+dumps show `["/profile", "/"]` → one click →
+`["/profile", "/", "/staffrequests"]` → a second click →
+`["/profile", "/profile", "/staffrequests", "/training"]`. The user
+loses the page they landed on (back-back skips it). 5/5
+deterministic in the isolated repro (`scripts/r56-probe8.mjs`),
+generic across routes (the beforeFiles rewrite is INNOCENT — verified
+with plain routes); the clone's own code performs no history
+manipulation. Not fixable in-app without hand-patching framework
+internals: the E2E pins the CORRECT one-click back contract, the
+repro script is the standing detector, and the follow-up is the
+Next upgrade watch (`docs/remediation-plan-session56.md` §B).
+
+**The pins**: R56-A..E (5 E2E in
+`tests/e2e/session56-readonly-family.spec.ts` — computed-truth, the
+r52 method) + 4 unit pins (the R56-A..D recipe family).
+
+**The instrument rules**:
+
+- **The Navigation API rule**: `navigation.entries()` is the ground
+  truth for history-stack forensics — the URL bar and
+  `history.length` cannot distinguish a replaced entry from a
+  truncated one (a corrupted stack LOOKS like a stuck back button).
+- **The viewport-verification rule**: verify `window.innerWidth` in
+  the same session before mobile-grid measurements — `agent-browser
+  set viewport` failures are silent and the default viewport is
+  ~1280 (a "mobile" census that never re-settles measures desktop
+  widths and invents phantom divergences).
+- **The raw-comparison rule**: the census `ev()` wrapper's
+  ERR-strings still compare soundly (agent-browser returns raw
+  objects unquoted and string values quoted — the double-parse
+  ERR-wraps half the returns; compare the RAW forms, not extracted
+  fields).
+
+**The lesson**: the census frontier has two remaining layers past
+surfaces — the boundary journeys (round 54) and the history-stack
+walks (this round) — plus the sub-threshold interiors (the read-only
+recipe): a surface's STATIC pin can pass while its tile-level
+computed truth diverges, because the pin asserted the container and
+never the contents. When a divergence hides below the measurement
+threshold, the fix is the computed-truth method applied one level
+deeper — not a new census family.
