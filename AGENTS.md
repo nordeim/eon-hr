@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 793 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 257 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 258 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3241,3 +3241,60 @@ validation, the recipe pins). No behavior change.
 the family across EVERY route that exhibits it, not just the first
 (/dashboard); the E2E pin then walks the same family so the
 active-matching logic is guarded per-route, not per-recipe.
+
+## Session 54 (parity round 53) — the mobile-nav interaction walk
+
+Fresh clone to `aad1e74` (the owner's session_108 journal — docs-only
+on the landed round-52 `dc2201c`); baseline gates ALL GREEN (793/793
+unit · 257/257 E2E, no flakes). The census took the user-called-out
+surface to its deepest level: the full user journey paired live.
+
+**The deploy watch: both sides QUIET** — login `C2ujlke6`/`D5oCh2kx`
+unchanged (no 21st deploy), app `C-IrDy5f`/`BGNH4KkS` unchanged.
+The standing audits **5/5** + route sweep **12/12** + **verify-r49
+13/13** + **verify-r45 13/13** (the full confirmation ladder).
+
+**THE MOBILE-NAV INTERACTION WALK** (`scripts/r54-census.mjs`, both
+apps at 390×844, seven paired phases): the at-rest chrome (hamburger
+28×28 + the 5-tab bar) MATCH · the hamburger tap's settled drawer
+family (overlay rgba(0,0,0,0.8), panel 288px/#fafafa/#e5e5e5 border,
+transform settled — computed-truth only; the panel class bytes are
+the documented construction allowance) MATCH · the drawer's DEFAULT
+group-state map (all 9 aria-controls triggers collapsed) MATCH · the
+Payroll group expansion round-trip (aria flip + 5 sub-items) MATCH ·
+**the leaf-tap round-trip — the ONE interaction divergence**: REF
+navigates to /training and KEEPS the drawer open (data-state=open at
+500ms/1900ms); the clone navigates and CLOSES it. This is the
+**documented reference regression** found at session 10/11 (3/3
+trials then; the SKILL §21 deviation list), re-verified live 43
+rounds and 20 login deploys later — the deviation direction is kept
+(the clone's auto-close is the superset: standard mobile UX + the
+pathname-change effect covering browser-back) · the overlay tap
+(full pointerdown/up sequence — Radix ignores bare click() dispatches)
+MATCH · the bottom-tab tap + active pair MATCH. **Verdict: 7/9, the
+2 DIFFs both being the documented deviation — no new gaps.**
+
+**Pinned** (R54-A): the drawer's default collapsed-group map E2E
+guard — all 8 nav group triggers + the footer bell render
+aria-expanded="false" at first open, the collapsed groups' sub-item
+leaves hidden (the full-menu pin asserts the 13 labels render but
+not the collapsed-default contract). Plus the E2E comment fix: the
+drawer-geometry test's "(closing happens via overlay tap / Esc /
+navigation)" line implied navigation-close is REF behavior — now
+cites the documented deviation instead.
+
+**Pins**: 1 E2E (R54-A). Gates: lint 0/0 · tsc ✓ · **793/793 unit**
+(unchanged) · build ✓ · **258/258 E2E** (+1).
+
+**The round's instrument lessons**: the interaction-walk census —
+when a surface's static families are all pinned (rounds 50–52), the
+next frontier is the full user journey (open → expand → navigate →
+dismiss); the interaction family is where never-paired-live
+divergences hide. The visible-link rule: a raw selector click hits
+the FIRST DOM match — on the clone that's the hidden desktop-sidebar
+copy (DOM order differs between the platforms) — filter for
+visibility before clicking. The symmetric-settling rule: paired
+reads must settle for the same delay after their dispatches (the
+mid-exit read is a false DIFF). The Radix overlay rule: the
+outside-close contract listens for pointerdown/up, not bare
+click() — synthetic overlay taps need the full pointer sequence.

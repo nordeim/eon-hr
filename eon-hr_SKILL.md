@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.36.0 (session-53 remediation complete — the 20th-deploy login re-audit + the nav-registry drift re-check 44/44 + the bottom-nav active-state family censused + pinned) · **Last updated:** 2026-10-18
-> **State:** 793 unit + 257 E2E tests green, lint/typecheck/build
+> **Version:** 3.37.0 (session-54 remediation complete — the mobile-nav interaction walk censused + the R54-A default-group-map pin + the drawer auto-close deviation re-verified) · **Last updated:** 2026-10-18
+> **State:** 793 unit + 258 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3331,3 +3331,65 @@ the standing watch pattern: verify-r45 standalone (13/13) + the app
 side's confirmation ladder (standing 5/5 + sweep 12/12 + verify-r49
 13/13) — the app-side instruments re-run through every login deploy
 because the two builds deploy independently.
+
+## §64 Session 54 (parity round 53) — the interaction-walk census
+
+**The frontier problem**: rounds 50–52 pinned the mobile navigation's
+every STATIC family — the at-rest chrome, the drawer panel/footer, the
+expanded-group interiors, the per-route active states. But a surface's
+static families can all match while its INTERACTION family diverges:
+no prior round had paired the full user journey (open → expand →
+navigate → dismiss) live. The never-paired-live behaviors are exactly
+where silent divergences hide.
+
+**The walk** (`scripts/r54-census.mjs`, both apps at 390×844, seven
+paired phases): the at-rest chrome → the hamburger tap's settled
+drawer family → the drawer's DEFAULT group-state map → the group
+expansion round-trip → the leaf-tap navigation → the overlay-tap
+close → the bottom-tab tap + active pair. **7/9 MATCH; the 2 DIFFs
+are the same finding** — REF's drawer STAYS OPEN after a leaf tap
+(`data-state="open"` at 500ms and 1900ms, real CDP clicks) while the
+clone closes it: the documented reference regression from session
+10/11 (its own drawer auto-closed in the early builds, a redeploy
+broke it, 3/3 trials then), re-verified live 43 rounds and 20 login
+deploys later. The deviation direction stays (the clone's auto-close
+is the superset: the standard mobile pattern + a pathname-change
+effect covering browser-back, which REF's drawer also survives open).
+
+**The instrument rules** (two false DIFFs in the first draft):
+
+- **The visible-link rule**: a raw selector click
+  (`a[href="/training"]`) hits the FIRST DOM match — on the clone
+  that's the hidden desktop-sidebar copy (its DOM precedes the drawer
+  portal; REF's portal precedes its sidebar). The click on a hidden
+  element is a no-op — the instrument silently measures nothing.
+  Filter for visibility (`offsetParent !== null`) or scope to the
+  drawer's own container before clicking.
+- **The symmetric-settling rule**: paired reads must settle for the
+  SAME delay after their respective dispatches. The first draft read
+  REF 1.2s after its overlay tap (fully closed + unmounted) but the
+  clone ~0ms after (mid exit-animation, `data-state="closed"`) — a
+  false DIFF from timing asymmetry, not behavior.
+- **The Radix overlay rule**: the Dialog outside-close contract
+  listens for `pointerdown`/`pointerup`, NOT bare `click()`. A
+  synthetic overlay tap must dispatch the full pointer sequence
+  (`pointerdown` → `pointerup` → `click`, all bubbling) or it proves
+  nothing — bare `click()` dispatches are silently ignored.
+
+**The pin** (R54-A): the drawer's DEFAULT group-state map E2E guard —
+all 8 nav group triggers + the footer bell render
+`aria-expanded="false"` at first open, the collapsed groups' sub-item
+leaves hidden. The full-menu pin asserts the 13 top-level labels
+render but NOT the collapsed-default contract; a nav refactor that
+pre-expands groups (or a Collapsible `defaultOpen` drift) would pass
+every standing pin while changing the drawer's at-rest interior. The
+pin walks the census-verified both-sides state.
+
+**The lesson**: when a surface's static families are all pinned, the
+next census frontier is the interaction walk — enumerate the surface's
+user journey (its every state transition a finger can cause), pair
+each step live, and pin the contracts that lack a guard. The
+interaction family is also where the documented-deviation re-verification
+lives: a reference regression recorded 43 rounds ago still reproduces
+today, and the re-verification is itself census value (the deviation
+list stays current without a new investigation).
