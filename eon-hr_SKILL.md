@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.42.0 (session-59 remediation complete — the badge/chip fill family: the status-tinted kanban count chips on both boards (REF tints every column/stage; the session-6 pin had generalized a single-column measurement), the securitysettings Enabled form with REF's CircleCheckBig glyph, and the sixteen trap-2 palette pins ending the oklch drift on every unpinned shade in active use) · **Last updated:** 2026-10-19
-> **State:** 828 unit + 291 E2E tests green, lint/typecheck/build
+> **Version:** 3.43.0 (session-60 remediation complete — the dark-mode fill family: the checkbox's both-theme pair + the 16px glyph, the employees GRID default (the set-comparison blind spot), REF's inline 12-field settings Company edit form, the compliance severity tints, the blue-600 text split, and the payrollengine's flat emerald (the gradient-over-color P1 bug a backgroundImage census catches)) · **Last updated:** 2026-10-19
+> **State:** 834 unit + 297 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -29,7 +29,7 @@
 > back/forward/scroll-restore/drawer/tab walks + the read-only surface
 > family: the settings Company tiles (bg-slate-50 + the Address
 > col-span-2 implicit grid), the profile identity email's disabled
-> state, and the hrreports slate thead).
+> state, and the hrreports slate thead) + the dark-mode fill family: the checkbox both-theme pair, the employees GRID default, the inline 12-field settings Company edit, the compliance severity tints, the blue-600 text split, and the flat payrollengine emerald.
 
 ---
 
@@ -3776,3 +3776,61 @@ gate); (3) the census leaf filter (children.length > 0) hides
 icon-bearing badges — the census is the survey, the E2E pin (icon
 class + geometry) is the contract; (4) a "false DIFF" deserves one
 more look before writing it off.
+
+## §70 Session 60 (parity round 59) — the dark-mode fill family
+
+The r57/r58 censuses covered fills in LIGHT mode; this round took the
+same union read into **DARK mode** (`html.dark`, the shared
+`localStorage darkMode="true"` contract — session 33), all 49 routes
+paired live (`scripts/r60-darkfill-census.mjs`). Pre-fix 39/49,
+post-fix 45/49 (four documented DIFFs: the profile role text, the
+employees with-data leaves, REF's live careers postings, the 404 tag
+superset). **Two lessons generalize: read backgroundImage with
+backgroundColor** (the payrollengine computed the "right" color while
+the default gradient image class painted over it — tailwind-merge
+does not conflict the two) and **never set-compare fills** (the
+r58-24 "byte-identical" claim hid a mapping inversion).
+
+**R60-A — the checkbox dark pair + the glyph**: REF's dark form is
+bg `#fafafa` (its dark `--primary`) + the `#171717` check
+(primary-foreground) — pin the literal pair
+(`dark:data-[state=checked]:bg-[#fafafa]`), never
+`dark:text-white`. The glyph is authored `h-4 w-4` (14×16 rendered —
+the flex shrink; REF-measured, both sides identical).
+
+**R60-B — the employees default view is GRID**: REF boots
+GRID-active (bg-primary on the grid toggle, the outline on list —
+non-persisted; three fresh loads + the reload test). Set-compare hid
+this for two rounds.
+
+**R60-C — the settings Company edit is an INLINE form flip**: the
+12-field recipe (the `grid md:grid-cols-2 gap-6` grid, REF's labels
++ placeholders verbatim, Save Changes in the header with the
+lucide-save glyph, Cancel at the bottom-right) — not a dialog. The
+schema/API gain logoUrl/city/country; keep the working PATCH
+(REF's own form renders empty + its Save is a silent no-op).
+
+**R60-D — the compliance notify tints**: `text-*-600 border-*-200
+hover:bg-*-50` per severity window (red/orange/yellow) on the
+outline base — the tints do NOT flip in dark.
+
+**R60-E — the blue-600 text split**: REF authors literal
+`text-white` on workflowconfigpage x2 + notificationpreferences;
+recruitmentkanban/staffrequests/documenttracker/the chat new-chat
+keep the flipping primary-foreground token. Read TEXT colors, not
+just fills.
+
+**R60-F — the payrollengine Generate Payroll is the FLAT emerald
+solid** (`bg-emerald-600 hover:bg-emerald-700
+text-primary-foreground shadow`, backgroundImage: none) — via the
+dedicated `emerald` variant, never a className over the default
+gradient (the image class survives the merge).
+
+**The r60 instrument lessons**: the `"$Abcd1234"` double-quote
+shell-expansion trap (a password fill in double quotes expands to
+EMPTY — silent re-auth failures); REF's short session TTL (re-auth
+every 15 routes + login-page detection); content waits for
+client-rendered surfaces (the 404); settle the 150ms
+transition-colors before color reads (mid-flight blends like
+rgb(60,60,60)); and the sweep needs the non-cascade FK walk (a
+stray's NotificationPreference P2003s the bare user delete).

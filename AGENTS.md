@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 828 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 291 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 834 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 297 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3721,6 +3721,70 @@ with the icon + 92px geometry). Gates: lint 0/0 · tsc ✓ · **828/828
 unit** (+5) · build ✓ · **291/291 E2E** (+6, no flakes) · post-fix
 census 47/49 · DB pristine (1/1/2).
 
+## Session 60 (parity round 59) — the dark-mode fill family
+
+Workspace re-cloned from `cfce320`. Baseline gates ALL GREEN (828/828
+unit · 290/291 E2E, the session-58 switch/checkbox spec 11/11 green in
+isolation — the documented flake-check). The deploy watch: BOTH SIDES
+QUIET (login `CpCk8Zmk`/`A8a43VEI`, app `C-IrDy5f`/`BGNH4KkS`); the
+confirmation ladder green (standing 5/5 + sweep 12/12 + verify-r49
+13/13 + verify-r45 13/13).
+
+**The census (`scripts/r60-darkfill-census.mjs`, all 49 routes, paired
+live, DARK mode via the shared localStorage contract): the union read
+— button fills INCLUDING backgroundImage + the non-button leaf fills.
+Pre-fix 39/49, post-fix 45/49** (the four remaining DIFFs documented:
+the profile role text, the employees with-data leaves, REF's live
+careers postings, the 404 tag superset).
+
+- **R60-A — the checkbox dark pair + the both-themes glyph**: REF's
+  dark form = bg #fafafa (its dark --primary) + the #171717 check
+  (primary-foreground) + the glyph authored `h-4 w-4` (14×16 rendered
+  — the flex shrink, REF-measured). The r58 pin (#171717 + the
+  invented dark:text-white, built on "REF never renders a checkbox in
+  dark" — disproven: five rows render) and the r48 h-3 w-3 were both
+  superseded. Fix: `dark:data-[state=checked]:bg-[#fafafa]` + the
+  token + h-4 w-4.
+- **R60-B — the employees default view is GRID**: REF boots
+  GRID-active (three fresh loads + the reload test — nothing
+  persists); the clone booted list. The r58-24 "byte-identical" was a
+  set-comparison blind spot. Three legacy E2E flows updated.
+- **R60-C — the settings Company edit is an INLINE 12-field form
+  flip**: REF's press replaces the card content with the measured
+  recipe (the 2-col 24px-gap grid, the 12 labels, the placeholder
+  strings verbatim, Save Changes in the header + the lucide-save
+  glyph, Cancel at the bottom-right). The clone's dialog retired; the
+  schema/API gain logoUrl/city/country; the working PATCH superset
+  stays (REF's own form renders empty + its Save is a silent no-op).
+- **R60-D — the compliance notify tints**: per-severity members on the
+  outline base (red/orange/yellow-600 text + *-200 border + *-50
+  hover — the tints do NOT flip in dark). Four palette pins
+  (orange-200/50, yellow-200/50).
+- **R60-E — the blue-600 text split**: REF authors literal text-white
+  on workflowconfigpage x2 + notificationpreferences (255,255,255 both
+  themes); recruitmentkanban/staffrequests/documenttracker/the chat's
+  new-chat keep the flipping primary-foreground token. The clone had
+  both sides inverted. The prior censuses never read button text
+  colors.
+- **R60-F — the payrollengine Generate Payroll is the FLAT emerald
+  solid** (backgroundImage: none, both themes): the clone's className
+  authoring left the default gradient in the class list —
+  tailwind-merge does not conflict bg-emerald-600 with the arbitrary
+  gradient image class, so the gradient PAINTED OVER the emerald in
+  BOTH themes. A P1-family bug a color-only census cannot see; fixed
+  via the new `emerald` variant.
+- **R60-G (documented)** — the 404 Go Home: byte-identical computed
+  fills both themes; REF renders a button, the clone keeps the
+  r36-documented <a>-link superset.
+
+**Pinned**: 6 unit (RED-first; the R32-A9/R48-C2b/R58-8..12 legacy
+pins amended to the re-measured truths) + 6 E2E
+(`tests/e2e/session60-dark-fills.spec.ts` — computed truth, both
+themes). Gates: lint 0/0 · tsc ✓ · **834/834 unit** (+6) · build ✓ ·
+**297/297 E2E** (+6, no flakes) · post-fix census 45/49 · DB pristine
+(1/1/2 — the sweep gained the non-cascade FK walk: the stray's
+NotificationPreference P2003'd the bare delete).
+
 ## Session 59 instrument lessons (the badge-fill census, carry-forward)
 
 **The r59 lessons** (the badge-fill census): (1) `agent-browser close --all`
@@ -3736,6 +3800,27 @@ hides icon-bearing badges — the census is the survey, the E2E pin
 one more look — the securitysettings artifact decomposed into a
 timing lesson AND a real 16px structural gap (the CircleCheckBig
 glyph).
+
+## Session 60 instrument lessons (the dark-fill census, carry-forward)
+
+**The r60 lessons**: (1) **the `"$Abcd1234"` shell-expansion trap** — a
+password fill passed in DOUBLE quotes inside an execSync template
+literal expands the unset shell variable to EMPTY; every "re-auth"
+silently fails and the browser keeps its stale cookie (the symptom:
+sessions that "refuse" to re-auth + intermittent login-page reads);
+always single-quote; (2) REF's session TTL is short (~5 min
+idle/sequential-load) — the census re-auths every 15 routes +
+login-page detection, and a combined orchestrator can outlive the
+cookie — run ladder components individually when the combined run
+shows session-death DIFFs; (3) **a bg+backgroundImage census beats a
+backgroundColor-only census** — the payrollengine bug computed the
+"right" color while the gradient image painted over it; (4) the
+client-rendered 404 needs content waits (the Go Home renders after the
+client boot; REF renders it server-side); (5) **set-comparison hides
+mapping inversions** — the r58-24 "byte-identical" claim compared fill
+sets, not per-button mappings; (6) color reads must settle the
+150ms transition-colors after a theme toggle (a mid-flight read
+catches the blend — rgb(60,60,60) between #fafafa and #171717).
 
 ## Session 57 instrument lessons (carry-over, from the round-56 record)
 
