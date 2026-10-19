@@ -262,12 +262,49 @@
   --color-sky-100: #e0f2fe;
   --color-sky-600: #0284c7;
 
+  /* amber 100/400/600/700 (session 59, R59-D): the Badge warning
+     variant + compliance alerts render amber shades v4's oklch default
+     drifts into lab() (trap 2) — REF's recruitmentkanban Offer chip
+     measures rgb(254,243,199)/rgb(180,83,9) = the v3 hexes. */
   --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-400: #fbbf24;
   --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
 
+  /* emerald-100/700 (session 59, R59-D): the Badge success variant +
+     the communications/payrollmodule chips — same trap-2 drift. */
   --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+
+  /* yellow 100/600/700 (session 59, R59-D): the taskmanager In-Progress
+     chip (REF-measured rgb(254,249,195)/rgb(161,98,7)) + the analytics
+     icon colors (yellow-600, 10 sites). */
+  --color-yellow-100: #fef9c3;
+  --color-yellow-600: #ca8a04;
+  --color-yellow-700: #a16207;
+
+  /* red-100 (session 59, R59-D): the Badge destructive variant —
+     REF's recruitmentkanban Rejected chip measures rgb(254,226,226). */
+  --color-red-100: #fee2e2;
+
+  /* purple-700 (session 59, R59-D): the taskmanager Review chip —
+     REF measures rgb(126,34,206); purple-100 stays pinned above. */
+  --color-purple-700: #7e22ce;
+
+  /* violet-100/700 (session 59, R59-D): the Badge purple variant —
+     same trap-2 drift. */
+  --color-violet-100: #ede9fe;
+  --color-violet-700: #6d28d9;
+
+  /* pink-600 (session 59, R59-D): the expenses CTA gradient endpoint
+     (from-purple-600 to-pink-600) — matches REF today; pinned for
+     stability against future engine drift. */
+  --color-pink-600: #db2777;
 
   --color-teal-50: #f0fdfa;
   --color-teal-500: #14b8a6;

@@ -50,11 +50,15 @@ interface JobRow {
 }
 
 const COLUMNS = [
-  { stage: "applied", label: "Applied", dot: "bg-blue-500" },
-  { stage: "interviewing", label: "Interviewing", dot: "bg-violet-500" },
-  { stage: "offer", label: "Offer", dot: "bg-amber-500" },
-  { stage: "hired", label: "Hired", dot: "bg-emerald-500" },
-  { stage: "rejected", label: "Rejected", dot: "bg-red-500" },
+  /* Session 59 (R59-B): REF tints each stage's count chip by status
+     (live-measured: slate-200/blue/amber/green/red — note the Offer
+     stage is AMBER here where the taskmanager's In-Progress is YELLOW;
+     REF keeps two different warning shades across its own pages). */
+  { stage: "applied", label: "Applied", chip: "bg-slate-200 text-slate-700" },
+  { stage: "interviewing", label: "Interviewing", chip: "bg-blue-100 text-blue-700" },
+  { stage: "offer", label: "Offer", chip: "bg-amber-100 text-amber-700" },
+  { stage: "hired", label: "Hired", chip: "bg-green-100 text-green-700" },
+  { stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700" },
 ];
 
 function labelize(v: string): string {
@@ -351,7 +355,7 @@ export default function RecruitmentKanbanPage() {
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
-                  <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs bg-slate-200 text-slate-700">
+                  <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs ${col.chip}`}>
                     {colCandidates.length}
                   </div>
                 </div>

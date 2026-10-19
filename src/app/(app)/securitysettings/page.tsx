@@ -173,19 +173,30 @@ export default function SecuritySettingsPage() {
                           {row.label}
                         </label>
                       </div>
-                      {/* Session 49 (R48-C2): REF's badge is a DIV (not
-                          the span Badge) — rounded-md border px-2.5 py-0.5
-                          text-xs font-semibold + the focus members; the
-                          zero-state pair is the slate Disabled form
-                          (live-measured), Enabled keeps the green pair. */}
+                      {/* Session 49 (R48-C2) + session 59 (R59-E): REF's
+                          badge is a DIV (not the span Badge) — rounded-md
+                          border px-2.5 py-0.5 text-xs font-semibold + the
+                          focus members. The r59 census re-measured BOTH
+                          forms live: the Disabled stays the plain slate
+                          form (no icon, no shadow); the ENABLED form
+                          carries REF's shadow + hover:bg-primary/80 +
+                          border-green-200 members AND the CircleCheckBig
+                          glyph (w-3 h-3 mr-1 — 92px vs the plain 76px). */}
                       <div
                         className={
                           settings[row.key]
-                            ? "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-100 text-green-700"
+                            ? "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow hover:bg-primary/80 bg-green-100 text-green-700 border-green-200"
                             : "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-slate-100 text-slate-700"
                         }
                       >
-                        {settings[row.key] ? "Enabled" : "Disabled"}
+                        {settings[row.key] ? (
+                          <>
+                            <CircleCheckBig className="w-3 h-3 mr-1" aria-hidden="true" />
+                            Enabled
+                          </>
+                        ) : (
+                          "Disabled"
+                        )}
                       </div>
                     </div>
                   ))}

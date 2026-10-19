@@ -359,9 +359,12 @@ describe("taskmanager board recipe (session 6)", () => {
     expect(taskmanager).not.toContain("text-sm font-semibold text-foreground");
   });
 
-  it("count chip: rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700", () => {
+  it("count chip: rounded-md border px-2.5 py-0.5 text-xs font-semibold — the shape stays, the tint is per-column (session 59 R59-A re-measure)", () => {
+    // session 6 measured only the Backlog column and generalized the
+    // slate; session 59 re-measured all five: the chip SHAPE is pinned
+    // here, the per-column tints in the R59-A pin below
     expect(taskmanager).toContain(
-      "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700"
+      "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
     );
     expect(taskmanager).not.toContain("rounded-full border px-2.5");
   });
@@ -5312,9 +5315,12 @@ describe("session-48 unmapped-route interiors (parity round 47 — the rootmap f
     expect(src).not.toContain(".toFixed(2) }");
   });
 
-  it("R47-F3: recruitmentkanban's stage-count chips are REF's badge-form DIVs (rounded-md, the focus ring family, bg-slate-200 text-slate-700 — the census's DIV-vs-SPAN catch, the full class form measured this round)", () => {
+  it("R47-F3 (session-59 re-measure): recruitmentkanban's stage-count chips are REF's badge-form DIVs (rounded-md, the focus ring family, the per-stage tint via col.chip — the census's DIV-vs-SPAN catch)", () => {
     const src = page("recruitmentkanban", "page.tsx");
-    expect(src).toMatch(/<div className="inline-flex items-center rounded-md border px-2\.5 py-0\.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary\/80 text-xs bg-slate-200 text-slate-700">/);
+    // the class prefix stays REF's exact form; the bg/text tail is the
+    // per-stage ${col.chip} (session 59 R59-B: slate-200/blue/amber/
+    // green/red — REF tints each stage's chip)
+    expect(src).toMatch(/<div className=\{`inline-flex items-center rounded-md border px-2\.5 py-0\.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary\/80 text-xs \$\{col\.chip\}`\}>/);
     expect(src).not.toMatch(/h-\[22px\]/);
   });
 });
@@ -6148,5 +6154,102 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
 
   it("R58-23: the posts multipart path enforces the same content cap as the JSON path", () => {
     expect(postsApi()).toContain('content.length > 2000');
+  });
+});
+
+describe("Badge/chip fill family (session 59, R59-A..D — the non-button fill census)", () => {
+  /* The r59 census (scripts/r59-badge-census.mjs, 49 routes, paired
+     live): every non-button leaf's computed fill. REF renders
+     STATUS-TINTED count chips on both kanban boards (the session-6 pin
+     measured only Backlog and generalized the slate); and the census's
+     lab() serializations exposed the trap-2 oklch drift on every
+     unpinned shade in active use (emerald/amber/yellow/red-100/
+     purple-700/violet/pink-600). The /profile role badge text
+     ("Admin" vs REF's "User") is a documented data-level divergence
+     (the seed's admin role is load-bearing for the superset gates). */
+
+  const globalsR59 = () => soft(() => read("src", "app", "globals.css"));
+  const tmPage = () => soft(() => read("src", "app", "(app)", "taskmanager", "page.tsx"));
+  const rkPage = () => soft(() => read("src", "app", "(app)", "recruitmentkanban", "page.tsx"));
+
+  it("R59-A: the taskmanager count chips are status-tinted per column (REF's five recipes)", () => {
+    const page = tmPage();
+    // Backlog keeps the slate the session-6 pin measured; the other four
+    // columns gain their REF-measured tints
+    expect(page).toContain('{ id: "backlog", label: "Backlog", chip: "bg-slate-100 text-slate-700" }');
+    expect(page).toContain('{ id: "todo", label: "To Do", chip: "bg-blue-100 text-blue-700" }');
+    expect(page).toContain('{ id: "in_progress", label: "In Progress", chip: "bg-yellow-100 text-yellow-700" }');
+    expect(page).toContain('{ id: "review", label: "Review", chip: "bg-purple-100 text-purple-700" }');
+    expect(page).toContain('{ id: "done", label: "Done", chip: "bg-green-100 text-green-700" }');
+    // the chip renders REF's full class string (the focus/transition
+    // members the session-6 authoring lacked) + the per-column tint
+    expect(page).toContain('rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${col.chip}');
+    // the uniform-slate authoring is gone
+    expect(page).not.toContain('text-xs font-semibold bg-slate-100 text-slate-700">');
+  });
+
+  it("R59-B: the recruitmentkanban count chips are status-tinted per stage (REF's five recipes)", () => {
+    const page = rkPage();
+    expect(page).toContain('{ stage: "applied", label: "Applied", chip: "bg-slate-200 text-slate-700" }');
+    expect(page).toContain('{ stage: "interviewing", label: "Interviewing", chip: "bg-blue-100 text-blue-700" }');
+    expect(page).toContain('{ stage: "offer", label: "Offer", chip: "bg-amber-100 text-amber-700" }');
+    expect(page).toContain('{ stage: "hired", label: "Hired", chip: "bg-green-100 text-green-700" }');
+    expect(page).toContain('{ stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700" }');
+    // the tint rides REF's exact prefix (which the clone already had)
+    expect(page).toContain('focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs ${col.chip}');
+    // the uniform-slate-200 tail is gone
+    expect(page).not.toContain('text-xs bg-slate-200 text-slate-700">');
+  });
+
+  it("R59-D: the sixteen trap-2 palette pins land in @theme (the oklch drift ends on every used shade)", () => {
+    const css = globalsR59();
+    // the census-measured REF truths (byte-identical to the v3 hexes)
+    expect(css).toContain("--color-yellow-100: #fef9c3");
+    expect(css).toContain("--color-yellow-600: #ca8a04");
+    expect(css).toContain("--color-yellow-700: #a16207");
+    expect(css).toContain("--color-amber-100: #fef3c7");
+    expect(css).toContain("--color-amber-400: #fbbf24");
+    expect(css).toContain("--color-amber-600: #d97706");
+    expect(css).toContain("--color-amber-700: #b45309");
+    expect(css).toContain("--color-red-100: #fee2e2");
+    expect(css).toContain("--color-purple-100: #f3e8ff");
+    expect(css).toContain("--color-purple-700: #7e22ce");
+    expect(css).toContain("--color-emerald-100: #d1fae5");
+    expect(css).toContain("--color-emerald-700: #047857");
+    expect(css).toContain("--color-violet-100: #ede9fe");
+    expect(css).toContain("--color-violet-700: #6d28d9");
+    expect(css).toContain("--color-pink-600: #db2777");
+  });
+
+  it("R59-A/B negative: no other uniform count-chip authoring remains on the two boards", () => {
+    // the shared Badge component stays rounded-full (the clone's own
+    // table-badge convention — REF-unmeasurable at the demo's zero
+    // state); this pin only guards the two kanban boards
+    const tm = tmPage();
+    expect(tm.match(/\$\{col\.chip\}/g)?.length).toBe(1);
+    const rk = rkPage();
+    expect(rk.match(/\$\{col\.chip\}/g)?.length).toBe(1);
+  });
+});
+
+describe("Badge/chip fill family — part 2 (session 59, R59-E — the securitysettings Enabled form re-measured)", () => {
+  /* The census's /securitysettings "false DIFF" turned out to be TWO
+     things: the timing artifact AND a real structural gap — REF's
+     Enabled badges render the CircleCheckBig glyph (w-3 h-3 mr-1,
+     92px) + the shadow/hover:bg-primary/80/border-green-200 members,
+     while the Disabled form stays the plain slate. The r48 round only
+     measured the zero-state Disabled form. */
+
+  const secPageR59 = () => soft(() => read("src", "app", "(app)", "securitysettings", "page.tsx"));
+
+  it("R59-E: the Enabled badge carries REF's glyph + the shadow/hover/border-green-200 members; the Disabled stays plain", () => {
+    const src = secPageR59();
+    expect(src).toContain(
+      'focus:ring-offset-2 shadow hover:bg-primary/80 bg-green-100 text-green-700 border-green-200'
+    );
+    expect(src).toContain('<CircleCheckBig className="w-3 h-3 mr-1" aria-hidden="true" />');
+    // the Disabled form keeps the plain slate (no icon, no shadow)
+    expect(src).toContain('focus:ring-offset-2 bg-slate-100 text-slate-700');
+    expect(src).not.toContain('border-slate-200" : "inline-flex');
   });
 });

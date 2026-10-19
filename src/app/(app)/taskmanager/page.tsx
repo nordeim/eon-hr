@@ -59,11 +59,14 @@ interface ProjectRow {
 }
 
 const COLUMNS = [
-  { id: "backlog", label: "Backlog" },
-  { id: "todo", label: "To Do" },
-  { id: "in_progress", label: "In Progress" },
-  { id: "review", label: "Review" },
-  { id: "done", label: "Done" },
+  /* Session 59 (R59-A): REF tints each column's count chip by status
+     (live-measured: slate/blue/yellow/purple/green-100 + *-700 text).
+     The session-6 pin measured only Backlog and generalized the slate. */
+  { id: "backlog", label: "Backlog", chip: "bg-slate-100 text-slate-700" },
+  { id: "todo", label: "To Do", chip: "bg-blue-100 text-blue-700" },
+  { id: "in_progress", label: "In Progress", chip: "bg-yellow-100 text-yellow-700" },
+  { id: "review", label: "Review", chip: "bg-purple-100 text-purple-700" },
+  { id: "done", label: "Done", chip: "bg-green-100 text-green-700" },
 ] as const;
 
 const PRIORITIES = ["low", "medium", "high", "urgent"] as const;
@@ -372,10 +375,11 @@ export default function TaskManagerPage() {
                   >
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-slate-900">{col.label}</h3>
-                      {/* Reference count chip (session 6): rounded-md
-                          border px-2.5 py-0.5 text-xs font-semibold
-                          bg-slate-100 text-slate-700. */}
-                      <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700">
+                      {/* Reference count chip (session 6 + session 59 R59-A):
+                          rounded-md border px-2.5 py-0.5 text-xs
+                          font-semibold + REF's transition/focus members, with
+                          the per-column status tint (col.chip). */}
+                      <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${col.chip}`}>
                         {columnTasks.length}
                       </div>
                     </div>
