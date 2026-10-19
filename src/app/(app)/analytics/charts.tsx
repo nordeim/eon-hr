@@ -5,7 +5,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -44,8 +43,9 @@ export function EmployeeStatusPie({ data }: { data: StatusSlice[] }) {
             <Cell key={slice.name} fill={slice.color} />
           ))}
         </Pie>
+        {/* Session 61 (R61-Q): REF renders NO legend on the analytics
+            charts (live-measured — zero legend spans). */}
         <Tooltip />
-        <Legend />
       </PieChart>
     </ResponsiveContainer>
   );

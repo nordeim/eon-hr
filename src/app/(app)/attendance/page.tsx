@@ -357,7 +357,10 @@ export default function StaffAttendancePage() {
               {!canMark ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center bg-red-100 rounded-full">
-                  <ShieldAlert className="h-8 w-8 text-red-600" aria-hidden="true" />
+                  {/* Session 61 (R61-W): REF's restricted-card ShieldAlert
+                    renders red-500 (rgb(239,68,68) — live-measured),
+                    not red-600. */}
+                <ShieldAlert className="h-8 w-8 text-red-500" aria-hidden="true" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-slate-900">Access Restricted</h3>
                 <p className="text-slate-500 max-w-sm">

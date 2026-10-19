@@ -273,10 +273,13 @@ export function StatCard({
         {variant === "value-in-tile" ? (
           /* Session 12 (R11-N): the reference's evaluations stat card —
              the VALUE sits inside the 40px slate-100 tile (SPAN text-lg
-             font-bold text-slate-700), the label to its right. 74px card. */
+             font-bold text-slate-700), the label to its right. 74px card.
+             Session 61 (R61-E): the span honors valueClassName (twMerge)
+             — REF colors the tile values per stat (green-700 /
+             orange-700 / slate-500, live-measured both themes). */
           <>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-              <span className="text-lg font-bold text-slate-700">{value}</span>
+              <span className={cn("text-lg font-bold text-slate-700", valueClassName)}>{value}</span>
             </div>
             <span className="text-sm text-slate-600">{label}</span>
           </>

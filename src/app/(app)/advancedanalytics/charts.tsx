@@ -6,7 +6,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -84,7 +83,8 @@ export function PayrollTrendLine({ data }: { data: PayrollPoint[] }) {
           tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 100000)}k` : `${Math.round(v / 100)}`)}
         />
         <Tooltip formatter={(value) => [formatSar(Number(value)), "Payroll"]} />
-        <Legend />
+        {/* Session 61 (R61-R): REF renders NO legend on the payroll
+            trend chart (live-measured). */}
         <Line type="monotone" dataKey="payroll" name="Payroll (SAR)" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
       </LineChart>
     </ResponsiveContainer>

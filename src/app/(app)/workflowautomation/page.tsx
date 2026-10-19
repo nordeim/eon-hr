@@ -203,7 +203,9 @@ export default function WorkflowAutomationPage() {
         layout="flat36"
         actionsStart
         iconClassName="text-purple-600"
-        sectionIcon={<Sparkles aria-hidden="true" />}
+        /* Session 61 (R61-S): REF's section icon is Zap (live-measured
+           lucide-zap w-4 h-4 text-purple-600); the Sparkles replaced. */
+        sectionIcon={<Zap aria-hidden="true" />}
         title="Automated Workflows"
         subtitle="Streamline HR processes with intelligent automation"
         actions={

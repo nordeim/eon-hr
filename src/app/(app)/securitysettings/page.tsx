@@ -220,14 +220,19 @@ export default function SecuritySettingsPage() {
             </div>
             <CardContent className="p-6">
               {/* Session 12 (R11-S): the compact space-y-3 text-sm
-                  slate-600 list — 20px check icon + <strong>-prefixed
-                  line, one line each. */}
+                  slate-600 list — 20px blue shield icon (session 61) +
+                  <strong>-prefixed line, one line each. */}
               <div className="space-y-3 text-sm text-slate-600">
                 {RECOMMENDATIONS.map((r) => (
                   <div key={r.title} className="flex gap-3">
-                    {/* Session 49 (R48-C2): REF's glyph — circle-check-big
-                        at w-3 h-3 mr-1 (live-measured), no shrink-0. */}
-                    <CircleCheckBig className="h-3 w-3 mr-1" aria-hidden="true" />
+                    {/* Session 49 (R48-C2) measured the check glyph on the
+                        FEATURE rows (y:520-760 — circle-check-big w-3 h-3
+                        mr-1, still correct there). Session 61 (R61-G):
+                        the RECOMMENDATIONS rows carry a different glyph —
+                        REF renders lucide-shield w-5 h-5 text-blue-600
+                        flex-shrink-0 (20px, live-measured y:1026-1154);
+                        the r48 generalization corrected. */}
+                    <Shield className="w-5 h-5 text-blue-600 flex-shrink-0" aria-hidden="true" />
                     <p>
                       <strong>{r.title}:</strong> {r.text.slice(r.title.length + 2)}
                     </p>

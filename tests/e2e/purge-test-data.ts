@@ -11,6 +11,19 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
 
 async function main(): Promise<void> {
+  /* Session 61: the purge used to delete the @eon-hr.test employees
+     FIRST — but the R58-22 fixture rows (assigned assets, reviewer
+     duties, survey responses) reference them, so a mid-run failure
+     that leaked fixtures made EVERY subsequent purge P2003 at this
+     line and die silently (global-setup swallows the error), leaving
+     the stale rows to poison findFirst-based assertions. The fixture
+     sweeps now run BEFORE the employee sweep (the same FK-walk
+     discipline the r60 sweep-loading-probe gained). */
+  await db.asset.deleteMany({ where: { name: "E2E Fill Laptop" } });
+  await db.review.deleteMany({ where: { reviewer: { email: { endsWith: "@eon-hr.test" } } } });
+  await db.surveyResponse.deleteMany({ where: { employee: { email: { endsWith: "@eon-hr.test" } } } });
+  await db.reviewCycle.deleteMany({ where: { name: "E2E Fill Cycle" } });
+  await db.survey.deleteMany({ where: { title: "E2E Fill Survey" } });
   const removed = await db.employee.deleteMany({
     where: { email: { endsWith: "@eon-hr.test" } },
   });
@@ -35,6 +48,21 @@ async function main(): Promise<void> {
   // Session 57 (R57-A2): the import spec creates employees from
   // e2e-import-@eon-hr.test rows — the employee sweep above already
   // covers them (endsWith @eon-hr.test).
+  // Session 61: walk the non-cascade USER dependents before the user
+  // sweeps (the r60 lesson: a signup-created NotificationPreference row
+  // P2003s the bare deleteMany and kills the rest of the purge).
+  const testUsers = { email: { endsWith: "@eon-hr.test" } };
+  await db.notificationPreference.deleteMany({ where: { user: testUsers } });
+  await db.message.deleteMany({ where: { sender: testUsers } });
+  await db.aIChat.deleteMany({ where: { user: testUsers } });
+  await db.post.deleteMany({ where: { user: testUsers } });
+  await db.announcement.deleteMany({ where: { author: testUsers } });
+  await db.notification.deleteMany({ where: { user: testUsers } });
+  await db.auditLog.deleteMany({ where: { user: testUsers } });
+  await db.goal.deleteMany({ where: { createdBy: testUsers } });
+  await db.leaveRequest.deleteMany({ where: { approver: testUsers } });
+  await db.staffRequest.deleteMany({ where: { user: testUsers } });
+  await db.expenseClaim.deleteMany({ where: { user: testUsers } });
   // Session 57 (R57-E2): the deletion round-trip signs up
   // e2e-delete-*@eon-hr.test users — sweep any that failed mid-way (the
   // successful round-trip deletes itself).
@@ -53,9 +81,8 @@ async function main(): Promise<void> {
   if (goneFillDeleteUsers.count > 0) {
     console.log(`[purge] removed ${goneFillDeleteUsers.count} fill-delete-test user(s)`);
   }
-  await db.asset.deleteMany({ where: { name: "E2E Fill Laptop" } });
-  await db.reviewCycle.deleteMany({ where: { name: "E2E Fill Cycle" } });
-  await db.survey.deleteMany({ where: { title: "E2E Fill Survey" } });
+  // (the E2E Fill fixture sweeps moved to the TOP of main — see the
+  // session-61 note; they must precede the employee sweep)
   // Session 57 (R57-B): the wall media spec posts with attachments —
   // sweep the posts and orphaned db/uploads files.
   const gonePosts = await db.post.deleteMany({

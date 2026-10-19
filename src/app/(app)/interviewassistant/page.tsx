@@ -131,7 +131,11 @@ export default function InterviewAssistantPage() {
                   <Label htmlFor="ia-candidate">Candidate</Label>
                   <Select value={candidateId} onValueChange={setCandidateId}>
                     <SelectTrigger id="ia-candidate">
-                      <SelectValue placeholder={candidates.length === 0 ? "No candidates yet" : "Select candidate"} />
+                      {/* Session 61 (R61-L): REF renders the standard
+                        shadcn placeholder at zero candidates too
+                        (live-measured) — the conditional "No candidates
+                        yet" authoring replaced. */}
+                    <SelectValue placeholder="Select candidate" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Unassigned</SelectItem>
@@ -142,11 +146,6 @@ export default function InterviewAssistantPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {candidates.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Add candidates in Recruitment first, or analyze unassigned notes.
-                    </p>
-                  ) : null}
                 </div>
               )}
             </CardContent>

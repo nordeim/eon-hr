@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Target, Star, Trash2, Loader2, CalendarClock } from "lucide-react";
+import { Award, CalendarClock, CircleAlert, CircleCheckBig, Loader2, Plus, Star, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -230,10 +230,14 @@ export default function PerformanceManagementPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-4">
+        {/* Session 61 (R61-U): REF's stat glyphs (live-measured) —
+            Total=Target(blue-500), Completed=CircleCheckBig(green-500),
+            At Risk=CircleAlert(orange-500), Reviews=Award(purple-500);
+            the clone had Target×3 + Star. */}
         <StatCard variant="no-tile" label="Total Goals" value={stats.total} icon={<Target className="w-10 h-10 text-blue-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Completed" value={stats.completed} valueClassName="text-green-600" icon={<Target className="w-10 h-10 text-green-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} valueClassName="text-orange-600" icon={<Target className="w-10 h-10 text-orange-500" aria-hidden="true" />} />
-        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} valueClassName="text-purple-600" icon={<Star className="w-10 h-10 text-purple-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Completed" value={stats.completed} valueClassName="text-green-600" icon={<CircleCheckBig className="w-10 h-10 text-green-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="At Risk" value={stats.atRisk} valueClassName="text-orange-600" icon={<CircleAlert className="w-10 h-10 text-orange-500" aria-hidden="true" />} />
+        <StatCard variant="no-tile" label="Reviews" value={stats.reviews} valueClassName="text-purple-600" icon={<Award className="w-10 h-10 text-purple-500" aria-hidden="true" />} />
       </div>
 
       <Tabs defaultValue="goals">

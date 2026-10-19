@@ -89,6 +89,7 @@ export function PageHeader({
   mobileKickerTitle,
   mobileKickerBack = false,
   mobileKickerSubtitle,
+  mobileKickerSubtitleClassName,
   mobileHeader = "visible",
   centered = false,
   actionsStart = false,
@@ -137,6 +138,11 @@ export function PageHeader({
    *  the button nor the subtitle (byte-identical sweep, this round). */
   mobileKickerBack?: boolean;
   mobileKickerSubtitle?: string;
+  /** Session 61 (R61-O): REF's kicker subtitles vary per page — the
+   *  profile's "Manage your account" renders slate-400 (live-measured
+   *  via the hidden-kicker read) while the rest sit at slate-500; the
+   *  escape hatch lets a call site override (twMerge). */
+  mobileKickerSubtitleClassName?: string;
   /** Session 18 (R17-A): REF's default-family header rows switch
    *  flex-col → flex-row at md (768) — `flex flex-col md:flex-row
    *  justify-between items-start md:items-center gap-4` (measured on
@@ -225,7 +231,7 @@ export function PageHeader({
                 (measured on every REF kicker — text-lg font-bold
                 text-slate-900 dark:text-white truncate). */}
               <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate">{mobileKickerTitle ?? title}</h1>
-              {mobileKickerSubtitle ? <p className="text-xs text-slate-500 truncate">{mobileKickerSubtitle}</p> : null}
+              {mobileKickerSubtitle ? <p className={cn("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName)}>{mobileKickerSubtitle}</p> : null}
             </div>
           </div>
         </div>

@@ -258,7 +258,7 @@ export default function PayrollPage() {
         <div className="p-6">
           <div className="flex gap-4">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
               <Input
                 type="text"
                 placeholder="Search employee..."
@@ -290,6 +290,12 @@ export default function PayrollPage() {
           <div className="p-0">
             {records.length === 0 ? (
               <EmptyState
+                /* Session 61 (R61-J): REF's payroll empty icon is the
+                   DollarSign (w-16 h-16 mx-auto mb-4 text-slate-400 —
+                   live-measured x:816 y:670), not the EmptyState default
+                   Inbox; the loans page already renders its DollarSign
+                   via this prop (the r10 re-measure). */
+                icon={<DollarSign aria-hidden="true" />}
                 title="No payroll records"
                 description="Add payroll for this month to get started"
                 action={

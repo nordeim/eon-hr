@@ -3,7 +3,7 @@
 import * as React from "react";
 import { CheckCircle, CircleCheckBig, DollarSign, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { useToast } from "@/components/ui/toast";
@@ -120,14 +120,27 @@ export default function PayrollAiPage() {
           />
         </div>
 
+        {/* Session 61 (R61-K): REF's suggestions card carries a
+            CardHeader (the CardTitle "AI Suggestions" — font-semibold
+            leading-none tracking-tight, live-measured y:423) + the
+            p-6 content (the empty stack at x:313); the round-33 pin's
+            headerless p-12 form superseded by the r61 re-measure. */}
         <Card className="border-slate-200">
-          <CardContent className="p-12 text-center">
-            {/* REF's empty contract (round 33): the 64px CircleCheckBig
-                (all utilities on the icon — REF's exact chain) + the 18px
-                semibold heading + the 16px slate-500 line. */}
-            <CircleCheckBig className="w-16 h-16 mx-auto mb-4 text-green-500" aria-hidden="true" />
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">All Clear!</h3>
-            <p className="text-slate-500">No payroll adjustments needed</p>
+          <CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+            <CardTitle>AI Suggestions</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {/* REF's content carries ONE inner wrapper: text-center
+                py-12 (live-measured y:488 h:236; the icon lands at
+                y:536 = wrapper + py-12). */}
+            <div className="text-center py-12">
+              {/* REF's empty contract (round 33): the 64px CircleCheckBig
+                  (all utilities on the icon — REF's exact chain) + the 18px
+                  semibold heading + the 16px slate-500 line. */}
+              <CircleCheckBig className="w-16 h-16 mx-auto mb-4 text-green-500" aria-hidden="true" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">All Clear!</h3>
+              <p className="text-slate-500">No payroll adjustments needed</p>
+            </div>
           </CardContent>
         </Card>
       </div>

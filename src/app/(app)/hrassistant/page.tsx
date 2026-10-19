@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, Loader2, Send, Sparkles, Target } from "lucide-react";
+import { Bot, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -157,12 +157,12 @@ export default function HrAssistantPage() {
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
-                /* Session 48 (R47-E5): REF's zero chat renders the icon
-                   only — no suggestion line (the r46 census; the clone's
-                   copy line retires with the training precedent). */
-                <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <Sparkles className="mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
-                </div>
+                /* Session 61 (R61-M): REF's zero-message pane renders
+                   NOTHING — live-measured (no icon, no copy; only the
+                   bot kicker + the send row). The r47-E5 "icon only"
+                   pin is superseded by the r61 re-measure (the sparkles
+                   retired). */
+                <div className="flex flex-1" />
               ) : (
                 messages.map((m) => {
                   const isUser = m.role === "user";

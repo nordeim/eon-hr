@@ -344,6 +344,10 @@ export default function ProfilePage() {
         mobileKickerTitle="Profile"
         mobileKickerBack
         mobileKickerSubtitle="Manage your account"
+        /* Session 61 (R61-O): REF's profile kicker subtitle renders
+           slate-400 (rgb(148,163,184) — live-measured; the other
+           kickers stay slate-500). */
+        mobileKickerSubtitleClassName="text-slate-400"
         layout="flat48"
         iconClassName="text-blue-600"
         sectionIcon={<CircleUser aria-hidden="true" />}

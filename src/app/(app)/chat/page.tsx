@@ -207,7 +207,10 @@ export default function ChatPage() {
         {/* conversation list */}
         <div className="hidden w-80 shrink-0 flex-col border-r border-slate-200 md:flex">
           <div className="flex items-center justify-between gap-2 px-4 py-4">
-            <h2 className="text-lg font-bold text-foreground">Messages</h2>
+            {/* Session 61 (R61-H): REF authors slate-900 (unflipping —
+                measured rgb(15,23,42) in DARK) — not the flipping
+                foreground token. */}
+            <h2 className="text-lg font-bold text-slate-900">Messages</h2>
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
@@ -221,8 +224,14 @@ export default function ChatPage() {
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <div className="relative px-4 pb-4">
-            <Search className="pointer-events-none absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          {/* Session 61 (R61-B/I): REF's search wrapper is BARE relative
+              (h:36 — the icon's top-1/2 centers ON the input; the
+              left-7 authoring inflated the wrapper's height via pb-4,
+              centering the icon 8px low). The row padding moves to this
+              outer div; the icon rides REF's authored slate-400. */}
+          <div className="px-4 pb-4">
+            <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
             <Input
               placeholder="Search conversations..."
               value={search}
@@ -230,6 +239,7 @@ export default function ChatPage() {
               className="pl-10"
               aria-label="Search conversations"
             />
+            </div>
           </div>
           {/* Session 17 (R16-C): REF's list container is a bare
               flex-1 overflow-y-auto — the px-2/pb-4 row padding moved
@@ -394,7 +404,7 @@ export default function ChatPage() {
             <DialogDescription>Pick someone to start messaging.</DialogDescription>
           </DialogHeader>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
             <Input
               placeholder="Search people..."
               value={pickerSearch}

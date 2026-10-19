@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Briefcase, Building2, CircleCheckBig, FileSearch, Loader2, MapPin, Plus, Sparkles, Trash2, TrendingUp, UserPlus, Users } from "lucide-react";
+import { Briefcase, Building2, CircleCheckBig, FileSearch, Filter, Loader2, MapPin, Plus, Sparkles, Trash2, TrendingUp, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -348,10 +348,14 @@ export default function RecruitmentPage() {
         {/* ---------------- Applicants & Ranking ---------------- */}
         {/* Session 12 (R11-K): the reference's toolbar — flex flex-wrap
             gap-3 items-center bg-white p-4 rounded-xl border — with a 16px
-            Users icon, w-48/w-40/w-40 selects and the ml-auto count. */}
+            Filter icon (session 61), w-48/w-40/w-40 selects and the ml-auto count. */}
         <TabsContent value="applicants" className="mt-6 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200">
-            <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            {/* Session 61 (R61-V): REF's filter row leads with the
+                Filter glyph in authored slate-400 (rgb(148,163,184)
+                both themes — live-measured); the Users + muted-token
+                authoring replaced. */}
+            <Filter className="h-4 w-4 text-slate-400" aria-hidden="true" />
             <Select value={jobFilter} onValueChange={setJobFilter}>
               <SelectTrigger className="w-48" aria-label="Filter by job">
                 <SelectValue />

@@ -288,7 +288,7 @@ export default function RecruitmentKanbanPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
           <Input
             aria-label="Search candidates"
             placeholder="Search candidates, jobs or emails…"

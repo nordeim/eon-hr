@@ -5,6 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  DefaultLegendContent,
   Legend,
   Line,
   LineChart,
@@ -77,12 +78,38 @@ export function SurveyComparisonBar({ data }: { data: SurveyPoint[] }) {
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
-        <YAxis yAxisId="count" allowDecimals={false} width={36} />
         <YAxis yAxisId="sentiment" orientation="right" domain={[-100, 100]} width={48} />
+        <YAxis yAxisId="count" allowDecimals={false} width={36} />
         <Tooltip />
-        <Legend />
-        <Bar yAxisId="count" dataKey="responses" name="Responses" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={32} />
-        <Bar yAxisId="sentiment" dataKey="sentiment" name="Avg sentiment" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={32} />
+        {/* Session 61 (R61-P): REF's legend (live-measured) — the
+            Responses bar is blue-500 #3b82f6 (NOT blue-600) + the
+            second series named "Avg Sentiment %" (the DOM order
+            [Responses, Avg Sentiment %]). */}
+        {/* Session 61 (R61-P): REF's legend (live-measured) — the
+            Responses bar is blue-500 #3b82f6 (NOT blue-600) + the second
+            series named "Avg Sentiment %", DOM order [Responses,
+            Avg Sentiment %]. recharts 3's auto-legend order ignores the
+            Bar mount order (measured both arrangements — it stayed
+            [Avg …, Responses]), so the payload pins it explicitly. */}
+        {/* Session 61 (R61-P): REF's legend (live-measured) — the
+            Responses bar is blue-500 #3b82f6 (NOT blue-600) + the second
+            series named "Avg Sentiment %", DOM order [Responses,
+            Avg Sentiment %]. recharts 3's auto-legend order ignores
+            BOTH the Bar mount order and the YAxis declaration order
+            (measured both arrangements — it stayed [Avg …, Responses]),
+            so the default renderer is reused with the payload reordered. */}
+        <Legend
+          content={(props) => {
+            const payload = props.payload ?? [];
+            const byValue = new Map(payload.map((entry) => [entry.value, entry]));
+            const ordered = [byValue.get("Responses"), byValue.get("Avg Sentiment %")].filter(
+              (entry): entry is NonNullable<typeof entry> => entry != null
+            );
+            return <DefaultLegendContent {...props} payload={ordered} />;
+          }}
+        />
+        <Bar yAxisId="count" dataKey="responses" name="Responses" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={32} />
+        <Bar yAxisId="sentiment" dataKey="sentiment" name="Avg Sentiment %" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={32} />
       </BarChart>
     </ResponsiveContainer>
   );

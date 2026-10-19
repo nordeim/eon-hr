@@ -696,7 +696,11 @@ describe("session-18 parity round 17 — header row breakpoint + profile kicker"
     expect(pageHeader).toMatch(/aria-label="Back to dashboard"/);
     expect(pageHeader).toMatch(/variant="ghost"/);
     // the subtitle line: text-xs slate-500 truncate inside flex-1 min-w-0
-    expect(pageHeader).toMatch(/mobileKickerSubtitle \? <p className="text-xs text-slate-500 truncate">/);
+    /* Session 61 amendment (R61-O): the subtitle gained the
+       mobileKickerSubtitleClassName escape hatch (the profile's kicker
+       subtitle renders slate-400 on REF — a per-page variance); the
+       base recipe stays slate-500. */
+    expect(pageHeader).toMatch(/mobileKickerSubtitle \? <p className=\{cn\("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName\)\}>/);
   });
 
   it("R17-B: the profile page opts into the back kicker", () => {

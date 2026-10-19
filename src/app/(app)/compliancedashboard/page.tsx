@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Bell, CircleCheckBig, CircleX, FileText, FileWarning, Loader2, Search, Shield, ShieldCheck, TriangleAlert } from "lucide-react";
+import { AlertTriangle, Bell, CircleCheckBig, CircleX, FileText, FileWarning, Loader2, Search, Shield, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -227,7 +227,7 @@ export default function ComplianceDashboardPage() {
         layout="flat36-sm"
         actionsStart
         iconClassName="text-red-600"
-        sectionIcon={<ShieldCheck aria-hidden="true" />}
+        sectionIcon={<Shield aria-hidden="true" />}
         title="Compliance Dashboard"
         subtitle="Proactive document expiry tracking & automated notifications"
         actions={
@@ -270,11 +270,30 @@ export default function ComplianceDashboardPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   {/* Session 23 (R22-D): Expired renders FIRST — the REF-measured
-                      tile order [Expired, ≤7, ≤15, ≤30]. */}
-                  <StatCard variant="mini-centered" label="Expired" value={chipCounts.expired ?? 0} />
-                  <StatCard variant="mini-centered" label="Expiring ≤ 7 days" value={chipCounts.d7 ?? 0} />
-                  <StatCard variant="mini-centered" label="Expiring ≤ 15 days" value={chipCounts.d15 ?? 0} />
-                  <StatCard variant="mini-centered" label="Expiring ≤ 30 days" value={chipCounts.d30 ?? 0} />
+                      tile order [Expired, ≤7, ≤15, ≤30].
+                      Session 61 (R61-C): the chips are NOT the shared
+                      mini-centered StatCard recipe — REF (live-measured,
+                      BOTH themes) renders per-severity card borders +
+                      DIV values (text-3xl font-bold mb-1 text-*-700,
+                      unflipping) + DIV labels (text-xs text-slate-500);
+                      the hrreports/npref mini-centered pages render P
+                      values — a different REF recipe, kept there. */}
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-red-200 p-4 text-center">
+                    <div className="text-3xl font-bold mb-1 text-red-700">{chipCounts.expired ?? 0}</div>
+                    <div className="text-xs text-slate-500">Expired</div>
+                  </div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-orange-200 p-4 text-center">
+                    <div className="text-3xl font-bold mb-1 text-orange-700">{chipCounts.d7 ?? 0}</div>
+                    <div className="text-xs text-slate-500">Expiring ≤ 7 days</div>
+                  </div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-yellow-200 p-4 text-center">
+                    <div className="text-3xl font-bold mb-1 text-yellow-700">{chipCounts.d15 ?? 0}</div>
+                    <div className="text-xs text-slate-500">Expiring ≤ 15 days</div>
+                  </div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-blue-200 p-4 text-center">
+                    <div className="text-3xl font-bold mb-1 text-blue-700">{chipCounts.d30 ?? 0}</div>
+                    <div className="text-xs text-slate-500">Expiring ≤ 30 days</div>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -355,14 +374,20 @@ export default function ComplianceDashboardPage() {
                         is REF's "At-Risk Employees" (the clone had retitled
                         it "Document Expiry Monitor"). */}
                     <div className="tracking-tight text-sm font-semibold text-slate-700 flex items-center gap-2">
-                      <FileWarning className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                      {/* Session 61 (R61-D): REF's at-risk title-row icon
+                          is TriangleAlert orange-500 (live-measured). */}
+                      <TriangleAlert className="h-4 w-4 text-orange-500" aria-hidden="true" />
                       At-Risk Employees
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
               {filtered.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
-                  <FileWarning className="mx-auto h-16 w-16" aria-hidden="true" />
+                  {/* Session 61 (R61-D): REF's empty state — the 48px
+                      CircleCheckBig in green-400 with mb-3 (live-measured
+                      x:824 y:784, 12px to the P); the 64px FileWarning
+                      default-colored form replaced. */}
+                  <CircleCheckBig className="w-12 h-12 mx-auto mb-3 text-green-400" aria-hidden="true" />
                   {/* Session 48 (R47-F1): REF's empty P carries NO class. */}
                   <p>No documents at risk in this filter</p>
                 </div>

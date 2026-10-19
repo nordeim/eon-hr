@@ -238,13 +238,21 @@ export default function EvaluationsPage() {
             (24px rhythm; the base mt-2 is overridden to mt-6 per trap 4)
             containing the 4× 74px value-in-tile stat row, the row header
             and the empty one-liner / cycle list. Stats live INSIDE the
-            tab on the reference (below the pill, y=264). */}
-        <TabsContent value="workflows" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">
+            tab on the reference (below the pill, y=264).
+            Session 61 (R61-F): the mt-6 member RESTORED — the r61 probe
+            measured the tab→stats gap REF 24px vs clone 8px (the member
+            had gone missing; everything below the strip sat 16px high). */}
+        <TabsContent value="workflows" className="mt-6 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Session 61 (R61-E): REF colors the tile VALUES per stat
+                (live-measured BOTH themes): Total slate-700 (the shared
+                base), Completed green-700, In Progress orange-700,
+                Not Started slate-500 — the r11 pin generalized the
+                single-tile slate-700. */}
             <StatCard variant="value-in-tile" label="Total Reviews" value={stats.total} />
-            <StatCard variant="value-in-tile" label="Completed" value={stats.completed} />
-            <StatCard variant="value-in-tile" label="In Progress" value={stats.inProgress} />
-            <StatCard variant="value-in-tile" label="Not Started" value={stats.notStarted} />
+            <StatCard variant="value-in-tile" label="Completed" value={stats.completed} valueClassName="text-green-700" />
+            <StatCard variant="value-in-tile" label="In Progress" value={stats.inProgress} valueClassName="text-orange-700" />
+            <StatCard variant="value-in-tile" label="Not Started" value={stats.notStarted} valueClassName="text-slate-500" />
           </div>
 
           {/* The row header — flex justify-between items-center with h3

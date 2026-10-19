@@ -257,7 +257,12 @@ export default function RequestReportsPage() {
                       live-measured this round. */}
                   <table className="w-full text-sm">
                     <thead>
-                      <tr>
+                      {/* Session 61 (R61-X): REF's header row carries the
+                          members itself — border-b text-left text-slate-500
+                          (live-measured, unflipping: the ths computed
+                          rgb(100,116,139) in BOTH themes; the bare tr left
+                          them inheriting the flipping foreground token). */}
+                      <tr className="border-b text-left text-slate-500">
                         <th className="pb-2 pr-4">Ref #</th>
                         <th className="pb-2 pr-4">Employee</th>
                         <th className="pb-2 pr-4">Category</th>

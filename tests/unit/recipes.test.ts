@@ -614,7 +614,9 @@ describe("border-b DIV-title card headers (session 12, R11-E/F/G/H/I)", () => {
     expect(src).toMatch(/type="month"/);
     // The empty state KEEPS its dark Add Payroll CTA (live-verified:
     // 142x36 at y=826 with the description mb-4 ahead of it).
-    expect(src).toMatch(/EmptyState[\s\S]{0,300}action=/);
+    // Session 61: the window widened — the R61-J DollarSign icon prop +
+    // its comment now sit between (the CTA still rides the action=).
+    expect(src).toMatch(/EmptyState[\s\S]{0,700}action=/);
     expect(src).toContain("Add Payroll");
   });
 
@@ -1903,11 +1905,14 @@ describe("session-23 scroll-dimension recipes (parity round 22 — the scroll di
   });
 
   it("R22-D: the compliance monitor tab renders Expired FIRST + the At-Risk Employees table title (REF-measured order + title; the clone had them swapped/retitled)", () => {
-    const statsIdx = compliancePage.indexOf('variant="mini-centered"');
+    /* Session 61 amendment: the chips left the shared mini-centered
+       StatCard for REF's hand-rolled recipe (R61-C — per-severity
+       borders + colored DIV values); the ORDER contract stays. */
+    const statsIdx = compliancePage.indexOf('border-red-200');
     expect(statsIdx).toBeGreaterThan(-1);
     const statsBlock = compliancePage.slice(statsIdx, statsIdx + 900);
-    const expiredIdx = statsBlock.indexOf('label="Expired"');
-    const d7Idx = statsBlock.indexOf('label="Expiring ≤ 7 days"');
+    const expiredIdx = statsBlock.indexOf('text-red-700">');
+    const d7Idx = statsBlock.indexOf('text-orange-700">');
     expect(expiredIdx).toBeGreaterThan(-1);
     expect(d7Idx).toBeGreaterThan(-1);
     expect(expiredIdx).toBeLessThan(d7Idx);
@@ -2442,7 +2447,9 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     expect(src).toMatch(/CardTitle className="text-sm">Active Chats/);
     expect(src).toContain("Active Chats");
     expect(src).toContain("max-h-96 space-y-1 overflow-y-auto p-2");
-    expect(src).toContain('<p className="text-sm text-muted-foreground">No chats</p>');
+    /* Session 61 amendment (R61-N): the line carries REF's exact
+       recipe — slate-500 (unflipping) + p-4 text-center members. */
+    expect(src).toContain('<p className="text-sm text-slate-500 p-4 text-center">No chats</p>');
     // the stretched column-card recipe is gone (the natural-height card)
     expect(src).toContain('<Card className="border-slate-200">');
     expect(src).not.toContain('<Card className="flex min-h-0');
@@ -3189,8 +3196,9 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     expect(compliancePage).toContain('{ key: "d7", label: "Within 7 days" }');
     expect(compliancePage).toContain('{ key: "d30", label: "Within 30 days" }');
     expect(compliancePage).not.toContain('{ key: "all", label: "All Alerts" }');
-    // the stat tiles keep the Expiring ≤ taxonomy (both render on REF)
-    expect(compliancePage).toMatch(/label="Expiring ≤ 7 days"/);
+    /* Session 61 amendment (R61-C): the chips are hand-rolled now —
+       the Expiring ≤ taxonomy rides the DIV label texts. */
+    expect(compliancePage).toContain('>Expiring ≤ 7 days</div>');
   });
 
   it("R35-C3: the documents API accepts REF's five types (+ the model's default fallback)", () => {
@@ -5433,7 +5441,11 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
     expect(src).toMatch(/<h3 className="text-lg font-semibold text-orange-900">/);
     expect(src).toContain('className="text-sm text-orange-700"');
     expect(src).toContain("inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-slate-100 text-slate-700");
-    expect(src).toContain('<CircleCheckBig className="h-3 w-3 mr-1"');
+    /* Session 61 amendment (R61-G): the recommendations carry REF's
+       blue Shield glyphs (re-measured — the r48 check glyph was a
+       feature-row generalization). */
+    expect(src).toContain('<Shield className="w-5 h-5 text-blue-600 flex-shrink-0"');
+    expect(src).not.toContain('<CircleCheckBig className="h-3 w-3 mr-1"');
     expect(src).not.toContain("<Badge");
   });
 
@@ -5479,7 +5491,11 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
   it("R48-C6: evaluations — the value-in-tile stats + the Radix-verbatim panels (ring-offset-background + space-y-6)", () => {
     const src = page("evaluations", "page.tsx");
     expect(src.match(/variant="value-in-tile"/g)?.length).toBe(4);
-    expect(src.match(/TabsContent value="[a-z0-9]+" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"/g)?.length).toBeGreaterThanOrEqual(3);
+    /* Session 61 amendment (R61-F): the FIRST panel gains the restored
+       r11 mt-6 (the tab→stats gap re-measured REF 24px vs clone 8px);
+       the other 2+ panels keep the bare Radix-verbatim form. */
+    expect(src.match(/TabsContent value="[a-z0-9]+" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(src).toContain('TabsContent value="workflows" className="mt-6 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"');
   });
 
   it("R48-C7: requestreports — the always-row header (Back ghost h-8 px-3 text-xs + classless h1/p block + the bare flex gap-2 cluster) + the horizontal-bare stats + the pb-2 pr-4 th family", () => {
@@ -6406,5 +6422,215 @@ describe("Dark-mode fill family (session 60, R60-A..F — the dark-mode union ce
     expect(api).toContain("logoUrl:");
     expect(api).toContain("city:");
     expect(api).toContain("country:");
+  });
+});
+
+describe("Dark-mode text-color family (session 61, R61-A..W — the dark text-color census)", () => {
+  /* The r61 census (scripts/r61-textcolor-census.mjs, 49 routes, paired
+     live, DARK mode): the computed `color` of every text-bearing
+     NON-button element (headings, text leaves, non-button icons) +
+     ::placeholder colors — the recorded r59/r60 blind spot ("the prior
+     censuses never read button TEXT colors") extended past buttons.
+     Pre-fix 23/49. Nineteen real findings decomposed element-level by
+     seven probes: the four unpinned shades (orange-500/700/900 +
+     purple-500), the authored-slate-400 search icons (six sites + the
+     recruitment filter), the compliance severity chips (colored DIV
+     values + xs slate-500 labels + per-severity card borders — a
+     BOTH-theme gap), the compliance alerts/at-risk icons, the
+     evaluations per-tile value colors (both themes) + the lost r11
+     mt-6, the securitysettings Shield recommendation glyphs, the chat
+     h2/wrapper, the payroll DollarSign empty icon, the payrollai
+     CardHeader + p-6, the interviewassistant invented copy, the
+     hrassistant empty-pane icon, the hrassistantchat No-chats recipe,
+     the profile kicker subtitle, the chart legends (surveyanalytics
+     recolor + two removals), four icon shapes, and the attendance
+     restricted-card red-500. */
+
+  const g61 = () => soft(() => read("src", "app", "globals.css"));
+  const pg = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R61-A: the four unpinned shades (orange-500/700/900, purple-500) — the v3 sRGB pins", () => {
+    const css = g61();
+    expect(css).toContain("--color-orange-500: #f97316");
+    expect(css).toContain("--color-orange-700: #c2410c");
+    expect(css).toContain("--color-orange-900: #7c2d12");
+    expect(css).toContain("--color-purple-500: #a855f7");
+    // green-400 (R61-D): the compliance at-risk empty icon — the fix
+    // made it active, exposing the drift; REF renders #4ade80
+    expect(css).toContain("--color-green-400: #4ade80");
+  });
+
+  it("R61-B: the search/filter icons author text-slate-400 (unflipping), not the muted token", () => {
+    // REF authors slate-400 on its search icons (rgb(148,163,184) both
+    // themes — live-verified); the clone rode text-muted-foreground
+    // (light slate-500, dark neutral-400 #a3a3a3)
+    for (const route of ["payroll", "documenttracker", "assetmanagement", "recruitmentkanban"]) {
+      expect(pg(route)).toContain("text-slate-400");
+      expect(pg(route)).not.toContain("<Search className=\"pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground\"");
+    }
+    const chat = pg("chat");
+    expect(chat.match(/<Search className="[^"]*text-slate-400"/g)?.length).toBe(2);
+    expect(chat).not.toContain("<Search className=\"pointer-events-none absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground\"");
+  });
+
+  it("R61-V: the recruitment filter row icon is Filter + slate-400 (not Users + muted)", () => {
+    const src = pg("recruitment");
+    expect(src).toContain("<Filter className=\"h-4 w-4 text-slate-400\" aria-hidden=\"true\" />");
+    expect(src).not.toContain("<Users className=\"h-4 w-4 text-muted-foreground\" aria-hidden=\"true\" />");
+  });
+
+  it("R61-C: the compliance severity chips — per-severity border + colored DIV value + xs slate-500 label", () => {
+    const src = pg("compliancedashboard");
+    // REF (both themes, live-measured): the four cards carry
+    // border-{severity}-200 + shadow; DIV values text-3xl font-bold
+    // mb-1 text-{severity}-700; DIV labels text-xs text-slate-500
+    expect(src).toContain("border border-red-200");
+    expect(src).toContain("border border-orange-200");
+    expect(src).toContain("border border-yellow-200");
+    expect(src).toContain("border border-blue-200");
+    expect(src).toContain('<div className="text-3xl font-bold mb-1 text-red-700">');
+    expect(src).toContain('<div className="text-3xl font-bold mb-1 text-orange-700">');
+    expect(src).toContain('<div className="text-3xl font-bold mb-1 text-yellow-700">');
+    expect(src).toContain('<div className="text-3xl font-bold mb-1 text-blue-700">');
+    expect(src).toContain('<div className="text-xs text-slate-500">Expired</div>');
+    // the shared mini-centered StatCard no longer renders these chips
+    expect(src).not.toContain('variant="mini-centered" label="Expired"');
+    expect(src).not.toContain('variant="mini-centered" label="Expiring ≤ 7 days"');
+  });
+
+  it("R61-D: the compliance at-risk icons — TriangleAlert row + the CircleCheckBig green-400 empty state", () => {
+    const src = pg("compliancedashboard");
+    expect(src).toContain("<TriangleAlert className=\"h-4 w-4 text-orange-500\" aria-hidden=\"true\" />");
+    expect(src).not.toContain("<FileWarning className=\"h-4 w-4 text-orange-500\" aria-hidden=\"true\" />");
+    expect(src).toContain("<CircleCheckBig className=\"w-12 h-12 mx-auto mb-3 text-green-400\" aria-hidden=\"true\" />");
+    expect(src).not.toContain("<FileWarning className=\"mx-auto h-16 w-16\" aria-hidden=\"true\" />");
+  });
+
+  it("R61-E: the evaluations stat-tile values carry REF's per-tile colors (both themes)", () => {
+    const src = pg("evaluations");
+    expect(src).toContain('label="Completed" value={stats.completed} valueClassName="text-green-700"');
+    expect(src).toContain('label="In Progress" value={stats.inProgress} valueClassName="text-orange-700"');
+    expect(src).toContain('label="Not Started" value={stats.notStarted} valueClassName="text-slate-500"');
+  });
+
+  it("R61-F: the evaluations TabsContent restores the r11 mt-6 (the tab→stats gap 24px)", () => {
+    const src = pg("evaluations");
+    expect(src).toContain('className="mt-6 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"');
+  });
+
+  it("R61-G: the securitysettings recommendations render REF's blue Shield glyphs", () => {
+    const src = pg("securitysettings");
+    expect(src).toContain("<Shield className=\"w-5 h-5 text-blue-600 flex-shrink-0\" aria-hidden=\"true\" />");
+    expect(src).not.toContain("<CircleCheckBig className=\"h-3 w-3 mr-1\" aria-hidden=\"true\" />");
+  });
+
+  it("R61-H: the chat Messages h2 authors slate-900 (unflipping, not the foreground token)", () => {
+    const src = pg("chat");
+    expect(src).toContain('<h2 className="text-lg font-bold text-slate-900">Messages</h2>');
+    expect(src).not.toContain('<h2 className="text-lg font-bold text-foreground">Messages</h2>');
+  });
+
+  it("R61-I: the chat search wrapper is bare (padding on the row; the icon left-3, centered)", () => {
+    const src = pg("chat");
+    expect(src).toContain("<Search className=\"pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400\" aria-hidden=\"true\" />");
+    expect(src).not.toContain('className="relative px-4 pb-4"');
+  });
+
+  it("R61-J: the payroll empty state renders the DollarSign icon (not the EmptyState default Inbox)", () => {
+    const src = pg("payroll");
+    expect(src).toContain("icon={<DollarSign aria-hidden=\"true\" />}");
+  });
+
+  it("R61-K: the payrollai suggestions card — the AI Suggestions CardHeader + p-6 content + the py-12 wrapper", () => {
+    const src = pg("payrollai");
+    expect(src).toContain("AI Suggestions");
+    expect(src).toContain("<CardTitle>AI Suggestions</CardTitle>");
+    expect(src).toContain('<CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">');
+    expect(src).toContain('<CardContent className="p-6">');
+    expect(src).toContain('<div className="text-center py-12">');
+    expect(src).not.toContain('<CardContent className="p-12 text-center">');
+  });
+
+  it("R61-L: the interviewassistant at-rest contract — standard placeholder, no invented hint copy", () => {
+    const src = pg("interviewassistant");
+    expect(src).toContain('<SelectValue placeholder="Select candidate" />');
+    expect(src).not.toContain('placeholder={candidates.length === 0 ? "No candidates yet" : "Select candidate"}');
+    expect(src).not.toContain("Add candidates in Recruitment first");
+    // the AI Analysis card itself stays (the r48-C1 documented superset —
+    // REF's own analyze is a no-op)
+    expect(src).toContain("AI Analysis");
+  });
+
+  it("R61-M: the hrassistant zero-message pane renders nothing (the sparkles retired)", () => {
+    const src = pg("hrassistant");
+    expect(src).not.toContain("<Sparkles className=\"mb-3 h-8 w-8 text-slate-300\" aria-hidden=\"true\" />");
+  });
+
+  it("R61-N: the hrassistantchat No-chats line — slate-500 + p-4 text-center (unflipping)", () => {
+    const src = pg("hrassistantchat");
+    expect(src).toContain('<p className="text-sm text-slate-500 p-4 text-center">No chats</p>');
+    expect(src).not.toContain('<p className="text-sm text-muted-foreground">No chats</p>');
+  });
+
+  it("R61-O: the profile kicker subtitle renders slate-400 (REF's per-page variance)", () => {
+    const src = pg("profile");
+    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-400"');
+    const ph = soft(() => read("src", "components", "shared", "page-header.tsx"));
+    expect(ph).toContain("mobileKickerSubtitleClassName");
+    expect(ph).toContain('mobileKickerSubtitle ? <p className={cn("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName)}>');
+  });
+
+  it("R61-P: the surveyanalytics legend — Responses blue-500 + the Avg Sentiment % name", () => {
+    const src = soft(() => read("src", "app", "(app)", "surveyanalytics", "charts.tsx"));
+    expect(src).toContain('name="Responses" fill="#3b82f6"');
+    expect(src).toContain('name="Avg Sentiment %" fill="#10b981"');
+    expect(src).not.toContain('name="Avg sentiment" fill="#10b981"');
+    expect(src).not.toContain('fill="#2563eb"');
+  });
+
+  it("R61-Q: the analytics chart renders NO legend (REF ships none)", () => {
+    const src = soft(() => read("src", "app", "(app)", "analytics", "charts.tsx"));
+    expect(src).not.toContain("<Legend />");
+  });
+
+  it("R61-R: the advancedanalytics chart renders NO legend (REF ships none)", () => {
+    const src = soft(() => read("src", "app", "(app)", "advancedanalytics", "charts.tsx"));
+    expect(src).not.toContain("<Legend />");
+  });
+
+  it("R61-S: the workflowautomation header icon is Zap (not Sparkles)", () => {
+    const src = pg("workflowautomation");
+    expect(src).toContain("sectionIcon={<Zap aria-hidden=\"true\" />}");
+    expect(src).not.toContain("sectionIcon={<Sparkles aria-hidden=\"true\" />}");
+  });
+
+  it("R61-T: the compliance header icon is Shield (not ShieldCheck)", () => {
+    const src = pg("compliancedashboard");
+    expect(src).toContain("sectionIcon={<Shield aria-hidden=\"true\" />}");
+    expect(src).not.toContain("sectionIcon={<ShieldCheck aria-hidden=\"true\" />}");
+  });
+
+  it("R61-U: the performancemanagement stat icons — CircleCheckBig/CircleAlert/Award", () => {
+    const src = pg("performancemanagement");
+    expect(src).toContain("<CircleCheckBig className=\"w-10 h-10 text-green-500\" aria-hidden=\"true\" />");
+    expect(src).toContain("<CircleAlert className=\"w-10 h-10 text-orange-500\" aria-hidden=\"true\" />");
+    expect(src).toContain("<Award className=\"w-10 h-10 text-purple-500\" aria-hidden=\"true\" />");
+    expect(src.match(/<Target className="w-10 h-10/g)?.length).toBe(1);
+  });
+
+  it("R61-W: the attendance restricted card's ShieldAlert is red-500 (not red-600)", () => {
+    const src = pg("attendance");
+    expect(src).toContain("<ShieldAlert className=\"h-8 w-8 text-red-500\" aria-hidden=\"true\" />");
+    expect(src).not.toContain("<ShieldAlert className=\"h-8 w-8 text-red-600\" aria-hidden=\"true\" />");
+  });
+});
+
+describe("Dark-mode text-color family (session 61 addendum — the requestreports th)", () => {
+  it("R61-X: the requestreports header row carries REF's tr members (border-b text-left text-slate-500 — unflipping)", () => {
+    const src = soft(() => read("src", "app", "(app)", "requestreports", "page.tsx"));
+    expect(src).toContain('<tr className="border-b text-left text-slate-500">');
+    // the th family stays the bare r48 form
+    expect(src).toContain('<th className="pb-2 pr-4">Ref #</th>');
+    expect(src).toContain('<th className="pb-2">Date</th>');
   });
 });

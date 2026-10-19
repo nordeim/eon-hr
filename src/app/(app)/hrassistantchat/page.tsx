@@ -193,8 +193,12 @@ export default function HrAssistantChatPage() {
                 </div>
               ) : chats.length === 0 ? (
                 /* REF: a single muted 14px line in the list flow (y=302) —
-                   no icon, no centered empty-state block */
-                <p className="text-sm text-muted-foreground">No chats</p>
+                   no icon, no centered empty-state block.
+                   Session 61 (R61-N): the line carries REF's exact
+                   recipe — text-slate-500 (unflipping, rgb(100,116,139)
+                   both themes) + p-4 text-center members (live-measured
+                   class capture). */
+                <p className="text-sm text-slate-500 p-4 text-center">No chats</p>
               ) : (
                   <div className="flex flex-col gap-1">
                     {chats.map((c) => (
