@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.43.0 (session-60 remediation complete — the dark-mode fill family: the checkbox's both-theme pair + the 16px glyph, the employees GRID default (the set-comparison blind spot), REF's inline 12-field settings Company edit form, the compliance severity tints, the blue-600 text split, and the payrollengine's flat emerald (the gradient-over-color P1 bug a backgroundImage census catches)) · **Last updated:** 2026-10-19
-> **State:** 834 unit + 297 E2E tests green, lint/typecheck/build
+> **Version:** 3.44.0 (session-61 remediation complete — the dark-mode text-color family: the four+one palette pins, the authored-slate-400 search icons, the compliance severity chips (per-severity borders + colored DIV values, both themes), the at-risk green-400 empty state, the evaluations per-tile colors + the lost r11 mt-6, the securitysettings Shield glyphs, the chat h2 + bare wrapper, the payrollai CardHeader stack, the chart-legend order/removals, and the requestreports tr members (the post-fix census's own catch)) · **Last updated:** 2026-10-19
+> **State:** 858 unit + 314 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3834,3 +3834,70 @@ client-rendered surfaces (the 404); settle the 150ms
 transition-colors before color reads (mid-flight blends like
 rgb(60,60,60)); and the sweep needs the non-cascade FK walk (a
 stray's NotificationPreference P2003s the bare user delete).
+
+## §71 Session 61 (parity round 60) — the dark-mode text-color family
+
+**The census**: the computed `color` of every text-bearing NON-button
+element (h1–h6, text leaves, non-button icons) + ::placeholder
+colors, all 49 routes paired live in dark — the recorded r59/r60
+blind spot ("the prior censuses never read button TEXT colors")
+extended past buttons. Pre-fix **23/49**, post-fix **40/49** (nine
+documented DIFFs). Comparison: the deduped (tag|color) set —
+text-agnostic against the seeded-LOC vs zero-data-REF populations;
+every DIFF decomposed element-level with classes + both-theme
+verification.
+
+**The hard-won recipes this round**:
+
+- **The unpinned-shade discipline is per-CONSUMER, not per-round**:
+  pinning orange-500/700/900 + purple-500 (the lab() serializations)
+  wasn't the end — R61-D's fix made green-400 active on the clone and
+  its OWN drift appeared. When a fix introduces a new shade consumer,
+  verify its computed value the same run.
+- **The compliance severity chips are NOT the mini-centered recipe**:
+  REF (both themes) renders per-severity card borders
+  (`border-{red,orange,yellow,blue}-200`) + DIV values (`text-3xl
+  font-bold mb-1 text-*-700`, unflipping) + DIV labels (`text-xs
+  text-slate-500`). The hrreports/npref mini-centered cards render P
+  values — two different REF recipes that a shared component had
+  converged. Per-page recipes must be measured per page.
+- **REF authors slate-400 where intuition reaches for the token**: the
+  search/filter icons carry literal `text-slate-400` (unflipping,
+  rgb(148,163,184) both themes) — the clone's muted-foreground token
+  renders slate-500 in light and neutral-400 in dark. The same family:
+  the chat h2 (slate-900, unflipping), the No-chats line
+  (slate-500 + p-4 text-center), the requestreports tr (`border-b
+  text-left text-slate-500` — the ths inherit it), the profile kicker
+  subtitle (slate-400 — a per-page variance).
+- **Recharts 3's legend order ignores both the Bar mount order and the
+  YAxis declaration order** (measured both) — and the `payload` prop
+  is omitted from the recharts-3 public types (a TS build error, not a
+  runtime one). The deterministic path: `<Legend content={(props) =>
+  <DefaultLegendContent {...props} payload={reordered} />} />`.
+- **A recipe comment without the recipe is a regression signal**: the
+  r11 "base mt-2 overridden to mt-6 per trap 4" comment survived in
+  the evaluations source while the mt-6 member itself had gone missing
+  — everything below the tab strip sat 16px high for who knows how
+  many rounds. Pin the member, not the comment.
+- **The asChild icon escapes the button filters**: the profile's
+  kicker back-arrow renders via `asChild` as an `<a>` —
+  `closest('button')` doesn't exclude it, and at w:0 (hidden at
+  desktop) it still reads a computed color. Census reads need the
+  r60 w:0 filter, not just the button filter.
+
+**The purge P2003 chain (test infra)**: a leaked fixture row made
+every subsequent global-setup purge DIE SILENTLY at the employee
+sweep (the global-setup swallows purge errors as non-fatal) — the
+stale rows then poisoned `findFirst`-based assertions in later runs.
+A purge must walk the FKs first (fixtures → employees → the
+non-cascade user dependents), and a silently-failing sweep is worse
+than no sweep.
+
+**The r61 instrument lessons**: the manual-:3100-server trap (the
+in-memory login rate limiter — LIMIT 10/15min per-IP "local" —
+accumulated across debug logins + reused-port playwright runs →
+mid-suite 403 lockouts; always kill manual servers before
+`test:e2e`); REF's transient refresh-cw (a blue-600 loading icon that
+appears only mid-fetch, y:-52 — settled re-reads don't show it);
+lucide-react's Filter renders class `lucide-funnel` (the
+library-version family — target `class*="funnel"` in the E2E).

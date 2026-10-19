@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 834 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 297 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 858 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 314 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3837,3 +3837,90 @@ re-learned); (4) the exported-`DATABASE_URL` trap re-fires per
 tool-call (the shell is not persistent for unsets) — prefix every
 db-touching command with `unset DATABASE_URL` or
 `env -u DATABASE_URL`.
+
+## Session 61 (parity round 60) — the dark-mode text-color family
+
+Workspace continued from `3417545`. Baseline gates ALL GREEN (834/834
+unit · 297/297 E2E). Deploy watch BOTH SIDES QUIET
+(`CpCk8Zmk`/`A8a43VEI` + `C-IrDy5f`/`BGNH4KkS`); the confirmation
+ladder green (standing 5/5 + sweep 12/12 + verify-r49 13/13 +
+verify-r45 13/13).
+
+**The census (`scripts/r61-textcolor-census.mjs`, 49 routes, paired
+live, DARK): the computed `color` of every text-bearing NON-button
+element (h1–h6, text leaves, non-button icons) + ::placeholder
+colors — the recorded r59/r60 blind spot closed. Comparison: the
+deduped (tag|color) set, text-agnostic; every DIFF decomposed
+element-level (7 probes). Pre-fix 23/49, post-fix 40/49** (nine
+documented DIFFs: the profile role badge + a hidden-kicker-icon
+census artifact, the interviewassistant r48-C1 superset card, four
+data-driven leaves, the onboardingtemplates 404 icon, the attendance
+admin superset).
+
+- **R61-A**: the four unpinned shades pinned (orange-500/700/900,
+  purple-500 — the lab() serializations) + green-400 (the fix's own
+  new consumer).
+- **R61-B/V**: the seven search/filter icons — REF authors
+  `text-slate-400` unflipping; the clone rode the flipping
+  muted-foreground token (payroll, chat ×2, documenttracker,
+  assetmanagement, recruitmentkanban, recruitment + Users→Filter).
+- **R61-C**: the compliance severity chips hand-rolled — per-severity
+  card borders + DIV values (text-3xl font-bold mb-1 text-*-700,
+  unflipping, both themes) + DIV labels (text-xs text-slate-500);
+  NOT the mini-centered StatCard (which stays for hrreports/npref —
+  REF renders P values there, a different recipe).
+- **R61-D/E/F/G**: the at-risk TriangleAlert + the 48px green-400
+  empty state; the evaluations per-tile value colors (the StatCard
+  span honors valueClassName) + the lost r11 mt-6 restored (the
+  tab→stats gap REF 24px vs clone 8px); the securitysettings blue
+  Shield glyphs (the r48-C2 check was a feature-row generalization).
+- **R61-H..K**: the chat h2 slate-900 + the BARE search wrapper (the
+  px-4 pb-4 centered the icon 8px low); the payroll DollarSign empty
+  icon; the payrollai CardHeader + p-6/py-12 stack.
+- **R61-L..O**: the interviewassistant standard placeholder + the
+  hint retired (the AI Analysis card stays — the r48-C1 superset);
+  the hrassistant empty pane renders NOTHING (r47-E5 superseded);
+  the No-chats `text-sm text-slate-500 p-4 text-center`; the profile
+  kicker slate-400 (the `mobileKickerSubtitleClassName` escape hatch).
+- **R61-P/Q/R**: the surveyanalytics legend — Responses blue-500 +
+  "Avg Sentiment %" + the DOM order via the DefaultLegendContent
+  reorder (**recharts 3's auto order ignores both the Bar mount
+  order and the YAxis declaration order**); the analytics +
+  advancedanalytics Legends removed (REF ships none).
+- **R61-S/T/U/W/X**: the icon shapes (Zap, Shield, CircleCheckBig/
+  CircleAlert/Award) + the attendance red-500 + the requestreports
+  tr members (`border-b text-left text-slate-500` — the post-fix
+  census's own catch: decomposed in probe2 but dropped from the
+  first plan draft, re-found by the re-run).
+- **The purge FK-walk fix**: a leaked R58-22 fixture row made every
+  subsequent global-setup purge DIE SILENTLY at the employee sweep
+  (P2003, swallowed as non-fatal) — the stale rows then poisoned
+  `findFirst`-based assertions. The purge walks the FKs first now
+  (fixtures → employees → the non-cascade user dependents).
+
+**Pinned**: 24 unit (RED-first; the R22-D/R30-B1/R35-C2/R48-C2/
+R48-C6/R17-B legacy pins amended to the re-measured truths) + 18 E2E
+(`tests/e2e/session61-textcolor.spec.ts` — computed truth, both
+themes). Gates: lint 0/0 · tsc ✓ · **858/858 unit** (+24) · build ✓ ·
+**314/314 E2E** (+18, no flakes — the session-58 switch/checkbox
+flake fired once mid-verification, 11/11 in isolation) · post-fix
+census 40/49 · DB pristine 1/1/2.
+
+## Session 61 instrument lessons (the text-color census, carry-forward)
+
+**The r61 lessons**: (1) **the manual-:3100-server trap** — an
+in-memory login rate limiter (LIMIT 10/15min, per-IP "local" for
+every test) accumulated across debug logins + reused-port playwright
+runs → mid-suite 403 lockouts; always kill manual servers before
+`test:e2e` (playwright reuses an occupied port); (2) **a silently
+failing purge is worse than no purge** — the leftovers compound and
+poison `findFirst` assertions; walk the FKs first; (3) **the
+text-color census needs the w:0 filter** — hidden kicker/sr-only
+svgs pollute the tag|color sets (the profile's back-icon renders via
+`asChild` as an `<a>`, so `closest('button')` doesn't exclude it);
+(4) **REF's transient refresh-cw**: a blue-600 loading icon appears
+only mid-fetch (y:-52) — settled re-reads don't show it; (5) the
+recharts-3 legend order ignores both the Bar mount and YAxis
+declaration orders — the DefaultLegendContent reorder is the
+deterministic path (the `payload` prop is omitted from the
+recharts-3 public types).
