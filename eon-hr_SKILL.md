@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.44.0 (session-61 remediation complete — the dark-mode text-color family: the four+one palette pins, the authored-slate-400 search icons, the compliance severity chips (per-severity borders + colored DIV values, both themes), the at-risk green-400 empty state, the evaluations per-tile colors + the lost r11 mt-6, the securitysettings Shield glyphs, the chat h2 + bare wrapper, the payrollai CardHeader stack, the chart-legend order/removals, and the requestreports tr members (the post-fix census's own catch)) · **Last updated:** 2026-10-19
-> **State:** 858 unit + 314 E2E tests green, lint/typecheck/build
+> **Version:** 3.45.0 (session-62 remediation complete — the dark-mode border-color family: the Customize token flip (the frozen session-3 literal retired), the checkbox border literal pair (the both-theme bug on the wrong token), the four palette pins (green-200/amber-200/cyan-300/cyan-50), the unflipping border-slate-200 card family (nine cards across seven routes + the loans/offboarding empty-state rewrites), the attendance per-color action buttons + the 3-level Report-Type card + the stat hover members, the per-stage kanban columns, the calendar ths + the weekend variant, the per-page thead recipes, the profile badge DIV, the two-level severity cards, and the textarea resize-none) · **Last updated:** 2026-10-19
+> **State:** 873 unit + 327 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3901,3 +3901,77 @@ mid-suite 403 lockouts; always kill manual servers before
 appears only mid-fetch, y:-52 — settled re-reads don't show it);
 lucide-react's Filter renders class `lucide-funnel` (the
 library-version family — target `class*="funnel"` in the E2E).
+
+## §72 Session 62 (parity round 61) — the dark-mode border-color family
+
+**The frontier**: the prior censuses covered fills (r57 CTAs light,
+r58 badges light, r59 union dark) and text colors (r60/r61 non-button
+text dark) — **borders were never censused**. The r62 census
+(`scripts/r62-border-census.mjs`, 49 routes, paired live, DARK, three
+batches) read the computed `border-color` of every visibly-bordered
+element in `main`, buttons INCLUDED (button borders were never read
+by any prior census). Pre-fix 29/49 → post-fix **44/49** (five
+documented DIFFs: the employees seeded leaves, the attendance admin
+superset, the interviewassistant r48-C1 superset card, the
+onboardingtemplates 404 `<a>` superset, REF's live careers data).
+
+**The families** (all live-measured, element-level decomposed via
+`scripts/r62-probe.mjs` + `r62-probe-cmp.mjs`):
+
+1. **The frozen light-mode literal** — the dashboard Customize button
+   pinned `border-[#e5e5e5]` (a session-3 light measurement); REF's
+   button rides the flipping `border-input` token. Light identical,
+   dark divergent — the literal retired, the token supplies both.
+   Audit for this family: grep authored `border-[#` literals in page
+   code; any that match a token's LIGHT value are frozen pins.
+2. **The wrong token on a shared component** — the Checkbox borders
+   rode `border-primary`, but the clone's `--primary` is the nav-blue
+   repurposing (#1877f2 both themes); REF's checkbox border rides
+   REF's own flipping `--primary` (#171717 light / #fafafa dark). A
+   BOTH-theme divergence invisible to every fill/text census — fixed
+   with the literal pair (the established fill-literal pattern in the
+   same file: `border-[#171717] dark:border-[#fafafa]`).
+3. **The trap-2 drift on border shades** — `border-green-200` rendered
+   `lab(92.42% -26.47 12.94)` on the clone vs REF's pinned
+   `rgb(187,247,208)` (#bbf7d0). New pins: green-200, amber-200,
+   cyan-300, cyan-50 (the v3 sRGB hexes).
+4. **The unflipping border-slate-200 card family** — REF's page cards
+   carry an explicit `border-slate-200` (they stay LIGHT-bordered in
+   dark mode); the clone's cards rode the flipping `border` token
+   (dark #262626). Nine cards across seven routes + the
+   loans/offboarding empty-state rewrites to REF's live recipe.
+5. **REF's borders live on different elements per family** — page
+   cards (the card), assetmanagement/payrollmodule tables (the header
+   ROW: `border-b border-slate-200 bg-slate-50`), recruitment's table
+   (the THEAD itself — the shared TableHeader's `[&_tr]:border-b`
+   neutralized there), the shiftcalendar (the th: `border-b
+   border-slate-200 bg-white` + the weekend `bg-slate-50
+   text-slate-400`). Never generalize one measured site to a shared
+   component.
+6. **The per-color action buttons** — REF's attendance trio carries
+   explicit outline borders (Devices cyan-300 + hover:bg-cyan-50,
+   Settings slate-300 + hover:bg-accent, Dashboard blue-300 +
+   hover:bg-blue-50).
+7. **The per-stage kanban columns** — the session-11 pin had
+   generalized the Applied column's slate to all five (the r59
+   single-measure blind spot again); REF's columns are per-stage
+   (slate/blue/amber/green/red) inside `flex-shrink-0 w-64` wrappers
+   (`p-3 min-h-[400px]` on the column div).
+
+**The muted-foreground mapping note** (documented, no fix): REF's
+`--muted-foreground` = neutral-500 (#737373) light / #a3a3a3 dark,
+but REF AUTHORS `text-slate-500` (#64748b) on its subtitles; the
+clone's token pins #64748b (subtitle parity) and its tabs/select
+carry the neutral-500/400 literals (tab parity) — computed parity on
+every censused dimension. A token-level re-map would ripple through
+all 49 routes' text surfaces: a future round's scope, not a patch.
+
+**The r62 instrument lessons**: the rect-visibility filter for border
+reads (zero-content dividers render 1px+ rects — filter by
+`rect.width === 0 && rect.height === 0` only, never by text content);
+the truncated class-string trap (tw-merge reorders members — compare
+SORTED member SETS, `[...el.classList].sort()`, before declaring a
+member missing; the "missing min-h-[60px]" was a false positive);
+both-theme bugs hide from single-theme censuses (the checkbox border
+diverged in LIGHT too); census batches must save DIFF dumps to files
+(a mid-batch tool timeout otherwise loses the batch).

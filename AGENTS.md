@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 858 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 314 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 873 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 327 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -3924,3 +3924,118 @@ recharts-3 legend order ignores both the Bar mount and YAxis
 declaration orders — the DefaultLegendContent reorder is the
 deterministic path (the `payload` prop is omitted from the
 recharts-3 public types).
+
+## Session 62 (parity round 61) — the dark-mode border-color family
+
+Workspace re-cloned from `4cd0aa4` (the round-60 landing + the
+session_126 narrative; the sandbox reset wiped the local artifacts —
+the environment + the census instrument rebuilt per protocol).
+Baseline gates ALL GREEN (858/858 unit · 314/314 E2E). Deploy watch:
+**the 25th login deploy detected** (login JS `Bt_cFPps`→`Doo5f9jm` +
+a new `frontend-config` chunk; login CSS + the app side quiet) —
+re-audited NON-VISUAL via the full ladder (standing 5/5 + sweep
+12/12 + verify-r49 13/13 + **verify-r45 13/13**).
+
+**The census (`scripts/r62-border-census.mjs`, 49 routes, paired
+live, DARK, three batches): the computed `border-color` of every
+visibly-bordered element in `main` (all four sides, width>0 +
+style!=none, transparent sides skipped, buttons INCLUDED — button
+borders were never read by any prior census) — the recorded r60/r61
+blind spot closed. Comparison: the deduped (tag|color) set; every
+DIFF decomposed element-level (`scripts/r62-probe.mjs` +
+`r62-probe-cmp.mjs`, the symmetric class-set diff). Pre-fix 29/49,
+post-fix 44/49** (five documented DIFFs: the employees seeded leaves,
+the attendance admin superset, the interviewassistant r48-C1
+superset card, the onboardingtemplates 404 `<a>` superset, REF's
+live careers data).
+
+- **R62-A**: the dashboard Customize button's frozen session-3
+  literal (`border-[#e5e5e5]`, a light-mode measurement) retired —
+  the outline variant's `border-input` token supplies the identical
+  light pair + REF's measured dark flip (#262626).
+- **R62-B**: the Checkbox border rode `border-primary` — but the
+  clone's `--primary` is the documented nav-blue repurposing
+  (#1877f2 both themes) while REF's checkbox border rides REF's own
+  FLIPPING `--primary` (**#171717 light / #fafafa dark, both
+  live-measured) — a BOTH-theme divergence no fill/text census could
+  see. Fixed with the literal pair (the established fill-literal
+  pattern in the same file).
+- **R62-C**: four new @theme pins — green-200 #bbf7d0 (the
+  securitysettings lab(92.42% -26.47 12.94) drift, live-measured) +
+  amber-200 #fde68a + cyan-300 #67e8f9 + cyan-50 #ecfeff (the new
+  E/F consumers).
+- **R62-D**: the border-slate-200 card family — REF's page cards
+  stay LIGHT-bordered in dark (unflipping); nine cards across seven
+  routes + the loans/offboarding empty-state rewrites to REF's live
+  recipe (text-card-foreground shadow col-span-full, wrapper `grid
+  gap-6 md:grid-cols-1 lg:grid-cols-2`) + the compliance At-Risk
+  overflow-hidden + the attendance Report-Type card to REF's 3-level
+  shape (Card > p-4 > `flex gap-4 items-center`) + the attendance
+  stat cards' `hover:shadow-lg transition-shadow`.
+- **R62-E**: the attendance action-button trio — Devices
+  `border-cyan-300 hover:bg-cyan-50`, Settings `border-slate-300
+  hover:bg-accent`, Dashboard `border-blue-300 hover:bg-blue-50`
+  (per-color outline borders, member-set measured live).
+- **R62-F**: the recruitmentkanban columns are PER-STAGE (slate/
+  blue/amber/green/red border-2 + bg pairs inside `flex-shrink-0
+  w-64` wrappers, p-3 + min-h-[400px]) — the session-11 pin had
+  generalized the Applied column's slate to all five (the r59
+  single-measure blind spot again).
+- **R62-G**: the shiftcalendar ths carry `border-b border-slate-200
+  bg-white` + the weekend variant (bg-slate-50 text-slate-400).
+- **R62-H**: REF's thead recipes vary per page —
+  assetmanagement/payrollmodule put `border-b border-slate-200
+  bg-slate-50` on the header ROW; recruitment puts the border on the
+  THEAD itself (the shared TableHeader's `[&_tr]:border-b`
+  neutralized there via `[&_tr]:border-0`).
+- **R62-I**: the profile role badge is a DIV (the census reads
+  tag|color sets — the clone's span diverged; shrink-0 retired, the
+  "Admin" text stays the documented data allowance).
+- **R62-J**: the compliance severity cards restructured to REF's
+  two-level shape (the border on the card, `p-4 text-center` on the
+  inner wrapper — was flattened).
+- **R62-K**: the shared Textarea base + `resize-none` (REF measured
+  2/2: companywall + interviewassistant).
+
+**The muted-foreground mapping note** (documented, no fix): REF's
+`--muted-foreground` = neutral-500 (#737373) light / #a3a3a3 dark,
+but REF AUTHORS `text-slate-500` (#64748b) on its subtitles; the
+clone's token pins #64748b (subtitle parity) and its tabs/select
+carry the neutral-500/400 literals (tab parity) — computed parity
+on every censused dimension; a token-level re-map would ripple
+through all 49 routes' text surfaces (a future round's scope).
+
+**Pinned**: 15 unit (RED-first; the R48-C2b/R59-B/R39-E1 legacy pins
+amended to the re-measured truths) + 14 E2E
+(`tests/e2e/session62-border-colors.spec.ts` — computed border
+truth, both themes where applicable; the session-49 R48-C2 spec
+amended). Gates: lint 0/0 · tsc ✓ · **873/873 unit** (+15) ·
+build ✓ · **327/327 E2E** (+14, the session-58 switch/checkbox
+documented flake fired once mid-verification, 5/5 in isolation) ·
+post-fix census 44/49 · DB pristine 1/1/2 (the loading-probe user
+swept).
+
+## Session 62 instrument lessons (the border-color census, carry-forward)
+
+**The r62 lessons**: (1) **the rect-visibility filter for border
+reads** — an element can carry a visible border with zero content
+(height 0 + border-b renders 1px+ in the rect); filter by
+`rect.width === 0 && rect.height === 0` only, never by text content
+(the r61 w:0 lesson applied to borders); (2) **the truncated
+class-string trap** — tw-merge reorders members, so a 170-char
+prefix comparison produces false member-diffs; compare SORTED
+member SETS (`[...el.classList].sort()`) before declaring a member
+missing (the companywall textarea "missing min-h-[60px]" was a
+false positive — the member sat past the cut); (3) **the
+frozen-literal family** — light-mode measurements pinned as hex
+literals (#e5e5e5) don't flip; a token that matches in light can
+hide a dark divergence for months (audited: this was the only
+authored border literal); (4) **REF's borders live on three
+different elements per recipe family** — page cards (the card),
+tables (the row on assetmanagement/payrollmodule, the thead on
+recruitment), calendars (the th) — never generalize one measured
+site to a shared component; (5) **the both-theme bugs hide from
+single-theme censuses** — the checkbox border diverged in LIGHT
+too (#171717 vs #1877f2) but every prior census read fills/text,
+never borders; (6) the census batches must save DIFF dumps to
+files — a mid-batch tool timeout otherwise loses the batch.
