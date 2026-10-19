@@ -166,4 +166,36 @@ confirmation ladder re-run → DB pristine check → screenshots → docs.
 
 ## Completion record (filled at landing)
 
-- [ ] (to be filled after the round lands)
+- [x] The census re-run: **47/49 route badge fills MATCH** post-fix
+      (was 44/49) — the two remaining DIFFs are the documented
+      allowances (R59-C the profile role text; the with-data
+      /employees surface — REF-unmeasurable, REF's own wizard create
+      is a silent no-op live).
+- [x] The kanban boards: both chip families carry REF's per-status
+      tints (computed truth byte-identical; the census reads 5/5 chips
+      MATCH on both boards).
+- [x] The trap-2 sweep: sixteen palette pins landed in `@theme`; the
+      census's `lab()` serializations are gone — the employees Active
+      badge now reads `rgb(209,250,229)/rgb(4,120,87)`, the probe
+      palette renders rgb() across the board (the E2E R59-D pin).
+- [x] The "false DIFF" (R59-E) decomposed into the content-wait lesson
+      AND a real structural gap: REF's Enabled badge carries the
+      CircleCheckBig glyph + the shadow/hover/border-green-200 members
+      (92px vs 76px) — fixed with the byte-faithful authoring; the
+      census now reads securitysettings MATCH (both sides' Enabled
+      forms are icon-bearing, and the census leaf filter skips both
+      equally — the E2E pin holds the full contract).
+- [x] The E2E spec: `tests/e2e/session59-badge-fills.spec.ts` — 6
+      chromium specs, all green on the final code (the ten chip fills,
+      the palette rgb() renders vs lab(), the seeded Active badge's
+      emerald pair, the five securitysettings badges with the icon +
+      92px geometry + the content-wait pattern).
+- [x] Gates: lint 0/0 · tsc ✓ · **828/828 unit** (+5, RED-first) ·
+      build ✓ · **291/291 E2E** (+6, no flakes — the session-58
+      full-suite flake did not recur this window) · confirmation
+      ladder green (standing 5/5 + sweep 12/12 + verify-r49 13/13 +
+      verify-r45 13/13) · the 23rd login deploy re-audited non-visual
+      (login JS `CpCk8Zmk` / CSS `A8a43VEI`).
+- [x] DB pristine: 1/1/2 after the loading-probe sweep; 448
+      screenshot files (+8: the 265-267 pairs + the 268/269 LOC
+      evidence, all hash-verified distinct).

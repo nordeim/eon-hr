@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.41.0 (session-58 remediation complete — the CTA-fill recipe family: REF's five fill recipes carried (the DARK solid, the BLUE-600/INDIGO-600/TEAL-600 solids, the two one-off gradients), the P1 assets bg-none fix, the form-control checked fills pinned to the dark neutral, the employees toggle order re-measured, the profile DELETE walk's three missing non-cascade relations cleared, the posts multipart cap) · **Last updated:** 2026-10-19
-> **State:** 823 unit + 286 E2E tests green, lint/typecheck/build
+> **Version:** 3.42.0 (session-59 remediation complete — the badge/chip fill family: the status-tinted kanban count chips on both boards (REF tints every column/stage; the session-6 pin had generalized a single-column measurement), the securitysettings Enabled form with REF's CircleCheckBig glyph, and the sixteen trap-2 palette pins ending the oklch drift on every unpinned shade in active use) · **Last updated:** 2026-10-19
+> **State:** 828 unit + 291 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3708,3 +3708,71 @@ REF's indigo/teal solids); (4) `to right` vs `90deg` is
 Chromium's serialization equivalence, not a drift; (5) JSX
 attribute expressions take plain `/* */` comments — `{/* */}`
 inside `actions={…}` is a parse error.
+
+## §69 Session 59 (parity round 58) — the badge/chip fill family
+
+The r58 button census saw every primary action's fill; this round
+censused the layer it never read — **every NON-button leaf's computed
+fill** (status pills, count chips, table badges; all 49 routes,
+paired live, `scripts/r59-badge-census.mjs`). Pre-fix 44/49, post-fix
+47/49 (the two documented allowances: the profile role text, the
+with-data employees surface).
+
+**R59-A — the taskmanager count chips are STATUS-TINTED per column**:
+Backlog `bg-slate-100 text-slate-700`, To Do `bg-blue-100
+text-blue-700`, In Progress `bg-yellow-100 text-yellow-700`, Review
+`bg-purple-100 text-purple-700`, Done `bg-green-100 text-green-700`
+(+ REF's transition/focus members). The clone had the uniform slate
+— the session-6 pin measured only Backlog and generalized it: the
+census blind-spot pattern again (single-column measurement ≠ the
+family).
+
+**R59-B — the recruitmentkanban stage chips**: Applied `bg-slate-200`,
+Interviewing `bg-blue-100`, Offer `bg-amber-100` (REF keeps TWO
+warning shades across its own pages — amber here, yellow on the
+taskmanager; carry both, do not normalize), Hired `bg-green-100`,
+Rejected `bg-red-100`, all `text-*-700`. The class prefix was
+already byte-identical — only the tint members drifted.
+
+**R59-E — the securitysettings Enabled form**: REF's badge carries
+the **CircleCheckBig glyph** (`w-3 h-3 mr-1` — 92px vs the plain
+76px) + the `shadow hover:bg-primary/80 border-green-200` members;
+the Disabled form stays the plain slate. The census's "timing
+artifact" DIFF decomposed into the content-wait lesson AND this real
+16px structural gap — triage an artifact before dismissing it.
+
+**R59-D — the trap-2 palette sweep**: the census's `lab()`
+serializations exposed the oklch drift on every UNPINNED shade in
+active use. Sixteen pins landed (yellow-100/600/700,
+amber-100/400/600/700, red-100, purple-100/700, emerald-100/700,
+violet-100/700, pink-600 — the v3 hexes, byte-identical to the
+REF-measured rgb() truths). The sweep method: `grep` the used
+shades per family across `src/` minus the `@theme` pin inventory —
+the gap list IS the pin list.
+
+**R59-C — the documented allowance**: the profile role badge recipe
+matches byte-for-byte; the TEXT reads "Admin" (the seed's role —
+load-bearing for the requireRole superset gates and the admin-gated
+E2E round-trips) vs REF's "User". Do NOT flip the seed role to
+chase one badge's text.
+
+**The with-data frontier re-verified**: REF's own Create Employee
+wizard is a silent no-op live (4 steps → Create → no row, no toast)
+— the employees-table surfaces stay REF-unmeasurable; the clone's
+working wizard remains the documented superset.
+
+**The pins**: 5 unit (RED-first) + 6 E2E (computed truth). Gates:
+lint 0/0 · tsc ✓ · **828/828 unit** · build ✓ · **291/291 E2E** ·
+post-fix census **47/49** · DB pristine (1/1/2).
+
+**Instrument lessons**: (1) `agent-browser close --all` RESETS THE
+VIEWPORT — re-opened sessions default to 1280×577 and the verify
+scripts ride the ref session's existing viewport; always re-set
+1440×900 after any session reset (a fresh-opened ref produced a
+12/13 verify-r49 with pure viewport-artifact chart widths); (2)
+data-gated badge reads need CONTENT waits, not fixed milliseconds
+(the census missed REF's four Enabled badges at 400ms — the Loader2
+gate); (3) the census leaf filter (children.length > 0) hides
+icon-bearing badges — the census is the survey, the E2E pin (icon
+class + geometry) is the contract; (4) a "false DIFF" deserves one
+more look before writing it off.
