@@ -212,7 +212,11 @@ export default function ChatPage() {
               type="button"
               onClick={() => setPickerOpen(true)}
               aria-label="New conversation"
-              className="flex h-8 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white transition-colors hover:bg-blue-700 cursor-pointer"
+              /* Session 60 (R60-E): REF's new-chat button rides the
+                 primary-foreground token (light #fafafa / dark #171717
+                 — live-measured both themes), not the literal white the
+                 r16 authoring guessed. */
+              className="flex h-8 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
             >
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
             </button>

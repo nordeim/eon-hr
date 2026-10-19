@@ -54,6 +54,14 @@ const buttonVariants = cva(
         blue: "text-primary-foreground shadow bg-blue-600 hover:bg-blue-700",
         solidIndigo: "text-primary-foreground shadow bg-indigo-600 hover:bg-indigo-700",
         teal: "text-white shadow bg-teal-600 hover:bg-teal-700",
+        // Session 60 (R60-F): REF's payrollengine Generate Payroll —
+        // the FLAT emerald-600 solid (bg rgb(5,150,105), backgroundImage
+        // none, live-measured both themes). The old authoring passed
+        // className="bg-emerald-600 …" with the default variant: the
+        // arbitrary gradient image class survives tailwind-merge and
+        // PAINTS OVER the emerald color (a bg+bgImage census catches
+        // what a color-only census cannot).
+        emerald: "text-primary-foreground shadow bg-emerald-600 hover:bg-emerald-700",
         // R58-16: REF's REVERSED blue gradient — recruitment's Post New Job
         // is from-indigo-600 to-blue-600 (the endpoints swapped vs default).
         indigoBlue:

@@ -267,6 +267,9 @@ test.describe("employees CRUD (4-step wizard)", () => {
     await expect(wizard.getByRole("heading", { name: "Add New Employee" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Employees", exact: true })).toBeVisible();
 
+    // Session 60 (R60-B): the page boots GRID-active (REF's fresh
+    // default) — toggle to the list view for the table assertions below.
+    await page.getByRole("button", { name: "List view" }).click();
     // Appears in the directory (reference columns: Employee, Job Title,
     // Status, Start Date, Actions — no Employment column).
     await expect(page.getByText("e2e-temp@eon-hr.test")).toBeVisible();

@@ -180,8 +180,11 @@ export default function WorkflowConfigPage() {
         subtitle="Configure multi-level approval hierarchies for requests and expenses"
         actions={
           /* Session 58 (R58-10): REF's New Workflow is the SOLID
-             blue-600 — live-measured, the CTA-fill census. */
-          <Button variant="blue" onClick={() => setDialogOpen(true)}>
+             blue-600 — live-measured, the CTA-fill census. Session 60
+             (R60-E): REF authors text-white here (literal — 255,255,255
+             both themes, live-measured; the other blue sites keep the
+             flipping primary-foreground token). */
+          <Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Workflow
           </Button>
@@ -206,7 +209,7 @@ export default function WorkflowConfigPage() {
                 blue variant — the inline bg-blue-600 className hack
                 (which the gradient default painted over: background-image
                 wins over background-color) is retired. */}
-            <Button variant="blue" onClick={() => setDialogOpen(true)}>
+            <Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2" aria-hidden="true" />
               Create First Workflow
             </Button>

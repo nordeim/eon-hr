@@ -213,8 +213,10 @@ export default function NotificationPreferencesPage() {
           )}
           <div className="pt-2 flex justify-end">
             {/* Session 58 (R58-12): REF's Save Preferences is the SOLID
-                blue-600 — live-measured, the CTA-fill census. */}
-            <Button variant="blue" onClick={onSavePreferences} disabled={savingPrefs || prefs === null}>
+                blue-600 — live-measured, the CTA-fill census. Session 60
+                (R60-E): REF authors text-white here (literal, both
+                themes — the workflowconfig pair's treatment). */}
+            <Button variant="blue" className="text-white" onClick={onSavePreferences} disabled={savingPrefs || prefs === null}>
               {savingPrefs ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
               Save Preferences
             </Button>

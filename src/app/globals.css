@@ -245,6 +245,11 @@
   --color-purple-600: #9333ea;
   --color-orange-100: #ffedd5;
   --color-orange-600: #ea580c;
+  /* orange 200/50 (session 60, R60-D): the compliance notify buttons'
+     per-severity border + hover members — REF live-measured
+     text-orange-600 border-orange-200 hover:bg-orange-50 (trap 2). */
+  --color-orange-200: #fed7aa;
+  --color-orange-50: #fff7ed;
 
   --color-red-50: #fef2f2;
   --color-red-200: #fecaca;
@@ -283,10 +288,14 @@
 
   /* yellow 100/600/700 (session 59, R59-D): the taskmanager In-Progress
      chip (REF-measured rgb(254,249,195)/rgb(161,98,7)) + the analytics
-     icon colors (yellow-600, 10 sites). */
+     icon colors (yellow-600, 10 sites). yellow 200/50 (session 60,
+     R60-D): the compliance notify ≤ 30 days button's border + hover
+     members — REF live-measured (trap 2). */
   --color-yellow-100: #fef9c3;
   --color-yellow-600: #ca8a04;
   --color-yellow-700: #a16207;
+  --color-yellow-200: #fef08a;
+  --color-yellow-50: #fefce8;
 
   /* red-100 (session 59, R59-D): the Badge destructive variant —
      REF's recruitmentkanban Rejected chip measures rgb(254,226,226). */

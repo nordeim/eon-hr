@@ -119,6 +119,9 @@ test.describe("session-59 badge/chip fill family (computed truth)", () => {
 
   test("R59-D2: the employees table's Active badge renders the pinned emerald pair (the seeded row)", async ({ page }) => {
     await page.goto("/employees");
+    // session 60 (R60-B): the page boots GRID-active (REF's fresh
+    // default) — toggle to the list view before the table read
+    await page.getByRole("button", { name: "List view" }).click();
     // the seeded demo employee's row exists in the isolated e2e db
     const badge = page.locator("main tbody span", { hasText: "Active" }).first();
     await expect(badge).toBeVisible();

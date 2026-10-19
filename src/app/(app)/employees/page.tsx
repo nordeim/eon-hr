@@ -67,7 +67,14 @@ export default function EmployeesPage() {
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState("");
   const [status, setStatus] = React.useState("active");
-  const [view, setView] = React.useState<"list" | "grid">("list");
+  /* Session 60 (R60-B): REF's fresh-loaded /employees renders the GRID
+     toggle as the active-styled button (bg-primary, w=40) and LIST as
+     the outline (w=42) — live-measured on three fresh loads + a reload
+     test (click list → reload → grid-active again; nothing persists).
+     The r58-24 "byte-identical" claim was a set-comparison blind spot:
+     the same two fills sat on opposite buttons. The default view is
+     GRID; the list is one toggle away. */
+  const [view, setView] = React.useState<"list" | "grid">("grid");
 
   const [mode, setMode] = React.useState<"list" | "wizard">("list");
   const [editing, setEditing] = React.useState<EmployeeRow | null>(null);

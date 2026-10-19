@@ -102,24 +102,24 @@ test.describe("session-58 CTA-fill recipe family (computed truth)", () => {
           };
         });
       });
-    // list is the default active state: dark 40px, the outline grid 42px;
-    // REF renders LIST FIRST (left), GRID second — re-measured live (the
-    // session-14 "Grid first" order flipped in a deploy)
+    // session 60 (R60-B): REF boots GRID-active — the same two fills the
+    // r58 pin saw, on REF's buttons (the set-comparison blind spot
+    // closed): LIST is the outline (42px), GRID the primary (40px)
     let toggles = await readToggles();
     expect(toggles).toEqual([
-      { svg: "LIST", bg: DARK, h: 32, w: 40, fs: "12px" },
-      { svg: "GRID", bg: "rgb(255, 255, 255)", h: 32, w: 42, fs: "12px" },
+      { svg: "LIST", bg: "rgb(255, 255, 255)", h: 32, w: 42, fs: "12px" },
+      { svg: "GRID", bg: DARK, h: 32, w: 40, fs: "12px" },
     ]);
-    // the round-trip: grid becomes the active dark one (move the mouse
+    // the round-trip: list becomes the active one (move the mouse
     // away first — playwright's click parks it on the button and the
     // hover state serializes the /90 color-mix as lab()/oklab(), not rgb)
-    await page.getByRole("button", { name: "Grid view" }).click();
+    await page.getByRole("button", { name: "List view" }).click();
     await page.mouse.move(5, 5);
     await page.waitForTimeout(250);
     toggles = await readToggles();
     expect(toggles).toEqual([
-      { svg: "LIST", bg: "rgb(255, 255, 255)", h: 32, w: 42, fs: "12px" },
-      { svg: "GRID", bg: DARK, h: 32, w: 40, fs: "12px" },
+      { svg: "LIST", bg: DARK, h: 32, w: 40, fs: "12px" },
+      { svg: "GRID", bg: "rgb(255, 255, 255)", h: 32, w: 42, fs: "12px" },
     ]);
   });
 

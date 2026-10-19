@@ -191,10 +191,14 @@ export default function PayrollEnginePage() {
                 </SelectContent>
               </Select>
             </div>
+            {/* Session 60 (R60-F): the flat emerald solid via the
+                variant — the old className authoring layered the default
+                gradient OVER the emerald color (the image class survives
+                tailwind-merge; REF renders backgroundImage: none). */}
             <Button
+              variant="emerald"
               onClick={onGenerate}
               disabled={generating}
-              className="bg-emerald-600 text-primary-foreground shadow hover:bg-[#047857]"
             >
               {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Calculator className="mr-2" aria-hidden="true" />}
               Generate Payroll

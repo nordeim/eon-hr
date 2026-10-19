@@ -281,11 +281,22 @@ export default function ComplianceDashboardPage() {
                   {([7, 15, 30] as const).map((w) => (
                     /* Session 15 (R14-F): the reference renders the notify
                        buttons at the h-8 size (32px, px-3, text-xs — the
-                       size="sm" variant) with 16px mr-1 icons: 166/173/173. */
+                       size="sm" variant) with 16px mr-1 icons: 166/173/173.
+                       Session 60 (R60-D): REF carries per-severity tint
+                       members on the outline base — live-measured both
+                       themes (the tints do NOT flip in dark; only the
+                       outline bg does): ≤7 red, ≤15 orange, ≤30 yellow. */
                     <Button
                       key={w}
                       variant="outline"
                       size="sm"
+                      className={
+                        w === 7
+                          ? "text-red-600 border-red-200 hover:bg-red-50"
+                          : w === 15
+                          ? "text-orange-600 border-orange-200 hover:bg-orange-50"
+                          : "text-yellow-600 border-yellow-200 hover:bg-yellow-50"
+                      }
                       onClick={() => notifyWindow(w)}
                       disabled={notifying !== null}
                     >

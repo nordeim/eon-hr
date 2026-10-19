@@ -2799,8 +2799,13 @@ describe("session-33 dark theme + RTL + swipe-to-open recipes (parity round 32)"
   });
 
   it("R32-A9: the primary-foreground text surfaces stay readable in dark (the unmeasurable-surface superset)", () => {
-    const checkbox = read("src", "components", "ui", "checkbox.tsx");
-    expect(checkbox).toContain("dark:data-[state=checked]:text-white");
+    /* Session 60 amendment: the checkbox line moved to the r60 pin —
+       REF's dark checkbox is now MEASURED (bg #fafafa + the #171717
+       check via primary-foreground, the securitysettings rows render
+       five in dark), so the "unmeasurable superset" guess
+       (dark:text-white) is retired. The avatar + chat surfaces below
+       stay unmeasured in dark (REF's demo renders no avatars/dark chat
+       data) — their readable-superset members stay. */
     const avatar = read("src", "components", "ui", "avatar.tsx");
     expect(avatar).toContain("dark:text-white");
     for (const p of ["chat", "hrassistantchat"]) {
@@ -5437,7 +5442,11 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
     expect(cb).toContain("border border-primary shadow focus-visible:outline-none focus-visible:ring-1");
     expect(cb).not.toContain("data-[state=checked]:border-primary");
     expect(cb).not.toContain("cursor-pointer");
-    expect(cb).toContain("dark:data-[state=checked]:text-white");
+    /* Session 60 amendment: the dark:text-white member retired — REF's
+       dark checkbox is now MEASURED (the r60 census: bg #fafafa + the
+       #171717 check via primary-foreground); the r48 guess is superseded
+       by the R60-A pin. */
+    expect(cb).not.toContain("dark:data-[state=checked]:text-white");
   });
 
   it("R48-C3: payrollreports — the Radix-verbatim tabs (4 TabsContent panels + the old-shadcn trigger pass) + the BARE Monthly th family + the md:hidden mobile WhatsApp copy", () => {
@@ -6107,11 +6116,13 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
   it("R58-8..12: the BLUE-600 sites — staffrequests, documenttracker, workflowconfigpage x2, recruitmentkanban, notificationpreferences", () => {
     expect(staffPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
     expect(docPage()).toContain('<Button variant="blue" onClick={openNewDialog}>');
-    expect(wfPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
-    expect(wfPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
+    /* Session 60 (R60-E) amendment: the workflowconfig + notifprefs sites
+       carry REF's literal text-white (live-measured both themes); the
+       r58 authoring kept the variant's primary-foreground. */
+    expect(wfPage()).toContain('<Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>');
     expect(wfPage()).not.toContain('className="bg-blue-600 text-white hover:bg-blue-700"');
     expect(kanbanPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
-    expect(notifPage()).toContain('<Button variant="blue" onClick={onSavePreferences}');
+    expect(notifPage()).toContain('<Button variant="blue" className="text-white" onClick={onSavePreferences}');
   });
 
   it("R58-13..15: the INDIGO-600 and TEAL-600 sites", () => {
@@ -6251,5 +6262,149 @@ describe("Badge/chip fill family — part 2 (session 59, R59-E — the securitys
     // the Disabled form keeps the plain slate (no icon, no shadow)
     expect(src).toContain('focus:ring-offset-2 bg-slate-100 text-slate-700');
     expect(src).not.toContain('border-slate-200" : "inline-flex');
+  });
+});
+
+describe("Dark-mode fill family (session 60, R60-A..F — the dark-mode union census)", () => {
+  /* The r60 census (scripts/r60-darkfill-census.mjs, 49 routes, paired
+     live, DARK mode via the shared localStorage contract): the union
+     read — button fills (backgroundColor + backgroundImage) + the
+     non-button leaf fills. Pre-fix 39/49. Seven real findings: the
+     checkbox's dark pair + the both-themes 16px glyph, the employees
+     GRID default (the r58-24 set-comparison blind spot), the settings
+     Company inline 12-field edit form (REF's press behavior), the
+     compliance notify severity tints (both themes), the blue-600
+     text-color split (3 literal text-white sites + the chat token
+     flip), and the payrollengine's gradient-over-emerald P1 bug (a
+     bg+bgImage census catches what a color-only census cannot). The
+     404 Go Home false-DIFF (the client-rendered 404 needs content
+     waits) and the $Abcd1234 double-quote shell-expansion trap are
+     the round's instrument lessons. */
+
+  const checkboxUi = () => soft(() => read("src", "components", "ui", "checkbox.tsx"));
+  const employeesPageR60 = () => soft(() => read("src", "app", "(app)", "employees", "page.tsx"));
+  const compliancePage = () => soft(() => read("src", "app", "(app)", "compliancedashboard", "page.tsx"));
+  const buttonUiR60 = () => soft(() => read("src", "components", "ui", "button.tsx"));
+  const payrollenginePage = () => soft(() => read("src", "app", "(app)", "payrollengine", "page.tsx"));
+  const workflowconfigPage = () => soft(() => read("src", "app", "(app)", "workflowconfigpage", "page.tsx"));
+  const notifPrefsPage = () => soft(() => read("src", "app", "(app)", "notificationpreferences", "page.tsx"));
+  const chatPageR60 = () => soft(() => read("src", "app", "(app)", "chat", "page.tsx"));
+  const settingsPageR60 = () => soft(() => read("src", "app", "(app)", "settings", "page.tsx"));
+  const companyApiR60 = () => soft(() => read("src", "app", "api", "company", "route.ts"));
+  const globalsR60 = () => soft(() => read("src", "app", "globals.css"));
+
+  it("R60-A: the checkbox renders REF's both-theme pair + the 16px glyph (dark #fafafa fill, #171717 check, h-4 w-4)", () => {
+    const src = checkboxUi();
+    // REF's checked fill resolves bg-primary: light #171717, dark #fafafa
+    // (measured live on the securitysettings checkboxes, both themes) —
+    // the r58 switch pattern, applied to the checkbox
+    expect(src).toContain("data-[state=checked]:bg-[#171717] dark:data-[state=checked]:bg-[#fafafa]");
+    // the check color rides the primary-foreground token (light white,
+    // dark #171717 — REF's dark check measured rgb(23,23,23)); the
+    // invented dark:text-white member is retired
+    expect(src).toContain("data-[state=checked]:text-primary-foreground");
+    expect(src).not.toContain("dark:data-[state=checked]:text-white");
+    // REF authors the Check glyph at h-4 w-4 (16px, both themes — the
+    // r48 authoring's h-3 w-3 was never re-measured until the r60 census)
+    expect(src).toContain('<Check className="h-4 w-4" />');
+  });
+
+  it("R60-B: the employees page boots GRID-active (REF's non-persisted fresh default)", () => {
+    const src = employeesPageR60();
+    // REF's fresh-loaded /employees renders the GRID toggle as the
+    // active-styled button (bg-primary, w=40) and LIST as the outline
+    // (w=42) — measured on three fresh loads + a reload test (the
+    // state does not persist). The r58-24 "byte-identical" claim was a
+    // set-comparison blind spot: the same two fills sat on opposite
+    // buttons.
+    expect(src).toContain('React.useState<"list" | "grid">("grid")');
+  });
+
+  it("R60-D: the compliance notify buttons carry REF's per-severity tint members (both themes)", () => {
+    const src = compliancePage();
+    // REF (light + dark, live-measured): the three outline buttons carry
+    // text-*-600 + border-*-200 + hover:bg-*-50 per window; the tints
+    // do NOT flip in dark (only the outline bg does)
+    expect(src).toContain('? "text-red-600 border-red-200 hover:bg-red-50"');
+    expect(src).toContain('? "text-orange-600 border-orange-200 hover:bg-orange-50"');
+    expect(src).toContain(': "text-yellow-600 border-yellow-200 hover:bg-yellow-50"');
+    // the palette pins (the trap-2 discipline — every shade in active use)
+    const css = globalsR60();
+    expect(css).toContain("--color-orange-200: #fed7aa");
+    expect(css).toContain("--color-orange-50: #fff7ed");
+    expect(css).toContain("--color-yellow-200: #fef08a");
+    expect(css).toContain("--color-yellow-50: #fefce8");
+  });
+
+  it("R60-E: the blue-600 text split — 3 literal text-white sites + the chat token flip", () => {
+    // REF splits its blue-600 buttons: workflowconfigpage x2 +
+    // notificationpreferences carry literal text-white (255,255,255 both
+    // themes); recruitmentkanban/staffrequests/documenttracker keep the
+    // flipping text-primary-foreground; the chat new-chat (hand-authored)
+    // rides the token (250 light / 23 dark)
+    const wf = workflowconfigPage();
+    expect((wf.match(/variant="blue" className="text-white"/g) || []).length).toBe(2);
+    const np = notifPrefsPage();
+    expect(np).toContain('variant="blue" className="text-white"');
+    // the chat new-chat flips text-white -> text-primary-foreground
+    const chat = chatPageR60();
+    expect(chat).toContain("bg-blue-600 text-primary-foreground transition-colors hover:bg-blue-700");
+    expect(chat).not.toContain("bg-blue-600 text-white");
+  });
+
+  it("R60-F: the payrollengine Generate Payroll is the FLAT emerald solid (the emerald variant)", () => {
+    // REF (both themes, re-verified live): bg-emerald-600
+    // hover:bg-emerald-700 text-primary-foreground shadow —
+    // backgroundImage: none. The className hack layered the default
+    // gradient OVER the emerald color (tailwind-merge does not
+    // conflict bg-emerald-600 with the arbitrary gradient image class).
+    const btn = buttonUiR60();
+    expect(btn).toContain('emerald: "text-primary-foreground shadow bg-emerald-600 hover:bg-emerald-700"');
+    const pe = payrollenginePage();
+    expect(pe).toContain('<Button\n              variant="emerald"');
+    expect(pe).not.toContain('className="bg-emerald-600 text-primary-foreground');
+  });
+
+  it("R60-C: the settings Company edit is REF's INLINE 12-field form flip (the dialog retired)", () => {
+    const src = settingsPageR60();
+    // REF's press flips the card content into the inline form: the 12
+    // labels in REF's order, the placeholder strings verbatim, Save
+    // Changes in the header row (replacing Edit), Cancel at the form's
+    // bottom-right, a 2-col 24px-gap grid
+    expect(src).toContain('htmlFor="company-name">Company Name</Label>');
+    expect(src).toContain('htmlFor="company-logo">Logo URL</Label>');
+    expect(src).toContain('htmlFor="company-industry">Industry</Label>');
+    expect(src).toContain('htmlFor="company-size">Company Size</Label>');
+    expect(src).toContain('htmlFor="company-address">Address</Label>');
+    expect(src).toContain('htmlFor="company-city">City</Label>');
+    expect(src).toContain('htmlFor="company-country">Country</Label>');
+    expect(src).toContain('htmlFor="company-phone">Phone</Label>');
+    expect(src).toContain('htmlFor="company-email">Email</Label>');
+    expect(src).toContain('htmlFor="company-website">Website</Label>');
+    expect(src).toContain('htmlFor="company-tax">Tax ID</Label>');
+    expect(src).toContain('htmlFor="company-reg">Registration Number</Label>');
+    expect(src).toContain('placeholder="Company name"');
+    expect(src).toContain('placeholder="https://example.com/logo.png"');
+    expect(src).toContain('placeholder="Technology, Healthcare, etc."');
+    expect(src).toContain('placeholder="Street address"');
+    expect(src).toContain('placeholder="Company phone"');
+    expect(src).toContain('placeholder="contact@company.com"');
+    expect(src).toContain('placeholder="https://www.company.com"');
+    expect(src).toContain('placeholder="Tax identification number"');
+    expect(src).toContain('placeholder="Company registration number"');
+    // Save Changes replaces the Edit button in the header while editing
+    expect(src).toContain("editOpen ? (");
+    expect(src).toContain("Save Changes\n              </Button>");
+    // the dialog form is retired
+    expect(src).not.toContain("<Dialog open={editOpen}");
+    // the schema + API carry the three new fields
+    const schema = prismaSchema;
+    expect(schema).toContain("logoUrl");
+    expect(schema).toContain("city");
+    expect(schema).toContain("country");
+    const api = companyApiR60();
+    expect(api).toContain("logoUrl:");
+    expect(api).toContain("city:");
+    expect(api).toContain("country:");
   });
 });

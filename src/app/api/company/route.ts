@@ -15,6 +15,10 @@ const CompanyInput = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email").optional().or(z.literal("")),
   website: z.string().trim().max(200).optional().or(z.literal("")),
   address: z.string().trim().max(200).optional().or(z.literal("")),
+  // Session 60 (R60-C): REF's inline form's separate fields
+  city: z.string().trim().max(80).optional().or(z.literal("")),
+  country: z.string().trim().max(80).optional().or(z.literal("")),
+  logoUrl: z.string().trim().max(300).optional().or(z.literal("")),
   taxId: z.string().trim().max(60).optional().or(z.literal("")),
   registrationNumber: z.string().trim().max(60).optional().or(z.literal("")),
 });
@@ -27,6 +31,9 @@ const COMPANY_FIELDS = {
   email: true,
   website: true,
   address: true,
+  city: true,
+  country: true,
+  logoUrl: true,
   taxId: true,
   registrationNumber: true,
   updatedAt: true,
@@ -57,6 +64,9 @@ export async function PATCH(req: NextRequest) {
       ...(data.email !== undefined ? { email: data.email || null } : {}),
       ...(data.website !== undefined ? { website: data.website || null } : {}),
       ...(data.address !== undefined ? { address: data.address || null } : {}),
+      ...(data.city !== undefined ? { city: data.city || null } : {}),
+      ...(data.country !== undefined ? { country: data.country || null } : {}),
+      ...(data.logoUrl !== undefined ? { logoUrl: data.logoUrl || null } : {}),
       ...(data.taxId !== undefined ? { taxId: data.taxId || null } : {}),
       ...(data.registrationNumber !== undefined ? { registrationNumber: data.registrationNumber || null } : {}),
     };

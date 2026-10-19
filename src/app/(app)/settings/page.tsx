@@ -11,7 +11,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -48,6 +47,10 @@ interface CompanyInfo {
   email: string | null;
   website: string | null;
   address: string | null;
+  /* Session 60 (R60-C): REF's inline form's separate fields */
+  city: string | null;
+  country: string | null;
+  logoUrl: string | null;
   taxId: string | null;
   registrationNumber: string | null;
 }
@@ -187,6 +190,9 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
     email: "",
     website: "",
     address: "",
+    city: "",
+    country: "",
+    logoUrl: "",
     taxId: "",
     registrationNumber: "",
   });
@@ -216,6 +222,9 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
         email: company.email ?? "",
         website: company.website ?? "",
         address: company.address ?? "",
+        city: company.city ?? "",
+        country: company.country ?? "",
+        logoUrl: company.logoUrl ?? "",
         taxId: company.taxId ?? "",
         registrationNumber: company.registrationNumber ?? "",
       });
@@ -240,6 +249,9 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
           email: form.email.trim(),
           website: form.website.trim(),
           address: form.address.trim(),
+          city: form.city.trim(),
+          country: form.country.trim(),
+          logoUrl: form.logoUrl.trim(),
           taxId: form.taxId.trim(),
           registrationNumber: form.registrationNumber.trim(),
         }),
@@ -286,68 +298,81 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
         <div className="flex items-center justify-between">
           <div className="font-semibold leading-none tracking-tight">Company Information</div>
           {canEdit ? (
-            <Button variant="outline" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2" aria-hidden="true" />
-              Edit
-            </Button>
+            /* Session 60 (R60-C): REF's press flips the card into the
+               inline form — Save Changes (the outline h-9 with the
+               lucide-save w-4 h-4 mr-2 glyph, live-measured w:166)
+               replaces the Edit button in the header row while editing. */
+            editOpen ? (
+              <Button variant="outline" onClick={() => void onSave()} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2" aria-hidden="true" />}
+                Save Changes
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                <Pencil className="mr-2" aria-hidden="true" />
+                Edit
+              </Button>
+            )
           ) : null}
         </div>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {COMPANY_FIELDS.map((f) => (
-              <div key={f.key} className={f.key === "address" ? "p-4 bg-slate-50 rounded-lg col-span-2" : "p-4 bg-slate-50 rounded-lg"}>
-                <p className="text-sm text-slate-500 mb-1">{f.label}</p>
-                <p className="font-medium text-slate-900">
-                  {company ? company[f.key] || "Not set" : "Not set"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Company Information</DialogTitle>
-            <DialogDescription>Update your company details.</DialogDescription>
-          </DialogHeader>
+        {editOpen ? (
+          /* Session 60 (R60-C): REF's INLINE 12-field edit form —
+             live-measured: the `grid md:grid-cols-2 gap-6` field grid
+             (523px tracks, 24px gap at 1440), the labels in REF's order
+             (Company Name, Logo URL, Industry, Company Size [a select],
+             Address, City, Country, Phone, Email, Website, Tax ID,
+             Registration Number) with REF's placeholder strings, and
+             the Cancel (outline, no icon) at the form's bottom-right.
+             REF's own form renders EMPTY values and its Save is a
+             silent no-op live (the documented broken-write-paths
+             family) — the clone's superset: prefilled values, the
+             PATCH round-trip, the toast, the flip back to the tiles. */
           <form
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
               void onSave();
             }}
           >
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="company-name">Company Name</Label>
-              <Input
-                id="company-name"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-name">Company Name</Label>
+                <Input
+                  id="company-name"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Company name"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-logo">Logo URL</Label>
+                <Input
+                  id="company-logo"
+                  value={form.logoUrl}
+                  onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
+                  placeholder="https://example.com/logo.png"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-industry">Industry</Label>
                 <Input
                   id="company-industry"
                   value={form.industry}
                   onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                  placeholder="retail"
+                  placeholder="Technology, Healthcare, etc."
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-size">Company Size</Label>
                 <Select value={form.size || "none"} onValueChange={(v) => setForm({ ...form, size: v === "none" ? "" : v })}>
                   <SelectTrigger id="company-size">
-                    <SelectValue placeholder="Not set" />
+                    <SelectValue placeholder="Select size" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Not set</SelectItem>
+                    <SelectItem value="none">Select size</SelectItem>
                     {SIZE_OPTIONS.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s} employees
@@ -356,75 +381,101 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-address">Address</Label>
+                <Input
+                  id="company-address"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  placeholder="Street address"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-city">City</Label>
+                <Input
+                  id="company-city"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="City"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-country">Country</Label>
+                <Input
+                  id="company-country"
+                  value={form.country}
+                  onChange={(e) => setForm({ ...form, country: e.target.value })}
+                  placeholder="Country"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-phone">Phone</Label>
                 <Input
                   id="company-phone"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="+65 87651230"
+                  placeholder="Company phone"
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-email">Email</Label>
                 <Input
                   id="company-email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="contact@company.com"
                 />
               </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="company-website">Website</Label>
-              <Input
-                id="company-website"
-                value={form.website}
-                onChange={(e) => setForm({ ...form, website: e.target.value })}
-                placeholder="https://example.com"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="company-address">Address</Label>
-              <Input
-                id="company-address"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="Singapore, Singapore"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="company-website">Website</Label>
+                <Input
+                  id="company-website"
+                  value={form.website}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  placeholder="https://www.company.com"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-tax">Tax ID</Label>
                 <Input
                   id="company-tax"
                   value={form.taxId}
                   onChange={(e) => setForm({ ...form, taxId: e.target.value })}
+                  placeholder="Tax identification number"
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="company-reg">Registration Number</Label>
                 <Input
                   id="company-reg"
                   value={form.registrationNumber}
                   onChange={(e) => setForm({ ...form, registrationNumber: e.target.value })}
+                  placeholder="Company registration number"
                 />
               </div>
             </div>
-            <DialogFooter>
+            <div className="flex justify-end">
               <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Save Changes
-              </Button>
-            </DialogFooter>
+            </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {COMPANY_FIELDS.map((f) => (
+                <div key={f.key} className={f.key === "address" ? "p-4 bg-slate-50 rounded-lg col-span-2" : "p-4 bg-slate-50 rounded-lg"}>
+                  <p className="text-sm text-slate-500 mb-1">{f.label}</p>
+                  <p className="font-medium text-slate-900">
+                    {company ? company[f.key] || "Not set" : "Not set"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
