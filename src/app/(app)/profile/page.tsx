@@ -362,8 +362,12 @@ export default function ProfilePage() {
           (not initials), the flex-1 column (h2 text-2xl name, email
           text-slate-600 mb-3, the Change Photo button 164x36 BELOW the
           email), and the "User" role badge pinned right (blue-50 text
-          blue-700 border-blue-200, 53x22, vertically centered). */}
-      <Card>
+          blue-700 border-blue-200, 53x22, vertically centered).
+          Session 62 (R62-D2/R62-I): the card + border-slate-200 (the
+          unflipping pair) + the badge is a DIV with REF's member set
+          (the r62 border census — the span/shrink-0 retired; the text
+          stays the seed's role — the documented data allowance). */}
+      <Card className="border-slate-200">
         <CardContent className="p-6">
           {loading || !profile ? (
             <div className="flex items-center gap-6">
@@ -413,9 +417,11 @@ export default function ProfilePage() {
                   Change Photo
                 </Button>
               </div>
-              <span className="inline-flex shrink-0 items-center rounded-md border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+              {/* Session 62 (R62-I): REF's badge is a DIV (the r62 border
+                  census reads tag|color sets — the span diverged). */}
+              <div className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
                 {profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "User"}
-              </span>
+              </div>
             </div>
           )}
         </CardContent>
@@ -436,9 +442,10 @@ export default function ProfilePage() {
           <TabsTrigger value="preferences"><SlidersHorizontal className="h-4 w-4 mr-2" aria-hidden="true" />Preferences</TabsTrigger>
         </TabsList>
 
-        {/* General tab — Personal Information form (reference recipe) */}
+        {/* General tab — Personal Information form (reference recipe).
+            Session 62 (R62-D2): + border-slate-200 (the unflipping pair). */}
         <TabsContent value="general" className="mt-0">
-          <Card>
+          <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-200 p-6">
               <div className="font-semibold leading-none tracking-tight">Personal Information</div>
             </CardHeader>

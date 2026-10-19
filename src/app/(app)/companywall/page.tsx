@@ -337,7 +337,10 @@ export default function CompanyWallPage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : posts.length === 0 ? (
-        <div className="rounded-xl border bg-card shadow-sm">
+        /* Session 62 (R62-D2): REF's live recipe — text-card-foreground
+           shadow border-slate-200 (the unflipping pair; was the
+           hand-rolled shadow-sm — the r62 border census). */
+        <div className="rounded-xl border bg-card text-card-foreground shadow border-slate-200">
           <EmptyState
             title="No posts yet"
             description="Be the first to share something with your team!"

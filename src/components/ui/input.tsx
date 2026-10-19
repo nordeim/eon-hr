@@ -27,8 +27,10 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
     <textarea
       className={cn(
         /* Session 40 (R39-E): the same v4 migration — min-h-[60px] (was
-           80), bg-transparent, text-base md:text-sm, shadow-sm, ring-1. */
-        "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm",
+           80), bg-transparent, text-base md:text-sm, shadow-sm, ring-1.
+           Session 62 (R62-K): + resize-none — REF's textareas carry it
+           (member-set measured 2/2: companywall + interviewassistant). */
+        "flex min-h-[60px] w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm",
         "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         className

@@ -214,7 +214,10 @@ export default function OffboardingPage() {
             full-width card (238px) — icon + h3 + P only, NO CTA (the
             affordance is the header button). */
         <div className="grid md:grid-cols-2 lg:grid-cols-3">
-          <div className="col-span-full rounded-xl border bg-card shadow-sm">
+          {/* Session 62 (R62-D1): REF's live card recipe — the unflipping
+              border-slate-200 + text-card-foreground shadow (was the
+              hand-rolled shadow-sm; the r62 border census). */}
+          <div className="rounded-xl border bg-card text-card-foreground shadow col-span-full border-slate-200">
             <EmptyState
               icon={<LogOut className="h-6 w-6" aria-hidden="true" />}
               title="No offboarding processes"

@@ -53,12 +53,16 @@ const COLUMNS = [
   /* Session 59 (R59-B): REF tints each stage's count chip by status
      (live-measured: slate-200/blue/amber/green/red — note the Offer
      stage is AMBER here where the taskmanager's In-Progress is YELLOW;
-     REF keeps two different warning shades across its own pages). */
-  { stage: "applied", label: "Applied", chip: "bg-slate-200 text-slate-700" },
-  { stage: "interviewing", label: "Interviewing", chip: "bg-blue-100 text-blue-700" },
-  { stage: "offer", label: "Offer", chip: "bg-amber-100 text-amber-700" },
-  { stage: "hired", label: "Hired", chip: "bg-green-100 text-green-700" },
-  { stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700" },
+     REF keeps two different warning shades across its own pages).
+     Session 62 (R62-F): the COLUMN recipes too — REF's five columns
+     carry per-stage border-2 + bg pairs (member-set measured live
+     this round; the session-11 pin had generalized the Applied
+     column's slate to all five — the r59 single-measure blind spot). */
+  { stage: "applied", label: "Applied", chip: "bg-slate-200 text-slate-700", column: "rounded-lg border-2 bg-slate-100 border-slate-300 p-3 min-h-[400px]" },
+  { stage: "interviewing", label: "Interviewing", chip: "bg-blue-100 text-blue-700", column: "rounded-lg border-2 bg-blue-50 border-blue-200 p-3 min-h-[400px]" },
+  { stage: "offer", label: "Offer", chip: "bg-amber-100 text-amber-700", column: "rounded-lg border-2 bg-amber-50 border-amber-200 p-3 min-h-[400px]" },
+  { stage: "hired", label: "Hired", chip: "bg-green-100 text-green-700", column: "rounded-lg border-2 bg-green-50 border-green-200 p-3 min-h-[400px]" },
+  { stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700", column: "rounded-lg border-2 bg-red-50 border-red-200 p-3 min-h-[400px]" },
 ];
 
 function labelize(v: string): string {
@@ -347,12 +351,20 @@ export default function RecruitmentKanbanPage() {
                      Task contract from session 28 / R27-B). */
                   reorderCandidate(id, col.stage, null);
                 }}
-                className={`w-64 shrink-0 rounded-lg border-2 border-slate-300 bg-slate-100 p-3.5 ${
-                  dragCandId && candidates.find((c) => c.id === dragCandId)?.stage !== col.stage
-                    ? "ring-2 ring-inset ring-blue-500/40"
-                    : ""
-                }`}
+                /* Session 62 (R62-F): REF's structure — the width rides a
+                    flex-shrink-0 w-64 WRAPPER (this div); the column div
+                    carries the per-stage recipe (col.column). The
+                    drag-ring superset stays (the clone's working DnD
+                    affordance — REF's columns carry no ring). */
+                className="flex-shrink-0 w-64"
               >
+                <div
+                  className={`${col.column} ${
+                    dragCandId && candidates.find((c) => c.id === dragCandId)?.stage !== col.stage
+                      ? "ring-2 ring-inset ring-blue-500/40"
+                      : ""
+                  }`}
+                >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
                   <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs ${col.chip}`}>
@@ -448,6 +460,7 @@ export default function RecruitmentKanbanPage() {
                       </div>
                     </div>
                   ))}
+                </div>
                 </div>
               </div>
             );

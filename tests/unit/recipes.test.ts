@@ -3897,7 +3897,9 @@ describe("session-40 shell restructure + input migration + careers org-view (par
   });
 
   it("R39-E1: the Textarea base is REF's migrated recipe — min-h-[60px] (was 80) + the same v4 family", () => {
-    expect(input40).toContain("flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm");
+    /* Session 62 amendment (R62-K): + resize-none — REF's textareas
+       carry it (member-set measured 2/2 this round). */
+    expect(input40).toContain("flex min-h-[60px] w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm");
     expect(input40).not.toContain("min-h-[80px]");
   });
 
@@ -5451,7 +5453,14 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
 
   it("R48-C2b: the checkbox component — the FIRST live-measured REF form (border-primary + shadow + ring-1; NO data-[state=checked]:border-primary, NO cursor-pointer)", () => {
     const cb = read("src", "components", "ui", "checkbox.tsx");
-    expect(cb).toContain("border border-primary shadow focus-visible:outline-none focus-visible:ring-1");
+    /* Session 62 amendment (R62-B): the border member moved to the
+       literal pair border-[#171717] dark:border-[#fafafa] — REF's
+       checkbox border rides ITS flipping --primary token (both themes
+       live-measured this round); the clone's --primary is the
+       documented nav-blue repurposing (#1877f2), so border-primary
+       rendered the blue in BOTH themes. */
+    expect(cb).toContain("border border-[#171717] dark:border-[#fafafa] shadow focus-visible:outline-none focus-visible:ring-1");
+    expect(cb).not.toContain("border border-primary");
     expect(cb).not.toContain("data-[state=checked]:border-primary");
     expect(cb).not.toContain("cursor-pointer");
     /* Session 60 amendment: the dark:text-white member retired — REF's
@@ -6217,11 +6226,13 @@ describe("Badge/chip fill family (session 59, R59-A..D — the non-button fill c
 
   it("R59-B: the recruitmentkanban count chips are status-tinted per stage (REF's five recipes)", () => {
     const page = rkPage();
-    expect(page).toContain('{ stage: "applied", label: "Applied", chip: "bg-slate-200 text-slate-700" }');
-    expect(page).toContain('{ stage: "interviewing", label: "Interviewing", chip: "bg-blue-100 text-blue-700" }');
-    expect(page).toContain('{ stage: "offer", label: "Offer", chip: "bg-amber-100 text-amber-700" }');
-    expect(page).toContain('{ stage: "hired", label: "Hired", chip: "bg-green-100 text-green-700" }');
-    expect(page).toContain('{ stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700" }');
+    /* Session 62 amendment (R62-F): the five config lines gained the
+       per-stage column member — the chips are unchanged. */
+    expect(page).toContain('chip: "bg-slate-200 text-slate-700", column: "rounded-lg border-2 bg-slate-100 border-slate-300 p-3 min-h-[400px]"');
+    expect(page).toContain('chip: "bg-blue-100 text-blue-700", column: "rounded-lg border-2 bg-blue-50 border-blue-200 p-3 min-h-[400px]"');
+    expect(page).toContain('chip: "bg-amber-100 text-amber-700", column: "rounded-lg border-2 bg-amber-50 border-amber-200 p-3 min-h-[400px]"');
+    expect(page).toContain('chip: "bg-green-100 text-green-700", column: "rounded-lg border-2 bg-green-50 border-green-200 p-3 min-h-[400px]"');
+    expect(page).toContain('chip: "bg-red-100 text-red-700", column: "rounded-lg border-2 bg-red-50 border-red-200 p-3 min-h-[400px]"');
     // the tint rides REF's exact prefix (which the clone already had)
     expect(page).toContain('focus:ring-offset-2 border-transparent shadow hover:bg-primary/80 text-xs ${col.chip}');
     // the uniform-slate-200 tail is gone
@@ -6632,5 +6643,136 @@ describe("Dark-mode text-color family (session 61 addendum — the requestreport
     // the th family stays the bare r48 form
     expect(src).toContain('<th className="pb-2 pr-4">Ref #</th>');
     expect(src).toContain('<th className="pb-2">Date</th>');
+  });
+});
+
+describe("Dark-mode border-color family (session 62, R62-A..K — the dark border-color census)", () => {
+  /* The r62 census (scripts/r62-border-census.mjs, 49 routes, paired
+     live, DARK mode): the computed border-color of every visibly-bordered
+     element in main, buttons INCLUDED (button borders were never read by
+     any prior census). Pre-fix 29/49. Twenty DIFF routes decomposed
+     element-level (scripts/r62-probe.mjs + r62-probe-cmp.mjs). The
+     families: the frozen light-mode Customize literal, the
+     checkbox-border-on-the-wrong-token (a BOTH-theme divergence),
+     the unpinned border shades (green-200 lab() drift live-measured),
+     the border-slate-200 card family (REF's cards stay LIGHT-bordered
+     in dark), the per-color attendance action buttons, the per-stage
+     kanban columns (the session-11 single-column blind spot), the
+     calendar ths, the thead-tr recipes, the profile badge tag, the
+     flattened severity cards, and the missing textarea resize-none. */
+
+  const g62 = () => soft(() => read("src", "app", "globals.css"));
+  const pg62 = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R62-A: the Customize button rides the flipping border-input token (the session-3 frozen literal retired)", () => {
+    const src = soft(() => read("src", "app", "(app)", "dashboard", "customize-button.tsx"));
+    expect(src).toContain('variant="outline"');
+    expect(src).not.toContain("border-[#e5e5e5]");
+  });
+
+  it("R62-B: the checkbox border carries REF's literal pair (border-primary was the nav-blue repurposing — a BOTH-theme divergence)", () => {
+    const cb = soft(() => read("src", "components", "ui", "checkbox.tsx"));
+    expect(cb).toContain("border border-[#171717] dark:border-[#fafafa]");
+    expect(cb).not.toContain("border border-primary");
+  });
+
+  it("R62-C: the four new palette pins (green-200/amber-200/cyan-300/cyan-50) — v3 sRGB, ending the lab() drift + serving the new consumers", () => {
+    const css = g62();
+    expect(css).toContain("--color-green-200: #bbf7d0");
+    expect(css).toContain("--color-amber-200: #fde68a");
+    expect(css).toContain("--color-cyan-300: #67e8f9");
+    expect(css).toContain("--color-cyan-50: #ecfeff");
+  });
+
+  it("R62-D1: REF's empty-state cards carry the unflipping border-slate-200 member (loans + offboarding rewrite to the live recipe)", () => {
+    const loans = pg62("loans");
+    expect(loans).toContain('className="grid gap-6 md:grid-cols-1 lg:grid-cols-2"');
+    expect(loans).toContain('className="rounded-xl border bg-card text-card-foreground shadow col-span-full border-slate-200"');
+    expect(loans).not.toContain("shadow-sm lg:col-span-2");
+    const off = pg62("offboarding");
+    expect(off).toContain('className="rounded-xl border bg-card text-card-foreground shadow col-span-full border-slate-200"');
+  });
+
+  it("R62-D2: the standard-Card pages gain border-slate-200 (training/companywall/hrletters/analytics/profile/compliance)", () => {
+    expect(pg62("training")).toMatch(/<Card className="border-slate-200">/);
+    const cw = pg62("companywall");
+    expect(cw).toContain('className="rounded-xl border bg-card text-card-foreground shadow border-slate-200"');
+    expect(cw).not.toContain('className="rounded-xl border bg-card shadow-sm"');
+    expect(pg62("hrletters")).toMatch(/<Card className="border-slate-200">/);
+    const an = pg62("analytics");
+    expect((an.match(/<Card className="border-slate-200">/g) || []).length).toBeGreaterThanOrEqual(3);
+    const prof = pg62("profile");
+    expect((prof.match(/<Card className="border-slate-200">/g) || []).length).toBeGreaterThanOrEqual(2);
+    expect(pg62("compliancedashboard")).toMatch(/<Card className="border-slate-200 overflow-hidden">/);
+  });
+
+  it("R62-D3: the attendance Report Type card is REF's 3-level shape (Card border-slate-200 > p-4 > flex gap-4 items-center)", () => {
+    const src = pg62("attendance");
+    expect(src).toContain('className="rounded-xl border bg-card text-card-foreground shadow border-slate-200"');
+    expect(src).toContain('<div className="p-4">');
+    expect(src).toContain('className="flex gap-4 items-center"');
+    expect(src).not.toContain("flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm");
+  });
+
+  it("R62-D4: the attendance stat cards carry REF's hover:shadow-lg transition-shadow members", () => {
+    const src = pg62("attendance");
+    // the StatCard call sites pass the hover members via className (the
+    // component's Card cn() appends them to its border-slate-200 base)
+    expect((src.match(/className="hover:shadow-lg transition-shadow"/g) || []).length).toBe(5);
+  });
+
+  it("R62-E: the attendance action-button trio carries REF's per-color borders + hover fills", () => {
+    const src = pg62("attendance");
+    expect(src).toMatch(/className="text-cyan-700 border-cyan-300 hover:bg-cyan-50"/);
+    expect(src).toMatch(/className="border-slate-300 hover:bg-accent"/);
+    expect(src).toMatch(/className="text-blue-700 border-blue-300 hover:bg-blue-50"/);
+  });
+
+  it("R62-F: the recruitmentkanban columns are REF's per-stage recipes inside flex-shrink-0 w-64 wrappers", () => {
+    const src = pg62("recruitmentkanban");
+    expect(src).toContain('className="flex-shrink-0 w-64"');
+    expect(src).toContain("bg-slate-100 border-slate-300 p-3 min-h-[400px]");
+    expect(src).toContain("bg-blue-50 border-blue-200 p-3 min-h-[400px]");
+    expect(src).toContain("bg-amber-50 border-amber-200 p-3 min-h-[400px]");
+    expect(src).toContain("bg-green-50 border-green-200 p-3 min-h-[400px]");
+    expect(src).toContain("bg-red-50 border-red-200 p-3 min-h-[400px]");
+    expect(src).not.toContain("w-64 shrink-0 rounded-lg border-2 border-slate-300 bg-slate-100 p-3.5");
+  });
+
+  it("R62-G: the shiftcalendar ths carry border-b border-slate-200 bg-white + the weekend variant", () => {
+    const src = pg62("shiftcalendar");
+    expect(src).toContain("text-slate-600 border-b border-slate-200 bg-white");
+    expect(src).toContain("bg-slate-50 text-slate-400");
+  });
+
+  it("R62-H1: the assetmanagement + payrollmodule header rows carry border-slate-200 bg-slate-50", () => {
+    expect(pg62("assetmanagement")).toMatch(/<TableRow className="border-slate-200 bg-slate-50">/);
+    expect(pg62("payrollmodule")).toMatch(/<TableRow className="border-slate-200 bg-slate-50">/);
+  });
+
+  it("R62-H2: the recruitment theads neutralize the shared inner-tr border (REF carries the border on the thead itself)", () => {
+    const src = pg62("recruitment");
+    expect(src).toContain('className="bg-slate-50 border-b border-slate-200 [&_tr]:border-0"');
+  });
+
+  it("R62-I: the profile role badge is a DIV with REF's member set (the span + shrink-0 retired; the 'Admin' text stays — the documented data allowance)", () => {
+    const src = pg62("profile");
+    expect(src).toContain('<div className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700');
+    expect(src).not.toContain("<span className=\"inline-flex shrink-0 items-center rounded-md border border-blue-200");
+  });
+
+  it("R62-J: the compliance severity cards are REF's two-level shape (the flattened p-4 text-center moves to the inner wrapper)", () => {
+    const src = pg62("compliancedashboard");
+    expect(src).toContain('className="rounded-xl bg-card text-card-foreground shadow border border-red-200"');
+    expect(src).toContain('className="rounded-xl bg-card text-card-foreground shadow border border-orange-200"');
+    expect(src).toContain('className="rounded-xl bg-card text-card-foreground shadow border border-yellow-200"');
+    expect(src).toContain('className="rounded-xl bg-card text-card-foreground shadow border border-blue-200"');
+    expect(src).toContain('<div className="p-4 text-center">');
+    expect(src).not.toContain("border border-red-200 p-4 text-center");
+  });
+
+  it("R62-K: the shared Textarea base carries REF's resize-none", () => {
+    const src = soft(() => read("src", "components", "ui", "input.tsx"));
+    expect(src).toContain("resize-none");
   });
 });

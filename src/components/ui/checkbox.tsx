@@ -14,7 +14,14 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
         // OLD shadcn base: border-PRIMARY + shadow + ring-1 (not the
         // newer border-input/shadow-sm/ring-2 form); the checked-border
         // member + the pointer member are retired (REF carries neither).
-        "peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        // Session 62 (R62-B): the border member moves to the literal
+        // pair — REF's checkbox border rides ITS --primary token which
+        // FLIPS (#171717 light / #fafafa dark, both live-measured), but
+        // the clone's --primary is the documented nav-blue repurposing
+        // (#1877f2 both themes) — border-primary rendered the blue in
+        // BOTH themes (a both-theme divergence the r62 border census
+        // caught; no prior fill/text census could see it).
+        "peer h-4 w-4 shrink-0 rounded-sm border border-[#171717] dark:border-[#fafafa] shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
         // Session 58 (R58-20) + session 60 (R60-A): REF's checked fill is
         // its shadcn --primary resolving #171717 in light (measured live,
         // r58) and #fafafa in dark (measured live on the securitysettings

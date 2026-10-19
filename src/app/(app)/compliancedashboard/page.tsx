@@ -277,22 +277,34 @@ export default function ComplianceDashboardPage() {
                       DIV values (text-3xl font-bold mb-1 text-*-700,
                       unflipping) + DIV labels (text-xs text-slate-500);
                       the hrreports/npref mini-centered pages render P
-                      values — a different REF recipe, kept there. */}
-                  <div className="rounded-xl bg-card text-card-foreground shadow border border-red-200 p-4 text-center">
-                    <div className="text-3xl font-bold mb-1 text-red-700">{chipCounts.expired ?? 0}</div>
-                    <div className="text-xs text-slate-500">Expired</div>
+                      values — a different REF recipe, kept there.
+                      Session 62 (R62-J): restructured to REF's two-level
+                      shape — the border lives on the card, `p-4
+                      text-center` on the inner wrapper (member-set
+                      measured live this round; was flattened). */}
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-red-200">
+                    <div className="p-4 text-center">
+                      <div className="text-3xl font-bold mb-1 text-red-700">{chipCounts.expired ?? 0}</div>
+                      <div className="text-xs text-slate-500">Expired</div>
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-card text-card-foreground shadow border border-orange-200 p-4 text-center">
-                    <div className="text-3xl font-bold mb-1 text-orange-700">{chipCounts.d7 ?? 0}</div>
-                    <div className="text-xs text-slate-500">Expiring ≤ 7 days</div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-orange-200">
+                    <div className="p-4 text-center">
+                      <div className="text-3xl font-bold mb-1 text-orange-700">{chipCounts.d7 ?? 0}</div>
+                      <div className="text-xs text-slate-500">Expiring ≤ 7 days</div>
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-card text-card-foreground shadow border border-yellow-200 p-4 text-center">
-                    <div className="text-3xl font-bold mb-1 text-yellow-700">{chipCounts.d15 ?? 0}</div>
-                    <div className="text-xs text-slate-500">Expiring ≤ 15 days</div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-yellow-200">
+                    <div className="p-4 text-center">
+                      <div className="text-3xl font-bold mb-1 text-yellow-700">{chipCounts.d15 ?? 0}</div>
+                      <div className="text-xs text-slate-500">Expiring ≤ 15 days</div>
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-card text-card-foreground shadow border border-blue-200 p-4 text-center">
-                    <div className="text-3xl font-bold mb-1 text-blue-700">{chipCounts.d30 ?? 0}</div>
-                    <div className="text-xs text-slate-500">Expiring ≤ 30 days</div>
+                  <div className="rounded-xl bg-card text-card-foreground shadow border border-blue-200">
+                    <div className="p-4 text-center">
+                      <div className="text-3xl font-bold mb-1 text-blue-700">{chipCounts.d30 ?? 0}</div>
+                      <div className="text-xs text-slate-500">Expiring ≤ 30 days</div>
+                    </div>
                   </div>
                 </div>
 
@@ -363,7 +375,10 @@ export default function ComplianceDashboardPage() {
                   </span>
                 </div>
 
-                <Card>
+                {/* Session 62 (R62-D2): + border-slate-200 overflow-hidden —
+                    REF's live card recipe (the unflipping pair, r62
+                    census; the overflow-hidden is REF's member). */}
+                <Card className="border-slate-200 overflow-hidden">
                   {/* Session 48 (R47-F1): REF's At-Risk card header —
                       flex flex-col space-y-1.5 p-6 border-b border-slate-200
                       bg-slate-50 py-3 with the title tracking-tight

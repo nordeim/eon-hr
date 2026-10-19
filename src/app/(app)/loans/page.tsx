@@ -230,7 +230,11 @@ export default function LoansPage() {
           h3, the slate-500 line (mb-4) and the flat-primary CTA 194x36
           (icon mr-2). The with-data table stays the clone's superset (the
           reference's populated layout is unmeasurable — it renders no
-          loans). */}
+          loans).
+          Session 62 (R62-D1): the card rewrite to REF's live recipe —
+          `text-card-foreground shadow col-span-full border-slate-200`
+          (the unflipping border pair: REF's card stays LIGHT-bordered
+          in dark, live-measured by the r62 border census). */}
       {loading ? (
         <div className="rounded-xl border bg-card shadow-sm">
           <div className="flex items-center justify-center py-16">
@@ -239,7 +243,7 @@ export default function LoansPage() {
         </div>
       ) : loans.length === 0 ? (
         <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-          <div className="rounded-xl border bg-card shadow-sm lg:col-span-2">
+          <div className="rounded-xl border bg-card text-card-foreground shadow col-span-full border-slate-200">
             <EmptyState
               icon={<DollarSign className="h-6 w-6" aria-hidden="true" />}
               title="No loans yet"

@@ -406,7 +406,7 @@ export default function RecruitmentPage() {
                  (text-center py-10 text-slate-400, 101px) under the
                  bg-slate-50 bordered thead. */
               <Table>
-                <TableHeader className="bg-slate-50 border-b border-slate-200">
+                <TableHeader className="bg-slate-50 border-b border-slate-200 [&_tr]:border-0">
                   <TableRow>
                     <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
                     <TableHead className="font-semibold text-slate-600">Job</TableHead>
@@ -426,7 +426,7 @@ export default function RecruitmentPage() {
               </Table>
             ) : (
               <Table>
-                <TableHeader className="bg-slate-50 border-b border-slate-200">
+                <TableHeader className="bg-slate-50 border-b border-slate-200 [&_tr]:border-0">
                   <TableRow>
                     <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
                     <TableHead className="font-semibold text-slate-600">Job</TableHead>

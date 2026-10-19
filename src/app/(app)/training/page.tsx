@@ -182,7 +182,9 @@ export default function TrainingPage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-900">Training Platforms</h2>
         </div>
-        <Card>
+        {/* Session 62 (R62-D2): + border-slate-200 — REF's cards stay
+            LIGHT-bordered in dark (the unflipping pair, r62 census). */}
+        <Card className="border-slate-200">
           {/* p-0: the reference's empty state (p-12) renders directly in
               the card — no interior padding layer. */}
           <CardContent className="p-0">

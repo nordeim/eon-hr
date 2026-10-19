@@ -275,7 +275,7 @@ export default function StaffAttendancePage() {
             </Button>
             <Button
               variant="outline"
-              className="text-cyan-700"
+              className="text-cyan-700 border-cyan-300 hover:bg-cyan-50"
               onClick={() => toast.toast({ title: "Devices", description: "Kiosk and biometric device sync is managed by your administrator.", variant: "info" })}
             >
               <MonitorSmartphone className="mr-2" aria-hidden="true" />
@@ -283,12 +283,13 @@ export default function StaffAttendancePage() {
             </Button>
             <Button
               variant="outline"
+              className="border-slate-300 hover:bg-accent"
               onClick={() => toast.toast({ title: "Attendance settings", description: "Grace period, overtime and shift rules are configured by your administrator.", variant: "info" })}
             >
               <Settings className="mr-2" aria-hidden="true" />
               Settings
             </Button>
-            <Button variant="outline" className="text-blue-700" onClick={() => router.push("/attendancedashboard")}>
+            <Button variant="outline" className="text-blue-700 border-blue-300 hover:bg-blue-50" onClick={() => router.push("/attendancedashboard")}>
               <LayoutDashboard className="mr-2" aria-hidden="true" />
               Dashboard
             </Button>
@@ -307,23 +308,31 @@ export default function StaffAttendancePage() {
           with the "Report Type:" label and a three-option select. The
           reference's own page overflows its content area (1238px wide);
           the clone keeps the fitting 1120px — the documented
-          fix-the-broken superset. */}
-      <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm">
-        <Label htmlFor="attendance-report-type" className="shrink-0 text-sm font-medium text-foreground">
-          Report Type:
-        </Label>
-        <Select value={reportType} onValueChange={(v) => setReportType(v as (typeof REPORT_TYPES)[number]["value"])}>
-          <SelectTrigger id="attendance-report-type" className="w-48" aria-label="Report type">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {REPORT_TYPES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>
-                {t.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          fix-the-broken superset.
+          Session 62 (R62-D3): restructured to REF's 3-level shape —
+          Card (border-slate-200, the unflipping pair) > div.p-4 >
+          div.flex.gap-4.items-center (the member-set measured live;
+          was the flattened flex card — gap-3, p-4 on the card). */}
+      <div className="rounded-xl border bg-card text-card-foreground shadow border-slate-200">
+        <div className="p-4">
+          <div className="flex gap-4 items-center">
+            <Label htmlFor="attendance-report-type" className="shrink-0 text-sm font-medium text-foreground">
+              Report Type:
+            </Label>
+            <Select value={reportType} onValueChange={(v) => setReportType(v as (typeof REPORT_TYPES)[number]["value"])}>
+              <SelectTrigger id="attendance-report-type" className="w-48" aria-label="Report type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REPORT_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -333,11 +342,14 @@ export default function StaffAttendancePage() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-            <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" />
-            <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" />
-            <StatCard label={reportStats.third.label} value={reportStats.third.value} icon={<CircleX className="w-6 h-6 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" />
-            <StatCard label={reportStats.fourth.label} value={reportStats.fourth.value} icon={<Clock className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" />
-            <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<TrendingUp className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
+            {/* Session 62 (R62-D4): REF's stat cards carry
+                hover:shadow-lg transition-shadow (member-set measured
+                live this round). */}
+            <StatCard label={reportStats.first.label} value={reportStats.first.value} icon={<Users className="w-6 h-6 text-blue-600" aria-hidden="true" />} tileClassName="bg-blue-100" className="hover:shadow-lg transition-shadow" />
+            <StatCard label={reportStats.second.label} value={reportStats.second.value} icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />} tileClassName="bg-green-100" className="hover:shadow-lg transition-shadow" />
+            <StatCard label={reportStats.third.label} value={reportStats.third.value} icon={<CircleX className="w-6 h-6 text-red-600" aria-hidden="true" />} tileClassName="bg-red-100" className="hover:shadow-lg transition-shadow" />
+            <StatCard label={reportStats.fourth.label} value={reportStats.fourth.value} icon={<Clock className="w-6 h-6 text-orange-600" aria-hidden="true" />} tileClassName="bg-orange-100" className="hover:shadow-lg transition-shadow" />
+            <StatCard label={reportStats.fifth.label} value={reportStats.fifth.value} icon={<TrendingUp className="w-6 h-6 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" className="hover:shadow-lg transition-shadow" />
           </div>
 
           {/* Session 14 (R13-D): the reference's stat-tab block — the

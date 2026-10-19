@@ -165,8 +165,11 @@ export default async function AnalyticsPage() {
           lg:grid-cols-2 gap-6` (548px tiles); cards carry border-b
           headers with leading-none DIV titles (no descriptions) and
           render the charts UNCONDITIONALLY (zero-data included). */}
+      {/* Session 62 (R62-D2): the three chart cards + border-slate-200 —
+          REF's cards stay LIGHT-bordered in dark (the unflipping pair,
+          r62 census). */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-slate-200">
           <CardHeader className="p-6 border-b border-slate-200">
             <div className="font-semibold leading-none tracking-tight">Employee Status Distribution</div>
           </CardHeader>
@@ -175,7 +178,7 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-200">
           <CardHeader className="p-6 border-b border-slate-200">
             <div className="font-semibold leading-none tracking-tight">Department Task Completion</div>
           </CardHeader>
@@ -189,7 +192,7 @@ export default async function AnalyticsPage() {
           header (title-only) + `grid md:grid-cols-3 gap-8` of plain text
           stacks: text-sm slate-500 label mb-2 over a text-2xl bold value
           (slate-900 / green-600 / indigo-600). No icons, no borders. */}
-      <Card>
+      <Card className="border-slate-200">
         <CardHeader className="p-6 border-b border-slate-200">
           <div className="font-semibold leading-none tracking-tight">Onboarding Summary</div>
         </CardHeader>

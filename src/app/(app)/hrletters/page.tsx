@@ -183,7 +183,9 @@ export default function HRLettersPage() {
           reference's own copy invites the action ("Request your first HR
           letter to get started"); the header stays action-free like the
           reference. */}
-      <Card>
+      {/* Session 62 (R62-D2): + border-slate-200 — the unflipping pair
+          (REF's card stays LIGHT-bordered in dark, r62 census). */}
+      <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-200">
           <CardTitle className="leading-none">Letter Requests</CardTitle>
         </CardHeader>

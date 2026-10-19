@@ -348,7 +348,19 @@ export default function ShiftCalendarPage() {
                 <thead>
                   <tr>
                     {WEEKDAYS.map((d) => (
-                      <th key={d} className="px-2 py-3 text-center font-semibold text-slate-600">
+                      /* Session 62 (R62-G): REF's th recipe gains the
+                          border-b border-slate-200 bg-white members +
+                          the weekend variant (bg-slate-50 text-slate-400
+                          on Sat/Sun — member-set measured live, r62
+                          border census). */
+                      <th
+                        key={d}
+                        className={
+                          d === "Sat" || d === "Sun"
+                            ? "py-3 px-2 text-center font-semibold text-slate-600 border-b border-slate-200 bg-slate-50 text-slate-400"
+                            : "py-3 px-2 text-center font-semibold text-slate-600 border-b border-slate-200 bg-white"
+                        }
+                      >
                         {d}
                       </th>
                     ))}

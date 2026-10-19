@@ -231,6 +231,11 @@
 
   --color-green-50: #f0fdf4;
   --color-green-100: #dcfce7;
+  /* green-200 (session 62, R62-C): the securitysettings Enabled badge
+     + the alert success variant + the recruitmentkanban Hired column
+     border — REF renders rgb(187,247,208) = the v3 hex; the unpinned
+     shade drifted into lab() (trap 2, live-measured this round). */
+  --color-green-200: #bbf7d0;
   --color-green-500: #22c55e;
   --color-green-600: #16a34a;
   --color-green-700: #15803d;
@@ -287,6 +292,9 @@
      measures rgb(254,243,199)/rgb(180,83,9) = the v3 hexes. */
   --color-amber-50: #fffbeb;
   --color-amber-100: #fef3c7;
+  /* amber-200 (session 62, R62-C): the recruitmentkanban Offer column
+     border — REF renders rgb(253,230,138) = the v3 hex (trap 2). */
+  --color-amber-200: #fde68a;
   --color-amber-400: #fbbf24;
   --color-amber-500: #f59e0b;
   --color-amber-600: #d97706;
@@ -344,6 +352,11 @@
      button text renders rgb(14,116,144) = v3 cyan-700 — the family was
      entirely unpinned and teal-700 was the wrong shade (oklch drift). */
   --color-cyan-700: #0e7490;
+  /* cyan-300 + cyan-50 (session 62, R62-C): the attendance Devices
+     action button — REF live-measured border-cyan-300 (rgb(103,232,249))
+     + hover:bg-cyan-50 (rgb(236,254,255)) — the v3 hexes (trap 2). */
+  --color-cyan-300: #67e8f9;
+  --color-cyan-50: #ecfeff;
 
   /* Radii (v3 defaults) */
   --radius-sm: 0.125rem;

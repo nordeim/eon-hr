@@ -66,9 +66,13 @@ export function CustomizeButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {/* Reference (session-3): h-9 (36px), px-4 py-2, text-sm, radius 6px,
-            border #E5E5E5 (neutral-200 — NOT slate-200), bg-white. */}
-        <Button variant="outline" className="border-[#e5e5e5] px-4 py-2 text-sm">
+        {/* Reference (session-3, light): h-9 (36px), px-4 py-2, text-sm,
+            radius 6px, border #E5E5E5 (neutral-200 — NOT slate-200),
+            bg-white. Session 62 (R62-A): the frozen literal border class
+            retired — the outline variant's border-input token supplies
+            the identical light pair + REF's measured dark flip (#262626,
+            the r62 border census). */}
+        <Button variant="outline" className="px-4 py-2 text-sm">
           <Settings className="h-4 w-4 mr-2" aria-hidden="true" />
           Customize
         </Button>

@@ -126,7 +126,13 @@ test.describe("session-49 bare interiors", () => {
     expect(h3cls).toContain("text-lg font-semibold text-orange-900");
     const cb = page.locator("[role=checkbox]").first();
     const cbCls = await cb.getAttribute("class");
-    expect(cbCls).toContain("border border-primary shadow");
+    /* Session 62 amendment (R62-B): the border member moved to the
+       literal pair border-[#171717] dark:border-[#fafafa] — REF's
+       checkbox border rides ITS flipping --primary token (both themes
+       live-measured in the r62 border census); the clone's --primary
+       is the documented nav-blue repurposing. */
+    expect(cbCls).toContain("border border-[#171717] dark:border-[#fafafa] shadow");
+    expect(cbCls).not.toContain("border border-primary");
     expect(cbCls).toContain("focus-visible:ring-1");
     expect(cbCls).not.toContain("data-[state=checked]:border-primary");
     const badge = page.locator("div.inline-flex.items-center.rounded-md").first();

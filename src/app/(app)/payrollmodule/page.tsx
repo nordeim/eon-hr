@@ -296,7 +296,10 @@ export default function PayrollModulePage() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
+              {/* Session 62 (R62-H1): REF's header row carries
+                  border-slate-200 bg-slate-50 (the unflipping pair,
+                  r62 census). */}
+              <TableRow className="border-slate-200 bg-slate-50">
                 <TableHead>Employee</TableHead>
                 <TableHead>Basic Salary</TableHead>
                 <TableHead>Allowances</TableHead>
