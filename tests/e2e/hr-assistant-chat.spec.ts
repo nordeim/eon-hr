@@ -43,8 +43,11 @@ test.describe("hr assistant chat empty states (session 31)", () => {
     await expect(page.getByText(/Your HR assistant answers questions/)).toHaveCount(0);
 
     // The centered block sits over the line inside the pane card (order).
+    // Session 66 (R66-B) amendment: the icon is SVG-AUTHORED (REF's live
+    // form — mx-auto mb-4 on the icon itself); the mb-4 wrapper div is
+    // retired, so the icon is now a DIRECT child of the text-center block.
     const pane = page.locator("div.lg\\:col-span-3");
-    await expect(pane.locator("div.text-center > div.mb-4 > svg")).toHaveCount(1);
+    await expect(pane.locator("div.text-center > svg")).toHaveCount(1);
 
     // Geometry anchor (desktop 1280 default): the pane card fills the row.
     const cardBox = await pane.locator(".rounded-xl").boundingBox();

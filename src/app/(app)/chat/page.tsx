@@ -233,7 +233,7 @@ export default function ChatPage() {
                  px-3 (16px icon + 24px = REF's live 40×32), not the
                  fixed w-10 form (computed-equal at rest; the padding
                  member is the authored truth). */
-              className="flex h-8 shrink-0 items-center justify-center rounded-md bg-blue-600 px-3 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
+              className="flex h-8 shrink-0 items-center justify-center gap-2 rounded-md bg-blue-600 px-3 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
             >
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
             </button>

@@ -240,11 +240,11 @@ export default function PerformanceManagementPage() {
         <StatCard variant="no-tile" label="Reviews" value={stats.reviews} valueClassName="text-purple-600" icon={<Award className="w-10 h-10 text-purple-500" aria-hidden="true" />} />
       </div>
 
-      <Tabs defaultValue="goals">
+      <Tabs defaultValue="goals" className="space-y-6">
         {/* Session 15 (R14-C): the reference pill is the default
             shrink-wrapped TabsList + bg-white border border-slate-200
             (296×36 live-measured) — the R13 white-pill recipe. */}
-        <TabsList className="bg-white border border-slate-200">
+        <TabsList className="mb-0! bg-white border border-slate-200">
           <TabsTrigger value="goals">Goals & KPIs</TabsTrigger>
           <TabsTrigger value="reviews">Performance Reviews</TabsTrigger>
         </TabsList>
@@ -254,7 +254,7 @@ export default function PerformanceManagementPage() {
             zero-state toolbar is justify-end + the button alone). */}
         <TabsContent
           value="goals"
-          className="ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"
+          className="mt-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"
         >
           <div className={goals.length > 0 ? "flex items-center justify-between gap-2" : "flex justify-end"}>
             {goals.length > 0 ? (
@@ -279,7 +279,7 @@ export default function PerformanceManagementPage() {
             /* Session 48 (R47-E4): REF's zero state renders an EMPTY grid
                — no empty-state card (the r46 training precedent; the
                Set New Goal row above stays the entry). */
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6">
               {goals.map((goal) => (
                 <Card key={goal.id}>
                   <CardHeader>
@@ -372,7 +372,7 @@ export default function PerformanceManagementPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="reviews" className="flex flex-col gap-4">
+        <TabsContent value="reviews" className="mt-6 flex flex-col gap-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

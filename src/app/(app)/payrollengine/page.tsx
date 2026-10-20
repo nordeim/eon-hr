@@ -165,20 +165,20 @@ export default function PayrollEnginePage() {
       <Card className="border-0 shadow-sm">
         <CardContent className="p-5">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-2 leading-5">
+            <div className="space-y-1">
               <Label htmlFor="pe-month">Payroll Month</Label>
               <Input
-                className="mt-2 w-44"
+                className="w-44"
                 id="pe-month"
                 type="month"
                 value={month}
                 onChange={(e) => onMonthChange(e.target.value)}
               />
             </div>
-            <div className="space-y-2 leading-5">
+            <div className="space-y-1">
               <Label htmlFor="pe-department">Department</Label>
               <Select value={departmentId} onValueChange={(v) => setDepartmentId(v)}>
-                <SelectTrigger id="pe-department" className="mt-2 w-48">
+                <SelectTrigger id="pe-department" className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -219,6 +219,7 @@ export default function StaffRequestsPage() {
       <PageHeader
         rowBreakpoint="md"
         size="md"
+        actionsBare
         title="Staff Requests"
         subtitle="Submit and manage requests across departments"
         actions={

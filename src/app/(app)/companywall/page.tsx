@@ -253,8 +253,8 @@ export default function CompanyWallPage() {
                 rows={3}
                 className="min-h-[60px]"
               />
-              <div className="space-y-3">
-                <Label className="block leading-5" htmlFor="post-audience">Who can see this post?</Label>
+              <div className="space-y-2">
+                <Label htmlFor="post-audience">Who can see this post?</Label>
                 <Select value={audience} onValueChange={setAudience}>
                   <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
                     <SelectValue />
@@ -342,6 +342,7 @@ export default function CompanyWallPage() {
            hand-rolled shadow-sm — the r62 border census). */
         <div className="rounded-xl border bg-card text-card-foreground shadow border-slate-200">
           <EmptyState
+            icon={<House aria-hidden="true" />}
             title="No posts yet"
             description="Be the first to share something with your team!"
           />

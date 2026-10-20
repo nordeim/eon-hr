@@ -182,6 +182,7 @@ export default function EmployeesPage() {
         size="lg"
         mobileKicker
         mobileHeader="hidden"
+        alwaysRow
         className="mb-8"
         title="Employees"
         subtitle={`Manage your ${counts.total} employees`}
@@ -337,7 +338,7 @@ export default function EmployeesPage() {
           </Table>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {employees.map((emp) => (
             <div key={emp.id} className="rounded-xl border bg-card p-4 shadow">
               <div className="flex items-start justify-between gap-2">

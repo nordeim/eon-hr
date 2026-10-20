@@ -212,11 +212,11 @@ export default function EvaluationsPage() {
         subtitle="Structured reviews, automated workflows & AI-generated performance reports"
       />
 
-      <Tabs defaultValue="workflows">
+      <Tabs defaultValue="workflows" className="space-y-6">
         {/* Session 12 (R11-N): the centered equal-width tablist — grid
             w-full max-w-lg mx-auto grid-cols-3 (512×36; triggers 167px
             each) on the white bordered pill. */}
-        <TabsList className="bg-white border border-slate-200 grid w-full max-w-lg mx-auto grid-cols-3">
+        <TabsList className="mb-0! bg-white border border-slate-200 grid w-full max-w-lg mx-auto grid-cols-3">
           {/* Session 12 (R11-N): reference triggers — text-xs (12px/16px,
               24px tall) with 12px leading icons (ChartColumn,
               ClipboardCheck, Target). */}
@@ -268,6 +268,10 @@ export default function EvaluationsPage() {
               New Review
             </Button>
           </div>
+          {/* Session 66 (R66-E): REF wraps this block in a space-y-3
+              container (the census read the line as its boundary child —
+              the r13-era direct-child authoring is amended). */}
+          <div className="space-y-3">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -351,6 +355,7 @@ export default function EvaluationsPage() {
               </CardContent>
             </Card>
           )}
+          </div>
         </TabsContent>
 
         <TabsContent value="eval360" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6">

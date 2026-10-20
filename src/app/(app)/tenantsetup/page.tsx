@@ -53,7 +53,7 @@ export default function TenantSetupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl shadow">
         <CardHeader className="flex flex-col space-y-1.5 border-b p-6 text-center">
-          <div className="mx-auto mb-[22px] flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mx-auto mb-4">
             <Users className="h-8 w-8 text-blue-600" aria-hidden="true" />
           </div>
           <div className="font-semibold tracking-tight text-2xl">Welcome to EonHR</div>
@@ -85,11 +85,13 @@ export default function TenantSetupPage() {
                 required
               />
             </div>
-            <div className="flex justify-end pt-4">
+            <div className="flex pt-4">
               {/* Session 58 (R58-4): REF's Continue is the DARK solid
-                  (bg-primary #171717) — live-measured, the CTA-fill
-                  census. */}
-              <Button type="submit" variant="dark" disabled={saving}>
+                  (bg-primary #171717) — live-measured, the CTA-fill census.
+                  Session 66 (R66-J): the footer is NOT justify-end — REF's
+                  button right-aligns via its own ml-auto (the census read
+                  the resolved 527px left margin). */}
+              <Button type="submit" variant="dark" className="ml-auto" disabled={saving}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Continue
               </Button>

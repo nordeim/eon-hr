@@ -230,7 +230,11 @@ export default function WorkflowAutomationPage() {
         <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
-      ) : (
+      ) : workflows.length > 0 ? (
+        /* Session 66 (R66-O): the grid renders ONLY with data — REF
+           renders NOTHING below the stat row at 0 workflows (the R16-B
+           zero-render pattern; the census read the empty grid's gap
+           tuple REF never emits). */
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {workflows.map((workflow) => {
             const mod = moduleBadge(workflow.module);
@@ -294,7 +298,7 @@ export default function WorkflowAutomationPage() {
             );
           })}
         </div>
-      )}
+      ) : null}
 
       <NewWorkflowDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreate} />
     </div>

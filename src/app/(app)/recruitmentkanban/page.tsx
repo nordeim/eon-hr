@@ -274,10 +274,10 @@ export default function RecruitmentKanbanPage() {
           `inline-flex items-center rounded-md border px-2.5` 30x22) over a
           `min-h-32 rounded-md` drop zone. The clone's working
           search/filter/move/delete flow rides the reference's furniture. */}
-      <div className="flex flex-col space-y-6">
       <PageHeader
         rowBreakpoint="md"
         size="md"
+        actionsUnwrapped
         title="Recruitment Pipeline"
         subtitle="Track candidates through the hiring process"
         actions={
@@ -373,7 +373,15 @@ export default function RecruitmentKanbanPage() {
                     {colCandidates.length}
                   </div>
                 </div>
-                <div className="flex min-h-32 flex-col gap-2 rounded-md transition-colors">
+                {/* Session 66 (R66-R): the zone is REF's BARE
+                    `min-h-32 rounded-md` (live-measured — no flex, no
+                    gap member); the with-data card stack rides an inner
+                    gap-2 wrapper so the zero-state zone renders empty
+                    exactly like REF while the superset DnD keeps its
+                    spacing. */}
+                <div className="min-h-32 rounded-md transition-colors">
+                  {colCandidates.length > 0 ? (
+                  <div className="flex flex-col gap-2">
                   {colCandidates.map((candidate) => (
                     <div
                       key={candidate.id}
@@ -462,6 +470,8 @@ export default function RecruitmentKanbanPage() {
                       </div>
                     </div>
                   ))}
+                  </div>
+                  ) : null}
                 </div>
                 </div>
               </div>
@@ -541,7 +551,6 @@ export default function RecruitmentKanbanPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
     </div>
   );
 }

@@ -282,11 +282,14 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
           with zero surveys (empty axes) — no "No surveys yet" gate. */}
       {(
         <>
-          {/* Session 12 (R11-T): the chart grid and the full-width
-              response card share a 24px rhythm (space-y-6) on the
-              reference. */}
-          <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Session 66 (R66-N): REF renders ONE grid — the chart cards
+              and the full-width response card share
+              `grid md:grid-cols-2 gap-6`, the third card spanning
+              md:col-span-2 INSIDE it (live-measured; the clone's
+              space-y-6 > grid > sibling structure was render-equal
+              but structurally divergent — the r66 census's
+              same-visual-different-STRUCTURE family). */}
+          <div className="grid md:grid-cols-2 gap-6">
             <Card className="border-slate-200">
               {/* Session 12 (R11-T): title-only header (72px, DIV
                   font-semibold tracking-tight text-base) — the reference
@@ -309,16 +312,15 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
                 <SentimentTrendLine data={trend} />
               </CardContent>
             </Card>
-          </div>
 
-          <Card className="border-slate-200">
-            <div className="flex flex-col space-y-1.5 p-6">
-              <div className="font-semibold tracking-tight text-base">Response Count &amp; Avg Sentiment by Survey</div>
-            </div>
-            <CardContent className="p-6 pt-0">
-              <SurveyComparisonBar data={bySurvey} />
-            </CardContent>
-          </Card>
+            <Card className="border-slate-200 md:col-span-2">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <div className="font-semibold tracking-tight text-base">Response Count &amp; Avg Sentiment by Survey</div>
+              </div>
+              <CardContent className="p-6 pt-0">
+                <SurveyComparisonBar data={bySurvey} />
+              </CardContent>
+            </Card>
           </div>
         </>
       )}

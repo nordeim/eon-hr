@@ -201,6 +201,7 @@ export default function LoansPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        actionsUnwrapped
 
         /* Session 49 (R48-A3): the always-row family — REF renders the
          *  UNPREFIXED always-row (measured @1440×900 this round). */
@@ -245,7 +246,7 @@ export default function LoansPage() {
         <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
           <div className="rounded-xl border bg-card text-card-foreground shadow col-span-full border-slate-200">
             <EmptyState
-              icon={<DollarSign className="h-6 w-6" aria-hidden="true" />}
+              icon={<DollarSign aria-hidden="true" />}
               title="No loans yet"
               description="Create your first loan request"
               action={

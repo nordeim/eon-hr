@@ -168,6 +168,7 @@ export default function WorkflowConfigPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <PageHeader
+        actionsUnwrapped
 
         /* Session 49 (R48-A3): the always-row family — REF renders the
          *  UNPREFIXED always-row (measured @1440×900 this round), with
@@ -204,16 +205,13 @@ export default function WorkflowConfigPage() {
         <div className="rounded-xl border bg-card text-center shadow py-16">
           <Settings2 className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
           <p className="text-slate-500">No workflows configured yet.</p>
-          <div className="mt-4">
-            {/* Session 58 (R58-10): the Create First Workflow joins the
-                blue variant — the inline bg-blue-600 className hack
-                (which the gradient default painted over: background-image
-                wins over background-color) is retired. */}
-            <Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2" aria-hidden="true" />
-              Create First Workflow
-            </Button>
-          </div>
+          {/* Session 66 (R66-K): the CTA carries mt-4 DIRECTLY (REF's
+              authored form — the census read the button's own 16px top
+              margin; the wrapper div is retired). */}
+          <Button variant="blue" className="mt-4 text-white" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2" aria-hidden="true" />
+            Create First Workflow
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

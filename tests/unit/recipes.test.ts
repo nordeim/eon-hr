@@ -1221,9 +1221,9 @@ describe("taskmanager column + badge (session 14, R13-J)", () => {
 describe("payrollengine fields (session 14, R13-K)", () => {
   const page = read("src", "app", "(app)", "payrollengine", "page.tsx");
 
-  it("toolbar field wrappers use space-y-2 (64px fields, 132px card)", () => {
-    expect(page).toMatch(/space-y-2/);
-    expect(page).not.toMatch(/space-y-1"/);
+  it("toolbar field wrappers use REF's space-y-1 groups (session 66, R66-H: the r66 margin census re-measured the label-to-control gap at 4px — the r13 space-y-2 measurement had drifted; the group value is amended, the 64px fields unchanged)", () => {
+    expect(page).toMatch(/space-y-1/);
+    expect(page).not.toMatch(/space-y-2 leading-5/);
   });
 });
 
@@ -1248,8 +1248,8 @@ describe("small pins: hrreports status + shiftcalendar (session 14, R13-L)", () 
 describe("recruitment tab pill + trigger icons (session 15, R14-A)", () => {
   const page = read("src", "app", "(app)", "recruitment", "page.tsx");
 
-  it("tab pill is the shrink-wrap + bg-white border recipe (439px)", () => {
-    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  it("tab pill is the shrink-wrap + bg-white border recipe (439px; session 66 R66-E amendment: the mb-0! member — the v4 space-y root gives the inline-flex List a bottom margin that never collapses with the content mt, doubling the gap; the R22-B kill pattern)", () => {
+    expect(page).toMatch(/TabsList className="mb-0! bg-white border border-slate-200"/);
     expect(page).not.toMatch(/<TabsList>\s*$/);
   });
 
@@ -1292,8 +1292,8 @@ describe("training section furniture (session 15, R14-B)", () => {
 describe("performancemanagement tab pill (session 15, R14-C)", () => {
   const page = read("src", "app", "(app)", "performancemanagement", "page.tsx");
 
-  it("tab pill is the shrink-wrap + bg-white border recipe (296px)", () => {
-    expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
+  it("tab pill is the shrink-wrap + bg-white border recipe (296px; session 66 R66-E amendment: the mb-0! member — the v4 space-y root gives the inline-flex List a bottom margin that never collapses with the content mt, doubling the gap; the R22-B kill pattern)", () => {
+    expect(page).toMatch(/TabsList className="mb-0! bg-white border border-slate-200"/);
   });
 });
 
@@ -2459,10 +2459,10 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     expect(src).not.toContain('<Card className="flex min-h-0');
   });
 
-  it("R30-B2: the chat right-pane empty — the h-full card with the centered 64px slate-300 MessageSquare + the single muted line (no h3 title, no description)", () => {
+  it("R30-B2: the chat right-pane empty — the h-full card with the centered 64px slate-300 MessageSquare + the single muted line (no h3 title, no description; session 66 R66-B amendment: the icon carries the mx-auto mb-4 member set itself — the svg-authored form)", () => {
     const src = read("src", "app", "(app)", "hrassistantchat", "page.tsx");
     expect(src).toContain("MessageSquare");
-    expect(src).toContain("h-16 w-16 text-slate-300");
+    expect(src).toContain("h-16 w-16 mx-auto mb-4 text-slate-300");
     expect(src).toContain("Select a chat or start a new one");
     expect(src).toContain("flex h-full items-center justify-center");
     // REF renders no description under the line
@@ -4817,10 +4817,10 @@ describe("session-47 zero-state app interiors (parity round 46 — the page-root
 
   // --- A. the page-root families ---
 
-  it("R46-A1: the PageCanvas component — REF's page-level pair (relative overflow-hidden > touch-pan-y; the invisible deco slot is documented non-clone)", () => {
+  it("R46-A1: the PageCanvas component — REF's page-level pair (relative overflow-hidden > touch-pan-y) + the deco band CLONED (session 66, R66-A: the r47 documented-non-clone decision is REVERSED by the r66 margin census — the band's -80px computed signature was the top REF-only family, live on all 8 PageCanvas routes; the band is clipped invisible at rest, exactly REF's structure)", () => {
     expect(pageCanvas47).toContain('className="relative overflow-hidden"');
     expect(pageCanvas47).toContain('className="touch-pan-y"');
-    expect(pageCanvas47).not.toContain("absolute top-0");
+    expect(pageCanvas47).toContain("absolute top-0 left-0 right-0 flex justify-center items-center h-20 -mt-20");
   });
 
   it("R46-A2: the seven TRIO pages render PageCanvas with their verbatim content roots (dashboard/employees bare; payroll/taskmanager/leavemanagement/expenses/loans gradients — the v3 form + the dark: pairs; NO select-none anywhere — REF dropped the page-root family, only the shell chrome keeps it)", () => {
@@ -6130,8 +6130,11 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
     expect((profilePageR58().match(/<Button type="submit"[^>]*variant="dark"/g) || []).length).toBeGreaterThanOrEqual(4);
     // the loans empty-state CTA joins the other four dark empty-state CTAs
     expect(loansPageR58()).toContain('<Button variant="dark" onClick={() => setDialogOpen(true)}>');
-    // tenantsetup Continue
-    expect(tenantPage()).toContain('<Button type="submit" variant="dark" disabled={saving}>');
+    // tenantsetup Continue (session 66, R66-J amendment: the button
+    // gained ml-auto — REF's footer right-aligns via the button's own
+    // auto margin, not a justify-end row; the dark-fill contract
+    // unchanged)
+    expect(tenantPage()).toContain('<Button type="submit" variant="dark" className="ml-auto" disabled={saving}>');
     // securitysettings Save + REF's Lock glyph (lucide-lock w-4 h-4 mr-2)
     expect(secPage()).toContain('<Button variant="dark" onClick={onSave} disabled={saving || settings === null}>');
     expect(secPage()).toMatch(/<Lock className="h-4 w-4 mr-2"/);
@@ -6382,7 +6385,11 @@ describe("Dark-mode fill family (session 60, R60-A..F — the dark-mode union ce
     // flipping text-primary-foreground; the chat new-chat (hand-authored)
     // rides the token (250 light / 23 dark)
     const wf = workflowconfigPage();
-    expect((wf.match(/variant="blue" className="text-white"/g) || []).length).toBe(2);
+    // Session 66 (R66-K) amendment: the empty-state CTA carries mt-4
+    // DIRECTLY (REF's authored form — the census read the button's own
+    // 16px top margin); the color contract (blue variant + literal
+    // text-white) is unchanged, the member set re-ordered.
+    expect((wf.match(/variant="blue" className="(?:mt-4 )?text-white"/g) || []).length).toBe(2);
     const np = notifPrefsPage();
     expect(np).toContain('variant="blue" className="text-white"');
     // the chat new-chat flips text-white -> text-primary-foreground
@@ -7008,5 +7015,152 @@ describe("Geometry census (session 65, R65-A..G — parity round 64: padding + b
     const css = read("src", "app", "globals.css");
     expect(css).toContain("--radius-sm: 0.25rem;");
     expect(css).not.toContain("--radius-sm: 0.125rem");
+  });
+});
+
+describe("Margin/gap census (session 66, R66-A..S — parity round 65: margin + gap)", () => {
+  /* The r66 census (scripts/r66-margin-census.mjs, 49 routes, paired
+     live, LIGHT): the computed margin (4 sides) + rowGap/columnGap of
+     every margin/gap-bearing element in main — the FIRST full-population
+     read of the two dimensions (color r57-63, padding+radius r65 —
+     margins/gaps never measured). Pre-fix 19/49. All 30 DIFFs
+     decomposed element-level (r66-probe + r66-probe-cmp + targeted
+     live probes): 18 fix families + the documented allowances. The
+     space-y direction-flip normalization (mark II): v3 authors
+     space-y as margin-TOP on *+*, v4 as margin-BLOCK-END on
+     :not(:last-child) — the census parses the parent's space-y value
+     and emits position-independent v:N tokens so the flip cannot mask
+     real DIFFs. */
+
+  const pg66 = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R66-A: the PageCanvas scroll band — REF's over-the-top pull-refresh band (absolute h-20 -mt-20 + the centered refresh-cw spinner; the r47 documented non-clone, promoted this round by the -80px census family)", () => {
+    const src = read("src", "components", "shared", "page-canvas.tsx");
+    expect(src).toContain("absolute top-0 left-0 right-0 flex justify-center items-center h-20 -mt-20");
+    expect(src).toContain("w-6 h-6 text-blue-600");
+    expect(src).toMatch(/transform:\s*"none"/);
+  });
+
+  it("R66-B: the EmptyState icon is SVG-AUTHORED — the mx-auto mb-4 member set rides the icon itself (REF's live form); the wrapper + the [&_svg] scaling div retire; the icons match REF's live names", () => {
+    const src = read("src", "components", "shared", "empty-state.tsx");
+    expect(src).toContain("w-16 h-16 mx-auto mb-4 text-slate-300");
+    expect(src).not.toContain("mb-4 flex justify-center");
+    expect(src).not.toContain("[&_svg]:h-16");
+    const off = pg66("offboarding");
+    expect(off).toContain("<UserMinus");
+    expect(off).not.toContain("<LogOut");
+    // companywall's empty uses REF's live House icon (not the default)
+    expect(pg66("companywall")).toContain("<House");
+    // training's hand-authored empty adopts the same svg-authoring
+    const training = pg66("training");
+    expect(training).toContain("h-16 w-16 mx-auto mb-4 text-slate-300");
+    expect(training).not.toContain("mt-3 text-slate-500");
+  });
+
+  it("R66-C: the StatCard tileFixed pages render the UNSPACED row (the mb-3 member is the padded-tile pages' recipe only)", () => {
+    const src = read("src", "components", "shared", "stat-card.tsx");
+    expect(src).toContain('tileFixed ? "flex items-start justify-between" : "mb-3 flex items-start justify-between"');
+  });
+
+  it("R66-D: the employees header row is the alwaysRow family (no gap member) and the grid is REF's md:2/lg:3 gap-6 recipe", () => {
+    const src = pg66("employees");
+    expect(src).toMatch(/alwaysRow/);
+    expect(src).toContain("grid md:grid-cols-2 lg:grid-cols-3 gap-6");
+    expect(src).not.toContain("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3");
+  });
+
+  it("R66-E: the Radix tab pages ride REF's space-y rhythm — the root space-y-6, the TabsList mb-0! (the v4 inline-flex mb never collapses with the content mt — the R22-B pattern), the mt-6 content", () => {
+    const src = pg66("recruitment");
+    expect(src).toMatch(/<Tabs[^>]*space-y-6/);
+    expect(src).toContain('<TabsList className="mb-0! bg-white border border-slate-200">');
+    expect(src).not.toContain("mt-6 flex flex-col gap-4");
+    expect(src).toContain("mt-6 space-y-4");
+    const ev = pg66("evaluations");
+    expect(ev).toMatch(/<Tabs[^>]*space-y-6/);
+    expect(ev).toContain('<TabsList className="mb-0! bg-white border border-slate-200 grid w-full max-w-lg mx-auto grid-cols-3">');
+    expect(ev).toContain('className="space-y-3"');
+  });
+
+  it("R66-F: the actions cluster per-page truth — staffrequests gap-2; the raw-button five render the button directly in the row", () => {
+    expect(pg66("staffrequests")).toMatch(/actionsBare/);
+    for (const route of ["expenses", "loans", "recruitment", "recruitmentkanban", "workflowconfigpage"]) {
+      expect(pg66(route)).toMatch(/actionsUnwrapped/);
+    }
+  });
+
+  it("R66-G: the companywall audience group is space-y-2 with the leading-none Label (the R10-C frozen measurement re-measured live)", () => {
+    const src = pg66("companywall");
+    expect(src).toContain('className="space-y-2"');
+    expect(src).not.toContain('className="block leading-5"');
+    expect(src).not.toContain('className="space-y-3"');
+  });
+
+  it("R66-H: the payrollengine form groups are space-y-1 (REF's 4px label-to-control)", () => {
+    const src = pg66("payrollengine");
+    expect(src).not.toContain("space-y-2 leading-5");
+    expect(src.match(/space-y-1/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+  });
+
+  it("R66-I: the requestsettings empty line is the space-y-2 child with REF's member order", () => {
+    const src = pg66("requestsettings");
+    expect(src).toContain('className="text-slate-400 text-sm"');
+    expect(src).not.toContain('className="text-sm text-slate-400"');
+  });
+
+  it("R66-J: the tenantsetup identity circle is mx-auto mb-4 and the Continue button right-aligns via ml-auto (the footer is not justify-end)", () => {
+    const src = pg66("tenantsetup");
+    expect(src).not.toContain("mb-[22px]");
+    expect(src).toContain('className="flex pt-4"');
+    expect(src).toMatch(/ml-auto/);
+  });
+
+  it("R66-K: the workflowconfigpage empty-state CTA carries the mt-4 member on the button itself", () => {
+    const src = pg66("workflowconfigpage");
+    expect(src).not.toContain('<div className="mt-4">');
+    expect(src).toMatch(/mt-4/);
+  });
+
+  it("R66-L: the performancemanagement tabs ride the 24px rhythm (root space-y-6 + mt-6 contents) and the goals grid is REF's bare gap-6", () => {
+    const src = pg66("performancemanagement");
+    expect(src).toMatch(/<Tabs[^>]*space-y-6/);
+    expect(src).toContain('<TabsList className="mb-0! bg-white border border-slate-200">');
+    expect(src).toContain('className="grid gap-6"');
+    expect(src).not.toContain("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3");
+  });
+
+  it("R66-M: the shiftswap card rides REF's card-only space-y-4 wrapper (the pills stay direct space-y-8 children)", () => {
+    const src = pg66("shiftswap");
+    const iPills = src.indexOf("flex gap-1 bg-white border border-slate-200 p-1 rounded-xl");
+    const iWrap = src.indexOf('className="space-y-4"');
+    const iCard = src.indexOf("<Card>");
+    expect(iPills).toBeGreaterThan(-1);
+    expect(iWrap).toBeGreaterThan(iPills);
+    expect(iCard).toBeGreaterThan(iWrap);
+  });
+
+  it("R66-N: the surveyanalytics chart section is ONE grid — the third card spans md:col-span-2 (REF's structure)", () => {
+    const src = read("src", "app", "(app)", "surveyanalytics", "analytics.tsx");
+    expect(src).toContain('className="grid md:grid-cols-2 gap-6"');
+    expect(src).toMatch(/md:col-span-2/);
+    expect(src).not.toContain('className="space-y-6"');
+  });
+
+  it("R66-O: the offboarding empty grid carries gap-6 (REF's 24px empty-grid gap)", () => {
+    expect(pg66("offboarding")).toContain('className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"');
+  });
+
+  it("R66-P: the hrassistant settled pane is EMPTY (the h-full div renders only in the loading branch)", () => {
+    expect(pg66("hrassistant")).not.toContain('<div className="h-full" />');
+  });
+
+  it("R66-Q: the chat new-chat button keeps the gap-2 member (the hand-authored R65 form dropped it)", () => {
+    expect(pg66("chat")).toMatch(/gap-2 rounded-md bg-blue-600 px-3/);
+  });
+
+  it("R66-R: the recruitmentkanban root is the flat R10-K form (the middle wrapper retires) and the drop zone is REF's bare min-h-32", () => {
+    const src = pg66("recruitmentkanban");
+    expect(src).not.toContain('className="flex flex-col space-y-6"');
+    expect(src).not.toContain("flex min-h-32 flex-col gap-2");
+    expect(src).toMatch(/min-h-32 rounded-md/);
   });
 });

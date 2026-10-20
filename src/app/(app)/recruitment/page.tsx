@@ -304,6 +304,7 @@ export default function RecruitmentPage() {
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         rowBreakpoint="md"
+        actionsUnwrapped
         section="AI-Powered Recruitment"
         layout="flat36-sm"
         iconClassName="text-indigo-600"
@@ -333,13 +334,13 @@ export default function RecruitmentPage() {
         <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<TrendingUp className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
       </div>
 
-      <Tabs defaultValue="applicants">
+      <Tabs defaultValue="applicants" className="space-y-6">
         {/* Session 15 (R14-A): the reference pill is the default
             shrink-wrapped TabsList + bg-white border border-slate-200
             (439×36); the first two triggers carry 12px lucide icons
             (users / sparkles) with gap-1 — the compliance trigger
             recipe (190/131/108 live-measured). */}
-        <TabsList className="bg-white border border-slate-200">
+        <TabsList className="mb-0! bg-white border border-slate-200">
           <TabsTrigger value="applicants" className="gap-1"><Users className="h-3 w-3" aria-hidden="true" /> Applicants &amp; Ranking</TabsTrigger>
           <TabsTrigger value="cvupload" className="gap-1"><Sparkles className="h-3 w-3" aria-hidden="true" /> AI CV Upload</TabsTrigger>
           <TabsTrigger value="jobs">Job Postings</TabsTrigger>
@@ -349,7 +350,7 @@ export default function RecruitmentPage() {
         {/* Session 12 (R11-K): the reference's toolbar — flex flex-wrap
             gap-3 items-center bg-white p-4 rounded-xl border — with a 16px
             Filter icon (session 61), w-48/w-40/w-40 selects and the ml-auto count. */}
-        <TabsContent value="applicants" className="mt-6 flex flex-col gap-4">
+        <TabsContent value="applicants" className="mt-6 space-y-4">
           <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200">
             {/* Session 61 (R61-V): REF's filter row leads with the
                 Filter glyph in authored slate-400 (rgb(148,163,184)
@@ -526,7 +527,7 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- AI CV Upload ---------------- */}
-        <TabsContent value="cvupload" className="mt-6 flex flex-col gap-4">
+        <TabsContent value="cvupload" className="mt-6 space-y-4">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-xl border bg-card p-5 shadow-sm">
               <div className="flex flex-col gap-1 pb-4">
@@ -650,7 +651,7 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- Job Postings ---------------- */}
-        <TabsContent value="jobs" className="mt-6 flex flex-col gap-4">
+        <TabsContent value="jobs" className="mt-6 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />

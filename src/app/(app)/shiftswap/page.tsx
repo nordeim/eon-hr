@@ -181,9 +181,12 @@ export default function ShiftSwapPage() {
           ))}
         </div>
 
-        {/* REF's tab row (round 33 re-measure): the pills sit in a
-            `flex gap-1 bg-white border border-slate-200 p-1 rounded-xl`
-            container (the pill lands x=293 y=315). */}
+        {/* Session 66 (R66-M, corrected): REF's pills ride the page's
+            space-y-8 directly (the census read their 32px top margin);
+            ONLY the card rides a space-y-4 wrapper (a single child at the
+            zero state). REF's tab row (round 33 re-measure): the pills sit
+            in a `flex gap-1 bg-white border border-slate-200 p-1
+            rounded-xl` container (the pill lands x=293 y=315). */}
         <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-xl w-fit">
           {/* Session 50 (R49-B2): REF's pill form — py-2 (not h-9) +
               hover:bg-slate-50 (live-measured). */}
@@ -213,6 +216,9 @@ export default function ShiftSwapPage() {
             p-12 text-center interior, the arrow-left-right glyph DIRECT
             (w-12 h-12 mx-auto mb-3 text-slate-300), and the mt-less
             slate-500 line (live-measured). */}
+        {/* Session 66 (R66-M): REF's card-only space-y-4 wrapper (the
+            card is its boundary child — the census read v:16). */}
+        <div className="space-y-4">
         <Card>
           <CardContent className="p-12 text-center">
             {loading ? (
@@ -241,6 +247,7 @@ export default function ShiftSwapPage() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

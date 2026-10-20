@@ -276,7 +276,9 @@ export default function RequestSettingsPage() {
             </div>
 
             {limits.length === 0 ? (
-              <p className="text-sm text-slate-400">No limits configured</p>
+              <div className="space-y-2">
+                <p className="text-slate-400 text-sm">No limits configured</p>
+              </div>
             ) : (
               <ul className="space-y-1">
                 {limits.map((l, i) => (

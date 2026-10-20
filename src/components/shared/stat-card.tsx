@@ -365,7 +365,13 @@ export function StatCard({
                  live-measured: w-10 h-10 … mb-3). */
               tileElement
             ) : (
-              <div className={cn("mb-3 flex items-start justify-between", tileRowClassName)}>{tileElement}</div>
+              /* Session 66 (R66-C): the tileFixed standard pages render
+                 the UNSPACED row — REF's second standard form (the r66
+                 margin census: advancedanalytics / allleaverequests /
+                 payrollai live-measure the row WITHOUT mb-3; the value
+                 spacing rides the call sites' mt-4 P form). The padded
+                 p-3 pages keep the mb-3 row (payroll live-verified). */
+              <div className={cn(tileFixed ? "flex items-start justify-between" : "mb-3 flex items-start justify-between", tileRowClassName)}>{tileElement}</div>
             )}
             {textBlock}
           </>

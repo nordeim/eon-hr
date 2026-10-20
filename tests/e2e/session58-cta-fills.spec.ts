@@ -180,6 +180,15 @@ test.describe("session-58 CTA-fill recipe family (computed truth)", () => {
       expect(await sw.evaluate((s) => getComputedStyle(s).backgroundColor)).toBe(DARK);
     }
     await page.goto("/securitysettings");
+    // the checkboxes render after the security-settings fetch — wait for
+    // them BEFORE counting, or the count races the Loader (0 matches while
+    // settings === null). The missing wait was the "session-58 transient":
+    // a count-vs-fetch race whose firing odds shift with machine timing
+    // (it fired 3× consecutively on a cold-cache sandbox at session 66 —
+    // mid-suite, isolated, and grep runs — while the post-failure
+    // snapshot showed the correct 4 checked, proving the state was right
+    // and only the read was early). Mirrors the switches wait above.
+    await expect(page.locator("main [role=checkbox]").first()).toBeVisible({ timeout: 15000 });
     const checked = await page.locator("main [role=checkbox][aria-checked=true]").all();
     // the settings defaults: audit logging, encryption, backups, GDPR on;
     // 2FA off (the fifth, unchecked)

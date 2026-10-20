@@ -161,12 +161,14 @@ export default function HrAssistantPage() {
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
-                /* Session 61 (R61-M): REF's zero-message pane renders
-                   NOTHING — live-measured (no icon, no copy; only the
-                   bot kicker + the send row). The r47-E5 "icon only"
-                   pin is superseded by the r61 re-measure (the sparkles
-                   retired). */
-                <div className="h-full" />
+                /* Session 61 (R61-M) + Session 66 (R66-P): REF's zero-message
+                   pane renders NOTHING — live-measured (no icon, no copy;
+                   only the bot kicker + the send row). The r47-E5 "icon
+                   only" pin is superseded by the r61 re-measure (the
+                   sparkles retired); the r65-E loader-branch h-full div
+                   leaked into the settled state and is retired too (the
+                   r66 census: the pane is EMPTY at rest — no children). */
+                null
               ) : (
                 messages.map((m) => {
                   const isUser = m.role === "user";

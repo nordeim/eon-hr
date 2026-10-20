@@ -199,10 +199,12 @@ export default function TrainingPage() {
                  retired — the with-data entry is the grid's dashed
                  add-tile). */
               <div className="p-12 text-center">
-                <div className="flex justify-center">
-                  <GraduationCap className="h-16 w-16 text-slate-300" aria-hidden="true" />
-                </div>
-                <p className="mt-3 text-slate-500">No training platforms available</p>
+                {/* Session 66 (R66-B): the icon is SVG-AUTHORED — REF's
+                    live form puts mx-auto mb-4 on the icon itself (the
+                    margin census read the mx-auto family; the wrapper
+                    + the mt-3 line retire). */}
+                <GraduationCap className="h-16 w-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
+                <p className="text-slate-500">No training platforms available</p>
               </div>
             ) : (
               /* Session 47 (R46-H1): REF's zero-state renders NO create

@@ -39,18 +39,23 @@ export function EmptyState({
 }) {
   return (
     <div className={cn("p-12 text-center", className)}>
-      {/* Session 11 (R10 follow-up): the reference's icon carries mb-4 —
-          re-measured on BOTH payroll and loans (icon bottom → h3 = 16px);
-          the wrapper had no margin, shortening every empty state by 16px. */}
-      <div className="mb-4 flex justify-center">
-        {iconChip ? (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 [&_svg]:h-8 [&_svg]:w-8 [&_svg]:text-slate-400">{icon}</div>
-        ) : icon ? (
-          <div className="[&_svg]:h-16 [&_svg]:w-16 [&_svg]:text-slate-300">{icon}</div>
-        ) : (
-          <Inbox className="h-16 w-16 text-slate-300" aria-hidden="true" />
-        )}
-      </div>
+      {/* Session 66 (R66-B): the icon is SVG-AUTHORED — REF's live empty
+          states put the member set on the icon itself
+          (`lucide-{name} w-16 h-16 mx-auto mb-4 text-slate-300`), with
+          NO wrapper (the r64-era centered-wrapper + svg-scaling-div
+          idiom is retired — the margin census read REF's mx-auto as
+          the 479/303/96px computed family the wrapper form cannot
+          produce). The chip variant carries mx-auto mb-4 on the circle
+          itself (the R11-C recipe). */}
+      {iconChip ? (
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mx-auto mb-4 [&_svg]:h-8 [&_svg]:w-8 [&_svg]:text-slate-400">{icon}</div>
+      ) : icon && React.isValidElement(icon) ? (
+        React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+          className: cn("w-16 h-16 mx-auto mb-4 text-slate-300", (icon.props as { className?: string }).className),
+        })
+      ) : (
+        <Inbox className="w-16 h-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
+      )}
       <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
       {description ? (
         <p className={cn("text-slate-500", action ? "mb-4" : undefined)}>{description}</p>

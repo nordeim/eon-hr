@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, Loader2, MessageSquare, Plus, Send, Sparkles, Target } from "lucide-react";
+import { Bot, Loader2, MessageSquare, Plus, Send, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -252,7 +252,7 @@ export default function HrAssistantChatPage() {
                     </div>
                   ) : messages.length === 0 ? (
                     <EmptyState
-                      icon={<Sparkles className="h-6 w-6" aria-hidden="true" />}
+                      icon={<MessageSquare aria-hidden="true" />}
                       title="Ask me anything HR"
                       description="Leave balances, payroll periods, HR letters and company policy."
                       className="py-8"
@@ -337,9 +337,10 @@ export default function HrAssistantChatPage() {
                16px slate-500 line (y=529). No title, no description. */
             <CardContent className="flex h-full items-center justify-center">
               <div className="text-center">
-                <div className="mb-4 flex justify-center">
-                  <MessageSquare className="h-16 w-16 text-slate-300" aria-hidden="true" />
-                </div>
+                {/* Session 66 (R66-B): the icon is SVG-AUTHORED — the
+                    mx-auto mb-4 member set rides the icon itself (the
+                    r66 census; the wrapper div is retired). */}
+                <MessageSquare className="h-16 w-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
                 <p className="text-slate-500">Select a chat or start a new one</p>
               </div>
             </CardContent>
