@@ -289,12 +289,15 @@ export default function AssetManagementPage() {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          {/* Session 64 (R64-A): REF clears the left-3 search icon with
+              pl-9 (36px — live-measured this round). */}
           <Input
             type="text"
             placeholder="Search assets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search assets"
+            className="pl-9"
           />
         </div>
         <Select value={status} onValueChange={setStatus}>

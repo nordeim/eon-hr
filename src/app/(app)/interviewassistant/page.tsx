@@ -258,10 +258,13 @@ export default function InterviewAssistantPage() {
                   the CTA-fill census. */}
               <div className="space-y-2">
                 <Label htmlFor="ia-notes">Notes</Label>
+                {/* Session 64 (R64-D): REF's live textarea placeholder
+                    (live-measured this round — the authored example essay
+                    retired; R61-L held the SELECT's string only). */}
                 <Textarea
                   id="ia-notes"
                   rows={10}
-                  placeholder="e.g. Led the redesign project, delivered ahead of schedule. Excellent communication — confident presenter. Concern: depth in testing…"
+                  placeholder="Enter your interview observations, candidate responses, and overall impressions..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />

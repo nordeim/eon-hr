@@ -273,12 +273,15 @@ export default function PayrollModulePage() {
           ("Search employees...") between the stats and the table card. */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+        {/* Session 64 (R64-A): REF clears the left-3 search icon with
+            pl-9 (36px — live-measured this round). */}
         <Input
           type="text"
           placeholder="Search employees..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search employees"
+          className="pl-9"
         />
       </div>
 

@@ -259,12 +259,16 @@ export default function PayrollPage() {
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              {/* Session 64 (R64-A): REF clears the left-3 search icon
+                  with pl-10 (40px left padding — live-measured; the
+                  r11-H pin held the toolbar's outer geometry only). */}
               <Input
                 type="text"
                 placeholder="Search employee..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 aria-label="Search employee"
+                className="pl-10"
               />
             </div>
             <Input

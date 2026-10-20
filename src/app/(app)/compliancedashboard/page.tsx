@@ -339,12 +339,15 @@ export default function ComplianceDashboardPage() {
 
                 <div className="flex flex-wrap gap-3 p-4">
                   <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  {/* Session 64 (R64-B): REF's live placeholder names the
+                      employee dimension (the query filters document name AND
+                      employeeName — the authored inventory-string retired). */}
                   <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search documents"
+                    placeholder="Search employee..."
                     className="w-48"
-                    aria-label="Search documents"
+                    aria-label="Search employee"
                   />
                   <Select value={type} onValueChange={setType}>
                     <SelectTrigger className="w-36" aria-label="Filter by document type">

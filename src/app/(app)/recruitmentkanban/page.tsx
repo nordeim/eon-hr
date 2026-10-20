@@ -293,9 +293,11 @@ export default function RecruitmentKanbanPage() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+          {/* Session 64 (R64-C): REF's live placeholder (live-measured
+              this round — the authored triple-target string retired). */}
           <Input
-            aria-label="Search candidates"
-            placeholder="Search candidates, jobs or emails…"
+            aria-label="Search applicants"
+            placeholder="Search applicants..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"

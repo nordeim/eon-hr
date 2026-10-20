@@ -6868,3 +6868,65 @@ describe("Light-mode text-color family (session 63, R63-A..G — the light-mode 
     expect(src).not.toContain("text-slate-900");
   });
 });
+
+describe("Light-mode border census + the input-family probes (session 64, R64-A..E — parity round 63)", () => {
+  /* The r64 census (scripts/r64-lightborder-census.mjs, 49 routes, paired
+     live, LIGHT mode): the computed border-color of every visibly-bordered
+     element in main — the LAST uncensured cell of the computed-color
+     matrix (fill r57 light + r59 dark, text r60 dark + r62 light, border
+     r61 dark + r63 light). Pre-fix 44/49 with all 5 DIFFs decomposed to
+     documented allowances (the seeded employees grid card + badge, the
+     attendance admin superset cards, the interviewassistant r48-C1 card,
+     the onboardingtemplates r36 404 anchor superset, REF's live careers
+     data) — ZERO border fixes required. The round's real finds came from
+     the two per-dimension probes the census's set-comparison inversion
+     risk motivated: the iconed-search-input LEFT PADDING (probe2 — REF
+     clears the absolute left-3 icon with pl-10/pl-9; the clone rendered
+     the same wrappers without the padding member — typed text COLLIDED
+     with the icon on 4 routes) and the placeholder TEXT values (probe3 —
+     r60/r63 read placeholder COLORS only; 4 authored strings diverged
+     from REF's live verbatim copy). Session-12's R11-H pin measured the
+     payroll toolbar's outer geometry but never the interior padding
+     member — a measurement gap live-caught 51 rounds later. */
+
+  const pg64 = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R64-A: the iconed-search inputs clear the absolute left-3 icon (REF: payroll pl-10 = 40px; payrollmodule / documenttracker / assetmanagement pl-9 = 36px — live-measured; the icon-to-Input windows)", () => {
+    const payroll = pg64("payroll");
+    expect(payroll).toMatch(/absolute left-3[\s\S]{0,600}className="pl-10"/);
+    const payrollmodule = pg64("payrollmodule");
+    expect(payrollmodule).toMatch(/absolute left-3[\s\S]{0,600}className="pl-9"/);
+    const documenttracker = pg64("documenttracker");
+    expect(documenttracker).toMatch(/absolute left-3[\s\S]{0,600}className="pl-9"/);
+    const assetmanagement = pg64("assetmanagement");
+    expect(assetmanagement).toMatch(/absolute left-3[\s\S]{0,600}className="pl-9"/);
+  });
+
+  it("R64-B: the compliance search input rides REF's live placeholder + label (the query filters document name AND employeeName; the authored inventory-string retired)", () => {
+    const src = pg64("compliancedashboard");
+    expect(src).toContain('placeholder="Search employee..."');
+    expect(src).toContain('aria-label="Search employee"');
+    expect(src).not.toContain("Search documents");
+  });
+
+  it("R64-C: the recruitmentkanban search input rides REF's live placeholder + label (the authored triple-target string retired)", () => {
+    const src = pg64("recruitmentkanban");
+    expect(src).toContain('placeholder="Search applicants..."');
+    expect(src).toContain('aria-label="Search applicants"');
+    expect(src).not.toContain("Search candidates");
+  });
+
+  it("R64-D: the interviewassistant notes textarea rides REF's live verbatim placeholder (the authored example essay retired; R61-L held only the SELECT's string)", () => {
+    const src = pg64("interviewassistant");
+    expect(src).toContain('placeholder="Enter your interview observations, candidate responses, and overall impressions..."');
+    expect(src).not.toContain("Led the redesign");
+  });
+
+  it("R64-E: the tenantsetup wizard placeholders ride REF's live example values (the R31-C10 pin held the labels only)", () => {
+    const src = pg64("tenantsetup");
+    expect(src).toContain('placeholder="Acme Corporation"');
+    expect(src).toContain('placeholder="admin@acme.com"');
+    expect(src).not.toContain("Your company name");
+    expect(src).not.toContain("owner@company.com");
+  });
+});

@@ -63,11 +63,14 @@ export default function TenantSetupPage() {
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="company-name">Company Name *</Label>
+              {/* Session 64 (R64-E): REF's live example placeholders
+                  (live-measured this round — R31-C10 held the labels
+                  only). */}
               <Input
                 id="company-name"
                 value={form.companyName}
                 onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
-                placeholder="Your company name"
+                placeholder="Acme Corporation"
                 required
               />
             </div>
@@ -78,7 +81,7 @@ export default function TenantSetupPage() {
                 type="email"
                 value={form.ownerEmail}
                 onChange={(e) => setForm((f) => ({ ...f, ownerEmail: e.target.value }))}
-                placeholder="owner@company.com"
+                placeholder="admin@acme.com"
                 required
               />
             </div>

@@ -263,12 +263,15 @@ export default function DocumentTrackerPage() {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-64">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          {/* Session 64 (R64-A): REF clears the left-3 search icon with
+              pl-9 (36px — live-measured this round). */}
           <Input
             type="text"
             placeholder="Search by employee or document number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search documents"
+            className="pl-9"
           />
         </div>
         <div className="flex bg-white border border-slate-200 rounded-lg p-1 gap-1">
