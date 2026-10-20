@@ -197,10 +197,24 @@ test.describe("dialog focus + trigger contracts (session 38, R37)", () => {
     await page.getByRole("button", { name: "Add Workflow" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    const w = await dialog.evaluate((dl: HTMLElement) => {
+    // Session-67 (R67 lesson): the width MUST settle before the read — the
+    // dialog's data-[state=open]:zoom-in-95 animate-in means toBeVisible()
+    // passes at mount while the scale transition is still in flight, and a
+    // mid-transition read lands at 113 × scale ≈ 109 (the full-suite 109.06
+    // failure was exactly this; isolated reruns on a warm server settle
+    // before the evaluate). The poll-until-stable read replaces the single
+    // read: two consecutive equal widths = the transition has finished.
+    const readW = () => dialog.evaluate((dl: HTMLElement) => {
       const b = Array.from(dl.querySelectorAll("button")).find((x) => x.textContent?.trim() === "Add Level");
       return b ? b.getBoundingClientRect().width : 0;
     });
+    let w = await readW();
+    for (let i = 0; i < 12; i++) {
+      await page.waitForTimeout(120);
+      const w2 = await readW();
+      if (w2 === w && w > 0) break;
+      w = w2;
+    }
     // REF = 113 in the paired browser probe (12px pads + 16px icon + 4px
     // mr-1 + text); headless Chromium rasterizes the text ~2px narrower —
     // the range pins the mr-1 recipe while tolerating the rasterization
