@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.48.0 (session-65 remediation complete — the geometry census: the FIRST full-population computed read of PADDING + BORDER-RADIUS, the two dimensions every color census was blind to (the r64 lesson), 32/49 pre-fix → 44/49 post-fix with all 5 DIFFs documented allowances; the seven fix families: the StatCard standard-variant p-3 padding-driven tiles (payroll/expenses/surveys/attendance — the session-17 zero-padding note was a page-specific generalization, the r65 per-tile probe split the family; tileFixed on the analytics-side pages + tile-right by contract), the td/th UA-padding restoration (TW v4's preflight universal padding reset zeroes the Chrome UA 1px REF's runtime keeps — the R23-A cursor precedent, a REAL v4 engine difference), the chat column header (ONE p-4 border-b wrapper — the split authoring had DROPPED the border-b, a set-blindness catch), the compliance filter row's bordered-white-box member set, the hrassistant 500px/p-6 pane + p-4 row + 60px textarea, the requestreports Back button's py-2 leak (ghost sm), and the --radius-sm token (REF's live rounded-sm = 4px, the v4 scale)) · **Last updated:** 2026-10-20
-> **State:** 892 unit + 346 E2E tests green, lint/typecheck/build
+> **Version:** 3.49.0 (session-66 remediation complete — the margin/gap census: the FIRST full-population computed read of MARGIN (4 sides) + rowGap/columnGap, the two dimensions no census had ever covered, 19/49 pre-fix → 45/49 post-fix with all 4 DIFFs documented allowances; the eighteen fix families: the PageCanvas scroll band (the r47 documented non-clone promoted by the -80px census family), the SVG-authored empty-state icons (mx-auto mb-4 ON the svg — the 479/303/96px computed family), the StatCard tileFixed unspaced row, the employees alwaysRow header + gap-6 grid, the Radix tabs rhythm (space-y-6 root + the R22-B mb-0! List kill — the v4 inline-flex margins never collapse, the 48px trap), the actions-cluster three-form truth (gap-3 clusters / gap-2 staffrequests / the raw-button five), the companywall space-y-2 group (a REF-side drift of the R10-C pin), the payrollengine space-y-1 groups, the requestsettings space-y-2 line, the tenantsetup mb-4 circle + ml-auto footer, the mt-4 workflowconfigpage CTA, the performancemanagement bare gap-6 grid, the shiftswap card-only wrapper, the surveyanalytics single-grid + col-span-2, the offboarding gap-6 + the workflowautomation grid gate, the EMPTY hrassistant pane, the chat gap-2 member, and the recruitmentkanban flat root + bare drop zone) · **Last updated:** 2026-10-21
+> **State:** 910 unit + 360 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4279,3 +4279,90 @@ functional divergence whose fix lives upstream.
 5. **A frozen measurement can be a frozen GENERALIZATION**: the R16-D
    "NOT p-3" tile note was real data applied to the wrong population —
    re-measure per page before trusting any family-level pin.
+
+## §76 Session 66 (parity round 65) — the margin/gap census (margin + gap)
+
+Workspace rebuilt (fresh clone at `0a31b7c`, the round-64 landing);
+environment per protocol. Baseline gates ALL GREEN (892/892 unit ·
+E2E 345/346 — the one failure RETIRED as a real spec race, below).
+**Deploy watch: the 29TH LOGIN DEPLOY detected** (login JS
+`DcjXLM5U`→`q8Uif46n` + CSS `D_pxMX7I`→`CiCfCTzx`; the app side
+quiet) — re-audited NON-VISUAL via the full ladder after a fresh
+re-auth (standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45
+13/13). The watch finals are the post-29th hashes.
+
+**The census** (`scripts/r66-margin-census.mjs`, 49 routes, paired
+live, LIGHT, three batches): the computed margin (4 sides) +
+rowGap/columnGap of every margin/gap-bearing element in main — the
+FIRST full-population read of the two dimensions NO census had ever
+covered. **Pre-fix 19/49; post-fix 45/49** (the 4 remaining DIFFs are
+the documented allowances: employees seeded, attendance admin
+superset, careers live data, interviewassistant r48-C1). The 18 fix
+families and their full member sets live in
+`docs/remediation-plan-session66.md`; the highlights:
+
+- **R66-A** the PageCanvas scroll band cloned (the r47 "non-clone"
+  reversed — the `-80,0,0,0` census family, 8 routes).
+- **R66-B** the EmptyState icon is SVG-authored (`w-16 h-16 mx-auto
+  mb-4 text-slate-300` ON the svg; the wrapper + `[&_svg]` divs
+  retired; the icon names fixed to REF's live set).
+- **R66-C/D/E/F** the per-page recipe splits: the tileFixed UNSPACED
+  row; the employees alwaysRow + `grid md:grid-cols-2 lg:grid-cols-3
+  gap-6`; the Radix tabs rhythm (space-y-6 root + **the R22-B
+  `mb-0!` List kill** — the v4 inline-flex margins never collapse,
+  the 48px trap); the actions-cluster three-form truth.
+- **R66-G..R** the group/recipe re-measures (companywall's
+  REF-side drift, payrollengine's 4px groups, tenantsetup's ml-auto
+  footer, the surveyanalytics single-grid, the shiftswap card-only
+  wrapper, the kanban flat root + bare zone, the EMPTY hrassistant
+  pane, the chat gap-2).
+
+**The session-58 "transient" RETIRED**: the switch/checkbox spec
+fired 3× consecutively in isolation on the cold sandbox — a
+count-without-wait race (the count read 0 while the fetch was
+pending; the post-failure snapshot showed the correct state). The
+wait mirrors the switches block; the documented-transient family
+shrinks by one and its real mechanism is recorded.
+
+**TDD**: 18 unit pins (RED-first) + 5 legacy-pin amendments + 1
+legacy E2E amendment + 14 E2E
+(`tests/e2e/session66-margin-gap.spec.ts`, computed truth).
+**Gates**: lint 0/0 · tsc ✓ · 910/910 unit · build ✓ · **360/360
+E2E** · post-fix census 45/49 · 36 screenshots (the 368–403 pair set
+→ 580 files; the 402 mobile pair byte-matches the r65 366 pair —
+cross-round byte-stability of the standing surface) · DB pristine.
+
+The frontier after this round: **the computed-style matrix is now
+complete across every axis this project has defined — color (fill ×
+light/dark, text × light/dark, border × light/dark) AND geometry
+(padding + radius, light) AND spacing (margin + gap, light)**. The
+remaining verification cells: the DARK-mode re-census of the two
+geometry axes (theme-invariant by authoring, never
+computed-verified); the muted-foreground/--primary token re-map
+stays optional; the login deploy watch stays armed at the post-29th
+finals; the Next.js 16.4.0 history bug remains the one recorded
+functional divergence whose fix lives upstream.
+
+### Session 66 instrument lessons (carry-forward)
+
+1. **The space-y direction flip is a POSITION problem**: v3 zeroes
+   the FIRST child, v4 the LAST — and the tuple bundles each
+   element's own gap, so position-equal sets still diverged. Mark II
+   parses the parent's authored value and emits `v:N` for every
+   boundary-shaped pair — position-independent on both engines.
+2. **A census MATCH can be a set-absorption false MATCH** (set
+   blindness, third face): allleaverequests MATCHed while its row
+   carried a member REF never renders. Probes are the verdict.
+3. **Inline-flex margins never collapse**: a space-y root under v4
+   DOUBLES the tabs→content gap (24+24). The R22-B `mb-0!` kill on
+   the List + the content's own mt is the compensation (census v:24
+   + visual 24 on both engines).
+4. **A census read can be a mid-load transient** (evaluations' tabs
+   read mr=0 at census time, (304,304) settled) — re-probe at rest
+   before fixing.
+5. **A pinned "transient" can be a real spec race**: the session-58
+   flake's true mechanism was a count-without-wait race — when a
+   transient fires in isolation, retire the race.
+6. **A frozen measurement can drift ON REF's side** (the R10-C
+   companywall pin recorded a REF that no longer exists) —
+   re-measure before amending the clone.

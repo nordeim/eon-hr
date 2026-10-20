@@ -4402,3 +4402,187 @@ pristine.
    population — the probe2 per-page split (p-3 on the four classic
    standard pages, fixed on the analytics family) is the pattern for
    any "family" pin that has never been re-measured per page.
+
+## Session 66 (parity round 65) — the margin/gap census (margin 4 sides + rowGap/columnGap)
+
+Workspace rebuilt from scratch (fresh clone at `0a31b7c` — the
+round-64 landing; environment per protocol: `.env` with
+`DATABASE_URL="file:../db/custom.db"` + the generated AUTH_SECRET, db
+pushed + seeded, playwright chromium; the exported-DATABASE_URL trap
+unset). Baseline gates: lint 0/0 · tsc ✓ · 892/892 unit · build ✓ ·
+E2E 345/346 — the one failure was the "session-58 switch/checkbox
+transient" firing CONSISTENTLY in isolation (3× consecutive): root
+cause isolated and RETIRED — the R58-19 spec counted
+`[aria-checked=true]` immediately after goto with NO wait, racing the
+async security-settings fetch (the count read 0 while `settings ===
+null`; the post-failure snapshot showed the correct 4 checked). The
+wait mirrors the switches block; 3× green post-fix. The "documented
+transient family" shrinks by one — its real mechanism was a
+count-without-wait race all along.
+
+**Deploy watch: THE 29TH LOGIN DEPLOY DETECTED** — login JS
+`DcjXLM5U`→`q8Uif46n` + CSS `D_pxMX7I`→`CiCfCTzx` (the app side
+QUIET `C-IrDy5f`/`BGNH4KkS`). The full confirmation ladder re-audited
+it **NON-VISUAL** after a fresh re-auth: standing 5/5 + sweep 12/12 +
+verify-r49 13/13 + verify-r45 13/13. The watch finals are the
+post-29th hashes.
+
+**The census** (`scripts/r66-margin-census.mjs` — the computed margin
+(4 sides) + rowGap/columnGap of every margin/gap-bearing element in
+main, 49 routes, paired live, LIGHT, three batches with DIFF dumps):
+the FIRST full-population read of the two dimensions NO census had
+ever covered. **Pre-fix 19/49.** The round's instrument work ran TWO
+normalization marks: mark I (one-sided space-y pairs → `v:N`) still
+left positional noise (v3 puts the ZERO on the FIRST child, v4 on the
+LAST — and the tuple bundles each element's own gap, so position-equal
+sets diverged anyway); **mark II** parses the parent's `space-y-N`
+value from its class (the rem scale mapped to px, the LAST matching
+token wins — responsive variants sort after plain ones) and emits
+position-independent `v:N` for every child whose pair is (0,0),
+(N,0), (0,N) or (N,N). Batch 1 rose 1/17 → 4/17 on the same code.
+
+All 30 DIFFs decomposed element-level (`r66-probe` the same-normalized
+inventory + `r66-probe-cmp` the symmetric diff + targeted live
+probes): **18 fix families + 4 documented allowances** (employees
+seeded, attendance admin superset, careers live data,
+interviewassistant r48-C1). Post-fix: **45/49** — better than the
+plan's 43 projection (onboardingtemplates + evaluations matched after
+their fixes).
+
+The eighteen families (the plan records the full member sets):
+
+- **R66-A the PageCanvas scroll band**: REF renders an
+  `absolute top-0 left-0 right-0 flex justify-center items-center h-20
+  -mt-20` band (a transform:none div holding the refresh-cw
+  `w-6 h-6 text-blue-600` spinner) on all 8 PageCanvas routes — the
+  r47-A measurement documented it "non-clone"; the census's
+  `-80,0,0,0` REF-only family (×8) promoted it to clone (clipped
+  invisible at rest; PageCanvas now renders it).
+- **R66-B the EmptyState icon is SVG-authored**: REF puts
+  `w-16 h-16 mx-auto mb-4 text-slate-300` ON THE SVG (computed mx-auto
+  = the 479/303/96px census family); the clone's wrapper + `[&_svg]`
+  scaling div retired — cloneElement injects the member set, the
+  icons fixed to REF's live names (offboarding LogOut→UserMinus,
+  companywall gains the House, hrassistantchat Sparkles→MessageSquare;
+  its SECOND hand-authored pane empty + training's hand-authored empty
+  adopted the same form).
+- **R66-C the StatCard tileFixed row**: REF's second standard form —
+  the tileFixed pages render the row WITHOUT mb-3 (the value's mt-4 P
+  form was already pinned at the call sites; allleaverequests censused
+  MATCH via set-absorption — the census MATCH ≠ element parity, the
+  third face of set blindness).
+- **R66-D the employees row/grid**: REF's row is the alwaysRow family
+  (`hidden md:flex items-center justify-between mb-8` — NO gap
+  member); the grid is `grid md:grid-cols-2 lg:grid-cols-3 gap-6`.
+- **R66-E the Radix tabs rhythm**: REF's Tabs root carries space-y-6
+  (the List/Content are its space-y children) and the
+  evaluations empty-line rides a space-y-3 block. The v4 TRAP found
+  executing: the inline-flex TabsList's space-y mb NEVER COLLAPSES
+  with the content's mt (48px vs REF's 24) — the fix is the R22-B
+  `mb-0!` kill on the List + the content's own mt-6 (census v:24 both
+  sides, visual 24 both engines). Recruitment + evaluations +
+  performancemanagement.
+- **R66-F the actions-cluster per-page truth** (the session-5 "gap-3"
+  frozen generalization re-measured live): REF has THREE forms —
+  `flex gap-3` multi-button clusters (employees/taskmanager/attendance,
+  unchanged), `flex gap-2` (staffrequests → `actionsBare`), and the
+  RAW BUTTON with no wrapper at all (expenses/loans/recruitment/
+  recruitmentkanban/workflowconfigpage → `actionsUnwrapped`).
+- **R66-G the companywall audience group**: `space-y-2` + the
+  leading-none Label (the R10-C `space-y-3` + `block leading-5` pin
+  was a frozen measurement — REF's live form re-measured).
+- **R66-H the payrollengine form groups**: `space-y-2 leading-5` →
+  `space-y-1` (+ the inputs' own mt-2 members retired — the v4 child
+  utility wins over the space-y gap, a literal 8px REF does not
+  render).
+- **R66-I the requestsettings empty line**: REF wraps it in a
+  `space-y-2` div (member order `text-slate-400 text-sm`).
+- **R66-J the tenantsetup circle + footer**: `mx-auto mb-4` (the
+  custom `mb-[22px]` retired) + the Continue right-aligns via its OWN
+  `ml-auto` (the footer is not justify-end; the census read the
+  resolved 527.047px).
+- **R66-K the workflowconfigpage CTA**: the button carries `mt-4`
+  DIRECTLY (the wrapper div retired).
+- **R66-L the performancemanagement tabs + goals grid**: the bare
+  `grid gap-6` (no responsive cols — REF's authored form) + the
+  mt-6/mb-0! rhythm.
+- **R66-M the shiftswap card wrapper**: REF's pills ride the page
+  space-y-8 DIRECTLY (the census read their 32px top margin); ONLY
+  the card rides a `space-y-4` wrapper (single child at zero).
+- **R66-N the surveyanalytics chart section**: ONE
+  `grid md:grid-cols-2 gap-6` with the third card `md:col-span-2`
+  INSIDE it (the clone's space-y-6 > grid > sibling structure was
+  render-equal but structurally divergent — the same-visual-
+  different-STRUCTURE family).
+- **R66-O the offboarding empty grid + the workflowautomation grid
+  gate**: `gap-6` added (REF's 24px empty-grid gap); the
+  workflowautomation grid renders ONLY with data (REF renders NOTHING
+  below the stat row at zero — the R16-B pattern; the census read the
+  empty grid's gap tuple REF never emits).
+- **R66-P the hrassistant settled pane**: EMPTY (the R65-E loader
+  div leaked into the settled state — retired; REF's pane renders
+  nothing at rest).
+- **R66-Q the chat new-chat button**: the `gap-2` shadcn base member
+  restored on the hand-authored R65-C2 form.
+- **R66-R the recruitmentkanban root + drop zone**: the middle
+  `flex flex-col space-y-6` wrapper retired (REF's root is the flat
+  R10-K `p-4 md:p-8 space-y-6`); the zone is REF's BARE
+  `min-h-32 rounded-md` with the with-data card stack on an inner
+  gap-2 wrapper (the zero-state zone renders empty; the superset DnD
+  keeps its spacing).
+
+TDD: 18 unit pins (the R66 block, RED-first) + 5 legacy-pin
+amendments (the R13-K payrollengine group value; the R46-A1
+non-clone REVERSAL; the R58 tenantsetup member set; the R60-E
+workflowconfigpage regex; the R14-A/C pill pins for the mb-0! member)
++ 1 legacy E2E amendment (the session-31 hrassistantchat icon
+locator) + 14 E2E (`tests/e2e/session66-margin-gap.spec.ts` —
+computed truth: the -80px band, the 479px centered icon margins, the
+0px/12px tile rows, the employees 0px row + 24px grid, the 8px
+staffrequests cluster + the expenses raw button, the companywall 8px
+group, the payrollengine 4px group, the tenantsetup 16px circle +
+ml-auto, the 16px workflowconfigpage CTA, the 24px PM tabs rhythm +
+24px grid, the 32px shiftswap pills-to-card + the v:16 wrapper, the
+2-track surveyanalytics grid + col-span, the EMPTY hrassistant pane,
+the 8px chat gap). Gates: lint 0/0 · tsc ✓ · **910/910 unit** (+18) ·
+build ✓ · **360/360 E2E** (+14; the amended session-31 spec green) ·
+post-fix census **45/49** · 36 screenshots (the 368–403 pair set →
+580 files; no ref/loc collisions; the 402 mobile pair byte-matches
+the r65 366 pair — cross-round byte-stability of the standing
+surface) · DB pristine.
+
+## Session 66 instrument lessons (the margin/gap census, carry-forward)
+
+1. **The space-y direction flip is a POSITION problem, not just a
+   value problem**: v3 puts the zero margin on the FIRST child, v4 on
+   the LAST — per-element one-sided normalization (mark I) still
+   leaves DIFFs because the tuple bundles each element's own gap.
+   Parse the PARENT's authored space-y value and emit `v:N` for every
+   boundary-shaped pair (mark II) — position-independent on both
+   engines.
+2. **A census MATCH can be a set-absorption false MATCH** (the third
+   face of set blindness): allleaverequests censused MATCH while its
+   StatCard row carried mb-3 REF does not render — another element
+   supplied the identical tuple. Set equality is the alarm; per-element
+   probes are the verdict; the E2E pins are the contract.
+3. **The inline-flex margins never collapse**: an inline-flex child's
+   space-y margin-bottom does NOT collapse with the next sibling's
+   margin-top (margins of inline-level boxes never collapse) — a
+   space-y-6 Tabs root under v4 DOUBLES the tabs→content gap (24+24).
+   The R22-B `mb-0!` kill on the List + the content's own mt is the
+   compensation pattern (census v:24 + visual 24 on both engines).
+4. **A census read can be a mid-load transient**: REF's evaluations
+   tabs read `mr=0, ml=304` at census time (+6.4s post-open) but
+   `(304,304)` settled — the loading state had a different container.
+   Element-level re-probes at rest are the tiebreaker; never fix
+   against a transient read.
+5. **A pinned "transient" can be a real spec race**: the session-58
+   switch/checkbox flake fired 3× consecutively on the cold-cache
+   sandbox — the count-ran-before-fetch race was always the mechanism;
+   the "documented transient" framing masked it. When a transient
+   fires in isolation, retire the race, don't re-run.
+6. **A frozen measurement can drift ON REF's side**: the R10-C
+   companywall `space-y-3 + block leading-5` pin was a real measurement
+   — REF's live form is now `space-y-2` + leading-none. Re-measure any
+   pin the census contradicts before amending the clone; the pin may
+   be recording a REF that no longer exists.
