@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 880 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 333 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 885 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 339 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -4168,3 +4168,95 @@ windows (the hrreports 300→1200), (c) a globally-scoped
 retired class (the shiftcalendar "+N more" overflow button — scope
 retirement assertions to the measured surface or pin the sharer
 positively with its allowance reason).
+
+## Session 64 (parity round 63) — the light-mode border-color census
+
+Workspace rebuilt from scratch (fresh clone at `b1ab187` — the round-62
+landing; environment per protocol: `.env` with
+`DATABASE_URL="file:../db/custom.db"` + the generated AUTH_SECRET, db
+pushed + seeded, playwright chromium). Baseline gates ALL GREEN
+(880/880 unit · 327/327→333/333 E2E — the fresh-clone suite ran clean).
+Deploy watch: BOTH SIDES QUIET (the post-26th finals held — JS
+`D3ArZVPB` / CSS `OJK0Y98H`; no 27th deploy).
+
+**The census (`scripts/r64-lightborder-census.mjs`, 49 routes, paired
+live, LIGHT, three batches with DIFF dumps): the computed border-color
+of every visibly-bordered element in main, buttons included — the LAST
+uncensured cell of the computed-color matrix (fill r57 light + r59
+dark, text r60 dark + r62 light, border r61 dark + r63 light). Pre-fix
+44/49 — the best pre-fix state of any census round (the light recipes
+were the original cloning baseline; 7 rounds of pins hold them). All 5
+DIFFs decomposed to DOCUMENTED ALLOWANCES (`r64-probe.mjs`): employees
+(the seeded grid card + its "Full Time" badge), attendance (the "Today's
+Overview" + "Recent Records" admin superset cards), interviewassistant
+(the r48-C1 AI Analysis card), onboardingtemplates (the r36 404 Go-Home
+anchor — members byte-identical, tag superset), careers (REF's live
+demo company buttons). Post-fix re-run: 44/49 unchanged — the census
+stands. ZERO border fixes required.**
+
+The round's real finds came from the census's set-comparison inversion
+risk — closed via the element-level symmetric diff (`r64-probe-cmp.mjs`)
+plus two per-dimension probes the payroll input's class-string diff
+motivated:
+
+- **R64-A — the iconed-search-input left padding (4 routes)**:
+  `r64-probe2.mjs` (all 49 routes, both sides) read every iconed input's
+  computed paddingLeft — REF clears the `absolute left-3` search icon
+  with pl-10 (payroll — 40px) or pl-9 (payrollmodule / documenttracker
+  / assetmanagement — 36px); the clone rendered the same wrappers
+  WITHOUT the padding member (typed text started at 12px and collided
+  with the icon — a visible UX defect). employees / chat /
+  staffrequests / careers already carried their measured members.
+  Session-12's R11-H pin measured the payroll toolbar's outer geometry
+  (862px / relative / flex-1) but never the interior padding — a
+  51-round-old measurement gap, live-caught.
+- **R64-B..E — the placeholder-TEXT dimension (`r64-probe3.mjs`, all 49
+  routes, both sides — r60/r63 read placeholder COLORS only)**: 45/49
+  verbatim pre-fix; 4 authored strings diverged from REF's live copy —
+  the compliance search ("Search employee..." — the query filters
+  document name AND employeeName), the recruitmentkanban search
+  ("Search applicants..."), the interviewassistant notes textarea (REF's
+  verbatim observations string — the R61-L pin held the SELECT's
+  placeholder only), and the tenantsetup wizard ("Acme Corporation" /
+  "admin@acme.com" — the R31-C10 pin held the labels). Post-fix:
+  49/49. The clone's aria-labels (a documented a11y superset REF lacks)
+  follow the REF semantics ("Search employee" / "Search applicants").
+
+TDD: 5 unit pins (the R64 block, RED-first) + 6 E2E
+(`tests/e2e/session64-light-border.spec.ts` — the 4 paddings computed,
+the 4 placeholder surfaces, and the round's border-census truth pin:
+the payroll search input rides the border-input token pair
+rgb(229,229,229) light / rgb(38,38,38) dark). Gates: lint 0/0 · tsc ✓ ·
+**885/885 unit** (+5) · build ✓ · **339/339 E2E** (+6, zero flakes —
+both documented transients stayed quiet) · post-fix probes 9/9 padding
++ 49/49 text + 44/49 border (unchanged, all allowances) · 18
+screenshot files (the 326–343 pair set: the 4 typed-text padding pairs,
+the 4 placeholder pairs, the mobile drawer pair @390×844 — the
+standing mobile-menu check evidence; 520 files total, hash-verified
+distinct) · deploy watch quiet · DB pristine.
+
+## Session 64 instrument lessons (the light-border census, carry-forward)
+
+**The r64 lessons**: (1) **the zero-fix census is legitimate — and the
+inversion probe is where the yield hides**: a census can come back
+all-allowance (the light border did — 44/49 pre-fix) yet the round
+still produced 5 real fixes, because the element-level symmetric diff
+surfaced an authorship split whose downstream dimension (padding) had
+never been measured; after a zero-DIFF census, run at least one
+per-dimension probe on the family the census shares a surface with;
+(2) **color censuses cannot see PADDING** — the iconed-search family's
+left padding was never in any computed read, and byte-level geometry
+pins held only the pages measured WITH the member (employees / chat /
+staffrequests / careers); 4 sibling pages authored without it drifted
+for 51 rounds; (3) **the placeholder-TEXT dimension was never censused**
+— r60/r63 read the ::placeholder COLORS; the text values were only
+byte-pinned on measured surfaces, and 4 authored strings survived —
+copy census is cheap (one attribute read, all routes) and catches
+invented strings no color read can see; (4) **the fresh-session
+screenshot protocol** — spin fresh agent-browser sessions for viewport-
+sensitive captures (the r63 stale-viewport lesson applied: fresh
+"ref64"/"loc64" sessions, zero stale-state fights); (5) **the tw-merge
+member-order mirage** — the post-fix clone inputs serialize their
+members in REF's order (`focus-visible:ring-1 focus-visible:ring-ring`
+first) because tw-merge reorders on merge; compare sorted member SETS
+(the r62 lesson, re-confirmed in the probe2 tails).

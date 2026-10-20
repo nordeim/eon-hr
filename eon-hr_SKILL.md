@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.46.0 (session-63 remediation complete — the light-mode text-color census: the Input/Textarea `::placeholder` literal pair (REF's muted #737373/#a3a3a3 — the 15-route token-rider divergence ended), the hrreports empty Group By trigger's foreground pair (a both-theme button-text divergence — the instance override carries BOTH variant members; the base's R37-E literal stays for the loans dialog), the profile kicker subtitle's flipping pair (the r61 dark-only pin amended), the shiftcalendar assign affordance's Plus icon + the iconed summary header (the pb-3 + the Users icon — the census "color diff" was a children-filter artifact), the recruitment AI Score th's TrendingUp icon, and the attendance restricted card's X icon + slate-800 h3 (the r61 color fix kept the un-measured SHAPE)) · **Last updated:** 2026-10-20
-> **State:** 880 unit + 333 E2E tests green, lint/typecheck/build
+> **Version:** 3.47.0 (session-64 remediation complete — the light-mode border-color census: the LAST uncensured cell of the computed-color matrix closed, 44/49 pre-fix with all 5 DIFFs documented allowances and ZERO border fixes; the round's real finds came from the input-family probes the census's inversion check motivated — the iconed-search left paddings (payroll pl-10, payrollmodule/documenttracker/assetmanagement pl-9 — typed text had collided with the left-3 icon for 51 rounds) and the placeholder-TEXT dimension (4 authored strings retired for REF's live verbatim copy: the compliance "Search employee...", the recruitmentkanban "Search applicants...", the interviewassistant observations textarea, the tenantsetup "Acme Corporation"/"admin@acme.com" pair)) · **Last updated:** 2026-10-20
+> **State:** 885 unit + 339 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4059,3 +4059,115 @@ post-26th finals (JS D3ArZVPB / CSS OJK0Y98H — the first CSS-side
 login change since round 45, re-audited non-visual 13/13 via
 verify-r45); the Next.js 16.4.0 history bug remains the one
 recorded functional divergence whose fix lives upstream.
+
+> **Session-64 correction**: the "BOTH themes" claim above was a slip —
+> the border family had run in DARK only (r61); the LIGHT border cell
+> had never been censused. §74's round closed it (44/49 pre-fix, all 5
+> DIFFs documented allowances, zero border fixes) — the matrix is NOW
+> genuinely complete: fill (light r57–r58 + dark r59), text (dark r60 +
+> light r62), border (dark r61 + light r63).
+
+## §74 Session 64 (parity round 63) — the light-mode border-color census
+
+Workspace rebuilt from scratch (fresh clone at `b1ab187`, the round-62
+landing); environment per protocol. Baseline gates ALL GREEN (880/880
+unit · 333/333 E2E). Deploy watch: **both sides quiet** — the post-26th
+finals held (JS `D3ArZVPB` / CSS `OJK0Y98H`), no 27th deploy.
+
+**The census** (`scripts/r64-lightborder-census.mjs`, 49 routes, paired
+live, LIGHT, three batches, DIFF dumps to files): the computed
+`border-color` of every visibly-bordered element in `main`, buttons
+included — the last uncensured cell of the computed-color matrix.
+**Pre-fix 44/49** (the best pre-fix state of any census round — the
+light recipes were the original cloning baseline and seven rounds of
+pins hold them); all 5 DIFFs decomposed to documented allowances
+(`r64-probe.mjs`): the seeded employees grid card + its "Full Time"
+badge, the attendance "Today's Overview"/"Recent Records" admin
+superset cards, the interviewassistant r48-C1 AI Analysis card, the
+onboardingtemplates r36 404 Go-Home anchor (members byte-identical,
+tag superset), REF's live careers company buttons. **Post-fix re-run:
+44/49 unchanged — zero border fixes.**
+
+**The round's real finds — the input-family probes.** The census's
+set-comparison inversion risk was closed with the element-level
+symmetric diff (`r64-probe-cmp.mjs`), which surfaced an authorship
+split on the payroll search input whose padding dimension had never
+been measured. Two per-dimension probes followed:
+
+- **R64-A — the iconed-search left padding** (`r64-probe2.mjs`, all 49
+  routes, both sides, computed paddingLeft): REF clears the `absolute
+  left-3` search icon with `pl-10` (payroll — 40px) or `pl-9`
+  (payrollmodule / documenttracker / assetmanagement — 36px,
+  live-measured); the clone rendered the same wrappers WITHOUT the
+  padding member — typed text started at 12px and collided with the
+  icon (a visible UX defect). employees / chat / staffrequests /
+  careers already carried their measured members. Session-12's R11-H
+  pin held the payroll toolbar's outer geometry (862px / relative /
+  flex-1) but never the interior member — a 51-round-old measurement
+  gap. Post-fix: 9/9 iconed surfaces at parity.
+- **R64-B..E — the placeholder-TEXT dimension** (`r64-probe3.mjs`, all
+  49 routes, both sides — r60/r63 read placeholder COLORS only):
+  45/49 verbatim pre-fix; four authored strings retired for REF's live
+  copy — the compliance search ("Search employee..." — the query
+  filters document name AND employeeName; the aria-label follows), the
+  recruitmentkanban search ("Search applicants..."), the
+  interviewassistant notes textarea (REF's verbatim observations
+  string — R61-L had pinned the SELECT's placeholder only), and the
+  tenantsetup wizard ("Acme Corporation" / "admin@acme.com" — R31-C10
+  held the labels only). Post-fix: 49/49.
+
+**TDD**: 5 unit pins (the R64 block, RED-first — retirement assertions
+scoped per the r63 pin-defect lessons; the recipe comments contain no
+retired literals) + 6 E2E (`tests/e2e/session64-light-border.spec.ts`:
+the four paddings computed, the four placeholder surfaces, and the
+round's border-census truth pin — the payroll search input rides the
+border-input token pair rgb(229,229,229) light / rgb(38,38,38) dark).
+**Gates**: lint 0/0 · tsc ✓ · 885/885 unit (+5) · build ✓ · 339/339
+E2E (+6, zero flakes) · post-fix probes 9/9 padding + 49/49 text ·
+44/49 border (unchanged, all allowances) · 18 screenshots (the
+326–343 pair set: the typed-text padding pairs, the placeholder pairs,
+the mobile drawer pair @390×844 — the standing mobile-menu check
+evidence; 520 files, hash-verified distinct) · deploy watch quiet · DB
+pristine.
+
+The frontier after this round: **the computed-color matrix is
+complete** (fill light+dark, text dark+light, border dark+light — every
+cell censused, every DIFF decomposed to a fix or a documented
+allowance); the input-family dimensions now carry computed pins
+(padding + placeholder text); the remaining known divergences are the
+documented allowances (the with-data superset surfaces stay
+REF-unmeasurable at the demo's zero state; the advancedanalytics
+hidden-tooltip artifact); the muted-foreground/primary TOKEN
+re-mapping question stays a future round's optional scope (the literal
+pairs hold computed parity on every censused surface); the login
+deploy watch stays armed at the post-26th finals; the Next.js 16.4.0
+history bug remains the one recorded functional divergence whose fix
+lives upstream.
+
+### Session 64 instrument lessons (carry-forward)
+
+1. **The zero-fix census is legitimate — and the inversion probe is
+   where the yield hides.** A census can come back all-allowance (the
+   light border did) yet the round still yields real fixes: the
+   element-level symmetric diff surfaced an authorship split whose
+   downstream dimension (padding) had never been measured. After a
+   zero-DIFF census, run at least one per-dimension probe on the
+   family the census shares a surface with.
+2. **Color censuses cannot see PADDING.** The iconed-search family's
+   left padding was never in any computed read, and byte-level
+   geometry pins held only the pages measured WITH the member; four
+   sibling pages authored without it drifted for 51 rounds.
+3. **The placeholder-TEXT dimension was never censused.** r60/r63 read
+   the ::placeholder COLORS; the text values were only byte-pinned on
+   measured surfaces, and four authored strings survived. A copy census
+   is cheap (one attribute read, all routes) and catches invented
+   strings no color read can see.
+4. **The fresh-session screenshot protocol.** Fresh agent-browser
+   sessions for viewport-sensitive captures (the r63 stale-viewport
+   lesson applied: fresh "ref64"/"loc64" sessions, zero stale-state
+   fights).
+5. **The tw-merge member-order mirage.** The post-fix clone inputs
+   serialize their members in REF's order (`focus-visible:ring-1
+   focus-visible:ring-ring` first) because tw-merge reorders on merge;
+   compare sorted member SETS (the r62 lesson, re-confirmed in the
+   probe2 tails).
