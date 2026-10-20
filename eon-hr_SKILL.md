@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.49.0 (session-66 remediation complete — the margin/gap census: the FIRST full-population computed read of MARGIN (4 sides) + rowGap/columnGap, the two dimensions no census had ever covered, 19/49 pre-fix → 45/49 post-fix with all 4 DIFFs documented allowances; the eighteen fix families: the PageCanvas scroll band (the r47 documented non-clone promoted by the -80px census family), the SVG-authored empty-state icons (mx-auto mb-4 ON the svg — the 479/303/96px computed family), the StatCard tileFixed unspaced row, the employees alwaysRow header + gap-6 grid, the Radix tabs rhythm (space-y-6 root + the R22-B mb-0! List kill — the v4 inline-flex margins never collapse, the 48px trap), the actions-cluster three-form truth (gap-3 clusters / gap-2 staffrequests / the raw-button five), the companywall space-y-2 group (a REF-side drift of the R10-C pin), the payrollengine space-y-1 groups, the requestsettings space-y-2 line, the tenantsetup mb-4 circle + ml-auto footer, the mt-4 workflowconfigpage CTA, the performancemanagement bare gap-6 grid, the shiftswap card-only wrapper, the surveyanalytics single-grid + col-span-2, the offboarding gap-6 + the workflowautomation grid gate, the EMPTY hrassistant pane, the chat gap-2 member, and the recruitmentkanban flat root + bare drop zone) · **Last updated:** 2026-10-21
-> **State:** 910 unit + 360 E2E tests green, lint/typecheck/build
+> **Version:** 3.50.0 (session-67 remediation complete — the dark-mode geometry/spacing re-census: the matrix-completion VERIFICATION round, the first zero-fix round in the project's history. The computed-style matrix is now COMPLETE on every axis × every theme: color (fill/text/border × light/dark, r57-63), geometry (padding + radius × light r65 + DARK r67), spacing (margin + gap × light r66 + DARK r67). The dark censuses read the full 49-route population on both axes in the dark cascade — dark geometry 44/49 + dark margin/gap 45/49, every DIFF a byte-identical standing allowance, and the allowance routes re-read LIGHT vs DARK produce BYTE-IDENTICAL census tuples on both axes (theme-invariance computed-verified per route, not just per axis). The 30th login deploy detected + re-audited non-visual via the full ladder. The R37-C spec race retired (a measure-without-settle race: the dialog's zoom-in-95 animate-in makes toBeVisible() pass at mount while the scale transition is in flight — 113 × mid-scale = the 109.06 suite failure; the poll-until-stable read is the settle contract). The theme-invariance contract locked with 6 computed-truth E2E pins in session67-dark-geometry.spec.ts (the boot-script dark contract + the /login theme-inert split, the dark StatCard twins, the dark scroll band, the dark svg-authored empty-state margins, the dark employees grid, the dark tenantsetup circle) · **Last updated:** 2026-10-21
+> **State:** 910 unit + 366 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4366,3 +4366,100 @@ functional divergence whose fix lives upstream.
 6. **A frozen measurement can drift ON REF's side** (the R10-C
    companywall pin recorded a REF that no longer exists) —
    re-measure before amending the clone.
+
+## §77 Session 67 (parity round 66) — the dark-mode geometry/spacing re-census (the matrix-completion verification round)
+
+Workspace rebuilt (fresh clone at `07fcfbf`, the round-65 landing);
+environment per protocol (the exported-DATABASE_URL trap hit and
+resolved — the sandbox re-exports it per invocation; the AUTH_SECRET
+quoting contract: the ladder greps the QUOTED form). Baseline gates:
+lint 0/0 · tsc ✓ · 910/910 unit · build ✓ · E2E 359/360 — the one
+failure RETIRED as a real spec race (below).
+
+**Deploy watch: THE 30TH LOGIN DEPLOY detected** (login JS
+`q8Uif46n`→`DwY57mhH` + CSS `CiCfCTzx`→`BpSyi-cD`; the app side
+quiet `C-IrDy5f`/`BGNH4KkS`) — re-audited NON-VISUAL via the full
+confirmation ladder after a fresh re-auth (standing 5/5 + sweep 12/12
++ verify-r49 13/13 + verify-r45 13/13). The watch finals are the
+post-30th hashes.
+
+**The censuses** (`scripts/r67-dark-geometry-census.mjs` +
+`scripts/r67-dark-margin-census.mjs` — the r65/r66 populations
+re-read in the DARK cascade, all 49 routes, armed via localStorage
+`darkMode="true"` + the boot script's pre-paint class): **the first
+VERIFICATION-ONLY round in the project's history — zero fix families
+on the two axes.** Dark geometry **44/49** + dark margin/gap **45/49**
+— every DIFF a byte-identical standing allowance (employees seeded,
+attendance admin superset, interviewassistant r48-C1,
+onboardingtemplates r36 anchor, careers live data).
+
+**The theme-invariance byte-proof**: the DIFF routes re-read in LIGHT
+vs DARK produce BYTE-IDENTICAL census tuples on BOTH axes (the
+5-route geometry re-read + the 4-route margin re-read, diffed
+file-vs-file: zero differences). The geometry + spacing axes are
+computed-verified theme-invariant end to end — the computed-style
+matrix is now COMPLETE: color (fill/text/border) × light/dark,
+geometry × light/dark, spacing × light/dark.
+
+**The R37-C spec race RETIRED** (the r66 lesson-5 family): the
+full-suite 359/360 failure measured the Add-Level button at 109.06px
+vs the 110–115 pin — the dialog's `zoom-in-95` animate-in makes
+`toBeVisible()` pass at MOUNT while the scale transition is in flight
+(113 × mid-scale ≈ 109.06). The poll-until-stable read (two
+consecutive equal widths = settled) is the fix — the settle contract
+for ANY geometry read on an animated surface.
+
+**The mobile-menu standing check**: the full functional cycle
+verified (toggle → open + nav links; the Training LMS link navigates;
+Escape closes), and the 418 LIGHT mobile drawer pair @390×844
+BYTE-MATCHES the r66 402 pair on both sides (three-round
+byte-stability of the standing surface); the DARK mobile drawer pair
+(420/421) is the new dark-surface evidence.
+
+**TDD**: zero unit pins (zero source changes) + 6 E2E
+(`tests/e2e/session67-dark-geometry.spec.ts` — the theme-invariance
+contract locked with computed truth: R67-A the boot-script dark
+contract incl. the /login theme-inert R39-B split, R67-B the dark
+StatCard padded/tileFixed twins, R67-C the dark scroll band, R67-D
+the dark svg-authored empty-state margins, R67-E the dark employees
+grid + alwaysRow, R67-F the dark tenantsetup circle + ml-auto).
+**Gates**: lint 0/0 · tsc ✓ · 910/910 unit (unchanged) · build ✓ ·
+**366/366 E2E** (+6; the hardened R37-C green) · the censuses 44/49
++ 45/49 (all allowances) · 18 screenshots (the 404–421 pair set →
+604 files; the 418 pair byte-matches the r66 set) · DB pristine.
+
+The frontier after this round: **the computed-style matrix is
+COMPLETE** — every axis (color fill/text/border, geometry
+padding+radius, spacing margin+gap) censused in BOTH themes, every
+DIFF across all ten censuses a documented allowance or a shipped
+fix. The remaining recorded items: the muted-foreground/--primary
+token re-map (optional); the login deploy watch stays armed at the
+post-30th finals (`DwY57mhH`/`BpSyi-cD` + the quiet app side
+`C-IrDy5f`/`BGNH4KkS`); the Next.js 16.4.0 history bug remains the
+one recorded functional divergence whose fix lives upstream.
+
+### Session 67 instrument lessons (carry-forward)
+
+1. **The measure-without-settle race**: an animated surface (dialog
+   zoom-in-95) passes `toBeVisible()` at mount while the transform is
+   in flight — a geometry read taken then measures the ANIMATION, not
+   the element (109.06 = 113 × mid-scale). Poll-until-stable is the
+   settle contract for any geometry read on an animated surface.
+2. **The theme re-census needs a NAVIGATION after the localStorage
+   write**: the boot script applies html.dark pre-paint on LOAD —
+   setting `darkMode="true"` does not toggle the current page. The
+   census route-opens all navigate (the reads are correctly dark);
+   verify dark via the post-navigation body background
+   (`rgb(10,10,10)`), not a same-page class check.
+3. **A verification round still needs the allowance byte-proof**: a
+   census that returns all-allowance is weak evidence alone (the r64
+   zero-fix lesson); the byte-identity diff (the same routes re-read
+   in LIGHT vs DARK, tuples compared file-vs-file) is the strong
+   form — theme-invariance proven PER ROUTE, not just per axis.
+4. **The per-batch DIFF dump OVERWRITES by default**: re-run the DIFF
+   routes as their own batch (or set the dump env) before
+   byte-diffing across reads.
+5. **The AUTH_SECRET quoting contract**: the ladder greps the QUOTED
+   form from `.env`; an unquoted secret greps empty and the
+   instrumentation gate refuses the boot. `.env` values follow the
+   `.env.example` form: quoted.

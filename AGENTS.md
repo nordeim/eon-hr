@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 892 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 346 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 910 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 366 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -4586,3 +4586,121 @@ surface) · DB pristine.
    — REF's live form is now `space-y-2` + leading-none. Re-measure any
    pin the census contradicts before amending the clone; the pin may
    be recording a REF that no longer exists.
+
+## Session 67 (parity round 66) — the dark-mode geometry/spacing re-census (the matrix-completion verification round)
+
+Workspace rebuilt from scratch (fresh clone at `07fcfbf` — the
+round-65 landing; environment per protocol: `.env` with
+`DATABASE_URL="file:../db/custom.db"` + a QUOTED generated AUTH_SECRET
+(the standing-run greps the quoted form — an unquoted value greps
+empty and the instrumentation gate refuses the boot), db pushed +
+seeded at `<repo>/db/custom.db`, playwright chromium; the
+exported-DATABASE_URL trap HIT AND RESOLVED — the sandbox re-exports
+`DATABASE_URL=file:/home/z/my-project/db/custom.db` per invocation, so
+EVERY db-touching command runs with an in-invocation `unset
+DATABASE_URL`). Baseline gates: lint 0/0 · tsc ✓ · **910/910 unit** ·
+build ✓ · E2E 359/360 — the one failure RETIRED below (the R37-C spec
+race).
+
+**Deploy watch (`scripts/r67-deploy-watch.mjs`, the post-29th finals
+armed): THE 30TH LOGIN DEPLOY DETECTED** — login JS
+`q8Uif46n`→`DwY57mhH` + CSS `CiCfCTzx`→`BpSyi-cD` (the app side QUIET
+`C-IrDy5f`/`BGNH4KkS`). After a fresh re-auth of the shared REF
+session (the stale-session lesson), the full confirmation ladder
+re-audited the 30th **NON-VISUAL**: standing 5/5 + sweep 12/12 +
+verify-r49 13/13 + verify-r45 13/13. The watch finals are the
+post-30th hashes.
+
+**The frontier (the round-65 completion record's next cell)**: the
+computed-style matrix covered color × both themes (r57–r63) and the
+LIGHT cells of geometry (r65) + spacing (r66); the two DARK cells of
+the geometry/spacing axes — theme-invariant BY AUTHORING (no `dark:`
+geometry/spacing members exist in the corpus) — had never been
+computed-verified. The instruments: `r67-dark-geometry-census.mjs`
+(the r65 population re-read in dark) + `r67-dark-margin-census.mjs`
+(the r66 population re-read in dark), both armed via
+`localStorage darkMode="true"` + the boot script's pre-paint class
+(verified live via the body background `rgb(10,10,10)` after
+navigation — the sanity print that checks html.dark immediately after
+the set correctly reads FALSE: the class applies on the NEXT load).
+
+**The censuses — the FIRST VERIFICATION-ONLY round in the project's
+history (zero fix families on the two axes)**:
+- **Dark geometry 44/49** — the 5 DIFFs are the standing documented
+  allowances, byte-identical tuples: employees (seeded grid cards),
+  attendance (admin superset), interviewassistant (r48-C1),
+  onboardingtemplates (the r36 `<a>` superset — identical
+  `8,16,8,16|r:8` geometry, the tag is the superset), careers (live
+  demo data + hero superset).
+- **Dark margin/gap 45/49** — the 4 DIFFs are the standing allowances
+  (employees, attendance, interviewassistant, careers).
+- **The theme-invariance byte-proof (the round's strongest evidence)**:
+  the DIFF routes re-read in LIGHT vs DARK produce BYTE-IDENTICAL
+  census tuples on BOTH axes (the 5-route geometry re-read + the
+  4-route margin re-read, diffed file-vs-file: zero differences). The
+  geometry + spacing axes are computed-verified theme-invariant end to
+  end.
+
+**The R37-C spec race RETIRED (the one real defect found)**: the
+full-suite baseline's 359/360 failure — the session-38 Add-Level
+width pin measured **109.06px** vs the 110–115 range — passed 3×
+isolated. Root cause (the r66 lesson-5 family, a MEASURE-without-
+settle race): the dialog's `data-[state=open]:zoom-in-95`
+animate-in means `toBeVisible()` passes at MOUNT while the scale
+transition is in flight — 113 × mid-transition scale ≈ 109.06
+exactly. The fix: the poll-until-stable read (two consecutive equal
+widths = settled, ×12 @120ms) in `tests/e2e/dialog-interiors.spec.ts`.
+
+**The mobile-menu standing check (the standing user emphasis)**: the
+full functional cycle verified — toggle → drawer opens with the nav
+links (Dashboard, Training LMS, Assets, Staff Requests, AI HR
+Assistant…), the "Training LMS" link navigates to `/training`
+(auto-close on route change), Escape closes the re-opened drawer. The
+byte-stability pair: the 418 LIGHT mobile drawer pair @390×844
+**byte-matches the r66 402 pair on BOTH sides** (and transitively the
+r65 366 pair — three-round byte-stability of the standing surface).
+The DARK mobile drawer pair (420/421) captured as the new
+dark-surface evidence.
+
+TDD: **zero unit pins (zero source changes — a verification round)**;
++6 E2E (`tests/e2e/session67-dark-geometry.spec.ts` — the
+theme-invariance contract locked with computed truth: the boot-script
+dark contract incl. the /login theme-inert R39-B split, the dark
+StatCard padded/tileFixed row twins, the dark scroll band, the dark
+svg-authored empty-state margins, the dark employees grid +
+alwaysRow, the dark tenantsetup circle + ml-auto). Gates: lint 0/0 ·
+tsc ✓ · **910/910 unit** (unchanged) · build ✓ · **366/366 E2E**
+(+6; the hardened R37-C green) · the censuses 44/49 + 45/49 (all
+allowances) · 18 screenshots (the 404–421 pair set → 604 files; the
+418 pair byte-matches the r66 set) · DB pristine.
+
+## Session 67 instrument lessons (the dark re-census, carry-forward)
+
+1. **The measure-without-settle race**: an animated surface (dialog
+   zoom-in-95) passes `toBeVisible()` at mount while the transform is
+   still in flight — a geometry read taken then measures the
+   ANIMATION, not the element (109.06 = 113 × mid-scale). The
+   poll-until-stable read (two consecutive equal values) is the
+   settle contract for any geometry read on an animated surface.
+2. **The theme re-census needs a NAVIGATION after the localStorage
+   write**: the boot script applies html.dark pre-paint on LOAD —
+   setting `darkMode="true"` does not toggle the CURRENT page (only
+   the Moon handler does). The census route-opens all navigate, so
+   the reads are correctly dark — but a sanity print checking
+   html.dark immediately after the set reads FALSE by design; verify
+   dark via the post-navigation body background instead.
+3. **A verification round still needs the allowance byte-proof**: a
+   census that returns all-allowance is weak evidence alone (the r64
+   zero-fix lesson); the byte-identity diff — the same routes re-read
+   in LIGHT vs DARK, tuples compared file-vs-file — is the strong
+   form: it proves theme-invariance PER ROUTE, not just per axis.
+4. **The per-batch DIFF dump OVERWRITES by default**: the r62
+   mid-batch dump protocol saves each batch's DIFFs, but re-running a
+   later batch overwrites the file — re-run the DIFF routes as their
+   own batch (or set the R67_DUMP env) before byte-diffing across
+   reads.
+5. **The AUTH_SECRET quoting contract**: the standing-run/ladder
+   scripts grep `AUTH_SECRET="\K[^"]+` — the QUOTED form — from
+   `.env`; an unquoted secret greps empty and the instrumentation
+   gate refuses the boot ("AUTH_SECRET is required in production").
+   `.env` values follow the `.env.example` form: quoted.
