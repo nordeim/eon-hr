@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.47.0 (session-64 remediation complete — the light-mode border-color census: the LAST uncensured cell of the computed-color matrix closed, 44/49 pre-fix with all 5 DIFFs documented allowances and ZERO border fixes; the round's real finds came from the input-family probes the census's inversion check motivated — the iconed-search left paddings (payroll pl-10, payrollmodule/documenttracker/assetmanagement pl-9 — typed text had collided with the left-3 icon for 51 rounds) and the placeholder-TEXT dimension (4 authored strings retired for REF's live verbatim copy: the compliance "Search employee...", the recruitmentkanban "Search applicants...", the interviewassistant observations textarea, the tenantsetup "Acme Corporation"/"admin@acme.com" pair)) · **Last updated:** 2026-10-20
-> **State:** 885 unit + 339 E2E tests green, lint/typecheck/build
+> **Version:** 3.48.0 (session-65 remediation complete — the geometry census: the FIRST full-population computed read of PADDING + BORDER-RADIUS, the two dimensions every color census was blind to (the r64 lesson), 32/49 pre-fix → 44/49 post-fix with all 5 DIFFs documented allowances; the seven fix families: the StatCard standard-variant p-3 padding-driven tiles (payroll/expenses/surveys/attendance — the session-17 zero-padding note was a page-specific generalization, the r65 per-tile probe split the family; tileFixed on the analytics-side pages + tile-right by contract), the td/th UA-padding restoration (TW v4's preflight universal padding reset zeroes the Chrome UA 1px REF's runtime keeps — the R23-A cursor precedent, a REAL v4 engine difference), the chat column header (ONE p-4 border-b wrapper — the split authoring had DROPPED the border-b, a set-blindness catch), the compliance filter row's bordered-white-box member set, the hrassistant 500px/p-6 pane + p-4 row + 60px textarea, the requestreports Back button's py-2 leak (ghost sm), and the --radius-sm token (REF's live rounded-sm = 4px, the v4 scale)) · **Last updated:** 2026-10-20
+> **State:** 892 unit + 346 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4171,3 +4171,111 @@ lives upstream.
    focus-visible:ring-ring` first) because tw-merge reorders on merge;
    compare sorted member SETS (the r62 lesson, re-confirmed in the
    probe2 tails).
+
+## §75 Session 65 (parity round 64) — the geometry census (padding + border-radius)
+
+Workspace rebuilt (fresh clone at `c10ab5b`, the round-63 landing);
+environment per protocol. Baseline gates ALL GREEN (885/885 unit ·
+338+1 E2E — the session-42 user-menu transient 6/6 isolated, joining
+the documented family). **Deploy watch: the 28TH LOGIN DEPLOY
+detected** (login JS `D3ArZVPB`→`DcjXLM5U` + CSS
+`OJK0Y98H`→`D_pxMX7I`, the frontend-config chunk held, the app side
+quiet) — re-audited NON-VISUAL via the full ladder (standing 5/5 +
+sweep 12/12 + verify-r49 13/13 + verify-r45 13/13, after a fresh
+re-auth — the deploy had invalidated the shared REF session; the first
+ladder run read the login page on every route). The watch finals are
+the post-28th hashes.
+
+**The census** (`scripts/r65-geometry-census.mjs`, 49 routes, paired
+live, LIGHT, three batches, DIFF dumps to files): the computed padding
+(4 sides) + border-radius of every geometry-bearing element in main,
+buttons included — the first full-population read of the two
+dimensions every color census was blind to. **Pre-fix 32/49.** All 17
+DIFFs decomposed element-level (`r65-probe` + `r65-probe-cmp` the
+symmetric tuple diff with class/rect/text attribution; `r65-probe2`
+the per-tile recipe probe across the 18 stat-tile pages): **7 fix
+families + the 5 documented-allowance routes. Post-fix 44/49 — exactly
+the projection.**
+
+The seven families (the fix layer records the full member sets):
+
+- **R65-A** the StatCard standard-variant tile is PADDING-DRIVEN — REF
+  live-measures `bg-{c}-100 p-3 rounded-xl` 48×48 on payroll /
+  expenses / surveys / attendance; the session-17 "NOT p-3" note was a
+  page-specific generalization (advancedanalytics / analytics
+  tile-right / allleaverequests / payrollai render FIXED on REF — the
+  per-tile probe split the family). The standard base is now `p-3
+  rounded-xl …` with the `tileFixed` escape; tile-right is fixed by
+  contract (the post-fix census caught the regression on /analytics
+  before it shipped — the E2E re-run held).
+- **R65-B** the td/th UA-padding restoration — TW v4's preflight
+  universal padding reset (`*,:after,:before,::backdrop{…;padding:0}`)
+  zeroes the Chrome UA's `td,th{padding:1px}`; REF's runtime keeps the
+  1px on every unstyled cell side. Restored in `@layer base` (the
+  R23-A cursor precedent). A REAL Tailwind v4 engine difference — the
+  fourth documented preflight divergence (cursor, the space-y flip,
+  the shadow scale, and now the cell padding).
+- **R65-C** the chat column header — ONE `p-4 border-b border-slate-200`
+  wrapper (the split authoring had DROPPED the border-b; the r63
+  border census's set comparison couldn't see it — the page's other
+  slate-200 borders satisfied the set) + the padding-driven px-3
+  new-chat button.
+- **R65-D** the compliance filter row's bordered-white-box member set
+  (`flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border
+  border-slate-200`) — another set-blindness catch (the clone's Card
+  root had supplied the identical white tuple).
+- **R65-E** the hrassistant geometry — the 500px p-6 space-y-4 pane,
+  the border-t p-4 flex gap-3 row, the min-h-[60px] textarea (the
+  clone authored 460px/p-4/p-3/48px — visible layout drift).
+- **R65-F** the requestreports Back button — `variant="ghost"
+  size="sm"` (the default-size override leaked the base py-2 as an 8px
+  vertical pad REF does not render).
+- **R65-G** `--radius-sm: 0.25rem` — REF's live rounded-sm computes
+  4px (the v4 scale); the 2px pin was the v3-era assumption never
+  computed-verified.
+
+**TDD**: 9 unit pins (the R65 block RED-first; 2 legacy amendments —
+the session-10 tile pin to the two-form contract, the R48-C7 Back pin
+to the sm size; the R60-E chat member re-ordered) + 7 E2E
+(`tests/e2e/session65-geometry.spec.ts`, computed truth).
+**Gates**: lint 0/0 · tsc ✓ · 892/892 unit · build ✓ · 346/346 E2E
+(the session-58 switch/checkbox transient fired once mid-suite, 11/11
+isolated per the flake-check) · post-fix census 44/49 · 24 screenshots
+(the 344–367 pair set; the mobile pair byte-matches the r64 set —
+cross-round byte-stability of the standing surface) → 550 files ·
+DB pristine.
+
+The frontier after this round: **the computed-style matrix now covers
+color (fill/text/border × light/dark) AND geometry (padding +
+radius, light)**; the remaining geometry cells are the dark-mode
+geometry re-census (theme-invariant by authoring, but the dark: variant
+members have never been computed-verified) and the margin/gap dimension
+(no census has read margins); the td/th restoration should be
+re-verified on the next dark census (the 1px is theme-invariant);
+the muted-foreground/--primary token re-map stays a future round's
+optional scope; the login deploy watch stays armed at the post-28th
+finals; the Next.js 16.4.0 history bug remains the one recorded
+functional divergence whose fix lives upstream.
+
+### Session 65 instrument lessons (carry-forward)
+
+1. **The rounded-full serialization split**: TW v4's
+   `calc(infinity * 1px)` serializes as `33554432px` (2^25) vs REF's
+   v3-era `9999px` — normalize any radius ≥ 9999 to a `full` token or
+   the family drowns the real DIFFs (the first run read 2/17 with the
+   serialization noise as the only DIFF family).
+2. **No `//` comments inside eval strings** — `evalOn` flattens
+   newlines; a `//` comment swallows the rest of the one-liner.
+3. **A deploy invalidates every REF session — re-auth before the
+   ladder**: the standing-run and routesweep scripts assume a
+   pre-authed session; a uniform identical read across all routes is
+   the stale-session signature (the first ladder run read the login
+   page everywhere — 0/5 + 0/12).
+4. **Set blindness, second face**: same-set-DIFFERENT-STRUCTURE false
+   MATCHes — the chat's missing border-b and the compliance's missing
+   box hid behind tuples other elements supplied. Set equality is the
+   alarm; per-element attribution (class + rect + text) is the
+   verdict.
+5. **A frozen measurement can be a frozen GENERALIZATION**: the R16-D
+   "NOT p-3" tile note was real data applied to the wrong population —
+   re-measure per page before trusting any family-level pin.
