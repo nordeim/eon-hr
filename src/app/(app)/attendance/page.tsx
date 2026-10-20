@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, CalendarCheck, CircleCheckBig, CircleX, Clock, FileSpreadsheet, FileText, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, ShieldAlert, TrendingUp, Users, Workflow } from "lucide-react";
+import { Calendar, CalendarCheck, CircleCheckBig, CircleX, Clock, FileSpreadsheet, FileText, LayoutDashboard, Loader2, MonitorSmartphone, Printer, Settings, TrendingUp, Users, Workflow, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -369,12 +369,18 @@ export default function StaffAttendancePage() {
               {!canMark ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center bg-red-100 rounded-full">
-                  {/* Session 61 (R61-W): REF's restricted-card ShieldAlert
-                    renders red-500 (rgb(239,68,68) — live-measured),
-                    not red-600. */}
-                <ShieldAlert className="h-8 w-8 text-red-500" aria-hidden="true" />
+                  {/* Session 61 (R61-W): REF's restricted-card icon renders
+                      red-500 (rgb(239,68,68) — live-measured), not red-600.
+                      Session 63 (R63-G): the SHAPE is lucide-x — the r61
+                      color fix kept the un-measured shield glyph (REF's
+                      icon class read live both themes; color censuses
+                      cannot see icon shapes). */}
+                  <X className="h-8 w-8 text-red-500" aria-hidden="true" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900">Access Restricted</h3>
+                {/* Session 63 (R63-G): REF's h3 is text-slate-800
+                    (rgb(30,41,59), unflipping — live-measured both themes;
+                    was slate-900). */}
+                <h3 className="mb-2 text-lg font-semibold text-slate-800">Access Restricted</h3>
                 <p className="text-slate-500 max-w-sm">
                   Only Admin or Security role users can mark attendance. Please contact your administrator.
                 </p>

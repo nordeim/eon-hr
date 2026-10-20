@@ -344,10 +344,13 @@ export default function ProfilePage() {
         mobileKickerTitle="Profile"
         mobileKickerBack
         mobileKickerSubtitle="Manage your account"
-        /* Session 61 (R61-O): REF's profile kicker subtitle renders
-           slate-400 (rgb(148,163,184) — live-measured; the other
-           kickers stay slate-500). */
-        mobileKickerSubtitleClassName="text-slate-400"
+        /* Session 61 (R61-O) → session 63 (R63-C): REF's profile kicker
+           subtitle is the FLIPPING pair — slate-500 (rgb(100,116,139))
+           in light, slate-400 (rgb(148,163,184)) in dark. The r61-O pin
+           froze slate-400 from the dark census alone (the r63 light
+           census + the 390×844 mobile re-measure caught the light side;
+           the other kickers stay slate-500 both themes). */
+        mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"
         layout="flat48"
         iconClassName="text-blue-600"
         sectionIcon={<CircleUser aria-hidden="true" />}

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeftRight, Calendar, CalendarRange, CalendarX2, ChevronLeft, ChevronRight, Clock3, Loader2, Users, X } from "lucide-react";
+import { ArrowLeftRight, Calendar, CalendarRange, CalendarX2, ChevronLeft, ChevronRight, Clock3, Loader2, Plus, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -340,7 +340,11 @@ export default function ShiftCalendarPage() {
               day number (text-xs text-slate-400 mb-1) over a space-y-0.5
               stack; empty cells `border-slate-50 bg-slate-50/50`; the
               "assign" affordance = `text-xs text-slate-300
-              hover:text-blue-500`. The clone's working assign/remove flow
+              hover:text-blue-500`.
+              Session 63 (R63-D): REF's affordance carries the lucide-plus
+              icon (w-3 h-3, riding the button's unflipping slate-300 —
+              both themes live-measured) + the gap-0.5 mt-1 members.
+              The clone's working assign/remove flow
               rides the reference's furniture. */}
           <div className="rounded-xl bg-card shadow-sm">
             <div className="overflow-x-auto p-0">
@@ -381,9 +385,10 @@ export default function ShiftCalendarPage() {
                               {dayAssignments.length === 0 ? (
                                 <button
                                   type="button"
-                                  className="flex items-center text-xs text-slate-300 hover:text-blue-500"
+                                  className="text-xs text-slate-300 hover:text-blue-500 flex items-center gap-0.5 mt-1"
                                   onClick={() => setAssignDate(cell.dateKey)}
                                 >
+                                  <Plus className="w-3 h-3" aria-hidden="true" />
                                   assign
                                 </button>
                               ) : (
@@ -435,10 +440,19 @@ export default function ShiftCalendarPage() {
               with border-b border-slate-100 ("Employee Schedule Summary —
               {Month} {Year}") + p-0 content (empty on the reference at 0
               assignments; the clone's per-department breakdown rides it as
-              the superset). */}
+              the superset).
+              Session 63 (R63-E): REF's header is the iconed three-part
+              recipe — the header div carries the pb-3 override (12px
+              bottom, not p-6's 24px) and the title div is
+              `font-semibold tracking-tight text-base flex items-center
+              gap-2` with a lucide-users w-4 h-4 icon riding the
+              foreground pair (10,10,10 light / 250,250,250 dark — the
+              color already matched; the icon + members + the pb-3 are
+              the r63 census decomposition). */}
           <div className="rounded-xl bg-card shadow-sm">
-            <div className="flex flex-col space-y-1.5 border-b border-slate-100 p-6">
-              <div className="font-semibold leading-none tracking-tight">
+            <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 pb-3">
+              <div className="font-semibold tracking-tight text-base flex items-center gap-2">
+                <Users className="w-4 h-4" aria-hidden="true" />
                 Employee Schedule Summary — {monthLabel(data.month)}
               </div>
             </div>

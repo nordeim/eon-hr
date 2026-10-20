@@ -13,7 +13,13 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
            retired; the login page counters with its own overrides
            (the two-build split — REF's login kept the old family). */
         "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors",
-        "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        /* Session 63 (R63-A): REF's ::placeholder rides ITS muted token —
+           #737373 light / #a3a3a3 dark (the r63 light census live-measured
+           across 15 routes; the r60/r61 dark censuses verified dark).
+           The clone's --muted-foreground pins slate-500 #64748b (the
+           subtitle-parity rendered-truth pin), so the placeholder moves
+           to the literal pair (the R62-B checkbox pattern). */
+        "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         className
       )}
@@ -31,7 +37,8 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
            Session 62 (R62-K): + resize-none — REF's textareas carry it
            (member-set measured 2/2: companywall + interviewassistant). */
         "flex min-h-[60px] w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm",
-        "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        /* Session 63 (R63-A): the same literal pair as the Input base. */
+        "placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         className
       )}

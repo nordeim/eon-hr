@@ -294,16 +294,22 @@ test.describe("session-61 dark-mode text-color family (computed truth)", () => {
     expect(sparkles).toEqual([]);
   });
 
-  test("R61-O: the profile kicker subtitle renders slate-400", async ({ page }) => {
+  test("R61-O (session-63 amendment R63-C): the profile kicker subtitle is the FLIPPING pair — slate-500 light / slate-400 dark", async ({ page }) => {
     // the kicker renders hidden at desktop (md:hidden) — the class is
-    // still readable (the census's hidden-element lesson)
+    // still readable (the census's hidden-element lesson). The r61 pin
+    // froze slate-400 from the dark census alone; the r63 light census
+    // + the 390×844 re-measure caught the light side (the pair now
+    // rides text-slate-500 dark:text-slate-400).
     await page.goto("/profile");
     await expect(page.locator("main h2", { hasText: "sepnetflix2023" })).toBeVisible({ timeout: 15000 });
-    const c = await page.evaluate(() => {
+    const read = () => page.evaluate(() => {
       const p = [...document.querySelectorAll("main p")].find((el) => (el.textContent || "").trim() === "Manage your account");
       return p ? getComputedStyle(p).color : null;
     });
-    expect(c).toBe(SLATE400);
+    expect(await read()).toBe(SLATE500);
+    await setDark(page, true);
+    expect(await read()).toBe(SLATE400);
+    await setDark(page, false);
   });
 
   test("R61-P: the surveyanalytics legend — Responses blue-500 + the Avg Sentiment % name", async ({ page }) => {

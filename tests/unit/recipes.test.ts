@@ -1230,7 +1230,11 @@ describe("payrollengine fields (session 14, R13-K)", () => {
 describe("small pins: hrreports status + shiftcalendar (session 14, R13-L)", () => {
   it("hrreports Group By select defaults to an empty trigger (Status Filter shows All)", () => {
     const page = read("src", "app", "(app)", "hrreports", "page.tsx");
-    expect(page).toMatch(/Group By[\s\S]{0,300}SelectValue placeholder=""/);
+    /* Session 63 amendment (R63-B): the window widened 300→1200 — the
+       trigger's placeholder-override recipe comment (which grew again
+       when the dark: member landed) now sits between the label and
+       the SelectValue. */
+    expect(page).toMatch(/>Group By<\/Label>[\s\S]{0,1200}SelectValue placeholder=""/);
     expect(page).toMatch(/groupBy, setGroupBy\] = React\.useState<string>\(""\)/);
   });
 
@@ -3890,7 +3894,12 @@ describe("session-40 shell restructure + input migration + careers org-view (par
 
   it("R39-D1: the Input base is REF's migrated v4 recipe — bg-transparent + text-base md:text-sm + at-rest shadow-sm + ring-1 focus (offset-0) + file:text-foreground (live-measured on the loans dialog; the round-19 ring-2/offset-2/bg-card recipe retired)", () => {
     expect(input40).toContain("border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors");
-    expect(input40).toContain("file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
+    /* Session 63 amendment (R63-A): the placeholder member moves to the
+       literal pair — REF's ::placeholder = its muted #737373 light
+       (live-measured across 15 routes this round), the clone's token
+       pins slate-500 for subtitle parity. */
+    expect(input40).toContain("file:text-sm file:font-medium file:text-foreground placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring");
+    expect(input40).not.toContain("placeholder:text-muted-foreground");
     expect(input40).toContain("disabled:cursor-not-allowed disabled:opacity-50 md:text-sm");
     expect(input40).not.toContain("bg-card");
     expect(input40).not.toContain("ring-offset-2");
@@ -6583,9 +6592,9 @@ describe("Dark-mode text-color family (session 61, R61-A..W — the dark text-co
     expect(src).not.toContain('<p className="text-sm text-muted-foreground">No chats</p>');
   });
 
-  it("R61-O: the profile kicker subtitle renders slate-400 (REF's per-page variance)", () => {
+  it("R61-O (session-63 amendment R63-C): the profile kicker subtitle is the FLIPPING pair — slate-500 light / slate-400 dark (the r61 dark-only pin; REF's light side live-measured at 390×844 this round)", () => {
     const src = pg("profile");
-    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-400"');
+    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"');
     const ph = soft(() => read("src", "components", "shared", "page-header.tsx"));
     expect(ph).toContain("mobileKickerSubtitleClassName");
     expect(ph).toContain('mobileKickerSubtitle ? <p className={cn("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName)}>');
@@ -6629,10 +6638,10 @@ describe("Dark-mode text-color family (session 61, R61-A..W — the dark text-co
     expect(src.match(/<Target className="w-10 h-10/g)?.length).toBe(1);
   });
 
-  it("R61-W: the attendance restricted card's ShieldAlert is red-500 (not red-600)", () => {
+  it("R61-W (session-63 amendment R63-G): the attendance restricted card's icon is the lucide X at red-500 (the r61-W fix corrected the color; the r63 census read REF's icon class — the SHAPE was never measured before)", () => {
     const src = pg("attendance");
-    expect(src).toContain("<ShieldAlert className=\"h-8 w-8 text-red-500\" aria-hidden=\"true\" />");
-    expect(src).not.toContain("<ShieldAlert className=\"h-8 w-8 text-red-600\" aria-hidden=\"true\" />");
+    expect(src).toContain('<X className="h-8 w-8 text-red-500" aria-hidden="true" />');
+    expect(src).not.toContain("ShieldAlert");
   });
 });
 
@@ -6774,5 +6783,88 @@ describe("Dark-mode border-color family (session 62, R62-A..K — the dark borde
   it("R62-K: the shared Textarea base carries REF's resize-none", () => {
     const src = soft(() => read("src", "components", "ui", "input.tsx"));
     expect(src).toContain("resize-none");
+  });
+});
+
+describe("Light-mode text-color family (session 63, R63-A..G — the light-mode text-color census)", () => {
+  /* The r63 census (scripts/r63-lighttext-census.mjs, 49 routes, paired
+     live, LIGHT mode): the computed color of every text-bearing element
+     in main — BUTTONS INCLUDED (button text/icon colors were never read
+     by any prior census in ANY theme) — plus ::placeholder colors.
+     Pre-fix 26/49. The families: the placeholder token rider (REF's
+     ::placeholder = its muted #737373 light vs the clone's slate-500
+     token — the documented muted-foreground mapping made visible), the
+     empty Group By trigger (a both-theme button-text divergence), the
+     kicker subtitle's dark-only pin (R61-O), the shiftcalendar assign
+     icon + the summary header icon (children-filter census artifacts
+     decomposed to structural truths), the recruitment AI Score th icon,
+     and the attendance restricted card's icon shape + h3 shade (the
+     r61-W color fix kept the wrong SHAPE — color censuses cannot see
+     icon shapes). The instrument lessons: the visibility:hidden
+     recharts tooltip mounts with a label on REF (an at-rest-invisible
+     census artifact — advancedanalytics), and a title that carries an
+     icon is invisible to the leaf read (the summary "color diff" was
+     same-color structural drift). */
+
+  const in63 = () => soft(() => read("src", "components", "ui", "input.tsx"));
+  const pg63 = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R63-A: the Input + Textarea placeholder literal pair (REF's ::placeholder rides ITS muted #737373 light / #a3a3a3 dark — the clone's token pins slate-500; the literal pair ends the 15-route light divergence)", () => {
+    const src = in63();
+    expect(src).toContain("placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3]");
+    // both bases carry it (Input + Textarea)
+    expect(src.match(/placeholder:text-\[#737373\] dark:placeholder:text-\[#a3a3a3\]/g)?.length).toBe(2);
+    expect(src).not.toContain("placeholder:text-muted-foreground");
+  });
+
+  it("R63-B: the hrreports Group By empty trigger renders REF's foreground pair (the data-placeholder override — a both-theme button-text divergence no prior census saw)", () => {
+    const src = pg63("hrreports");
+    expect(src).toContain('id="hr-group" className="mt-1 w-full data-[placeholder]:text-foreground dark:data-[placeholder]:text-foreground"');
+    // the dark: member is required — the base's dark neutral rule carries
+    // the .dark ancestor class (higher specificity than a light-only tie)
+    expect(src).toContain("dark:data-[placeholder]:text-foreground");
+    // the base's R37-E neutral literal stays (the loans dialog placeholder pin untouched)
+    expect(soft(() => read("src", "components", "ui", "select.tsx"))).toContain("data-[placeholder]:text-neutral-500 dark:data-[placeholder]:text-neutral-400");
+  });
+
+  it("R63-C: the profile kicker subtitle is the FLIPPING pair (light slate-500 / dark slate-400 — the r61-O dark-only pin amended; live-measured at 390×844 both themes)", () => {
+    const src = pg63("profile");
+    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"');
+    expect(src).not.toContain('mobileKickerSubtitleClassName="text-slate-400"');
+  });
+
+  it("R63-D: the shiftcalendar assign affordance is iconed (REF: lucide-plus w-3 h-3 + gap-0.5 mt-1 members, unflipping slate-300 both themes)", () => {
+    const src = pg63("shiftcalendar");
+    expect(src).toContain('className="text-xs text-slate-300 hover:text-blue-500 flex items-center gap-0.5 mt-1"');
+    expect(src).toContain('<Plus className="w-3 h-3" aria-hidden="true" />');
+    /* The "+N more" overflow button — a with-data superset surface (it
+       renders only when a cell holds >2 assignments; REF-unmeasurable at
+       the demo's zero state) — keeps the r11 recipe. Only the empty-cell
+       assign affordance was live-measured this round. */
+    expect(src).toContain('className="flex items-center text-xs text-slate-300 hover:text-blue-500"');
+    expect(src).toContain("+{dayAssignments.length - 2} more");
+  });
+
+  it("R63-E: the shiftcalendar summary header is REF's iconed three-part recipe (the pb-3 override + the Users icon + the text-base flex title — the census 'color diff' was a children-filter artifact; the color already matched)", () => {
+    const src = pg63("shiftcalendar");
+    expect(src).toContain('className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 pb-3"');
+    expect(src).toContain('className="font-semibold tracking-tight text-base flex items-center gap-2"');
+    expect(src).toContain('<Users className="w-4 h-4" aria-hidden="true" />');
+    expect(src).not.toContain('className="flex flex-col space-y-1.5 border-b border-slate-100 p-6"');
+  });
+
+  it("R63-F: the recruitment AI Score th carries the trending-up icon inside the flex wrapper (both tables; th slate-600 unflipping)", () => {
+    const src = pg63("recruitment");
+    expect(src).toContain('<div className="flex items-center gap-1"><TrendingUp className="w-3 h-3" aria-hidden="true" />AI Score</div>');
+    expect(src.match(/<div className="flex items-center gap-1"><TrendingUp className="w-3 h-3" aria-hidden="true" \/>AI Score<\/div>/g)?.length).toBe(2);
+    expect(src).not.toContain('>AI Score</TableHead>');
+  });
+
+  it("R63-G: the attendance restricted card's REF pair — the X icon (NOT ShieldAlert; the r61-W shape blind spot) + the h3 slate-800 (unflipping, 30,41,59 both themes)", () => {
+    const src = pg63("attendance");
+    expect(src).toContain('<X className="h-8 w-8 text-red-500" aria-hidden="true" />');
+    expect(src).not.toContain("ShieldAlert");
+    expect(src).toContain('className="mb-2 text-lg font-semibold text-slate-800"');
+    expect(src).not.toContain("text-slate-900");
   });
 });

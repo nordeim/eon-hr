@@ -216,7 +216,18 @@ export default function HRReportsPage() {
             <div>
               <Label htmlFor="hr-group" className="text-xs text-slate-500">Group By</Label>
               <Select value={groupBy} onValueChange={setGroupBy}>
-                <SelectTrigger id="hr-group" className="mt-1 w-full">
+                {/* Session 63 (R63-B): REF's empty Group By trigger has NO
+                    data-placeholder attribute (its runtime mounts the
+                    trigger differently) and renders the trigger's own
+                    FOREGROUND pair — #0a0a0a light / #fafafa dark (both
+                    live-measured). The clone's Radix fires data-placeholder
+                    on the empty value, so this trigger overrides the base's
+                    R37-E neutral literal back to the foreground pair — the
+                    dark: member is required too (the base's dark rule
+                    carries the .dark ancestor class = higher specificity
+                    than a light-only override). The base member stays (the
+                    loans dialog "Select employee" placeholder pin). */}
+                <SelectTrigger id="hr-group" className="mt-1 w-full data-[placeholder]:text-foreground dark:data-[placeholder]:text-foreground">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>

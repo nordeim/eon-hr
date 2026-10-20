@@ -410,7 +410,11 @@ export default function RecruitmentPage() {
                   <TableRow>
                     <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
                     <TableHead className="font-semibold text-slate-600">Job</TableHead>
-                    <TableHead className="font-semibold text-slate-600">AI Score</TableHead>
+                    {/* Session 63 (R63-F): REF's AI Score th carries the
+                        trending-up icon (w-3 h-3 inside flex items-center
+                        gap-1, riding the th's unflipping slate-600 — both
+                        themes live-measured). */}
+                    <TableHead className="font-semibold text-slate-600"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3" aria-hidden="true" />AI Score</div></TableHead>
                     <TableHead className="font-semibold text-slate-600">Skills Match</TableHead>
                     <TableHead className="font-semibold text-slate-600">Status</TableHead>
                     <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
@@ -430,7 +434,9 @@ export default function RecruitmentPage() {
                   <TableRow>
                     <TableHead className="font-semibold text-slate-600">Candidate</TableHead>
                     <TableHead className="font-semibold text-slate-600">Job</TableHead>
-                    <TableHead className="font-semibold text-slate-600">AI Score</TableHead>
+                    {/* Session 63 (R63-F): the with-data table matches the
+                        empty-state th recipe (the icon rides both). */}
+                    <TableHead className="font-semibold text-slate-600"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3" aria-hidden="true" />AI Score</div></TableHead>
                     <TableHead className="font-semibold text-slate-600">Skills Match</TableHead>
                     <TableHead className="font-semibold text-slate-600">Status</TableHead>
                     <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
