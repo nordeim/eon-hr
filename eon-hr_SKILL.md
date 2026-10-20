@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.45.0 (session-62 remediation complete — the dark-mode border-color family: the Customize token flip (the frozen session-3 literal retired), the checkbox border literal pair (the both-theme bug on the wrong token), the four palette pins (green-200/amber-200/cyan-300/cyan-50), the unflipping border-slate-200 card family (nine cards across seven routes + the loans/offboarding empty-state rewrites), the attendance per-color action buttons + the 3-level Report-Type card + the stat hover members, the per-stage kanban columns, the calendar ths + the weekend variant, the per-page thead recipes, the profile badge DIV, the two-level severity cards, and the textarea resize-none) · **Last updated:** 2026-10-19
-> **State:** 873 unit + 327 E2E tests green, lint/typecheck/build
+> **Version:** 3.46.0 (session-63 remediation complete — the light-mode text-color census: the Input/Textarea `::placeholder` literal pair (REF's muted #737373/#a3a3a3 — the 15-route token-rider divergence ended), the hrreports empty Group By trigger's foreground pair (a both-theme button-text divergence — the instance override carries BOTH variant members; the base's R37-E literal stays for the loans dialog), the profile kicker subtitle's flipping pair (the r61 dark-only pin amended), the shiftcalendar assign affordance's Plus icon + the iconed summary header (the pb-3 + the Users icon — the census "color diff" was a children-filter artifact), the recruitment AI Score th's TrendingUp icon, and the attendance restricted card's X icon + slate-800 h3 (the r61 color fix kept the un-measured SHAPE)) · **Last updated:** 2026-10-20
+> **State:** 880 unit + 333 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -3975,3 +3975,87 @@ member missing; the "missing min-h-[60px]" was a false positive);
 both-theme bugs hide from single-theme censuses (the checkbox border
 diverged in LIGHT too); census batches must save DIFF dumps to files
 (a mid-batch tool timeout otherwise loses the batch).
+
+## §73 Session 63 (parity round 62) — the light-mode text-color census
+
+The third computed-color census dimension and the LAST uncensured
+theme layer: the computed `color` of every text-bearing element in
+`main` — BUTTONS INCLUDED (button text/icons were never read by any
+prior census in ANY theme — the r60/r61/r62 blind spot closed) —
+plus `::placeholder` colors, all 49 routes, paired live in LIGHT.
+Pre-fix 26/49 → post-fix **41/49** (every remaining DIFF decomposed
+and documented as a known allowance or a re-confirmed transient).
+The round was also the vehicle for the documented byte-parity
+backlog: REF's `--muted-foreground` = neutral-500 #737373 (the
+clone's token pins slate-500 #64748b for the subtitle/tab parity) —
+the un-compensated token riders surfaced as the 15-route placeholder
+family.
+
+**The fixes (R63-A..G)**: (A) the Input/Textarea placeholder moved
+from `placeholder:text-muted-foreground` to REF's muted LITERAL pair
+`placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3]` (the
+R62-B checkbox pattern; the token stays pinned for the
+subtitle/tab-parity consumers); (B) the hrreports empty Group By
+trigger — REF's trigger mounts WITHOUT `data-placeholder` (its
+runtime differs) and renders its own foreground pair
+(#0a0a0a/#fafafa) while the clone's Radix fires data-placeholder →
+the R37-E neutral literal painted it (a BOTH-theme button-text
+divergence); the trigger instance now overrides with BOTH variant
+members — **the dark: member is REQUIRED**: cn()/tw-merge replaces
+the base member PER VARIANT at merge time, so a light-only override
+leaves the base's dark member live (learned twice: first the E2E
+dark assertion caught it); (C) the profile kicker subtitle is the
+FLIPPING pair (slate-500 light / slate-400 dark — the r61-O pin
+froze the dark measurement for both themes); (D) the shiftcalendar
+assign affordance is iconed (lucide-plus w-3 h-3 + gap-0.5 mt-1,
+unflipping slate-300); (E) the shiftcalendar summary "color diff"
+was a CHILDREN-FILTER artifact (an iconed title is invisible to the
+leaf read — the color always matched); the real divergences are
+structural: the pb-3 header override + the text-base flex title +
+the lucide-users icon; (F) the recruitment AI Score th carries the
+trending-up icon inside the flex gap-1 wrapper (both tables); (G)
+the attendance restricted card's icon is **lucide-x** (the r61-W
+color fix kept the un-measured shield SHAPE — color censuses cannot
+see icon shapes) + the h3 is text-slate-800 (unflipping).
+
+**The r63 instrument lessons**: (1) the standalone static-copy trap —
+`npx next build` alone leaves `.next/standalone/.next/static` EMPTY
+(the copies live in the `bun run build` script); an E2E run against
+the uncopied build serves UNSTYLED pages whose computed colors read
+as the Chrome UA defaults (::placeholder rgb(117,117,117)) — always
+build via the package script; (2) Tailwind v4 dark: variants compile
+to `:where(.dark,.dark *)` = ZERO specificity — ties resolve by file
+order in CSS but the operative resolver is cn()/tw-merge (REPLACES
+the base member per variant); author BOTH variant members on
+instance overrides; (3) the children-filter census artifact — a
+title carrying an icon is invisible to the leaf text read;
+decompose "color diffs" to the STRUCTURE before pinning a color that
+already matched; (4) the visibility:hidden recharts tooltip mounts
+WITH a default label on REF but empty on the clone — at-rest
+invisible census artifacts are documentation, not fixes (hover
+parity holds); (5) a page that fits one 900px viewport makes two
+full-page captures byte-identical — capture the second surface at a
+different viewport (the 390×844 mobile pair), and the agent-browser
+viewport state can go stale after restore cycles (fresh sessions
+when the capture size doesn't stick); (6) the pin-defect trio — a
+source COMMENT containing the retired member breaks the pin's
+`.not.toContain`; a recipe comment between a label and its control
+breaks legacy regex windows (widen the window); a globally-scoped
+`.not.toContain` breaks when another element legitimately shares
+the retired class (the shiftcalendar "+N more" overflow button —
+scope retirement assertions to the measured surface or pin the
+sharer positively with its allowance reason).
+
+The frontier after this round: the three computed-color dimensions
+(fill r59–r60, text r60–r63, border r61–r62) are now censused in
+BOTH themes (light text was the last uncensured layer); the
+remaining known divergences are the documented allowances (the
+with-data superset surfaces stay REF-unmeasurable at the demo's
+zero state; the advancedanalytics hidden-tooltip artifact; the
+muted-foreground/primary TOKEN re-mapping question stays a future
+round's scope — the literal pairs hold computed parity on every
+censused surface); the login deploy watch stays armed at the
+post-26th finals (JS D3ArZVPB / CSS OJK0Y98H — the first CSS-side
+login change since round 45, re-audited non-visual 13/13 via
+verify-r45); the Next.js 16.4.0 history bug remains the one
+recorded functional divergence whose fix lives upstream.

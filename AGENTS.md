@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 873 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 327 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 880 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 333 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -4039,3 +4039,132 @@ single-theme censuses** — the checkbox border diverged in LIGHT
 too (#171717 vs #1877f2) but every prior census read fills/text,
 never borders; (6) the census batches must save DIFF dumps to
 files — a mid-batch tool timeout otherwise loses the batch.
+
+## Session 63 (parity round 62) — the light-mode text-color census
+
+Workspace carried the round-61 landing (`f4bf0bd`); environment rebuilt
+per protocol (`.env` with `DATABASE_URL="file:../db/custom.db"` + the
+generated AUTH_SECRET, db pushed + seeded, playwright chromium).
+Baseline gates ALL GREEN (873/873 unit · 327/327 E2E). Deploy watch:
+**the 26th login deploy detected** (login JS `Doo5f9jm`→`D3ArZVPB` +
+CSS `A8a43VEI`→`OJK0Y98H` — the first CSS-side login change since
+round 45) — re-audited NON-VISUAL via the full ladder (standing 5/5 +
+sweep 12/12 + verify-r49 13/13 + **verify-r45 13/13** — all 13 login
+pairs MATCH). The watch finals updated to the post-26th truths.
+
+**The census (`scripts/r63-lighttext-census.mjs`, 49 routes, paired
+live, LIGHT, three batches with DIFF dumps): the computed `color` of
+every text-bearing element in `main` — headings, text leaves, svgs,
+BUTTONS INCLUDED (button text/icon colors were never read by any
+prior census in ANY theme — the r60/r61/r62 blind spot closed) —
+plus `::placeholder` colors. The recorded gaps this round fills: (1)
+no computed text census ever ran in LIGHT; (2) button text was never
+censused in any theme; (3) the documented byte-parity backlog —
+REF's `--muted-foreground` = neutral-500 #737373 (the clone's token
+pins slate-500 #64748b) — surfaced as the 15-route placeholder
+family. Pre-fix 26/49, post-fix 41/49** (every remaining DIFF
+decomposed + documented: the employees seeded leaves + REF's
+transient refresh-cw, the taskmanager mid-load read (steady-state
+MATCH re-confirmed), the profile asChild back-arrow artifact, the
+attendance admin superset, the interviewassistant r48-C1 superset
+card, the advancedanalytics hidden-tooltip census artifact, the
+onboardingtemplates 404 `<a>` superset, REF's live careers data).
+
+- **R63-A**: the Input + Textarea `::placeholder` moved from the
+  token rider (`placeholder:text-muted-foreground` → the clone's
+  slate-500 tint, WRONG in light) to REF's muted LITERAL pair
+  (`placeholder:text-[#737373] dark:placeholder:text-[#a3a3a3]` —
+  the R62-B checkbox pattern; the token itself stays pinned for the
+  subtitle/tab parity) — a 15-route light-mode divergence ended.
+- **R63-B**: the hrreports empty Group By trigger — REF's trigger
+  has NO `data-placeholder` attribute (its runtime mounts the
+  trigger differently) and renders the trigger's OWN foreground pair
+  (#0a0a0a/#fafafa), while the clone's Radix fires data-placeholder →
+  the R37-E neutral literal painted it. A BOTH-theme button-text
+  divergence (button text was never censused). The instance override
+  carries BOTH variant members (`data-[placeholder]:text-foreground
+  dark:data-[placeholder]:text-foreground` — the dark: member is
+  required: cn()/tw-merge replaces the base member per variant, so a
+  light-only override leaves the base's dark member live); the
+  base's R37-E literal stays (the loans dialog pin).
+- **R63-C**: the profile kicker subtitle is the FLIPPING pair —
+  slate-500 light / slate-400 dark (the r61-O pin froze the dark
+  measurement for both themes; the r63 light census + the 390×844
+  re-measure caught the light side).
+- **R63-D**: the shiftcalendar assign affordance is iconed —
+  `text-xs text-slate-300 hover:text-blue-500 flex items-center
+  gap-0.5 mt-1` + a `lucide-plus w-3 h-3` (unflipping slate-300,
+  both themes live-measured). The "+N more" overflow button (a
+  with-data superset surface, REF-unmeasurable at the demo's zero
+  state) keeps the r11 recipe.
+- **R63-E**: the shiftcalendar summary header — the census "color
+  diff" was a CHILDREN-FILTER artifact (a title that carries an icon
+  is invisible to the leaf read; the color always matched); the real
+  divergences are structural: the header's `pb-3` override + the
+  title's `text-base flex items-center gap-2` members + the
+  `lucide-users w-4 h-4` icon riding the foreground pair.
+- **R63-F**: the recruitment AI Score th carries the
+  `lucide-trending-up w-3 h-3` icon inside a `flex items-center
+  gap-1` wrapper (both tables; th slate-600 unflipping).
+- **R63-G**: the attendance restricted card — REF's icon is
+  `lucide-x` NOT the shield (the r61-W color fix kept the
+  un-measured SHAPE; color censuses cannot see icon shapes) + the h3
+  is `text-slate-800` (unflipping 30,41,59 — was slate-900). Both
+  surfaces render for non-admins only — recipe-aligned per the
+  r61-W precedent (the census's REF session user is non-admin, the
+  LOC admin seed is not; the unit pin holds it member-level).
+
+Also documented (no fix): the advancedanalytics recharts tooltip —
+REF's recharts mounts the hidden tooltip node WITH a default label,
+the clone's mounts it empty; `visibility: hidden` at rest on both —
+an at-rest-invisible census artifact, NOT a visual divergence
+(hover parity holds). TDD: 7 unit pins (the R63 block) RED-first +
+three legacy pins amended to the re-measured truths (R39-D1 the
+placeholder literal pair; R61-O the flipping pair; R61-W the X icon)
++ the session-14 hrreports regex window widened (300→1200 — the
+recipe comment now sits between the label and the SelectValue).
+E2E: +6 chromium specs (`tests/e2e/session63-light-text.spec.ts` —
+computed pairs, both themes, setDark AFTER goto) + the session-61
+R61-O spec amended to the flipping pair. Gates: lint 0/0 · tsc ✓ ·
+**880/880 unit** (+7) · build ✓ · **333/333 E2E** (the two
+documented transients — the session-58 switch/checkbox flake + the
+session-40 dialog-animation read — both fired once mid-verification,
+both 5/5 in isolation per the flake-check) · post-fix census 41/49 ·
+12 screenshot files (the 314–325 pair set) · deploy watch both
+sides quiet (post-26th finals) · DB pristine.
+
+## Session 63 instrument lessons (the light-text census, carry-forward)
+
+**The r63 lessons**: (1) **the standalone static-copy trap** —
+`npx next build` alone leaves `.next/standalone/.next/static` EMPTY
+(the copy steps live in the `bun run build` script); the E2E webServer
+then serves UNSTYLED pages whose computed colors read as the Chrome
+UA defaults (::placeholder = rgb(117,117,117), the Material gray) —
+always build via the package script; (2) **the dark-variant
+specificity lesson** — Tailwind v4's dark: variants compile to
+`:where(.dark,.dark *)` (ZERO specificity), so a base member and an
+instance override tie on specificity and resolve by FILE ORDER in
+dark — but the operative resolver is cn()/tw-merge, which REPLACES
+the base member per variant at merge time; an instance override must
+author BOTH variant members or the base's dark member stays live
+(the R63-B lesson, twice-learned); (3) **the children-filter
+artifact** — a title that carries an icon is invisible to the leaf
+text read; decompose a "color diff" to the STRUCTURE (icon, members,
+paddings) before pinning a color that already matched; (4) **the
+visibility:hidden tooltip** — recharts mounts its tooltip node at
+rest (hidden) with a default label on REF but empty on the clone —
+at-rest-invisible census artifacts are documentation, not fixes;
+(5) **the single-viewport page** — a page whose content fits one
+900px viewport makes two full-page captures byte-identical (the
+318/320 collision); capture the second surface at a different
+viewport (the 390×844 mobile pair), and note the agent-browser
+viewport state can go stale after restore cycles — spin a FRESH
+session when the capture size doesn't stick; (6) **the pin-defect
+trio** — (a) a source COMMENT containing the retired member breaks
+the pin's `.not.toContain` (the attendance shield comment), (b) a
+recipe comment between a label and its control breaks legacy regex
+windows (the hrreports 300→1200), (c) a globally-scoped
+`.not.toContain` breaks when another element legitimately shares the
+retired class (the shiftcalendar "+N more" overflow button — scope
+retirement assertions to the measured surface or pin the sharer
+positively with its allowance reason).
