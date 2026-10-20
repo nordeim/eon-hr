@@ -175,7 +175,7 @@ export default function AllLeaveRequestsPage() {
           valueTag="p"
           labelTag="p"
           valueClassName="mt-4 mb-0"
-          tileRowClassName=""
+          tileRowClassName="" tileFixed
           icon={<Calendar className="w-6 h-6 text-yellow-600" aria-hidden="true" />}
           tileClassName="bg-yellow-100"
         />
@@ -185,7 +185,7 @@ export default function AllLeaveRequestsPage() {
           valueTag="p"
           labelTag="p"
           valueClassName="mt-4 mb-0"
-          tileRowClassName=""
+          tileRowClassName="" tileFixed
           icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />}
           tileClassName="bg-green-100"
         />
@@ -195,7 +195,7 @@ export default function AllLeaveRequestsPage() {
           valueTag="p"
           labelTag="p"
           valueClassName="mt-4 mb-0"
-          tileRowClassName=""
+          tileRowClassName="" tileFixed
           icon={<Plane className="w-6 h-6 text-blue-600" aria-hidden="true" />}
           tileClassName="bg-blue-100"
         />

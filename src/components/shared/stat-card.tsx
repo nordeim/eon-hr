@@ -70,6 +70,11 @@ interface StatCardProps {
    *  advancedanalytics/payrollai/allleaverequests render the tile row
    *  WITHOUT the mb-3 (the value's mt-4 supplies the stack instead). */
   tileRowClassName?: string;
+  /** Session 65 (R65-A): keep the fixed w-12 h-12 tile on the pages REF
+   *  renders fixed (advancedanalytics / allleaverequests / payrollai —
+   *  analytics rides the tile-right branch) — the default standard pages
+   *  render REF's padding-driven p-3 form. */
+  tileFixed?: boolean;
   className?: string;
 }
 
@@ -160,7 +165,16 @@ const VARIANT_LABEL: Partial<Record<StatCardVariant, string>> = {
 };
 
 /** Variants that render the icon tile (the reference's mini, mini-centered
- *  and no-tile stat cards carry no icon tile at all). */
+ *  and no-tile stat cards carry no icon tile at all).
+ *  Session 65 (R65-A): the standard-variant tile is PADDING-DRIVEN — REF
+ *  live-measures `bg-{c}-100 p-3 rounded-xl` 48×48 (12px padding + the 24px
+ *  svg) on payroll / expenses / surveys / attendance. The session-17 R16-D
+ *  "NOT p-3" note was a generalization error: its zero-padding measurement
+ *  was taken on the OTHER 48px-tile pages — advancedanalytics, analytics
+ *  (tile-right), allleaverequests, payrollai — which REF renders FIXED
+ *  (w-12 h-12 … rounded-xl, live-verified by the r65 per-tile probe). Those
+ *  pages pass tileFixed; the default standard pages render the padded
+ *  form. The shrink note below applies to the FIXED form only. */
 const TILED: readonly StatCardVariant[] = [
   "standard",
   "compact",
@@ -185,19 +199,23 @@ export function StatCard({
   valueTag,
   labelTag,
   tileRowClassName,
+  tileFixed,
   variant = "standard",
   className,
 }: StatCardProps) {
   const tile = tileClassName ?? iconClassName;
   const tiled = icon != null && TILED.includes(variant);
 
-  // Tile geometry per variant: standard/tile-right = 48×48 (h-12 w-12 with
-  // a flex-CENTERED 24px icon — NOT p-3: session 17 R16-D measured REF's
-  // tile padding at 0px, so its min-content is the bare svg and it
-  // flex-shrinks 48→24 at constrained card widths), compact/compact-s =
-  // 40×40 (w-10 h-10 + 20px icon), horizontal = 44×44 (w-11 h-11 + 20px
-  // icon — session 12 R11-D: the icon is 20px w-5 h-5 with a per-color
-  // text class from the call site, not 24px).
+  // Tile geometry per variant (session 65 re-measure — the r65 per-tile
+  // probe): the STANDARD default is padding-driven p-3 (48×48 = 12px
+  // padding + the 24px svg) and cannot flex-shrink below 48; the
+  // tileFixed standard pages + tile-right render the FIXED h-12 w-12
+  // form (session 17 R16-D measured REF's fixed-tile padding at 0px, so
+  // its min-content is the bare svg and it flex-shrinks 48→24 at
+  // constrained card widths — that behavior belongs to the fixed form
+  // only), compact/compact-s = 40×40 (w-10 h-10 + 20px icon), horizontal
+  // = 44×44 (w-11 h-11 + 20px icon — session 12 R11-D: the icon is 20px
+  // w-5 h-5 with a per-color text class from the call site, not 24px).
   /* Session 48 (R47-D1): REF's tiles carry GEOMETRY + BG only — the icon
    * size + color ride the svg's own classes (w-5 h-5 text-{c}-600 on the
    * compacts, w-6 h-6 on the 48px tiles — live-measured on recruitment,
@@ -216,7 +234,19 @@ export function StatCard({
              * with BG only; the icon size + color ride the svg's own
              * classes (w-5 h-5 text-{c}-600, NO guard — live-measured). */
             "w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100"
-          : "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100";
+          : tileFixed || variant === "tile-right"
+            ? /* Session 65 (R65-A): REF renders these 48px tiles FIXED
+               * (w-12 h-12 … rounded-xl, padding 0 — the r65 per-tile
+               * probe: advancedanalytics / allleaverequests / payrollai
+               * via tileFixed, plus analytics whose tile-right branch
+               * is fixed by contract); the shrink behavior below
+               * applies here. */
+              "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100"
+            : /* Session 65 (R65-A): REF's default standard pages render
+               * the tile PADDING-DRIVEN — bg-{c}-100 p-3 rounded-xl
+               * (12px padding + the 24px svg = 48×48, live-measured on
+               * payroll / expenses / surveys / attendance). */
+              "p-3 rounded-xl flex items-center justify-center bg-blue-100";
 
   const tileElement = tiled ? (
     /* Session 17 (R16-D): NO shrink-0 — the reference's tile flex-shrinks

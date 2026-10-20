@@ -92,7 +92,7 @@ export default function PayrollAiPage() {
             valueTag="p"
             labelTag="p"
             valueClassName="mt-4 mb-0"
-            tileRowClassName=""
+            tileRowClassName="" tileFixed
             icon={<Sparkles className="w-6 h-6 text-blue-600" aria-hidden="true" />}
             tileClassName="bg-blue-100"
             value={loading ? "…" : String(stats.pending)}
@@ -102,7 +102,7 @@ export default function PayrollAiPage() {
             valueTag="p"
             labelTag="p"
             valueClassName="mt-4 mb-0"
-            tileRowClassName=""
+            tileRowClassName="" tileFixed
             icon={<CircleCheckBig className="w-6 h-6 text-green-600" aria-hidden="true" />}
             tileClassName="bg-green-100"
             value={loading ? "…" : String(stats.accepted)}
@@ -112,7 +112,7 @@ export default function PayrollAiPage() {
             valueTag="p"
             labelTag="p"
             valueClassName="mt-4 mb-0"
-            tileRowClassName=""
+            tileRowClassName="" tileFixed
             icon={<DollarSign className="w-6 h-6 text-purple-600" aria-hidden="true" />}
             tileClassName="bg-purple-100"
             value={loading ? "…" : `${stats.totalAdjustments / 100} SAR`}

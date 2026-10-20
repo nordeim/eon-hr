@@ -151,9 +151,13 @@ export default function HrAssistantPage() {
 
         <Card className="border-slate-200 shadow-xl">
           <CardContent className="p-0">
-            <div ref={scrollRef} className="flex h-[460px] flex-col gap-3 overflow-y-auto p-4">
+            {/* Session 65 (R65-E): REF's pane is the block + space-y-4
+                recipe (h-500 p-6 — live-measured 500px/24px; the clone
+                authored a flex h-460 p-4 stack). The loader branch keeps
+                its centering via h-full inside the fixed-height pane. */}
+            <div ref={scrollRef} className="h-[500px] overflow-y-auto p-6 space-y-4">
               {!booted ? (
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex h-full items-center justify-center">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
@@ -162,7 +166,7 @@ export default function HrAssistantPage() {
                    bot kicker + the send row). The r47-E5 "icon only"
                    pin is superseded by the r61 re-measure (the sparkles
                    retired). */
-                <div className="flex flex-1" />
+                <div className="h-full" />
               ) : (
                 messages.map((m) => {
                   const isUser = m.role === "user";
@@ -188,7 +192,12 @@ export default function HrAssistantPage() {
                 })
               )}
             </div>
-            <div className="flex items-end gap-2 border-t p-3">
+            {/* Session 65 (R65-E): REF's input row — border-t p-4 flex
+                gap-3 (live-measured 16px padding, row h≈93) with the
+                min-h-[60px] textarea; the clone authored p-3 + a 48px
+                textarea. The send Button keeps the R58-6 pin (REF's
+                48×36 dark solid — verified unchanged this round). */}
+            <div className="border-t p-4 flex gap-3">
               <Textarea
                 rows={1}
                 value={draft}
@@ -200,7 +209,7 @@ export default function HrAssistantPage() {
                   }
                 }}
                 placeholder="Ask me anything about HR..."
-                className="min-h-[48px] flex-1 resize-none"
+                className="min-h-[60px] flex-1 resize-none"
               />
               {/* Session 58 (R58-6): REF's send is the DARK solid at the
                   DEFAULT size (h-9 px-4 py-2, icon-only → 48x36) — not

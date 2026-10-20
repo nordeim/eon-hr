@@ -206,7 +206,17 @@ export default function ChatPage() {
       <div className="flex h-[calc(100vh-8rem)] min-h-[560px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         {/* conversation list */}
         <div className="hidden w-80 shrink-0 flex-col border-r border-slate-200 md:flex">
-          <div className="flex items-center justify-between gap-2 px-4 py-4">
+          {/* Session 65 (R65-C): REF authors ONE p-4 border-b wrapper
+              containing the h2 row AND the search — the split authoring
+              (a padded h2 row + a padded search div) dropped the column
+              header's border-b entirely, and the r63 border census's set
+              comparison could not see it (the page's other slate-200
+              borders satisfied the set). Restructured to REF's live
+              recipe: the wrapper carries ALL the padding + the border;
+              the h2 row is bare with mb-4; the search wrapper stays
+              bare relative (the R61-B/I icon contract unchanged). */}
+          <div className="p-4 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-4">
             {/* Session 61 (R61-H): REF authors slate-900 (unflipping —
                 measured rgb(15,23,42) in DARK) — not the flipping
                 foreground token. */}
@@ -218,18 +228,21 @@ export default function ChatPage() {
               /* Session 60 (R60-E): REF's new-chat button rides the
                  primary-foreground token (light #fafafa / dark #171717
                  — live-measured both themes), not the literal white the
-                 r16 authoring guessed. */
-              className="flex h-8 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
+                 r16 authoring guessed.
+                 Session 65 (R65-C): the button is padding-driven —
+                 px-3 (16px icon + 24px = REF's live 40×32), not the
+                 fixed w-10 form (computed-equal at rest; the padding
+                 member is the authored truth). */
+              className="flex h-8 shrink-0 items-center justify-center rounded-md bg-blue-600 px-3 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
             >
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
             </button>
-          </div>
-          {/* Session 61 (R61-B/I): REF's search wrapper is BARE relative
-              (h:36 — the icon's top-1/2 centers ON the input; the
-              left-7 authoring inflated the wrapper's height via pb-4,
-              centering the icon 8px low). The row padding moves to this
-              outer div; the icon rides REF's authored slate-400. */}
-          <div className="px-4 pb-4">
+            </div>
+            {/* Session 61 (R61-B/I): the search wrapper is BARE relative
+                (h:36 — the icon's top-1/2 centers ON the input; the
+                left-7 authoring inflated the wrapper's height via pb-4,
+                centering the icon 8px low). The icon rides REF's
+                authored slate-400. */}
             <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
             <Input

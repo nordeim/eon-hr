@@ -5516,10 +5516,13 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
     expect(src).toContain('TabsContent value="workflows" className="mt-6 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-6"');
   });
 
-  it("R48-C7: requestreports — the always-row header (Back ghost h-8 px-3 text-xs + classless h1/p block + the bare flex gap-2 cluster) + the horizontal-bare stats + the pb-2 pr-4 th family", () => {
+  it("R48-C7: requestreports — the always-row header (Back ghost at the sm size + classless h1/p block + the bare flex gap-2 cluster) + the horizontal-bare stats + the pb-2 pr-4 th family", () => {
     const src = page("requestreports", "page.tsx");
     expect(src).toContain('<div className="flex items-center justify-between">');
-    expect(src).toContain('className="h-8 rounded-md px-3 text-xs"');
+    // Session 65 (R65-F) amendment: the Back button moved from the
+    // default-size + className override (which leaked the base py-2) to
+    // REF's authored sm member set — padding 0px 12px, live-measured.
+    expect(src).toContain('<Button variant="ghost" size="sm" onClick={() => history.back()}>');
     expect(src).toContain('<div className="flex gap-2">');
     expect(src.match(/variant="horizontal-bare"/g)?.length).toBe(4);
     expect(src).toContain('<th className="pb-2 pr-4">');
@@ -6383,8 +6386,11 @@ describe("Dark-mode fill family (session 60, R60-A..F — the dark-mode union ce
     const np = notifPrefsPage();
     expect(np).toContain('variant="blue" className="text-white"');
     // the chat new-chat flips text-white -> text-primary-foreground
+    // Session 65 (R65-C) amendment: the button gained the px-3 member
+    // (REF's padding-driven form) between bg-blue-600 and the token —
+    // the member-set re-ordered, the color contract unchanged.
     const chat = chatPageR60();
-    expect(chat).toContain("bg-blue-600 text-primary-foreground transition-colors hover:bg-blue-700");
+    expect(chat).toContain("bg-blue-600 px-3 text-primary-foreground transition-colors hover:bg-blue-700");
     expect(chat).not.toContain("bg-blue-600 text-white");
   });
 
@@ -6928,5 +6934,79 @@ describe("Light-mode border census + the input-family probes (session 64, R64-A.
     expect(src).toContain('placeholder="admin@acme.com"');
     expect(src).not.toContain("Your company name");
     expect(src).not.toContain("owner@company.com");
+  });
+});
+
+describe("Geometry census (session 65, R65-A..G — parity round 64: padding + border-radius)", () => {
+  /* The r65 census (scripts/r65-geometry-census.mjs, 49 routes, paired
+     live, LIGHT mode): the computed padding (4 sides) + border-radius of
+     every geometry-bearing element in main — the FIRST full-population
+     read of the two dimensions every color census was blind to (the r64
+     lesson: color censuses cannot see PADDING). Pre-fix 32/49. All 17
+     DIFFs decomposed element-level (r65-probe / r65-probe-cmp /
+     r65-probe2 the per-tile recipe probe): 7 fix families + the
+     documented allowances (employees seeded, attendance admin superset +
+     the restricted card re-verified at geometry parity, interviewassistant
+     r48-C1, onboardingtemplates r36 anchor, careers live data). */
+
+  const pg65 = (route: string) => soft(() => read("src", "app", "(app)", route, "page.tsx"));
+
+  it("R65-A: the StatCard standard-variant tile is padding-driven (the live 48px tiles: 12px padding + the 24px svg), with the tileFixed escape for the pages REF renders fixed", () => {
+    const statCard = read("src", "components", "shared", "stat-card.tsx");
+    // REF live-measures bg-{c}-100 p-3 rounded-xl 48x48 on payroll /
+    // expenses / surveys / attendance (the session-17 zero-padding
+    // measurement was taken on the OTHER 48px-tile pages and
+    // generalized — the per-page probe2 split the family this round).
+    expect(statCard).toContain("p-3 rounded-xl flex items-center justify-center bg-blue-100");
+    // The pages REF renders FIXED (advancedanalytics, analytics
+    // tile-right, allleaverequests, payrollai) keep the w-12 h-12 form
+    // via the tileFixed prop.
+    expect(statCard).toContain("tileFixed");
+    expect(statCard).toContain("w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100");
+    for (const [route, n] of [["advancedanalytics", 4], ["allleaverequests", 3], ["payrollai", 3]] as const) {
+      expect(soft(() => read("src", "app", "(app)", route, "page.tsx")).match(/tileFixed/g)?.length ?? 0).toBeGreaterThanOrEqual(n);
+    }
+  });
+
+  it("R65-B: the td/th base-layer restoration — TW v4's preflight zeroes the UA cell padding; REF's runtime keeps the 1px (the R23-A cursor-restoration precedent)", () => {
+    const css = read("src", "app", "globals.css");
+    expect(css).toMatch(/th,\s*td\s*\{\s*padding:\s*1px;\s*\}/);
+  });
+
+  it("R65-C: the chat column header — ONE p-4 border-b wrapper (the border-b the split authoring dropped), the bare mb-4 h2 row, the bare relative search wrapper, and the padding-driven new-chat button", () => {
+    const src = pg65("chat");
+    expect(src).toContain('className="p-4 border-b border-slate-200"');
+    expect(src).toContain('className="flex items-center justify-between mb-4"');
+    expect(src).not.toContain("px-4 pb-4");
+    expect(src).not.toContain("w-10 shrink-0");
+    expect(src).toMatch(/bg-blue-600[^"]*px-3/);
+  });
+
+  it("R65-D: the compliance filter row is a bordered white box (items-center + bg-white + rounded-xl + border — live-measured full member set)", () => {
+    const src = pg65("compliancedashboard");
+    expect(src).toContain('className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200"');
+    expect(src).not.toContain('className="flex flex-wrap gap-3 p-4"');
+  });
+
+  it("R65-E: the hrassistant chat geometry — the 500px p-6 space-y-4 pane, the p-4 gap-3 input row, the min-h-[60px] textarea (live-measured: REF renders 500px/16px/60px; the clone authored 460px/12px/48px)", () => {
+    const src = pg65("hrassistant");
+    expect(src).toContain('className="h-[500px] overflow-y-auto p-6 space-y-4"');
+    expect(src).not.toContain("h-[460px]");
+    expect(src).toContain('className="border-t p-4 flex gap-3"');
+    expect(src).not.toContain("items-end gap-2 border-t p-3");
+    expect(src).toContain("min-h-[60px]");
+    expect(src).not.toContain("min-h-[48px]");
+  });
+
+  it("R65-F: the requestreports Back button rides the sm size (REF's authored member set — the default-size override leaked the base py-2 into an 8px vertical pad REF does not render)", () => {
+    const src = pg65("requestreports");
+    expect(src).toContain('<Button variant="ghost" size="sm" onClick={() => history.back()}>');
+    expect(src).not.toContain('className="h-8 rounded-md px-3 text-xs"');
+  });
+
+  it("R65-G: the radius token — REF's live rounded-sm computes 4px (the v4 scale; the securitysettings checkboxes are the visible census surface); the v3-default 2px pin retired", () => {
+    const css = read("src", "app", "globals.css");
+    expect(css).toContain("--radius-sm: 0.25rem;");
+    expect(css).not.toContain("--radius-sm: 0.125rem");
   });
 });

@@ -337,7 +337,13 @@ export default function ComplianceDashboardPage() {
                   ))}
                 </div>
 
-                <div className="flex flex-wrap gap-3 p-4">
+                {/* Session 65 (R65-D): the filter row is a bordered white
+                    box — REF's live full member set (items-center +
+                    bg-white + rounded-xl + border, live-measured; the fill
+                    censuses could not see the missing box: the clone's
+                    Card root supplied an identical white tuple — set
+                    blindness the geometry census caught). */}
+                <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200">
                   <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
                   {/* Session 64 (R64-B): REF's live placeholder names the
                       employee dimension (the query filters document name AND

@@ -121,7 +121,12 @@ export default function RequestReportsPage() {
               actions cluster. Live-measured @1440×900. */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" className="h-8 rounded-md px-3 text-xs" onClick={() => history.back()}>
+              {/* Session 65 (R65-F): REF's Back button is the sm size
+                  member set (h-8 px-3 text-xs, NO py member — the
+                  default-size override leaked the base py-2 as an 8px
+                  vertical pad REF does not render; live-measured
+                  padding 0px 12px). */}
+              <Button variant="ghost" size="sm" onClick={() => history.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
                 Back
               </Button>
