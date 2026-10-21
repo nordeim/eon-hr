@@ -327,14 +327,21 @@ test.describe("settings tab actions (session 36, R35-F)", () => {
     await expect(dialog.getByLabel("Manager Email")).toBeVisible();
     await expect(dialog.getByPlaceholder("manager@company.com")).toBeVisible();
 
-    // The dialog geometry: max-w-lg (512px at desktop). ±1 — the zoom-in-95
-    // enter animation's tail can read 511 mid-transform (the round-35
-    // loans/user-menu rounding precedent).
-    const geo = await dialog.evaluate((d: HTMLElement) => {
-      const r = d.getBoundingClientRect();
-      return { w: Math.round(r.width), h: Math.round(r.height) };
-    });
-    expect(Math.abs(geo.w - 512)).toBeLessThanOrEqual(1);
+    // The dialog geometry: max-w-lg (512px at desktop). Session-68: the
+    // poll-until-stable read (the r67 R37-C retirement — the zoom-in-95
+    // animate-in means toBeVisible() passes at MOUNT while the scale
+    // transition is in flight; a single read under full-suite load measured
+    // 510 = 512 × mid-scale and broke the ±1 tolerance that was only sized
+    // for the transform tail). Two consecutive equal widths = settled.
+    const readW = () => dialog.evaluate((d: HTMLElement) => Math.round(d.getBoundingClientRect().width));
+    let gw = await readW();
+    for (let i = 0; i < 12; i++) {
+      await page.waitForTimeout(120);
+      const w2 = await readW();
+      if (w2 === gw && gw > 0) break;
+      gw = w2;
+    }
+    expect(Math.abs(gw - 512)).toBeLessThanOrEqual(1);
 
     // The native-validation empty submit (Name required, no custom text).
     await dialog.getByRole("button", { name: "Create", exact: true }).click();
