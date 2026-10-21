@@ -40,12 +40,36 @@
  *     Dev adds 'unsafe-inline' to style-src-elem — Turbopack injects
  *     <style> elements for CSS in dev (the mirror of the dev-only
  *     script-src 'unsafe-eval' allowance).
+ *
+ *   - The Trusted-Types rung (session-72, R72-A, production-only):
+ *     `require-trusted-types-for 'script'` makes every DOM XSS sink
+ *     (innerHTML et al.) require a Trusted* value, and `trusted-types
+ *     default` is the policy-NAME allowlist — only the 'default' policy
+ *     may exist, so attacker-JS cannot mint a new policy. The pass-through
+ *     default policy is created by the nonced TT_BOOT bootstrap in the
+ *     root layout (FIRST authored <head> script, before the flight data
+ *     parses — no client sink write can precede it). The r72 census
+ *     green-lit the rung: ZERO raw DOM-XSS sinks in the source and
+ *     exactly five dangerouslySetInnerHTML members, all server-rendered,
+ *     constant-authored and nonced. HONEST SCOPE: a pass-through default
+ *     policy does not sanitize — the rung's value is the enforcement
+ *     machinery + the policy-name control + the DOMPurify-ready
+ *     foundation. Chromium-only enforcement (other engines ignore the
+ *     pair); dev stays WITHOUT it (Turbopack's injected scripts/evals
+ *     would trip it — the mirror of the dev-only unsafe-eval).
+ *
+ *   - worker-src 'self' (session-72, R72-B): the explicit member for the
+ *     offline-shell service worker (public/sw.js). The CSP3 fallback
+ *     chain would inherit it from script-src 'self'; the explicit member
+ *     documents the PWA contract. Present in BOTH shapes (inert without
+ *     a SW).
  */
 
 export function buildCsp(nonce: string, isDev = false): string {
   const scriptSrc = ["script-src 'self'", `'nonce-${nonce}'`, "'strict-dynamic'"];
   const connectSrc = ["connect-src 'self'"];
   const styleSrcElem = ["style-src-elem 'self'", `'nonce-${nonce}'`];
+  const isProd = !isDev;
   if (isDev) {
     // Next dev (Turbopack fast-refresh) evals modules and talks to the
     // HMR websocket — the production standalone needs neither. Dev also
@@ -55,7 +79,7 @@ export function buildCsp(nonce: string, isDev = false): string {
     connectSrc.push("ws:");
     styleSrcElem.push("'unsafe-inline'");
   }
-  return [
+  const directives = [
     "default-src 'self'",
     scriptSrc.join(" "),
     styleSrcElem.join(" "),
@@ -63,9 +87,17 @@ export function buildCsp(nonce: string, isDev = false): string {
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     connectSrc.join(" "),
+    "worker-src 'self'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "object-src 'none'",
-  ].join("; ");
+  ];
+  // R72-A: the Trusted-Types pair rides PRODUCTION ONLY (dev's
+  // Turbopack pipeline injects scripts/evals that would trip the
+  // enforcement — the mirror of the dev-only unsafe-eval allowance).
+  if (isProd) {
+    directives.push("trusted-types default", "require-trusted-types-for 'script'");
+  }
+  return directives.join("; ");
 }

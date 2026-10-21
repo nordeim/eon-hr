@@ -88,6 +88,45 @@ if(localStorage.getItem("darkMode")==="true"){document.documentElement.classList
 if(localStorage.getItem("app_lang")==="ar"){document.documentElement.setAttribute("dir","rtl");}
 }catch(e){}})();`;
 
+/**
+ * Session 72 (R72-A): the Trusted-Types default-policy bootstrap — the
+ * pass-through 'default' policy paired with the CSP's `trusted-types
+ * default` + `require-trusted-types-for 'script'` directives (see
+ * src/lib/csp.ts). Rendered FIRST in <head> (before THEME_BOOT and
+ * before the flight-data inline scripts parse), so the policy exists
+ * before any client-side mount could write a DOM-XSS sink. A default
+ * policy auto-wraps plain strings at every Trusted-Types sink; the
+ * pass-through is the HONEST scope — the rung's value is the
+ * enforcement machinery + the policy-NAME control (`trusted-types
+ * default` forbids creating any other policy name), not sanitizing:
+ * the whole source reads zero raw innerHTML/insertAdjacentHTML/
+ * document.write sinks and exactly five dangerouslySetInnerHTML
+ * members, every one server-rendered, constant-authored and nonced.
+ * Feature-detected (Chromium enforces; other engines ignore the
+ * directives and never reach the createPolicy call).
+ * PRODUCTION-ONLY render: dev's Turbopack pipeline injects scripts
+ * and evals that would trip the enforcement (the mirror of the
+ * dev-only script-src 'unsafe-eval' allowance).
+ */
+const TT_BOOT = `(function(){try{
+if(window.trustedTypes&&trustedTypes.createPolicy){trustedTypes.createPolicy('default',{createHTML:function(s){return s;},createScript:function(s){return s;},createScriptURL:function(s){return s;}});}
+}catch(e){}})();`;
+
+/**
+ * Session 72 (R72-B): the service-worker registration for the offline
+ * shell (public/sw.js — the static-shell cache + the never-cache-HTML
+ * navigation design). Registered after the page 'load' event so it
+ * never competes with first paint, and NONCED (script-src gates inline
+ * scripts; the CSP3 auto-nonce covers the chunks Next renders, this
+ * authored one carries the explicit attribute like THEME_BOOT).
+ * PRODUCTION-ONLY render: in dev the worker would cache-serve stale
+ * Turbopack chunks and break fast-refresh; the E2E suite and the
+ * standalone servers run the production build, dev stays worker-free.
+ */
+const SW_REGISTRATION = `(function(){try{
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+}catch(e){}})();`;
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "http";
@@ -100,11 +139,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // when no middleware ran (no CSP → no nonce needed — the pairing
   // stays consistent).
   const nonce = h.get("x-nonce") ?? undefined;
+  // Session 72: both boot scripts are PRODUCTION-ONLY (dev's Turbopack
+  // pipeline would trip the TT enforcement and cache-serve stale
+  // chunks through the worker).
+  const isProd = process.env.NODE_ENV === "production";
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {isProd && <script nonce={nonce} dangerouslySetInnerHTML={{ __html: TT_BOOT }} />}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        {isProd && <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SW_REGISTRATION }} />}
       </head>
       <body className="font-sans antialiased">
         <ToastProvider>{children}</ToastProvider>
