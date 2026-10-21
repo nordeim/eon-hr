@@ -1,0 +1,15 @@
+Round 70 (session 71) complete — pushed to main @ `a9bff63`, remote verified, key shredded.
+
+**This round delivered:**
+
+1. **THE 33RD LOGIN DEPLOY LADDERED NON-VISUAL — byte-confirmed for the first time** — login JS `CKnh3tRk`→`BCr9BMlh` (CSS quiet, the app side quiet, the frontend-config preload holding); the fresh re-auth clean (Turnstile stays unenforced — the standing login-side watch item). The full ladder: standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 — and the login standing pair (476) BYTE-MATCHES the r70 pair (458) on both sides: the deploy changed the JS hash without changing a rendered byte.
+
+2. **THE CSP PIPELINE COMPLETED (R71-A)** — the r70 delta audit found the login layout's BreadcrumbList JSON-LD serving bare (CSP gates non-executable script types too — a silent block the E2E suite cannot catch; caught by reading the served bytes). Fixed, and the style policy hardened into the CSP spec's elem/attr SPLIT: `style-src-elem 'self' 'nonce-N'` (the only authored `<style>` element in the whole served surface — the session-45 login cascade mirror — MOVED to the server login layout for the stamping) + `style-src-attr 'unsafe-inline'` (the Radix/vaul/recharts dynamic attributes, un-nonce-able by nature). Proven violation-free by the console probe (dialog, popper, 9 charts, the drawer — zero violations) + the full suite green under the hardened policy.
+
+3. **THE TLS-FRONTED DEPLOYMENT STORY SHIPPED (R71-B)** — the x-forwarded-proto contract PINNED (the spoofed header resolves https:// sitemap locs + the robots Sitemap + the canonical/og URLs — the whole metadataBase origin chain, zero-config) + DEPLOYMENT.md REWRITTEN to the measured truth (the Eon HR name, the real counts, the phantom NEXT_PUBLIC_SITE_URL row deleted, the new §8 nginx/Caddy TLS proxy story).
+
+4. **THE DRAWER-INSTRUMENT CORRECTION** — the byte-stability capture exposed a six-round evidence defect: the r70 template's aria-label selector NEVER matched REF since the r46 redeploy (every r66-r70 REF "drawer pair" captured the drawer CLOSED), and the eval-click's onOpenAutoFocus focus-ring state is a distinct legitimate state. The corrected snapshot-ref mechanism: the LOC chain HOLDS (**492≡474≡456≡438≡418≡402≡366** — both r71 fix families changed zero rendered bytes) and the REF drawer is captured OPEN for the first time (the corrected baseline).
+
+**Gates:** lint 0/0 · tsc ✓ · **924/924 unit** (+2) · build ✓ · **E2E 380/380** (+6, zero flakes, 5.9m) · byte-stability 492≡474 (seven-round chain) · the ladder 43/43 · 676 tracked screenshots (+18) · DB pristine · 2 commits pushed via the SSH wrapper, no new branches.
+
+**Next:** the watch re-arms at the post-33rd finals (login JS `BCr9BMlh` + CSS `BpSyi-cD` + the preload; the app side `C-IrDy5f`/`BGNH4KkS`); the Turnstile rollout stays the standing login-side watch item. Suggested next round: run the r72 deploy watch; the candor-ordered superset candidates are the remaining CSP strictness rungs (a Trusted-Types story), a PWA/offline story (the manifest is already self-hosted), and whatever the next deploy carries.
