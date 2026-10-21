@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 910 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 368 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 370 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -4819,3 +4819,89 @@ pristine. `next`/`eslint-config-next` pinned at 16.4.2; the
    protocol still requires the full ladder (a login-side change can
    presage an app rollout), and the byte-stability pair is the
    independent app-surface re-confirmation.
+
+## Session 69 (parity round 68) — the 32nd-deploy confirmation ladder + the HTTP-layer security-headers parity set
+
+The recorded backlog came out of round 67 empty of open visual/
+functional items; this round converted the standing watches and the
+open superset consideration. Baseline reproduced on the fresh clone
+first: lint 0/0 · tsc ✓ · 910/910 unit · build ✓ · **E2E 368/368
+(5.6m, zero flakes)**.
+
+**THE 32ND LOGIN DEPLOY — detected by `scripts/r69-deploy-watch.mjs`
+(the post-31st finals armed)**: login JS `8hcVVGz2`→`CKnh3tRk` plus a
+NEW `api/frontend-config.js?v=3` script (login CSS QUIET `BpSyi-cD`;
+the app side QUIET `C-IrDy5f`/`BGNH4KkS`). The frontend-config
+payload is a Base44 PLATFORM-level config (Datadog tokens, the
+Turnstile site key, `TURNSTILE_LOGIN_ENABLED: "true"`, the Google
+client ID, platform URLs) — NOT an Eon-HR-app change. The login DOM
+recon: structurally unchanged (the same 7 buttons, one form,
+email+password, ZERO Turnstile iframes/widgets rendered for this
+session). Per the standing protocol the full confirmation ladder ran
+anyway (a login-side change can presage an app rollout): after a
+fresh re-auth, standing **5/5** + sweep **12/12** + verify-r49
+**13/13** + verify-r45 **13/13** (the login-view family — the direct
+paired audit of the changed surface) → **NON-VISUAL**. The watch
+finals are the post-32nd hashes. The Turnstile rollout is recorded
+as a standing note: while the challenge stays unenforced for our
+flow, no clone-side action; an enforced rollout would break the
+watch's own re-auth and require a login-surface re-audit + a
+clone-side bot-guard decision.
+
+**The Next.js patch watch: QUIET** — `npm view next` reads 16.4.2 as
+the latest stable (16.5.0 is canary-only). The codebase is current;
+the watch stays armed.
+
+**R69-A — THE HTTP-LAYER PARITY SET (the round's fix family, the
+first below the DOM layer in the project's history)**. 67 rounds of
+audits lived at the DOM/computed-style layer; the HTTP response-
+header layer was never censused. The live REF serves a 5-header
+security set on every response (`curl -sI https://eon.base44.app/
+login`): `x-content-type-options: nosniff` · `x-frame-options:
+DENY` · `referrer-policy: strict-origin-when-cross-origin` ·
+`strict-transport-security: max-age=31536000` ·
+`permissions-policy: camera=(self), microphone=(self),
+geolocation=(self), payment=(self), usb=(self), magnetometer=(),
+gyroscope=()`. The clone's standalone served NONE (next.config.ts
+had no `headers()`; src/proxy.ts adds none; zero existing tests).
+TDD: the pin RED first (`tests/e2e/session69-security-headers.spec.ts`
+R69-Aa/R69-Ab — page route + API route, 2 specs failing on the
+headerless build) → `headers()` added to next.config.ts (source
+`/:path*` — every route, pages AND `/api/*`, exactly like the REF
+platform; HSTS included: browsers ignore it over plain HTTP, it
+protects real TLS-fronted deployments, it matches REF; no CSP — REF
+serves none, measured, and a Next.js CSP needs its own nonce
+pipeline) → re-build → pin GREEN (3/3) → curl parity verified
+against the standalone (page + API both carry the set; values
+byte-identical to REF — the casing difference is transport-level
+HTTP/1.1 vs HTTP/2 normalization). **E2E 368 → 370.**
+
+**The standing checks**: the mobile-menu full functional cycle
+(toggle → the drawer opens with Dashboard/Training LMS/Assets/
+Staff Requests/AI HR Assistant → the Training LMS link navigates to
+/training → auto-close `open:false` verified) + **the byte-stability
+pair: the 456 LIGHT mobile drawer pair @390×844 BYTE-MATCHES the r68
+438 pair on BOTH sides (md5-identical) — the FIVE-round chain
+(456 ≡ 438 ≡ 418 ≡ 402 ≡ 366)**; the 32nd deploy left the mobile
+surface byte-identical AND the header patch changed zero rendered
+bytes. The TW-v4 standing scan: `!important` 15 (baseline held),
+the oklch hits all comments. Screenshots: the 440–457 set (18 files
+→ 640 on disk; all 9 same-number pairs hash-distinct) — the LOGIN
+page pair on the 32nd-deploy REF (captured logged-out, fresh
+sessions, BEFORE the auth) + the LIGHT standing route pairs
+(dashboard, payroll, employees, attendance, training, recruitment,
+settings) + the mobile drawer pair. DB pristine (the verify-r45
+loading-probe user swept per the r61 protocol).
+
+TDD: +2 E2E (the security-headers pins) + **1 legacy unit amendment
+(R51-A2)** — the rewrite-scope pin's regex matched `source:` literals
+across the WHOLE config file, so the headers() block's own
+`source: "/:path*"` (Next's headers API shares the key name) tripped
+it; per the r65/r66 legacy-amendment protocol the pin now reads the
+REWRITES() BLOCK (its true contract: exactly the two entries) and
+ADDITIONALLY pins the headers contract (exactly one catch-all; the two
+config surfaces kept separate). Gates: lint 0/0 · tsc ✓ · 910/910 unit
+· build ✓ · **E2E 370/370** · the ladder NON-VISUAL (43/43) ·
+byte-stability 456≡438 · DB pristine. `.env.example` verified (only
+DATABASE_URL + AUTH_SECRET are read — the process.env sweep re-run
+this round).

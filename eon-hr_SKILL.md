@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.51.0 (session-68 remediation complete — the Next.js security-patch upgrade + the history-bug closure round: next 16.4.0 → 16.4.2 (16.4.1 ships TWO CRITICAL unauthenticated-RCE fixes — use-cache typed arrays + the Image Optimization API with SVG — plus a Server-Actions DoS fix; 16.4.2 adds Turbopack stability) with the full gate pyramid green on the upgrade (lint/tsc/910 unit/build/366 E2E, zero flakes). THE R56-E RECORDED FUNCTIONAL DIVERGENCE CLOSES: the 16.4.0 Navigation API history corruption (the loaded entry replaced by the entry-below duplicate on the second client navigation — back-back skipped the loaded page, 5/5 deterministic) is FIXED UPSTREAM between 16.4.0 and 16.4.2 — the revived entries-dump detector reads push-only growth (prefix preserved, +1 per click, zero adjacent duplicates) and back-back reaching the loaded page; locked with the 2-pin session68-history-closure spec (the two-deep back contract + the push-only entries contract). The 31st login deploy detected (JS DwY57mhH→8hcVVGz2, CSS + app side quiet) + re-audited NON-VISUAL via the full ladder on the UPGRADED build (standing 5/5 + sweep 12/12 + verify-r49/r45 13/13). The REF-drift light-text re-census vs the CURRENT REF: 42/49 MATCH — NO DRIFT, better than the r63 post-fix 41/49 (the taskmanager transient now MATCHES at steady state), every DIFF the documented allowance set; the placeholder/muted literal pairs all held → the muted-foreground/--primary token question CLOSED as architectural (zero user-visible surface). The byte-stability pair: the 438 mobile drawer pair BYTE-MATCHES the r67 418 pair on both sides — a FOUR-round chain (438≡418≡402≡366) and the FIRST CROSS-VERSION byte-proof (16.4.0-captured vs 16.4.2-captured: the upgrade changed zero rendered bytes) · **Last updated:** 2026-10-21
-> **State:** 910 unit + 368 E2E tests green, lint/typecheck/build
+> **Version:** 3.52.0 (session-69 remediation complete — the 32nd-deploy confirmation ladder + the HTTP-layer security-headers parity round: THE 32ND LOGIN DEPLOY detected (JS 8hcVVGz2→CKnh3tRk + a NEW platform-level api/frontend-config.js preload carrying TURNSTILE_LOGIN_ENABLED=true; CSS + the app side quiet) and re-audited NON-VISUAL via the full confirmation ladder after a fresh re-auth (standing 5/5 + sweep 12/12 + verify-r49/r45 13/13 — the login-view family as the direct paired audit of the changed surface; the login DOM recon structurally unchanged: the 7-button set, one form, zero Turnstile widgets rendered). R69-A THE HTTP-LAYER PARITY GAP CLOSED — 67 rounds of audits lived at the DOM/computed-style layer; the HTTP response-header layer was never censused until this round: the live REF serves a 5-header security set on every response (x-content-type-options nosniff · x-frame-options DENY · referrer-policy strict-origin-when-cross-origin · strict-transport-security max-age=31536000 · the permissions-policy camera/microphone/geolocation/payment/usb=(self) + magnetometer/gyroscope=() allowlist) that the clone's standalone lacked entirely — fixed via next.config.ts headers() (source /:path*, pages AND /api/*, exactly like the REF platform; HSTS included — browsers ignore it over plain HTTP, it protects TLS-fronted deployments; no CSP — REF serves none, measured), pinned RED-first with the 2-spec session69-security-headers E2E pair (page + API routes), curl parity byte-verified against the standalone. The Next.js patch watch: QUIET (16.4.2 remains the latest stable; 16.5.0 canary-only). The byte-stability pair: the 456 mobile drawer pair BYTE-MATCHES the r68 438 pair on both sides — the FIVE-round chain (456≡438≡418≡402≡366): the 32nd deploy left the mobile surface byte-identical AND the header patch changed zero rendered bytes. The mobile-menu cycle green (toggle → nav links → Training LMS navigates → auto-close) · **Last updated:** 2026-10-21
+> **State:** 910 unit + 370 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4562,3 +4562,108 @@ regression proof is the full suite green on 16.4.2). Gates: lint 0/0
    protocol ran the complete confirmation ladder — a login change
    can presage an app rollout; the byte-stability pair is the
    independent app-surface re-confirmation.
+
+## §79 Session 69 (parity round 68) — the 32nd-deploy confirmation ladder + the HTTP-layer security-headers parity set
+
+**The round's context.** The recorded backlog came out of round 67 empty
+of open visual/functional items — the matrix complete (color × light/dark,
+geometry × light/dark, spacing × light/dark), the security patches current
+(16.4.2), the history divergence closed and pinned. The remaining standing
+items: the deploy watch (re-armed at the post-31st finals), the Next.js
+patch watch, and the open superset-expansion consideration. This round
+converted all three.
+
+**THE 32ND LOGIN DEPLOY** (`scripts/r69-deploy-watch.mjs`, the post-31st
+finals armed): login JS `8hcVVGz2`→`CKnh3tRk` plus a NEW
+`api/frontend-config.js?v=3` script; login CSS QUIET (`BpSyi-cD`); the
+app side QUIET (`C-IrDy5f`/`BGNH4KkS`). The frontend-config payload is
+Base44 PLATFORM infrastructure — Datadog tokens, the Turnstile site key
+(`TURNSTILE_LOGIN_ENABLED: "true"`), the Google client ID, platform URLs —
+not an Eon-HR-app change. The login DOM recon: structurally unchanged
+(the same 7 buttons — Continue with Google/Microsoft/Apple, Sign in,
+Forgot password?, Need an account? Sign up — one form, email+password,
+ZERO Turnstile iframes/widgets rendered for our session). The full
+confirmation ladder ran anyway per the standing protocol: after a fresh
+re-auth — standing **5/5** + sweep **12/12** + verify-r49 **13/13** +
+verify-r45 **13/13** (the login-view family: the direct paired audit of
+the changed surface) → **NON-VISUAL**. The Turnstile config is recorded
+as a standing watch note: while the challenge stays unenforced for our
+flow, no clone-side action; an ENFORCED rollout would break the watch's
+own re-auth and require a login-surface re-audit + a clone-side
+bot-guard decision.
+
+**R69-A — the HTTP-layer parity set (the round's fix family, the first
+below the DOM layer in the project's history).** 67 rounds of audits
+lived at the DOM/computed-style layer; the HTTP response-header layer
+was never censused. The live REF serves a 5-header security set on every
+response (`curl -sI https://eon.base44.app/login`):
+
+- `x-content-type-options: nosniff`
+- `x-frame-options: DENY`
+- `referrer-policy: strict-origin-when-cross-origin`
+- `strict-transport-security: max-age=31536000`
+- `permissions-policy: camera=(self), microphone=(self),
+  geolocation=(self), payment=(self), usb=(self), magnetometer=(),
+  gyroscope=()`
+
+The clone's standalone served NONE of them (next.config.ts had no
+`headers()`; src/proxy.ts adds none; zero existing tests). The fix:
+`async headers()` in `next.config.ts` — source `/:path*` so every route
+(pages AND `/api/*`) carries the set, exactly like the REF platform.
+Design decisions: HSTS included (browsers ignore it over plain HTTP —
+the local/E2E transport; it protects real TLS-fronted deployments; it
+matches REF); `x-frame-options: DENY` safe (the app never frames
+itself); NO CSP (REF serves none, measured — and a Next.js CSP needs
+its own nonce pipeline for inline/hydration scripts). TDD: the pin RED
+first (`tests/e2e/session69-security-headers.spec.ts` R69-Aa the page
+route + R69-Ab the API route — 2 specs failing on the headerless
+build) → the fix → re-build → pin GREEN (3/3 with the setup project) →
+curl parity verified against the served standalone (page + API both;
+values byte-identical to REF — the casing difference is transport-level
+HTTP/1.1 vs HTTP/2 normalization). E2E 368 → 370. **The one legacy
+amendment the fix required (R51-A2, per the r65/r66 protocol)**: the
+rewrite-scope pin's regex matched `source:` literals across the WHOLE
+next.config.ts, so the headers() block's own `source: "/:path*"`
+(Next's headers API shares the key name) tripped it — the pin now
+reads the REWRITES() BLOCK (its true contract: exactly the two
+entries) and ADDITIONALLY pins the headers contract (exactly one
+catch-all; the two config surfaces kept separate). 910/910 green.
+
+**The standing checks.** The mobile-menu full functional cycle (toggle →
+the drawer opens with Dashboard/Training LMS/Assets/Staff Requests/AI HR
+Assistant → the Training LMS link navigates to /training → auto-close
+`open:false` verified). The byte-stability pair: **the 456 LIGHT mobile
+drawer pair @390×844 BYTE-MATCHES the r68 438 pair on BOTH sides
+(md5-identical) — the FIVE-round chain (456 ≡ 438 ≡ 418 ≡ 402 ≡ 366)**:
+the 32nd deploy left the mobile surface byte-identical AND the header
+patch changed zero rendered bytes. The TW-v4 standing scan: `!important`
+15 (baseline held), the oklch hits all comments. Screenshots: the
+440–457 set (18 files → 640 on disk; all 9 same-number pairs
+hash-distinct) — the LOGIN page pair on the 32nd-deploy REF (captured
+logged-out, fresh sessions, BEFORE the auth) + the LIGHT standing route
+pairs + the mobile drawer pair. DB pristine (the verify-r45
+loading-probe user swept per the r61 protocol).
+
+**Gates:** lint 0/0 · tsc ✓ · 910/910 unit · build ✓ · **E2E 370/370**
+(zero flakes) · the ladder NON-VISUAL (43/43) · byte-stability 456≡438
+· DB pristine. `.env.example` verified (only DATABASE_URL + AUTH_SECRET
+are read — the process.env sweep re-run this round).
+
+**Carry-forward lessons (session-69 instrument notes):**
+
+1. **The layer below the DOM exists** — after 67 computed-style rounds,
+   the HTTP response-header layer was the last un-audited surface; the
+   REF's platform infra (not its app code) carried a full security set
+   the DOM census could never see. Census new LAYERS, not just new
+   members of a censused layer.
+2. **A tool-timeout kill takes the spawned server with it** — the
+   screenshots wrapper spawned the :3200 server WITHOUT `setsid`, so
+   the 600s tool timeout killed both; the surviving evidence (the URL +
+   the drawer state) proved the killed tail had ALREADY run, but the
+   clean re-run needed the detached reboot. Long-running instruments
+   spawn their servers `(setsid … &)` or accept re-booting on kill.
+3. **The deploy-watch verdict can ADD instruments** — the 32nd shipped
+   a NEW script (`frontend-config.js`) the fingerprint regex had to
+   grow around; the watch's value is the DIFF against the last known
+   set, and new members are findings to decode (payload read), not
+   noise to ignore.
