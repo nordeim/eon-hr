@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 910 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 366 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 368 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -4704,3 +4704,118 @@ allowances) · 18 screenshots (the 404–421 pair set → 604 files; the
    `.env`; an unquoted secret greps empty and the instrumentation
    gate refuses the boot ("AUTH_SECRET is required in production").
    `.env` values follow the `.env.example` form: quoted.
+
+## Session 68 (parity round 67) — the Next.js security-patch upgrade + the history-bug closure + the 31st-deploy ladder + the drift re-census
+
+The matrix was complete (r66); this round converted the recorded
+frontier. Baseline on 16.4.0 reproduced first: lint 0/0 · tsc ✓ ·
+910/910 unit · build ✓ · **E2E 366/366 (5.5m, zero flakes)**.
+
+**THE UPGRADE WATCH IS ACTIONABLE — next 16.4.0 → 16.4.2**
+(`bun add next@16.4.2 eslint-config-next@16.4.2`; package.json pinned
+to the exact patch version). 16.4.1 (2026-10-14) ships TWO CRITICAL
+unauthenticated-RCE security fixes (use-cache functions returning
+typed arrays + the Image Optimization API when SVG files are used)
+plus a High Server-Actions DoS fix; 16.4.2 (2026-10-15) adds the
+Turbopack snapshot-consistency + module-graph backports. A
+production-ready codebase cannot stay on 16.4.0 against two
+critical unauthenticated RCEs. Post-upgrade gates: lint 0/0 · tsc ✓
+· **910/910 unit** · build ✓ (22.4s compile) · **E2E 366/366 on the
+upgraded build (5.6m, zero flakes)** — the upgrade is
+regression-free at every gate.
+
+**THE HISTORY BUG IS FIXED UPSTREAM — the one recorded functional
+divergence CLOSES** (R56-E / the session-56 §B record). The revived
+detector (`scripts/r68-history-detector.mjs`, the Navigation API
+entries dump — the session-56 repro shape, determinism pre-step:
+`about:blank` first, else a re-run inherits the previous stack):
+after a full load + two client-side navigations the entries grow
+push-only (prefix preserved, one entry per click, ZERO adjacent
+duplicates) and back-back REACHES the loaded page — the 16.4.0
+corruption (the loaded entry replaced by the entry-below duplicate,
+back-back skipping the loaded page, 5/5 deterministic) is GONE
+between 16.4.0 and 16.4.2. Locked with 2 computed-truth E2E pins in
+`tests/e2e/session68-history-closure.spec.ts`: R68-A the two-deep
+back contract (back-back after load + two client navigations lands
+on the loaded page) + R68-B the push-only entries contract (the
+entry list: +1 per click, prefix preserved, no adjacent duplicates,
+the pushed tail in order) — green on the first run; a future
+framework upgrade that reintroduces the corruption trips the gate.
+
+**THE 31ST LOGIN DEPLOY — detected by `scripts/r68-deploy-watch.mjs`
+(post-30th finals armed): login JS `DwY57mhH`→`8hcVVGz2`, login CSS
+QUIET (`BpSyi-cD`), the app side QUIET (`C-IrDy5f`/`BGNH4KkS`)**.
+After a fresh re-auth of the shared REF session, the full
+confirmation ladder re-audited the 31st **NON-VISUAL**: standing
+5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 — on the
+UPGRADED :3200 standalone (a free re-validation that the standing
+audits hold on 16.4.2). The watch finals are the post-31st hashes.
+
+**THE REF-DRIFT RE-CENSUS (the r63 light-text instrument re-run
+against the CURRENT REF — the color censuses last ran ≥3 REF deploys
+ago): 42/49 MATCH, NO DRIFT** — better than the r63 post-fix 41/49
+(the r63-era taskmanager mid-load transient now MATCHES at steady
+state). Every DIFF decomposes to the documented allowance set
+exactly: employees (the seeded grid cards), profile (the asChild
+back-arrow tag artifact), attendance (the admin superset),
+interviewassistant (the r48-C1 card), advancedanalytics (the hidden
+recharts-tooltip mount), onboardingtemplates (the r36 `<a>`
+superset), careers (REF's live data). The placeholder literal pairs
+(`rgb(115,115,115)` on every censused route), the muted text pairs,
+and the neutral literal overrides all held — **the
+muted-foreground/--primary token question CLOSES as architectural**:
+the token re-map has zero user-visible surface (every computed
+surface carries its literal override; the census is the evidence).
+
+**The standing checks**: the mobile-menu full functional cycle
+(toggle → the drawer opens with the nav links → the Training LMS
+link navigates to /training → auto-close on the route change,
+`open:false` verified) + **the byte-stability pair: the 438 LIGHT
+mobile drawer pair @390×844 BYTE-MATCHES the r67 418 pair on BOTH
+sides** (md5-identical) — a FOUR-round byte-stability chain
+(438 ≡ 418 ≡ 402 ≡ 366) and the FIRST CROSS-VERSION byte-proof
+(418 captured on 16.4.0, 438 on 16.4.2: the upgrade changed zero
+rendered bytes of the standing surface; the REF side identical also
+re-confirms the 31st deploy left the app surface untouched). The
+TW-v4 standing scan: `!important` 15 (baseline held), the oklch
+hits all comments. Screenshots: the 422–439 pair set (18 files,
+616 total) — the LIGHT route pairs on the upgraded build (the
+light complement to r67's dark theme), the mobile drawer pair, the
+inline functional cycle. DB pristine (the verify-r45
+loading-probe user swept per the r61 protocol).
+
+TDD: +2 E2E (the history-closure contract) · zero unit pins (zero
+app-source changes; the upgrade's regression proof is the full
+366/366 suite on 16.4.2 + the new pins → **368/368**). Gates: lint
+0/0 · tsc ✓ · 910/910 unit · build ✓ · **E2E 368/368** · DB
+pristine. `next`/`eslint-config-next` pinned at 16.4.2; the
+`bun.lock` + `package.json` are the upgrade's manifest.
+
+## Session 68 instrument lessons (carry-forward)
+
+1. **A re-run detector inherits the live session's stack**: the
+   history detector's first run was clean evidence, but the re-run's
+   e0 read showed the PREVIOUS run's entries — `agent-browser open`
+   on the URL the tab already sits at is a same-URL reload (no new
+   entry), and the session's Navigation entries persist. The
+   determinism pre-step: `open about:blank` first (a document change
+   resets the starting stack), then the app URL.
+2. **agent-browser eval returns two shapes**: a JSON-encoded string
+   for scalars, PRETTY-PRINTED JSON (multi-line, real newlines) for
+   arrays — the parse chain must try the plain parse before the
+   double-decode, else array reads come back "ERR:" + the raw text
+   and the verdict machinery reads a polluted value.
+3. **The background-process launch pattern**: `setsid nohup … &`
+   inside `( … & )` detached from the tool's process group; the
+   plain `nohup … & disown` died silently (0-byte log, no process)
+   when the invocation returned — reproduce the working pattern
+   exactly for any long E2E/census run.
+4. **The sleep-units trap, hit AGAIN**: `sleep 2500` in a shell
+   chain means 2500 SECONDS (41 minutes), not 2.5s — the session-67
+   "units error" lesson is standing; the fresh instance cost a
+   60s tool timeout. Shell sleeps are SECONDS; write `sleep 2.5`.
+5. **The deploy-watch verdict splits by side**: the 31th deploy
+   changed the LOGIN JS only (CSS + the app side quiet) — the
+   protocol still requires the full ladder (a login-side change can
+   presage an app rollout), and the byte-stability pair is the
+   independent app-surface re-confirmation.
