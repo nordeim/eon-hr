@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.52.0 (session-69 remediation complete — the 32nd-deploy confirmation ladder + the HTTP-layer security-headers parity round: THE 32ND LOGIN DEPLOY detected (JS 8hcVVGz2→CKnh3tRk + a NEW platform-level api/frontend-config.js preload carrying TURNSTILE_LOGIN_ENABLED=true; CSS + the app side quiet) and re-audited NON-VISUAL via the full confirmation ladder after a fresh re-auth (standing 5/5 + sweep 12/12 + verify-r49/r45 13/13 — the login-view family as the direct paired audit of the changed surface; the login DOM recon structurally unchanged: the 7-button set, one form, zero Turnstile widgets rendered). R69-A THE HTTP-LAYER PARITY GAP CLOSED — 67 rounds of audits lived at the DOM/computed-style layer; the HTTP response-header layer was never censused until this round: the live REF serves a 5-header security set on every response (x-content-type-options nosniff · x-frame-options DENY · referrer-policy strict-origin-when-cross-origin · strict-transport-security max-age=31536000 · the permissions-policy camera/microphone/geolocation/payment/usb=(self) + magnetometer/gyroscope=() allowlist) that the clone's standalone lacked entirely — fixed via next.config.ts headers() (source /:path*, pages AND /api/*, exactly like the REF platform; HSTS included — browsers ignore it over plain HTTP, it protects TLS-fronted deployments; no CSP — REF serves none, measured), pinned RED-first with the 2-spec session69-security-headers E2E pair (page + API routes), curl parity byte-verified against the standalone. The Next.js patch watch: QUIET (16.4.2 remains the latest stable; 16.5.0 canary-only). The byte-stability pair: the 456 mobile drawer pair BYTE-MATCHES the r68 438 pair on both sides — the FIVE-round chain (456≡438≡418≡402≡366): the 32nd deploy left the mobile surface byte-identical AND the header patch changed zero rendered bytes. The mobile-menu cycle green (toggle → nav links → Training LMS navigates → auto-close) · **Last updated:** 2026-10-21
-> **State:** 910 unit + 370 E2E tests green, lint/typecheck/build
+> **Version:** 3.53.0 (session-70 remediation complete — the SEO-surface parity pair + the CSP nonce-pipeline superset round: the deploy watch BOTH SIDES QUIET (no 33rd deploy — the post-32nd finals hold; the fresh re-auth clean, Turnstile unenforced) + the Next.js patch watch QUIET (16.4.2 latest stable). THE HTTP-LAYER SWEEP #2 (the r68 lesson: census new LAYERS) found the last uncensured member of the r25 SEO layer: the live REF serves sitemap.xml (61 entries: / at 1.0 + the 60 app routes at 0.8, all weekly, no lastmod) + its robots.txt declares the Sitemap — the clone had neither. R70-A THE SEO SURFACE REACHES FULL PARITY: src/lib/sitemap-routes.ts (the 61-slug canonical registry, readdirSync-pinned against the (app) route tree) + src/app/sitemap.ts (origin-resolved via headers(), like the metadataBase) + src/app/robots.ts (REF's directive set + the clone's Disallow: /api/ superset + the Sitemap line; public/robots.txt deleted — the static file shadows the route) — the live URL-set diff: REF's 61 ⊆ the clone's 62, the one superset member /dashboard (the clone's canonical dashboard route). R70-B THE FIRST SECURITY-POLICY SUPERSET (REF serves no CSP — measured): the official Next.js middleware-nonce pattern — src/lib/csp.ts (buildCsp: default-src 'self'; script-src 'self' 'nonce-N' 'strict-dynamic'; style-src 'unsafe-inline' for the Radix/vaul/recharts style attributes; NO upgrade-insecure-requests — it would break the plain-HTTP transport; dev adds unsafe-eval + ws:) + src/proxy.ts extended (per-request nonce on request AND response headers — Next auto-nonces its scripts from the request CSP header, curl-verified; the matcher widened to /login + /logout; the auth-redirect scoped past them) + the root layout noncing its own inline scripts (the THEME_BOOT boot + the JSON-LD blocks — CSP applies to non-executable types too). The strictness is earned: the full-source URL sweep reads ZERO external runtime resources. The functional proof: the FULL suite green under the policy. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS navigates → auto-close) + the byte-stability pair 474 BYTE-MATCHES the r69 456 pair on both sides — the SIX-round chain (474≡456≡438≡418≡402≡366): the header/meta-layer fixes changed zero rendered bytes · **Last updated:** 2026-10-21
+> **State:** 922 unit + 374 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4667,3 +4667,104 @@ are read — the process.env sweep re-run this round).
    grow around; the watch's value is the DIFF against the last known
    set, and new members are findings to decode (payload read), not
    noise to ignore.
+
+## §80 Session 70 (parity round 69) — the SEO-surface parity pair (sitemap + robots Sitemap directive) + the CSP nonce pipeline (the first security-policy superset)
+
+**The round's motivation.** The recorded backlog stayed EMPTY of open
+visual/functional items; the standing watches were the deploy watch, the
+Next.js patch watch, and the superset-expansion consideration. The r68
+lesson ("census new LAYERS, not just new members") sent the sweep below
+the response headers, where it found the last uncensured member of the
+SEO layer the clone otherwise supersedes.
+
+1. **The watches: BOTH QUIET.** The r70 deploy watch (the post-32nd
+   finals armed) read the login side at JS `CKnh3tRk` + CSS `BpSyi-cD`
+   (the frontend-config preload holding) and the app side at
+   `C-IrDy5f`/`BGNH4KkS` — no 33rd deploy, NO ladder required. The
+   fresh re-auth succeeded clean (the Turnstile challenge unenforced
+   for our session/IP — the standing login-side watch item). `npm view
+   next`: 16.4.2 remains the latest stable (16.5.0 canary-only).
+2. **THE SEO-SURFACE GAP (R70-A)**: the live REF serves
+   `sitemap.xml` (200, application/xml, 61 `<url>` entries — `/` at
+   1.0 + the 60 app routes at 0.8, all `<changefreq>weekly</changefreq>`,
+   no `<lastmod>`; saved as docs/ref-sitemap-r70.xml) and its
+   robots.txt declares `Sitemap: …/sitemap.xml`. The clone served NO
+   sitemap route and its static robots.txt had no Sitemap directive.
+   Fixed with the Next metadata routes: `src/lib/sitemap-routes.ts`
+   (the 61-slug canonical registry — the session-32 complete page set
+   in the clone's lowercase canonical form — + `buildSitemap`, the
+   pure builder) + `src/app/sitemap.ts` (origin via headers(), the
+   metadataBase pattern) + `src/app/robots.ts` (REF's directives + the
+   clone's `Disallow: /api/` superset + the origin-resolved Sitemap
+   line), with `public/robots.txt` DELETED (the static file shadows
+   the route). The live URL-set diff: REF's 61 ⊆ the clone's 62; the
+   one superset member `/dashboard` (the clone's canonical dashboard
+   route — its page canonical points there; REF omits it only because
+   its dashboard IS `/`). Documented renderer normalizations (not
+   divergences): priority `1` vs REF's `1.0` (xsd:decimal-equal), the
+   robots `User-Agent:` capitalization (the spec is case-insensitive),
+   compact XML vs REF's pretty-print.
+3. **THE CSP NONCE PIPELINE (R70-B) — the first security-policy
+   SUPERSET** (REF serves no CSP — measured in r68): the official
+   Next.js middleware-nonce pattern. `src/lib/csp.ts` `buildCsp(nonce,
+   isDev)`: `default-src 'self'; script-src 'self' 'nonce-N'
+   'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self'
+   data: blob:; font-src 'self' data:; connect-src 'self'; base-uri
+   'self'; form-action 'self'; frame-ancestors 'none'; object-src
+   'none'` — NO upgrade-insecure-requests (it would upgrade the
+   plain-HTTP standalone's subresources to https and break the local +
+   E2E transport; HSTS covers TLS), dev adds `'unsafe-eval'` + `ws:`.
+   `src/proxy.ts` extended: the per-request nonce set on the REQUEST
+   headers (Next reads the nonce from the request CSP header and
+   stamps it on every script it renders — curl-verified: the chunks
+   carry `nonce="…"`) AND the response; the matcher widened to include
+   /login + /logout (documents with scripts), the R55-C auth-redirect
+   explicitly scoped past the two auth pages. The root layout nonces
+   its own inline scripts (THEME_BOOT + the two JSON-LD blocks — CSP
+   applies to non-executable script types too). The strict `'self'`
+   baseline is EARNED: the full-source URL sweep reads ZERO external
+   runtime resources (only placeholder strings in seed data). The
+   functional proof: the FULL E2E suite green on the patched build —
+   any blocked script would break hydration and fail the suite loudly.
+4. **The standing checks**: the mobile-menu cycle green (toggle → the
+   drawer with Dashboard/Training LMS/Assets/Staff Requests → the
+   Training LMS link CLICKED:/training → auto-close `open:false`
+   verified); **the byte-stability pair 474 BYTE-MATCHES the r69 456
+   pair on BOTH sides (md5-identical: ref e24ad06…, loc e3df921…) —
+   the SIX-round chain (474≡456≡438≡418≡402≡366)**: the quiet REF +
+   the header/meta-layer fix families changed zero rendered bytes; the
+   TW-v4 scan clean (`!important` 15, oklch all comments); DB pristine
+   (users = [sepnetflix2023@outlook.com] only). The sweep's other
+   findings recorded: REF's soft-404 (HTTP 200 SPA shell on unknown
+   routes — the clone's proper 404 kept as the production-grade
+   superset) + REF's manifest/favicon 302-redirects (the clone
+   self-hosts both).
+
+TDD: +12 unit (the 7-spec sitemap seam incl. the registry-vs-filesystem
+readdirSync pin + the 5-spec csp seam) + 4 E2E (both pairs), RED-first
+(4 failed on the unpatched build → 5/5 green after). Gates: lint 0/0 ·
+tsc ✓ · **922/922 unit** · build ✓ · **E2E 374/374 (5.6m, zero
+flakes)** · byte-stability 474≡456 · DB pristine. Screenshots: the
+458–475 set (18 files → 658 on disk; all 9 same-number pairs
+hash-distinct).
+
+**The session-70 instrument lessons (carry-forward):**
+
+1. **The detached-launch pattern needs the parenthesized subshell** —
+   `setsid nohup … &` inside a `&&` chain still died silently (the
+   18-byte log); `(setsid nohup … < /dev/null &)` survived. The r68
+   lesson survives refinement: it is not setsid alone but the
+   double-fence (subshell + setsid) that escapes the tool's process
+   group.
+2. **Assert against the renderer's serialization, not the spec's
+   spelling** — the sitemap pin expected `<priority>1.0</priority>`
+   (REF's bytes) where Next serializes `1`; the robots pin expected
+   `User-agent:` where Next renders `User-Agent:`. RED-first caught
+   both on the patched build in seconds; the fix is in the ASSERTION
+   (the semantic contract — xsd:decimal equivalence, case-insensitive
+   directives), never in re-implementing the renderer's bytes.
+3. **Template scripts inherit template bugs** — the r69 screenshots
+   template's auto-close eval had an unbalanced paren (a SyntaxError
+   misread as a check failure); the cycle's URL evidence proved
+   navigation, and the direct re-run (`open:false`) closed the proof.
+   Copy an instrument, re-verify its weakest read.
