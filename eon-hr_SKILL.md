@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.53.0 (session-70 remediation complete — the SEO-surface parity pair + the CSP nonce-pipeline superset round: the deploy watch BOTH SIDES QUIET (no 33rd deploy — the post-32nd finals hold; the fresh re-auth clean, Turnstile unenforced) + the Next.js patch watch QUIET (16.4.2 latest stable). THE HTTP-LAYER SWEEP #2 (the r68 lesson: census new LAYERS) found the last uncensured member of the r25 SEO layer: the live REF serves sitemap.xml (61 entries: / at 1.0 + the 60 app routes at 0.8, all weekly, no lastmod) + its robots.txt declares the Sitemap — the clone had neither. R70-A THE SEO SURFACE REACHES FULL PARITY: src/lib/sitemap-routes.ts (the 61-slug canonical registry, readdirSync-pinned against the (app) route tree) + src/app/sitemap.ts (origin-resolved via headers(), like the metadataBase) + src/app/robots.ts (REF's directive set + the clone's Disallow: /api/ superset + the Sitemap line; public/robots.txt deleted — the static file shadows the route) — the live URL-set diff: REF's 61 ⊆ the clone's 62, the one superset member /dashboard (the clone's canonical dashboard route). R70-B THE FIRST SECURITY-POLICY SUPERSET (REF serves no CSP — measured): the official Next.js middleware-nonce pattern — src/lib/csp.ts (buildCsp: default-src 'self'; script-src 'self' 'nonce-N' 'strict-dynamic'; style-src 'unsafe-inline' for the Radix/vaul/recharts style attributes; NO upgrade-insecure-requests — it would break the plain-HTTP transport; dev adds unsafe-eval + ws:) + src/proxy.ts extended (per-request nonce on request AND response headers — Next auto-nonces its scripts from the request CSP header, curl-verified; the matcher widened to /login + /logout; the auth-redirect scoped past them) + the root layout noncing its own inline scripts (the THEME_BOOT boot + the JSON-LD blocks — CSP applies to non-executable types too). The strictness is earned: the full-source URL sweep reads ZERO external runtime resources. The functional proof: the FULL suite green under the policy. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS navigates → auto-close) + the byte-stability pair 474 BYTE-MATCHES the r69 456 pair on both sides — the SIX-round chain (474≡456≡438≡418≡402≡366): the header/meta-layer fixes changed zero rendered bytes · **Last updated:** 2026-10-21
-> **State:** 922 unit + 374 E2E tests green, lint/typecheck/build
+> **Version:** 3.54.0 (session-71 remediation complete — the CSP completion pair + the TLS-fronted deployment story: the r71 deploy watch DETECTED THE 33RD LOGIN DEPLOY (login JS CKnh3tRk→BCr9BMlh, CSS quiet, the app side quiet) and the full confirmation ladder audited it NON-VISUAL (standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13; byte-confirmed by the 476 login pair ≡ the r70 458 pair on both sides). THE R70 DELTA AUDIT FOUND THE MISSED NONCE: the login layout's BreadcrumbList JSON-LD served bare (CSP gates non-executable script types too — a silent block the E2E suite cannot catch); R71-A THE CSP COMPLETION: the style-src elem/attr SPLIT — style-src-elem 'self' 'nonce-N' (the only authored <style> element in the whole served surface, the session-45 login cascade mirror, MOVED to the server login layout for the stamping — a client page cannot read headers()) + style-src-attr 'unsafe-inline' (the Radix popper/vaul transform/recharts dynamic attributes — un-nonce-able by nature), dev adds elem 'unsafe-inline' for Turbopack's injected styles; the CSP-violation console probe: dialog + select popper + 9 recharts svgs + the vaul drawer ALL clean under the hardened policy. R71-B THE TLS-FRONTED DEPLOYMENT STORY: the x-forwarded-proto contract PINNED (the spoofed header resolves https:// sitemap locs + robots Sitemap + canonical/og — the whole metadataBase origin chain, zero-config TLS) + DEPLOYMENT.md REWRITTEN to the measured truth (the Eon HR name, the 42-handler/54-endpoint counts, the NEXT_PUBLIC_SITE_URL row DELETED — nothing reads it, the honest two-variable env contract, the new §8 nginx/Caddy proxy story). THE DRAWER-INSTRUMENT CORRECTION: the r70 template's aria-label selector NEVER matched REF since the r46 redeploy — every r66-r70 REF "drawer pair" captured the drawer CLOSED; the corrected snapshot-ref mechanism byte-matches the LOC side (492≡474, the SEVEN-round chain: 492≡474≡456≡438≡418≡402≡366 — the r71 fix families changed zero rendered bytes) and captures the REF drawer OPEN for the first time (the corrected baseline). The standing checks: the mobile-menu cycle green twice (the inline probe + the script-native cycle: toggle → nav links → Training LMS navigates → auto-close open:false) · **Last updated:** 2026-10-21
+> **State:** 924 unit + 380 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4768,3 +4768,109 @@ hash-distinct).
    misread as a check failure); the cycle's URL evidence proved
    navigation, and the direct re-run (`open:false`) closed the proof.
    Copy an instrument, re-verify its weakest read.
+
+## §81 Session 71 (parity round 70) — the CSP completion pair (the missed JSON-LD nonce + the style-src elem/attr split) + the TLS-fronted deployment story + the drawer-instrument correction
+
+**The round's motivation.** The backlog stayed EMPTY; the standing
+watches were the deploy watch, the patch watch, the Turnstile rollout,
+and the candor-ordered superset candidates: "a TLS-fronted deployment
+story, CSP style-src hardening, and whatever the next deploy carries."
+
+1. **THE 33RD LOGIN DEPLOY: DETECTED, LADDERED, NON-VISUAL.** The r71
+   watch read login JS `CKnh3tRk`→`BCr9BMlh` (CSS quiet, the app side
+   quiet). The full ladder: standing 5/5 + sweep 12/12 + verify-r49
+   13/13 + verify-r45 13/13 — and this round the login standing pair
+   BYTE-CONFIRMS the verdict (476 ≡ the r70 458 pair on both sides:
+   the deploy changed the login JS hash without changing a rendered
+   byte). The watch finals are the post-33rd hashes.
+2. **R71-A THE CSP COMPLETION (the pure superset deepened).** The r70
+   delta audit found the root layout's two JSON-LD blocks nonced but
+   the LOGIN LAYOUT's BreadcrumbList bare — CSP gates
+   non-executable script types too, so the browser blocked it
+   silently (no visual delta, invisible to the E2E suite; caught by
+   reading the served HTML with curl). The same audit swept the whole
+   surface for `<style>` ELEMENTS: exactly ONE exists (the session-45
+   login focus-cascade mirror; 27 app routes + 404 + logout read
+   zero) — which reshaped the "nonce'd style pipeline touching every
+   Radix primitive" candidate into the CSP spec's elem/attr SPLIT:
+   `style-src-elem 'self' 'nonce-N'` + `style-src-attr
+   'unsafe-inline'` (the attribute side is DYNAMIC by nature — Radix
+   popper px offsets, vaul transforms, recharts svg styles cannot be
+   nonce'd or hashed; the element side is where the hardening pays).
+   The `<style>` block MOVED from the client page to the SERVER login
+   layout (client components cannot read headers(); rendered before
+   {children}, keeping the body-after-head-links winning cascade
+   position). Dev adds elem 'unsafe-inline' (Turbopack's injected
+   styles). Proof stack: the R71-A1..A3 pins + the CSP-violation
+   console probe (dialog, select popper, 9 recharts svgs, the vaul
+   drawer — zero violations) + the FULL suite green (380/380).
+3. **R71-B THE TLS-FRONTED DEPLOYMENT STORY.** HSTS is served (r69)
+   but only bites behind real TLS; the missing piece is the PROXY
+   CONTRACT, now PINNED: the spoofed `x-forwarded-proto: https`
+   resolves https:// sitemap locs + the robots Sitemap line + the
+   canonical/og URLs (the whole metadataBase origin chain —
+   zero-config TLS, no site-URL env var exists or is needed).
+   DEPLOYMENT.md rewritten to the measured truth: the Eon HR name (it
+   still said "ORBITAL"), the 42-handler/54-endpoint counts (it said
+   16), the `NEXT_PUBLIC_SITE_URL` row DELETED (nothing reads it —
+   the honest two-variable env contract), and the new §8 (nginx +
+   Caddy examples, the x-forwarded-proto table, why the app serves
+   its own security headers and no upgrade-insecure-requests).
+4. **THE DRAWER-INSTRUMENT CORRECTION (the evidence lesson).** The
+   492 byte-stability capture initially missed the 474 pair on BOTH
+   sides — two instrument defects, not code changes: (a) the r70
+   template's `button[aria-label="Toggle Sidebar"]` NEVER matched on
+   REF since the r46 redeploy dropped the aria-label — every r66-r70
+   REF "drawer pair" actually captured the drawer CLOSED (the probe
+   instruments got the r46 amendment; the screenshot scripts never
+   did); (b) a raw eval `b.click()` programmatic open triggers
+   vaul/Radix onOpenAutoFocus — the first menu button renders its
+   focus-visible ring, a different legitimate state than the
+   user-realistic mouse open. The CORRECTED mechanism (the
+   accessible-name snapshot ref, mouse-based): the LOC 492 pair
+   BYTE-MATCHES 474 (md5 e3df921… — the SEVEN-round chain
+   492≡474≡456≡438≡418≡402≡366 HOLDS through both r71 fix families)
+   and the REF drawer is captured OPEN for the first time (bfaa0da…,
+   the corrected baseline; ref-vs-loc open-drawer delta 3.6% — text
+   antialiasing + the standing allowances, panel means within 4 sRGB
+   units, scrims identical).
+
+TDD: +2 unit (the csp seam's prod elem/attr split + the NO-blanket
+regex + the dev elem allowance; the R44-A1 legacy pin amended to the
+layout — the cascade mirror's new home) + 6 E2E (the R71-A triple RED
+first — 3 failed on the unpatched build — + the R71-B TLS triple, the
+r67 verification-pin pattern, GREEN pre-change and live-curl-verified;
+one assertion-vs-renderer normalization: the robots "User-Agent:"
+capitalization, the r70 lesson repeating on the round's own spec). The
+session70-csp pin amended to the split contract. Gates: lint 0/0 ·
+tsc ✓ · **924/924 unit** · build ✓ · **E2E 380/380 (5.9m, zero
+flakes)** · byte-stability 492≡474 (LOC; the REF baseline corrected) ·
+the ladder 43/43 · DB pristine. Screenshots: the 476-492 set (18
+files → 676 tracked; all 9 same-number pairs hash-distinct; the route
+pairs byte-stable vs r70 on both sides).
+
+**The session-71 instrument lessons (carry-forward):**
+
+1. **CSP gates the non-executable script types — audit them by
+   reading the served bytes, not by watching the suite.** A blocked
+   `application/ld+json` block produces zero rendering delta, so the
+   380-spec suite stayed green over a policy violation for a full
+   round. The catch instrument: curl the served HTML and grep the
+   tag list for un-nonced members — the audit the r70 round should
+   have run at GREEN time.
+2. **Classify the gate before touching source.** The first suite
+   launch failed 367/374 with `browserType.launch: Executable
+   doesn't exist` — the fresh machine's playwright cache held
+   chromium-1200 while @playwright/test 1.63 pins the 1248 shell.
+   Infrastructure failure, not source debt: `bunx playwright install
+   chromium` retired it without a single code edit. Reproduce, read
+   the error's own words, then split infra from code.
+3. **A byte-stability chain is only as honest as its capture
+   mechanism.** The six-round drawer chain held — but the REF side
+   was byte-stable at capturing a CLOSED drawer (the selector never
+   matched since r46). Chains prove stability of WHAT YOU CAPTURE;
+   when the pair's purpose is a specific state, verify the state
+   itself (the scrim read, the link visibility) at capture time — the
+   snapshot-ref click is the mechanism that survives attribute
+   drift, and the mouse-vs-programmatic open distinction (the
+   onOpenAutoFocus focus ring) is part of the state's definition.
