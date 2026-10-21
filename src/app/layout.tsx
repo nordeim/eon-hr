@@ -38,8 +38,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** REF's two app-route JSON-LD schemas (WebSite + Organization). */
-function JsonLdScripts({ origin }: { origin: string }) {
+/** REF's two app-route JSON-LD schemas (WebSite + Organization).
+ *  Session 70 (R70-B): the nonce — CSP's script-src applies to
+ *  non-executable script types too (a browser blocks an un-nonced
+ *  application/ld+json block under a nonce policy), so the JSON-LD
+ *  blocks carry the same per-request nonce the middleware minted. */
+function JsonLdScripts({ origin, nonce }: { origin: string; nonce?: string }) {
   const website = {
     name: "Eon HR",
     "@context": "https://schema.org",
@@ -54,8 +58,8 @@ function JsonLdScripts({ origin }: { origin: string }) {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
+      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
     </>
   );
 }
@@ -89,15 +93,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const proto = h.get("x-forwarded-proto") ?? "http";
   const host = h.get("host") ?? "localhost:3000";
   const origin = `${proto}://${host}`;
+  // Session 70 (R70-B): the middleware's per-request nonce for the
+  // CSP pipeline — stamped on this layout's own inline scripts (Next
+  // auto-nonces the scripts IT renders from the request CSP header;
+  // authored inline scripts need the explicit attribute). Undefined
+  // when no middleware ran (no CSP → no nonce needed — the pairing
+  // stays consistent).
+  const nonce = h.get("x-nonce") ?? undefined;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>
       <body className="font-sans antialiased">
         <ToastProvider>{children}</ToastProvider>
-        <JsonLdScripts origin={origin} />
+        <JsonLdScripts origin={origin} nonce={nonce} />
       </body>
     </html>
   );

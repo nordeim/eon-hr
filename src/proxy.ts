@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { buildCsp } from "@/lib/csp";
 
 /**
  * Session 55 (R55-C): the edge auth guard — REF's logged-out guard
@@ -16,14 +17,37 @@ import { NextResponse, type NextRequest } from "next/server";
  * defense-in-depth for present-but-INVALID cookies (its hardcoded
  * from_url=/dashboard is the sensible recovery target there).
  *
- * The matcher excludes /login, /logout, /api, Next internals, and
- * dot-files — the auth endpoints themselves must stay reachable while
- * logged out (the rate-limited login flow, the logout navigation).
+ * Session 70 (R70-B): the CSP nonce pipeline. Every matched DOCUMENT
+ * route now gets a per-request nonce: the CSP is set on the REQUEST
+ * headers (Next.js reads the nonce from the request CSP header and
+ * stamps it on every script it renders — the documented auto-nonce
+ * mechanism) and on the response. The matcher was widened to include
+ * /login + /logout (documents with scripts — they need the policy too);
+ * the auth-redirect below is explicitly scoped to skip them (the auth
+ * endpoints must stay reachable while logged out). The API routes, the
+ * _next internals, and dot-files (static assets, /sitemap.xml,
+ * /robots.txt) stay unmatched — CSP is a document policy, and those
+ * surfaces keep riding the r69 5-header set from next.config.ts.
  */
 const SESSION_COOKIE = "eon_session";
+const AUTH_PATHS = new Set(["/login", "/logout"]);
 
 export default function proxy(req: NextRequest) {
-  if (req.cookies.has(SESSION_COOKIE)) return NextResponse.next();
+  // R70-B: the CSP nonce pipeline — one nonce per request, the strict
+  // 'self' baseline (the app loads zero external resources), and the
+  // dev-only allowances (fast-refresh eval + the HMR websocket).
+  const nonce = crypto.randomUUID();
+  const csp = buildCsp(nonce, process.env.NODE_ENV !== "production");
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  res.headers.set("Content-Security-Policy", csp);
+
+  // R55-C: the auth guard — scoped past the auth pages now that the
+  // matcher includes them.
+  if (AUTH_PATHS.has(req.nextUrl.pathname)) return res;
+  if (req.cookies.has(SESSION_COOKIE)) return res;
 
   /* The from_url is built on the REQUEST's own authority (the Host
    * header — what the browser actually used), not req.nextUrl's
@@ -43,5 +67,5 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|login|logout|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
