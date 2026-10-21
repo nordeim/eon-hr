@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.55.0 (session-72 remediation complete — the Trusted-Types rung + the PWA/offline story: the r72 deploy watch DETECTED THE 34TH LOGIN DEPLOY (login JS BCr9BMlh→DOgRuj38, CSS quiet, the app side quiet) and the full confirmation ladder audited it NON-VISUAL (standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 — byte-confirmed by the 493 login pair ≡ the r71 476 pair on both sides). R72-A THE TRUSTED-TYPES RUNG: the CSP strictness ladder's next step — `trusted-types default` (the policy-NAME allowlist: only the 'default' policy may exist) + `require-trusted-types-for 'script'` (every DOM XSS sink requires a Trusted* value) + the nonced pass-through default-policy bootstrap FIRST in the root layout's <head> (production-only; dev's Turbopack pipeline would trip it); the r72 sink census green-lit the rung: ZERO raw innerHTML/insertAdjacentHTML/document.write sinks in the whole source + exactly five constant-authored nonced dSHI members; the LIVE enforcement pin proves creating a rogue policy name THROWS. R72-B THE PWA/OFFLINE STORY: REF measured with ZERO service workers (its manifest links on the login surface only, a stale platform-template description, EXTERNAL supabase icons), so the clone ships the OFFLINE SHELL: public/sw.js (the versioned static-shell precache + cache-first /_next/static chunks + network-only navigations with the cached /offline.html fallback — page HTML is NEVER cached: the authed-HTML leak-free design) + public/offline.html (CSP-clean by construction: zero scripts, zero <style> elements) + the nonced production-only registration bootstrap; proven by the un-authed /sw.js fetch, the live registration + control, and the setOffline(true) navigation landing on the offline page. THE EIGHT-ROUND BYTE CHAIN: the 509 drawer pair BYTE-MATCHES the r71 492 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 509≡492≡474≡456≡438≡418≡402≡366: both r72 fix families changed zero rendered bytes, the corrected open-drawer baseline reproduces). The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-21
-> **State:** 937 unit + 387 E2E tests green, lint/typecheck/build
+> **Version:** 3.56.0 (session-73 remediation complete — the security-isolation rung + the PWA manifest-linkage completion: the r73 deploy watch DETECTED THE 35TH LOGIN DEPLOY (login JS DOgRuj38→BANnI-PC AND login CSS BpSyi-cD→COgwiEvt — the first CSS movement since r70; the app side quiet C-IrDy5f/BGNH4KkS) and the full confirmation ladder audited it NON-VISUAL (the fresh login pair BYTE-IDENTICAL to the r72 493 REF baseline 69aa4241… + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13). R73-B THE SECURITY-ISOLATION RUNG: the transport-layer superset deepened — COOP same-origin + CORP same-origin + COEP require-corp on the r69 catch-all (re-measured: REF serves NONE of the three on any surface; the trio is response-layer, zero rendered bytes; COEP earned by the standing zero-external-resources URL sweep; measured on /login, /api/health, a /_next/static chunk, and public/sw.js). R73-C THE PWA MANIFEST-LINKAGE COMPLETION: the found-and-fixed bug — the r72 census claimed every-page manifest linkage, measured FALSE (the link lived only in the login layout; the whole authed shell served zero manifest links while the SW registered everywhere); fixed by hoisting manifest + apple-touch-icon to the root layout's metadata (Next's per-field inheritance carries them everywhere). THE NINE-ROUND BYTE CHAIN: the 526 drawer pair BYTE-MATCHES the r72 509 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 526≡509≡492≡474≡456≡438≡418≡402≡366) and the 510 login pair BYTE-MATCHES the r72 493 pair on both sides — both r73 fix families changed zero rendered bytes. The dependency audit recorded: two HIGH advisories, both dev-tooling transitive chains, both upstream-blocked (braces 3.0.3 is the latest published; deepmerge-ts 8 ships only in Prisma 8-RC) — accepted with the upstream watch, the runtime graph unaffected. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-22
+> **State:** 937 unit + 394 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4978,3 +4978,60 @@ isolation; the final sequential run 387/387).
    the offline page. Less cache, more truth: the E2E offline spec
    PROVES the fallback on an uncached route rather than asserting a
    cache hit.
+
+
+## §83 Session 73 (parity round 72) — the security-isolation rung (COOP + CORP + COEP) + the PWA manifest-linkage completion + the 35th-deploy ladder
+
+**The round's motivation.** The backlog stayed EMPTY; the standing
+watches were the deploy watch (the post-34th finals), the patch watch,
+the Turnstile rollout, and the session_157 candor-ordered candidates:
+"the remaining PWA rungs, a security-headers second pass (COOP/COEP/
+CORP — REF serves none), and whatever the next deploy carries."
+
+**R73-A the 35th-deploy ladder.** The watch detected login JS
+`DOgRuj38`→`BANnI-PC` AND login CSS `BpSyi-cD`→`COgwiEvt` (the first
+CSS movement since r70; the app side quiet). The ladder — the fresh
+login pair BYTE-IDENTICAL to the r72 493 REF baseline + standing 5/5
++ sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 — audited it
+NON-VISUAL. A CSS-fingerprint change is NOT a visual change until
+the rendered bytes differ: classify by the PAIR, not the fingerprint.
+
+**R73-B the security-isolation rung.** Re-measured: REF serves NO
+COOP/CORP/COEP on any surface. The trio shipped on the r69 catch-all
+(every response — measured on the page, the API, the chunk, and
+public/sw.js). COEP `require-corp` is EARNED by the standing
+zero-external-resources URL sweep: a strict policy you cannot sustain
+is worse than none, a strict policy the codebase already satisfies is
+free hardening. Response-layer = zero rendered bytes: the byte chain
+proves the trio non-visual.
+
+**R73-C the PWA manifest-linkage completion — the found-and-fixed
+bug.** The r72 census claimed "every-page linkage"; a live read this
+round falsified it (the link lived only in the login layout; the
+authed shell served zero manifest links). The fix hoisted manifest +
+apple-touch-icon to the root layout's metadata — Next's per-field
+inheritance carries them everywhere the child does not override.
+
+**The round's carry-forward lessons:**
+
+1. **Verify documented-but-unpinned census claims with a live read.**
+   The r72 "every-page manifest linkage" was a documented assertion
+   with no executable pin; two rounds later the live read falsified
+   it. A claim becomes true or false the moment you measure it — and
+   the fix's job is to turn the claim into a contract (the R73-Ca
+   pin): the next agent cannot regress what the suite asserts.
+2. **The playwright chromium-cache mismatch is infrastructure, again.**
+   The environment held 1200-series browsers while playwright 1.63
+   needs 1248; browserType.launch fails with "Executable doesn't
+   exist". `bunx playwright install chromium` restores it. Classify
+   the gate (infrastructure vs source debt) BEFORE touching anything:
+   the first mixed run produced six red tests whose causes were TWO
+   different things (three real RED assertions + launch failures) —
+   the re-run with the restored cache separated them cleanly.
+3. **An SW-control assertion races the registration lifecycle.** The
+   registration fires on window 'load', the install precaches the
+   shell, skipWaiting + clients.claim flip the controller — a direct
+   post-goto read lands anywhere in that sequence. The r72
+   ready+reload pattern (await navigator.serviceWorker.ready, reload,
+   then read the controller) is the contract-safe form; reuse it
+   verbatim.

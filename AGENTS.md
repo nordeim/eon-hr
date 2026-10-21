@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 937 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 387 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 394 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -5217,3 +5217,91 @@ the zero.db re-create race (re-run green) and the
 concurrent-ladder chromium target-crash (the load lesson: the
 ladder is port-safe with the suite but not LOAD-safe — run the
 final proof sequentially).
+
+## Session 73 (parity round 72) — the security-isolation rung (COOP + CORP + COEP) + the PWA manifest-linkage completion (the authed-shell gap) + the 35th-deploy ladder
+
+**The round's motivation.** The session-72 completion record left the
+backlog EMPTY of open visual/functional items; the standing watches
+were the deploy watch (the post-34th finals), the patch watch, the
+Turnstile rollout, and the candor-ordered superset candidates from
+session_157: "the remaining PWA rungs (a web-app-installability pass,
+the offline-page styling parity), a security-headers second pass
+(COOP/COEP/CORP — REF serves none, the superset stays open), and
+whatever the next deploy carries." The deploy carried.
+
+1. **The r73 deploy watch (the r72 instrument re-armed at the post-34th
+   finals): THE 35TH LOGIN DEPLOY DETECTED** — login JS
+   `DOgRuj38`→`BANnI-PC` AND login CSS `BpSyi-cD`→`COgwiEvt` (the FIRST
+   CSS movement since r70; the frontend-config preload holds; the app
+   side QUIET `C-IrDy5f`/`BGNH4KkS`). The fresh re-auth clean (Turnstile
+   stays unenforced — the standing login-side watch item; the login DOM
+   census re-read the unchanged 7-button set + one email/password form +
+   zero rendered Turnstile widgets). The full confirmation ladder: the
+   fresh logged-out login pair BYTE-IDENTICAL to the r72 493 REF
+   baseline (`69aa4241…`) + standing **5/5** + sweep **12/12** +
+   verify-r49 **13/13** + verify-r45 **13/13** → **THE 35TH LOGIN DEPLOY
+   IS NON-VISUAL**. The watch re-armed at the post-35th finals
+   (scripts/r73-deploy-watch.mjs) reads BOTH SIDES QUIET. The patch
+   watch: QUIET (16.4.2 still the latest stable).
+2. **R73-B THE SECURITY-ISOLATION RUNG (the transport-layer superset
+   deepened).** Re-measured this round (curl -sI): the live REF serves
+   NO Cross-Origin-Opener-Policy, NO Cross-Origin-Embedder-Policy, and
+   NO Cross-Origin-Resource-Policy on any surface — the r68 finding
+   holds; the trio is a pure superset, response-layer (zero rendered
+   bytes). Shipped on the r69 catch-all (the same `/:path*` source, so
+   every response carries them — pages, /api/*, /_next/static chunks,
+   public/ assets: measured on /login, /api/health, a chunk, and
+   public/sw.js): COOP `same-origin` (windows share references only
+   with same-origin openers) + CORP `same-origin` (no other origin may
+   embed this origin's resources) + COEP `require-corp` (the document
+   may only load subresources that opt in via CORP/CORS — EARNED by the
+   standing zero-external-resources URL sweep; the social glyphs are
+   inline SVG, recharts/Radix pull nothing cross-origin).
+3. **R73-C THE PWA MANIFEST-LINKAGE COMPLETION (the found-and-fixed
+   bug).** The r72 census claimed "every-page linkage" for the manifest;
+   measured FALSE — the link lived only in the login layout, so the
+   ENTIRE authed shell (61 routes) served zero `<link rel="manifest">`
+   while the service worker registered on every page (live-measured on
+   the authed dashboard: `manifest:false`). Chrome's installability
+   criteria need the link on the page being installed. The fix hoists
+   `manifest: "/manifest.json"` + the apple-touch-icon to the ROOT
+   layout's metadata (Next's per-field inheritance carries them to
+   every route the child does not override; login's own identical
+   values stay). Non-visual head elements — zero rendered bytes.
+4. **THE NINE-ROUND BYTE CHAIN HOLDS** — the 526 drawer pair
+   BYTE-MATCHES the r72 509 pair on BOTH sides (loc `e3df921…`, ref
+   `bfaa0da…`): 526≡509≡492≡474≡456≡438≡418≡402≡366. The 510 login
+   pair BYTE-MATCHES the r72 493 pair on BOTH sides — both r73 fix
+   families changed zero rendered bytes AND the 35th deploy left both
+   surfaces byte-identical. The mobile-menu functional cycle green:
+   toggle → the drawer (Dashboard/Training LMS/Assets/Staff Requests) →
+   Training LMS CLICKED:/training → auto-close `open:false`.
+5. **THE DEPENDENCY AUDIT RECORDED** — `bun audit` reads exactly two
+   advisories, both HIGH, both DEV-TOOLING transitive chains, both
+   upstream-blocked: `braces@3.0.3` (GHSA-vfj7-8cjw-p6xm — the
+   eslint-config-next→fast-glob→micromatch chain; 3.0.3 IS the latest
+   published version — no ecosystem fix exists) and `deepmerge-ts@7.1.5`
+   (GHSA-ggr8-5vv4-36mx — the prisma→@prisma/config chain pins the ^7
+   line; the fix ships only in Prisma 8, still RC). Neither is in the
+   runtime standalone graph; neither is attacker-reachable. A surgical
+   `bun update` attempt was REVERTED (it pollutes package.json with two
+   fake direct deps while leaving the real nested consumer untouched).
+   Recorded as accepted dev-chain advisories with the upstream watch.
+
+**TDD:** +7 E2E (RED-first both families — the R73-B triple: the trio
+absent on the page route, the API route, and /sw.js; the R73-C
+quadruple: the authed dashboard's manifest + apple links (RED on the
+unpatched build), the login's standing manifest contract, the served
+manifest's installability fields, and the SW control via the
+r72-proven ready+reload pattern (the first draft's direct read raced
+the registration lifecycle — the timing, not the contract, fixed by
+following the r72 pattern)). Gates: lint 0/0 · tsc ✓ · **937/937
+unit** · build ✓ · **E2E 394/394 (6.5m, zero flakes — the SEQUENTIAL
+run)** · byte-stability 526≡509 (the nine-round chain, both sides) +
+510≡493 (the login pair, both sides) · the ladder standing 5/5 + sweep
+12/12 + verify-r49 13/13 + verify-r45 13/13 · 711 tracked screenshots
+(+17) · DB pristine. TRAPS retired (all infrastructure, classified
+before touching source): the playwright chromium-cache mismatch (the
+environment held 1200-series browsers while 1.63 needs 1248 —
+`bunx playwright install chromium` restores it) and the SW-control
+timing race (ready+reload, never a direct post-goto read).

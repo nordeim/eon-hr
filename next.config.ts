@@ -58,6 +58,28 @@ const nextConfig: NextConfig = {
   // deployments, and it matches REF exactly. No CSP: REF serves none
   // (measured) and a Next.js CSP needs its own nonce pipeline.
   // Pinned by tests/e2e/session69-security-headers.spec.ts (R69-Aa/b).
+  //
+  // Session 73 (R73-B): the security-isolation rung — the second pass
+  // the session_157 frontier ordered. Re-measured this round (curl -sI):
+  // the live REF serves NO cross-origin isolation policies on any
+  // surface, so the trio is a pure superset (and response-layer: zero
+  // rendered bytes — the byte-stability chain unaffected by
+  // construction):
+  //   cross-origin-opener-policy: same-origin — windows share
+  //     references only with same-origin openers (the tabnabbing /
+  //     window-confusion class).
+  //   cross-origin-resource-policy: same-origin — no other origin may
+  //     embed this origin's resources; lands on EVERY response the
+  //     catch-all covers (pages, /api/*, /_next/static chunks, public/
+  //     assets — measured this round), which is exactly the opt-in the
+  //     document's own subresource loads need under COEP.
+  //   cross-origin-embedder-policy: require-corp — the document may
+  //     only load subresources that opt in via CORP or CORS. EARNED: the
+  //     whole-source URL sweep (session-70, re-verified) reads ZERO
+  //     external runtime resources — every asset self-hosted; the social
+  //     glyphs are inline SVG; recharts/Radix pull no cross-origin
+  //     fetches. Pinned RED-first by
+  //     tests/e2e/session73-security-isolation.spec.ts (R73-Ba/b/c).
   async headers() {
     return [
       {
@@ -72,6 +94,9 @@ const nextConfig: NextConfig = {
             value:
               "camera=(self), microphone=(self), geolocation=(self), payment=(self), usb=(self), magnetometer=(), gyroscope=()",
           },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
         ],
       },
     ];

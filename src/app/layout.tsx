@@ -25,7 +25,22 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description:
       "Eon HR — modern HR management: employees, payroll, recruitment, training, compliance, performance, analytics.",
-    icons: { icon: "/icon-192.png" },
+    // Session 73 (R73-C): the PWA manifest-linkage completion. The r72
+    // census claimed every-page manifest linkage; measured FALSE — the
+    // link lived only in the login layout, so the whole authed shell (61
+    // routes) served zero <link rel="manifest"> while the service worker
+    // registered on every page. Chrome's installability criteria need the
+    // link on the page being installed. Next's metadata resolution
+    // inherits per-field: every route that does not set its own manifest
+    // / icons (none do, and login's own values are identical) carries
+    // these from the root. Non-visual head elements — zero rendered
+    // bytes. Pinned RED-first by
+    // tests/e2e/session73-pwa-linkage.spec.ts (R73-Ca/b).
+    manifest: "/manifest.json",
+    icons: {
+      icon: "/icon-192.png",
+      apple: "/apple-touch-icon.png",
+    },
     openGraph: {
       type: "website",
       siteName: "Eon HR",
