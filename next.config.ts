@@ -48,6 +48,34 @@ const nextConfig: NextConfig = {
       { source: "/", destination: "/dashboard" },
     ];
   },
+  // Session 69 (R69-A): the HTTP-layer parity set. The live REF platform
+  // serves a 5-header security set on every response (measured via
+  // curl -sI on https://eon.base44.app/login — the layer 67 rounds of
+  // DOM-level audits never censused); the clone's standalone served none.
+  // Source "/:path*" covers every route — pages AND /api/* — exactly
+  // like the REF platform. HSTS included: browsers ignore it over plain
+  // HTTP (the local/E2E transport), it protects real TLS-fronted
+  // deployments, and it matches REF exactly. No CSP: REF serves none
+  // (measured) and a Next.js CSP needs its own nonce pipeline.
+  // Pinned by tests/e2e/session69-security-headers.spec.ts (R69-Aa/b).
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(self), geolocation=(self), payment=(self), usb=(self), magnetometer=(), gyroscope=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -5793,8 +5793,22 @@ describe("session-51: the route-casing alias + the mobile-nav census record (rou
     // serves the dashboard at `/` URL-unchanged — the r55 census phase B;
     // the session-51 URL-unchanged-serve pattern's sibling). The scope
     // stays closed: the canonical capital form + the root, nothing else.
-    const sources = cfg.match(/source: "\/[^"]*"/g) || [];
+    // Session 69 (R69-A amendment): Next's headers() API shares the
+    // `source:` key name, so the REWRITES scope must be read from the
+    // rewrites() BLOCK — not the whole file (the headers() source
+    // "/:path*" is the security-headers catch-all, a different API
+    // surface, not a rewrite alias; pinned below).
+    const rewritesBlock = cfg.split("async rewrites()")[1].split("async headers()")[0];
+    const sources = rewritesBlock.match(/source: "\/[^"]*"/g) || [];
     expect(sources).toEqual(['source: "/Dashboard"', 'source: "/"']);
+    // The headers() scope: exactly ONE catch-all (a second source would
+    // break the security set's every-route coverage; a narrower source
+    // would leave routes headerless) — the R69-A every-route contract.
+    const headersBlock = cfg.split("async headers()")[1];
+    expect((headersBlock.match(/source: "\/:path\*"/g) || []).length).toBe(1);
+    // And the two config surfaces stay separate: no rewrite sources hide
+    // in the headers block and vice versa.
+    expect(headersBlock).not.toContain('source: "/Dashboard"');
   });
 });
 
