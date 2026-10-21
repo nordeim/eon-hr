@@ -4508,21 +4508,33 @@ describe("session-45 login redeploy re-audit (parity round 44 — the icon color
      spinner; (5) the title/subtitle member order. */
 
   const loginPage45 = read("src", "app", "login", "page.tsx");
+  // Session-71 amendment (R71-A): the runtime-mirror style block MOVED
+  // from the client page to the SERVER login layout (src/app/login/
+  // layout.tsx) for the CSP nonce — style-src-elem gates <style>
+  // ELEMENTS, and a client component cannot read headers() to stamp
+  // one. The protective intent is unchanged: the block renders on the
+  // login surface, in the body, after the head links (the winning
+  // cascade position). The pin reads the LAYOUT now — the block's home.
+  const loginLayout71 = read("src", "app", "login", "layout.tsx");
 
   // --- A. the runtime-injected ring cascade ---
 
-  it("R44-A1: the login ships the runtime-mirror style block — REF's two verbatim focus rules, rendered IN PLACE (a plain style element lands after the head links — the same winning cascade position the platform's injected block occupies)", () => {
+  it("R44-A1: the login ships the runtime-mirror style block — REF's two verbatim focus rules, rendered IN PLACE (a plain style element lands after the head links — the same winning cascade position the platform's injected block occupies; session-71: the block lives in the server LAYOUT, nonce'd for style-src-elem)", () => {
     // the two rules verbatim from REF's runtime block (the escaped class
     // selectors double-escaped for the template literal)
-    expect(loginPage45).toContain(
+    expect(loginLayout71).toContain(
       ".focus\\\\:border-slate-400:focus{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}"
     );
-    expect(loginPage45).toContain(
+    expect(loginLayout71).toContain(
       ".focus\\\\:ring-slate-400:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(148 163 184 / var(--tw-ring-opacity, 1))}"
     );
     // a plain in-place style element (no precedence prop — React 19 only
-    // hoists styles that carry one)
-    expect(loginPage45).toMatch(/<style>\{`/);
+    // hoists styles that carry one), stamped with the per-request nonce
+    // (R71-A: the style-src-elem contract).
+    expect(loginLayout71).toMatch(/<style nonce=\{nonce\} dangerouslySetInnerHTML=\{\{ __html: FOCUS_CASCADE_MIRROR \}\} \/>/);
+    // and the moved block is GONE from the client page (single source).
+    expect(loginPage45).not.toMatch(/<style>\{`/);
+    expect(loginPage45).not.toContain(".focus\\\\:border-slate-400:focus");
   });
 
   it("R44-A2: the input class strings stay REF-verbatim (the fix is PURE CASCADE — no member changes on the inputs themselves; the ring-ring token appears on the two inputs AND the Sign in's base; session-46 amendment — the hidden views' four sibling inputs + two CTAs carry the tokens too, so the counts anchor to the SIGN-IN form region)", () => {

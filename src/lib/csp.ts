@@ -26,26 +26,40 @@
  *     is plain HTTP — UIR would upgrade subresource requests to https
  *     and break them. HSTS (the r68 set) already covers TLS-fronted
  *     deployments.
- *   - style-src keeps 'unsafe-inline': TW4's compiled CSS rides a
- *     <link> ('self'), but the inline style ATTRIBUTES (Radix popper
- *     positioning, vaul drawer transforms, recharts svg styles) need
- *     the inline allowance — a nonce'd style pipeline would touch every
- *     primitive for zero reference delta (REF ships none of this).
+ *   - style-src is SPLIT per the CSP spec (session-71, R71-A): 
+ *     style-src-elem gates <style> ELEMENTS — 'self' (TW4's compiled CSS
+ *     rides a <link>) + the nonce (the one authored login cascade-mirror
+ *     block, moved to the server login layout for the stamping) — while
+ *     style-src-attr gates inline style ATTRIBUTES, which keep
+ *     'unsafe-inline': the Radix popper positioning, vaul drawer transforms
+ *     and recharts svg styles write DYNAMIC runtime values that cannot be
+ *     nonce'd or hashed. The split takes the element-side hardening and
+ *     documents the attribute reality instead of pretending at a hash
+ *     pipeline (a blocked injected <style> element can no longer exfiltrate
+ *     via CSS; the attributes were never the exfil vector anyway).
+ *     Dev adds 'unsafe-inline' to style-src-elem — Turbopack injects
+ *     <style> elements for CSS in dev (the mirror of the dev-only
+ *     script-src 'unsafe-eval' allowance).
  */
 
 export function buildCsp(nonce: string, isDev = false): string {
   const scriptSrc = ["script-src 'self'", `'nonce-${nonce}'`, "'strict-dynamic'"];
   const connectSrc = ["connect-src 'self'"];
+  const styleSrcElem = ["style-src-elem 'self'", `'nonce-${nonce}'`];
   if (isDev) {
     // Next dev (Turbopack fast-refresh) evals modules and talks to the
-    // HMR websocket — the production standalone needs neither.
+    // HMR websocket — the production standalone needs neither. Dev also
+    // injects <style> elements for CSS, so style-src-elem keeps
+    // 'unsafe-inline' in dev only.
     scriptSrc.push("'unsafe-eval'");
     connectSrc.push("ws:");
+    styleSrcElem.push("'unsafe-inline'");
   }
   return [
     "default-src 'self'",
     scriptSrc.join(" "),
-    "style-src 'self' 'unsafe-inline'",
+    styleSrcElem.join(" "),
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     connectSrc.join(" "),

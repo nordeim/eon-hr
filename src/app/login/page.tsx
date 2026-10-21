@@ -344,17 +344,13 @@ function LoginForm() {
        (rounded-xl, bg-slate-50/50, border-slate-200, pl-10, 16px→14px
        responsive font) and the responsive sign-in action. */
     <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_bottom_right,#f8fafc,#f1f5f9)] p-4 text-[#09090b] [--ring:#09090b] [--foreground:#09090b]">
-      {/* REF's runtime focus-cascade mirror (session-45): the platform
-          injects a second Tailwind stylesheet INLINE (after the linked
-          one) on the login — its two plain-focus rules sit at equal
-          specificity but later in document order than the linked
-          focus-visible ring rule, so they WIN: the keyboard-focused
-          inputs render the slate-400 ring, while the Sign in's token ring
-          is untouched (the button's tail carries no plain-focus ring
-          member). This element renders in place — a plain style tag (no
-          precedence prop, so React 19 keeps it in the body, after the
-          head links) — reproducing the same winning cascade position. */}
-      <style>{`.focus\\:border-slate-400:focus{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}.focus\\:ring-slate-400:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(148 163 184 / var(--tw-ring-opacity, 1))}`}</style>
+      {/* REF's runtime focus-cascade mirror (session-45) lived HERE as a
+          plain <style> element; session-71 (R71-A) MOVED it to the server
+          login layout with the CSP nonce stamped (style-src-elem gates
+          <style> ELEMENTS — a client page cannot read headers() to nonce
+          it). The winning cascade position is preserved: the layout
+          renders it before this main element, still in the body, after
+          the head <link> stylesheets. */}
       <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 text-[#09090b] shadow-2xl backdrop-blur-sm">
           {/* REF's card rides its login build's --card-foreground, which is

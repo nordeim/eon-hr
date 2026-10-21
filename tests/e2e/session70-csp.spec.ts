@@ -18,11 +18,15 @@ import { test, expect } from "@playwright/test";
 //   THEME_BOOT pre-paint boot + the two JSON-LD blocks: CSP applies to
 //   non-executable script types too).
 // - Production policy: default-src 'self'; script-src 'self' 'nonce-N'
-//   'strict-dynamic'; style-src 'self' 'unsafe-inline' (TW4's compiled
-//   CSS rides a <link>; the inline style ATTRIBUTES — Radix, vaul,
-//   recharts — need the inline allowance); img-src 'self' data: blob:;
-//   font-src 'self' data:; connect-src 'self'; base-uri 'self';
-//   form-action 'self'; frame-ancestors 'none'; object-src 'none'.
+//   'strict-dynamic'; style-src SPLIT per the CSP spec (session-71,
+//   R71-A): style-src-elem 'self' 'nonce-N' for <style> ELEMENTS (TW4's
+//   compiled CSS rides a <link>; the one authored login cascade-mirror
+//   block carries the layout's nonce) + style-src-attr 'unsafe-inline'
+//   for inline style ATTRIBUTES (Radix, vaul, recharts — dynamic
+//   runtime values that cannot be nonce'd or hashed); img-src 'self'
+//   data: blob:; font-src 'self' data:; connect-src 'self'; base-uri
+//   'self'; form-action 'self'; frame-ancestors 'none'; object-src
+//   'none'.
 //   NO upgrade-insecure-requests: the local standalone + E2E transport
 //   is plain HTTP — UIR would upgrade subresources to https and break
 //   them (HSTS already covers the TLS-fronted production case).
@@ -50,7 +54,12 @@ test.describe("session-70 CSP nonce pipeline (R70-B, the superset)", () => {
       expect(csp).toContain("default-src 'self'");
       expect(csp).toContain("script-src 'self' 'nonce-");
       expect(csp).toContain("'strict-dynamic'");
-      expect(csp).toContain("style-src 'self' 'unsafe-inline'");
+      // Amended session-71 (R71-A): the blanket style-src directive is
+      // replaced by the elem/attr split — elements take the nonce,
+      // attributes keep 'unsafe-inline' (the documented necessity).
+      expect(csp).toContain("style-src-elem 'self' 'nonce-");
+      expect(csp).toContain("style-src-attr 'unsafe-inline'");
+      expect(csp).not.toMatch(/(?:^|; )style-src /);
       expect(csp).toContain("img-src 'self' data: blob:");
       expect(csp).toContain("font-src 'self' data:");
       expect(csp).toContain("connect-src 'self'");
