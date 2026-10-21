@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.56.0 (session-73 remediation complete — the security-isolation rung + the PWA manifest-linkage completion: the r73 deploy watch DETECTED THE 35TH LOGIN DEPLOY (login JS DOgRuj38→BANnI-PC AND login CSS BpSyi-cD→COgwiEvt — the first CSS movement since r70; the app side quiet C-IrDy5f/BGNH4KkS) and the full confirmation ladder audited it NON-VISUAL (the fresh login pair BYTE-IDENTICAL to the r72 493 REF baseline 69aa4241… + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13). R73-B THE SECURITY-ISOLATION RUNG: the transport-layer superset deepened — COOP same-origin + CORP same-origin + COEP require-corp on the r69 catch-all (re-measured: REF serves NONE of the three on any surface; the trio is response-layer, zero rendered bytes; COEP earned by the standing zero-external-resources URL sweep; measured on /login, /api/health, a /_next/static chunk, and public/sw.js). R73-C THE PWA MANIFEST-LINKAGE COMPLETION: the found-and-fixed bug — the r72 census claimed every-page manifest linkage, measured FALSE (the link lived only in the login layout; the whole authed shell served zero manifest links while the SW registered everywhere); fixed by hoisting manifest + apple-touch-icon to the root layout's metadata (Next's per-field inheritance carries them everywhere). THE NINE-ROUND BYTE CHAIN: the 526 drawer pair BYTE-MATCHES the r72 509 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 526≡509≡492≡474≡456≡438≡418≡402≡366) and the 510 login pair BYTE-MATCHES the r72 493 pair on both sides — both r73 fix families changed zero rendered bytes. The dependency audit recorded: two HIGH advisories, both dev-tooling transitive chains, both upstream-blocked (braces 3.0.3 is the latest published; deepmerge-ts 8 ships only in Prisma 8-RC) — accepted with the upstream watch, the runtime graph unaffected. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-22
-> **State:** 937 unit + 394 E2E tests green, lint/typecheck/build
+> **Version:** 3.57.0 (session-74 remediation complete — the PWA installability end-to-end pass + the SW cache-lifecycle hardening: the r74 deploy watch DETECTED THE 36TH LOGIN DEPLOY (login JS BANnI-PC→index-CiBFwtqW AND login CSS COgwiEvt→index-B9rzNd1e — the second CSS movement in two rounds; the app side quiet C-IrDy5f/BGNH4KkS) and the full confirmation ladder audited it NON-VISUAL (the fresh login pair BYTE-IDENTICAL to the r73 510 REF baseline 69aa4241… + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13). R74-B THE PWA INSTALLABILITY END-TO-END PASS: the r73 "structurally complete" claim MEASURED FIRST via Chrome's own installability checker (CDP Page.getInstallabilityErrors) — ZERO ERRORS on BOTH surfaces (the logged-out /login AND the authed /dashboard: the manifest link + fields + the 192/512 icon decodes + the SW registration + the secure context, the whole criteria chain verified by the browser itself); pinned executable by tests/e2e/session74-pwa-installability.spec.ts (R74-B1a/b — the standing-contract green pin, the regression tripwire for the whole chain). R74-C THE SW CACHE-LIFECYCLE HARDENING: the found-and-fixed audit gap in the r72-era worker — THE FROZEN SHELL (the un-bumped cache name meant install never re-fired: every existing client held the r72-era shell bytes indefinitely; a latent update bug) + THE UNBOUNDED CHUNK CACHE (the /_next/static accumulation grew across every deploy with nothing evicting it); fixed by the generation mechanism (GEN r74 + the generation-stamped eon-hr-shell-r74 + the stable cross-generation eon-hr-chunks + the CHUNKS_CAP 120 oldest-first bound) with the bump protocol turned EXECUTABLE (the shell-drift tripwire: the sha256 of the six SHELL asset bytes pinned to the GEN — an asset edit without a bump goes RED). THE TEN-ROUND BYTE CHAIN: the 543 drawer pair BYTE-MATCHES the r73 526 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 543≡526≡509≡492≡474≡456≡438≡418≡402≡366) and the 527 login pair BYTE-MATCHES the r73 510 pair on both sides — both fix families changed zero rendered bytes. The dependency watch AMENDED: the deepmerge-ts fix HAS shipped upstream in @prisma/config 7.10.1 (deepmerge-ts 8.0.2) but the repo's stable prisma 6.19.3 pins @prisma/config 6.19.3 EXACTLY and the 6.x line ends there — accepted with the watch re-recorded at a 6.x backport or the repo's Prisma major upgrade. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-22
+> **State:** 941 unit + 396 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -5035,3 +5035,184 @@ inheritance carries them everywhere the child does not override.
    ready+reload pattern (await navigator.serviceWorker.ready, reload,
    then read the controller) is the contract-safe form; reuse it
    verbatim.
+
+## §84 Session 74 (parity round 73) — the PWA installability end-to-end pass + the SW cache-lifecycle hardening (the generation mechanism) + the 36th-deploy ladder
+
+**The theme.** The recorded backlog stayed EMPTY of open visual/functional
+items; the frontier was the candor-ordered candidates — the PWA
+installability end-to-end pass ("a beforeinstallprompt-driven install,
+now structurally complete") and whatever the next deploy carried. The
+deploy carried (the 36TH LOGIN DEPLOY, both login fingerprints moving
+again), the installability claim was MEASURED before it was pinned
+(the r73 lesson applied: "structurally complete" is an assertion until
+Chrome itself says so), and the fresh-eyes audit of the r72-era
+service worker found the round's fix: TWO cache-lifecycle defects that
+had shipped with the original offline-shell design and stayed
+invisible to every rendered-byte check (worker-layer, below the
+screenshot plane).
+
+**The 36TH LOGIN DEPLOY — the ladder again, the verdict again
+NON-VISUAL.** Login JS `BANnI-PC`→`index-CiBFwtqW` (the
+`frontend-config` preload holding) AND login CSS
+`COgwiEvt`→`index-B9rzNd1e` (the SECOND CSS movement in two rounds —
+after ~30 deploys without one, two in a row). The confirmation ladder:
+the fresh logged-out login pair (1440×900, LIGHT, fresh session)
+BYTE-IDENTICAL to the r73 510 REF baseline (`69aa4241…`) — a CSS
+fingerprint change that renders identically, classified by the PAIR,
+not the fingerprint. Standing 5/5 + sweep 12/12 (the seeded :3200
+orchestrator) + verify-r49 13/13 (the zero-tenant :3201) + verify-r45
+13/13 (the standalone login reaudit) — all green. The watch re-armed
+at the post-36th finals reads BOTH SIDES QUIET. **The instrument
+lesson of the round:** the first re-armed-watch run's eval timeouts
+read the LOGIN page's bundles as the "app side" (the post-login
+navigation hadn't settled when the fingerprint eval fired) — a
+deploy-watch false alarm. The classification rule: when a watch reads
+APP-CHANGED with a fingerprint set that exactly matches the LOGIN
+side, verify the authed surface on a WARM session before believing
+the verdict — the login re-auth and the fresh-page settle are the
+watch's real dependencies, and an overloaded agent-browser daemon
+(native thread-creation crash under too many stale sessions —
+`--all close` + restart) exacerbates the race.
+
+**R74-B — the installability end-to-end pass: measure, then pin.** The
+r73 record claimed the installability chain "structurally complete"
+(manifest link everywhere + fields + SW). Measured this round via
+CDP `Page.getInstallabilityErrors` — Chrome's own criteria checker,
+the instrument behind Lighthouse's installable audit and the
+omnibox's install affordance: **`installabilityErrors: []` on BOTH
+surfaces** — the logged-out /login AND the authed /dashboard. The
+criteria chain the browser re-verified itself: the page's manifest
+link, the manifest's field set, the 192/512 icon fetches + decodes
+(real size/type checks), the service-worker registration with a fetch
+handler, and the secure context (localhost qualifies). Zero errors ==
+installable, end to end — the strongest headless-achievable proof
+(the native `beforeinstallprompt` event needs real-Chrome engagement
+heuristics and does not fire in test contexts). Pinned by
+`tests/e2e/session74-pwa-installability.spec.ts` (R74-B1a/b) — green
+today (the standing-contract precedent, R73-Cb/Cc), the tripwire that
+turns RED if any future edit (an icon swap, a manifest field change,
+a registration-path change, a header/CSP change that breaks a
+criterion) regresses the chain. **The declined sibling:** a
+`beforeinstallprompt` CAPTURE + custom install UI — considered and
+declined (the plan's non-goal record): the browser's own install
+affordances work with zero page code, and a custom install UI has no
+REF counterpart to parity against (the offline-page-polish deferral
+precedent). No capture, no UI, no speculative code.
+
+**R74-C — the SW cache-lifecycle hardening (the found-and-fixed).**
+The fresh-eyes audit of `public/sw.js` measured two lifecycle defects
+in the r72-era design, both invisible to the rendered-byte chain:
+
+1. **THE FROZEN SHELL.** The SHELL precache (offline.html,
+   manifest.json, icon-192/512, eon-logo, og-image) re-fetches ONLY
+   at the service worker's install event — and install re-fires ONLY
+   when sw.js bytes change. sw.js had not changed since r72, so every
+   existing client held the r72-era shell bytes INDEFINITELY: the day
+   a shell asset changes (an icon re-export, a manifest field, the
+   still-deferred offline-page polish), every installed client serves
+   the stale copy forever unless someone remembers to hand-bump the
+   cache name. A latent update bug — the bump protocol existed in
+   prose, unenforced.
+2. **THE UNBOUNDED CHUNK CACHE.** `/_next/static/` chunks rode
+   cache-first into the SAME-NAMED cache; every deploy's new
+   hash-named chunks accumulated and nothing evicted them (the
+   activate sweep deletes only OTHER-named caches). A slow storage
+   leak, bounded only by the browser's whole-origin eviction.
+
+The fix — the generation mechanism, ~20 lines:
+
+```js
+const GEN = "r74";
+const SHELL_CACHE = "eon-hr-shell-r74"; // generation-stamped: bump on ANY shell-asset change
+const CHUNKS_CACHE = "eon-hr-chunks";   // stable: immutable chunks survive generation bumps
+const CHUNKS_CAP = 120;                 // bound the accumulation, oldest-first trim on put
+```
+
+- install precaches into SHELL_CACHE; activate sweeps every cache
+  outside {SHELL_CACHE, CHUNKS_CACHE} — so THIS sw.js byte change
+  (the first since r72) finally EXERCISES the update path: every
+  r72-generation client re-installs, re-precaches the shell, and
+  sweeps the old cache on activation.
+- the chunk branch rides the STABLE cache: a shell-only generation
+  bump does not re-download the chunk set (immutable, hash-named).
+- every chunk put trims oldest-first past the cap (Cache Storage
+  keys() return insertion order in Chromium; the spec does not
+  guarantee it — worst case the trim removes a random still-valid
+  chunk that lazily re-fetches. Harmless, documented in-source).
+- **the bump protocol turned EXECUTABLE** — the design's real teeth:
+  the shell-drift tripwire (`tests/unit/pwa-surface.test.ts` R74-C1)
+  recomputes the sha256 over the six SHELL asset bytes and pins
+  `GEN:digest` as a pair — an asset edit without a GEN bump goes RED
+  ("bump GEN in sw.js AND update this pinned pair"), and a GEN bump
+  without the digest update goes RED too. The protocol is now a
+  contract, not a comment.
+
+**The spec-family amendments (the contract evolves):** the r72 unit pin
+("the versioned cache name" — `toContain("eon-hr-shell-r72")`) and
+the r72 E2E served-contract assertion (R72-B1) both amended to the
+generation-stamped name; the EXACTLY-ONE `caches.match` pin (the
+leak-free navigation design) held UNCHANGED by construction — the
+chunk trim uses `cache.keys()`/`cache.delete()`, never
+`caches.match`. The full r72/r73 PWA family green on the patched
+build: the offline fallback (setOffline(true) still lands on the
+offline page), the SW control (ready + reload), the manifest linkage,
+the un-authed sw.js fetch (now serving the generation mechanism).
+
+**TDD RED-first, honestly scoped:** the R74-C0..C3 unit quadruple
+failed on the unpatched build (the GEN mechanism absent — 4 RED while
+the 10 standing pins stayed green); the R74-B E2E pair ran GREEN on
+HEAD by design (the standing-contract verification pin — the claim
+was measured TRUE before the pin existed, and the pin exists to keep
+it true). Both are recorded for what they are.
+
+**The TEN-round byte chain holds** — 543≡526≡509≡492≡474≡456≡438≡
+418≡402≡366 on both sides (loc `e3df921…`, ref `bfaa0da…`), the login
+pair 527≡510 on both sides (`bd718ed…` / `69aa4241…`), and all seven
+standing route pairs byte-stable vs the r73 set — the worker-layer
+fix family changed zero rendered bytes (the byte chain's blind spot
+for worker-layer changes is exactly why the R74-C pins exist: the
+unit tripwire covers what the screenshot plane cannot see).
+
+**The carry-forward lessons:**
+
+1. **Audit the layers the byte chain cannot see.** The screenshot
+   plane proves rendered-byte stability; the service worker, the
+   cache storage, the update lifecycle, and the spec files themselves
+   are invisible to it. A round's fresh-eyes pass should read ONE
+   layer below the previous round's fix — r72 shipped the SW, r74
+   found the SW's lifecycle defects. The next candidate layer below
+   R74: the manifest/icon content lifecycle (the tripwire now guards
+   it) and the installability verdict itself (the R74-B pin guards
+   it).
+2. **Measure the documented-but-unmeasured claims with the STRONGEST
+   available instrument.** "Structurally complete" measured TRUE this
+   round — but only because someone ran Chrome's own checker. The
+   instrument ladder: a prose claim < a source read < a curl < a
+   live probe < the browser's own verdict (CDP). When the browser
+   offers a first-party oracle (`Page.getInstallabilityErrors`),
+   use it instead of re-implementing the criteria list by hand.
+3. **A deployed-lifecycle protocol is only real when it is a failing
+   test.** The r72 "bump the cache name when the shell changes"
+   protocol lived in comments and did not fire for two rounds of
+   shell-side work. The tripwire pattern (pin the asset bytes to the
+   generation constant — BOTH directions of the pairing locked)
+   generalizes to any "remember to X when Y changes" protocol: the
+   sitemap registry tripwire (session-70), the nav-registry tripwire
+   (session-52), and now the shell-drift tripwire. Prefer a tripwire
+   over a comment every time.
+
+**Gates:** lint 0/0 · tsc ✓ · 941/941 unit (+4) · build ✓ · E2E
+396/396 (+2 pins, zero flakes, 6.5m — the SEQUENTIAL proof run) ·
+byte-stability 543≡526 + 527≡510 (both sides) + the route pairs ·
+the ladder 43/43 NON-VISUAL · 729 tracked screenshots (+18, the
+527-543 set) · DB pristine.
+
+**Next:** the watch re-arms at the post-36th finals (`scripts/
+r74-deploy-watch.mjs`); the Turnstile rollout stays the standing
+login-side watch item; the upstream dependency watch re-records at "a
+6.x backport or the repo's Prisma major upgrade (7/8 stable)". The
+remaining candor-ordered superset candidates: the offline-page styling
+polish (still deferred — no REF counterpart), a REAL-Chrome
+install smoke on a deployed HTTPS origin (the headless verdict is
+the strongest in-scope proof; the native install flow itself needs a
+live deployment), and whatever the next deploy carries.

@@ -15,7 +15,9 @@ import { test, expect, type APIRequestContext } from "@playwright/test";
 // NO service worker: no public/sw.js, no registration anywhere.
 //
 // The rung: the offline shell —
-//   - public/sw.js: CACHE `eon-hr-shell-r72` (the static shell:
+//   - public/sw.js: the generation-stamped CACHE (session-74's
+//     R74-C amendment: SHELL_CACHE `eon-hr-shell-r74` + the stable
+//     `eon-hr-chunks` — the static shell:
 //     /offline.html + the manifest + the icons + the logo + og-image,
 //     precached at install) + cache-first for /_next/static/ chunks +
 //     NAVIGATIONS: network-only with the offline fallback to the
@@ -52,8 +54,9 @@ test.describe("session-72 PWA/offline story (R72-B)", () => {
     }
     const body = await res.text();
     // The semantic contract (never the exact bytes): the versioned cache,
-    // the offline.html fallback, the never-cache-HTML design.
-    expect(body).toContain("eon-hr-shell-r72");
+    // the offline.html fallback, the never-cache-HTML design. The
+    // session-74 amendment (R74-C3): the generation-stamped name.
+    expect(body).toContain("eon-hr-shell-r74");
     expect(body).toContain("offline.html");
     expect(body).toContain("navigate");
     expect(body).toContain("skipWaiting");

@@ -33,8 +33,36 @@
 // contract: the versioned cache name, the shell list, the EXACTLY-ONE
 // caches.match (the offline fallback), and the absence of any page-HTML
 // caching.
+//
+// Session-74 (R74-C): the cache-generation mechanism. The r72 design
+// left the cache name un-bumped since r72 — two lifecycle defects the
+// round's fresh-eyes audit measured: (a) THE FROZEN SHELL — the SHELL
+// precache re-fetches only at the install event, and install re-fires
+// only when sw.js bytes change, so every existing client held the
+// r72-era shell bytes indefinitely (a latent update bug: the day a
+// shell asset changes, every installed client serves the stale copy
+// forever unless someone remembers the hand-bump); (b) THE UNBOUNDED
+// CHUNK CACHE — /_next/static chunks accumulated cache-first into
+// the same-named cache across every deploy with nothing evicting
+// them (a slow storage leak bounded only by the browser's own
+// whole-origin eviction). The fix:
+//   - GEN + the generation-stamped SHELL_CACHE — bump on ANY
+//     shell-asset change (the activate sweep migrates old-generation
+//     clients); the shell-drift tripwire in tests/unit/pwa-surface
+//     .test.ts (R74-C1) pins the SHELL asset bytes to the generation
+//     so the bump protocol is EXECUTABLE, not prose.
+//   - the STABLE CHUNKS_CACHE — immutable hash-named chunks survive
+//     generation bumps (a shell-only change does not re-download the
+//     chunk set).
+//   - the CHUNKS_CAP bound — the accumulation is trimmed oldest-first
+//     on every put.
 
-const CACHE = "eon-hr-shell-r72";
+const GEN = "r74";
+// = `eon-hr-shell-${GEN}` — kept literal for the grep-able served contract
+const SHELL_CACHE = "eon-hr-shell-r74";
+// stable across generations: chunks survive shell bumps, bounded by
+const CHUNKS_CACHE = "eon-hr-chunks";
+const CHUNKS_CAP = 120;
 const SHELL = [
   "/offline.html",
   "/manifest.json",
@@ -47,7 +75,7 @@ const SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(CACHE)
+      .open(SHELL_CACHE)
       .then((cache) => cache.addAll(SHELL))
       .then(() => self.skipWaiting()),
   );
@@ -57,7 +85,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL_CACHE && k !== CHUNKS_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -70,11 +98,24 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(req.url);
     if (url.origin === self.location.origin && url.pathname.startsWith("/_next/static/")) {
       event.respondWith(
-        caches.open(CACHE).then(async (cache) => {
+        caches.open(CHUNKS_CACHE).then(async (cache) => {
           const hit = await cache.match(req);
           if (hit) return hit;
           const res = await fetch(req);
-          if (res.ok) cache.put(req, res.clone());
+          if (res.ok) {
+            await cache.put(req, res.clone());
+            // Session-74 (R74-C2): the bound. Cache Storage keys() return
+            // insertion order in Chromium (the spec does not guarantee
+            // the order — worst case the trim removes a random still-valid
+            // chunk that lazily re-fetches, harmless). Oldest-first trim
+            // keeps the cross-deploy accumulation bounded.
+            const keys = await cache.keys();
+            if (keys.length > CHUNKS_CAP) {
+              for (const k of keys.slice(0, keys.length - CHUNKS_CAP)) {
+                await cache.delete(k);
+              }
+            }
+          }
           return res;
         }),
       );

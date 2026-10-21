@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 
 // Session-72 (R72-B) — the PWA/offline surface pins.
@@ -21,8 +22,14 @@ describe("R72-B: the service worker (public/sw.js)", () => {
   const sw = read("public/sw.js");
 
   it("exists and pins the versioned cache name", () => {
+    // Session-74 amendment (R74-C3): the r72 literal `eon-hr-shell-r72`
+    // became the generation-stamped SHELL_CACHE — the sw update mechanism
+    // (install re-fires only on sw.js byte change) means an un-bumped
+    // name froze the shell at r72 bytes for every existing client; the
+    // generation constant + the shell-drift tripwire (R74-C1 below) now
+    // enforce the bump protocol.
     expect(existsSync(path.join(repo, "public/sw.js"))).toBe(true);
-    expect(sw).toContain("eon-hr-shell-r72");
+    expect(sw).toContain("eon-hr-shell-r74");
   });
 
   it("precaches the static shell including the offline fallback", () => {
@@ -50,6 +57,68 @@ describe("R72-B: the service worker (public/sw.js)", () => {
   it("activates immediately and cleans stale caches", () => {
     expect(sw).toContain("skipWaiting");
     expect(sw).toContain("clients.claim");
+  });
+});
+
+// Session-74 (R74-C) — the SW cache-lifecycle hardening pins: the
+// found-and-fixed gap of the round's fresh-eyes audit of the r72-era
+// worker. Two defects the r72 design left open:
+//   (a) THE FROZEN SHELL — the SHELL precache re-fetches only at the
+//       install event, and install re-fires only when sw.js bytes
+//       change; an un-bumped cache name meant every existing client
+//       held the r72-era shell bytes indefinitely (a latent update
+//       bug: the day a shell asset changes, every installed client
+//       serves the stale copy forever).
+//   (b) THE UNBOUNDED CHUNK CACHE — /_next/static chunks accumulated
+//       cache-first into the same-named cache across every deploy
+//       with nothing evicting them (a slow storage leak).
+// The amendment (public/sw.js): the GEN constant + the
+// generation-stamped SHELL_CACHE (bump on any shell-asset change;
+// the activate sweep migrates old-generation clients) + the stable
+// CHUNKS_CACHE (immutable chunks survive generation bumps — no
+// re-download) + the CHUNKS_CAP oldest-first trim on every chunk put.
+// These pins lock the mechanism AND the bump protocol executable:
+// the shell-drift tripwire pairs the SHELL asset bytes to the
+// generation — an asset edit without a bump goes RED with the
+// message that guides it.
+describe("R74-C: the SW cache-lifecycle (the generation mechanism + the bound)", () => {
+  const sw74 = read("public/sw.js");
+  const gen = sw74.match(/const GEN = "([^"]+)"/)?.[1];
+
+  it("R74-C0: carries the generation mechanism (GEN + the stamped shell cache + the stable chunk cache + the cap)", () => {
+    expect(gen, "the GEN constant exists in public/sw.js").toBeTruthy();
+    expect(sw74, "SHELL_CACHE derives from GEN (literal-consistency)").toContain(`eon-hr-shell-${gen}`);
+    expect(sw74, "CHUNKS_CACHE is the stable cross-generation name").toContain("eon-hr-chunks");
+    const cap = Number(sw74.match(/const CHUNKS_CAP = (\d+)/)?.[1]);
+    expect(Number.isFinite(cap), "CHUNKS_CAP exists").toBeTruthy();
+    expect(cap, "the cap is a sane bound (dozens of chunks per build)").toBeGreaterThan(20);
+  });
+
+  it("R74-C1: the shell-drift tripwire — the SHELL asset bytes are pinned to the generation", () => {
+    // The sha256 over the six SHELL assets (the exact SHELL list the
+    // install event precaches), digest-prefixed with the GEN so BOTH
+    // sides of the pairing lock: an asset edit without a GEN bump goes
+    // RED, and a GEN bump without the digest update goes RED.
+    const assets = ["offline.html", "manifest.json", "icon-192.png", "icon-512.png", "eon-logo.png", "og-image.png"];
+    const h = crypto.createHash("sha256");
+    for (const a of assets) h.update(readFileSync(path.join(repo, "public", a)));
+    const pair = `${gen}:${h.digest("hex").slice(0, 32)}`;
+    expect(pair, "a SHELL asset changed OR the generation bumped — bump GEN in sw.js AND update this pinned pair (the activate sweep migrates old-generation clients)").toBe("r74:37b1d2ee6cc95c840bee0eaba2ec3a3b");
+  });
+
+  it("R74-C2: the chunks ride the stable cache with the oldest-first bound on put", () => {
+    expect(sw74, "the chunk branch opens the stable chunk cache").toContain("caches.open(CHUNKS_CACHE)");
+    expect(sw74, "the put-time bound check exists").toMatch(/keys\.length > CHUNKS_CAP/);
+    expect(sw74, "the trim deletes the oldest entries (insertion-order assumption documented)").toMatch(/keys\.slice\(0,/);
+    // The bound lives ONLY on the chunk branch: the navigation branch
+    // stays the leak-free design (page HTML never cached — the r72
+    // contract re-pinned above).
+    const matches = sw74.match(/caches\.match\(/g) ?? [];
+    expect(matches.length, "still exactly one caches.match — the offline.html fallback").toBe(1);
+  });
+
+  it("R74-C3: the activate sweep keeps exactly the current generation pair", () => {
+    expect(sw74).toMatch(/k !== SHELL_CACHE && k !== CHUNKS_CACHE/);
   });
 });
 
