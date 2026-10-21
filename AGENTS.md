@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 924 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 380 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 937 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 387 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -5113,3 +5113,107 @@ with browserType.launch Executable-doesn't-exist; `bunx playwright
 install chromium` retired it (classify the gate before touching
 source: reproduce, then split infrastructure failure from code
 debt).
+
+## Session 72 (parity round 71) — the Trusted-Types rung (the CSP strictness ladder's next step) + the PWA/offline story (the service worker + the offline fallback) + the 34th-deploy ladder
+
+**The round's motivation.** The recorded backlog stayed EMPTY of open
+visual/functional items; the standing watches were the deploy watch
+(the post-33rd finals), the patch watch, the Turnstile rollout, and the
+candor-ordered superset candidates from session_155: "the remaining CSP
+strictness rungs (a Trusted-Types story), a PWA/offline story (the
+manifest already self-hosted), and whatever the next deploy carries."
+
+1. **The r72 deploy watch (scripts/r72-deploy-watch.mjs, the post-33rd
+   finals armed): THE 34TH LOGIN DEPLOY DETECTED** — login JS
+   `BCr9BMlh`→`DOgRuj38` (login CSS QUIET `BpSyi-cD`; the
+   frontend-config preload holds; the app side QUIET
+   `C-IrDy5f`/`BGNH4KkS`). The fresh re-auth succeeded clean (Turnstile
+   stays unenforced — the standing login-side watch item). The full
+   confirmation ladder: standing **5/5** + sweep **12/12** (the r52
+   orchestrator, seeded :3200) + verify-r49 **13/13** (the zero-tenant
+   :3201 boot — one 0/13 read on a zero.db re-create race, re-run
+   green: infrastructure, classified before touching source) +
+   verify-r45 **13/13** (the login-view family) → **THE 34TH LOGIN
+   DEPLOY IS NON-VISUAL** — byte-confirmed by the 493 login pair ≡ the
+   r71 476 pair on BOTH sides. The watch finals are the post-34th
+   hashes. The patch watch: QUIET (16.4.2 still the latest stable).
+2. **R72-A THE TRUSTED-TYPES RUNG (the pure superset deepened)**. The
+   r72 sink census green-lit it: the whole source reads ZERO raw
+   DOM-XSS sinks (innerHTML/outerHTML/insertAdjacentHTML/
+   document.write — all zero) and exactly FIVE
+   dangerouslySetInnerHTML members — every one server-rendered,
+   constant-authored (JSON.stringify of constant objects or
+   template-literal CSS) and nonce'd. The rung (CSP3):
+   `require-trusted-types-for 'script'` (every DOM XSS sink requires a
+   Trusted* value) + `trusted-types default` (the policy-NAME
+   allowlist — only the 'default' policy may exist, so attacker-JS
+   cannot mint a new policy) + the nonced TT_BOOT bootstrap in the
+   root layout (FIRST authored <head> script, production-only; the
+   pass-through default policy: createHTML/createScript/
+   createScriptURL identity functions). HONEST SCOPE: a pass-through
+   default policy does not sanitize — the rung's value is the
+   enforcement machinery + the policy-name control + the
+   DOMPurify-ready foundation; the five sinks are constant-authored
+   and nonced, nothing to sanitize. Chromium-only enforcement (other
+   engines ignore the pair); dev stays WITHOUT it (Turbopack's
+   injected scripts/evals would trip it — the mirror of the dev-only
+   unsafe-eval allowance). The LIVE enforcement pin: creating a ROGUE
+   policy name THROWS under the allowlist (RED pre-change — any name
+   was allowed).
+3. **R72-B THE PWA/OFFLINE STORY (the functional superset)**. The
+   PWA-layer census measured REF: a login-surface-only manifest link
+   (a stale platform-template description mentioning "OnboardFlow",
+   EXTERNAL supabase-hosted icons), NO manifest on the authed shell,
+   and ZERO registered service workers on any surface. The clone
+   already superSETS the manifest surface (every-page linkage,
+   self-hosted icons — the standing zero-external-resources policy);
+   the missing piece was the OFFLINE SHELL, now shipped:
+   `public/sw.js` (CACHE `eon-hr-shell-r72`: the static shell
+   precached at install — /offline.html + the manifest + the icons +
+   the logo + the og-image; /_next/static/ chunks cache-first;
+   NAVIGATIONS network-only with the offline fallback to the cached
+   /offline.html on fetch failure. Page HTML is NEVER cached and
+   NEVER served from cache — the authed-HTML leak-free design; /api/
+   and everything else passes through untouched) +
+   `public/offline.html` (CSP-clean by construction: zero <script>,
+   zero <style> ELEMENTS — inline style attributes only) + the nonced
+   SW_REGISTRATION bootstrap in the root layout (production-only:
+   dev's Turbopack fast-refresh would break on stale cached chunks).
+   The proof: the un-authed /sw.js fetch (200 + the 5-header set),
+   the live registration (ready resolves, scope '/', the reloaded
+   page controlled), and the offline fallback (setOffline(true) → a
+   navigation lands on the offline page).
+4. **The standing checks**: the mobile-menu cycle green (toggle → the
+   drawer with Dashboard/Training LMS/Assets/Staff Requests → the
+   Training LMS link CLICKED:/training → auto-close `open:false`);
+   the byte-stability pair 509 BYTE-MATCHES the r71 492 pair on
+   BOTH sides (loc `e3df921…`, ref `bfaa0da…`) — the EIGHT-round
+   chain 509≡492≡474≡456≡438≡418≡402≡366: both r72 fix families
+   (the new non-visual <head> boots) changed zero rendered bytes, and
+   the corrected open-drawer REF baseline reproduces; the TW-v4 scan
+   clean (`!important` 15, oklch all comments); DB pristine (the
+   probe user swept per the r61 protocol mid-round; users =
+   [sepnetflix2023@outlook.com] only at close).
+
+TDD: +13 unit (the csp seam's TT pair + worker-src pins in both
+shapes; the pwa-surface seam: the SW semantic contract — the
+versioned cache, the shell list, the EXACTLY-ONE caches.match, the
+skipWaiting/clients.claim — + the offline page's CSP-clean
+construction + the manifest's self-hosted icons superset + the
+root-layout source pins) + 7 E2E (the R72-A triple RED-first —
+the directives, the nonced bootstrap, the LIVE rogue-policy-THROWS
+enforcement probe — + the R72-B quadruple — the un-authed sw.js
+fetch, the nonced registration script, the live registration +
+control, the offline fallback). One assertion-vs-authoring
+normalization (the /sw.js quote style — the semantic contract, not
+the authoring style). Gates: lint 0/0 · tsc ✓ · **937/937 unit** ·
+build ✓ · **E2E 387/387 (6.2m, zero flakes — the SEQUENTIAL run; the
+mid-round 379/380+1-target-crash read was CONCURRENT-load
+infrastructure, the organogram spec 3/3 green in isolation)** ·
+byte-stability 509≡492 (the eight-round chain) · the ladder 43/43
+NON-VISUAL · 694 tracked screenshots (+18) · DB pristine. TRAPS
+retired (both infrastructure, classified before touching source):
+the zero.db re-create race (re-run green) and the
+concurrent-ladder chromium target-crash (the load lesson: the
+ladder is port-safe with the suite but not LOAD-safe — run the
+final proof sequentially).

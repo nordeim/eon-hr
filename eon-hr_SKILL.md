@@ -10,8 +10,8 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.54.0 (session-71 remediation complete — the CSP completion pair + the TLS-fronted deployment story: the r71 deploy watch DETECTED THE 33RD LOGIN DEPLOY (login JS CKnh3tRk→BCr9BMlh, CSS quiet, the app side quiet) and the full confirmation ladder audited it NON-VISUAL (standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13; byte-confirmed by the 476 login pair ≡ the r70 458 pair on both sides). THE R70 DELTA AUDIT FOUND THE MISSED NONCE: the login layout's BreadcrumbList JSON-LD served bare (CSP gates non-executable script types too — a silent block the E2E suite cannot catch); R71-A THE CSP COMPLETION: the style-src elem/attr SPLIT — style-src-elem 'self' 'nonce-N' (the only authored <style> element in the whole served surface, the session-45 login cascade mirror, MOVED to the server login layout for the stamping — a client page cannot read headers()) + style-src-attr 'unsafe-inline' (the Radix popper/vaul transform/recharts dynamic attributes — un-nonce-able by nature), dev adds elem 'unsafe-inline' for Turbopack's injected styles; the CSP-violation console probe: dialog + select popper + 9 recharts svgs + the vaul drawer ALL clean under the hardened policy. R71-B THE TLS-FRONTED DEPLOYMENT STORY: the x-forwarded-proto contract PINNED (the spoofed header resolves https:// sitemap locs + robots Sitemap + canonical/og — the whole metadataBase origin chain, zero-config TLS) + DEPLOYMENT.md REWRITTEN to the measured truth (the Eon HR name, the 42-handler/54-endpoint counts, the NEXT_PUBLIC_SITE_URL row DELETED — nothing reads it, the honest two-variable env contract, the new §8 nginx/Caddy proxy story). THE DRAWER-INSTRUMENT CORRECTION: the r70 template's aria-label selector NEVER matched REF since the r46 redeploy — every r66-r70 REF "drawer pair" captured the drawer CLOSED; the corrected snapshot-ref mechanism byte-matches the LOC side (492≡474, the SEVEN-round chain: 492≡474≡456≡438≡418≡402≡366 — the r71 fix families changed zero rendered bytes) and captures the REF drawer OPEN for the first time (the corrected baseline). The standing checks: the mobile-menu cycle green twice (the inline probe + the script-native cycle: toggle → nav links → Training LMS navigates → auto-close open:false) · **Last updated:** 2026-10-21
-> **State:** 924 unit + 380 E2E tests green, lint/typecheck/build
+> **Version:** 3.55.0 (session-72 remediation complete — the Trusted-Types rung + the PWA/offline story: the r72 deploy watch DETECTED THE 34TH LOGIN DEPLOY (login JS BCr9BMlh→DOgRuj38, CSS quiet, the app side quiet) and the full confirmation ladder audited it NON-VISUAL (standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 — byte-confirmed by the 493 login pair ≡ the r71 476 pair on both sides). R72-A THE TRUSTED-TYPES RUNG: the CSP strictness ladder's next step — `trusted-types default` (the policy-NAME allowlist: only the 'default' policy may exist) + `require-trusted-types-for 'script'` (every DOM XSS sink requires a Trusted* value) + the nonced pass-through default-policy bootstrap FIRST in the root layout's <head> (production-only; dev's Turbopack pipeline would trip it); the r72 sink census green-lit the rung: ZERO raw innerHTML/insertAdjacentHTML/document.write sinks in the whole source + exactly five constant-authored nonced dSHI members; the LIVE enforcement pin proves creating a rogue policy name THROWS. R72-B THE PWA/OFFLINE STORY: REF measured with ZERO service workers (its manifest links on the login surface only, a stale platform-template description, EXTERNAL supabase icons), so the clone ships the OFFLINE SHELL: public/sw.js (the versioned static-shell precache + cache-first /_next/static chunks + network-only navigations with the cached /offline.html fallback — page HTML is NEVER cached: the authed-HTML leak-free design) + public/offline.html (CSP-clean by construction: zero scripts, zero <style> elements) + the nonced production-only registration bootstrap; proven by the un-authed /sw.js fetch, the live registration + control, and the setOffline(true) navigation landing on the offline page. THE EIGHT-ROUND BYTE CHAIN: the 509 drawer pair BYTE-MATCHES the r71 492 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 509≡492≡474≡456≡438≡418≡402≡366: both r72 fix families changed zero rendered bytes, the corrected open-drawer baseline reproduces). The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-21
+> **State:** 937 unit + 387 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -4874,3 +4874,107 @@ pairs byte-stable vs r70 on both sides).
    snapshot-ref click is the mechanism that survives attribute
    drift, and the mouse-vs-programmatic open distinction (the
    onOpenAutoFocus focus ring) is part of the state's definition.
+
+## §82 Session 72 (parity round 71) — the Trusted-Types rung (the CSP strictness ladder's next step) + the PWA/offline story (the service worker + the offline fallback) + the 34th-deploy ladder
+
+**The round's motivation.** The backlog stayed EMPTY; the standing watches
+were the deploy watch (the post-33rd finals), the patch watch, the
+Turnstile rollout, and the candor-ordered superset candidates from
+session_155: "the remaining CSP strictness rungs (a Trusted-Types
+story), a PWA/offline story (the manifest already self-hosted), and
+whatever the next deploy carries."
+
+1. **THE 34TH LOGIN DEPLOY: DETECTED, LADDERED, NON-VISUAL.** The r72
+   watch read login JS `BCr9BMlh`→`DOgRuj38` (CSS quiet, the app side
+   quiet, the preload holding). The full ladder: standing 5/5 + sweep
+   12/12 + verify-r49 13/13 (one 0/13 zero.db re-create race, re-run
+   green — infrastructure, classified before touching source) +
+   verify-r45 13/13 — and the login standing pair (493) BYTE-CONFIRMS
+   the verdict (≡ the r71 476 pair on both sides). The watch finals
+   are the post-34th hashes.
+2. **R72-A THE TRUSTED-TYPES RUNG.** The sink census green-lit it: the
+   whole source reads ZERO raw DOM-XSS sinks (innerHTML/
+   insertAdjacentHTML/document.write/outerHTML — all zero) and exactly
+   FIVE dangerouslySetInnerHTML members, every one server-rendered,
+   constant-authored and nonced. The rung (CSP3): `require-
+   trusted-types-for 'script'` + `trusted-types default` (the
+   policy-NAME allowlist) + the nonced TT_BOOT bootstrap FIRST in the
+   root layout's <head> (the pass-through default policy:
+   createHTML/createScript/createScriptURL identity functions —
+   HONEST SCOPE: it enables the enforcement machinery and makes every
+   future sink loud, it does not sanitize; the five current sinks are
+   constant-authored, nothing to sanitize). Production-only (dev's
+   Turbopack pipeline would trip it); Chromium-only enforcement
+   (graceful elsewhere). The LIVE pin: creating a ROGUE policy name
+   THROWS under the allowlist — RED pre-change (any name was allowed),
+   GREEN post-change. The console probe: the dialog + the vaul drawer
+   + 3 recharts svgs render with ZERO violations under the hardened
+   policy.
+3. **R72-B THE PWA/OFFLINE STORY.** The PWA-layer census measured REF:
+   login-surface-only manifest linkage (a stale platform-template
+   description, EXTERNAL supabase icons), NO manifest on the authed
+   shell, ZERO service workers. The clone already superSETS the
+   manifest surface (every-page linkage, self-hosted icons); the
+   missing piece was the OFFLINE SHELL, now shipped: `public/sw.js`
+   (CACHE `eon-hr-shell-r72`: the static shell precached at install +
+   cache-first `/_next/static/` chunks + network-only NAVIGATIONS
+   with the cached `/offline.html` fallback — page HTML is NEVER
+   cached and NEVER served from cache: the authed-HTML leak-free
+   design; /api/ passes through untouched) + `public/offline.html`
+   (CSP-clean by construction: zero scripts, zero `<style>` ELEMENTS
+   — inline style attributes only) + the nonced production-only
+   SW_REGISTRATION bootstrap. The proof quadruple: the UN-AUTHED
+   /sw.js fetch (200 + the 5-header set), the nonced registration
+   script in the served HTML, the LIVE registration (ready resolves,
+   scope '/', the reloaded page controlled), and the setOffline(true)
+   navigation landing on the offline page. The FULL suite green WITH
+   the worker active is the functional proof.
+4. **THE EIGHT-ROUND BYTE CHAIN.** The 509 drawer pair BYTE-MATCHES
+   the r71 492 pair on BOTH sides (loc `e3df921…`, ref `bfaa0da…` —
+   509≡492≡474≡456≡438≡418≡402≡366): the two new <head> boots are
+   non-visual, zero rendered bytes, and the corrected open-drawer REF
+   baseline reproduces. All 9 pairs byte-stable vs the r71 set
+   (493≡476 through 509≡492).
+
+TDD: +13 unit (the csp seam's TT pair + worker-src pins in both shapes
++ the dev NO-TT pin; the pwa-surface seam: the SW semantic contract
+(the versioned cache, the shell list, the EXACTLY-ONE caches.match,
+skipWaiting/clients.claim), the offline page's CSP-clean construction,
+the manifest's self-hosted-icons superset, the root-layout source
+pins) + 7 E2E (the R72-A triple RED-first + the R72-B quadruple RED-
+first; one assertion-vs-authoring normalization: the /sw.js quote
+style). Gates: lint 0/0 · tsc ✓ · **937/937 unit** · build ✓ ·
+**E2E 387/387 (6.2m, zero flakes — the SEQUENTIAL proof run)** ·
+byte-stability 509≡492 (the eight-round chain, both sides) · the
+ladder 43/43 NON-VISUAL · 694 tracked screenshots (+18) · DB
+pristine. TRAPS (both infrastructure, classified before touching
+source): the zero.db re-create race (0/13 → re-run 13/13) and the
+CONCURRENT-load chromium target-crash (the mid-round 379/380+1 read
+with the ladder running in parallel; the organogram spec 3/3 green in
+isolation; the final sequential run 387/387).
+
+**The session-72 instrument lessons (carry-forward):**
+
+1. **Port-safe is not LOAD-safe.** The ladder uses :3200/:3201 and the
+   suite uses :3100 — the r70 round ran them concurrently and got
+   away with it; this round's concurrent run crashed one chromium
+   target at `browserContext.newPage` and timed out another at
+   context setup (45s), with the failing set VARYING between runs
+   (the nondeterminism signature of infrastructure, not source).
+   The final proof run must be SEQUENTIAL — nothing else heavy on
+   the machine while the suite reads its verdict.
+2. **Re-run before root-cause.** verify-r49's first read this round
+   was 0/13 — every LOC pair showing the login page — on byte-
+   identical code to the round that read 13/13. The re-run read
+   exactly 13/13. The zero.db re-create (rm + push + seed + boot in
+   one process tree) races itself on a loaded machine; one green
+   re-run on identical source retires the question before any
+   investigation.
+3. **A functional superset needs a leak-free design, not a maximal
+   cache.** The easy PWA story caches everything; the honest one
+   caches the static shell ONLY — page HTML never enters the Cache
+   Storage (no stale authed pages, no cross-user leakage on shared
+   machines), navigations go to the network first and fall back to
+   the offline page. Less cache, more truth: the E2E offline spec
+   PROVES the fallback on an uncached route rather than asserting a
+   cache hit.
