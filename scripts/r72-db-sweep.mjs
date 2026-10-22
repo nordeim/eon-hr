@@ -9,8 +9,14 @@ if (probe) {
   // The probe user has no related rows (the loading-state tests create it
   // bare via the ensure-user seam); delete cascades any stragglers.
   await p.user.delete({ where: { id: probe.id } }).catch(async (e) => {
-    // If FKs block the bare delete, clear dependent rows first.
+    // If FKs block the bare delete, clear dependent rows first. The r80
+    // lesson: the verify-r45 signup flow now seeds a notificationPref row
+    // for the probe user (an FK the original fallback missed — P2003 on
+    // the bare re-delete); clear every known dependent before retrying.
     await p.employee.deleteMany({ where: { userId: probe.id } }).catch(() => {});
+    await p.notificationPreference.deleteMany({ where: { userId: probe.id } }).catch(() => {});
+    await p.notification.deleteMany({ where: { userId: probe.id } }).catch(() => {});
+    await p.auditLog.deleteMany({ where: { userId: probe.id } }).catch(() => {});
     await p.user.delete({ where: { id: probe.id } });
   });
   console.log("swept loading-probe user:", probe.id);
