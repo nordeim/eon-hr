@@ -200,10 +200,19 @@ export default function PayrollPage() {
     <PageCanvas>
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
+      {/* Session 81 (R81-B): the REF's payroll row is the md family
+           (live-measured: `hidden md:flex flex-col md:flex-row
+           justify-between items-start md:items-center gap-4`) — the sm
+           default emitted sm:flex-row/sm:justify-between/sm:items-center.
+           Visually inert (the row is hidden below md on both sides, row
+           at md+; the raised offset rowY=64 verified identical), but the
+           DOM member contract now matches the REF. */}
       <PageHeader
         section="Payroll Management"
         mobileKicker
         mobileHeader="hidden"
+        rowBreakpoint="md"
+        actionsNowrap
         layout="raised-48"
         iconClassName="text-green-600"
         sectionIcon={<DollarSign aria-hidden="true" />}

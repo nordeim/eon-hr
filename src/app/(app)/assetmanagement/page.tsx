@@ -254,6 +254,7 @@ export default function AssetManagementPage() {
     <div className="p-4 md:p-8 space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <PageHeader
         rowBreakpoint="md"
+        actionsNowrap
         title="Asset Management"
         subtitle="Track company equipment assigned to employees"
         actions={

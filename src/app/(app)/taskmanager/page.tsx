@@ -287,6 +287,7 @@ export default function TaskManagerPage() {
         /* Session 49 (R48-A4): REF's desktop row is the hidden md:flex
          *  RESPONSIVE md family (live-measured @1440×900 this round). */
         rowBreakpoint="md"
+        actionsNowrap
         layout="raised-48"
         iconClassName="text-blue-600"
         sectionIcon={<FolderKanban aria-hidden="true" />}

@@ -231,6 +231,7 @@ export default function StaffAttendancePage() {
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         rowBreakpoint="md"
+        actionsNowrap
         section="Attendance Management"
         layout="flat48"
         iconClassName="text-blue-600"
@@ -341,7 +342,13 @@ export default function StaffAttendancePage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+          {/* Session 81 (R81-A): the five-column member is lg: — the REF's
+              stats grid (live-measured at 1024: `grid grid-cols-2
+              md:grid-cols-3 lg:grid-cols-5 gap-4`, 5 computed columns).
+              The xl: member this line carried left the whole 1024-1279
+              band at 3 columns where the REF renders 5 — the lg-band
+              grid census finding, fixed with the session81-lg-band spec. */}
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             {/* Session 62 (R62-D4): REF's stat cards carry
                 hover:shadow-lg transition-shadow (member-set measured
                 live this round). */}

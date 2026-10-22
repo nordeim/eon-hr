@@ -98,6 +98,7 @@ export function PageHeader({
   alwaysRow = false,
   heroClassName,
   actionsBare = false,
+  actionsNowrap = false,
   actionsUnwrapped = false,
 }: {
   section?: string;
@@ -190,6 +191,17 @@ export function PageHeader({
   /** Session 49 (R48-A5): hrreports/requestreports' cluster is the BARE
    *  `flex gap-2` — no flex-wrap, no items-center, no gap-3. */
   actionsBare?: boolean;
+  /** Session 81 (R81-C): the BARE UNWRAPPED `flex gap-3` cluster — the r81
+   *  cluster census (34 pages read on BOTH sides @1024) measured the REF
+   *  per-page inconsistent: payrollmodule + attendancedashboard wrap
+   *  (`flex items-center gap-3 flex-wrap` — the default matches those),
+   *  staffrequests rides gap-2, and FIVE pages (payroll, taskmanager,
+   *  documenttracker, attendance, assetmanagement) ride the bare
+   *  unwrapped `flex gap-3`. The wrap default on those five collapsed
+   *  their header rows at tablet width where the REF's rows keep their
+   *  natural min-content and the page overflows (the REF-authored
+   *  overflow class — payroll ref scrollW 861 vs the wrapped 768). */
+  actionsNowrap?: boolean;
   /** Session 49 (R48-A5): REF renders SINGLE actions DIRECTLY in the
    *  row (leavemanagement, assets, payrollreports' WhatsApp) — no
    *  wrapper div at all. */
@@ -347,14 +359,18 @@ export function PageHeader({
           Session 49 (R48-A5): REF's own clusters are the bare `flex gap-2`
           (hrreports/requestreports) or NOTHING — single actions render
           directly in the row (leavemanagement, assets, payrollreports).
-          The wrap family stays the default for the responsive rows. */}
+          Session 81 (R81-C): the per-page map completed — the wrap family
+          stays the default (payrollmodule + attendancedashboard measured
+          wrapping on the REF), with actionsBare (gap-2),
+          actionsUnwrapped, and actionsNowrap (the bare gap-3) as the
+          measured per-page variants. */}
       {actions ? (
         actionsUnwrapped ? (
           actions
         ) : (
           <div
             className={cn(
-              actionsBare ? "flex gap-2" : "flex flex-wrap items-center gap-3",
+              actionsBare ? "flex gap-2" : actionsNowrap ? "flex gap-3" : "flex flex-wrap items-center gap-3",
               actionsClassName
             )}
           >
