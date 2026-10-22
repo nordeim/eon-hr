@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.58.0 (session-75 audit complete — the outage-survivor round closed through micro-task delegation: the r75 deploy watch read BOTH SIDES QUIET (login JS index-CiBFwtqW + CSS index-B9rzNd1e + the app side C-IrDy5f/BGNH4KkS all byte-current — no 37th deploy); the HTTPS-origin probe found NO origin in scope (port 3000 dead, no cloudflared — the "real-Chrome install smoke" candidate recorded BLOCKED-IN-SCOPE); the fallback fresh-eyes candidate executed: THE LIGHTHOUSE FIRST-PARTY AUDIT 100/100/100 (accessibility/best-practices/SEO on BOTH the logged-out /login and the root / — zero flagged weighted audits, all spot-checks green; Lighthouse ≥12 removed the PWA category upstream, so the repo's executable PWA oracle stays Chrome's own installability checker — the r74 pins). ZERO DEFECTS FOUND — ZERO SOURCE CHANGES: the round's diff is the instrument (scripts/r75-screenshots.mjs), the evidence (18 screenshots, 545-561 → 747 tracked), and the docs layer. THE ELEVEN-ROUND BYTE CHAIN: the 561 drawer pair ≡ the r74 543 pair on BOTH sides (561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366) + the 545 login pair ≡ the r74 527 pair on both sides + all seven route pairs stable. The mobile-menu cycle green (toggle → drawer → Training LMS CLICKED:/training → auto-close open:false — no TW-v4 regression; the oklch census precisely confirmed comments-only, 6/6). Gates: lint 0/0 · tsc · 941/941 unit · build · E2E 396/396 (6.3m, zero flakes). The instrument lessons: micro-task delegation beats a dead main-session tool plane; the sandbox supervisor kills process trees at invocation boundaries (only a double-fork daemonizer reparented to PID 1 survives); long test runs go foreground+logfile) · **Last updated:** 2026-10-22
+> **Version:** 3.59.0 (session-76 audit complete — the double-deploy round: the deploy watch fired TWICE — the 37TH login deploy (JS `index-CiBFwtqW`→`index-BVGv30vf`) and the 38TH ~10 minutes later (JS `index-BVGv30vf`→`index-CXV35yah`, detected mid-round while fetching the 37th's bundle for the forensic diff) — BOTH LADDERED NON-VISUAL via the full confirmation protocol (the fresh login pair BYTE-IDENTICAL to the `69aa4241…` baseline both times + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 both times; the fresh re-auths clean, Turnstile unenforced, the login DOM census unchanged). THE BUNDLE FORENSICS (the round's fresh-eyes instrument): both deploys are CHUNK-GRAPH REBUILDS — ~840 regenerated chunk-hash references in the `__vite__mapDeps` dependency map, the entry bundles the same 97529 bytes, the rendered login BYTE-IDENTICAL (PNG-proven) — a platform-side rebuild, zero rendered change. The watch re-armed at the post-38th finals reads BOTH SIDES QUIET; the NEW deploy-cadence watch records the ~10-minute rebuild cadence. THE TWELVE-ROUND BYTE CHAIN: the 579 drawer pair ≡ the r75 561 pair on BOTH sides (579≡561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366) + the 563 login pair ≡ the r75 545 pair on both sides (past BOTH deploys) + all seven route pairs stable. The mobile-menu cycle green (toggle → drawer → Training LMS CLICKED:/training → auto-close open:false — no TW-v4 regression). ZERO DEFECTS FOUND — ZERO SOURCE CHANGES (the third consecutive audit-only round). Gates: lint 0/0 · tsc · 941/941 unit · build · E2E 396/396 (6.3m, zero flakes). Six instrument traps retired on the way (the stale REF session cookie after a deploy; the fresh-session viewport default; the daemon overload + its close-all side effect; the chromium cache; the exported DATABASE_URL; the signup-flow probe user)) · **Last updated:** 2026-10-22
 > **State:** 941 unit + 396 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -5266,3 +5266,64 @@ r75 retire record: all three hit, all three retired, zero source
 changes. (5) Lighthouse's PWA category is gone (≥12) — say "Chrome's
 installability checker" when you mean the executable PWA oracle, not
 "Lighthouse PWA".
+
+## §86 Session 76 (parity round 75) — the double-deploy round: the 37th + the 38th both laddered non-visual + the bundle forensics + the twelve-round byte chain
+
+The round fired the deploy watch TWICE. The 37TH login deploy (login
+JS `index-CiBFwtqW`→`index-BVGv30vf`; CSS + the app side quiet) was
+detected at the opening read and laddered NON-VISUAL — the fresh
+login pair BYTE-IDENTICAL to the standing `69aa4241…` baseline +
+standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13.
+The 38TH landed ~10 minutes later (login JS `index-BVGv30vf`→`index-CXV35yah`),
+detected MID-ROUND while the 37th's bundle was being fetched for the
+forensic diff — and laddered NON-VISUAL by the identical protocol
+(the fresh pair again byte-identical; the ladder again green).
+
+The round's fresh-eyes instrument: THE BUNDLE FORENSICS. All three
+entry generations fetched live (97530 / 97529 / 97529 bytes, three
+distinct md5s); the generation-over-generation diff is ~840
+regenerated chunk-hash references in the `__vite__mapDeps` dependency
+map (`mixpanelUtils`, `i18n`, `UserAppMain`, `axiosClient`, …) while
+the entry's own code stays the same size and the rendered login
+stays byte-identical — the classification: platform-side
+chunk-graph rebuilds, zero rendered change. The watch re-armed at
+the post-38th finals (login JS `index-CXV35yah` + CSS
+`index-B9rzNd1e`; the app side `C-IrDy5f`/`BGNH4KkS`) reads BOTH
+SIDES QUIET. THE DEPLOY-CADENCE WATCH (new): two non-visual rebuilds
+inside ~10 minutes — expect further deploys of the same class.
+
+The standing checks at HEAD `61ac313` all green (the patch watch
+QUIET at next 16.4.2 latest; `bun audit` unchanged — the two
+upstream-blocked dev-chain advisories; the TW-v4 scan clean — 15
+`!important` all globals.css, oklch 6/6 comments-only; secrets zero;
+the XSS sink census zero-unsafe — the 9 pattern matches all
+classified server-rendered + nonced; DB pristine after the
+signup-flow probe-user sweep per the r61 protocol).
+
+The byte-stability proofs (numbers 563-579): the 579 drawer pair ≡
+the r75 561 pair on BOTH sides (the TWELVE-round chain
+579≡561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366); the 563 login
+pair ≡ the r75 545 pair on BOTH sides — past BOTH deploys; all seven
+route pairs stable. The mobile-menu functional cycle green (toggle →
+the drawer → Training LMS CLICKED:/training → auto-close `open:false`
+— no TW-v4 regression).
+
+ZERO DEFECTS FOUND — ZERO SOURCE CHANGES (the third consecutive
+audit-only round). Six instrument traps retired on the way (all
+infrastructure): (1) the stale REF session cookie after a deploy —
+the first ladder read 0/5 + 0/12 (every authed route read the login
+page's h1); re-auth + re-run green; (2) the fresh-session viewport
+default — after a daemon reset the `ref` session defaulted to 1280px
+while loc0 read 1440px, making every responsive recharts container
+read narrow (the surveyanalytics "diff" was pure viewport); always
+`set viewport 1440 900` before reads; (3) the agent-browser daemon
+overload (`spawnSync /bin/sh EAGAIN` — `close --all` + pkill +
+restart) with the side effect that `close --all` wipes the warm `ref`
+session auth; (4) the chromium-cache trap (r1200 vs r1248); (5) the
+exported-`DATABASE_URL` trap (active again); (6) the verify-r45
+signup-flow probe user swept per the r61 protocol.
+
+Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 396/396
+(6.3m, zero flakes — the sequential proof) · byte-stability 579≡561
++ 563≡545 + the route pairs stable, both sides · 765 tracked
+screenshots (+18, the 563-579 set) · DB pristine.
