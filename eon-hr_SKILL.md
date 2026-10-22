@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.59.0 (session-76 audit complete — the double-deploy round: the deploy watch fired TWICE — the 37TH login deploy (JS `index-CiBFwtqW`→`index-BVGv30vf`) and the 38TH ~10 minutes later (JS `index-BVGv30vf`→`index-CXV35yah`, detected mid-round while fetching the 37th's bundle for the forensic diff) — BOTH LADDERED NON-VISUAL via the full confirmation protocol (the fresh login pair BYTE-IDENTICAL to the `69aa4241…` baseline both times + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 both times; the fresh re-auths clean, Turnstile unenforced, the login DOM census unchanged). THE BUNDLE FORENSICS (the round's fresh-eyes instrument): both deploys are CHUNK-GRAPH REBUILDS — ~840 regenerated chunk-hash references in the `__vite__mapDeps` dependency map, the entry bundles the same 97529 bytes, the rendered login BYTE-IDENTICAL (PNG-proven) — a platform-side rebuild, zero rendered change. The watch re-armed at the post-38th finals reads BOTH SIDES QUIET; the NEW deploy-cadence watch records the ~10-minute rebuild cadence. THE TWELVE-ROUND BYTE CHAIN: the 579 drawer pair ≡ the r75 561 pair on BOTH sides (579≡561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366) + the 563 login pair ≡ the r75 545 pair on both sides (past BOTH deploys) + all seven route pairs stable. The mobile-menu cycle green (toggle → drawer → Training LMS CLICKED:/training → auto-close open:false — no TW-v4 regression). ZERO DEFECTS FOUND — ZERO SOURCE CHANGES (the third consecutive audit-only round). Gates: lint 0/0 · tsc · 941/941 unit · build · E2E 396/396 (6.3m, zero flakes). Six instrument traps retired on the way (the stale REF session cookie after a deploy; the fresh-session viewport default; the daemon overload + its close-all side effect; the chromium cache; the exported DATABASE_URL; the signup-flow probe user)) · **Last updated:** 2026-10-22
+> **Version:** 3.60.0 (session-77 audit complete — the triple-deploy round: the deploy watch fired TWICE more — the 39TH login deploy (JS `index-CXV35yah`→`index-BOwtYlPm` AND CSS `index-B9rzNd1e`→`index-DS1aCkan`, the FIRST login-CSS movement since the 35th) and the 40TH ~20 minutes later (JS `index-BOwtYlPm`→`index-HY4zt1AJ`, read by the probe's census mid-round) — BOTH LADDERED NON-VISUAL via the full confirmation protocol run on the current generation (the fresh login pair BYTE-IDENTICAL to the `69aa4241…` baseline + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13; the 39th's CSS transitively PNG-proven — the byte-identical pair ran ON the CSS it shipped). THE CSS-DELTA CLASSIFICATION: the 39th's CSS movement is a DEAD-CODE SWEEP — 8 arbitrary-value utility rules removed (`bg-[#e2e5ee]`, `bg-[#e9eef6]`, `bg-[#fbfcfd]`, `border-[#d6e6fe]/70`, the `.dark:` variants, `dark:text-[#868aa5]`) + 1 added, ZERO usages in the entry bundle or the rendered HTML; the JS entry 97529→97481 bytes, the chunk-graph-rebuild signature. THE TRANSFER-WEIGHT AUDIT (the round's fresh-eyes instrument — the FIRST page-weight measurement in the program): ALL ROUTES HEALTHY — no route over 2 MiB, no single asset over 1.5 MiB; the LOC authed routes decode 834-900 KiB, LEANER than the REF SPA's ~2.3 MiB bundle. THE THIRTEEN-ROUND BYTE CHAIN: the 597 drawer pair ≡ the r76 579 pair on BOTH sides (597≡579≡561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366) + the 581 login pair ≡ the r76 563 pair on both sides (past both deploys AND the CSS movement) + all seven route pairs stable. The mobile-menu cycle green (toggle → drawer → Training LMS CLICKED:/training → auto-close open:false — no TW-v4 regression). ZERO DEFECTS FOUND — ZERO SOURCE CHANGES (the fourth consecutive audit-only round). Gates: lint 0/0 · tsc · 941/941 unit · build · E2E 396/396 (6.3m, zero flakes). Four instrument traps retired on the way (the daemon overload again + its close-all side effect; the exported DATABASE_URL; the probe-user sweep after the LAST ladder run; the /tmp non-persistence)) · **Last updated:** 2026-10-22
 > **State:** 941 unit + 396 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -5327,3 +5327,83 @@ Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 396/396
 (6.3m, zero flakes — the sequential proof) · byte-stability 579≡561
 + 563≡545 + the route pairs stable, both sides · 765 tracked
 screenshots (+18, the 563-579 set) · DB pristine.
+
+## §87 Session 77 (parity round 76) — the triple-deploy round: the 39th + the 40th both laddered non-visual (the CSS movement classified as a dead-code sweep) + the transfer-weight audit + the thirteen-round byte chain
+
+The round fired the deploy watch TWICE — and the first one moved the
+CSS. The 39TH login deploy (login JS `index-CXV35yah`→`index-BOwtYlPm`
+AND login CSS `index-B9rzNd1e`→`index-DS1aCkan` — the first login-CSS
+movement since the 35th deploy; the app side quiet) was detected at
+the opening read. A CSS movement makes the ladder critical — and the
+ladder ran on the current generation: the fresh re-auth clean
+(Turnstile unenforced), the login DOM census unchanged (the six-button
+set, one form, zero Turnstile widgets), the fresh logged-out login
+pair BYTE-IDENTICAL to the standing `69aa4241…` baseline. The probe's
+census then read login JS `index-HY4zt1AJ` — the 40TH deploy, ~20
+minutes after the 39th (a third generation inside one round),
+confirming the deploy-cadence watch's prediction. The full ladder on
+the current generation: the fresh pair byte-identical + standing 5/5
++ sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 → BOTH DEPLOYS
+NON-VISUAL (the 39th's CSS is transitively PNG-proven: the
+byte-identical pair ran ON the CSS it shipped).
+
+The CSS-delta classification (the round's forensic work): the 39th's
+CSS movement is a DEAD-CODE SWEEP. Both CSS generations fetched live
+(902707 → 902076 bytes, a 631-byte shrink); the rule-level diff reads
+8 arbitrary-value utility rules REMOVED (`bg-[#e2e5ee]`,
+`bg-[#e9eef6]`, `bg-[#fbfcfd]`, `border-[#d6e6fe]/70`, the `.dark:`
+variants, `dark:text-[#868aa5]`) + 1 ADDED
+(`sm:grid-cols-[11rem_minmax(0,1fr)]`). A usage sweep of the current
+entry bundle and the served login HTML found ZERO references to any
+removed name — dead utilities from an older login-app iteration,
+swept by the platform build. The JS entry sizes: 97529 → 97481 bytes
+— the near-same-size chunk-graph-rebuild signature (the §86
+mechanism).
+
+The round's fresh-eyes instrument: THE TRANSFER-WEIGHT AUDIT — the
+FIRST page-weight measurement in the 76-round program
+(`scripts/r77-asset-audit.mjs`). Both apps measured per standing
+surface via the browser's own PerformanceResourceTiming. ALL ROUTES
+HEALTHY on the LOC side — no route over 2 MiB total transfer, no
+single asset over 1.5 MiB; the authed routes decode 834-900 KiB each,
+LEANER than the REF SPA's ~2.3 MiB decoded bundle (the architecture
+trade: REF ships 3.9 KiB HTML shells + one big SPA; LOC
+server-renders 59-74 KiB HTML per route + smaller per-route payloads).
+The REF record: login 76 requests / 1809 KiB decoded. Zero anomalies,
+zero findings — a production-readiness screen, not a parity claim
+(different bundlers ship different graphs by design).
+
+The standing checks at HEAD `2ec8d57` all green (the patch watch
+QUIET at next 16.4.2 latest, the 16.5 line at `16.5.0-canary.21`;
+`bun audit` unchanged — the two upstream-blocked dev-chain
+advisories; the TW-v4 scan clean — 15 `!important` all globals.css,
+oklch 6/6 comments-only; secrets zero; the XSS sink census
+zero-unsafe — the 9 pattern matches all classified server-rendered +
+nonced; DB pristine after the signup-flow probe-user sweep per the
+r61 protocol, run AFTER the last ladder execution).
+
+The byte-stability proofs (numbers 581-597): the 597 drawer pair ≡
+the r76 579 pair on BOTH sides (the THIRTEEN-round chain
+597≡579≡561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366); the 581 login
+pair ≡ the r76 563 pair on BOTH sides — past BOTH deploys AND the CSS
+movement; all seven route pairs stable. The mobile-menu functional
+cycle green (toggle → the drawer → Training LMS CLICKED:/training →
+auto-close `open:false` — no TW-v4 regression).
+
+ZERO DEFECTS FOUND — ZERO SOURCE CHANGES (the fourth consecutive
+audit-only round). Four instrument traps retired (all infrastructure):
+(1) the agent-browser daemon overload AGAIN — the first standing-run
+read 0/5 with the `loc` session stuck on `about:blank` and a
+`CDP command timed out: Runtime.evaluate` on the diagnostic;
+`close --all` + pkill + restart + re-auth (the §86 protocol
+re-proven, including the close-all-wipes-the-ref-auth side effect);
+(2) the exported-`DATABASE_URL` trap (active); (3) the verify-r45
+signup-flow probe user — swept AFTER the last ladder run (it
+re-creates itself on every ladder execution); (4) the sandbox `/tmp`
+does not persist between tool invocations — fetch forensic artifacts
+to a repo-local scratch dir (swept before the commit).
+
+Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 396/396
+(6.3m, zero flakes — the sequential proof) · byte-stability 597≡579
++ 581≡563 + the route pairs stable, both sides · 784 tracked
+screenshots (+18, the 581-597 set) · DB pristine.
