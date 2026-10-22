@@ -10,7 +10,7 @@
 > debugging; run §11 before every push. Every claim is verifiable against a
 > specific file or command — the file paths are authoritative.
 >
-> **Version:** 3.57.0 (session-74 remediation complete — the PWA installability end-to-end pass + the SW cache-lifecycle hardening: the r74 deploy watch DETECTED THE 36TH LOGIN DEPLOY (login JS BANnI-PC→index-CiBFwtqW AND login CSS COgwiEvt→index-B9rzNd1e — the second CSS movement in two rounds; the app side quiet C-IrDy5f/BGNH4KkS) and the full confirmation ladder audited it NON-VISUAL (the fresh login pair BYTE-IDENTICAL to the r73 510 REF baseline 69aa4241… + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13). R74-B THE PWA INSTALLABILITY END-TO-END PASS: the r73 "structurally complete" claim MEASURED FIRST via Chrome's own installability checker (CDP Page.getInstallabilityErrors) — ZERO ERRORS on BOTH surfaces (the logged-out /login AND the authed /dashboard: the manifest link + fields + the 192/512 icon decodes + the SW registration + the secure context, the whole criteria chain verified by the browser itself); pinned executable by tests/e2e/session74-pwa-installability.spec.ts (R74-B1a/b — the standing-contract green pin, the regression tripwire for the whole chain). R74-C THE SW CACHE-LIFECYCLE HARDENING: the found-and-fixed audit gap in the r72-era worker — THE FROZEN SHELL (the un-bumped cache name meant install never re-fired: every existing client held the r72-era shell bytes indefinitely; a latent update bug) + THE UNBOUNDED CHUNK CACHE (the /_next/static accumulation grew across every deploy with nothing evicting it); fixed by the generation mechanism (GEN r74 + the generation-stamped eon-hr-shell-r74 + the stable cross-generation eon-hr-chunks + the CHUNKS_CAP 120 oldest-first bound) with the bump protocol turned EXECUTABLE (the shell-drift tripwire: the sha256 of the six SHELL asset bytes pinned to the GEN — an asset edit without a bump goes RED). THE TEN-ROUND BYTE CHAIN: the 543 drawer pair BYTE-MATCHES the r73 526 pair on BOTH sides (loc e3df921…, ref bfaa0da… — 543≡526≡509≡492≡474≡456≡438≡418≡402≡366) and the 527 login pair BYTE-MATCHES the r73 510 pair on both sides — both fix families changed zero rendered bytes. The dependency watch AMENDED: the deepmerge-ts fix HAS shipped upstream in @prisma/config 7.10.1 (deepmerge-ts 8.0.2) but the repo's stable prisma 6.19.3 pins @prisma/config 6.19.3 EXACTLY and the 6.x line ends there — accepted with the watch re-recorded at a 6.x backport or the repo's Prisma major upgrade. The standing checks: the mobile-menu cycle green (toggle → nav links → Training LMS CLICKED:/training → auto-close open:false) · **Last updated:** 2026-10-22
+> **Version:** 3.58.0 (session-75 audit complete — the outage-survivor round closed through micro-task delegation: the r75 deploy watch read BOTH SIDES QUIET (login JS index-CiBFwtqW + CSS index-B9rzNd1e + the app side C-IrDy5f/BGNH4KkS all byte-current — no 37th deploy); the HTTPS-origin probe found NO origin in scope (port 3000 dead, no cloudflared — the "real-Chrome install smoke" candidate recorded BLOCKED-IN-SCOPE); the fallback fresh-eyes candidate executed: THE LIGHTHOUSE FIRST-PARTY AUDIT 100/100/100 (accessibility/best-practices/SEO on BOTH the logged-out /login and the root / — zero flagged weighted audits, all spot-checks green; Lighthouse ≥12 removed the PWA category upstream, so the repo's executable PWA oracle stays Chrome's own installability checker — the r74 pins). ZERO DEFECTS FOUND — ZERO SOURCE CHANGES: the round's diff is the instrument (scripts/r75-screenshots.mjs), the evidence (18 screenshots, 545-561 → 747 tracked), and the docs layer. THE ELEVEN-ROUND BYTE CHAIN: the 561 drawer pair ≡ the r74 543 pair on BOTH sides (561≡543≡526≡509≡492≡474≡456≡438≡418≡402≡366) + the 545 login pair ≡ the r74 527 pair on both sides + all seven route pairs stable. The mobile-menu cycle green (toggle → drawer → Training LMS CLICKED:/training → auto-close open:false — no TW-v4 regression; the oklch census precisely confirmed comments-only, 6/6). Gates: lint 0/0 · tsc · 941/941 unit · build · E2E 396/396 (6.3m, zero flakes). The instrument lessons: micro-task delegation beats a dead main-session tool plane; the sandbox supervisor kills process trees at invocation boundaries (only a double-fork daemonizer reparented to PID 1 survives); long test runs go foreground+logfile) · **Last updated:** 2026-10-22
 > **State:** 941 unit + 396 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -5216,3 +5216,53 @@ polish (still deferred — no REF counterpart), a REAL-Chrome
 install smoke on a deployed HTTPS origin (the headless verdict is
 the strongest in-scope proof; the native install flow itself needs a
 live deployment), and whatever the next deploy carries.
+
+## §85 Session 75 (parity round 74) — the audit-only round: the deploy watch both-sides-quiet + the Lighthouse first-party audit + the eleven-round byte chain
+
+**The round's shape.** Session 75 was interrupted three times by the
+session-level gateway outage (the `403 Forbidden / broken session` class —
+`docs/session_165.md`); its R75-A layer (environment, gates, the deploy
+watch, the standing checks) interim-saved @ `e82368c` with R75-B partial
+(sw.js + the auth layer clean). The resuming session completed the round
+with the outage still active on the main session's tool plane — executed
+entirely through micro-task delegation (each fresh subagent session holds
+a working plane for ~5-8 calls; the round ran as small self-contained
+delegated tasks with verbatim-content prompts for the prose-heavy parts).
+
+**The audit verdicts.** (1) THE DEPLOY WATCH BOTH SIDES QUIET — no 37th
+deploy (login `index-CiBFwtqW`/`index-B9rzNd1e` + app `C-IrDy5f`/
+`BGNH4KkS` all byte-current, live 200s). (2) THE HTTPS-ORIGIN PROBE:
+no origin in scope → the install-smoke candidate BLOCKED-IN-SCOPE (the
+r74 installability pins remain the standing evidence). (3) THE
+LIGHTHOUSE FIRST-PARTY AUDIT — 100/100/100 (accessibility/best-practices/
+SEO) on both the /login and the root surfaces, zero flagged weighted
+audits; Lighthouse ≥12 removed the PWA category upstream — the executable
+PWA oracle stays Chrome's own installability checker. (4) The standing
+checks clean: TW-v4 (15 `!important`; oklch 6/6 comments-only), DB
+pristine, bun audit unchanged (the two upstream-blocked dev-chain
+advisories), the patch watch quiet (16.4.2 latest; 16.5.0-canary.21
+approaching).
+
+**The proofs.** The ELEVEN-round byte chain (561≡543 both sides) + the
+login pair (545≡527 both sides) + the seven route pairs stable + the
+mobile-menu functional cycle green (toggle → drawer → Training LMS
+CLICKED:/training → auto-close `open:false` — the standing user emphasis,
+no TW-v4 regression). The closing gates: lint 0/0 · tsc · 941/941 unit ·
+build · E2E 396/396 (6.3m, zero flakes, sequential — the chromium-cache
+trap retired en route: r1200 cache vs the r1248 requirement,
+`bunx playwright install chromium`, environment-only).
+
+**The carry-forward lessons (the outage-survivor round).** (1) A dead
+main-session tool plane does not stop a round — delegate micro-tasks to
+fresh subagent sessions (bounded working windows), and put verbatim
+content in the prompts for anything prose-heavy. (2) The sandbox
+supervisor kills the ENTIRE process tree of each command shell at
+invocation boundaries — nohup/setsid/disown do not survive; only a
+double-fork daemonizer that reparents to PID 1 does. (3) Long test runs
+must go foreground with output redirected to a log file. (4) Classify
+the recurring environment traps (chromium-cache, exported DATABASE_URL,
+the daemon overload) as infrastructure BEFORE touching source — the
+r75 retire record: all three hit, all three retired, zero source
+changes. (5) Lighthouse's PWA category is gone (≥12) — say "Chrome's
+installability checker" when you mean the executable PWA oracle, not
+"Lighthouse PWA".
