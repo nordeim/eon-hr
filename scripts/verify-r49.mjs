@@ -40,11 +40,28 @@ run('agent-browser --session loc0 fill "input[type=email]" "sepnetflix2023@outlo
 await new Promise(r => setTimeout(r, 350));
 run("agent-browser --session loc0 fill 'input[type=password]' '$Abcd1234'");
 await new Promise(r => setTimeout(r, 350));
-const snap = run('agent-browser --session loc0 snapshot -i -c');
-const btnRef = (snap.match(/- button "Sign in" \[ref=(\w+)\]/) || [])[1];
-if (btnRef) run(`agent-browser --session loc0 click @${btnRef}`);
-await new Promise(r => setTimeout(r, 4200));
-console.log("loc0:", run('agent-browser --session loc0 get url').trim());
+async function loc0Auth() {
+  const snap = run('agent-browser --session loc0 snapshot -i -c');
+  const btnRef = (snap.match(/- button "Sign in" \[ref=(\w+)\]/) || [])[1];
+  if (btnRef) run(`agent-browser --session loc0 click @${btnRef}`);
+  await new Promise(r => setTimeout(r, 4200));
+  return run('agent-browser --session loc0 get url').trim();
+}
+// The careful re-auth retry (the r78 fill-timing lesson, applied r83 — a
+// fill-timing miss leaves loc0 logged-out and EVERY route read bounces to
+// /login, reading as a systematic 1/13 all-DIFF round).
+let loc0Url = await loc0Auth();
+if (loc0Url.includes("/login")) {
+  console.log("loc0 fill-timing miss — retrying the careful re-auth");
+  run('agent-browser --session loc0 open http://127.0.0.1:3201/login');
+  await new Promise(r => setTimeout(r, 1200));
+  run('agent-browser --session loc0 fill "input[type=email]" "sepnetflix2023@outlook.com"');
+  await new Promise(r => setTimeout(r, 600));
+  run("agent-browser --session loc0 fill 'input[type=password]' '$Abcd1234'");
+  await new Promise(r => setTimeout(r, 600));
+  loc0Url = await loc0Auth();
+}
+console.log("loc0:", loc0Url);
 
 const READ = `(() => {
   const main = document.querySelector('main');
