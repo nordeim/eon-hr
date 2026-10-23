@@ -260,7 +260,12 @@ export default function AssetManagementPage() {
         actions={
           <>
             <Button variant="outline" onClick={exportCsv}>
-              <Download aria-hidden="true" />
+              {/* Session 84 (R84-A): the svg's mr-2 ON TOP of the button's
+                  gap-2 — the session-14 R13-A iconed-button recipe this
+                  call site missed (the bare icon rendered the button
+                  104px vs the reference's 112px; live-measured both
+                  sides this round). */}
+              <Download className="mr-2" aria-hidden="true" />
               Export
             </Button>
             <Button

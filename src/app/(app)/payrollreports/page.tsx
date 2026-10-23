@@ -310,11 +310,17 @@ export default function PayrollReportsPage() {
                   <FileSpreadsheet className="mr-1 h-4 w-4" aria-hidden="true" />
                   CSV
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toast.toast({ title: "PDF export", description: "Use your browser's print dialog (already print-optimized).", variant: "success" })}
-                >
+                {/* Session 84 (R84-B): the reference's PDF button opens a
+                    BLANK window (window.open("") — a broken stub, no
+                    document, no print); the clone previously toasted an
+                    advisory "use your browser's print dialog". The
+                    session-29 R28-B/R29-C print superset already ships
+                    the print CSS (the chrome hidden, the dialogs
+                    suppressed, print-color-adjust: exact, the @page
+                    margins) — so this button now opens the REAL print
+                    dialog in one click (print → "Save as PDF" produces
+                    the print-optimized document). */}
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
                   <FileText className="mr-1 h-4 w-4" aria-hidden="true" />
                   PDF
                 </Button>
