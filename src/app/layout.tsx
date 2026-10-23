@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ToastProvider } from "@/components/ui/toast";
+import { Base44EditBadge } from "@/components/shared/base44-edit-badge";
 import "./globals.css";
 
 // No next/font: the reference app renders Tailwind v4's default
@@ -168,6 +169,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="font-sans antialiased">
         <ToastProvider>{children}</ToastProvider>
+        {/* Session 85 (R85-B): the reference's platform-injected "Edit
+            with Base44" badge — fixed bottom-right on every page (the
+            root-layout mount covers login + the authed shell + mobile,
+            matching the REF's app-wide injection). See
+            src/components/shared/base44-edit-badge.tsx. */}
+        <Base44EditBadge />
         <JsonLdScripts origin={origin} nonce={nonce} />
       </body>
     </html>

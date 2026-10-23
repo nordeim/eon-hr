@@ -92,6 +92,14 @@ test.describe("mobile navigation", () => {
   });
 
   test("bottom tab bar navigates between the five primary surfaces", async ({ page }) => {
+    // Session 85 (R85-B): the replicated Base44 edit badge (fixed
+    // bottom-right, z-999999 — the REF's own platform overlay) covers
+    // the right end of the 390px tab bar, exactly as it does on the
+    // reference. A real user dismisses it first; the test does too.
+    const badgeClose = page.locator("#badge-close");
+    if (await badgeClose.isVisible().catch(() => false)) {
+      await badgeClose.click();
+    }
     for (const [tab, url] of [
       ["Staff", "/employees"],
       ["Tasks", "/taskmanager"],

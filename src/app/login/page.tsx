@@ -378,12 +378,22 @@ function LoginForm() {
             <>
             {/* Circular brand mark — REF's structure (session-39): a
                 relative group wrapper, the blur-xl slate gradient glow
-                (opacity-30 → 40 on hover), then the self-hosted logo copy
-                (public/eon-logo.png) in the ring-wrapped shadowed span. */}
+                (opacity-30 → 40 on hover), then the self-hosted logo
+                (public/eon-logo-192.png) in the ring-wrapped shadowed
+                span. Session 85 (R85-B follow-up): the img now rides the
+                REF's EXACT rendered derivative — its 192px supabase
+                render (the URL the reference's own login loads), vendored
+                byte-for-byte. The old full-res 1563px original
+                (public/eon-logo.png, kept for the JSON-LD Organization
+                logo URL) downscaled through a different resampling path
+                and left AA-level pixel deltas inside the 96x96 box
+                (~350 px at ±1-2 channels — caught by this round's first
+                cross-side focused-state pixel diff). Same source bytes +
+                same 2x downscale = pixel-identical with the REF. */}
             <div className="relative group">
               <div className="absolute inset-0 bg-[linear-gradient(to_bottom_right,#e2e8f0,#cbd5e1)] rounded-full blur-xl opacity-30 group-hover:opacity-40 transition-opacity duration-300" />
               <span className="flex shrink-0 overflow-hidden rounded-full relative h-20 w-20 sm:h-24 sm:w-24 shadow-lg ring-4 ring-white/50 group-hover:shadow-xl transition-all duration-300">
-                <img src="/eon-logo.png" alt="Eon HR logo" className="aspect-square h-full w-full object-cover" />
+                <img src="/eon-logo-192.png" alt="Eon HR logo" className="aspect-square h-full w-full object-cover" />
               </span>
             </div>
             <div className="space-y-2 sm:space-y-3">

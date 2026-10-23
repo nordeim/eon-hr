@@ -399,6 +399,33 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* Session 85 (R85-A): the UA-default focus rings restored to the
+     reference's opaque resolution. TW v4's preflight AND the shadcn
+     `outline-ring/50` base rule above pin every element's
+     outline-color to color-mix(in oklab, var(--ring) 50%, transparent)
+     — the UA's `:focus-visible { outline: auto }` rings (the login
+     social buttons, the auth links) then render at 50% alpha
+     (oklab(0.140764 … / 0.5) = #0a0a0a/50, live-read; pixel-proven
+     fainter at the ring edges — 1692 differing pixels on the focused
+     social button). The reference rides the raw UA default, whose
+     RESOLVED value is OPAQUE rgb(16,16,16) 1px (blank-page-proven in
+     the parity browser; identical in light and dark — the class-based
+     dark mode never flips color-scheme). This same-layer-LATER rule
+     pins that resolved literal — `outline-color: auto` itself was
+     tried first and is NOT robust: the longhand `auto` value is
+     dropped by the CSS parser in some Chromium builds (Chrome 155's
+     CSSOM omits the rule entirely while Chrome 1248 accepts it), so
+     the resolved hex is the cross-browser-stable form (the house
+     pinned-hex doctrine — the same class as the R41-T1 token pins).
+     Same specificity, later order wins over both the preflight and
+     the @apply; the utilities-layer outline-color members (the
+     explicit outline-blue-600/amber recipes) still beat base, and the
+     ring-utility family is unaffected (their outline-style is
+     none/hidden — the color is inert there). Pinned RED-first by
+     tests/e2e/session85-keyboard.spec.ts (R85-A). */
+  * {
+    outline-color: rgb(16, 16, 16);
+  }
   body {
     /* Session 6: the canvas gradient (slate-50 -> blue-50, sRGB-pinned)
       moved to the AppShell root div — the reference paints it on its
@@ -577,6 +604,14 @@
   margin: 10mm;
 }
 @media print {
+  /* Session 85 (R85-B): the platform badge (the replicated Base44 edit
+     pill) is fixed-position chrome — hidden in the print-optimized
+     output per the session-29 print superset's standing decision class
+     (the REF's own print output is broken; the clone's print story is
+     the documented superset). */
+  #base44-edit-badge {
+    display: none !important;
+  }
   /* Session 40 (R39-O): the sidebar became the shadcn div.peer
      architecture — the escaped group/sidebar-wrapper class selector
      hides the whole subtree (the transparent RTL spacer + the fixed
