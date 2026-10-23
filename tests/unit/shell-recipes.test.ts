@@ -656,12 +656,21 @@ describe("session-18 parity round 17 — header row breakpoint + profile kicker"
     expect(read("src", "app", "(app)", "attendancedashboard", "dashboard.tsx")).toContain('rowBreakpoint="md"');
   });
 
-  it("R17-A: attendance's fitting wrap engages at md (row mode only)", () => {
-    // The R9-E sm:flex-wrap rode the sm:row — with the md breakpoint the
-    // wrap must follow the row (md:flex-wrap).
+  it("R17-A→R82-A: attendance's row is the REF's no-wrap md family (the wrap retired)", () => {
+    // Session 10 (R9-E) chose an anti-overflow row wrap (sm:flex-wrap →
+    // md:flex-wrap at R17-A) — predating the REF-authored-overflow parity
+    // standard (r79/r81). Session 82 (R82-A) removed it: the REF's row is
+    // the no-wrap md family (live-measured @1280: `flex flex-col
+    // md:flex-row justify-between items-start md:items-center gap-4`,
+    // min-content 1238 = hero 312 + gap 16 + cluster 911) whose page
+    // overflows at every md+ band (scrollW 1558 constant — byte-identical
+    // both sides post-fix). The pin now guards the ABSENCE of any
+    // row-level wrap member on the attendance page.
     const src = read("src", "app", "(app)", "attendance", "page.tsx");
-    expect(src).toContain('className="md:flex-wrap"');
+    expect(src).not.toContain('className="md:flex-wrap"');
     expect(src).not.toContain('className="sm:flex-wrap"');
+    expect(src).not.toContain("md:flex-wrap");
+    expect(src).toContain('rowBreakpoint="md"');
   });
 
   it("R17-A: the always-row pages keep the sm default (no rowBreakpoint)", () => {

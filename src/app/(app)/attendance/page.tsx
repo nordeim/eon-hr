@@ -235,7 +235,6 @@ export default function StaffAttendancePage() {
         section="Attendance Management"
         layout="flat48"
         iconClassName="text-blue-600"
-        className="md:flex-wrap"
         sectionIcon={<Calendar aria-hidden="true" />}
         title="Staff Attendance"
         subtitle="Track and manage employee attendance records"
@@ -245,14 +244,22 @@ export default function StaffAttendancePage() {
              rgb(14,116,144) = pinned v3 cyan-700, session 11 R10-A),
              Settings, Dashboard (blue-700 text) at h-9/14px outline, and
              the cyan-gradient Import Attendance CTA; every icon carries
-             the reference's mr-2 (16px effective icon-text gap). The
-             reference squeezes its title to a 312px two-line wrap and
-             lets the PAGE overflow horizontally (docW 1558 at 1440 — its
-             own bug); our fitting page keeps the title on one line and
-             wraps the cluster to a second row instead (sm:flex-wrap).
-             Dashboard navigates to /attendancedashboard (the reference's
-             one live control); Devices/Settings toast (the reference
-             leaves both dead). */
+             the reference's mr-2 (16px effective icon-text gap).
+             Session 82 (R82-A): the session-10 ROW-WRAP member is
+             REMOVED — the reference's row is the no-wrap md family
+             (`flex flex-col md:flex-row justify-between items-start
+             md:items-center gap-4`, live-measured) whose min-content
+             (hero 312 + gap 16 + cluster 911 = 1238) lets the PAGE
+             overflow horizontally at every md+ band (scrollW 1558
+             constant, 768-1440 — the REF-authored-overflow parity class
+             established r79/r81). The reference squeezes its title to a
+             312px two-line wrap; the pre-fix wrap member kept our page
+             fitting at 1280+ (the r81 "records data" misclassification —
+             corrected this round: the remainder was this member, the REF
+             renders the access-restricted state with NO records for this
+             user). Dashboard navigates to /attendancedashboard (the
+             reference's one live control); Devices/Settings toast (the
+             reference leaves both dead). */
           <>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="mr-2" aria-hidden="true" />
