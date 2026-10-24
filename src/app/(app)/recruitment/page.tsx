@@ -315,9 +315,16 @@ export default function RecruitmentPage() {
           /* Session 58 (R58-16): REF's Post New Job is the REVERSED blue
              gradient — from-indigo-600 to-blue-600 (#4F46E5→#2563EB,
              the endpoints swapped vs the default CTA — live-measured,
-             the CTA-fill census). */
+             the CTA-fill census).
+             Session 86 companion pass (R86-E): REF's CTA icon is
+             lucide-USER-PLUS (live-read: `lucide lucide-user-plus w-4
+             h-4 mr-2` — the person+plus glyph, 49 white pixels vs the
+             plain plus's 21 in the icon cell; the text geometry
+             identical cross-side). The glyph identity was invisible to
+             the color/text censuses (the r63 lesson class) — the
+             cross-side pixel diff surfaced it. */
           <Button variant="indigoBlue" onClick={() => setJobDialogOpen(true)}>
-            <Plus className="mr-2" aria-hidden="true" />
+            <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
             Post New Job
           </Button>
         }

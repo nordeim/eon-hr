@@ -205,8 +205,18 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
                    border in the DEFAULT border color #e5e5e5 (measured
                    rgb(229,229,229) — the base layer's * { border-color },
                    NOT the desktop sidebar's slate token). border-r picks it
-                   up; the panel stays 288px (border-box). */
-                className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col border-r bg-sidebar shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
+                   up; the panel stays 288px (border-box).
+                   Session 86 companion pass (R86-H): the panel carries
+                   text-sidebar-foreground — the r41 token fix's missing
+                   call site. The desktop sidebar's wrapper has the class
+                   (the `group peer … text-sidebar-foreground` line); the
+                   drawer panel did not, so the theme toggle (the panel's
+                   one color-inheriting member — every other drawer element
+                   carries explicit colors) read the body default
+                   rgb(10,10,10) instead of the REF's --sidebar-foreground
+                   zinc-700 rgb(63,63,70) (live-measured in the open
+                   drawer, cross-side). */
+                className="fixed inset-y-0 left-0 z-50 flex h-full w-[288px] max-w-[85vw] flex-col border-r bg-sidebar text-sidebar-foreground shadow-lg outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:[animation-duration:500ms] data-[state=closed]:[animation-duration:300ms] [animation-timing-function:cubic-bezier(0.32,0.72,0,1)] md:hidden"
               >
                 <DialogPrimitive.Title className="sr-only">Navigation menu</DialogPrimitive.Title>
                 <DialogPrimitive.Description className="sr-only">Main navigation</DialogPrimitive.Description>
