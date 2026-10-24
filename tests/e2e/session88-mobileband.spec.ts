@@ -97,9 +97,12 @@ test.describe("session-88 mobile-band cross-side — the remediated surfaces", (
     expect(icon).toBe("lucide-plus");
   });
 
-  // R88-C — the surveyanalytics zero-data charts render NO invented axes
-  // (the Distribution: no category ticks; the Trend: no month ticks).
-  test("R88-C: surveyanalytics at zero data renders the REF's empty chart axes", async ({ page }) => {
+  // R88-C — the surveyanalytics zero-data charts render the REF's
+  // contract (the union with the published chart-suite round): the
+  // Distribution is the EMPTY surface (no axes); the Trend renders the
+  // -100..100 REFERENCE SCALE (the explicit 5-tick ladder + grid, NO
+  // X month axis).
+  test("R88-C: surveyanalytics at zero data renders the REF's chart contract", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await page.goto("/surveyanalytics");
     await page.waitForSelector("text=Sentiment Distribution");
@@ -120,8 +123,10 @@ test.describe("session-88 mobile-band cross-side — the remediated surfaces", (
     });
     const distKey = Object.keys(read).find((k) => k.startsWith("Sentiment Distribution"));
     const trendKey = Object.keys(read).find((k) => k.startsWith("Sentiment Trend"));
+    // the Distribution: the EMPTY surface — zero axis ticks
     expect(distKey && read[distKey]).toBe(0);
-    expect(trendKey && read[trendKey]).toBe(0);
+    // the Trend: the -100..100 reference scale — exactly the 5-tick ladder
+    expect(trendKey && read[trendKey]).toBe(5);
   });
 
   // R88-D — the analyticsdashboard cluster does not wrap (the REF's

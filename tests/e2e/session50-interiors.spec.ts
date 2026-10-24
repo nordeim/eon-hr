@@ -17,7 +17,13 @@ import { expect, test } from "@playwright/test";
  * session50.md).
  */
 test.describe("session-50 deep interiors", () => {
-  test("R50-B1: shiftswap's stat cards carry the inline icon family + P/P pairs on the PLAIN card", async ({ page }) => {
+  /* Session 50 (R49-B1) → Session 88 (R88-F, the lockstep amendment — the
+   * stale-measurement retirement, the R50-A7 precedent): the r88 live
+   * re-measure proved the REF's stat cards carry 40px ICON TILES
+   * (w-10 h-10 rounded-xl + the blue/yellow/orange/green-100 family)
+   * wrapping the 20px icons — the r49 probe measured the icons INLINE
+   * and missed the tiles. The pin now asserts the tile contract. */
+  test("R50-B1: shiftswap's stat cards carry the 40px icon tiles + P/P pairs on the PLAIN card", async ({ page }) => {
     await page.goto("/shiftswap");
     await expect(page.getByRole("heading", { name: "Shift Swap" })).toBeVisible();
     const stats = await page.evaluate(() => {
@@ -26,12 +32,19 @@ test.describe("session-50 deep interiors", () => {
       );
       return cards.slice(0, 4).map((c) => ({
         cardCls: c.className.replace(/\s+/g, " ").trim(),
+        tileCls: c.querySelector("div[class*=w-10]")?.getAttribute("class") ?? null,
         svgCls: c.querySelector("svg")?.getAttribute("class") ?? null,
         valCls: c.querySelectorAll("p")[0]?.className ?? null,
         labelCls: c.querySelectorAll("p")[1]?.className ?? null,
       }));
     });
     expect(stats).toHaveLength(4);
+    const wantTiles = [
+      "w-10 h-10 rounded-xl flex items-center justify-center bg-blue-100",
+      "w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-100",
+      "w-10 h-10 rounded-xl flex items-center justify-center bg-orange-100",
+      "w-10 h-10 rounded-xl flex items-center justify-center bg-green-100",
+    ];
     const want = [
       "lucide lucide-users w-5 h-5 text-blue-600",
       "lucide lucide-clock w-5 h-5 text-yellow-600",
@@ -41,6 +54,7 @@ test.describe("session-50 deep interiors", () => {
     for (let i = 0; i < 4; i++) {
       expect(stats[i].cardCls).not.toContain("border-slate-200");
       expect(stats[i].cardCls).not.toContain("shadow-sm");
+      expect(stats[i].tileCls).toBe(wantTiles[i]);
       expect(stats[i].svgCls).toBe(want[i]);
       expect(stats[i].valCls.replace(/\s+/g, " ")).toContain("text-2xl font-bold text-slate-900");
       expect(stats[i].labelCls).toContain("text-xs text-slate-500");

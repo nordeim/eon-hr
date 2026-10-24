@@ -68,10 +68,14 @@ export function ReportChart({ data, type }: { data: GroupPoint[]; type: ReportCh
 
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+      {/* Session 88 (R88-E1): the REF renders the (default bar) report
+          chart GRID-ONLY — no XAxis/YAxis layers at all (the raw-svg
+          census: [title, desc, defs, grid]), the 4-line plot border at
+          [65,1081]x[5,255] on the 1086x320 surface: margin {top:5,
+          right:5, left:65, bottom:65}. The old declared-axes form
+          rendered 2 axis lines + the [36,1070]x[8,286] plot. */}
+      <BarChart data={data} margin={{ top: 5, right: 5, left: 65, bottom: 65 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
-        <YAxis allowDecimals={false} width={36} />
         <Tooltip />
         <Bar dataKey="count" name="Employees" radius={[4, 4, 0, 0]} maxBarSize={48}>
           {data.map((entry, idx) => (

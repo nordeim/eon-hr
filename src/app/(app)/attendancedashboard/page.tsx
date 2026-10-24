@@ -7,29 +7,30 @@ import {
   type DepartmentOption,
 } from "./dashboard";
 
+/* Session 88 (R88-B1): the month picker's functional superset — the
+ * selected month rides the ?month= query param (YYYY-MM), the default
+ * being the current month. Validated: a well-formed YYYY-MM with a
+ * real month index, else the current month (no throw on garbage). */
+function parseMonthParam(raw: string | undefined): { year: number; month: number } {
+  const now = new Date();
+  const m = /^([0-9]{4})-(0[1-9]|1[0-2])$/.exec(raw ?? "");
+  if (!m) return { year: now.getFullYear(), month: now.getMonth() };
+  return { year: Number(m[1]), month: Number(m[2]) - 1 };
+}
+
 export default async function AttendanceDashboardPage({
-  /* Session 88 (R88-E): the REF renders a month filter input as the
-   * first header action (live-measured: type=month, w=160, the standard
-   * Input classes, the current-month default). This wires it
-   * functionally — the SUPERSET: ?month=YYYY-MM reloads the window,
-   * title, and day count for the selected month (validated; invalid or
-   * missing falls back to the current month). */
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<{ month?: string }>;
 }) {
-  const params = await searchParams;
-  const rawMonth = typeof params.month === "string" ? params.month : "";
-  const monthMatch = rawMonth.match(/^(\d{4})-(\d{2})$/);
-  const now = new Date();
-  const year = monthMatch ? Number(monthMatch[1]) : now.getFullYear();
-  // month is 1-based in the input value; Date takes 0-based.
-  const monthIndex = monthMatch ? Number(monthMatch[2]) - 1 : now.getMonth();
-  const monthStart = new Date(year, monthIndex, 1);
-  const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
-  const monthTitle = `${new Date(year, monthIndex, 1).toLocaleString("en-US", { month: "long" })} ${year}`;
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-  const monthValue = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+  const sp = await searchParams; // the Next 16 contract (always awaited)
+  const { year, month } = parseMonthParam(sp?.month);
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+  const monthDate = new Date(year, month, 1);
+  const monthTitle = `${monthDate.toLocaleString("en-US", { month: "long" })} ${year}`;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthValue = `${year}-${String(month + 1).padStart(2, "0")}`;
 
   const [departments, employees, records] = await Promise.all([
     db.department.findMany({

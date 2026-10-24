@@ -1,116 +1,94 @@
 #!/usr/bin/env python3
-"""r88-docs-patch.py — the session-88 docs layer: the AGENTS/CLAUDE/README
-count-lockstep (941 unit + 472 E2E = 1413 total specs · 1534 tracked PNGs)
-+ the AGENTS session-88 layer + the SKILL version line + the worklog entry.
-Every replacement is asserted (count > 0) so a miss fails loudly."""
-import re
-import sys
+"""r88-docs-patch.py — the count-lockstep + session-88 layer patches for
+AGENTS.md / CLAUDE.md / README.md / eon-hr_SKILL.md (the standing docs
+pattern). Counts: 941 unit (unchanged) + 476 E2E = 1417 total;
+1531 tracked PNGs; SKILL 3.73.0 + §99."""
+import re, sys
 
-REPO = "/home/z/my-project/eon-hr"
+def patch(path, subs, count):
+    src = open(path).read()
+    n = 0
+    for old, new in subs:
+        if old not in src:
+            print(f"  !! MISS in {path}: {old[:70]}...")
+            continue
+        src = src.replace(old, new, 1)
+        n += 1
+    open(path, "w").write(src)
+    print(f"{path}: {n}/{count} patches applied")
 
-def patch(path, pairs, append=None):
-    with open(path, encoding="utf-8") as f:
-        text = f.read()
-    for old, new in pairs:
-        n = text.count(old)
-        assert n >= 1, f"MISS in {path}: {old[:90]!r} (found {n})"
-        text = text.replace(old, new)
-    if append:
-        text = text.rstrip("\n") + "\n\n" + append.rstrip("\n") + "\n"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(text)
-    print(f"patched {path} ({len(pairs)} replacements)")
+# ---------------- AGENTS.md ----------------
+AG = []
+AG.append((
+  "| E2E tests | `bun run test:e2e` (Playwright, 460 specs — needs `bun run build` first; the runner does NOT build for you) |",
+  "| E2E tests | `bun run test:e2e` (Playwright, 476 specs — needs `bun run build` first; the runner does NOT build for you) |"))
+AGENTS_TAIL = """
 
-# ---------- AGENTS.md ----------
-patch(f"{REPO}/AGENTS.md", [
-    # the command row
-    ("| E2E tests | `bun run test:e2e` (Playwright, 460 specs — needs `bun run build` first; the runner does NOT build for you) |",
-     "| E2E tests | `bun run test:e2e` (Playwright, 472 specs — needs `bun run build` first; the runner does NOT build for you) |"),
-])
+## Session 88 / Parity Round 87 — the chart-suite + stale-measurement round
 
-AGENTS_LAYER = """## Session 88 (parity round 87) — THE MOBILE-BAND CROSS-SIDE ROUND (the r87 close-out's named frontier: the first full-registry cross-side pass at 390×844 — all 61 authed routes) finding TWELVE clone-authored defects, ALL TDD-FIXED
+The r87 close-out's named frontier #1 — **the surveyanalytics 3-chart reconfiguration** ("the biggest remaining structural divergence") — executed together with the named residuals the same probes re-measured. Seven routes re-captured cross-side, every STRUCTURAL cluster localized, **SEVENTEEN defect members ALL TDD-FIXED** (R88-A1..A3 the surveyanalytics zero-state chart suite: the empty surface / the -100..100 reference scale with the left YAxis / the right-axis scale + the legend pair — the round's key recharts lesson: 3.x computes no axis ticks for empty/all-null data even with an explicit domain; the explicit `ticks` ladder + `allowDataOverflow` are BOTH required (the #7362 handling); R88-B1..B4 the attendancedashboard family: the missing month input (the superset wired via the `?month=` round-trip), the chart1 geometry + the 19-tick 2.x-cadence mimic (the XAxis height pin — 3.x auto-grows the band for the inherited 16px font), the Clock-In grid-only form, the summary card's plain h80 header + "Rate" + the plain-table rebuild; R88-C the tenantsetup +6 header (the space-y collision class, third instance — v4's margin-bottom-on-not-last-child collides with the circle's mb-4); R88-D1..D5 the reports icon family (the bare 20px title icons, the Plane/DollarSign/Shield/FileCheck tab swaps — the full 11-glyph census, the shared RefFilterGlyph, the Download pair, the card-header gradient band — the sRGB-pinned trap-3 form); R88-E1..E3 the hrreports grid-only chart + the FileSpreadsheet/Download pair + the Data Table icon; R88-F the shiftswap 40px stat tiles (the R49-B1 STALE-MEASUREMENT RETIREMENT — the R50-A7 precedent); R88-G/G3/G4 the companywall composer (the inline-label space-y trap at 8px scale, the trigger's leading users icon, the Post button's disabled-at-empty state — pixel-proven via the 50%-opacity capture against the computed-style probe's misleading enabled read). The residual pass harvested four more members (the recharts 3.x LEGEND RESERVATION — 24px inside the svg vs 2.x's sibling; the tenantsetup fields' interior gap; the circle's Building2 icon; the reports gradient) + retired the instrument finds (the hrreports loading-state capture artifact — the client-fetching pages need ≥6s settles; the querySelector DOM-order trap — the 3.x legend-icon svgs precede the chart svgs).
 
-**The round's fresh-eyes instrument:** `r88-mobile-capture/diff/triage/crop-diff` + the VLM crop reads + both-sides DOM probes + **the 3× reload stability verification** (`r88-variant-stability2.mjs` — every pinned recipe re-read on fresh loads against the r87 second-build-variant finding; all twelve STABLE 3/3). The read: **39 STRUCTURAL / 22 MINOR/AA** on the 61-route mobile registry; the triage: 8 data-driven clusters classified (careers' live job board, employeeselfservice's REF-side loading loop, the 0-vs-1 stats family, the bottom tables, the avatar/name/role) + **TWELVE clone-authored defects**:
-
-- **R88-A the reports CATEGORY ICON family** — four glyph identities on one page: calendar-days→**Plane**, banknote→**DollarSign**, heart-handshake→**Shield**, file-text→**FileCheck** (the r86-E/R87 glyph-identity class)
-- **R88-B the advancedanalytics Schedule Report CTA** — CalendarClock→**Plus** (paths M5 12h14 ~ M12 5v14)
-- **R88-C the surveyanalytics ZERO-DATA CHARTS** — data=[] at zero responses on the Distribution + the Trend (the invented X axes retired; the queue's #1 structural divergence). The version-class residual documented: the REF's Trend Y-domain tick labels at zero data render only on recharts 2.x
-- **R88-D the analyticsdashboard actions cluster** — `flex-nowrap` (the REF's unwrapped `flex items-center gap-3`): the REF-authored mobile overflow chain — the 456px natural-width cluster → the 488 root scroll → the subtitle ONE line (h=24)
-- **R88-E the attendancedashboard MONTH FILTER** — the missing functional member: a `type=month` w-40 input FIRST in the actions, wired to `?month=YYYY-MM` (the server reads the param — window/title/day-count reload; the functional SUPERSET)
-- **R88-F the profile icon family** — Camera→**Upload** (Change Photo), User→**CircleUser** (General), Globe→**Share2** (Social)
-- **R88-G the chat conversations column** — **always visible** (the REF's `w-80 border-r flex flex-col`): the prior `hidden md:flex` was a clone-authored responsive invention leaving mobile users NO way to open a conversation — a functional regression AND a visual defect (the fix restores both)
-- **R88-H the shiftcalendar table** — the REF's inline **min-width: 700px** (100px day columns + the one-row toolbar follow from the overflow)
-- **R88-I the workflowconfigpage empty-state card** — the missed `text-card-foreground` (the r87-I card-family call site)
-- **R88-J the shiftswap stat-card TILES** — the r49 "inline icon family" pin RETIRED as a stale measurement: the live REF renders `w-10 h-10 rounded-xl bg-*-100` tiles with the icon inside
-- **R88-K the tenantsetup hero glyph** — Users→**Building2**
-- **R88-L the companywall audience filter** — the **Users** glyph inside the trigger's `flex items-center gap-2` wrapper
-
-**THE CONTRACT PINS:** `tests/e2e/session88-mobileband.spec.ts` (12 tests) RED 12/12 as designed → GREEN; the lockstep amendments: the recipes.test.ts profile tab pair (User→CircleUser, Globe→Share2) + the Schedule Report glyph (CalendarClock→Plus).
-
-**THE POST-FIX MOBILE RE-VERIFY:** chat **73→4**, shiftcalendar **101→3**, shiftswap **65→2**, workflowconfigpage **11→2**, analyticsdashboard **120→29**; the residuals carried with classifications (the data-driven sets + the tenantsetup title member + the companywall composer offset + the surveyanalytics version class). **THE DESKTOP-BAND REGRESSION CHECK:** the changed surfaces clean (chat 4, shiftswap 3, workflowconfigpage 4, profile 9 cells); the standing E2E pins the primary guard.
-
-**THE MOBILE-MENU CYCLE: GREEN** on the remediated build (open → Training LMS → /training → auto-close; no TW-v4 regression under the twelve fixes; the mobile-navigation suite 17/17 inside the 472).
-
-**THE BYTE CHAIN (r88-screenshots, numbers 1297-1345 + the dev-server set 1347-1357 → 1534 tracked PNGs):** the login standing pair **BYTE-IDENTICAL** to `69aa4241…` (the 58th holding through a THIRD consecutive round) + the twelve mobile re-baselines + the twelve desktop guards + the six DEV-SERVER captures (the running-codebase evidence).
-
-Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · **E2E 472/472 (the 460 standing + the 12 new, 8.1m, zero flakes)** · the login pair byte-identical · 1534 tracked screenshots (+56) · DB pristine. The plan: `docs/remediation-plan-session88.md`; the narrative: `docs/session_202.md`; the SKILL §99 (v3.73.0).
-
-The round's traps (retired): the chromium version wipe (1200 vs 1248 — the r1248 lesson re-fired), the daemon-overload class (three firings), the resource-exhaustion EAGAIN class, the MultiEdit phantom-partial-apply re-fired, the strict-mode hidden-sidebar selector class (the unique-subtitle-anchor form), the recharts-3.x tick-selector mismatch, the stale-viewport triage ghost, the exported-DATABASE_URL trap (the TENTH consecutive sandbox)."""
-
-with open(f"{REPO}/AGENTS.md", "a", encoding="utf-8") as f:
-    f.write("\n\n" + AGENTS_LAYER + "\n")
-print("AGENTS.md session-88 layer appended")
-
-# ---------- CLAUDE.md ----------
-patch(f"{REPO}/CLAUDE.md", [
-    ("a 1401-spec test pyramid (941 unit + 460 E2E",
-     "a 1413-spec test pyramid (941 unit + 472 E2E"),
-])
-
-# ---------- README.md ----------
-with open(f"{REPO}/README.md", encoding="utf-8") as f:
-    rd = f.read()
-pairs = [
-    ("1401", "1413"),
-    ("460 E2E", "472 E2E"),
-    ("1478 tracked", "1534 tracked"),
-]
-for old, new in pairs:
-    if old in rd:
-        rd = rd.replace(old, new)
-        print(f"README.md: {old} -> {new} ({rd.count(new)} now)")
-    else:
-        print(f"README.md: pattern {old!r} not found (verify manually)")
-with open(f"{REPO}/README.md", "w", encoding="utf-8") as f:
-    f.write(rd)
-
-# ---------- eon-hr_SKILL.md ----------
-with open(f"{REPO}/eon-hr_SKILL.md", encoding="utf-8") as f:
-    sk = f.read()
-m = re.search(r"> \*\*Version:\*\* 3\.72\.0", sk)
-assert m, "SKILL version line not found"
-sk = sk.replace("> **Version:** 3.72.0", "> **Version:** 3.73.0", 1)
-print("SKILL version -> 3.73.0")
-SKILL_SECTION = """
-
-## 99. The Mobile-Band Cross-Side Round (session 88 / parity round 87)
-
-**The lesson:** the responsive bands are SEPARATE parity surfaces. The desktop band (1440×900) had been full-registry cross-compared since r87 while the mobile band (390×844) had NEVER been — and it held TWELVE clone-authored defects invisible to every desktop-band round, including a functional regression (the chat column hidden at mobile left users unable to open a conversation) and a missing functional member (the attendancedashboard month filter). The cross-side protocol must be run PER BAND: the same route can be desktop-clean and mobile-divergent (and vice versa).
-
-**The standing rules from the round:**
-
-1. **Every pinned recipe is re-read 3× on fresh loads before it enters a remediation plan** — the r87 REF light-mode build variant means a single capture can read the flipped build; the stability probe (fresh session, three sequential loads, identical reads required) is the gate.
-2. **The strict-mode selector trap at mobile:** a `text=Page Title` wait matches the HIDDEN sidebar's nav item FIRST (display:none but earlier in DOM order) and stalls the wait — wait on a unique VISIBLE anchor (the subtitle text) instead.
-3. **The recharts 3.x selector form:** `.recharts-cartesian-axis-tick text` returns 0 — count the tick ELEMENT, not its text child.
-4. **The overflow-chain family is authored, not accidental:** the REF ships `min-width` on tables and unwrapped action clusters that deliberately overflow the mobile viewport (shiftcalendar 700px table; analyticsdashboard 456px cluster → the 488 scroll). Matching the REF means REPRODUCING its overflows — never "fix" them with responsive wrapping the REF does not carry (the R81-C lesson, now with two more members).
-5. **The stale-measurement retirement:** a pin that says "live-measured" measured the build of ITS day (the r49 shiftswap inline icons vs the live REF's tiles). When a live read contradicts an old pin, the live read wins and the pin is amended in the same commit — with the retirement documented.
-6. **The functional-superset bridge:** when the REF carries a functional member the clone lacks (the month filter), the fix wires it FULLY (the param round-trip), not just visually.
-
-**The traps of the round (documented in AGENTS/session_202):** the chromium version wipe, the daemon overload (three firings), the resource-exhaustion EAGAIN class, the MultiEdit phantom-partial-apply, the exported-DATABASE_URL trap (the tenth consecutive sandbox).
+Gates: lint 0/0 · tsc ✓ · **941/941 unit** · build ✓ · **E2E 476/476 (the 460 standing + the 16 new session88-chartrecipes pins, 8.5m, zero flakes)** · the post-fix pixel re-verify: tenantsetup/shiftswap/companywall CLOSED to the sidebar AA band, reports max11, hrreports max59, surveyanalytics max26 (the hairline AA), attendancedashboard carrying the classified residuals (the data-driven table row + the recharts-version grid class — 15 even-day verticals vs 19 axis ticks, NOT decouplable via the 3.x API; every visible member live-verified matching) · the byte chain (1297-1341, 46 PNGs → 1531 tracked): the login + standing pairs BOTH SIDES STABLE (the REF light-sidebar variant flip on employees/attendance + 2/7 REF dark flips — the standing theming watch; the LOC recruitment drift = the companion's post-merge R86-E baseline shift) · the mobile-menu cycle GREEN by the manual proof (the script's timing race documented + patched) · DB pristine (the probe user swept at the close). The plan: `docs/remediation-plan-session88.md`; the narrative: `docs/session_202.md`; the SKILL §99 (v3.73.0).
 """
-sk = sk.rstrip("\n") + "\n" + SKILL_SECTION
-with open(f"{REPO}/eon-hr_SKILL.md", "w", encoding="utf-8") as f:
-    f.write(sk)
-print("SKILL §99 appended")
+AG.append(("TAIL_MARKER_THAT_DOES_NOT_EXIST", "x"))  # placeholder replaced below
+patch("AGENTS.md", [AG[0]], 1)
+# append the session-88 layer at the end
+src = open("AGENTS.md").read()
+if "## Session 88 / Parity Round 87" not in src:
+    open("AGENTS.md", "w").write(src.rstrip() + "\n" + AGENTS_TAIL)
+    print("AGENTS.md: session-88 layer appended")
 
-print("\nDOCS PATCH COMPLETE")
+# ---------------- CLAUDE.md ----------------
+CLAUDE = [(
+  "and a 1401-spec test pyramid (941 unit + 460 E2E — the session-87 full-registry cross-side pixel-diff round extended the standing protocol to all 61 routes finding fourteen clone-authored defects all TDD-fixed",
+  "and a 1417-spec test pyramid (941 unit + 476 E2E — the session-88 chart-suite + stale-measurement round reconfigured the surveyanalytics zero-state chart trio to the REF's recharts-2.x contract (the reference-scale `ticks` + `allowDataOverflow` mechanism — 3.x computes no ticks for empty data), restored the attendancedashboard month input + chart geometry + the plain summary table, retired the R49-B1 shiftswap stale measurement (the 40px stat tiles), and closed the companywall/tenantsetup/reports/hrreports icon-and-spacing families (the prior session-87 full-registry cross-side pixel-diff round had extended the standing protocol to all 61 routes finding fourteen clone-authored defects all TDD-fixed")]
+patch("CLAUDE.md", CLAUDE, 1)
+
+# ---------------- README.md ----------------
+RM = []
+RM.append((
+  "| E2E tests | Playwright | 1.63 | 460 specs across auth,",
+  "| E2E tests | Playwright | 1.63 | 476 specs across auth,"))
+RM.append((
+  "bun run test:e2e      # Playwright E2E (460 specs) — boots the production standalone server",
+  "bun run test:e2e      # Playwright E2E (476 specs) — boots the production standalone server"))
+patch("README.md", RM, 2)
+
+# ---------------- eon-hr_SKILL.md ----------------
+SKILL = []
+SKILL.append((
+  "> **State:** 941 unit + 460 E2E tests green, lint/typecheck/build",
+  "> **State:** 941 unit + 476 E2E tests green, lint/typecheck/build"))
+patch("eon-hr_SKILL.md", SKILL, 1)
+# version line: 3.72.0 -> 3.73.0 with the session-88 summary + Previous chain
+src = open("eon-hr_SKILL.md").read()
+m = re.search(r"> \*\*Version:\*\* 3\.72\.0 (.*?)\· Previous: 3\.71\.0", src, re.S)
+if m:
+    body = m.group(1)
+    new_body = " (session-88 — THE CHART-SUITE + STALE-MEASUREMENT ROUND: the r87 close-out's named frontier #1, the surveyanalytics 3-chart reconfiguration, executed with the named residuals — SEVENTEEN defect members ALL TDD-FIXED incl. the round's key recharts lesson (3.x computes no axis ticks for empty/all-null data even with an explicit domain; the explicit `ticks` ladder + `allowDataOverflow` are BOTH required — the #7362 handling), the recharts 3.x LEGEND-RESERVATION lesson (24px inside the svg vs 2.x's sibling — the margin arithmetic), the XAxis auto-grow lesson (3.x grows the band for the inherited 16px tick font — the height={30} pin), the R49-B1 stale-measurement retirement (the shiftswap 40px stat tiles), and the pixel-probe-over-computed-style lesson (the Post button's disabled-at-empty state: the capture's 50%-opacity read against the live probe's enabled read) · Previous: 3.72.0"
+    src = src.replace(m.group(0), "> **Version:** 3.73.0" + new_body, 1)
+    open("eon-hr_SKILL.md", "w").write(src)
+    print("SKILL.md: version 3.73.0 line written")
+else:
+    print("  !! SKILL version line pattern not found — manual patch needed")
+# §99 section (after §98)
+SEC99 = """
+
+### §99 · Session 88 — the chart-suite + stale-measurement round (the surveyanalytics reconfiguration + the residuals)
+
+The r87 queue's #1 frontier. **The recharts 2.x-vs-3.x zero-state contract** (the round's standing lesson, all three surveyanalytics charts): the REF renders (1) an EMPTY surface for the distribution chart (no grid/axes — the conditional `{!empty && <CartesianGrid/>}` form), (2) the -100..100 REFERENCE SCALE for the trend chart (a left YAxis + the 7-line grid, NO months at the zero state), (3) the same scale RIGHT-orientation for the wide chart (+ the legend pair, NO XAxis, no left axis — the hidden `yAxisId="count"` axis reserves the left band as the REF's implicit default does). **The mechanism**: 3.x computes NO axis ticks for empty/all-null data even with an explicit `domain` — the explicit `ticks={[-100,-50,0,50,100]}` bypasses the computation AND `allowDataOverflow` is required for the literal domain to resolve at data=[] (`parseNumericalUserDomain` returns undefined otherwise — recharts #7362). **The legend reservation**: 3.x reserves the legend's 24px INSIDE the svg (2.x renders it as a sibling below) — the margin bottoms subtract it (the att chart1 bottom 5, the survey chart3 bottom 35). **The XAxis auto-grow**: 3.x grows the axis band to ~54px for the inherited 16px tick font — `height={30}` pins the REF's fixed band; `interval={0}` + the explicit ladder defeats 3.x's fit-pruning (which dropped the odd days 1-7 from the 19-tick cadence). **The measurement-order lesson**: the at-rest CAPTURE is the truth over the live computed-style probe (the companywall Post button's disabled-at-empty state reads enabled on the live DOM but renders the 50%-opacity disabled fill in the capture — rgb(138,138,138) = #171717 over white). **The capture-settle lesson**: the client-fetching pages (hrreports) need ≥6s settles — the pre-fetch loading state renders a whole different card body. **The DOM-order trap**: the 3.x wrapper renders the legend-icon svgs BEFORE the chart svgs — a bare `querySelector('svg.recharts-surface')` hits a 14×14 legend icon; always filter by geometry.
+
+The icon-and-spacing families: the reports full 11-glyph tab census (users/clock/plane/dollar-sign/trending-up/graduation-cap/shield/file-check/log-out/building2/chart-column), the bare 20px title icons (currentColor, no wrapper), the shared `RefFilterGlyph` (extracted to `src/components/shared/ref-filter-glyph.tsx`), the sRGB-pinned card-header gradient (`bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]` — the trap-3 form the employee-wizard already ships), the shiftswap 40px stat tiles (the R49-B1 retirement), the tenantsetup Building2 circle icon + the +6 header (the third space-y-collision instance — the explicit `mt-1.5` stacks where v4's margin-bottom collides), and the companywall audience trigger (the leading users icon inside SelectValue + the `mt-2` inline-label gap).
+
+**The carried-forward watch (the recharts-version grid class):** the REF's 2.x renders 15 grid verticals at the EVEN-day positions (its own grid tick-set) where 3.x renders 19 at the explicit axis ticks, plus ~0.7px band-center offsets and the subpixel text raster — NOT decouplable via the 3.x public API; every visible member (the chart type, the legend, the cadence, the geometry, the reference scales) live-verified matching. The r89 frontier: the mobile-band cross-side pass, the REF theme-variance root cause, or the next named residuals.
+"""
+if "### §99" not in src:
+    src = open("eon-hr_SKILL.md").read()
+    if "### §98" in src:
+        i = src.index("### §98")
+        # append at the end of the file instead (the sections are chronological)
+        open("eon-hr_SKILL.md", "w").write(src.rstrip() + "\n" + SEC99)
+        print("SKILL.md: §99 appended")
+    else:
+        print("  !! §98 not found")
+print("DONE")

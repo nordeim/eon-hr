@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, Loader2, Printer } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -171,12 +171,16 @@ export default function HRReportsPage() {
         subtitleClassName="mt-0 text-slate-500"
         actions={
           <>
+            {/* Session 88 (R88-E2): the REF's export pair —
+                FileSpreadsheet (CSV) + Download (PDF), both w-4 h-4
+                mr-2 (live-measured; the old Download + Printer was a
+                clone invention). */}
             <Button variant="outline" onClick={exportCsv}>
-              <Download className="mr-2" aria-hidden="true" />
+              <FileSpreadsheet className="w-4 h-4 mr-2" aria-hidden="true" />
               Export CSV
             </Button>
             <Button variant="outline" onClick={() => window.print()}>
-              <Printer className="mr-2" aria-hidden="true" />
+              <Download className="w-4 h-4 mr-2" aria-hidden="true" />
               Export PDF
             </Button>
           </>
@@ -297,8 +301,11 @@ export default function HRReportsPage() {
         <div className="flex flex-col space-y-1.5 p-6">
           <div className="flex items-center justify-between">
             <div className="font-semibold tracking-tight text-base">{`Data Table (${data?.records.length ?? 0} records)`}</div>
+            {/* Session 88 (R88-E3): the REF's Data Table Export icon —
+                FileSpreadsheet w-4 h-4 mr-1 (live-measured; the old
+                Download was the wrong glyph for this button). */}
             <Button variant="outline" size="sm" onClick={exportCsv}>
-              <Download className="mr-1" aria-hidden="true" />
+              <FileSpreadsheet className="w-4 h-4 mr-1" aria-hidden="true" />
               Export
             </Button>
           </div>

@@ -807,8 +807,14 @@ describe("chart-page heights + iconed stat rows (session 12, R11-T/U)", () => {
 
   it("surveyanalytics charts are 240/240/260", () => {
     const src = read("src", "app", "(app)", "surveyanalytics", "charts.tsx");
-    expect(src.match(/height=\{240\}/g)?.length ?? 0).toBe(2);
-    expect(src.match(/height=\{260\}/g)?.length ?? 0).toBe(1);
+    /* Session 88 (R88-A, the count-lockstep amendment): the three charts
+     * now carry the REF's zero-state branches — chart 2 and chart 3 each
+     * render a conditional pair (the empty reference-scale form + the
+     * with-data form), so the container heights read 3 x 240 + 2 x 260
+     * (the geometry unchanged: chart1 240, chart2 240 both branches,
+     * chart3 260 both branches). */
+    expect(src.match(/height=\{240\}/g)?.length ?? 0).toBe(3);
+    expect(src.match(/height=\{260\}/g)?.length ?? 0).toBe(2);
   });
 
   it("surveyanalytics + attendancedashboard stat rows carry icons + tiles (146px)", () => {
@@ -1162,7 +1168,10 @@ describe("reports tab tiles + filters (session 14, R13-F)", () => {
 
   it("active tab renders ONE card with the 20px-iconed leading-none title", () => {
     expect(browser).toMatch(/font-semibold leading-none/);
-    expect(browser).toMatch(/h-5 w-5/);
+    /* Session 88 (R88-D1, the count-lockstep amendment): the REF's title
+     * icon is the BARE 20px svg at `w-5 h-5` (the class-order form,
+     * live-measured; the old h-5 w-5 wrapper-span form retired). */
+    expect(browser).toMatch(/w-5 h-5/);
   });
 
   it("report tiles are the p-4 recipe with two iconed 152px buttons", () => {
@@ -6173,7 +6182,10 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
 
   it("R58-1..6: the DARK-solid sites — the wall Post, the profile saves, the loans empty CTA, tenantsetup, securitysettings, hrassistant send", () => {
     // the wall's Post: REF bg-primary solid (the dark recipe)
-    expect(wallPage()).toContain('<Button variant="dark" onClick={onPost} disabled={posting}>');
+    /* Session 88 (R88-G4, the count-lockstep amendment): the Post
+     * button adds the empty-content disabled state (the REF's
+     * opacity-50 at-rest capture — pixel-proven rgb(138,138,138)). */
+    expect(wallPage()).toContain('<Button variant="dark" onClick={onPost} disabled={posting || !content.trim()}>');
     // the profile's four saves (Save Changes / Save Preferences / Update Password / Save Accounts)
     expect((profilePageR58().match(/<Button type="submit"[^>]*variant="dark"/g) || []).length).toBeGreaterThanOrEqual(4);
     // the loans empty-state CTA joins the other four dark empty-state CTAs

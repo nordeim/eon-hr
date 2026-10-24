@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, CircleCheckBig, Clock, Download, TriangleAlert, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,18 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { useToast } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
 import { initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ClockInDistribution, DailyAttendanceTrend, type DayPoint, type HourBucket } from "./charts";
@@ -50,13 +42,10 @@ export interface AttendanceRecordRow {
 export interface AttendanceDashboardData {
   departments: DepartmentOption[];
   employees: AttendanceEmployee[];
-  records: AttendanceRecordRow[]; // current month only
+  records: AttendanceRecordRow[]; // the selected month only
   monthTitle: string; // "October 2026"
   daysInMonth: number;
-  /* Session 88 (R88-E): the selected month as YYYY-MM (drives the
-     header's type=month filter input — the REF renders it first in the
-     actions cluster). */
-  monthValue: string;
+  monthValue: string; // "2026-10" — the R88-B1 month picker's value
 }
 
 function escapeCsv(value: string): string {
@@ -82,8 +71,8 @@ function rate(present: number, absent: number, late: number): number {
 }
 
 export function AttendanceDashboard({ data }: { data: AttendanceDashboardData }) {
-  const router = useRouter();
   const toast = useToast();
+  const router = useRouter();
   const [department, setDepartment] = React.useState<string>("all");
 
   const employees = React.useMemo(
@@ -154,7 +143,9 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
       return;
     }
     const rows: (string | number | null)[][] = [
-      ["Employee", "Department", "Present", "Absent", "Late", "Rate %"],
+      /* Session 88 (R88-B4): the REF's last column is "Rate" (not
+       * "Rate %" — live-measured on the plain th). */
+      ["Employee", "Department", "Present", "Absent", "Late", "Rate"],
       ...summary.map((s) => [
         s.employee.name,
         s.employee.department ?? "—",
@@ -180,21 +171,19 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
         subtitle="Daily clock-in/out trends, late arrivals & department reports"
         actions={
           <>
-            {/* Session 88 (R88-E): the REF's month filter — a type=month
-               input as the FIRST header action (w=160, the standard Input
-               classes, the current-month default; live-measured 3/3
-               reload-stable). Changing it navigates with ?month=YYYY-MM
-               (the functional superset: the server re-renders the window,
-               title, and day count for the selected month). */}
+            {/* Session 88 (R88-B1): the REF's month picker — a type=month
+                Input (w-40) BEFORE the department select, value the
+                selected month (live-measured x885 w160 h36). The superset:
+                picking a month refetches via the ?month= param. */}
             <Input
               type="month"
               className="w-40"
+              aria-label="Filter by month"
               value={data.monthValue}
               onChange={(e) => {
-                const v = e.target.value;
-                if (v) router.push(`/attendancedashboard?month=${v}`);
+                const next = e.target.value;
+                if (next) router.push(`/attendancedashboard?month=${next}`);
               }}
-              aria-label="Filter by month"
             />
             <Select value={department} onValueChange={setDepartment}>
               <SelectTrigger className="w-44" aria-label="Filter by department">
@@ -252,57 +241,63 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
-          <div className="space-y-1.5">
-            <CardTitle>Employee Attendance Summary</CardTitle>
-            <CardDescription>
-              {data.monthTitle} attendance breakdown per employee
-            </CardDescription>
+        {/* Session 88 (R88-B4): the REF's summary card — the PLAIN h80
+            CardHeader (`flex flex-col space-y-1.5 p-6`) wrapping ONE
+            justify-between row: the title-only div (font-semibold
+            tracking-tight text-base, NO description) + the inline
+            outline sm export button (live-measured h80 vs the flex-row
+            h98 form with the description). */}
+        <div className="flex flex-col space-y-1.5 p-6">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold tracking-tight text-base">Employee Attendance Summary</div>
+            <Button variant="outline" size="sm" onClick={exportReport}>
+              <Download className="mr-1" aria-hidden="true" />
+              Export
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={exportReport}>
-            <Download className="mr-1" aria-hidden="true" />
-            Export
-          </Button>
-        </CardHeader>
+        </div>
         <CardContent className="px-0 pb-0">
-          {/* Session 23 (R22-F): REF renders the 37px all-left th
-              (`text-left py-2 px-3 text-slate-500 font-medium` on ALL six
-              columns — including the numeric ones) and, at 0 rows, the
-              header-only table + a bare `py-8 text-slate-400` P as the
-              table's SIBLING — NOT an EmptyState component. */}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Employee</TableHead>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Department</TableHead>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Present</TableHead>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Absent</TableHead>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Late</TableHead>
-                <TableHead className="text-left py-2 px-3 text-slate-500 font-medium">Rate %</TableHead>
-              </TableRow>
-            </TableHeader>
+          {/* Session 23 (R22-F) + Session 88 (R88-B4): the REF renders a
+              PLAIN table — `w-full text-sm`, a class-less thead, the
+              `border-b border-slate-200` tr, and bare
+              `text-left py-2 px-3 text-slate-500 font-medium` th's (the
+              shadcn Table component's base classes polluted every th/tr
+              and shifted the row border color — the r86-I class). At 0
+              rows: the header-only table + a bare `py-8 text-slate-400` P
+              as the table's SIBLING — NOT an EmptyState component. */}
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Employee</th>
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Department</th>
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Present</th>
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Absent</th>
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Late</th>
+                <th className="text-left py-2 px-3 text-slate-500 font-medium">Rate</th>
+              </tr>
+            </thead>
             {summary.length > 0 ? (
-              <TableBody>
+              <tbody>
                 {summary.map((s) => (
-                  <TableRow key={s.employee.id}>
-                    <TableCell className="py-2 px-3">
+                  <tr key={s.employee.id} className="border-b border-slate-100">
+                    <td className="py-2 px-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>{initials(s.employee.name)}</AvatarFallback>
                         </Avatar>
                         <span className="font-medium text-foreground">{s.employee.name}</span>
                       </div>
-                    </TableCell>
-                    <TableCell className="py-2 px-3 text-muted-foreground">{s.employee.department ?? "—"}</TableCell>
-                    <TableCell className="py-2 px-3">{s.present}</TableCell>
-                    <TableCell className="py-2 px-3">{s.absent}</TableCell>
-                    <TableCell className="py-2 px-3">{s.late}</TableCell>
-                    <TableCell className="py-2 px-3 font-medium">{s.rate}%</TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="py-2 px-3 text-muted-foreground">{s.employee.department ?? "—"}</td>
+                    <td className="py-2 px-3">{s.present}</td>
+                    <td className="py-2 px-3">{s.absent}</td>
+                    <td className="py-2 px-3">{s.late}</td>
+                    <td className="py-2 px-3 font-medium">{s.rate}%</td>
+                  </tr>
                 ))}
-              </TableBody>
+              </tbody>
             ) : null}
-          </Table>
+          </table>
           {summary.length === 0 ? (
             <p className="text-center text-slate-400 py-8">No employees found for selected filter.</p>
           ) : null}

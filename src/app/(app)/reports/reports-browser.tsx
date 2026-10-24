@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Building2, CalendarRange, Clock, Download, FileCheck, FileText, GraduationCap, LogOut, Plane, DollarSign, Printer, Shield, TrendingUp, Users } from "lucide-react";
+import { BarChart3, Building2, Clock, DollarSign, Download, FileCheck, FileText, GraduationCap, LogOut, Plane, Shield, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/shared/page-header";
+import { RefFilterGlyph } from "@/components/shared/ref-filter-glyph";
 import { useToast } from "@/components/ui/toast";
 
 export interface DepartmentOption {
@@ -31,9 +32,14 @@ interface ReportDef {
 interface Category {
   id: string;
   label: string;
-  /** Session 11 (R10-L): every reference chip carries a 16px icon
-   *  (gap-2) — the per-category lucide set. */
-  icon: React.ReactNode;
+  /** Session 11 (R10-L) + Session 88 (R88-D1/D2): every reference chip
+   *  carries a 16px icon (gap-2) — the per-category lucide set, stored
+   *  as the COMPONENT so each site renders its own size: the tab at
+   *  h-4 w-4 (16px, live-measured), the card title at w-5 h-5 (20px,
+   *  currentColor — the R88-D1 bare-icon recipe, no blue wrapper).
+   *  R88-D2: Leave & Absence = Plane, Payroll & Compensation =
+   *  DollarSign (the old CalendarDays/Banknote were inventions). */
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
   reports: ReportDef[];
 }
 
@@ -41,7 +47,7 @@ const CATEGORIES: Category[] = [
   {
     id: "employee-master",
     label: "Employee Master",
-    icon: <Users className="h-4 w-4" aria-hidden="true" />,
+    icon: Users,
     reports: [
       {
         title: "Employee List (Active/Inactive/Terminated)",
@@ -78,7 +84,7 @@ const CATEGORIES: Category[] = [
   {
     id: "attendance-time",
     label: "Attendance & Time",
-    icon: <Clock className="h-4 w-4" aria-hidden="true" />,
+    icon: Clock,
     reports: [
       { title: "Daily Attendance Report", description: "Present, absent and late records per day", type: "attendance" },
       { title: "Late Arrivals Report", description: "Late check-ins with minutes late", type: "late-arrivals" },
@@ -88,9 +94,7 @@ const CATEGORIES: Category[] = [
   {
     id: "leave-absence",
     label: "Leave & Absence",
-    /* Session 88 (R88-A): the REF's glyph identities (live-measured,
-       3/3 reload-stable): plane / dollar-sign / shield / file-check. */
-    icon: <Plane className="h-4 w-4" aria-hidden="true" />,
+    icon: Plane,
     reports: [
       { title: "Leave Requests Report", description: "All leave requests with status and days", type: "leave" },
       { title: "Leave Balances Report", description: "Entitled vs used days per leave type", type: "leave-balances" },
@@ -100,8 +104,7 @@ const CATEGORIES: Category[] = [
   {
     id: "payroll-compensation",
     label: "Payroll & Compensation",
-    /* Session 88 (R88-A): dollar-sign, not banknote. */
-    icon: <DollarSign className="h-4 w-4" aria-hidden="true" />,
+    icon: DollarSign,
     reports: [
       { title: "Payroll Register", description: "Full payroll breakdown per period", type: "payroll" },
       { title: "Salary Disbursement Report", description: "Paid payslips only", type: "payroll-disbursement" },
@@ -111,7 +114,7 @@ const CATEGORIES: Category[] = [
   {
     id: "performance-appraisal",
     label: "Performance & Appraisal",
-    icon: <TrendingUp className="h-4 w-4" aria-hidden="true" />,
+    icon: TrendingUp,
     reports: [
       { title: "Goals & KPI Report", description: "Goal progress and status per employee", type: "performance-goals" },
       { title: "Performance Reviews Report", description: "Review ratings and completion", type: "performance-reviews" },
@@ -121,7 +124,7 @@ const CATEGORIES: Category[] = [
   {
     id: "training-development",
     label: "Training & Development",
-    icon: <GraduationCap className="h-4 w-4" aria-hidden="true" />,
+    icon: GraduationCap,
     reports: [
       { title: "Training Platforms Report", description: "Connected learning platforms", type: "training" },
       { title: "Course Catalog Report", description: "Available courses per platform", type: "training-courses" },
@@ -130,8 +133,7 @@ const CATEGORIES: Category[] = [
   {
     id: "employee-relations",
     label: "Employee Relations",
-    /* Session 88 (R88-A): shield, not heart-handshake. */
-    icon: <Shield className="h-4 w-4" aria-hidden="true" />,
+    icon: Shield,
     reports: [
       { title: "Staff Requests Report", description: "Requests across categories and priorities", type: "employee-relations" },
       { title: "Survey Responses Report", description: "Engagement survey responses with sentiment", type: "survey-responses" },
@@ -141,8 +143,7 @@ const CATEGORIES: Category[] = [
   {
     id: "contracts-compliance",
     label: "Contracts & Compliance",
-    /* Session 88 (R88-A): file-check, not file-text. */
-    icon: <FileCheck className="h-4 w-4" aria-hidden="true" />,
+    icon: FileCheck,
     reports: [
       { title: "Document Register", description: "All tracked employee documents", type: "contracts" },
       { title: "Document Expiry Report", description: "Documents sorted by expiry date", type: "document-expiry" },
@@ -152,7 +153,7 @@ const CATEGORIES: Category[] = [
   {
     id: "exit-separation",
     label: "Exit & Separation",
-    icon: <LogOut className="h-4 w-4" aria-hidden="true" />,
+    icon: LogOut,
     reports: [
       { title: "Offboarding Report", description: "Departures with reasons and status", type: "exit" },
       { title: "Exit Checklists Report", description: "Checklist completion status per departure", type: "exit-checklists" },
@@ -161,7 +162,7 @@ const CATEGORIES: Category[] = [
   {
     id: "organizational",
     label: "Organizational",
-    icon: <Building2 className="h-4 w-4" aria-hidden="true" />,
+    icon: Building2,
     reports: [
       { title: "Headcount by Department", description: "Employees and active counts per department", type: "organizational" },
       { title: "Reporting Structure Report", description: "Manager and direct-report mapping", type: "org-structure" },
@@ -170,7 +171,7 @@ const CATEGORIES: Category[] = [
   {
     id: "analytics-decision",
     label: "Analytics & Decision",
-    icon: <BarChart3 className="h-4 w-4" aria-hidden="true" />,
+    icon: BarChart3,
     reports: [
       { title: "Workforce Analytics Summary", description: "Key HR metrics in one table", type: "analytics" },
       { title: "Turnover Analysis", description: "Terminated employees and turnover rate", type: "turnover" },
@@ -250,7 +251,7 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
         <TabsList className="h-auto w-full flex-wrap justify-center border border-slate-200 bg-white text-neutral-500">
           {CATEGORIES.map((c) => (
             <TabsTrigger key={c.id} value={c.id} className="gap-2">
-              {c.icon}
+              <c.icon className="h-4 w-4" aria-hidden="true" />
               {c.label}
             </TabsTrigger>
           ))}
@@ -269,9 +270,17 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
                 at both levels — live-read, computed border
                 rgb(226,232,240)). */}
             <Card className="border-slate-200">
-              <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
+              {/* Session 88 (R88-D5): the REF's card header carries the
+                  gradient band (bg-gradient-to-r from-blue-50 to
+                  indigo-50 — live-measured computed rgb(239,246,255) at
+                  the left edge). The TW-v4 trap-3 rule: parity-critical
+                  gradients pin the sRGB interpolation via the
+                  arbitrary-value form (v4's bg-gradient-to-* interpolates
+                  in oklab and drifts the blend). */}
+              <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200 bg-[linear-gradient(to_right,#eff6ff,#eef2ff)]">
                 <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
-                  <span className="flex h-5 w-5 items-center justify-center text-blue-600">{c.icon}</span>
+                  {/* Session 88 (R88-D1): the REF's bare title icon — a DIRECT svg child of the title div at w-5 h-5 (20px), currentColor (the title's own ink; the old blue 16px wrapper span was a clone invention). */}
+                  <c.icon className="w-5 h-5" aria-hidden="true" />
                   {c.label} Reports
                 </div>
               </CardHeader>
@@ -287,12 +296,13 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
                     <div key={r.type} className="rounded-xl border bg-card text-card-foreground shadow border-slate-200 p-4">
                       <h3 className="font-semibold text-slate-900 mb-3">{r.title}</h3>
                       <div className="flex gap-2">
+                        {/* Session 88 (R88-D4): the REF renders Download on BOTH export buttons (`lucide-download w-3 h-3 mr-2` — the w-3 h-3 classes are DEAD, the button's [&_svg]:size-4 wins and the icon renders 16px, computed-verified; the class list mirrors the REF's DOM). The old Printer on the PDF was an invention. */}
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => exportCsv(r)}>
-                          <Download className="mr-2" aria-hidden="true" />
+                          <Download className="w-3 h-3 mr-2" aria-hidden="true" />
                           CSV
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => window.print()}>
-                          <Printer className="mr-2" aria-hidden="true" />
+                          <Download className="w-3 h-3 mr-2" aria-hidden="true" />
                           PDF
                         </Button>
                       </div>
@@ -311,7 +321,8 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
       <Card>
         <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
           <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
-            <CalendarRange className="h-5 w-5 text-blue-600" aria-hidden="true" />
+            {/* Session 88 (R88-D3): the REF's Report Filters title glyph — the CLASSIC-triangle Filter (the r87 lucide-version escalation, the vendored RefFilterGlyph — lucide 0.525's Funnel has different geometry), w-5 h-5 currentColor. */}
+            <RefFilterGlyph className="w-5 h-5" />
             Report Filters
           </div>
         </CardHeader>
