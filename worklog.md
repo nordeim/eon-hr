@@ -2383,3 +2383,29 @@ Work Log:
 Stage Summary:
 - Round 87 delivered: THE MOBILE-BAND CROSS-SIDE ROUND — the program's first complete 61-route cross-side coverage at 390×844 found TWELVE clone-authored defects (four icon-identity families + two REF-authored mobile-overflow chains + the missing functional month filter + the chat mobile-usability regression + the surveyanalytics zero-data charts + the stale-measurement retirement), ALL TDD-FIXED; the 58th deploy held through a third consecutive round; the mobile-menu emphasis verified GREEN; E2E 472/472
 - The r89 queue: the tenantsetup title font member, the companywall composer offset, the dark/RTL mobile bands (never cross-compared), the REF theme-variance root cause
+
+
+---
+
+Agent: session-89 (parity round 88 — the dark/rtl mobile-band round)
+Task: Session 89 / Parity Round 88 — the first cross-side DARK/RTL mobile-band pass at 390×844 (the r88 close-out's named frontier) + the standing mobile-menu emphasis + the carried queue
+
+Work Log:
+- Workspace RESET (the eleventh): fresh clone @ 94694f7 (the round-87 union + the owner's session_204 transcript) · the environment rebuilt (.env + install + db push/seed, the exported-DATABASE_URL trap ACTIVE for the eleventh sandbox)
+- Baseline gates GREEN on the unmodified HEAD: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 488/488 (8.8m, zero flakes — the chromium version-wipe trap re-fired: 1200 vs 1248, re-installed)
+- The standing audit: patch watch HOLD (16.4.3 = bug-fix backports only) · TW-v4 scan clean · secrets zero · the r88 union forms verified in-source
+- THE OPENING READ: the 59TH LOGIN DEPLOY detected (login JS index-DzlN4LV0 → index-BWZiPLrS + the frontend-config script now on login) — classified NON-VISUAL: the fresh login pair BYTE-IDENTICAL to 69aa4241 + standing 5/5 + sweep 12/12 (after the cookie re-auth) + verify-r49 13/13 + verify-r45 13/13 + the Turnstile census 0 widgets
+- THE FRONTEND-CONFIG DECODED: TURNSTILE_LOGIN_ENABLED "true" (configured, 0 widgets rendered) + the PRE_AUTH_EXPERIMENTS system — THE THEME-VARIANCE ROOT CAUSE (two fresh sessions read different variant assignments: "tagline" vs "control" — the per-visitor A/B experiment mechanism behind the documented non-deterministic REF theme variance)
+- THE DARK MOBILE-BAND PASS: all 61 routes captured cross-side @390×844 DARK → 26 IDENTICAL / 13 MINOR-AA / 22 STRUCTURAL
+- The triage: the digest + cluster + VLM-with-DOM-verification (five VLM misreads caught) → 4 REF-BROKEN routes (hrreports + interviewassistant render an EMPTY #root; employeeselfservice + employeedetail an empty shell — below ~640px, theme-independent; the r88 "loading-loop" classification of employeeselfservice RETRACTED) · 10 data/role classes · 5 clone-authored defects
+- THE FIVE DEFECTS TDD-FIXED (RED 6/6 → GREEN): R89-A the attendancedashboard tick-font inversion (the REF's MIXED form — X 11px / Y 16px — the r88-B2 round's wrong-axis measurement corrected; the 11px XAxis pin restored + the YAxis pinned + the REF's overflow-x-auto > w-full text-sm card-body wrapper + the Export button's w-full md:w-auto wrap — the button was OFF-CANVAS at x=376, now the REF's exact x=16/y=217/w=163) · R89-B the analyticsdashboard mirror inversion (the three stale 11px pins removed) · R89-C the requestsettings email input → the REF's type=text · R89-D the hrassistantchat grid height (lg:-gated → unconditional; the route CLOSED to IDENTICAL) · R89-E the profile kicker hoist (the exported PageHeaderMobileKicker at the page root — the 32px offset retired; 86 → 5 cells)
+- THE LOCKSTEP AMENDMENTS: the R88-B2 e2e pin (the wrong-axis 16px claim → the Y-tick contract) + the R61-O/R63-C/R17-B unit pins (the kicker props on the standalone component) — five amended, 941 unchanged
+- THE RTL MOBILE-BAND PASS: all 61 routes captured cross-side @390×844 RTL (app_lang=ar) → 0 IDENTICAL / 34 MINOR-AA / 27 STRUCTURAL — the capture-validity trap retired (the VLM LTR misjudgment disproven by the md5 byte-compare dbe7e9dc8f); the systematic bidi AA floor + the same residual classes as the dark band + two RTL-specific members flagged for r90
+- THE MOBILE-MENU CYCLE GREEN on the baseline AND the fixed build (open → Training LMS → /training → auto-close; no TW-v4 regression under the five fixes)
+- THE POST-FIX DARK RE-CAPTURE: hrassistantchat 56 → IDENTICAL · profile 86 → 5 · attendancedashboard 88 → 35 (the residual = the documented recharts-version grid class + the data table row)
+- THE EVIDENCE CHAIN 1403-1427 (the dev-server set 1403-1413 + the dark/RTL band pairs) → 1596 tracked PNGs
+- Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 494/494 (the 488 standing + the 6 new, 8.9m, zero flakes) · DB pristine · .env.example re-verified
+
+Stage Summary:
+- Round 88 delivered: THE DARK/RTL MOBILE-BAND ROUND — the first cross-side pass over both theme-direction states at mobile, finding FIVE clone-authored defects ALL TDD-FIXED (the mixed tick-font family with the wrong-axis measurement lesson, the off-canvas Export button, the email input, the grid height, the kicker hoist) + the REF-BROKEN mobile set standing finding (the functional-superset proof) + the theme-variance root cause DECODED (the per-visitor experiment system)
+- The r90 queue: the two RTL-specific members (the assetmanagement chevron, the allleaverequests icon spacing), the dark-band data residuals' re-reads, the recharts-version grid class (the standing watch), the experiment-assignment protocol's standing adoption, the 59th-or-newer login ladder (the re-armed watch)

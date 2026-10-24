@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PageHeader } from "@/components/shared/page-header";
+import { PageHeader, PageHeaderMobileKicker } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { initials } from "@/lib/utils";
@@ -333,6 +333,24 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
+      {/* Session 89 (R89-E): the kicker HOISTED out of the content column —
+       * the REF's profile tree renders it as the page root's direct child
+       * (p-4 > [kicker, max-w-5xl > [hero…]]), unlike every other kicker
+       * page. Inside the space-y-8 column it became the first child and
+       * the 32px space-y gap below it offset the whole page at mobile
+       * (the avatar at y=383 vs the REF's 351). */}
+      <PageHeaderMobileKicker
+        title="Profile"
+        subtitle="Manage your account"
+        back
+        /* Session 61 (R61-O) → session 63 (R63-C): REF's profile kicker
+           subtitle is the FLIPPING pair — slate-500 (rgb(100,116,139))
+           in light, slate-400 (rgb(148,163,184)) in dark. The r61-O pin
+           froze slate-400 from the dark census alone (the r63 light
+           census + the 390×844 mobile re-measure caught the light side;
+           the other kickers stay slate-500 both themes). */
+        subtitleClassName="text-slate-500 dark:text-slate-400"
+      />
       <div className="max-w-5xl mx-auto space-y-8">
       <PageHeader
         /* Session 49 (R48-A2): the bare family — REF renders the hero
@@ -340,17 +358,6 @@ export default function ProfilePage() {
          *  Live-measured @1440×900 this round. */
         bare
         section="My Profile"
-        mobileKicker
-        mobileKickerTitle="Profile"
-        mobileKickerBack
-        mobileKickerSubtitle="Manage your account"
-        /* Session 61 (R61-O) → session 63 (R63-C): REF's profile kicker
-           subtitle is the FLIPPING pair — slate-500 (rgb(100,116,139))
-           in light, slate-400 (rgb(148,163,184)) in dark. The r61-O pin
-           froze slate-400 from the dark census alone (the r63 light
-           census + the 390×844 mobile re-measure caught the light side;
-           the other kickers stay slate-500 both themes). */
-        mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"
         layout="flat48"
         iconClassName="text-blue-600"
         sectionIcon={<CircleUser aria-hidden="true" />}

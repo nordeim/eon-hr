@@ -55,7 +55,11 @@ export function HiringTrendArea({ data }: { data: MonthPoint[] }) {
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+        {/* Session 89 (R89-B): the stale 11px pin RETIRED — the REF
+         * renders EVERY tick on this page at the inherited 16px
+         * (live-verified, the r89 tickfont probe; the mirror image of
+         * the attendancedashboard inversion). */}
+        <XAxis dataKey="label" />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
         <Area type="monotone" dataKey="hires" name="New employees" stroke="#2563eb" fill="#dbeafe" strokeWidth={2} />
@@ -69,7 +73,7 @@ export function AttendanceVsLeaveBar({ data }: { data: MonthPoint[] }) {
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+        <XAxis dataKey="label" />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
         <Legend />
@@ -85,7 +89,7 @@ export function ExpenseTrendLine({ data }: { data: MonthPoint[] }) {
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+        <XAxis dataKey="label" />
         <YAxis width={72} tickFormatter={(v: number) => (v >= 100000 ? `${Math.round(v / 100000)}k` : `${Math.round(v / 100)}`)} />
         <Tooltip formatter={(value) => [formatSar(Number(value)), "Expenses"]} />
         <Line type="monotone" dataKey="expenses" name="Expenses (SAR)" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />

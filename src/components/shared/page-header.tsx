@@ -72,6 +72,43 @@ const HEADER_LAYOUTS = {
 
 export type HeaderLayout = keyof typeof HEADER_LAYOUTS;
 
+/* Session 89 (R89-E): the kicker extracted into a standalone export —
+ * the REF's /profile tree hoists the mobile kicker OUT of the content
+ * column (p-4 root > [kicker, max-w-5xl > [hero…]]), while every other
+ * kicker page renders it as the PageHeader's first block INSIDE the
+ * column. The profile page renders this component directly; the internal
+ * path below uses the same implementation (zero change for other pages).
+ * The props mirror the mobileKicker* family. */
+export function PageHeaderMobileKicker({
+  title,
+  subtitle,
+  back = false,
+  subtitleClassName,
+}: {
+  title: string;
+  subtitle?: string;
+  back?: boolean;
+  subtitleClassName?: string;
+}) {
+  return (
+    <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top">
+      <div className="flex items-center gap-3">
+        {back ? (
+          <Button variant="ghost" className="h-9 w-9 select-none" asChild>
+            <Link href="/dashboard" aria-label="Back to dashboard">
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          </Button>
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate">{title}</h1>
+          {subtitle ? <p className={cn("text-xs text-slate-500 truncate", subtitleClassName)}>{subtitle}</p> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PageHeader({
   section,
   sectionIcon,
@@ -212,41 +249,15 @@ export function PageHeader({
   return (
     <>
       {mobileKicker ? (
-        // Session 9 (R8-G): the redeployed reference's kicker is no longer
-        // effectively sticky — its `sticky top-0` sits inside a non-scrolling
-        // wrapper stack (measured: window scrolls, kicker scrolls away,
-        // y=-89 at scrollY=178). Static bar matches the rendered truth.
-        // Session 47 (R46-A5): the CLASS re-adopted verbatim — the live
-        // census reads REF's current kicker as `md:hidden sticky top-0
-        // z-20 bg-white dark:bg-slate-900 border-b border-slate-200
-        // dark:border-slate-800 px-4 py-3 safe-area-top` (the sticky stays
-        // inert inside the r39 scroller stack; the dark: pair + the
-        // safe-area-top member are the r39 shell families).
-        <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-area-top">
-          <div className="flex items-center gap-3">
-            {mobileKickerBack ? (
-              // Session 18 (R17-B): REF's back button — ghost h-9 w-9 with
-              // the 20px ArrowLeft (w-5 h-5, NOT the 16px default). REF
-              // navigates to /Dashboard (its casing quirk); the clone links
-              // to the casing-fixed /dashboard (documented deviation) and
-              // carries an aria-label REF lacks (a11y superset).
-              // Session 49 (R48-C3): REF's kicker back button carries
-              // select-none too (measured on payrollreports' kicker).
-              <Button variant="ghost" className="h-9 w-9 select-none" asChild>
-                <Link href="/dashboard" aria-label="Back to dashboard">
-                  <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-                </Link>
-              </Button>
-            ) : null}
-            <div className="min-w-0 flex-1">
-              {/* Session 48 (R47-A1): REF's kicker h1 carries the dark pair
-                (measured on every REF kicker — text-lg font-bold
-                text-slate-900 dark:text-white truncate). */}
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate">{mobileKickerTitle ?? title}</h1>
-              {mobileKickerSubtitle ? <p className={cn("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName)}>{mobileKickerSubtitle}</p> : null}
-            </div>
-          </div>
-        </div>
+        // Session 89 (R89-E): the internal path now renders the extracted
+        // standalone component (the same markup — the R8-G/R46-A5/R17-B/
+        // R47-A1/R48-C3 history carries in the component below).
+        <PageHeaderMobileKicker
+          title={mobileKickerTitle ?? title}
+          subtitle={mobileKickerSubtitle}
+          back={mobileKickerBack}
+          subtitleClassName={mobileKickerSubtitleClassName}
+        />
       ) : null}
       {bare ? (
         // Session 49 (R48-A2): the bare family — the hero block as a

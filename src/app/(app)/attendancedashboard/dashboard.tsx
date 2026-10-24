@@ -198,10 +198,22 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={exportReport}>
-              <Download className="mr-2" aria-hidden="true" />
-              Export Report
-            </Button>
+            {/* Session 89 (R89-A2): the button wrapped in a w-full md:w-auto
+             * div — the REF's mobile form renders the Export button on its
+             * OWN row (x=16/y=217/w=163, live-measured) because its page
+             * min-content (544, the recharts 2.x mount size) sits below the
+             * row's 523 max-content. The clone's 3.x mount size (575) leaves
+             * the row unwrapped — the button lands OFF-CANVAS at x=376 on
+             * the 390 viewport (unreachable at scroll-x=0). The wrapper
+             * restores the REF's rendered form exactly (verified in-sim:
+             * x=16/y=217/w=163); at md+ the div collapses to auto and the
+             * desktop row is unchanged. */}
+            <div className="w-full md:w-auto">
+              <Button variant="outline" onClick={exportReport}>
+                <Download className="mr-2" aria-hidden="true" />
+                Export Report
+              </Button>
+            </div>
           </>
         }
       />

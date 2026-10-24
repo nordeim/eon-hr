@@ -173,7 +173,7 @@ export default function HrAssistantChatPage() {
           Session 31 (R30-B): the card is REF's natural-height recipe —
           CardHeader (p-4, border-b) + the p-2 max-h-96 list body — NOT a
           stretched column card (REF's bottom lands at y≈362). */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:h-[calc(100vh-250px)]">
+      <div className="grid lg:grid-cols-4 gap-6 h-[calc(100vh-250px)]">
         {/* chat list */}
         <div className="flex flex-col space-y-4 lg:col-span-1">
           <Button variant="purple" className="w-full" onClick={onNewChat}>

@@ -62,22 +62,49 @@ export function DailyAttendanceTrend({ data }: { data: DayPoint[] }) {
    * bottom 177; the REF's 2.x layout: 29 + 30 = 59 → 201. The 3.x
    * equivalent: bottom 5 (5 + 30 + 24 = 59). */
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="day" interval={0} height={30} ticks={attendanceTickCadence(data.length)} />
-        <YAxis allowDecimals={false} />
-        <Tooltip />
-        {/* Session 87 (R87-N): recharts 3.x's Legend sorts its items by
+    /* Session 89 (R89-A2): the REF's authored card-body structure — the
+     * chart rides inside div.overflow-x-auto > div.w-full.text-sm (the
+     * live-measured REF chain: p-6 pt-0 > overflow-x-auto > w-full
+     * text-sm > recharts-responsive-container). */
+    <div className="overflow-x-auto">
+      <div className="w-full text-sm">
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            {/* Session 89 (R89-A1): the XAxis tick font RESTORED to the
+             * REF's measured 11px (live-verified both themes, 3×
+             * reload-stable; the r88-B2 comment's 16px claim was a
+             * measurement error in that parallel round — the pin it
+             * retired was correct). The 16px inherited form widened the
+             * chart's min-content 31px (493 vs 462) and pushed the
+             * page past the wrap threshold — the Export Report button
+             * landed OFF-CANVAS at mobile (x=376 on the 390 viewport).
+             * ONE root cause, THREE symptoms. */}
+            <XAxis
+              dataKey="day"
+              interval={0}
+              height={30}
+              tick={{ fontSize: 11 }}
+              ticks={attendanceTickCadence(data.length)}
+            />
+            {/* Session 89 (R89-A1, the companion pin): the YAxis ticks stay
+             * at the REF's 16px (its measured form — the XAxis 11px / YAxis
+             * 16px MIX; the text-sm wrapper would otherwise inherit 14px
+             * down to the Y ticks). */}
+            <YAxis allowDecimals={false} tick={{ fontSize: 16 }} />
+            <Tooltip />
+            {/* Session 87 (R87-N): recharts 3.x's Legend sorts its items by
             VALUE by default — itemSorter={null} renders the payload in
             declaration order (the REF's live-read Present/Late/Absent
             order). */}
-        <Legend itemSorter={null} />
-        <Bar dataKey="present" name="Present" fill="#10b981" />
-        <Bar dataKey="late" name="Late" fill="#f59e0b" />
-        <Bar dataKey="absent" name="Absent" fill="#ef4444" />
-      </BarChart>
-    </ResponsiveContainer>
+            <Legend itemSorter={null} />
+            <Bar dataKey="present" name="Present" fill="#10b981" />
+            <Bar dataKey="late" name="Late" fill="#f59e0b" />
+            <Bar dataKey="absent" name="Absent" fill="#ef4444" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
 
@@ -89,12 +116,16 @@ export function ClockInDistribution({ data }: { data: HourBucket[] }) {
    * declared. The old declared-axes form rendered 2 axis lines + the
    * [36,482]x[8,226] plot. */
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} margin={{ top: 5, right: 5, left: 65, bottom: 35 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip />
-        <Bar dataKey="count" name="Clock-ins" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="overflow-x-auto">
+      <div className="w-full text-sm">
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={data} margin={{ top: 5, right: 5, left: 65, bottom: 35 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip />
+            <Bar dataKey="count" name="Clock-ins" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }

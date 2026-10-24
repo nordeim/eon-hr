@@ -6667,12 +6667,12 @@ describe("Dark-mode text-color family (session 61, R61-A..W — the dark text-co
     expect(src).not.toContain('<p className="text-sm text-muted-foreground">No chats</p>');
   });
 
-  it("R61-O (session-63 amendment R63-C): the profile kicker subtitle is the FLIPPING pair — slate-500 light / slate-400 dark (the r61 dark-only pin; REF's light side live-measured at 390×844 this round)", () => {
+  it("R61-O (session-63 amendment R63-C; session-89 amendment R89-E): the profile kicker subtitle is the FLIPPING pair — slate-500 light / slate-400 dark (live-measured at 390×844 both themes; the r89 round hoisted the kicker out of the content column as the REF's profile tree does — the standalone PageHeaderMobileKicker now carries the pair)", () => {
     const src = pg("profile");
-    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"');
+    expect(src).toContain('subtitleClassName="text-slate-500 dark:text-slate-400"');
     const ph = soft(() => read("src", "components", "shared", "page-header.tsx"));
-    expect(ph).toContain("mobileKickerSubtitleClassName");
-    expect(ph).toContain('mobileKickerSubtitle ? <p className={cn("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName)}>');
+    expect(ph).toContain("PageHeaderMobileKicker");
+    expect(ph).toContain('subtitle ? <p className={cn("text-xs text-slate-500 truncate", subtitleClassName)}>');
   });
 
   it("R61-P: the surveyanalytics legend — Responses blue-500 + the Avg Sentiment % name", () => {
@@ -6902,10 +6902,10 @@ describe("Light-mode text-color family (session 63, R63-A..G — the light-mode 
     expect(soft(() => read("src", "components", "ui", "select.tsx"))).toContain("data-[placeholder]:text-neutral-500 dark:data-[placeholder]:text-neutral-400");
   });
 
-  it("R63-C: the profile kicker subtitle is the FLIPPING pair (light slate-500 / dark slate-400 — the r61-O dark-only pin amended; live-measured at 390×844 both themes)", () => {
+  it("R63-C (session-89 amendment R89-E): the profile kicker subtitle is the FLIPPING pair (light slate-500 / dark slate-400 — the r61-O dark-only pin amended; live-measured at 390×844 both themes; the r89 hoist moved the pair onto the standalone kicker)", () => {
     const src = pg63("profile");
-    expect(src).toContain('mobileKickerSubtitleClassName="text-slate-500 dark:text-slate-400"');
-    expect(src).not.toContain('mobileKickerSubtitleClassName="text-slate-400"');
+    expect(src).toContain('subtitleClassName="text-slate-500 dark:text-slate-400"');
+    expect(src).not.toContain('subtitleClassName="text-slate-400"');
   });
 
   it("R63-D: the shiftcalendar assign affordance is iconed (REF: lucide-plus w-3 h-3 + gap-0.5 mt-1 members, unflipping slate-300 both themes)", () => {

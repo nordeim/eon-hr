@@ -172,7 +172,7 @@ export default function RequestSettingsPage() {
                 mb-4 spaces the level rows (REF: 16 then 12s). */}
             <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-4">
               <Input placeholder="Approver name" value={name} onChange={(e) => setName(e.target.value)} aria-label="Approver name" />
-              <Input type="email" placeholder="Approver email" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Approver email" />
+              <Input type="text" placeholder="Approver email" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Approver email" />
               <Select value={level} onValueChange={setLevel}>
                 <SelectTrigger className="w-full" aria-label="Approval level">
                   <SelectValue />

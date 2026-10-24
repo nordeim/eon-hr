@@ -173,8 +173,12 @@ test("R88-B2: the Daily Attendance Trend renders the REF's geometry + tick caden
     };
   });
   expect(read).not.toBeNull();
-  // REF-measured: the YAxis at x65 (width 65), the 16px inherited tick
-  // font, the 2.x adaptive X cadence: [1..8, then the evens 10..30].
+  // REF-measured: the YAxis at x65 (width 65), the 16px Y-tick font (the
+  // session-89 clarification R89-A1: this selector reads the Y AXIS first —
+  // the REF renders the MIXED form, X ticks 11px / Y ticks 16px, both
+  // live-verified 3× stable on both themes; the r88 comment's blanket
+  // "inherited tick font" claim covered only the Y side), the 2.x adaptive
+  // X cadence: [1..8, then the evens 10..30].
   expect(read!.axisX).toBe("65");
   expect(read!.tickFont).toBe("16px");
   const expected = ["1", "2", "3", "4", "5", "6", "7", "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30"];

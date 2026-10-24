@@ -92,9 +92,10 @@ describe("category-A call sites carry the kicker props (session 7)", () => {
     });
   }
 
-  it("/profile keeps its content header and adds only the kicker", () => {
+  it("/profile keeps its content header and adds only the kicker (session-89 amendment R89-E: the kicker HOISTED out of the content column as a standalone PageHeaderMobileKicker — the REF's profile tree: p-4 root > [kicker, max-w-5xl])", () => {
     const src = read("src", "app", "(app)", "profile", "page.tsx");
-    expect(src).toContain("mobileKicker");
+    expect(src).toContain("<PageHeaderMobileKicker");
+    expect(src).not.toContain("mobileKicker");
     expect(src).not.toContain('mobileHeader="hidden"');
   });
 
@@ -698,7 +699,7 @@ describe("session-18 parity round 17 — header row breakpoint + profile kicker"
     // default), linking to /dashboard (the clone's casing-fix deviation;
     // REF navigates to /Dashboard), with an aria-label (a11y superset —
     // REF's button has none).
-    expect(pageHeader).toContain("mobileKickerBack ?");
+    expect(pageHeader).toContain("back ? (");
     expect(pageHeader).toMatch(/ArrowLeft/);
     expect(pageHeader).toMatch(/h-5 w-5/);
     expect(pageHeader).toMatch(/href="\/dashboard"/);
@@ -709,12 +710,12 @@ describe("session-18 parity round 17 — header row breakpoint + profile kicker"
        mobileKickerSubtitleClassName escape hatch (the profile's kicker
        subtitle renders slate-400 on REF — a per-page variance); the
        base recipe stays slate-500. */
-    expect(pageHeader).toMatch(/mobileKickerSubtitle \? <p className=\{cn\("text-xs text-slate-500 truncate", mobileKickerSubtitleClassName\)\}>/);
+    expect(pageHeader).toMatch(/subtitle \? <p className=\{cn\("text-xs text-slate-500 truncate", subtitleClassName\)\}>/);
   });
 
-  it("R17-B: the profile page opts into the back kicker", () => {
+  it("R17-B (session-89 amendment R89-E): the profile page opts into the back kicker (the standalone form after the hoist)", () => {
     const src = read("src", "app", "(app)", "profile", "page.tsx");
-    expect(src).toContain("mobileKickerBack");
-    expect(src).toContain('mobileKickerSubtitle="Manage your account"');
+    expect(src).toMatch(/back\s*$/m);
+    expect(src).toContain('subtitle="Manage your account"');
   });
 });
