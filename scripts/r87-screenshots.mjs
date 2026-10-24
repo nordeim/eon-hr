@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 // r87-screenshots.mjs — session-87 / parity round 86: the byte-chain
 // evidence set. Numbers continue from 1223 (the r86 set ended there).
+// MERGE NOTE (the parallel-session reconciliation): at the merge landing
+// the generated files were RENUMBERED +4 (1225-1283 -> 1229-1287) because
+// the session-86 companion pass's evidence pair had already taken 1225
+// (recruitment-userplus) + 1227 (mobile-drawer-moon) on the published
+// remote. The tracked evidence and all doc references use 1229-1287; do
+// NOT re-run this script as-is without bumping its base number first.
 //   1225       the LOGIN standing pair @1440x900 (vs the r86 1113 — both
 //              sides expected STABLE: no login-surface source changes)
 //   1227-1239  the seven standing route pairs @1440x900 (vs the r86
