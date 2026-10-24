@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageCanvas } from "@/components/shared/page-canvas";
 import { PageHeader } from "@/components/shared/page-header";
+import { RefFilterGlyph } from "@/components/shared/ref-filter-glyph";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -18,30 +19,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 
-/* Session 87 (R87-C): the Report Filters title glyph — VENDORED. The
-   REF renders lucide-filter (the CLASSIC triangle funnel: polygon
-   `22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3`, live-read cross-side);
-   lucide 0.525 renamed the glyph to Funnel with DIFFERENT path geometry
-   (the rounded-spout form — pixel-proven maxdelta 221 at the icon cell,
-   ABOVE the AA floor: the lucide-version watch's escalation path).
-   The vendored svg carries the REF's exact polygon + class form. */
-function RefFilterGlyph({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className ? `lucide lucide-filter ${className}` : "lucide lucide-filter"}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-
+/* Session 87 (R87-C) + Session 88 (R88-D3): the Report Filters title
+   glyph — VENDORED (the shared component, see
+   src/components/shared/ref-filter-glyph.tsx). The REF renders
+   lucide-filter (the CLASSIC triangle funnel); lucide 0.525 renamed the
+   glyph to Funnel with DIFFERENT path geometry (pixel-proven maxdelta
+   221, ABOVE the AA floor). */
 interface PayrollRow {
   id: string;
   period: string;

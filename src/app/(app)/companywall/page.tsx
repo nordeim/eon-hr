@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Heart, House, Image as ImageIcon, Loader2, Send, Video, X } from "lucide-react";
+import { Heart, House, Image as ImageIcon, Loader2, Send, Users, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -256,8 +256,27 @@ export default function CompanyWallPage() {
               <div className="space-y-2">
                 <Label htmlFor="post-audience">Who can see this post?</Label>
                 <Select value={audience} onValueChange={setAudience}>
-                  <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
-                    <SelectValue />
+                  {/* Session 88 (R88-G): the explicit mt-2 restores the
+                      REF's 8px label-to-trigger gap — v4's space-y-2 puts
+                      the 8px margin-bottom on the INLINE Label, and
+                      vertical margins on inline boxes are IGNORED (the
+                      S35/r87-tabinterior trap class, re-found at 8px
+                      scale: the group collapsed h68→h60 and the +8
+                      propagated to the card and the page). The explicit mt
+                      on the control is the house pattern (the reports
+                      filters + the login fix family). */}
+                  <SelectTrigger id="post-audience" className="mt-2 w-full" aria-label="Audience">
+                    {/* Session 88 (R88-G3): the REF's trigger interior —
+                        the value renders as `flex items-center gap-2`
+                        carrying the LEADING 16px users icon (live-measured
+                        x558; the trailing chevron stays the shadcn
+                        default). */}
+                    <SelectValue>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" aria-hidden="true" />
+                        {AUDIENCE_OPTIONS.find((o) => o.value === audience)?.label ?? "All Employees"}
+                      </div>
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {AUDIENCE_OPTIONS.map((o) => (
@@ -321,7 +340,12 @@ export default function CompanyWallPage() {
                 {/* Session 58 (R58-1): REF's Post is the DARK solid
                     (bg-primary #171717, h-9) — NOT the gradient CTA
                     (live-measured, the CTA-fill census). */}
-                <Button variant="dark" onClick={onPost} disabled={posting}>
+                {/* Session 88 (R88-G4): the REF's Post button renders the DISABLED
+                    opacity-50 state at empty content (pixel-proven: the
+                    capture reads rgb(138,138,138) = #171717 at 50% over
+                    white — the computed-rgb probe's enabled state misled;
+                    the at-rest capture is the truth). */}
+                <Button variant="dark" onClick={onPost} disabled={posting || !content.trim()}>
                   {posting ? <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" /> : <Send className="mr-2" aria-hidden="true" />}
                   Post
                 </Button>

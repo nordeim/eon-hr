@@ -157,21 +157,28 @@ export default function ShiftSwapPage() {
           subtitle="Request, approve, and manage shift swaps"
         />
 
-        {/* Session 50 (R49-B1): REF's stat cards — the PLAIN Card (no
-            border-slate-200/shadow-sm) with the INLINE icon family
-            before each P/P pair (users blue-600, clock yellow-600,
-            calendar orange-600, circle-check-big green-600, all
-            w-5 h-5 — live-measured this round). */}
+        {/* Session 50 (R49-B1) → Session 88 (R88-F, the stale-measurement
+            retirement — the R50-A7 precedent): the LIVE re-measure shows
+            the REF's stat cards carry 40px ICON TILES (`w-10 h-10
+            rounded-xl flex items-center justify-center` + the
+            blue/yellow/orange/green-100 family) wrapping the 20px icons
+            (users blue-600, clock yellow-600, calendar orange-600,
+            circle-check-big green-600 — the icon set the r49 round
+            measured correctly, but INLINE: that probe missed the tiles).
+            The tile shifts the value column +20px right — the r87
+            "stat-card 20px value offset" residual, now explained. */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { label: "My Requests", value: counts.myRequests, icon: <Users className="w-5 h-5 text-blue-600" aria-hidden="true" /> },
-            { label: "Peer Approval Needed", value: counts.peerApproval, icon: <Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" /> },
-            { label: "Manager Review", value: counts.managerReview, icon: <Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" /> },
-            { label: "Approved", value: counts.approved, icon: <CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" /> },
+            { label: "My Requests", value: counts.myRequests, tile: "bg-blue-100", icon: <Users className="w-5 h-5 text-blue-600" aria-hidden="true" /> },
+            { label: "Peer Approval Needed", value: counts.peerApproval, tile: "bg-yellow-100", icon: <Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" /> },
+            { label: "Manager Review", value: counts.managerReview, tile: "bg-orange-100", icon: <Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" /> },
+            { label: "Approved", value: counts.approved, tile: "bg-green-100", icon: <CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" /> },
           ].map((s) => (
             <Card key={s.label}>
               <CardContent className="p-4 flex items-center gap-3">
-                {s.icon}
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", s.tile)}>
+                  {s.icon}
+                </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-900">{loading ? "…" : s.value}</p>
                   <p className="text-xs text-slate-500">{s.label}</p>

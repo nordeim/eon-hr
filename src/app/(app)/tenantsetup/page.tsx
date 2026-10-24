@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Users } from "lucide-react";
+import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,9 +54,18 @@ export default function TenantSetupPage() {
       <Card className="w-full max-w-2xl shadow">
         <CardHeader className="flex flex-col space-y-1.5 border-b p-6 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mx-auto mb-4">
-            <Users className="h-8 w-8 text-blue-600" aria-hidden="true" />
+            <Building2 className="h-8 w-8 text-blue-600" aria-hidden="true" />
           </div>
-          <div className="font-semibold tracking-tight text-2xl">Welcome to EonHR</div>
+          {/* Session 88 (R88-C): the explicit mt-1.5 restores the REF's
+              22px circle-to-title gap — the header is flex-col, where the
+              REF's v3 space-y (margin-TOP on the next sibling) STACKS with
+              the circle's mb-4 (16+6=22, the header h197); Tailwind v4's
+              space-y puts margin-BOTTOM on the not-last-child, which
+              COLLIDES with the circle's mb-4 on the same element — the
+              utility wins and the 6px is lost (the gap collapsed to 16,
+              the header h191). The explicit mt stacks again in the flex
+              column. */}
+          <div className="font-semibold tracking-tight text-2xl mt-1.5">Welcome to EonHR</div>
           <p className="text-slate-600">Let&apos;s set up your HR management workspace</p>
         </CardHeader>
         <CardContent className="p-6">
@@ -68,24 +77,35 @@ export default function TenantSetupPage() {
                 elements feeding the space-y chain); the pb-2 member
                 restores the rendered geometry (padding on the parent —
                 the TW-v4 trap-4 rule forbids mt/mb on space-y children). */}
-            <div className="space-y-2 pb-2">
+            {/* Session 87 (R87-J) + Session 88 (R88-C2): the REF renders
+                h68 per field with the input 8px BELOW the label — the
+                inline Label's v4 space-y-2 margin-bottom is IGNORED on
+                inline boxes (the S35/r87-tabinterior class), so the
+                explicit mt-2 on the INPUT (the last child — no margin
+                collision, the reports-filters house pattern) restores
+                the REF's interior; the group height stays h68
+                (label 24 + gap 8 + input 36) and the R87-J h68/236
+                pins hold. */}
+            <div className="space-y-2">
               <Label htmlFor="company-name">Company Name *</Label>
               {/* Session 64 (R64-E): REF's live example placeholders
                   (live-measured this round — R31-C10 held the labels
                   only). */}
               <Input
                 id="company-name"
+                className="mt-2"
                 value={form.companyName}
                 onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
                 placeholder="Acme Corporation"
                 required
               />
             </div>
-            <div className="space-y-2 pb-2">
+            <div className="space-y-2">
               <Label htmlFor="owner-email">Owner Email *</Label>
               <Input
                 id="owner-email"
                 type="email"
+                className="mt-2"
                 value={form.ownerEmail}
                 onChange={(e) => setForm((f) => ({ ...f, ownerEmail: e.target.value }))}
                 placeholder="admin@acme.com"
