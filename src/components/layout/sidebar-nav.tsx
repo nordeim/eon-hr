@@ -296,7 +296,12 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
      localStorage app_lang="ar"; the whole layout mirrors (sidebar right,
      tabs mirrored) while the strings stay English (its i18n is not
      wired). The label flips to "EN" with an Arabic title
-     ("التبديل إلى الإنجليزية", REF-measured). */
+     ("التبديل إلى الإنجليزية", REF-measured).
+     Session 205 (R89-B): REF also sets html lang — live-measured
+     cross-side ("rtl | lang=ar" on REF vs "rtl | lang=en" on the clone,
+     both directions; the EN click restores lang="en"). The member is
+     invisible to rendering but load-bearing for screen readers and
+     font selection (the a11y superset discipline). */
   const [lang, setLang] = React.useState<"EN" | "عربي">("عربي");
   React.useEffect(() => {
     setLang(localStorage.getItem("app_lang") === "ar" ? "EN" : "عربي");
@@ -305,6 +310,7 @@ function SidebarFooter({ user, variant }: { user: ShellUser; variant: "desktop" 
     const next = lang === "EN" ? "عربي" : "EN";
     setLang(next);
     document.documentElement.dir = next === "EN" ? "rtl" : "ltr";
+    document.documentElement.lang = next === "EN" ? "ar" : "en";
     localStorage.setItem("app_lang", next === "EN" ? "ar" : "en");
   };
   /* Session 25 (R24-B): the stable popover content id — REF's bell carries

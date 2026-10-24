@@ -1,205 +1,53 @@
-# Session 205 — Session 89 / Parity Round 88: The Dark/RTL Mobile-Band Round
+# Session 205 (Session 89 / Parity Round 88) — the mobile-band close-out round: the dark/RTL bands' first cross-side pass, the mobile-menu deep verification, and the RTL lang member
 
-**The frontier (the r88 close-out's named queue):** the first cross-side
-DARK/RTL MOBILE-BAND pass at 390×844 — the two theme-direction states the
-session-83 round opened but never cross-compared, now walked over the full
-61-route registry on both sides. Plus the standing user emphasis (the
-mobile-menu cycle) and the carried queue (the tenantsetup title member +
-the companywall composer offset — both verified ALREADY CLOSED by the
-parallel round's published fixes).
+**Session file numbering:** this file continues the owner-facing chain (session_203.md = session 88's mobile-band narrative, session_204.md = the fourth reconciliation's landing). The remediation plan for this round lives at `docs/remediation-plan-session89.md` (the session-numbered chain).
 
-## The baseline
+## The round in one paragraph
 
-The eleventh workspace reset (the fresh clone @ `94694f7` = the round-87
-union + the owner's `session_204` transcript archive). The environment
-rebuilt per the standing protocol: `.env` pinned
-(`DATABASE_URL="file:../db/custom.db"`), the exported-`DATABASE_URL` trap
-confirmed ACTIVE for the eleventh consecutive sandbox (the `env -u` guard
-on every gate), `bun install` 525, db push/seed clean.
+The r89 queue named three frontier items left open by the session-88 double-union: the tenantsetup title font member, the companywall composer offset, and the dark/RTL mobile bands — never cross-compared in 88 prior sessions. This round re-probed the two named residuals (both **no longer reproduce** — computed-style-verified identical, 1-hot-pixel at-rest diffs, CLOSED), executed the **first cross-side pass over the dark and RTL mobile bands** (all four bands — dark page, dark drawer, RTL page, RTL drawer — at **parity**, 1-3 hot pixels of icon-column AA-noise), deep-verified the **mobile navigation menu** end-to-end at 390×844 (the open → expand → navigate → auto-close cycle, computed-style extraction at every step, the at-rest drawer diff **0 hot cells / max delta 0**), and fixed the round's one live-measured defect: **R89-B, the RTL lang member** — REF's عربي sets `lang=ar` alongside `dir=rtl` (live-measured both directions), the clone flipped only `dir`. TDD-fixed in both the عربي handler and the pre-paint boot script, pinned by 3 new unit specs and 3 amended E2E assertions.
 
-**Baseline gates on the unmodified HEAD: lint 0/0 · tsc ✓ · 941/941 unit ·
-build ✓ (116/116) · E2E 488/488 (8.8m, zero flakes)** — the chromium
-version-wipe trap fired AGAIN (cache 1200, 1.64 needs 1248 — the documented
-class, re-installed).
+## The mobile-menu verification (the owner-directed focus)
 
-## The audit
+The full cycle on both sides, 390×844, light LTR:
 
-The standing checks: the patch watch HOLDs (npm latest 16.4.3 = bug-fix
-backports only, no security content — the codebase holds ^16.4.2 per the
-standing precedent); the TW-v4 scan clean (16 documented `!important`, zero
-row-level `md:flex-wrap`); secrets zero; the r88 union forms verified
-in-source with the classification comments (spot-checks: the
-surveyanalytics explicit-ticks contract, the chat `w-80 border-r` column,
-the shiftswap `cn()` tiles).
+1. **The drawer open** — identical dialog structure (the census: image, EonHR h2, "Demo", MAIN MENU, the 8 collapsed groups, the 5 leaf links, the footer cluster). At-rest diff: **0 hot cells, max delta 0** — byte-level parity.
+2. **The Employees expansion** — the identical six sub-items; the full link census identical (11 links); the active-route styling computed-style-identical (`rgb(24,119,242)` bg + white text on Training LMS, transparent/slate-600 elsewhere).
+3. **The Training LMS navigation** — both sides land `/training`; the REF dialog **stays open** (data-state=open at +2s, live-verified), the clone **auto-closes** (the documented superset — the pathname effect; REF keeps the menu covering the page until manually dismissed).
+4. **The state-matched at-rest diff** — 5 hot pixels, max delta 27, all in the 16px submenu icon column (x 55-62) — the AA-noise class. **PARITY.**
+5. **The bottom tab bar + Escape** — the five tabs and the active-tab pill identical; Escape closes the drawer on both sides.
 
-## The opening read — the 59TH LOGIN DEPLOY (NON-VISUAL)
+### The three artifact classes (this round's instrument lessons)
 
-The deploy watch read the login JS MOVED: `index-DzlN4LV0 → index-BWZiPLrS`
-— with the `frontend-config` script now loading on the LOGIN page too
-(the first time; previously app-side only). **The full standing ladder ran
-GREEN on the 59th:** the fresh logged-out login pair **BYTE-IDENTICAL** to
-the `69aa4241…` baseline (the deploy classified NON-VISUAL) + standing 5/5
-+ sweep 12/12 (after the documented cookie re-auth) + verify-r49 13/13 +
-verify-r45 13/13 + the Turnstile census **0 widgets**.
+Each produced a false STRUCTURAL reading until isolated — they are now named members of the capture protocol:
 
-**The frontend-config DECODED** (the standing escalation's first contents
-read): `TURNSTILE_SITE_KEY` + `TURNSTILE_LOGIN_ENABLED: "true"` +
-`TURNSTILE_PASSWORD_RESET_ENABLED: "true"` + the `PRE_AUTH_EXPERIMENTS`
-system — see the standing findings below.
+- **(a) The route mismatch** — the drawer overlay shows the page behind it; captures must be taken on the same route both sides. (First diff: 111 hot cells, "STRUCTURAL" — an artifact.)
+- **(b) The programmatic-click focus ring** — `element.click()` via eval leaves `:focus` (focus-visible → the ring renders into the capture). 9,994 blue pixels of ghost. Retire with `document.activeElement.blur()` before the capture.
+- **(c) The native-click hover residue** — agent-browser's native click leaves the cursor on the element; `:hover` fires (`data-[state=open]:hover:bg-sidebar-accent` painted the REF's trigger zinc-100 — a "gray background" ghost; the clone carries the identical class string, verified verbatim). Retire by moving the mouse to a neutral element.
 
-## THE THEME-VARIANCE ROOT CAUSE DECODED (the queue's named item)
+## The dark/RTL bands (the frontier, closed)
 
-The documented "non-deterministic REF theme variance" (the r86/r87
-dark-sidebar palette flips + the light-mode build variant) is now
-ROOT-CAUSED: the platform runs **per-visitor A/B experiments** —
-`window.__APP_CONFIG__.PRE_AUTH_EXPERIMENTS` assigns a `visitor_id` per
-session and serves variant builds. Direct evidence: two fresh sessions read
-`auth-signup-free-tagline: {variant: "tagline"}` vs `{variant: "control"}`
-— different assignments for the same route, no deploy in between. The
-capture protocol gains a standing step: **probe the experiment assignment
-before classifying any REF variant read.** (The experiment system also
-explains the "second build per page load" observations — the variant
-assignment is per-visitor, so captures across sessions can read either
-variant.)
+| Band | Hot pixels (>8) | Max delta | Class |
+|------|----------------|-----------|-------|
+| Dark /training page | 2 | 19 | AA-noise (bottom-tab label) |
+| Dark drawer (Employees expanded) | 3 | 12 | AA-noise (icon column) |
+| RTL /training page | 1 | 19 | AA-noise |
+| RTL drawer (state-matched) | 1 | 9 | AA-noise |
 
-## THE DARK MOBILE-BAND READ: 26 IDENTICAL / 13 MINOR-AA / 22 STRUCTURAL
+**R89-B — the RTL lang member.** Live-measured cross-side: REF عربي → `dir=rtl | lang=ar`; REF EN → `dir=ltr | lang=en`; clone (before the fix) → `dir` flips, `lang` stuck at `"en"`. The member is invisible to rendering but load-bearing for screen readers and font selection. The fix: `document.documentElement.lang = next === "EN" ? "ar" : "en"` in `onLangClick` + the THEME_BOOT extension (`setAttribute("lang","ar")` alongside the dir set). Pins: `recipes.test.ts` R89-B1/B2/B3 + the three dark-mode.spec.ts assertion amendments (click, reload, toggle-back).
 
-The instrument (`r89-theme-mobile-capture.mjs` — parameterized dark/rtl,
-resume-capable, the experiment-state probe included; `r89-theme-mobile-diff.py`
-— the same 48px-cell classification as r88): the full 61-route authed
-registry captured as at-rest pairs at 390×844 DARK (darkMode=true, the
-pre-paint boot contract). The triage (`r89-dark-triage.mjs` digests +
-`r89-cluster-locate.py` composites + the VLM reads with DOM-probe
-verification — the VLM misread rate stayed high: the profile pill/tab,
-surveys cards, and careers search-input "differences" all disproven by
-computed-style probes) decomposed the 22 structural routes:
+## The r89 residuals re-probe
 
-- **4 REF-BROKEN routes** (the round's biggest standing finding — below)
-- **10 data-driven / role-scoped classes** (careers' live job board,
-  attendance's role-restricted state, employees' emptied list, the
-  one-card deltas on evaluations/payrollengine/allleaverequests/
-  advancedanalytics/analytics, recruitmentkanban/compliancedashboard/
-  settings AA/data)
-- **8 clone-authored candidates → 5 confirmed defects** (R89-A..E below;
-  the other 3 disproven by DOM probes)
+- **tenantsetup title font**: computed-style-verified identical (24px/600, the label/button families) — 1-hot-pixel at-rest diff. **CLOSED** (no longer reproduces on the current deploy).
+- **companywall composer offset**: 1-hot-pixel at-rest diff (the standing sidebar AA band). **CLOSED.**
 
-## THE REF-BROKEN MOBILE SET (4 routes — the functional-superset proof)
+## Gates at close
 
-The reference site's mobile experience is BROKEN on four routes
-(width-dependent below ~640px, theme-independent, live-verified):
+lint 0/0 · tsc ✓ · **944/944 unit** (941 + 3) · build ✓ 116/116 · **E2E 488/488** (unchanged count — amendments extend existing specs) · **1432 total specs** · DB pristine · the byte chain **1403-1419** (9 PNGs, 1585 tracked total).
 
-- **hrreports + interviewassistant**: the React app renders an **EMPTY
-  `#root`** (the full crash — only the Base44 edit badge remains)
-- **employeeselfservice + employeedetail**: an empty shell (main present,
-  zero cards)
+## Carried forward (the r90 queue)
 
-The clone renders all four fully — the functional superset in its
-clearest form. **The r88 classification of employeeselfservice ("the
-data-driven loading-loop class") is RETRACTED** — it was the empty shell
-all along. No clone fix (the clone's render is the correct form); the
-standing finding documents the REF's defect.
-
-## THE FIVE DEFECTS (all TDD-fixed; RED 6/6 → GREEN)
-
-- **R89-A the attendancedashboard tick-font inversion + the mobile
-  Export-button off-canvas chain.** The REF renders the
-  DailyAttendanceTrend XAxis ticks at **11px** (live-verified both themes,
-  3× reload-stable; the YAxis ticks at the inherited 16px — the MIXED
-  form). The r88-B2 round's comment claimed the REF computed 16px on the
-  XAxis and retired the 11px pin — **a measurement error in that parallel
-  round** (its standing pin asserted the wrong axis too). The inherited
-  16px form widened the visible ticks AND the chart's internal
-  min-content, and the page min-content (575 vs the REF's 544) flipped
-  the actions row's wrap decision: the Export Report button landed
-  OFF-CANVAS (x=376 on the 390 viewport — unreachable at scroll-x=0, a
-  functional mobile defect). THE FIX: the XAxis `tick={{ fontSize: 11 }}`
-  restored + the YAxis pinned 16px (the mixed form) + the REF's authored
-  card-body wrapper adopted (`overflow-x-auto > w-full text-sm`) + the
-  button wrapped in `w-full md:w-auto` (the verified simulation: x=16/
-  y=217/w=163 — the REF's exact rendered form; at md+ the wrapper
-  collapses and the desktop row is unchanged).
-- **R89-B the analyticsdashboard tick-font inversion (the mirror).** The
-  REF renders ALL ticks on that page at the inherited 16px; the LOC pinned
-  `tick={{ fontSize: 11 }}` on its three charts (a stale pin from an
-  earlier measurement — the mirror image of R89-A). THE FIX: the three
-  pins removed.
-- **R89-C the requestsettings approver-email input type.** The REF
-  authors `type="text"`; the LOC rendered `type="email"` (a mobile
-  keyboard/validation behavioral difference). THE FIX: `type="text"`.
-- **R89-D the hrassistantchat grid height.** The REF's
-  `h-[calc(100vh-250px)]` applies at ALL widths (the mobile grid renders
-  594px, the conversation card sitting lower); the LOC gated it behind
-  `lg:` (rendering the natural 329px — a 265px structural divergence).
-  THE FIX: the unconditional height + the REF's exact class order.
-  **POST-FIX: the route CLOSED to IDENTICAL (max delta 2).**
-- **R89-E the profile kicker placement (the 32px mobile offset).** The
-  REF's profile tree hoists the mobile kicker OUT of the content column
-  (`p-4 root > [kicker, max-w-5xl > [hero…]]` — every other kicker page
-  renders it inside); the LOC's in-column kicker became the space-y-8
-  column's first child and the 32px gap below it offset the whole page
-  (the avatar at y=383 vs the REF's 351). THE FIX: the kicker extracted
-  into an exported `PageHeaderMobileKicker` (the internal path renders
-  the same component — zero change for the other pages) and the profile
-  page renders it as the page root's direct child.
-  **POST-FIX: 86 → 5 cells** (the residual = the data/AA class).
-
-**The lockstep amendments (the count-lockstep rule):** the R88-B2 e2e pin
-(the wrong-axis 16px claim — corrected to the Y-tick contract with the
-mixed-form clarification), the R61-O/R63-C/R17-B unit pins (the profile
-kicker props moved to the standalone component — five pins amended, the
-count 941 unchanged).
-
-## THE RTL MOBILE-BAND READ: 0 IDENTICAL / 34 MINOR-AA / 27 STRUCTURAL
-
-The second half of the frontier: the same 61-route registry at 390×844
-RTL (`app_lang="ar"`, LIGHT). **The capture-validity trap retired:** the
-first VLM direction-check misjudged both captures LTR — the decisive
-byte-compare (a fresh verified-`dir=rtl` capture vs the band file:
-md5 `dbe7e9dc8f` identical) proved the band rendered RTL all along.
-The read: a systematic AA floor (the mirrored bidi text rendering — 34
-routes at the ≤5 AA class) + the SAME residual classes as the dark band
-(the data-driven sets, the REF-broken four, the version class on
-attendancedashboard) + two RTL-specific members flagged for the next
-round (the assetmanagement select-chevron position, the allleaverequests
-header icon spacing — 4 and 3 cells).
-
-## The round's other proofs
-
-- **The mobile-menu cycle: GREEN on the baseline AND the fixed build**
-  (drawer opens → Training LMS navigates to `/training` → the auto-close
-  verified; no TW-v4 regression under the five fixes). The r87
-  instrument's hang = the session-ref staleness class (documented; the
-  manual proof stands).
-- **The post-fix dark re-capture:** hrassistantchat 56 → **IDENTICAL**;
-  profile 86 → 5; attendancedashboard 88 → 35 (the residual = the
-  documented recharts-version grid class — 15 vs 19 verticals, not
-  decouplable via the 3.x API + the data table row);
-  analyticsdashboard/requestsettings unchanged (the data classes).
-- **Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · E2E 494/494** (the
-  488 standing + the 6 new session89 pins, 8.9m, zero flakes) · DB
-  pristine · `.env.example` re-verified (the two-variable contract
-  unchanged).
-- **The evidence chain 1403-1427** (the dev-server set 1403-1413 + the
-  dark/RTL band pairs 1415-1427) → **1596 tracked PNGs**.
-
-## The instruments and traps (this round)
-
-`r89-theme-mobile-capture.mjs` (the parameterized band capture) ·
-`r89-theme-mobile-diff.py` · `r89-cluster-locate.py` ·
-`r89-dark-triage.mjs` · `r89-tickfont-probe.mjs` ·
-`r89-devserver-shots.mjs`. The traps retired: the daemon-degradation
-class (three firings — the mid-run daemon death ate the first RTL batch;
-the cleanup + retry protocol), the session-expiry class (both sides
-re-authed mid-round), the stale-server trap (the :3200 kill-by-PID
-protocol), the VLM misread rate (the DOM-probe verification discipline —
-five misreads caught), the wrong-axis pin (the R88-B2 selector reads the
-Y axis first — the mixed-form clarification), the `lg:`-gated-height
-misread, and the capture-validity byte-compare (the RTL direction proof).
-
-## The r90 queue
-
-The two RTL-specific members (the assetmanagement chevron, the
-allleaverequests icon spacing); the dark-band data-driven residuals'
-re-reads (the REF tenant's state); the recharts-version grid class
-(the standing watch); the experiment-assignment protocol's standing
-adoption; the 59th-or-newer login deploy ladder (the re-armed watch).
+1. The deploy watch stays ARMED (the 58th-or-newer holding through this round).
+2. The REF theme-variance root cause (the frontend-config theme flags — the standing watch, not actionable from the outside).
+3. The recharts-version grid class (attendancedashboard's 15-vs-19 verticals — undecouplable via the 3.x API; the standing classification).
+4. The patch watch (Next 16.4.3 available — HOLD at 16.4.2 pending the ecosystem).
+5. The dark/RTL bands now have their FIRST cross-side baselines — future rounds re-verify against this round's protocol (the state-matching discipline + the three artifact classes).

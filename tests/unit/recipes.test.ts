@@ -7229,3 +7229,30 @@ describe("Margin/gap census (session 66, R66-A..S — parity round 65: margin + 
     expect(src).toMatch(/min-h-32 rounded-md/);
   });
 });
+
+/* ============================================================
+ * SESSION 205 / PARITY ROUND 89 — the RTL lang member (R89-B).
+ * REF's عربي sets BOTH dir=rtl AND lang=ar on <html> (live-measured
+ * cross-side this round: REF "rtl | lang=ar" vs clone "rtl | lang=en"
+ * — the clone's toggle flipped only dir, REF-measured on the live
+ * reference at 390x844 and 1440x900, both directions: EN click
+ * restores dir=ltr + lang=en). The pre-paint boot re-applies lang
+ * alongside dir so the attribute survives reloads (the R32-A10 boot
+ * contract, extended to the lang member).
+ * ============================================================ */
+describe("session 205 — the RTL lang member (R89-B)", () => {
+  it("R89-B1: the عربي click sets html lang alongside dir (REF live-measured lang=ar)", () => {
+    expect(sidebarNav).toMatch(/document\.documentElement\.lang\s*=\s*next\s*===\s*"EN"\s*\?\s*"ar"\s*:\s*"en"/);
+  });
+
+  it("R89-B2: the pre-paint boot applies lang=ar with dir=rtl (reload persistence, R32-A10 extension)", () => {
+    const src = read("src", "app", "layout.tsx");
+    expect(src).toMatch(/setAttribute\("dir","rtl"\);document\.documentElement\.setAttribute\("lang","ar"\)/);
+  });
+
+  it("R89-B3: the R32-B1 contract still holds — the dir flip + app_lang persistence + Arabic title", () => {
+    expect(sidebarNav).toContain('document.documentElement.dir');
+    expect(sidebarNav).toContain('localStorage.setItem("app_lang"');
+    expect(sidebarNav).toContain("التبديل إلى الإنجليزية");
+  });
+});

@@ -1,3 +1,55 @@
+# Remediation Plan — Session 89 (file narrative: session_205) / Parity Round 88: the mobile-band close-out round — the dark/RTL bands' FIRST cross-side pass + the mobile-menu deep verification + the RTL lang member (the r89 queue executed: the tenantsetup title font and the companywall composer offset RE-PROBED and found AT PARITY — no longer reproducing on the 58th-or-newer REF deploy — the dark/RTL mobile bands cross-compared for the first time, ALL FOUR BANDS AT PARITY, and the one live-measured defect of the round: REF's عربي sets html lang=ar alongside dir=rtl where the clone flipped only dir — TDD-fixed as R89-B with the boot-script extension and three E2E assertion amendments)
+
+**The round's motivation.** The session-204 close-out (the fourth parallel-session reconciliation, E2E 488/488) named the r89 queue: "the tenantsetup title font member, the companywall composer offset, the first cross-side pass over the DARK/RTL mobile bands, or the REF theme-variance root cause". This round executed the first three: (a) the named residuals re-probed cross-side on the live REF, (b) the dark and RTL mobile bands — never cross-compared in 88 prior sessions — captured as at-rest pairs at 390×844 and PIL grid-diffed, and (c) the owner-directed deep verification of the mobile navigation menu (the open → group-expand → navigate → auto-close cycle, the Tailwind-v4 regression watch), with computed-style extraction on both sides at every step.
+
+**The session's environment notes.** (1) Fresh clone at `94694f7` (the session_204 log commit); the workspace came in CURRENT, no source drift. (2) The exported-`DATABASE_URL` trap ACTIVE again (the 12th consecutive sandbox) — `env -u DATABASE_URL` on every gate invocation; the `.env` authored with the two-variable contract (`DATABASE_URL="file:../db/custom.db"` resolving against prisma/schema.prisma via src/lib/db-path.ts, `AUTH_SECRET` empty for dev). (3) The chromium-1248 wipe re-fired — `bunx playwright install chromium` (120 MiB) before the E2E layer would boot. (4) The background-process reaper: nohup'd builds/E2E runs die silently in this sandbox class — every gate re-run in the foreground. (5) The agent-browser device-name surface changed: `set device "iPhone 15 Pro"` is no longer in the supported list (iPhone 16/17 era) — the 390×844 band authored via `set viewport 390 844` (the protocol's own numbers, not a device profile).
+
+## The plan (as executed)
+
+1. **THE OPENING LADDER — the baseline gates on the fresh clone.** lint 0/0 · tsc clean · **941/941 unit** · build ✓ (116/116 pages, standalone healthy) · the DB pushed + seeded pristine (users = [sepnetflix2023@outlook.com], the seeded balances). The `.env.example` two-variable contract re-verified against src/lib/db-path.ts and src/lib/auth.ts.
+
+2. **THE REF RE-AUTH (the r89 queue's standing first step — the ref session cookie had expired).** The owner-supplied credentials (sepnetflix2023@outlook.com) signed in through the live login form; the REF dashboard read on the 58th-or-newer deploy. The REF mobile band re-measured: the five-tab bottom bar (Home/Staff/Tasks/Attendance/Profile), the 288px drawer, the MAIN MENU tree — all unchanged from the session-88 baselines.
+
+3. **THE MOBILE-MENU DEEP VERIFICATION (the owner-directed focus).** The full interaction cycle exercised on BOTH sides at 390×844 with computed-style extraction at every step:
+   - **The drawer open**: both sides render the identical dialog structure (image, EonHR h2, "Demo", MAIN MENU, 8 collapsed group triggers, the leaf links, the footer cluster with Notifications/dark-toggle/عربي/user). At-rest pixel diff: **0 hot cells, max delta 0** — byte-level parity on the open drawer.
+   - **The group expansion**: the Employees trigger expands to the identical six sub-items (All Employees, Tasks & Projects, Leave Requests, Attendance, Shift Calendar, Document Tracker) — the full dialog link census is IDENTICAL both sides (11 links). The active-route styling computed-style-verified: Training LMS `bg=rgb(24,119,242) color=rgb(255,255,255)`, every other link `bg=rgba(0,0,0,0) color=rgb(71,85,105)` — **identical on both sides**.
+   - **The navigation cycle**: Training LMS click → `/training` on both sides. The REF dialog STAYS OPEN after navigation (data-state=open live-verified at +2s); the clone AUTO-CLOSES — the documented superset (the pathname effect in app-shell.tsx), pinned by the standing mobile-navigation suite.
+   - **The state-matched at-rest diff**: after matching route (both /training), interaction state (no hover, no focus), and theme (light LTR): **5 hot pixels, max delta 27** — the 16px submenu icon column's antialiasing (x 55-62, y 195-267), the same AA-noise class the desktop band carries at its sidebar icons. **AT PARITY.**
+   - **The three test-methodology artifact classes found and retired** (this round's instrument lessons — each produced a false STRUCTURAL reading until isolated):
+     - **(a) the route mismatch**: diffing captures taken on different routes (dashboard vs /training) behind the drawer overlay — the overlay shows the page behind it; always navigate both sides to the same route before capturing.
+     - **(b) the programmatic-click focus ring**: `element.click()` via eval leaves `:focus` on the button (focus-visible = ring rendered in the capture); agent-browser's native click does not. The clone's "blue border around Employees" ghost — 9,994 blue pixels — was the ring, gone after `document.activeElement.blur()`.
+     - **(c) the native-click hover residue**: agent-browser's native click leaves the mouse cursor ON the element (`:hover` matches); the REF's "gray trigger background" ghost was `data-[state=open]:hover:bg-sidebar-accent` firing — the clone carries the identical class (class-string verified verbatim both sides); moving the mouse to a neutral element restored transparent on both.
+   - **The bottom tab bar**: five tabs both sides, the active-tab blue-600/blue-50 pill contract unchanged; Escape closes the drawer on both sides.
+
+4. **THE DARK MOBILE BAND (the frontier — never cross-compared before this round).** Both sides toggled via their own drawer theme buttons (the clone's "Switch to dark mode", the REF's unlabeled second footer button — same Moon/Sun family), both landing `html.dark` + body `rgb(10,10,10)`:
+   - **The /training page at-rest**: 2 hot pixels, max delta 19 (a 63×6px sliver at y 785-791, the bottom-tab label antialiasing) — **AT PARITY**.
+   - **The open drawer with Employees expanded**: 3 hot pixels, max delta 12 — the same icon-column AA-noise as the light band. **AT PARITY.**
+
+5. **THE RTL MOBILE BAND (the frontier, second half).** Both sides toggled via عربي:
+   - **The /training page at-rest**: 1 hot pixel — **AT PARITY** (the whole-layout mirror — the sidebar panel physically left, the peer spacer right — verified in both engines).
+   - **The open drawer (state-matched, no hover)**: 1 hot pixel, max delta 9 — **AT PARITY**.
+   - **R89-B — THE RTL LANG MEMBER (the round's one live-measured defect):** the REF's عربي sets **`dir=rtl` AND `lang=ar`** on `<html>` (live-measured: `"rtl | lang=ar"`), and the EN click restores `dir=ltr | lang=en`; the clone flipped only `dir` — `lang` stayed `"en"` forever (the root layout's SSR default). Invisible to rendering but load-bearing for screen readers, font selection, and the translate/hyphenation engines (the a11y superset discipline). **Fix (TDD, RED→GREEN):** (i) `onLangClick` in sidebar-nav.tsx gains `document.documentElement.lang = next === "EN" ? "ar" : "en"`; (ii) the pre-paint THEME_BOOT in layout.tsx applies `lang=ar` alongside `dir=rtl` (the R32-A10 boot contract extended — the attribute survives reloads); (iii) the `<html lang="en">` SSR default stays (the boot only arms it for the ar case, mirroring the login-inert early-return contract). **Pins:** recipes.test.ts +3 (R89-B1 the handler member, R89-B2 the boot member, R89-B3 the R32-B1 lockstep re-pin); dark-mode.spec.ts +3 assertion amendments (the عربي click lang=ar, the reload persistence, the EN toggle-back lang=en).
+
+6. **THE r89 RESIDUALS RE-PROBE (the named queue items).**
+   - **The tenantsetup title font member**: re-captured cross-side at 1440×900 — the "Welcome to EonHR" 24px/600 rgb(250,250,250), the paragraph 16px/400 rgb(71,85,105), both labels 14px/500, the Continue button 14px/500 — computed-style-verified IDENTICAL; the at-rest pixel diff **1 hot pixel** (the sidebar AA band). **CLOSED — no longer reproducing** (the 58th-or-newer deploy's own form; the r88 residual was a measurement-class ghost or has been superseded by the REF's own drift).
+   - **The companywall composer offset**: re-captured cross-side at 1440×900 — **1 hot pixel** (the same sidebar AA band, x=55 y=195). **CLOSED — no longer reproducing.**
+
+7. **THE COUNT LOCKSTEP.** Unit **944** (941 + 3 R89-B pins) · E2E **488** (the count unchanged — the three amendments extend existing specs, no new specs) · **1432 total specs** · **1585 tracked PNGs** (1576 + this round's 9: the byte chain 1403-1419).
+
+8. **THE STANDING WATCHES carried forward.** The deploy watch RE-ARMED (the 58th-or-newer holding through this round's probes — the login/mobil menu/dark/RTL surfaces all stable); the Turnstile census (key-shipped, zero widgets — unchanged); the patch watch (16.4.3 available, HOLD at 16.4.2); the recharts-version grid class (undecouplable); the lucide-composition drift; the space-y margin-collapse class (three documented instances, the house mt-N pattern); the count-lockstep rule; the capture-settle rule (≥6s for client-fetching pages).
+
+## Execution appendix — the round executed as planned
+
+- All gates green at close: lint 0/0 · tsc ✓ · **944/944 unit** · build ✓ 116/116 · **E2E 488/488** (the standing 460 + the session-88 mobile-band 12 + the chart-recipes 16, zero flakes) · DB pristine.
+- The mobile-menu cycle GREEN on the remediated build (the standing 17-test mobile-navigation suite + the dark-mode/RTL suite with the new lang assertions).
+- Evidence: the byte chain **1403-1419** (1403 the desktop dashboard, 1405 the open drawer, 1407 the expanded group, 1409 the /training auto-close proof, 1411 the dark band, 1413 the RTL drawer with `lang=ar`, 1415 the post-reset dashboard, 1417 tenantsetup, 1419 companywall).
+- The instrument scripts: `scripts/session205-mobile-xdiff.py` (the REF↔LOC grid diff at 390×844) + the interactive computed-style probes (documented above as the three artifact classes).
+- Docs: this plan + the narrative `docs/session_205.md` + the AGENTS/CLAUDE/README/SKILL count-lockstep amendments + the worklog round-88 entry.
+
+---
+
+# Appendix — the second execution's plan (the five-defect harvest)
+
 # Remediation Plan — Session 89 / Parity Round 88
 
 **The round's frontier:** the first cross-side DARK/RTL MOBILE-BAND pass (390×844) —
