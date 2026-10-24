@@ -192,6 +192,20 @@ export default function PayrollReportsPage() {
             the row (actionsUnwrapped), and the mobile full-width copy
             in a md:hidden div below. Live-measured @1440×900. */}
         <PageHeader
+          /* Session 86 (R86-A2): the +24px container offset — the REF's
+             v3-style space-y puts margin-TOP on sibling children; the
+             container's first DOM child is the md:hidden mobile sticky
+             header (display:none at desktop), so the SECOND child (this
+             desktop row) carries mt24 which COLLAPSES out of the
+             padding-less max-w-7xl container → the whole container sits
+             24px lower (y56 vs y32). TW v4's space-y compiles to
+             margin-block-end on :not(:last-child) — no first-child
+             margin-top, no collapse. This mt-6 replicates the REF's
+             computed mt24 with the identical collapse behavior; inert
+             at mobile (the row is hidden md:flex — display:none kills
+             margins; the REF's mobile top has no offset either, its
+             mobile sticky header being the first in-flow child). */
+          className="mt-6"
           mobileKicker
           mobileKickerBack
           mobileKickerTitle="Payroll Reports"
@@ -288,14 +302,27 @@ export default function PayrollReportsPage() {
               justify-between gap-3` — the bare left block (title DIV with
               the INLINE Calendar icon, h=20 + the mt-1 sub) and the
               `flex gap-2 flex-wrap` right block (input + CSV + PDF,
-              all top-aligned at y=403). */}
-          <CardHeader className="border-b p-6 pb-3">
+              all top-aligned at y=403).
+              Session 86 (R86-A3): the cross-side pixel-diff re-measure —
+              the header row is `flex flex-col space-y-1.5 p-6 pb-3` with
+              NO border-b (the border-b member never existed on the REF;
+              pixel-proven on the fresh at-rest pair). */}
+          <CardHeader className="p-6 pb-3">
             <div className="flex flex-col md:flex-row justify-between gap-3">
               <div>
-                <p className="font-semibold leading-none tracking-tight">
-                  <Calendar className="w-5 h-5 text-blue-600 mr-2 -translate-y-[1px]" aria-hidden="true" />
+                {/* Session 86 (R86-A3 residual): the title block is the REF's
+                    FLEX DIV — `font-semibold leading-none tracking-tight
+                    flex items-center gap-2` (live-read; the r33 comment's
+                    own "title DIV with the icon, h=20" — the <p> +
+                    inline-svg form that replaced it expanded the line box
+                    to 36px (leading-none 16 + the 20px inline svg), +16px
+                    on the header row and everything below). The svg rides
+                    the flex row (items-center, the gap-2 spacing — the
+                    mr-2/-translate-y baseline hacks retire). */}
+                <div className="font-semibold leading-none tracking-tight flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" aria-hidden="true" />
                   Monthly Payroll Summary
-                </p>
+                </div>
                 <p className="text-sm text-slate-500 mt-1">All employees for selected month</p>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -327,29 +354,36 @@ export default function PayrollReportsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
+          {/* Session 86 (R86-A4): REF's stats section re-measured by the
+              cross-side pixel-diff — the CardContent is p-0 and the GRID
+              itself carries the padding + the border (`grid grid-cols-2
+              md:grid-cols-4 gap-4 p-4 border-b border-slate-100`), each
+              stat cell a boxed `bg-slate-50 rounded-lg p-3` with DIV
+              children (the bare-cell + mb-6-grid + p-6-body form rendered
+              the grid at h48 vs the REF's h105). */}
+          <CardContent className="p-0">
             {loading ? (
               <div className="flex h-24 items-center justify-center">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : (
               <>
-                <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-                  <div>
-                    <p className="mb-1 text-xs text-slate-500">Total Earnings</p>
-                    <p className="text-lg font-bold text-blue-700">{fmt(stats.earnings)}</p>
+                <div className="grid grid-cols-2 gap-4 border-b border-slate-100 p-4 md:grid-cols-4">
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="mb-1 text-xs text-slate-500">Total Earnings</div>
+                    <div className="text-lg font-bold text-blue-700">{fmt(stats.earnings)}</div>
                   </div>
-                  <div>
-                    <p className="mb-1 text-xs text-slate-500">Total Deductions</p>
-                    <p className="text-lg font-bold text-red-600">{fmt(stats.deductions)}</p>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="mb-1 text-xs text-slate-500">Total Deductions</div>
+                    <div className="text-lg font-bold text-red-600">{fmt(stats.deductions)}</div>
                   </div>
-                  <div>
-                    <p className="mb-1 text-xs text-slate-500">Net Payroll</p>
-                    <p className="text-lg font-bold text-green-700">{fmt(stats.net)}</p>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="mb-1 text-xs text-slate-500">Net Payroll</div>
+                    <div className="text-lg font-bold text-green-700">{fmt(stats.net)}</div>
                   </div>
-                  <div>
-                    <p className="mb-1 text-xs text-slate-500">Employees</p>
-                    <p className="text-lg font-bold text-slate-700">{stats.employees}</p>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="mb-1 text-xs text-slate-500">Employees</div>
+                    <div className="text-lg font-bold text-slate-700">{stats.employees}</div>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -358,7 +392,15 @@ export default function PayrollReportsPage() {
                       hidden md:table-cell pair on Allowances/Overtime,
                       font-bold on Net Salary). */}
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50">
+                    {/* Session 86 (R86-A1): the header typography lives on
+                        the THEAD — `bg-slate-50 text-slate-600 text-xs
+                        uppercase` (the REF's thead class set verbatim,
+                        live-read; the bare px-4 py-3 + alignment th's
+                        INHERIT 12px/700/UPPERCASE → the header row h40.
+                        The r48 round measured the th forms but missed
+                        these thead-level members, leaving the table's
+                        text-sm 14px Title-case rendering, h44). */}
+                    <thead className="bg-slate-50 text-slate-600 text-xs uppercase">
                       <tr>
                         <th className="px-4 py-3 text-left">Employee</th>
                         <th className="px-4 py-3 text-right">Basic</th>

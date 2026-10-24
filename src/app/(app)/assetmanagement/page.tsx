@@ -352,7 +352,14 @@ export default function AssetManagementPage() {
                 <TableHead>Assigned To</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Warranty</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {/* Session 86 (R86-E): the Actions th re-measured by the
+                    cross-side pixel-diff — the REF renders text-LEFT
+                    (textX = thX + 16, live-read), exactly the TableHead
+                    component's default; the text-right override was a
+                    legacy shadcn-convention guess. The override drops,
+                    the component default (text-left py-3 px-4 …)
+                    matching the REF verbatim applies. */}
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

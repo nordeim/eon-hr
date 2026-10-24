@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2, CircleCheckBig, Clock, FileText, Loader2, Palette, Pencil, Plug, Plus, Save, SettingsIcon, Trash2, Users, Workflow } from "lucide-react";
+import { Building2, CircleCheckBig, Clock, FileText, Loader2, Palette, Plug, Plus, Save, SettingsIcon, SquarePen, Trash2, Users, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,8 +139,17 @@ export default function SettingsPage() {
           full-width muted pill) and iconed triggers (16px svg, mr-2). */}
       <Tabs defaultValue="company" className="space-y-6">
         <TabsList className="bg-white border border-slate-200">
-          <TabsTrigger value="company"><Building2 className="h-4 w-4 mr-2" aria-hidden="true" />Company</TabsTrigger>
-          <TabsTrigger value="workflows"><Workflow className="h-4 w-4 mr-2" aria-hidden="true" />Approval Workflows</TabsTrigger>
+          {/* Session 86 (R86-C): the tab icons re-measured by the
+              cross-side pixel-diff — path-data-verified against the REF's
+              rendered svgs: Company carries the GEAR (`Settings` —
+              "M12.22 2h-.44a2 2 0 0 0-2 2v.18…" + circle 12,12 r3),
+              Approval Workflows the CHECKMARK-IN-CIRCLE
+              (`CircleCheckBig` — "M21.801 10A10 10 0 1 1 17 3.335" +
+              "m9 11 3 3L22 4"). The Building2/Workflow pair were the
+              original build's guesses — never cross-checked until the
+              at-rest pixel protocol. */}
+          <TabsTrigger value="company"><SettingsIcon className="h-4 w-4 mr-2" aria-hidden="true" />Company</TabsTrigger>
+          <TabsTrigger value="workflows"><CircleCheckBig className="h-4 w-4 mr-2" aria-hidden="true" />Approval Workflows</TabsTrigger>
           <TabsTrigger value="shifts"><Clock className="h-4 w-4 mr-2" aria-hidden="true" />Shifts</TabsTrigger>
           <TabsTrigger value="departments"><Users className="h-4 w-4 mr-2" aria-hidden="true" />Departments</TabsTrigger>
           <TabsTrigger value="integrations"><Plug className="h-4 w-4 mr-2" aria-hidden="true" />Integrations</TabsTrigger>
@@ -309,7 +318,11 @@ function CompanyTab({ canEdit, toast }: { canEdit: boolean; toast: ReturnType<ty
               </Button>
             ) : (
               <Button variant="outline" onClick={() => setEditOpen(true)}>
-                <Pencil className="mr-2" aria-hidden="true" />
+                {/* Session 86 (R86-G): the REF's icon re-measured by the
+                    cross-side pixel-diff — path-data-verified: the SQUARE
+                    PEN (`SquarePen` — "M12 3H5a2 2 0 0 0-2 2v14…" +
+                    "M18.375 2.625…"), not the pencil glyph. */}
+                <SquarePen className="mr-2" aria-hidden="true" />
                 Edit
               </Button>
             )

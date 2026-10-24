@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ExternalLink, GraduationCap, Loader2, MonitorSmartphone, Plus, Video } from "lucide-react";
+import { ExternalLink, Loader2, MonitorSmartphone, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -203,7 +203,14 @@ export default function TrainingPage() {
                     live form puts mx-auto mb-4 on the icon itself (the
                     margin census read the mx-auto family; the wrapper
                     + the mt-3 line retire). */}
-                <GraduationCap className="h-16 w-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
+                {/* Session 86 (R86-D): the empty-state icon re-measured by
+                    the cross-side pixel-diff — path-data-verified against
+                    the REF's rendered svg: the VIDEO CAMERA (`Video` —
+                    "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87…" + the
+                    camera-body rect), not the graduation cap (the
+                    original build's guess, never cross-checked until the
+                    at-rest pixel protocol). */}
+                <Video className="h-16 w-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
                 <p className="text-slate-500">No training platforms available</p>
               </div>
             ) : (

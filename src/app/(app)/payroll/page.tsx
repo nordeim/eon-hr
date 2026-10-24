@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, Calendar, Check, DollarSign, FileDown, Loader2, Pencil, Plus, Search, Trash2, TrendingUp, Users } from "lucide-react";
+import { Banknote, Calendar, ChartColumn, Check, DollarSign, Loader2, Pencil, Plus, Search, Trash2, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,7 +79,15 @@ export default function PayrollPage() {
 
   // Session 12 (R11-H): toolbar-card filters — employee text search + month.
   const [search, setSearch] = React.useState("");
-  const [monthFilter, setMonthFilter] = React.useState("");
+  /* Session 86 (R86-B): the month filter DEFAULTS TO THE CURRENT PERIOD
+     — the REF's toolbar month input renders "October 2026"
+     (value="2026-10", live-read on the fresh at-rest pair); the empty
+     default left the input rendering the browser's dashed placeholder
+     (a cross-side pixel-diff finding, the 245-maxdelta cluster on the
+     input's text). The filtered table content is unchanged (0 records
+     either way in the seeded state) — this is the visible-default
+     parity member. */
+  const [monthFilter, setMonthFilter] = React.useState(currentPeriod());
 
   const period = currentPeriod();
 
@@ -230,7 +238,11 @@ export default function PayrollPage() {
                 })
               }
             >
-              <FileDown className="mr-2" aria-hidden="true" />
+              {/* Session 86 (R86-F): the REF's icon re-measured by the
+                  cross-side pixel-diff — the BAR CHART (`ChartColumn` —
+                  "M3 3v16a2 2 0 0 0 2 2h16" + the three column strokes,
+                  path-data-verified), not the file-download glyph. */}
+              <ChartColumn className="mr-2" aria-hidden="true" />
               Reports & Export
             </Button>
             <Button variant="green"

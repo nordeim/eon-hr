@@ -33,7 +33,7 @@ function run(cmd) { try { return execSync(cmd, { stdio: "pipe", timeout: 45000 }
 async function evalOn(session, expr, ms = 0) { if (ms) await new Promise(r => setTimeout(r, ms)); const oneLine = expr.split("\n").join(" "); const out = run(`agent-browser --session ${session} eval ${JSON.stringify(oneLine)}`); try { return JSON.parse(out.trim().replace(/^"|"$/g, "").replace(/\\"/g, '"').replace(/\\n/g, " ")); } catch { return { error: out.slice(0, 300) }; } }
 
 const baseRef = "https://eon.base44.app";
-const FINALS = { loginJs: "index-BgH6kzLl", loginCss: "index--4Ltml9o", appJs: "C-IrDy5f", appCss: "BGNH4KkS" }; // RE-ARMED at the post-56TH finals (the 56th landed at the r85 round-end: JS BdweUDbT->Cixyggh5, step-1-proven non-visual)
+const FINALS = { loginJs: "index-DzlN4LV0", loginCss: "index-BD8HgQNX", appJs: "C-IrDy5f", appCss: "BGNH4KkS" }; // RE-ARMED at the post-58TH finals (session 86: the 58th landed pre-round — JS BgH6kzLl->DzlN4LV0 + the NEW frontend-config script + CSS --4Ltml9o->BD8HgQNX, step-1-proven NON-VISUAL: the fresh login pair BYTE-IDENTICAL to 69aa4241 + the full ladder green)
 const FP = `(() => {
   const fp = (el) => { const m = (el.getAttribute('href') || el.getAttribute('src') || '').match(/([A-Za-z0-9_-]{6,})\\.(?:css|js)/); return m ? m[1] : null; };
   const css = [...document.querySelectorAll('link[rel=stylesheet]')].map(fp).filter(Boolean);

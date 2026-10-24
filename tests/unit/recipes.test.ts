@@ -992,9 +992,9 @@ describe("iconed button margins (session 14, R13-A)", () => {
     expect(page).toContain('className="lucide lucide-upload w-4 h-4 mr-2"');
   });
 
-  it("payroll Reports & Export icon carries mr-2 (185px button)", () => {
+  it("payroll Reports & Export icon carries mr-2 (185px button — session 86 amendment: REF's bar-chart glyph ChartColumn, was FileDown; path-data-verified by the cross-side pixel-diff)", () => {
     const page = read("src", "app", "(app)", "payroll", "page.tsx");
-    expect(page).toMatch(/<FileDown className="mr-2"/);
+    expect(page).toMatch(/<ChartColumn className="mr-2"/);
   });
 
   it("payrollmodule Generate All icon carries mr-2 (153px button — session 50 amendment: REF's calculator glyph, was Wand2)", () => {
@@ -1044,9 +1044,9 @@ describe("settings pill + company card (session 14, R13-B)", () => {
     expect(page).toMatch(/TabsList className="bg-white border border-slate-200"/);
   });
 
-  it("the seven tab triggers are iconed", () => {
-    expect(page).toMatch(/<Building2 className="h-4 w-4 mr-2"/);
-    expect(page).toMatch(/<Workflow className="h-4 w-4 mr-2"/);
+  it("the seven tab triggers are iconed (session 86 amendment: Company=SettingsIcon gear + Approval Workflows=CircleCheckBig, was Building2/Workflow; path-data-verified by the cross-side pixel-diff)", () => {
+    expect(page).toMatch(/<SettingsIcon className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<CircleCheckBig className="h-4 w-4 mr-2"/);
     expect(page).toMatch(/<Clock className="h-4 w-4 mr-2"/);
     expect(page).toMatch(/<Users className="h-4 w-4 mr-2"/);
     expect(page).toMatch(/<Plug className="h-4 w-4 mr-2"/);
@@ -1054,10 +1054,10 @@ describe("settings pill + company card (session 14, R13-B)", () => {
     expect(page).toMatch(/<FileText className="h-4 w-4 mr-2"/);
   });
 
-  it("company card header is title-only with the iconed h-9 Edit button", () => {
+  it("company card header is title-only with the iconed h-9 Edit button (session 86 amendment: SquarePen, was Pencil; path-data-verified)", () => {
     expect(page).not.toContain("<CardDescription>Public details");
     expect(page).toMatch(/font-semibold leading-none/);
-    expect(page).toMatch(/<Pencil className="mr-2"/);
+    expect(page).toMatch(/<SquarePen className="mr-2"/);
   });
 
   it("company fields render as the reference read-only tile grid (p-4, mb-1 label)", () => {
