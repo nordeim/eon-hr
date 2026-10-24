@@ -13,7 +13,7 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` (Vitest, 941 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 460 specs — needs `bun run build` first; the runner does NOT build for you) |
+| E2E tests | `bun run test:e2e` (Playwright, 472 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -5623,3 +5623,33 @@ Gates: lint 0/0 · tsc ✓ · **941/941 unit** · build ✓ · **E2E 460/460 (th
 
 The round's instrument traps (all retired): the background-process reaper (foreground + resume), the daemon overload, the mid-round chromium cache wipe (the standing r1248 lesson re-fired), the JSX comment placement trap (the {/* */} form is INVALID in the attribute/ternary-expression positions), the stale standalone serving the old build after a rebuild (kill-by-PID + re-verify), the read-layer cache corruption (ACTIVE — the Read tool + compilers over bash reads), the MultiEdit phantom-partial-apply (verify the file state after every failed batch).
 
+
+
+## Session 88 (parity round 87) — THE MOBILE-BAND CROSS-SIDE ROUND (the r87 close-out's named frontier: the first full-registry cross-side pass at 390×844 — all 61 authed routes) finding TWELVE clone-authored defects, ALL TDD-FIXED
+
+**The round's fresh-eyes instrument:** `r88-mobile-capture/diff/triage/crop-diff` + the VLM crop reads + both-sides DOM probes + **the 3× reload stability verification** (`r88-variant-stability2.mjs` — every pinned recipe re-read on fresh loads against the r87 second-build-variant finding; all twelve STABLE 3/3). The read: **39 STRUCTURAL / 22 MINOR/AA** on the 61-route mobile registry; the triage: 8 data-driven clusters classified (careers' live job board, employeeselfservice's REF-side loading loop, the 0-vs-1 stats family, the bottom tables, the avatar/name/role) + **TWELVE clone-authored defects**:
+
+- **R88-A the reports CATEGORY ICON family** — four glyph identities on one page: calendar-days→**Plane**, banknote→**DollarSign**, heart-handshake→**Shield**, file-text→**FileCheck** (the r86-E/R87 glyph-identity class)
+- **R88-B the advancedanalytics Schedule Report CTA** — CalendarClock→**Plus** (paths M5 12h14 ~ M12 5v14)
+- **R88-C the surveyanalytics ZERO-DATA CHARTS** — data=[] at zero responses on the Distribution + the Trend (the invented X axes retired; the queue's #1 structural divergence). The version-class residual documented: the REF's Trend Y-domain tick labels at zero data render only on recharts 2.x
+- **R88-D the analyticsdashboard actions cluster** — `flex-nowrap` (the REF's unwrapped `flex items-center gap-3`): the REF-authored mobile overflow chain — the 456px natural-width cluster → the 488 root scroll → the subtitle ONE line (h=24)
+- **R88-E the attendancedashboard MONTH FILTER** — the missing functional member: a `type=month` w-40 input FIRST in the actions, wired to `?month=YYYY-MM` (the server reads the param — window/title/day-count reload; the functional SUPERSET)
+- **R88-F the profile icon family** — Camera→**Upload** (Change Photo), User→**CircleUser** (General), Globe→**Share2** (Social)
+- **R88-G the chat conversations column** — **always visible** (the REF's `w-80 border-r flex flex-col`): the prior `hidden md:flex` was a clone-authored responsive invention leaving mobile users NO way to open a conversation — a functional regression AND a visual defect (the fix restores both)
+- **R88-H the shiftcalendar table** — the REF's inline **min-width: 700px** (100px day columns + the one-row toolbar follow from the overflow)
+- **R88-I the workflowconfigpage empty-state card** — the missed `text-card-foreground` (the r87-I card-family call site)
+- **R88-J the shiftswap stat-card TILES** — the r49 "inline icon family" pin RETIRED as a stale measurement: the live REF renders `w-10 h-10 rounded-xl bg-*-100` tiles with the icon inside
+- **R88-K the tenantsetup hero glyph** — Users→**Building2**
+- **R88-L the companywall audience filter** — the **Users** glyph inside the trigger's `flex items-center gap-2` wrapper
+
+**THE CONTRACT PINS:** `tests/e2e/session88-mobileband.spec.ts` (12 tests) RED 12/12 as designed → GREEN; the lockstep amendments: the recipes.test.ts profile tab pair (User→CircleUser, Globe→Share2) + the Schedule Report glyph (CalendarClock→Plus).
+
+**THE POST-FIX MOBILE RE-VERIFY:** chat **73→4**, shiftcalendar **101→3**, shiftswap **65→2**, workflowconfigpage **11→2**, analyticsdashboard **120→29**; the residuals carried with classifications (the data-driven sets + the tenantsetup title member + the companywall composer offset + the surveyanalytics version class). **THE DESKTOP-BAND REGRESSION CHECK:** the changed surfaces clean (chat 4, shiftswap 3, workflowconfigpage 4, profile 9 cells); the standing E2E pins the primary guard.
+
+**THE MOBILE-MENU CYCLE: GREEN** on the remediated build (open → Training LMS → /training → auto-close; no TW-v4 regression under the twelve fixes; the mobile-navigation suite 17/17 inside the 472).
+
+**THE BYTE CHAIN (r88-screenshots, numbers 1297-1345 + the dev-server set 1347-1357 → 1534 tracked PNGs):** the login standing pair **BYTE-IDENTICAL** to `69aa4241…` (the 58th holding through a THIRD consecutive round) + the twelve mobile re-baselines + the twelve desktop guards + the six DEV-SERVER captures (the running-codebase evidence).
+
+Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · **E2E 472/472 (the 460 standing + the 12 new, 8.1m, zero flakes)** · the login pair byte-identical · 1534 tracked screenshots (+56) · DB pristine. The plan: `docs/remediation-plan-session88.md`; the narrative: `docs/session_202.md`; the SKILL §99 (v3.73.0).
+
+The round's traps (retired): the chromium version wipe (1200 vs 1248 — the r1248 lesson re-fired), the daemon-overload class (three firings), the resource-exhaustion EAGAIN class, the MultiEdit phantom-partial-apply re-fired, the strict-mode hidden-sidebar selector class (the unique-subtitle-anchor form), the recharts-3.x tick-selector mismatch, the stale-viewport triage ghost, the exported-DATABASE_URL trap (the TENTH consecutive sandbox).

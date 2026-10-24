@@ -104,6 +104,19 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
     },
   ];
 
+  /* Session 88 (R88-C): the REF's ZERO-DATA chart policy (live-measured,
+     3/3 reload-stable): at zero responses the Distribution chart renders
+     an EMPTY svg (no grid, no axes, no legend) and the Trend chart renders
+     no X month labels — i.e. data=[] on both. The prior form fed the
+     Distribution three zero-valued slices and the Trend a synthetic
+     6-month window, rendering invented axes the REF does not show. The
+     with-data behavior is unchanged (the functional superset). Residual:
+     the REF's Trend still shows its Y-domain tick labels (-100..100) at
+     zero data — a recharts 2.x-only behavior (3.x renders no axes at
+     data=[]), documented as the version-class watch. */
+  const hasResponses = responses.length > 0;
+  const distributionData = hasResponses ? distribution : [];
+
   const trend: TrendPoint[] = data.monthLabels.map((label) => {
     const monthKey = label.slice(0, 3); // "May"
     const monthResponses = scored.filter((r) => {
@@ -118,6 +131,8 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
           : null,
     };
   });
+
+  const trendData = hasResponses ? trend : [];
 
   const surveysInScope =
     selected === "all" ? data.surveys : data.surveys.filter((s) => s.id === selected);
@@ -299,8 +314,10 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
               </div>
               <CardContent className="p-6 pt-0">
                 {/* Session 12 (R11-T): the reference renders the chart
-                    (empty axes) even with no responses. */}
-                <SentimentDistributionBar data={distribution} />
+                    (empty axes) even with no responses.
+                    Session 88 (R88-C): at zero responses it renders the
+                    EMPTY chart (data=[] — no invented category axis). */}
+                <SentimentDistributionBar data={distributionData} />
               </CardContent>
             </Card>
 
@@ -309,7 +326,7 @@ export function SurveyAnalytics({ data }: { data: SurveyAnalyticsData }) {
                 <div className="font-semibold tracking-tight text-base">Sentiment Trend Over Time</div>
               </div>
               <CardContent className="p-6 pt-0">
-                <SentimentTrendLine data={trend} />
+                <SentimentTrendLine data={trendData} />
               </CardContent>
             </Card>
 

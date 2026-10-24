@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarClock, Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -52,9 +52,12 @@ export function ScheduleReportButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {/* Session 14 (R13-A): the reference renders this as the default blue
-              gradient CTA (179px, iconed mr-2) — not outline. */}
+              gradient CTA (179px, iconed mr-2) — not outline.
+              Session 88 (R88-B): the REF's glyph is the PLAIN PLUS
+              (live-measured: lucide-plus, paths M5 12h14 ~ M12 5v14),
+              not CalendarClock. */}
         <Button>
-          <CalendarClock className="mr-2" aria-hidden="true" />
+          <Plus className="mr-2" aria-hidden="true" />
           Schedule Report
         </Button>
       </DialogTrigger>

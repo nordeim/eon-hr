@@ -7,12 +7,29 @@ import {
   type DepartmentOption,
 } from "./dashboard";
 
-export default async function AttendanceDashboardPage() {
+export default async function AttendanceDashboardPage({
+  /* Session 88 (R88-E): the REF renders a month filter input as the
+   * first header action (live-measured: type=month, w=160, the standard
+   * Input classes, the current-month default). This wires it
+   * functionally — the SUPERSET: ?month=YYYY-MM reloads the window,
+   * title, and day count for the selected month (validated; invalid or
+   * missing falls back to the current month). */
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const rawMonth = typeof params.month === "string" ? params.month : "";
+  const monthMatch = rawMonth.match(/^(\d{4})-(\d{2})$/);
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const monthTitle = `${now.toLocaleString("en-US", { month: "long" })} ${now.getFullYear()}`;
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const year = monthMatch ? Number(monthMatch[1]) : now.getFullYear();
+  // month is 1-based in the input value; Date takes 0-based.
+  const monthIndex = monthMatch ? Number(monthMatch[2]) - 1 : now.getMonth();
+  const monthStart = new Date(year, monthIndex, 1);
+  const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+  const monthTitle = `${new Date(year, monthIndex, 1).toLocaleString("en-US", { month: "long" })} ${year}`;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const monthValue = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
 
   const [departments, employees, records] = await Promise.all([
     db.department.findMany({
@@ -55,6 +72,7 @@ export default async function AttendanceDashboardPage() {
     ),
     monthTitle,
     daysInMonth,
+    monthValue,
   };
 
   return <AttendanceDashboard data={data} />;

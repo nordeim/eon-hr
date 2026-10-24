@@ -1032,7 +1032,10 @@ describe("iconed button margins (session 14, R13-A)", () => {
 
   it("advancedanalytics Schedule Report icon carries mr-2 (179px button)", () => {
     const page = read("src", "app", "(app)", "advancedanalytics", "schedule-report-button.tsx");
-    expect(page).toMatch(/<CalendarClock className="mr-2"/);
+    /* Session 88 (R88-B): the REF's glyph is the PLAIN PLUS
+       (live-measured: lucide-plus, paths M5 12h14 ~ M12 5v14) —
+       the CalendarClock pin was a clone invention. */
+    expect(page).toMatch(/<Plus className="mr-2"/);
   });
 });
 
@@ -1073,9 +1076,12 @@ describe("profile tabs + general form (session 14, R13-C)", () => {
   it("has exactly the four reference tabs, iconed, default general (no User tab)", () => {
     expect(page).not.toContain('<TabsTrigger value="user">');
     expect(page).toMatch(/defaultValue="general"/);
-    expect(page).toMatch(/<User className="h-4 w-4 mr-2"/);
+    /* Session 88 (R88-F): the REF's tab glyph set (live-measured, 3/3
+       reload-stable): General=circle-user, Social=share2 — the
+       user/globe pair was a clone invention. */
+    expect(page).toMatch(/<CircleUser className="h-4 w-4 mr-2"/);
     expect(page).toMatch(/<Lock className="h-4 w-4 mr-2"/);
-    expect(page).toMatch(/<Globe className="h-4 w-4 mr-2"/);
+    expect(page).toMatch(/<Share2 className="h-4 w-4 mr-2"/);
     expect(page).toMatch(/<SlidersHorizontal className="h-4 w-4 mr-2"/);
   });
 

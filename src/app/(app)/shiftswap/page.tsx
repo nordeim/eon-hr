@@ -157,21 +157,24 @@ export default function ShiftSwapPage() {
           subtitle="Request, approve, and manage shift swaps"
         />
 
-        {/* Session 50 (R49-B1): REF's stat cards — the PLAIN Card (no
-            border-slate-200/shadow-sm) with the INLINE icon family
-            before each P/P pair (users blue-600, clock yellow-600,
-            calendar orange-600, circle-check-big green-600, all
-            w-5 h-5 — live-measured this round). */}
+        {/* Session 50 (R49-B1, RETIRED session 88 / R88-J): the r49
+            "inline icon family" pin was a STALE measurement (the
+            pre-58th REF build). The live REF (3/3 reload-stable) renders
+            the icon family in 40px COLORED TILES: `w-10 h-10 rounded-xl
+            flex items-center justify-center bg-blue-100` (users),
+            bg-yellow-100 (clock), bg-orange-100 (calendar),
+            bg-green-100 (circle-check-big) — the icon w-5 h-5
+            text-*-600 INSIDE, the value/label pair beside it (gap-3). */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { label: "My Requests", value: counts.myRequests, icon: <Users className="w-5 h-5 text-blue-600" aria-hidden="true" /> },
-            { label: "Peer Approval Needed", value: counts.peerApproval, icon: <Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" /> },
-            { label: "Manager Review", value: counts.managerReview, icon: <Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" /> },
-            { label: "Approved", value: counts.approved, icon: <CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" /> },
+            { label: "My Requests", value: counts.myRequests, icon: <Users className="w-5 h-5 text-blue-600" aria-hidden="true" />, tile: "bg-blue-100" },
+            { label: "Peer Approval Needed", value: counts.peerApproval, icon: <Clock className="w-5 h-5 text-yellow-600" aria-hidden="true" />, tile: "bg-yellow-100" },
+            { label: "Manager Review", value: counts.managerReview, icon: <Calendar className="w-5 h-5 text-orange-600" aria-hidden="true" />, tile: "bg-orange-100" },
+            { label: "Approved", value: counts.approved, icon: <CircleCheckBig className="w-5 h-5 text-green-600" aria-hidden="true" />, tile: "bg-green-100" },
           ].map((s) => (
             <Card key={s.label}>
               <CardContent className="p-4 flex items-center gap-3">
-                {s.icon}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.tile}`}>{s.icon}</div>
                 <div>
                   <p className="text-2xl font-bold text-slate-900">{loading ? "…" : s.value}</p>
                   <p className="text-xs text-slate-500">{s.label}</p>

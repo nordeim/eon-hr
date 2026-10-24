@@ -205,7 +205,15 @@ export default function ChatPage() {
       <div className="max-w-7xl mx-auto">
       <div className="flex h-[calc(100vh-8rem)] min-h-[560px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         {/* conversation list */}
-        <div className="hidden w-80 shrink-0 flex-col border-r border-slate-200 md:flex">
+        {/* Session 88 (R88-G): the REF's conversations column is ALWAYS
+            VISIBLE (live-measured, 3/3 reload-stable: `w-80 border-r
+            border-slate-200 flex flex-col` — 320px at mobile with the
+            chat pane flex-1 beside it; the page scrolls horizontally,
+            the REF-authored overflow). The prior `hidden md:flex` was a
+            clone-authored responsive invention that left mobile users
+            with NO way to open a conversation — a functional regression
+            AND a visual defect. */}
+        <div className="w-80 border-r border-slate-200 flex flex-col">
           {/* Session 65 (R65-C): REF authors ONE p-4 border-b wrapper
               containing the h2 row AND the search — the split authoring
               (a padded h2 row + a padded search div) dropped the column

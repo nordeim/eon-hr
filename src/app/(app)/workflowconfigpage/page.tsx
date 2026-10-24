@@ -199,10 +199,13 @@ export default function WorkflowConfigPage() {
       ) : workflows.length === 0 ? (
         /* Session 11 (R10-Q): the reference's empty state — the py-16 sits
            on the CARD itself (measured classes "rounded-xl border bg-card
-           shadow text-center py-16", 976x266) with the 48px Settings2 icon
-           (mb-3), ONE slate-500 line, and the 213x36 flat blue-600 CTA as
-           direct children (y=169/229/269). */
-        <div className="rounded-xl border bg-card text-center shadow py-16">
+           text-card-foreground shadow text-center py-16", 976x266) with the
+           48px Settings2 icon (mb-3), ONE slate-500 line, and the 213x36
+           flat blue-600 CTA as direct children (y=169/229/269).
+           Session 88 (R88-I): the text-card-foreground token was missed at
+           this call site when the r87-I card family landed — restored
+           (the REF's computed color set at both card levels). */
+        <div className="rounded-xl border bg-card text-card-foreground text-center shadow py-16">
           <Settings2 className="mx-auto mb-3 h-12 w-12 text-slate-300" aria-hidden="true" />
           <p className="text-slate-500">No workflows configured yet.</p>
           {/* Session 66 (R66-K): the CTA carries mt-4 DIRECTLY (REF's

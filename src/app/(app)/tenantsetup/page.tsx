@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Users } from "lucide-react";
+import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,8 +53,11 @@ export default function TenantSetupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl shadow">
         <CardHeader className="flex flex-col space-y-1.5 border-b p-6 text-center">
+          {/* Session 88 (R88-K): the REF's hero glyph is Building2
+              (live-measured, 3/3 reload-stable: lucide-building2 w-8 h-8
+              text-blue-600) — Users was a clone invention. */}
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mx-auto mb-4">
-            <Users className="h-8 w-8 text-blue-600" aria-hidden="true" />
+            <Building2 className="h-8 w-8 text-blue-600" aria-hidden="true" />
           </div>
           <div className="font-semibold tracking-tight text-2xl">Welcome to EonHR</div>
           <p className="text-slate-600">Let&apos;s set up your HR management workspace</p>

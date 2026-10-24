@@ -348,7 +348,14 @@ export default function ShiftCalendarPage() {
               rides the reference's furniture. */}
           <div className="rounded-xl bg-card shadow-sm">
             <div className="overflow-x-auto p-0">
-              <table className="w-full border-collapse text-xs">
+              {/* Session 88 (R88-H): the REF's table carries an INLINE
+                  min-width: 700px (live-measured, 3/3 reload-stable) —
+                  the authored 100px day columns (7×100), the 732px
+                  mobile overflow, and the month-toolbar one-row layout
+                  all follow from it. The prior unconstrained form let
+                  the columns collapse to the assign-button's 61px
+                  min-content and wrapped the toolbar. */}
+              <table className="w-full border-collapse text-xs" style={{ minWidth: 700 }}>
                 <thead>
                   <tr>
                     {WEEKDAYS.map((d) => (

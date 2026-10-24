@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Camera, CircleUser, Facebook, Github, Globe, KeyRound, Linkedin, Loader2, Lock, Save, SlidersHorizontal, Trash2, Twitter, User } from "lucide-react";
+import { CircleUser, Facebook, Github, KeyRound, Linkedin, Loader2, Lock, Save, Share2, SlidersHorizontal, Trash2, Twitter, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -416,7 +416,7 @@ export default function ProfilePage() {
                   disabled={savingAvatar}
                   onClick={() => avatarInputRef.current?.click()}
                 >
-                  {savingAvatar ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Camera className="mr-2" aria-hidden="true" />}
+                  {savingAvatar ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Upload className="mr-2" aria-hidden="true" />}
                   Change Photo
                 </Button>
               </div>
@@ -439,9 +439,12 @@ export default function ProfilePage() {
           button INSIDE the form (flex justify-end, iconed). */}
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="bg-white border border-slate-200">
-          <TabsTrigger value="general"><User className="h-4 w-4 mr-2" aria-hidden="true" />General</TabsTrigger>
+          {/* Session 88 (R88-F): the REF's tab glyph set (live-measured, 3/3
+          reload-stable): General=circle-user, Social=share2 — the
+          user/globe pair was a clone invention. */}
+          <TabsTrigger value="general"><CircleUser className="h-4 w-4 mr-2" aria-hidden="true" />General</TabsTrigger>
           <TabsTrigger value="security"><Lock className="h-4 w-4 mr-2" aria-hidden="true" />Security</TabsTrigger>
-          <TabsTrigger value="social"><Globe className="h-4 w-4 mr-2" aria-hidden="true" />Social Accounts</TabsTrigger>
+          <TabsTrigger value="social"><Share2 className="h-4 w-4 mr-2" aria-hidden="true" />Social Accounts</TabsTrigger>
           <TabsTrigger value="preferences"><SlidersHorizontal className="h-4 w-4 mr-2" aria-hidden="true" />Preferences</TabsTrigger>
         </TabsList>
 

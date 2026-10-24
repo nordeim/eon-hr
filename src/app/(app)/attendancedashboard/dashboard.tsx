@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, CircleCheckBig, Clock, Download, TriangleAlert, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -51,6 +53,10 @@ export interface AttendanceDashboardData {
   records: AttendanceRecordRow[]; // current month only
   monthTitle: string; // "October 2026"
   daysInMonth: number;
+  /* Session 88 (R88-E): the selected month as YYYY-MM (drives the
+     header's type=month filter input — the REF renders it first in the
+     actions cluster). */
+  monthValue: string;
 }
 
 function escapeCsv(value: string): string {
@@ -76,6 +82,7 @@ function rate(present: number, absent: number, late: number): number {
 }
 
 export function AttendanceDashboard({ data }: { data: AttendanceDashboardData }) {
+  const router = useRouter();
   const toast = useToast();
   const [department, setDepartment] = React.useState<string>("all");
 
@@ -173,6 +180,22 @@ export function AttendanceDashboard({ data }: { data: AttendanceDashboardData })
         subtitle="Daily clock-in/out trends, late arrivals & department reports"
         actions={
           <>
+            {/* Session 88 (R88-E): the REF's month filter — a type=month
+               input as the FIRST header action (w=160, the standard Input
+               classes, the current-month default; live-measured 3/3
+               reload-stable). Changing it navigates with ?month=YYYY-MM
+               (the functional superset: the server re-renders the window,
+               title, and day count for the selected month). */}
+            <Input
+              type="month"
+              className="w-40"
+              value={data.monthValue}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v) router.push(`/attendancedashboard?month=${v}`);
+              }}
+              aria-label="Filter by month"
+            />
             <Select value={department} onValueChange={setDepartment}>
               <SelectTrigger className="w-44" aria-label="Filter by department">
                 <SelectValue />

@@ -139,6 +139,15 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsDashboardData }) {
         rowBreakpoint="md"
         title="Analytics Dashboard"
         subtitle="Visual overview of key HR metrics and trends"
+        /* Session 88 (R88-D): the REF's cluster is the UNWRAPPED
+           `flex items-center gap-3` (live-measured, 3/3 reload-stable).
+           flex-nowrap retires the default's flex-wrap (twMerge resolves
+           the pair to the nowrap member) — reproducing the REF-authored
+           mobile overflow chain: the cluster keeps its 456px natural
+           width, the shell's overflow-auto root scrolls to 488, and the
+           subtitle stays on ONE line (h=24) instead of wrapping. The
+           desktop band is unchanged (the cluster fits any >=768 row). */
+        actionsClassName="flex-nowrap"
         actions={
           <>
             <Select value={String(range)} onValueChange={(v) => setRange(Number(v))}>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, BarChart3, Building2, CalendarDays, CalendarRange, Clock, Download, FileText, GraduationCap, HeartHandshake, LogOut, Printer, TrendingUp, Users } from "lucide-react";
+import { BarChart3, Building2, CalendarRange, Clock, Download, FileCheck, FileText, GraduationCap, LogOut, Plane, DollarSign, Printer, Shield, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -88,7 +88,9 @@ const CATEGORIES: Category[] = [
   {
     id: "leave-absence",
     label: "Leave & Absence",
-    icon: <CalendarDays className="h-4 w-4" aria-hidden="true" />,
+    /* Session 88 (R88-A): the REF's glyph identities (live-measured,
+       3/3 reload-stable): plane / dollar-sign / shield / file-check. */
+    icon: <Plane className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Leave Requests Report", description: "All leave requests with status and days", type: "leave" },
       { title: "Leave Balances Report", description: "Entitled vs used days per leave type", type: "leave-balances" },
@@ -98,7 +100,8 @@ const CATEGORIES: Category[] = [
   {
     id: "payroll-compensation",
     label: "Payroll & Compensation",
-    icon: <Banknote className="h-4 w-4" aria-hidden="true" />,
+    /* Session 88 (R88-A): dollar-sign, not banknote. */
+    icon: <DollarSign className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Payroll Register", description: "Full payroll breakdown per period", type: "payroll" },
       { title: "Salary Disbursement Report", description: "Paid payslips only", type: "payroll-disbursement" },
@@ -127,7 +130,8 @@ const CATEGORIES: Category[] = [
   {
     id: "employee-relations",
     label: "Employee Relations",
-    icon: <HeartHandshake className="h-4 w-4" aria-hidden="true" />,
+    /* Session 88 (R88-A): shield, not heart-handshake. */
+    icon: <Shield className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Staff Requests Report", description: "Requests across categories and priorities", type: "employee-relations" },
       { title: "Survey Responses Report", description: "Engagement survey responses with sentiment", type: "survey-responses" },
@@ -137,7 +141,8 @@ const CATEGORIES: Category[] = [
   {
     id: "contracts-compliance",
     label: "Contracts & Compliance",
-    icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+    /* Session 88 (R88-A): file-check, not file-text. */
+    icon: <FileCheck className="h-4 w-4" aria-hidden="true" />,
     reports: [
       { title: "Document Register", description: "All tracked employee documents", type: "contracts" },
       { title: "Document Expiry Report", description: "Documents sorted by expiry date", type: "document-expiry" },

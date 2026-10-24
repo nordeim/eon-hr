@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Heart, House, Image as ImageIcon, Loader2, Send, Video, X } from "lucide-react";
+import { Heart, House, Image as ImageIcon, Loader2, Send, Users, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -256,8 +256,15 @@ export default function CompanyWallPage() {
               <div className="space-y-2">
                 <Label htmlFor="post-audience">Who can see this post?</Label>
                 <Select value={audience} onValueChange={setAudience}>
+                  {/* Session 88 (R88-L): the REF's trigger carries the Users
+                      glyph inside the value span's flex items-center gap-2
+                      wrapper (live-measured, 3/3 reload-stable: SPAN[users
+                      w-4 h-4 + text] + the trailing chevron). */}
                   <SelectTrigger id="post-audience" className="w-full" aria-label="Audience">
-                    <SelectValue />
+                    <span className="flex items-center gap-2">
+                      <Users className="w-4 h-4" aria-hidden="true" />
+                      <SelectValue />
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     {AUDIENCE_OPTIONS.map((o) => (
