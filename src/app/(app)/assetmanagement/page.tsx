@@ -62,8 +62,31 @@ interface EmployeeOption {
   lastName: string;
 }
 
-const STATUS_OPTIONS = ["all", "available", "assigned", "repair", "retired"];
-const TYPE_OPTIONS = ["all", "laptop", "phone", "monitor", "furniture", "vehicle", "other"];
+/* Session 90 (R90-C): the REF's live filter inventories (cross-side read
+   from the open selects): STATUS offers Returned + Pending Return where
+   the clone previously offered Repair/Retired; TYPE is the REF's twelve
+   EMOJI-LABELED entries (the clone's seven plain labels retired). The
+   labels ride the SelectItem children so the desktop popper, the mobile
+   bottom-sheet (R90-B) and the dialog selects all render the same set. */
+const STATUS_OPTIONS = ["all", "available", "assigned", "returned", "pending_return"];
+const TYPE_OPTIONS = [
+  "all", "laptop", "desktop", "phone", "tablet", "monitor",
+  "keyboard", "mouse", "headset", "furniture", "vehicle", "other",
+];
+const TYPE_LABELS: Record<string, string> = {
+  all: "All Types",
+  laptop: "\u{1F4BB} laptop",
+  desktop: "\u{1F5A5}\uFE0F desktop",
+  phone: "\u{1F4F1} phone",
+  tablet: "\u{1F4DF} tablet",
+  monitor: "\u{1F5A5}\uFE0F monitor",
+  keyboard: "\u2328\uFE0F keyboard",
+  mouse: "\u{1F5B1}\uFE0F mouse",
+  headset: "\u{1F3A7} headset",
+  furniture: "\u{1FA91} furniture",
+  vehicle: "\u{1F697} vehicle",
+  other: "\u{1F4E6} other",
+};
 
 function labelize(v: string): string {
   return v === "all" ? "All" : v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -325,7 +348,7 @@ export default function AssetManagementPage() {
           <SelectContent>
             {TYPE_OPTIONS.map((t) => (
               <SelectItem key={t} value={t}>
-                {t === "all" ? "All Types" : labelize(t)}
+                {TYPE_LABELS[t] ?? labelize(t)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -589,7 +612,7 @@ function AssetDialog({
                 <SelectContent>
                   {TYPE_OPTIONS.filter((t) => t !== "all").map((t) => (
                     <SelectItem key={t} value={t}>
-                      {labelize(t)}
+                      {TYPE_LABELS[t] ?? labelize(t)}
                     </SelectItem>
                   ))}
                 </SelectContent>

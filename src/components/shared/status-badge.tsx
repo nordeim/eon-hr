@@ -59,6 +59,11 @@ const STATUS_MAP: Record<string, { label: string; variant: "success" | "warning"
   assigned: { label: "Assigned", variant: "info" },
   repair: { label: "In Repair", variant: "warning" },
   retired: { label: "Retired", variant: "secondary" },
+  /* Session 90 (R90-C): the REF's asset filter set adds these — the badge
+     family follows the filter inventory (the seeded tenants + the
+     "In Repair" stat card keep the repair/retired members above). */
+  returned: { label: "Returned", variant: "success" },
+  pending_return: { label: "Pending Return", variant: "warning" },
   // requests
   resolved_req: { label: "Resolved", variant: "success" },
   urgent: { label: "Urgent", variant: "destructive" },

@@ -7256,3 +7256,72 @@ describe("session 205 — the RTL lang member (R89-B)", () => {
     expect(sidebarNav).toContain("التبديل إلى الإنجليزية");
   });
 });
+
+/* ============================================================
+ * Session 90 (parity round 89) — the RTL select-mirroring +
+ * mobile bottom-sheet round.
+ *
+ * The r89 close-out's two flagged RTL-specific members triaged:
+ * the assetmanagement select-chevron position was the visible tip of
+ * TWO defects — R90-A: Radix's SelectPrimitive.Trigger stamps
+ * dir={context.dir} whose useDirection fallback is "ltr" (no dir prop,
+ * no DirectionProvider), pinning EVERY select trigger's interior LTR
+ * while the page is RTL (the chevron never mirrored; the REF's trigger
+ * carries NO dir attribute — live-measured); R90-B: the REF swaps the
+ * desktop popper for a BOTTOM-SHEET below 768px (live-verified 736/640
+ * → sheet, 768 → popper) — the overlay/handle/h2/option-button recipe
+ * extracted verbatim from the live REF DOM. R90-C: the assetmanagement
+ * filter inventories (STATUS gained Returned + Pending Return; TYPE is
+ * the REF's 12 emoji-labeled entries). The allleaverequests member was
+ * CLOSED as the AA/subpixel floor (the REF's own 15.34px svg render).
+ * ============================================================ */
+describe("session 90 — the select family (R90-A/R90-B/R90-C)", () => {
+  it("R90-A: the RTL chevron contract — the MIRRORED form is mobile-only (the plain button carries no dir; the desktop Radix trigger keeps the stock dir stamp)", () => {
+    // the mobile plain-button branch renders BEFORE the Radix trigger and
+    // stamps NO dir (the REF's mobile form — live-measured: no attribute,
+    // computed rtl, the chevron at the start side)
+    const iMobile = selectUi.indexOf("data-placeholder={mobile.selected === undefined");
+    expect(iMobile).toBeGreaterThan(-1);
+    // the desktop branch: the stock Radix trigger — the REVISED R90-A note
+    // documents the REF's desktop dir="ltr" stamp (no dir strip)
+    const iNote = selectUi.indexOf("R90-A, revised");
+    expect(iNote).toBeGreaterThan(-1);
+    expect(selectUi).not.toContain("dir={undefined}");
+  });
+
+  it("R90-B1: the Select renders the REF's mobile bottom-sheet below 768 (the guarded matchMedia + the sheet recipe)", () => {
+    expect(selectUi).toContain("(max-width: 767px)");
+    expect(selectUi).toContain(
+      "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+    );
+    expect(selectUi).toContain("mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted");
+    expect(selectUi).toContain("Select an option");
+    expect(selectUi).toContain("p-4 pb-8 space-y-2 max-h-[60vh] overflow-y-auto");
+  });
+
+  it("R90-B2: the sheet's option buttons carry the REF's recipe (min-h-44 + the selected blue family + the Check)", () => {
+    expect(selectUi).toContain(
+      "w-full flex items-center justify-between p-4 rounded-lg border transition-colors min-h-[44px]",
+    );
+    expect(selectUi).toContain("bg-blue-50 border-blue-200 text-blue-900");
+    expect(selectUi).toContain("bg-white border-slate-200 hover:bg-slate-50");
+    expect(selectUi).toMatch(/<Check className="h-4 w-4 text-blue-600" \/>/);
+  });
+
+  it("R90-B3: the mobile trigger opens the sheet through the SelectMobileContext (the plain-button swap)", () => {
+    expect(selectUi).toContain("SelectMobileContext");
+    expect(selectUi).toContain("openSheet");
+  });
+
+  it("R90-C1: the assetmanagement type select offers the REF's 12 emoji-labeled entries", () => {
+    const src = read("src", "app", "(app)", "assetmanagement", "page.tsx");
+    expect(src).toContain('"all", "laptop", "desktop", "phone", "tablet", "monitor",');
+    expect(src).toContain('"keyboard", "mouse", "headset", "furniture", "vehicle", "other",');
+    expect(src).toContain(String.raw`laptop: "\u{1F4BB} laptop"`);
+  });
+
+  it("R90-C2: the assetmanagement status select offers Returned + Pending Return (the REF's five)", () => {
+    const src = read("src", "app", "(app)", "assetmanagement", "page.tsx");
+    expect(src).toContain('["all", "available", "assigned", "returned", "pending_return"]');
+  });
+});
