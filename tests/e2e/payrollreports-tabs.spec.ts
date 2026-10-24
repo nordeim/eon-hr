@@ -1,16 +1,17 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Session 35 (R34-E): the payrollreports tab contents — the with-data
- * superset. REF's four triggers are INERT (clicking Tax & Deductions /
- * History / Custom changes nothing on REF — re-verified live this round),
- * so any tab content is superset territory. This spec pins:
- *  - the at-rest contract: Monthly active, the summary card present
- *  - the superset round-trip: each tab swaps the sibling card, and the
- *    zero-data empty states render REF's card grammar
- *  - the Custom form's Generate flow (the zero-data path)
+ * Session 35 (R34-E): the payrollreports tab contents — AMENDED at session
+ * 87 (the r87 tab-interior instrument measured the REF's ACTUAL tab panels:
+ * its triggers are INTERACTIVE, and the session-35 "inert triggers" belief
+ * was wrong — the three non-Monthly interiors were invented without
+ * measurement and have been rebuilt to the REF recipes; see
+ * tests/e2e/session87-tabinterior.spec.ts for the full contract pins and
+ * docs/remediation-plan-session87.md). This spec keeps the round-trip
+ * coverage: each tab swaps the sibling panel, and the zero-data empty
+ * states render the REF-measured copy.
  */
-test.describe("payrollreports tabs (session 35, R34-E)", () => {
+test.describe("payrollreports tabs (session 35, R34-E; session-87 amendment)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/payrollreports");
     await expect(page.getByRole("heading", { name: "Payroll Reports" })).toBeVisible();
@@ -27,39 +28,46 @@ test.describe("payrollreports tabs (session 35, R34-E)", () => {
   test("Tax & Deductions swaps in the breakdown card with its empty state", async ({ page }) => {
     await page.getByRole("tab", { name: "Tax & Deductions" }).click();
     await expect(page.getByRole("tab", { name: "Tax & Deductions" })).toHaveAttribute("aria-selected", "true");
-    // Scope to the card title (the tab trigger shares the string — the
-    // strict-mode locator quirk).
-    const cardTitle = page.getByRole("paragraph").filter({ hasText: "Tax & Deductions" });
-    await expect(cardTitle).toBeVisible();
-    await expect(page.getByText("Deduction breakdown for", { exact: false })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Effective Rate" })).toBeVisible();
-    await expect(page.getByText(/No records for \d{4}-\d{2}/)).toBeVisible();
+    // Session 87 (R87-A): the REF-measured title/description (the old
+    // "Deduction breakdown for {month}" was the session-35 invention).
+    await expect(page.getByText("Tax & Deductions Report")).toBeVisible();
+    await expect(page.getByText("Breakdown of deductions and estimated tax")).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Est. Tax (15%)" })).toBeVisible();
+    // the REF's period-independent empty copy
+    await expect(page.getByText("No records for selected period")).toBeVisible();
   });
 
-  test("History swaps in the periods card with its empty state", async ({ page }) => {
+  test("History swaps in the per-employee card with its empty state", async ({ page }) => {
     await page.getByRole("tab", { name: "History" }).click();
     await expect(page.getByRole("tab", { name: "History" })).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("paragraph").filter({ hasText: "Payroll History" })).toBeVisible();
-    await expect(page.getByRole("paragraph").filter({ hasText: "All processed periods" })).toBeVisible();
-    await expect(page.getByText("No payroll history yet")).toBeVisible();
+    // Session 87 (R87-B): the REF-measured per-EMPLOYEE history (the old
+    // per-period aggregate was the session-35 invention).
+    await expect(page.getByText("Employee Earnings History")).toBeVisible();
+    await expect(page.getByText("Complete salary history per employee")).toBeVisible();
+    await expect(page.getByText("No payroll history found")).toBeVisible();
   });
 
-  test("Custom renders the range form and Generate runs the zero-data report", async ({ page }) => {
+  test("Custom renders the REF's three-card form and the reactive zero-data preview", async ({ page }) => {
     await page.getByRole("tab", { name: "Custom" }).click();
-    await expect(page.getByRole("paragraph").filter({ hasText: "Custom Report" })).toBeVisible();
-    await expect(page.getByRole("paragraph").filter({ hasText: "Build a report for any range" })).toBeVisible();
-    await expect(page.getByLabel("From", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("To", { exact: true })).toBeVisible();
-
-    await page.getByRole("button", { name: "Generate Report" }).click();
-    await expect(page.getByText("No records in range")).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Custom" })).toHaveAttribute("aria-selected", "true");
+    // Session 87 (R87-C): the REF's THREE-card architecture (the old
+    // one-card form + Generate button was the session-35 invention).
+    await expect(page.getByText("Report Filters")).toBeVisible();
+    await expect(page.getByText("Select Columns")).toBeVisible();
+    await expect(page.getByText("Report Preview")).toBeVisible();
+    await expect(page.getByLabel("From Month")).toBeVisible();
+    await expect(page.getByLabel("To Month")).toBeVisible();
+    // the preview derives reactively — the zero-data state renders without
+    // any Generate click (no Generate button exists on the REF)
+    await expect(page.getByText("No data for selected filters")).toBeVisible();
+    await expect(page.getByText("0 records")).toBeVisible();
   });
 
   test("back to Monthly restores the summary card", async ({ page }) => {
     await page.getByRole("tab", { name: "History" }).click();
-    await expect(page.getByRole("paragraph").filter({ hasText: "Payroll History" })).toBeVisible();
+    await expect(page.getByText("Employee Earnings History")).toBeVisible();
     await page.getByRole("tab", { name: "Monthly" }).click();
     await expect(page.getByText("Monthly Payroll Summary")).toBeVisible();
-    await expect(page.getByRole("paragraph").filter({ hasText: "Payroll History" })).toHaveCount(0);
+    await expect(page.getByText("Employee Earnings History")).toHaveCount(0);
   });
 });

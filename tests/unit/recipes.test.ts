@@ -3092,28 +3092,36 @@ describe("session-35 dialog interiors + deep RTL + payrollreports tabs (parity r
     expect(src).toContain("Monthly Payroll Summary");
   });
 
-  it("R34-E2: the Tax & Deductions card — the per-employee breakdown on REF's card grammar", () => {
+  it("R34-E2: the Tax & Deductions card — the REF-measured recipe (session 87 amendment: the r87 tab-interior instrument measured the REF's actual panel — the trending-up title + the From/To range toolbar + the SEVEN-column breakdown; the old Gross/Deductions/Effective-Rate aggregate was a session-35 invention)", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
     /* Session 49 (R48-C3) amendment: the conditional render retired —
        all four cards ride Radix TabsContent panels (REF mounts all
        four; the aggregates stay the wired superset). */
     expect(src).toContain('<TabsContent value="tax"');
-    expect(src).toContain("Tax & Deductions");
-    expect(src).toContain("Effective Rate");
+    expect(src).toContain("Tax &amp; Deductions Report");
+    expect(src).toContain("Breakdown of deductions and estimated tax");
+    /* Session 87 (R87-A): the REF's seven-column contract + the range toolbar */
+    expect(src).toContain("Est. Tax (15%)");
+    expect(src).toContain("Late/Absent");
+    expect(src).toContain("No records for selected period");
   });
 
-  it("R34-E3: the History card — the processed-periods table", () => {
+  it("R34-E3: the History card — the REF-measured per-employee recipe (session 87 amendment: the REF renders the PER-EMPLOYEE earnings history with the dollar-sign title + the Slip column; the per-period aggregate was a session-35 invention)", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
     expect(src).toContain('<TabsContent value="history"');
-    expect(src).toContain("Payroll History");
-    expect(src).toContain("No payroll history yet");
+    expect(src).toContain("Employee Earnings History");
+    expect(src).toContain("No payroll history found");
+    expect(src).toContain("Complete salary history per employee");
   });
 
-  it("R34-E4: the Custom card — the from/to range form + the filtered table", () => {
+  it("R34-E4: the Custom card — the REF's THREE-card architecture (session 87 amendment: Report Filters + Select Columns + Report Preview with the chip-driven columns and NO Generate button; the one-card form was a session-35 invention)", () => {
     const src = read("src", "app", "(app)", "payrollreports", "page.tsx");
     expect(src).toContain('<TabsContent value="custom"');
-    expect(src).toContain("Custom Report");
-    expect(src).toContain("Generate Report");
+    expect(src).toContain("Report Filters");
+    expect(src).toContain("Select Columns");
+    expect(src).toContain("Report Preview");
+    expect(src).toContain("No data for selected filters");
+    expect(src).not.toContain("Generate Report");
   });
 });
 
