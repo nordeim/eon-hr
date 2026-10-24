@@ -101,7 +101,7 @@ function JsonLdScripts({ origin, nonce }: { origin: string; nonce?: string }) {
 const THEME_BOOT = `(function(){try{
 if(location.pathname==="/login"){return;}
 if(localStorage.getItem("darkMode")==="true"){document.documentElement.classList.add("dark");}
-if(localStorage.getItem("app_lang")==="ar"){document.documentElement.setAttribute("dir","rtl");}
+if(localStorage.getItem("app_lang")==="ar"){document.documentElement.setAttribute("dir","rtl");document.documentElement.setAttribute("lang","ar");}
 }catch(e){}})();`;
 
 /**

@@ -131,6 +131,9 @@ test.describe("RTL mode (session 33, R32-B)", () => {
       .poll(() => page.evaluate(() => document.documentElement.getAttribute("dir")))
       .toBe("rtl");
     expect(await page.evaluate(() => localStorage.getItem("app_lang"))).toBe("ar");
+    // Session 205 (R89-B): REF sets html lang alongside dir (live-measured
+    // cross-side: "rtl | lang=ar" on REF; the EN click restores lang="en").
+    expect(await page.evaluate(() => document.documentElement.lang)).toBe("ar");
     // The button flipped to EN with REF's Arabic title.
     const en = page.getByRole("button", { name: "EN", exact: true });
     await expect(en).toBeVisible();
@@ -171,6 +174,8 @@ test.describe("RTL mode (session 33, R32-B)", () => {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.getAttribute("dir")))
       .toBe("rtl");
+    // Session 205 (R89-B): the boot re-applies lang with dir.
+    expect(await page.evaluate(() => document.documentElement.lang)).toBe("ar");
     // The strings stay English (REF's i18n is not wired — only the
     // direction flips). The desktop dashboard h1 is the welcome line.
     await expect(page.getByRole("heading", { name: /Welcome back/ })).toBeVisible();
@@ -187,5 +192,7 @@ test.describe("RTL mode (session 33, R32-B)", () => {
       .poll(() => page.evaluate(() => document.documentElement.getAttribute("dir")))
       .toBe("ltr");
     expect(await page.evaluate(() => localStorage.getItem("app_lang"))).toBe("en");
+    // Session 205 (R89-B): the EN click restores lang="en" (REF live-measured).
+    expect(await page.evaluate(() => document.documentElement.lang)).toBe("en");
   });
 });
