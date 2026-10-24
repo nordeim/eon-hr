@@ -5,8 +5,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -26,18 +24,29 @@ export interface HourBucket {
 }
 
 export function DailyAttendanceTrend({ data }: { data: DayPoint[] }) {
+  /* Session 87 (R87-N): the chart type re-measured by the full-registry
+   * cross-side pixel-diff — the REF renders a grouped BAR chart (90
+   * zero-height bars at zero data: 30 days × 3 series, live-read; the
+   * Present/Late/Absent legend order; recharts' default tick interval —
+   * the forced interval={0} showed all 31 ticks where the REF shows the
+   * default cadence). The LineChart rendered no marks at zero data. */
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+      <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={0} />
+        <XAxis dataKey="day" tick={{ fontSize: 11 }} />
         <YAxis allowDecimals={false} width={36} />
         <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="present" name="Present" stroke="#10b981" strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="late" name="Late" stroke="#f59e0b" strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="absent" name="Absent" stroke="#ef4444" strokeWidth={2} dot={false} />
-      </LineChart>
+        {/* Session 87 (R87-N): recharts 3.x's Legend sorts its items by
+            VALUE by default — itemSorter={null} renders the payload in
+            declaration order (the REF's live-read Present/Late/Absent
+            order; the default sort rendered AbsentLatePresent at the
+            all-zero seeded state). */}
+        <Legend itemSorter={null} />
+        <Bar dataKey="present" name="Present" fill="#10b981" />
+        <Bar dataKey="late" name="Late" fill="#f59e0b" />
+        <Bar dataKey="absent" name="Absent" fill="#ef4444" />
+      </BarChart>
     </ResponsiveContainer>
   );
 }

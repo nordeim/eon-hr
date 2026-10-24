@@ -3,7 +3,7 @@
 import * as React from "react";
 import { CheckCircle, CircleCheckBig, DollarSign, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { useToast } from "@/components/ui/toast";
@@ -127,7 +127,12 @@ export default function PayrollAiPage() {
             headerless p-12 form superseded by the r61 re-measure. */}
         <Card className="border-slate-200">
           <CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
-            <CardTitle>AI Suggestions</CardTitle>
+            {/* Session 87 (R87-H): the title re-measured by the
+                full-registry cross-side pixel-diff — the h16 title div
+                (`font-semibold leading-none tracking-tight`, no
+                text-base; the default CardTitle's text-base line box
+                renders h24 → the header 73 vs the REF's 65). */}
+            <div className="font-semibold leading-none tracking-tight">AI Suggestions</div>
           </CardHeader>
           <CardContent className="p-6">
             {/* REF's content carries ONE inner wrapper: text-center

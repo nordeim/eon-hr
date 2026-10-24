@@ -2489,7 +2489,12 @@ describe("session-31 drawer border + chat structure + legacy assets + swipe reci
     expect(src).toContain("border-b bg-slate-50");
     expect(src).toContain("leading-none");
     expect(src).toContain("p-12 text-center");
-    expect(src).toContain('Inbox className="h-16 w-16 text-slate-300"');
+    // Session 87 amendment (R87-A): the empty-state icon re-measured by
+    // the full-registry cross-side pixel-diff — the Laptop glyph in the
+    // direct form (was the r30-era Inbox + wrapper).
+    expect(src).toContain('Laptop className="w-16 h-16 mx-auto mb-4 text-slate-300"');
+    expect(src).not.toContain("<Inbox");
+    expect(src).not.toContain('Inbox className="h-16 w-16 text-slate-300"');
     expect(src).toContain("No assets yet");
   });
 
@@ -5447,11 +5452,14 @@ describe("session-49 bare interiors + header architecture (parity round 48 — t
 
   // --- B. the C-page contracts ---
 
-  it("R48-C1: interviewassistant — REF's two-card grid (`grid lg:grid-cols-2 gap-6`) with the Select Candidate + Interview Notes cards (labels: Candidate / Notes; the clone's AI Analysis rides column one as the superset)", () => {
+  // Session 87 amendment (R87-G): the titles moved to the REF's h16
+  // title-div form + the AI Analysis card is analysis-conditional (the
+  // at-rest two-card contract).
+  it("R48-C1: interviewassistant — REF's two-card grid (`grid lg:grid-cols-2 gap-6`) with the Select Candidate + Interview Notes cards (labels: Candidate / Notes; the AI Analysis card renders only once an analysis exists — session 87)", () => {
     const src = page("interviewassistant", "page.tsx");
     expect(src).toContain('className="grid lg:grid-cols-2 gap-6"');
-    expect(src).toContain(">Select Candidate</CardTitle>");
-    expect(src).toContain(">Interview Notes</CardTitle>");
+    expect(src).toContain(">Select Candidate</div>");
+    expect(src).toContain(">Interview Notes</div>");
     expect(src).toContain(">Candidate</Label>");
     expect(src).toContain(">Notes</Label>");
     expect(src).not.toContain('<form onSubmit={onAnalyze}');
@@ -6600,10 +6608,12 @@ describe("Dark-mode text-color family (session 61, R61-A..W — the dark text-co
     expect(src).toContain("icon={<DollarSign aria-hidden=\"true\" />}");
   });
 
-  it("R61-K: the payrollai suggestions card — the AI Suggestions CardHeader + p-6 content + the py-12 wrapper", () => {
+  // Session 87 amendment (R87-H): the title moved to the REF's h16
+  // title-div form (no text-base line box).
+  it("R61-K: the payrollai suggestions card — the AI Suggestions CardHeader (the h16 title div — session 87) + p-6 content + the py-12 wrapper", () => {
     const src = pg("payrollai");
     expect(src).toContain("AI Suggestions");
-    expect(src).toContain("<CardTitle>AI Suggestions</CardTitle>");
+    expect(src).toContain('<div className="font-semibold leading-none tracking-tight">AI Suggestions</div>');
     expect(src).toContain('<CardHeader className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">');
     expect(src).toContain('<CardContent className="p-6">');
     expect(src).toContain('<div className="text-center py-12">');
@@ -7133,10 +7143,13 @@ describe("Margin/gap census (session 66, R66-A..S — parity round 65: margin + 
     expect(src).not.toContain('className="text-sm text-slate-400"');
   });
 
-  it("R66-J: the tenantsetup identity circle is mx-auto mb-4 and the Continue button right-aligns via ml-auto (the footer is not justify-end)", () => {
+  // Session 87 amendment (R87-J): the footer row carries the REF's
+  // justify-between member (live-read; inert alongside the ml-auto
+  // button).
+  it("R66-J: the tenantsetup identity circle is mx-auto mb-4 and the Continue button right-aligns via ml-auto (the footer carries the REF's justify-between — session 87)", () => {
     const src = pg66("tenantsetup");
     expect(src).not.toContain("mb-[22px]");
-    expect(src).toContain('className="flex pt-4"');
+    expect(src).toContain('className="flex justify-between pt-4"');
     expect(src).toMatch(/ml-auto/);
   });
 

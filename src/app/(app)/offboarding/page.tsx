@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarDays, CheckCircle2, CircleCheckBig, Loader2, Plus, Trash2, UserMinus, XCircle } from "lucide-react";
+import { CalendarDays, CheckCircle2, Loader2, Plus, Trash2, UserMinus, Users, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -193,7 +193,12 @@ export default function OffboardingPage() {
         layout="flat36"
         actionsStart
         iconClassName="text-blue-600"
-        sectionIcon={<CircleCheckBig aria-hidden="true" />}
+        /* Session 87 (R87-E): the kicker icon re-measured by the
+           full-registry cross-side pixel-diff — path-data-verified
+           against the REF's rendered svg: the USERS glyph (the three
+           paths + the 9,7 r4 circle), not the checkmark family
+           (CircleCheckBig was the original build's guess). */
+        sectionIcon={<Users aria-hidden="true" />}
         title="Offboarding Journey"
         subtitle="Manage employee departures smoothly"
         actions={

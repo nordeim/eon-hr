@@ -58,11 +58,15 @@ export default async function EmployeePortalPage() {
         <CardContent className="p-8 text-center">
           {!employee || !process ? (
             <>
-              {/* Session 50 (R49-A7): REF renders the briefcase glyph
-                  DIRECT (w-8 h-8 text-blue-600, inline — centered by the
-                  p-8 text-center; no chip wrapper), H2 mb-2, the P
-                  mt-less — live-measured. */}
-              <Briefcase className="w-8 h-8 text-blue-600" aria-hidden="true" />
+              {/* Session 87 (R87-F): the empty-state icon re-measured by
+                  the full-registry cross-side pixel-diff — the REF
+                  renders a 64px `w-16 h-16 bg-blue-100 rounded-full
+                  mx-auto mb-4` circle WRAPPING the w-8 h-8 text-blue-600
+                  briefcase (live-read h64/h32); the r49-era "bare direct
+                  svg" measurement was stale. */}
+              <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <Briefcase className="w-8 h-8 text-blue-600" aria-hidden="true" />
+              </div>
               <h2 className="text-xl font-bold text-slate-900 mb-2">No Onboarding Found</h2>
               <p className="text-slate-600">
                 You don&apos;t have an active onboarding process yet. Please contact your HR team.

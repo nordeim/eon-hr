@@ -259,7 +259,11 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
             equal-width iconed 152px buttons). */}
         {CATEGORIES.map((c) => (
           <TabsContent key={c.id} value={c.id} className="mt-0">
-            <Card>
+            {/* Session 87 (R87-I residual): the OUTER section card also
+                carries the REF's border-slate-200 (the page hardcodes it
+                at both levels — live-read, computed border
+                rgb(226,232,240)). */}
+            <Card className="border-slate-200">
               <CardHeader className="flex flex-col space-y-1.5 border-b border-slate-200">
                 <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
                   <span className="flex h-5 w-5 items-center justify-center text-blue-600">{c.icon}</span>
@@ -269,7 +273,13 @@ const STATUS_OPTIONS = ["all", "active", "inactive", "terminated"];
               <CardContent className="p-6">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {c.reports.map((r) => (
-                    <div key={r.type} className="rounded-xl border bg-card p-4">
+                    /* Session 87 (R87-I): the card family re-measured by
+                       the full-registry cross-side pixel-diff — the
+                       REF's set verbatim: `rounded-xl border bg-card
+                       text-card-foreground shadow border-slate-200`
+                       (computed border rgb(226,232,240) vs the default
+                       token's rgb(229,229,229); + shadow). */
+                    <div key={r.type} className="rounded-xl border bg-card text-card-foreground shadow border-slate-200 p-4">
                       <h3 className="font-semibold text-slate-900 mb-3">{r.title}</h3>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => exportCsv(r)}>

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card } from "@/components/ui/card";
-import { Network, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { OrganogramTree, type OrgNodeData } from "./organogram-tree";
 
 interface EmployeeRow {
@@ -112,8 +112,13 @@ export default async function OrganogramPage() {
         <div className="min-w-max flex justify-center p-8">
           <Card className="border-slate-200">
             {!hasStructure || trees.length === 0 ? (
+              /* Session 87 (R87-B): the empty-state icon re-measured by
+                 the full-registry cross-side pixel-diff — the USERS
+                 glyph (`lucide-users w-16 h-16 mx-auto mb-4
+                 text-slate-300`, path-data-verified), not the network
+                 diagram. */
               <div className="p-12 text-center">
-                <Network className="mx-auto mb-4 h-16 w-16 text-slate-300" aria-hidden="true" />
+                <Users className="w-16 h-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
                 <p className="text-base text-slate-500">
                   No reporting structure defined. Assign managers to employees to build the org chart.
                 </p>

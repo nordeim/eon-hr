@@ -317,7 +317,12 @@ export default function PayrollModulePage() {
               {visibleRecords.length === 0 ? (
                 <TableRow>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
-                    No payslips for {monthLabel(period)}.
+                    {/* Session 87 (R87-C): the full REF sentence re-measured
+                        by the full-registry cross-side pixel-diff — the
+                        live-read text carries the CTA tail the truncated
+                        form dropped. */}
+                    No payslips for {monthLabel(period)}. Click{" "}
+                    {"\""}Generate All{"\""} to create them.
                   </td>
                 </TableRow>
               ) : (

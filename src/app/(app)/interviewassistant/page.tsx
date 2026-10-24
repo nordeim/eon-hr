@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 interface CandidateOption {
@@ -119,7 +118,11 @@ export default function InterviewAssistantPage() {
         <div className="space-y-6">
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-200">
-              <CardTitle className="leading-none">Select Candidate</CardTitle>
+              {/* Session 87 (R87-G): the REF's title is the h16 div —
+                  `font-semibold leading-none tracking-tight` (no
+                  text-base; the default CardTitle's text-base line box
+                  renders h24). */}
+              <div className="font-semibold leading-none tracking-tight">Select Candidate</div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               {loading ? (
@@ -127,7 +130,11 @@ export default function InterviewAssistantPage() {
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : (
-                <div className="space-y-2">
+                /* Session 87 (R87-G residual): the select group renders
+                   h68 on the REF (label 16 + gap 8 + select 36 + 8 of
+                   trailing-slot spacing) — pb-2 restores the rendered
+                   geometry (see the tenantsetup R87-J recipe). */
+                <div className="space-y-2 pb-2">
                   <Label htmlFor="ia-candidate">Candidate</Label>
                   <Select value={candidateId} onValueChange={setCandidateId}>
                     <SelectTrigger id="ia-candidate">
@@ -151,6 +158,13 @@ export default function InterviewAssistantPage() {
             </CardContent>
           </Card>
 
+          {/* Session 87 (R87-G): the at-rest card set re-measured by the
+              full-registry cross-side pixel-diff — the REF renders TWO
+              cards at rest (Select Candidate + Interview Notes); the
+              AI Analysis card renders ONLY once an analysis exists (the
+              functional superset is preserved: the card appears after
+              Analyze; the at-rest visual matches the REF). */}
+          {analysis ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -162,8 +176,7 @@ export default function InterviewAssistantPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5">
-            {analysis ? (
-              <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between gap-4 rounded-lg border bg-secondary/30 p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -229,21 +242,17 @@ export default function InterviewAssistantPage() {
                   {analysis.summary}
                 </p>
               </div>
-            ) : (
-              <EmptyState
-                icon={<Sparkles className="h-6 w-6" aria-hidden="true" />}
-                title="No analysis yet"
-                description="Write or paste interview notes, then click Analyze Interview."
-              />
-            )}
           </CardContent>
         </Card>
+          ) : null}
         </div>
 
         <div className="space-y-6">
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-200">
-              <CardTitle className="leading-none">Interview Notes</CardTitle>
+              {/* Session 87 (R87-G): the h16 title div (see Select
+                  Candidate). */}
+              <div className="font-semibold leading-none tracking-tight">Interview Notes</div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               {loading ? (
@@ -255,20 +264,23 @@ export default function InterviewAssistantPage() {
               {/* Session 58 (R58-21): REF's Analyze Interview is w-full and
                   a DIRECT child of the p-6 space-y-4 card body (498px),
                   not nested in the notes' space-y-2 div — live-measured,
-                  the CTA-fill census. */}
-              <div className="space-y-2">
+                  the CTA-fill census.
+                  Session 87 (R87-G residual): the notes group carries the
+                  same +8 trailing-slot spacing as the select group. */}
+              <div className="space-y-2 pb-2">
                 <Label htmlFor="ia-notes">Notes</Label>
                 {/* Session 64 (R64-D): REF's live textarea placeholder
                     (live-measured this round — the authored example essay
                     retired; R61-L held the SELECT's string only). */}
                 <Textarea
                   id="ia-notes"
-                  rows={10}
+                  rows={12}
                   placeholder="Enter your interview observations, candidate responses, and overall impressions..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">{notes.trim().split(/\s+/).filter(Boolean).length} words</p>
+                {/* Session 87 (R87-G): the word counter dropped — the
+                    REF's Notes card carries no counter at rest. */}
               </div>
               <Button variant="green" className="w-full" type="button" disabled={analyzing || !notes.trim()} onClick={() => void onAnalyze()}>
                 {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}

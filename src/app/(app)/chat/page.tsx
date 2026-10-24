@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, MessageCircle, MessageSquarePlus, Search, Send } from "lucide-react";
+import { Loader2, MessageCircle, Plus, Search, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -235,7 +235,7 @@ export default function ChatPage() {
                  member is the authored truth). */
               className="flex h-8 shrink-0 items-center justify-center gap-2 rounded-md bg-blue-600 px-3 text-primary-foreground transition-colors hover:bg-blue-700 cursor-pointer"
             >
-              <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
+              <Plus className="h-4 w-4" aria-hidden="true" />
             </button>
             </div>
             {/* Session 61 (R61-B/I): the search wrapper is BARE relative

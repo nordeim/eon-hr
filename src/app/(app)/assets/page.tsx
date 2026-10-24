@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Inbox, Laptop, Loader2, Plus } from "lucide-react";
+import { Laptop, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -182,13 +182,14 @@ export default function LegacyAssetsPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : assets.length === 0 ? (
-              /* REF's empty: the systemic icon-over-line recipe — a 64px
-                 slate-300 Inbox (mb-4 wrapper, y=310, path-fingerprinted)
-                 above the 16px slate-500 line (y=390) */
+              /* REF's empty (session-87 re-measure, the full-registry
+                 cross-side pixel-diff): the LAPTOP glyph as a DIRECT svg
+                 child of the p-12 — `lucide-laptop w-16 h-16 mx-auto
+                 mb-4 text-slate-300` (path "M20 16V7a2 2 0 0 0-2-2H6…"),
+                 no wrapper div (the r30-era Inbox + mb-4 flex wrapper
+                 was the build's guess). */
               <div className="p-12 text-center">
-                <div className="mb-4 flex justify-center">
-                  <Inbox className="h-16 w-16 text-slate-300" aria-hidden="true" />
-                </div>
+                <Laptop className="w-16 h-16 mx-auto mb-4 text-slate-300" aria-hidden="true" />
                 <p className="text-slate-500">No assets yet</p>
               </div>
             ) : (

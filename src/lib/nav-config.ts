@@ -38,6 +38,11 @@ export interface NavChild {
 export interface NavItem {
   label: string;
   href?: string;
+  /** Session 87 (R87-M): routes that ALSO mark this item active on the
+   *  sidebar (the REF's /dynamicdashboard marks Dashboard active —
+   * live-read rgb(24,119,242); the strict pathname===href equality
+   * rendered nothing active). */
+  aliases?: string[];
   children?: NavChild[];
   icon: LucideIcon;
 }
@@ -45,7 +50,10 @@ export interface NavItem {
 // The sidebar tree — matches the reference app exactly (labels, routes and
 // icons; sub-item icons re-measured in the session-2 parity audit).
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  // Session 87 (R87-M): /dynamicdashboard is a Dashboard-family route —
+  // the REF marks the desktop Dashboard item ACTIVE on it (and the
+  // mobile Home tab; live-read, the full-registry cross-side pass).
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, aliases: ["/dynamicdashboard"] },
   {
     label: "Employees",
     icon: Users,
@@ -139,8 +147,10 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export const BOTTOM_NAV: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Home", href: "/dashboard", icon: LayoutDashboard },
+export const BOTTOM_NAV: { label: string; href: string; icon: LucideIcon; aliases?: string[] }[] = [
+  // Session 87 (R87-M): the mobile Home tab mirrors the desktop
+  // Dashboard alias — the REF marks Home active on /dynamicdashboard.
+  { label: "Home", href: "/dashboard", icon: LayoutDashboard, aliases: ["/dynamicdashboard"] },
   { label: "Staff", href: "/employees", icon: Users },
   { label: "Tasks", href: "/taskmanager", icon: SquareCheckBig },
   { label: "Attendance", href: "/attendance", icon: Calendar },

@@ -197,7 +197,11 @@ test.describe("session-50 deep interiors", () => {
     expect(info.zeroSvg).toBe("lucide lucide-bell w-8 h-8 mx-auto mb-2 opacity-30");
   });
 
-  test("R50-A7: employeeportal's zero card — the briefcase glyph DIRECT (no chip), H2 mb-2, the mt-less P", async ({ page }) => {
+  // Session 87 amendment (R87-F): the full-registry cross-side pixel-diff
+  // re-measured the zero card — the REF renders a 64px bg-blue-100
+  // rounded-full circle WRAPPING the briefcase (live-read h64/h32); the
+  // r50-era "direct glyph, no chip" measurement was stale.
+  test("R50-A7: employeeportal's zero card — the briefcase glyph rides the bg-blue-100 circle wrapper (session 87 re-measure), H2 mb-2, the mt-less P", async ({ page }) => {
     await page.goto("/employeeportal");
     await expect(page.getByRole("heading", { name: "No Onboarding Found" })).toBeVisible();
     const info = await page.evaluate(() => {
@@ -206,16 +210,23 @@ test.describe("session-50 deep interiors", () => {
       const content = h2?.parentElement;
       const svg = content?.querySelector("svg");
       const p = h2?.nextElementSibling;
+      const wrap = svg?.parentElement;
+      const wrapR = wrap?.getBoundingClientRect();
       return {
         svgCls: svg ? norm(svg.getAttribute("class")) : null,
-        svgParentCls: svg?.parentElement ? norm(svg.parentElement.getAttribute("class")) : null,
+        wrapCls: wrap ? norm(wrap.getAttribute("class")) : null,
+        wrapH: wrapR ? Math.round(wrapR.height) : 0,
         h2Cls: h2 ? norm(h2.getAttribute("class")) : null,
         pCls: p ? norm(p.getAttribute("class")) : null,
       };
     });
     expect(info.svgCls).toBe("lucide lucide-briefcase w-8 h-8 text-blue-600");
-    expect(info.svgParentCls).toContain("text-center"); // the p-8 text-center content — NOT a chip
-    expect(info.svgParentCls).not.toContain("rounded-full");
+    // the REF's circle wrapper (h64): w-16 h-16 bg-blue-100 rounded-full
+    // mx-auto mb-4, the briefcase centered inside.
+    expect(info.wrapCls).toContain("bg-blue-100");
+    expect(info.wrapCls).toContain("rounded-full");
+    expect(info.wrapCls).toContain("mx-auto");
+    expect(info.wrapH).toBe(64);
     expect(info.h2Cls).toContain("mb-2");
     expect(info.pCls).toBe("text-slate-600");
   });

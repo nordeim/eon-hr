@@ -302,7 +302,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
             <div className="flex items-center justify-around px-2 py-2">
               {BOTTOM_NAV.map((tab) => {
                 const Icon = tab.icon;
-                const active = pathname === tab.href;
+                /* Session 87 (R87-M): the tab active check honors the
+                   nav config's aliases — the REF marks the mobile Home
+                   tab active on /dynamicdashboard (live-read). */
+                const active = pathname === tab.href || (tab.aliases?.includes(pathname) ?? false);
                 return (
                   <Link
                     key={tab.label}

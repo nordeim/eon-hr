@@ -201,6 +201,15 @@ export default function LoansPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
+        /* Session 87 (R87-L): the +32px container offset — the space-y-8
+           member of the r86-A2 TW-v4 margin-collapse class. The REF's
+           v3-style space-y-8 puts margin-TOP on the sibling past the
+           display:none md:hidden mobile sticky header, collapsing out of
+           the padding-less max-w-7xl container (the card sits at y228 vs
+           the LOC's y196). This mt-8 replicates the REF's computed mt32
+           with the identical collapse behavior; inert at mobile (the
+           row is hidden md:flex). */
+        className="mt-8"
         actionsUnwrapped
 
         /* Session 49 (R48-A3): the always-row family — REF renders the

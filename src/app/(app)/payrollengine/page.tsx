@@ -165,7 +165,14 @@ export default function PayrollEnginePage() {
       <Card className="border-0 shadow-sm">
         <CardContent className="p-5">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1">
+            {/* Session 87 (R87-K): the fields' rendered height re-measured
+                by the full-registry cross-side pixel-diff — the REF
+                renders h64 per field (label 16 + gap 4 + input 36 + 8 of
+                trailing-slot spacing); the pb-1 member restores the
+                rendered geometry (padding on the parent — the TW-v4
+                trap-4 rule forbids mt/mb on space-y children) → the
+                card h132. */}
+            <div className="space-y-1 pb-1">
               <Label htmlFor="pe-month">Payroll Month</Label>
               <Input
                 className="w-44"
@@ -175,7 +182,7 @@ export default function PayrollEnginePage() {
                 onChange={(e) => onMonthChange(e.target.value)}
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 pb-1">
               <Label htmlFor="pe-department">Department</Label>
               <Select value={departmentId} onValueChange={(v) => setDepartmentId(v)}>
                 <SelectTrigger id="pe-department" className="w-48">

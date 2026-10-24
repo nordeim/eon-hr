@@ -151,7 +151,11 @@ function NavLink({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const active = pathname === item.href;
+  /* Session 87 (R87-M): the active check honors the nav config's
+     aliases — the REF marks Dashboard active on /dynamicdashboard
+     (live-read, the full-registry cross-side pass); the strict
+     pathname===href equality rendered nothing active there. */
+  const active = pathname === item.href || (item.aliases?.includes(pathname) ?? false);
   const Icon = item.icon;
   /* Session 45 (R43-C4): REF authors the full attribute contract on
      every nav surface — the shadcn size marker + the literal-false

@@ -61,7 +61,14 @@ export default function TenantSetupPage() {
         </CardHeader>
         <CardContent className="p-6">
           <form onSubmit={onSubmit} className="space-y-6">
-            <div className="space-y-2">
+            {/* Session 87 (R87-J): the fields' rendered height re-measured
+                by the full-registry cross-side pixel-diff — the REF
+                renders h68 per field (label 16 + gap 8 + input 36 + 8 of
+                trailing-slot spacing from the REF's empty trailing
+                elements feeding the space-y chain); the pb-2 member
+                restores the rendered geometry (padding on the parent —
+                the TW-v4 trap-4 rule forbids mt/mb on space-y children). */}
+            <div className="space-y-2 pb-2">
               <Label htmlFor="company-name">Company Name *</Label>
               {/* Session 64 (R64-E): REF's live example placeholders
                   (live-measured this round — R31-C10 held the labels
@@ -74,7 +81,7 @@ export default function TenantSetupPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 pb-2">
               <Label htmlFor="owner-email">Owner Email *</Label>
               <Input
                 id="owner-email"
@@ -85,7 +92,10 @@ export default function TenantSetupPage() {
                 required
               />
             </div>
-            <div className="flex pt-4">
+            {/* Session 87 (R87-J): the REF's footer row carries
+                justify-between (live-read; inert alongside the
+                ml-auto button — class parity). */}
+            <div className="flex justify-between pt-4">
               {/* Session 58 (R58-4): REF's Continue is the DARK solid
                   (bg-primary #171717) — live-measured, the CTA-fill census.
                   Session 66 (R66-J): the footer is NOT justify-end — REF's
