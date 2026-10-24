@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, ChartColumn, FileSpreadsheet, FileText, Loader2, MessageCircle } from "lucide-react";
+import { Calendar, ChartColumn, DollarSign, FileSpreadsheet, FileText, Loader2, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,65 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 
+/* Session 87 (R87-C): the Report Filters title glyph — VENDORED. The
+   REF renders lucide-filter (the CLASSIC triangle funnel: polygon
+   `22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3`, live-read cross-side);
+   lucide 0.525 renamed the glyph to Funnel with DIFFERENT path geometry
+   (the rounded-spout form — pixel-proven maxdelta 221 at the icon cell,
+   ABOVE the AA floor: the lucide-version watch's escalation path).
+   The vendored svg carries the REF's exact polygon + class form. */
+function RefFilterGlyph({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className ? `lucide lucide-filter ${className}` : "lucide lucide-filter"}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+  );
+}
+
 interface PayrollRow {
   id: string;
   period: string;
   employeeName: string;
+  basicSalary: number;
   grossPay: number;
   deductions: number;
   netPay: number;
+  status: string;
 }
+
+/* Session 87 (R87-C): the Custom tab's column chips — the REF's
+   FOURTEEN, in its exact order, with its exact default-ON set
+   (live-measured on the active panel: the toggle chips are `px-3 py-1.5
+   rounded-full text-xs font-medium border transition-colors`, active
+   `bg-blue-600 text-white border-blue-600`, inactive
+   `bg-white text-slate-600 border-slate-300`). */
+const COLUMN_CHIPS = [
+  { key: "name", label: "Employee Name", on: true },
+  { key: "month", label: "Month", on: true },
+  { key: "basic", label: "Basic Salary", on: true },
+  { key: "housing", label: "Housing Allowance", on: false },
+  { key: "transport", label: "Transport Allowance", on: false },
+  { key: "food", label: "Food Allowance", on: false },
+  { key: "otHours", label: "Overtime Hours", on: false },
+  { key: "otAmount", label: "Overtime Amount", on: false },
+  { key: "total", label: "Total Earnings", on: true },
+  { key: "insurance", label: "Insurance", on: false },
+  { key: "loans", label: "Loans", on: false },
+  { key: "deductions", label: "Total Deductions", on: true },
+  { key: "net", label: "Net Salary", on: true },
+  { key: "status", label: "Status", on: true },
+] as const;
+
+type ColumnKey = (typeof COLUMN_CHIPS)[number]["key"];
 
 /**
  * The /payrollreports page — parity round 33 (R33-A), rebuilt to the
@@ -61,8 +112,26 @@ export default function PayrollReportsPage() {
      content is the with-data superset the frontier framed. The at-rest
      DOM (Monthly active + the summary card) is unchanged. */
   const [tab, setTab] = React.useState("monthly");
-  const [range, setRange] = React.useState({ from: "", to: "", employee: "all" });
-  const [customRows, setCustomRows] = React.useState<PayrollRow[] | null>(null);
+  /* Session 87 (R87-A/R87-C): the REF-measured range/filter/column state —
+     the Tax toolbar's From/To (From defaulting to JANUARY of the current
+     year, To to the current month — live-read `2026-01`/`2026-10` on the
+     REF), and the Custom tab's From Month/To Month (both the current
+     month) + Employee + Status filters. The old session-35 wiring kept
+     empty-string defaults and a Generate button — the REF has neither. */
+  const [taxRange, setTaxRange] = React.useState(() => ({
+    from: `${new Date().getFullYear()}-01`,
+    to: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`,
+  }));
+  const [custom, setCustom] = React.useState(() => {
+    const d = new Date();
+    const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return { from: m, to: m, employee: "all", status: "all" };
+  });
+  /* Session 87 (R87-C): the active column-chip set — the REF's default-ON
+     seven; the chips toggle preview columns LIVE (no Generate button). */
+  const [activeCols, setActiveCols] = React.useState<ColumnKey[]>(
+    () => COLUMN_CHIPS.filter((c) => c.on).map((c) => c.key),
+  );
   const [month, setMonth] = React.useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -75,15 +144,34 @@ export default function PayrollReportsPage() {
         const res = await fetch("/api/payroll");
         const json = await res.json();
         if (json.ok) {
+          /* Session 87 (R87-D): the field map FIXED — GET /api/payroll
+             returns the raw Prisma records ({ basicSalary, allowances,
+             bonus, deductions, netSalary, status, employee: { firstName,
+             lastName } }); the old map read employeeName/grossPay/netPay,
+             fields the API NEVER carried (the zero-data state masked the
+             mismatch since session 35 — any record would have rendered
+             undefined/NaN cells). */
           setRows(
             (json.data.records ?? []).map(
-              (r: { id: string; period: string; employeeName: string; grossPay: number; netPay: number }) => ({
+              (r: {
+                id: string;
+                period: string;
+                basicSalary: number;
+                allowances: number;
+                bonus: number;
+                deductions: number;
+                netSalary: number;
+                status: string;
+                employee: { firstName: string; lastName: string };
+              }) => ({
                 id: r.id,
                 period: r.period,
-                employeeName: r.employeeName,
-                grossPay: r.grossPay,
-                deductions: r.grossPay - r.netPay,
-                netPay: r.netPay,
+                employeeName: `${r.employee.firstName} ${r.employee.lastName}`,
+                basicSalary: r.basicSalary,
+                grossPay: r.basicSalary + r.allowances + r.bonus,
+                deductions: r.deductions,
+                netPay: r.netSalary,
+                status: r.status,
               })
             )
           );
@@ -115,67 +203,125 @@ export default function PayrollReportsPage() {
     employees: new Set(visible.map((r) => r.employeeName)).size,
   };
 
-  /* R34-E: the Tax & Deductions aggregation — per-employee gross /
-     deductions / effective rate / net, month-scoped (the same `visible`
-     slice the Monthly summary renders). */
-  const taxRows = React.useMemo(() => {
-    const byEmp = new Map<string, { gross: number; deductions: number; net: number }>();
-    for (const r of visible) {
-      const e = byEmp.get(r.employeeName) ?? { gross: 0, deductions: 0, net: 0 };
-      e.gross += r.grossPay;
-      e.deductions += r.deductions;
-      e.net += r.netPay;
-      byEmp.set(r.employeeName, e);
-    }
-    return [...byEmp.entries()].map(([name, v]) => ({
-      name,
-      ...v,
-      rate: v.gross > 0 ? v.deductions / v.gross : 0,
-    }));
-  }, [visible]);
+  /* Session 87 (R87-A): the Tax & Deductions rows — per-employee-per-MONTH
+     over the From→To range (YYYY-MM strings compare chronologically).
+     Insurance/Loans/Late-Absent render the documented 0.00 SAR
+     placeholders (PayrollRecord carries a single aggregate `deductions`
+     field — no component split; the same doctrine the Monthly tab's
+     Allowances/Overtime columns follow), Total Deductions = the record's
+     deductions, Est. Tax = 15% of gross (the flat-estimate reading of the
+     REF's "Est. Tax (15%)" label — both sides render empty, the formula
+     documented here as the superset decision). */
+  const taxRows = React.useMemo(
+    () => rows.filter((r) => r.period >= taxRange.from && r.period <= taxRange.to),
+    [rows, taxRange],
+  );
 
-  /* R34-E: the History aggregation — every processed period with its
-     totals, descending (periods are "YYYY-MM" — a string sort is a
-    chronological sort). */
-  const periods = React.useMemo(() => {
-    const byPeriod = new Map<string, { records: number; gross: number; deductions: number; net: number }>();
-    for (const r of rows) {
-      const p = byPeriod.get(r.period) ?? { records: 0, gross: 0, deductions: 0, net: 0 };
-      p.records += 1;
-      p.gross += r.grossPay;
-      p.deductions += r.deductions;
-      p.net += r.netPay;
-      byPeriod.set(r.period, p);
-    }
-    return [...byPeriod.entries()].sort((a, b) => b[0].localeCompare(a[0]));
-  }, [rows]);
+  /* Session 87 (R87-B): the History rows — every record (per employee per
+     month), newest period first; Basic = basicSalary, Housing/Transport/
+     Overtime the documented 0.00 SAR placeholders, Total Earnings = gross,
+     Net Salary = net, Slip = the payslip affordance. */
+  const historyRows = React.useMemo(
+    () => [...rows].sort((a, b) => b.period.localeCompare(a.period) || a.employeeName.localeCompare(b.employeeName)),
+    [rows],
+  );
 
-  /* R34-E: the Custom report — the from/to + employee range filter over
-     the loaded rows ("YYYY-MM" strings compare chronologically). */
-  function onGenerate() {
-    const filtered = rows.filter(
-      (r) =>
-        (!range.from || r.period >= range.from) &&
-        (!range.to || r.period <= range.to) &&
-        (range.employee === "all" || r.employeeName === range.employee)
-    );
-    setCustomRows(filtered);
-    toast.toast({ title: "Report generated", description: `${filtered.length} record(s) in range.`, variant: "success" });
+  /* Session 87 (R87-C): the Custom preview — the From/To range + the
+     employee + the status filters derive the rows REACTIVELY (no Generate
+     button on the REF); the active-chip set derives the columns. */
+  const previewRows = React.useMemo(
+    () =>
+      rows.filter(
+        (r) =>
+          r.period >= custom.from &&
+          r.period <= custom.to &&
+          (custom.employee === "all" || r.employeeName === custom.employee) &&
+          (custom.status === "all" || r.status === custom.status),
+      ),
+    [rows, custom],
+  );
+  const activeChips = React.useMemo(
+    () => COLUMN_CHIPS.filter((c) => activeCols.includes(c.key)),
+    [activeCols],
+  );
+  function toggleCol(key: ColumnKey) {
+    setActiveCols((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   }
-
-  function onExportCsv() {
-    const header = "Period,Employee,Gross,Net\n";
-    const body = visible
-      .map((r) => `${r.period},${r.employeeName},${(r.grossPay / 100).toFixed(2)},${(r.netPay / 100).toFixed(2)}`)
-      .join("\n");
-    const blob = new Blob([header + body], { type: "text/csv" });
+  /* The cell renderer for a preview column (the REF's preview th's are all
+     `px-4 py-3 text-left whitespace-nowrap`; the unmapped component chips
+     render the documented placeholders). */
+  function previewCell(r: PayrollRow, key: ColumnKey): string {
+    switch (key) {
+      case "name":
+        return r.employeeName;
+      case "month":
+        return r.period;
+      case "basic":
+        return fmt(r.basicSalary);
+      case "housing":
+      case "transport":
+      case "food":
+      case "insurance":
+      case "loans":
+      case "otAmount":
+        return "0.00 SAR";
+      case "otHours":
+        return "0";
+      case "total":
+        return fmt(r.grossPay);
+      case "deductions":
+        return fmt(r.deductions);
+      case "net":
+        return fmt(r.netPay);
+      case "status":
+        return r.status;
+    }
+  }
+  /* The CSV export helper (shared by the four tabs' CSV buttons — the
+     header row + the body rows join into a downloadable blob; the
+     filename differs per tab). */
+  function exportCsv(filename: string, header: string, bodyRows: string[]) {
+    const blob = new Blob([header + bodyRows.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "payroll-report.csv";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    toast.toast({ title: "CSV exported", description: `${visible.length} record(s).`, variant: "success" });
+    toast.toast({ title: "CSV exported", description: `${bodyRows.length} record(s).`, variant: "success" });
+  }
+  function onExportCsv() {
+    /* the Monthly tab's export (Period,Employee,Gross,Net over `visible`) */
+    exportCsv(
+      "payroll-report.csv",
+      "Period,Employee,Gross,Net\n",
+      visible.map((r) => `${r.period},${r.employeeName},${(r.grossPay / 100).toFixed(2)},${(r.netPay / 100).toFixed(2)}`),
+    );
+  }
+  function onExportTaxCsv() {
+    exportCsv(
+      "tax-deductions-report.csv",
+      "Employee,Month,Insurance,Loans,Late/Absent,Total Deductions,Est. Tax\n",
+      taxRows.map(
+        (r) =>
+          `${r.employeeName},${r.period},0.00,0.00,0.00,${(r.deductions / 100).toFixed(2)},${((r.grossPay * 0.15) / 100).toFixed(2)}`,
+      ),
+    );
+  }
+  function onExportHistoryCsv() {
+    exportCsv(
+      "earnings-history.csv",
+      "Employee,Month,Basic,Housing,Transport,Overtime,Total Earnings,Net Salary\n",
+      historyRows.map(
+        (r) =>
+          `${r.employeeName},${r.period},${(r.basicSalary / 100).toFixed(2)},0.00,0.00,0.00,${(r.grossPay / 100).toFixed(2)},${(r.netPay / 100).toFixed(2)}`,
+      ),
+    );
+  }
+  function onExportCustomCsv() {
+    const labels = activeChips.map((c) => c.label).join(",");
+    const body = previewRows.map((r) => activeChips.map((c) => previewCell(r, c.key)).join(","));
+    exportCsv("custom-report.csv", `${labels}\n`, body);
   }
 
   return (
@@ -448,44 +594,98 @@ export default function PayrollReportsPage() {
         </Card>
         </TabsContent>
 
-        {/* R34-E: the Tax & Deductions card — the per-employee breakdown
-            on REF's card grammar (border-slate-200, the p-6 pb-3 border-b
-            header, the bg-slate-50 uppercase thead, the py-12 empty TD). */}
+        {/* Session 87 (R87-A): the Tax & Deductions card REBUILT to the
+            REF-measured recipe (the r87 tab-interior instrument's first
+            find — the session-35 wiring invented a Gross/Deductions/
+            Effective Rate/Net aggregate the REF does not carry; the REF
+            renders the trending-up title + the From/To range toolbar +
+            the SEVEN-column breakdown). Live-measured in the active
+            panel @1440×900. */}
         <TabsContent value="tax" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
-          <CardHeader className="border-b p-6 pb-3">
-            <div>
-              <p className="font-semibold leading-none tracking-tight">Tax &amp; Deductions</p>
-              <p className="text-sm text-slate-500 mt-1">Deduction breakdown for {month}</p>
+          <CardHeader className="p-6 pb-3">
+            <div className="flex flex-col md:flex-row justify-between gap-3">
+              <div>
+                {/* the REF's title block: the FLEX DIV form (the r86-A3
+                    lesson) with the trending-up icon w-5 h-5
+                    text-orange-600 */}
+                <div className="font-semibold leading-none tracking-tight flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-orange-600" aria-hidden="true" />
+                  Tax &amp; Deductions Report
+                </div>
+                <p className="text-sm text-slate-500 mt-1">Breakdown of deductions and estimated tax</p>
+              </div>
+              {/* the REF's range toolbar: `flex gap-2 flex-wrap items-end`
+                  with the From/To groups (the Label text-xs above the w-36
+                  month input) + the CSV/PDF pair. TRAP (the S35 inline-label
+                  family, r87 re-find): the REF's v3 space-y-1 puts the 4px
+                  on the INPUT (mt — a block, applies); v4 puts it on the
+                  LABEL (inline — vertical margins IGNORED), collapsing
+                  the gap by 4px (input y427 vs the REF's y431, group h60
+                  vs h64). The house fix: explicit mt-1 on the control. */}
+              <div className="flex gap-2 flex-wrap items-end">
+                <div>
+                  <Label className="text-xs" htmlFor="tax-from">From</Label>
+                  <Input
+                    id="tax-from"
+                    type="month"
+                    className="w-36 mt-1"
+                    value={taxRange.from}
+                    onChange={(e) => setTaxRange((r) => ({ ...r, from: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs" htmlFor="tax-to">To</Label>
+                  <Input
+                    id="tax-to"
+                    type="month"
+                    className="w-36 mt-1"
+                    value={taxRange.to}
+                    onChange={(e) => setTaxRange((r) => ({ ...r, to: e.target.value }))}
+                  />
+                </div>
+                <Button variant="outline" size="sm" onClick={onExportTaxCsv}>
+                  <FileSpreadsheet className="mr-1 h-4 w-4" aria-hidden="true" />
+                  CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                  <FileText className="mr-1 h-4 w-4" aria-hidden="true" />
+                  PDF
+                </Button>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50">
+                <thead className="bg-slate-50 text-slate-600 text-xs uppercase">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Employee</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Effective Rate</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
+                    <th className="px-4 py-3 text-left">Employee</th>
+                    <th className="px-4 py-3 text-center">Month</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Insurance</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Loans</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Late/Absent</th>
+                    <th className="px-4 py-3 text-right">Total Deductions</th>
+                    <th className="px-4 py-3 text-right">Est. Tax (15%)</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {taxRows.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-400">
-                        No records for {month}
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        No records for selected period
                       </td>
                     </tr>
                   ) : (
                     taxRows.map((r) => (
-                      <tr key={r.name} className="border-b">
-                        <td className="px-4 py-3 font-medium text-slate-900">{r.name}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.gross)}</td>
+                      <tr key={r.id}>
+                        <td className="px-4 py-3 font-medium text-slate-900">{r.employeeName}</td>
+                        <td className="px-4 py-3 text-center text-slate-600">{r.period}</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
                         <td className="px-4 py-3 text-right text-slate-600">{fmt(r.deductions)}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{(r.rate * 100).toFixed(1)}%</td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(r.net)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(Math.round(r.grossPay * 0.15))}</td>
                       </tr>
                     ))
                   )}
@@ -496,43 +696,75 @@ export default function PayrollReportsPage() {
         </Card>
         </TabsContent>
 
-        {/* R34-E: the History card — every processed period with its
-            totals, newest first. */}
+        {/* Session 87 (R87-B): the History card REBUILT to the REF-measured
+            recipe — the REF renders the PER-EMPLOYEE earnings history (the
+            session-35 wiring invented a per-period aggregate), with the
+            dollar-sign title, the top-aligned CSV/PDF pair, and the NINE
+            columns incl. the Slip affordance. */}
         <TabsContent value="history" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
         <Card className="border-slate-200">
-          <CardHeader className="border-b p-6 pb-3">
-            <div>
-              <p className="font-semibold leading-none tracking-tight">Payroll History</p>
-              <p className="text-sm text-slate-500 mt-1">All processed periods</p>
+          <CardHeader className="p-6 pb-3">
+            <div className="flex flex-col md:flex-row justify-between gap-3">
+              <div>
+                <div className="font-semibold leading-none tracking-tight flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" aria-hidden="true" />
+                  Employee Earnings History
+                </div>
+                <p className="text-sm text-slate-500 mt-1">Complete salary history per employee</p>
+              </div>
+              {/* the REF's export pair rides `flex gap-2` TOP-ALIGNED (no
+                  items-end — the h44 right block vs the tax tab's h64) */}
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={onExportHistoryCsv}>
+                  <FileSpreadsheet className="mr-1 h-4 w-4" aria-hidden="true" />
+                  CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                  <FileText className="mr-1 h-4 w-4" aria-hidden="true" />
+                  PDF
+                </Button>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50">
+                <thead className="bg-slate-50 text-slate-600 text-xs uppercase">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Period</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Records</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
+                    <th className="px-4 py-3 text-left">Employee</th>
+                    <th className="px-4 py-3 text-center">Month</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Basic</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Housing</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Transport</th>
+                    <th className="px-4 py-3 text-right hidden md:table-cell">Overtime</th>
+                    <th className="px-4 py-3 text-right">Total Earnings</th>
+                    <th className="px-4 py-3 text-right font-bold">Net Salary</th>
+                    <th className="px-4 py-3 text-center">Slip</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {periods.length === 0 ? (
+                <tbody className="divide-y divide-slate-100">
+                  {historyRows.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-400">
-                        No payroll history yet
+                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                        No payroll history found
                       </td>
                     </tr>
                   ) : (
-                    periods.map(([period, p]) => (
-                      <tr key={period} className="border-b">
-                        <td className="px-4 py-3 font-medium text-slate-900">{period}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{p.records}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{fmt(p.gross)}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{fmt(p.deductions)}</td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(p.net)}</td>
+                    historyRows.map((r) => (
+                      <tr key={r.id}>
+                        <td className="px-4 py-3 font-medium text-slate-900">{r.employeeName}</td>
+                        <td className="px-4 py-3 text-center text-slate-600">{r.period}</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">{fmt(r.basicSalary)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
+                        <td className="px-4 py-3 text-right text-slate-600 hidden md:table-cell">0.00 SAR</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.grossPay)}</td>
+                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(r.netPay)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600">
+                            Download
+                          </Button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -543,93 +775,180 @@ export default function PayrollReportsPage() {
         </Card>
         </TabsContent>
 
-        {/* R34-E: the Custom card — the from/to + employee range form and
-            the generated table. */}
+        {/* Session 87 (R87-C): the Custom tab REBUILT to the REF's
+            THREE-card architecture — the session-35 wiring invented a
+            ONE-card form with a Generate button; the REF renders the
+            Report Filters card (the 4-cell grid incl. the Status select),
+            the Select Columns card (the FOURTEEN toggle chips), and the
+            Report Preview card (the chip-driven column set + the records
+            span + the CSV/PDF pair), with the preview deriving REACTIVELY
+            from the filters (no Generate button). */}
         <TabsContent value="custom" className="ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-4">
-        <Card className="border-slate-200">
-          <CardHeader className="border-b p-6 pb-3">
-            <div>
-              <p className="font-semibold leading-none tracking-tight">Custom Report</p>
-              <p className="text-sm text-slate-500 mt-1">Build a report for any range</p>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex flex-wrap items-end gap-4 mb-6">
-              <div className="space-y-1">
-                <Label className="text-xs" htmlFor="custom-from">From</Label>
-                <Input
-                  id="custom-from"
-                  type="month"
-                  className="w-40 mt-1"
-                  value={range.from}
-                  onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
-                />
+        <div className="space-y-4">
+          {/* Card 1 — Report Filters: the p-6 header (the filter icon +
+              the text-base title) + the 4-cell grid (all controls
+              w-full inside their cells) */}
+          <Card className="border-slate-200">
+            <CardHeader className="p-6">
+              <div className="font-semibold tracking-tight text-base flex items-center gap-2">
+                <RefFilterGlyph className="w-4 h-4" />
+                Report Filters
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs" htmlFor="custom-to">To</Label>
-                <Input
-                  id="custom-to"
-                  type="month"
-                  className="w-40 mt-1"
-                  value={range.to}
-                  onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
-                />
+            </CardHeader>
+            <CardContent className="p-6 pt-0 space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* the S35 inline-label trap (the r87 re-find): explicit
+                    mt-1 on every control — v4's space-y margin lands on
+                    the inline label and is ignored (the REF's v3 form puts
+                    it on the control; the login fix pattern) */}
+                <div>
+                  <Label className="text-xs" htmlFor="custom-from">From Month</Label>
+                  <Input
+                    id="custom-from"
+                    type="month"
+                    className="w-full mt-1"
+                    value={custom.from}
+                    onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs" htmlFor="custom-to">To Month</Label>
+                  <Input
+                    id="custom-to"
+                    type="month"
+                    className="w-full mt-1"
+                    value={custom.to}
+                    onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Employee</Label>
+                  <Select value={custom.employee} onValueChange={(v) => setCustom((c) => ({ ...c, employee: v }))}>
+                    <SelectTrigger className="w-full mt-1" aria-label="Filter employee">
+                      <SelectValue placeholder="All Employees" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Employees</SelectItem>
+                      {employeeNames.map((n) => (
+                        <SelectItem key={n} value={n}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Status</Label>
+                  <Select value={custom.status} onValueChange={(v) => setCustom((c) => ({ ...c, status: v }))}>
+                    <SelectTrigger className="w-full mt-1" aria-label="Filter status">
+                      <SelectValue placeholder="All Statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-1 flex-1 min-w-[180px]">
-                <Label className="text-xs">Employee</Label>
-                <Select
-                  value={range.employee}
-                  onValueChange={(v) => setRange((r) => ({ ...r, employee: v }))}
-                >
-                  <SelectTrigger className="w-full mt-1" aria-label="Filter employee">
-                    <SelectValue placeholder="All Employees" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Employees</SelectItem>
-                    {employeeNames.map((n) => (
-                      <SelectItem key={n} value={n}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            </CardContent>
+          </Card>
+          {/* Card 2 — Select Columns: the FOURTEEN toggle chips in the
+              REF's order; active bg-blue-600 text-white border-blue-600,
+              inactive bg-white text-slate-600 border-slate-300 */}
+          <Card className="border-slate-200">
+            <CardHeader className="p-6">
+              <div className="font-semibold tracking-tight text-base">Select Columns</div>
+            </CardHeader>
+            <CardContent className="p-6 pt-0">
+              <div className="flex flex-wrap gap-2">
+                {COLUMN_CHIPS.map((chip) => {
+                  const on = activeCols.includes(chip.key);
+                  return (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => toggleCol(chip.key)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        on
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white text-slate-600 border-slate-300"
+                      }`}
+                    >
+                      {chip.label}
+                    </button>
+                  );
+                })}
               </div>
-              <Button onClick={onGenerate} disabled={loading}>Generate Report</Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Period</th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase text-slate-600">Employee</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Gross</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Deductions</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold uppercase text-slate-600">Net</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(customRows ?? []).length === 0 ? (
+            </CardContent>
+          </Card>
+          {/* Card 3 — Report Preview: the justify-between header (the
+              title + the records span | the CSV/PDF pair) + the
+              chip-driven column table */}
+          <Card className="border-slate-200">
+            <CardHeader className="p-6 pb-3">
+              <div className="flex justify-between items-center">
+                <div className="font-semibold tracking-tight text-base">
+                  {"Report Preview "}
+                  <span className="text-slate-400 text-sm font-normal ml-2">{previewRows.length} records</span>
+                </div>
+                <div className="flex gap-2">
+                  {/* Session 87 (R87-C): the REF disables the PREVIEW exports
+                      at 0 records (live-read: disabled + opacity-0.5,
+                      cursor default — the pixel proof: the AA-gray text);
+                      the Monthly/Tax/History exports stay ENABLED at 0
+                      records (their 0-cell pairs prove it — those export
+                      the full dataset, this one exports the preview
+                      rows). */}
+                  <Button variant="outline" size="sm" onClick={onExportCustomCsv} disabled={previewRows.length === 0}>
+                    <FileSpreadsheet className="mr-1 h-4 w-4" aria-hidden="true" />
+                    CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => window.print()} disabled={previewRows.length === 0}>
+                    <FileText className="mr-1 h-4 w-4" aria-hidden="true" />
+                    PDF
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-600 text-xs uppercase">
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-400">
-                        No records in range
-                      </td>
+                      {activeChips.map((c) => (
+                        <th key={c.key} className="px-4 py-3 text-left whitespace-nowrap">
+                          {c.label}
+                        </th>
+                      ))}
                     </tr>
-                  ) : (
-                    (customRows ?? []).map((r) => (
-                      <tr key={r.id} className="border-b">
-                        <td className="px-4 py-3 font-medium text-slate-900">{r.period}</td>
-                        <td className="px-4 py-3 text-slate-600">{r.employeeName}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.grossPay)}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{fmt(r.deductions)}</td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">{fmt(r.netPay)}</td>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {previewRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={activeChips.length} className="py-12 text-center text-slate-400">
+                          No data for selected filters
+                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                    ) : (
+                      previewRows.map((r) => (
+                        <tr key={r.id}>
+                          {activeChips.map((c) => (
+                            <td key={c.key} className="px-4 py-3 text-left whitespace-nowrap text-slate-600">
+                              {previewCell(r, c.key)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         </TabsContent>
         </Tabs>
         </div>
