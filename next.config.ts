@@ -46,6 +46,17 @@ const nextConfig: NextConfig = {
     return [
       { source: "/Dashboard", destination: "/dashboard" },
       { source: "/", destination: "/dashboard" },
+      // Session 94 (R94-B): the careers/public route-casing set — the same
+      // URL-unchanged-rewrite pattern as /Dashboard above. REF's SPA pushes
+      // the CAPITALIZED forms (its careers chip click lands on
+      // /Careers?org={slug}, the back button on /Careers, and the job card's
+      // "View Details & Apply" on /ExternalJobApplication?org={slug}&job={slug}
+      // — live-verified against the REF; the platform serves both casings but
+      // the address bar carries the capitalized form). Next.js on a
+      // case-sensitive FS serves only the lowercase routes, so the rewrites
+      // serve the pages at the capitalized URLs with the bar UNCHANGED.
+      { source: "/Careers", destination: "/careers" },
+      { source: "/ExternalJobApplication", destination: "/externaljobapplication" },
     ];
   },
   // Session 69 (R69-A): the HTTP-layer parity set. The live REF platform

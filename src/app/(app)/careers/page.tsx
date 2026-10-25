@@ -104,8 +104,8 @@ export default function CareersPage() {
     return list;
   }, [jobs, activeCompany, query]);
 
-  const openOrg = (c: string) => router.push(`/careers?org=${slug(c)}`);
-  const backToAll = () => router.push("/careers");
+  const openOrg = (c: string) => router.push(`/Careers?org=${slug(c)}`);
+  const backToAll = () => router.push("/Careers");
 
   const countHeading = (
     <div className="mb-4 flex items-center justify-between">
@@ -181,7 +181,7 @@ export default function CareersPage() {
             <Button
               className="w-full"
               onClick={() =>
-                router.push(`/externaljobapplication?org=${slug(j.company ?? "")}&job=${slug(j.title)}`)
+                router.push(`/ExternalJobApplication?org=${slug(j.company ?? "")}&job=${slug(j.title)}`)
               }
             >
               View Details &amp; Apply
@@ -223,8 +223,11 @@ export default function CareersPage() {
           tall rhythm (the board and the org view share it). */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         {activeCompany ? (
-          /* R40-G: the org view — the back button + the company heading
-             ride in the tall-gap section. */
+          /* R40-G + session94 R94-A: the org view — the back button + the
+             company heading ride in the tall-gap section; the heading block
+             wraps in REF's `flex items-center gap-4` with the
+             "Explore career opportunities" subtitle underneath (live-captured
+             at REF's /Careers?org=demo). */
           <div className="mb-8">
             <Button
               variant="ghost"
@@ -233,7 +236,12 @@ export default function CareersPage() {
             >
               ← Back to all companies
             </Button>
-            <h2 className="text-3xl font-bold text-slate-900">{activeCompany}</h2>
+            <div className="flex items-center gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-slate-900">{activeCompany}</h2>
+                <p className="text-slate-600">Explore career opportunities</p>
+              </div>
+            </div>
           </div>
         ) : (
           <>

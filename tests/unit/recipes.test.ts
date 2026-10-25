@@ -4133,8 +4133,8 @@ describe("session-41 careers family + login button members (parity round 40)", (
     expect(careers41).toContain("View Details &amp; Apply");
   });
 
-  it("R40-F1: the apply CTA navigates to the external application page carrying the org + job slugs (REF's contract, the clone's lowercase route; REF's own target resolves the params to nothing visible — a REF-side artifact the clone's superset fixes)", () => {
-    expect(careers41).toContain("externaljobapplication?org=");
+  it("R40-F1: the apply CTA navigates to the external application page carrying the org + job slugs (REF's contract; session94 R94-B amendment: the push carries the CAPITALIZED /ExternalJobApplication address-bar form, served URL-unchanged by the rewrite; REF's own target resolves the params to nothing visible — a REF-side artifact the clone's superset fixes)", () => {
+    expect(careers41).toContain("ExternalJobApplication?org=");
     expect(careers41).toMatch(/job=\$\{/);
   });
 
@@ -5831,14 +5831,15 @@ describe("session-51: the route-casing alias + the mobile-nav census record (rou
     expect(cfg).toMatch(/rewrites/);
   });
 
-  it("R51-A2: the rewrite scope — the canonical /Dashboard + the root serve only (no wildcard-case aliasing; REF's other internal links are all lowercase)", () => {
+  it("R51-A2: the rewrite scope — the canonical capitalized aliases only, no wildcard-case family (the /Dashboard + root pair from session 51/55; session94 R94-B added the /Careers + /ExternalJobApplication public-flow pair — REF's pushes carry the capitalized forms; every other internal link stays lowercase)", () => {
     const cfg = read("next.config.ts");
     // exactly ONE /Dashboard entry — no case-wildcard family
     expect((cfg.match(/source: "\/Dashboard"/g) || []).length).toBe(1);
     // Session 55 (R55-B): the root serve joined the rewrite family (REF
     // serves the dashboard at `/` URL-unchanged — the r55 census phase B;
     // the session-51 URL-unchanged-serve pattern's sibling). The scope
-    // stays closed: the canonical capital form + the root, nothing else.
+    // stays closed: the canonical capital form + the root + the two
+    // session-94 public-flow aliases, nothing else.
     // Session 69 (R69-A amendment): Next's headers() API shares the
     // `source:` key name, so the REWRITES scope must be read from the
     // rewrites() BLOCK — not the whole file (the headers() source
@@ -5846,7 +5847,7 @@ describe("session-51: the route-casing alias + the mobile-nav census record (rou
     // surface, not a rewrite alias; pinned below).
     const rewritesBlock = cfg.split("async rewrites()")[1].split("async headers()")[0];
     const sources = rewritesBlock.match(/source: "\/[^"]*"/g) || [];
-    expect(sources).toEqual(['source: "/Dashboard"', 'source: "/"']);
+    expect(sources).toEqual(['source: "/Dashboard"', 'source: "/"', 'source: "/Careers"', 'source: "/ExternalJobApplication"']);
     // The headers() scope: exactly ONE catch-all (a second source would
     // break the security set's every-route coverage; a narrower source
     // would leave routes headerless) — the R69-A every-route contract.
@@ -7662,5 +7663,27 @@ describe("session93 — the unscanned creation surfaces round", () => {
     expect(read("prisma", "seed.ts")).toContain('"job-hrdirector"');
     expect(read("prisma", "seed.ts")).toContain('"job-sysadmin"');
     expect(schema).toContain('draft | active (session93 R93-H');
+  });
+});
+
+describe("session94 — the with-data applicant-pipeline round", () => {
+  const careersPage = read("src", "app", "(app)", "careers", "page.tsx");
+  const nextConfig = read("next.config.ts");
+
+  it("R94-A: the org view's heading block — the flex wrapper + the Explore career opportunities subtitle", () => {
+    expect(careersPage).toContain("Explore career opportunities");
+    expect(careersPage).toContain('className="flex items-center gap-4"');
+    expect(careersPage).toContain("text-3xl font-bold text-slate-900");
+  });
+
+  it("R94-B: the CAPITALIZED route pushes (the REF's address-bar contract)", () => {
+    expect(careersPage).toContain('router.push(`/Careers?org=${slug(c)}`)');
+    expect(careersPage).toContain('router.push("/Careers")');
+    expect(careersPage).toContain("`/ExternalJobApplication?org=${slug(j.company ?? \"\")}&job=${slug(j.title)}`");
+  });
+
+  it("R94-B: next.config.ts serves the CAPITALIZED routes via URL-unchanged rewrites (the R51-A precedent)", () => {
+    expect(nextConfig).toContain('{ source: "/Careers", destination: "/careers" }');
+    expect(nextConfig).toContain('{ source: "/ExternalJobApplication", destination: "/externaljobapplication" }');
   });
 });

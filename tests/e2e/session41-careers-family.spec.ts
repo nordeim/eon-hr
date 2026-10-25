@@ -164,7 +164,9 @@ test.describe("session-41 careers family (authed)", () => {
       /* Session 93 (R93-H): the seeded job's card renders too — scope to
          the POSTED card (the first: postedAt DESC). */
       await page.getByRole("button", { name: "View Details & Apply" }).first().click();
-      await expect(page).toHaveURL(/\/externaljobapplication\?org=acme-rockets&job=senior-test-engineer$/);
+      // session94 (R94-B): the apply CTA pushes the CAPITALIZED
+      // /ExternalJobApplication form (REF's address-bar contract)
+      await expect(page).toHaveURL(/\/ExternalJobApplication\?org=acme-rockets&job=senior-test-engineer$/);
       await expect(page.getByRole("heading", { name: "Job Opportunities" })).toBeVisible();
       // the superset: the page lists the param-resolved job
       await expect(page.getByText("Senior Test Engineer").first()).toBeVisible();

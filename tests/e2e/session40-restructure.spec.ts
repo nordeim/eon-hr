@@ -102,15 +102,18 @@ const AUTHED = test.describe("session-40 shell + input + careers (authed)", () =
       await expect(page.getByRole("heading", { name: "2 Open Positions" })).toBeVisible();
 
       await chip.click();
-      await expect(page).toHaveURL(/\/careers\?org=acme-rockets$/);
+      // session94 (R94-B): the chip pushes the CAPITALIZED /Careers form
+      await expect(page).toHaveURL(/\/Careers\?org=acme-rockets$/);
       await expect(page.getByRole("heading", { name: "Acme Rockets", level: 2 })).toBeVisible();
+      // session94 (R94-A): the org view carries the Explore career opportunities subtitle
+      await expect(page.getByText("Explore career opportunities")).toBeVisible();
       await expect(page.getByRole("button", { name: /Back to all companies/i })).toBeVisible();
       // the org's job card renders
       await expect(page.getByText("Senior Test Engineer").first()).toBeVisible();
 
-      // back returns to the board
+      // back returns to the board (the CAPITALIZED push — session94 R94-B)
       await page.getByRole("button", { name: /Back to all companies/i }).click();
-      await expect(page).toHaveURL(/\/careers$/);
+      await expect(page).toHaveURL(/\/Careers$/);
       await expect(page.getByRole("heading", { name: "Browse by Company" })).toBeVisible();
     } finally {
       if (jobId) await page.request.delete(`/api/jobs?id=${jobId}`);

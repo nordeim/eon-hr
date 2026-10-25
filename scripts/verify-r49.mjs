@@ -223,7 +223,13 @@ const PAIRS = [
   ["divs-surveys", "/surveys", ["rootCls", "h1Cls", "h1Text", "svgs"]],
   ["stats-payrollai", "/payrollai", ["rootCls", "h1Cls", "h1Text", "svgs", "cards"]],
   ["hero-careers", "/careers", ["rootCls", "h1Cls", "h1Text"]],
-  ["zero-externaljobapplication", "/externaljobapplication", ["rootCls", "h1Cls", "h1Text", "svgs", "cards"]],
+  // session94 R94-C: the externaljobapplication member reclassified — REF's
+  // page makes NO JobPosting fetch at all (resource timing: zero job queries;
+  // the "No Open Positions" zero state is a static render — the REF-inert
+  // class with payrollengine/payrollmodule). The clone's working superset
+  // renders the seeded ACTIVE job, so the data-dependent keys (svgs, cards)
+  // diverge BY DESIGN; the container/heading contract stays pinned.
+  ["zero-externaljobapplication", "/externaljobapplication", ["rootCls", "h1Cls", "h1Text"]],
 ];
 const SLOW = new Set(["slow-payrollmodule"]);
 
