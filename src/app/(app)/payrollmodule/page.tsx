@@ -4,7 +4,7 @@ import * as React from "react";
 import { Banknote, Calculator, DollarSign, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -41,9 +41,11 @@ interface PayslipRow {
   employeeId: string;
   period: string;
   basicSalary: number;
+  overtimeHours?: number; // session92 R92-M
   allowances: number;
   bonus: number;
   deductions: number;
+  notes?: string | null; // session92 R92-M
   netSalary: number;
   status: string;
   employee: { id: string; employeeId: string; firstName: string; lastName: string; email: string } | null;
@@ -54,6 +56,7 @@ interface EmployeeOption {
   employeeId: string;
   firstName: string;
   lastName: string;
+  baseSalary: number; // session92 R92-M: the Generate Payslip contract (the REF's dialog generates from the base)
 }
 
 function monthLabel(period: string): string {
@@ -158,9 +161,11 @@ export default function PayrollModulePage() {
     employeeId: string;
     period: string;
     basicSalary: number;
+    overtimeHours: number;
     allowances: number;
     bonus: number;
     deductions: number;
+    notes?: string;
   }) {
     setSaving(true);
     try {
@@ -433,42 +438,47 @@ function PayslipDialog({
     employeeId: string;
     period: string;
     basicSalary: number;
+    overtimeHours: number;
     allowances: number;
     bonus: number;
     deductions: number;
+    notes?: string;
   }) => Promise<boolean>;
 }) {
-  // Initial form state is derived from `record` at mount; the parent remounts
-  // this dialog via key={editing ? editing.id : "new"} so re-opening with a
-  // different record resets the form without a prefill effect.
+  // Session92 (R92-M): the REF's live dialog contract (512x372, "Add
+  // Payslip") — Employee *, Bonus (SAR), Notes ("Optional notes...") and
+  // the Generate Payslip footer; the payslip generates from the employee's
+  // baseSalary for the current period.
   const [form, setForm] = React.useState(() => ({
-    employeeId: record?.employeeId ?? "",
-    period: record?.period ?? defaultPeriod,
-    basic: record ? String(record.basicSalary / 100) : "0",
-    allowances: record ? String(record.allowances / 100) : "0",
+    employeeId: record?.employeeId ?? employees[0]?.id ?? "",
     bonus: record ? String(record.bonus / 100) : "0",
-    deductions: record ? String(record.deductions / 100) : "0",
+    notes: record?.notes ?? "",
   }));
 
-  const preview =
-    (Number(form.basic) || 0) + (Number(form.allowances) || 0) + (Number(form.bonus) || 0) -
-    (Number(form.deductions) || 0);
+  React.useEffect(() => {
+    if (open) {
+      setForm({
+        employeeId: record?.employeeId ?? employees[0]?.id ?? "",
+        bonus: record ? String(record.bonus / 100) : "0",
+        notes: record?.notes ?? "",
+      });
+    }
+  }, [open]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const basic = toMinor(form.basic);
-    const allowances = toMinor(form.allowances);
+    const employee = employees.find((emp) => emp.id === form.employeeId);
     const bonus = toMinor(form.bonus);
-    const deductions = toMinor(form.deductions);
-    if (basic === null || allowances === null || bonus === null || deductions === null) return;
-    if (basic + allowances + bonus - deductions < 0) return;
+    if (!employee || bonus === null) return;
     const saved = await onSave({
       employeeId: form.employeeId,
-      period: form.period,
-      basicSalary: basic,
-      allowances,
+      period: record?.period ?? defaultPeriod,
+      basicSalary: record?.basicSalary ?? employee.baseSalary,
+      overtimeHours: record?.overtimeHours ?? 0,
+      allowances: record?.allowances ?? 0,
       bonus,
-      deductions,
+      deductions: record?.deductions ?? 0,
+      notes: form.notes || undefined,
     });
     if (saved) onOpenChange(false);
   }
@@ -479,97 +489,53 @@ function PayslipDialog({
         <DialogHeader>
           <DialogTitle>{record ? "Edit Payslip" : "Add Payslip"}</DialogTitle>
           <DialogDescription>
-            {record ? "Update the salary components for this payslip." : "Create a payslip for an employee."}
+            {record ? "Update this payslip's bonus and notes." : "Generate a payslip with a bonus for an employee."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-employee">Employee</Label>
-              <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
-                <SelectTrigger id="ps-employee">
-                  <SelectValue placeholder="Select employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.firstName} {emp.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-period">Period</Label>
-              <Input
-                id="ps-period"
-                type="month"
-                required
-                value={form.period}
-                onChange={(e) => setForm({ ...form, period: e.target.value })}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ps-employee">Employee *</Label>
+            <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
+              <SelectTrigger id="ps-employee">
+                <SelectValue placeholder="Select employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.firstName} {emp.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-basic">Basic Salary (SAR)</Label>
-              <Input
-                id="ps-basic"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                value={form.basic}
-                onChange={(e) => setForm({ ...form, basic: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-allowances">Allowances (SAR)</Label>
-              <Input
-                id="ps-allowances"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.allowances}
-                onChange={(e) => setForm({ ...form, allowances: e.target.value })}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ps-bonus">Bonus (SAR)</Label>
+            <Input
+              id="ps-bonus"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.bonus}
+              onChange={(e) => setForm({ ...form, bonus: e.target.value })}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-bonus">Bonus (SAR)</Label>
-              <Input
-                id="ps-bonus"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.bonus}
-                onChange={(e) => setForm({ ...form, bonus: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ps-deductions">Deductions (SAR)</Label>
-              <Input
-                id="ps-deductions"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.deductions}
-                onChange={(e) => setForm({ ...form, deductions: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border bg-secondary/40 px-3 py-2">
-            <span className="text-sm text-muted-foreground">Net salary</span>
-            <span className="text-sm font-semibold text-foreground">{formatSar(Math.round(preview * 100))}</span>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ps-notes">Notes</Label>
+            <Textarea
+              id="ps-notes"
+              rows={3}
+              placeholder="Optional notes..."
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button variant="green" type="submit" disabled={saving}>
+            <Button variant="green" type="submit" disabled={saving || !form.employeeId}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-              {record ? "Save Changes" : "Add Payslip"}
+              {record ? "Save Changes" : "Generate Payslip"}
             </Button>
           </DialogFooter>
         </form>

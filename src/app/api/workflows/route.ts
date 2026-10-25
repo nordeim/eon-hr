@@ -4,36 +4,71 @@ import { db } from "@/lib/db";
 import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 
 // Workflow automation — CRUD for automated workflow definitions.
+// Session92 (R92-D): the REF's event-based contract live-read from its
+// Create Automated Workflow dialog — Trigger Type (the six lifecycle events)
+// + Target Department (Optional) + the Actions list
+// [{type, delayDays, message}] (Action Type × Delay (days) × Email Message).
+
+const TRIGGER_TYPES = [
+  "new_employee_onboarding",
+  "employee_offboarding",
+  "work_anniversary",
+  "birthday",
+  "probation_end",
+  "contract_renewal",
+] as const;
+
+const ACTION_TYPES = ["send_email", "create_task", "send_notification", "assign_template"] as const;
+
+const ActionItem = z.object({
+  type: z.enum(ACTION_TYPES),
+  delayDays: z.number().int().min(0).max(365).default(0),
+  message: z.string().trim().max(500).optional().or(z.literal("")),
+});
 
 const WorkflowInput = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
-  module: z.enum(["leave", "expense", "recruitment", "general"]).default("general"),
-  trigger: z.enum(["manual", "on_create", "on_status_change", "scheduled"]).default("manual"),
-  conditions: z
-    .array(z.string().trim().min(1).max(80))
-    .max(10, "At most 10 conditions")
-    .default([]),
-  actions: z
-    .array(z.string().trim().min(1).max(80))
-    .max(10, "At most 10 actions")
-    .default([]),
-  active: z.boolean().default(false),
+  triggerType: z.enum(TRIGGER_TYPES).default("new_employee_onboarding"),
+  targetDepartment: z.string().trim().max(120).optional().or(z.literal("")),
+  actions: z.array(ActionItem).min(1, "At least one action is required").max(10),
+  active: z.boolean().default(true),
 });
 
 const WorkflowPatch = z.object({
   name: z.string().trim().min(1).max(120).optional(),
-  module: z.enum(["leave", "expense", "recruitment", "general"]).optional(),
-  trigger: z.enum(["manual", "on_create", "on_status_change", "scheduled"]).optional(),
-  conditions: z.array(z.string().trim().min(1).max(80)).max(10).optional(),
-  actions: z.array(z.string().trim().min(1).max(80)).max(10).optional(),
+  triggerType: z.enum(TRIGGER_TYPES).optional(),
+  targetDepartment: z.string().trim().max(120).optional().or(z.literal("")),
+  actions: z.array(ActionItem).min(1).max(10).optional(),
   active: z.boolean().optional(),
 });
 
-function parseList(raw: string): string[] {
+interface WorkflowAction {
+  type: string;
+  delayDays: number;
+  message?: string;
+}
+
+function parseActions(raw: string): WorkflowAction[] {
   try {
     const parsed: unknown = JSON.parse(raw || "[]");
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((c): c is string => typeof c === "string" && c.length > 0);
+    const out: WorkflowAction[] = [];
+    for (const entry of parsed) {
+      if (typeof entry === "object" && entry !== null && "type" in entry) {
+        const e = entry as { type?: unknown; delayDays?: unknown; message?: unknown };
+        if (typeof e.type === "string" && e.type.length > 0) {
+          out.push({
+            type: e.type,
+            delayDays: typeof e.delayDays === "number" ? e.delayDays : 0,
+            ...(typeof e.message === "string" && e.message ? { message: e.message } : {}),
+          });
+        }
+      } else if (typeof entry === "string" && entry.length > 0) {
+        // legacy rows (pre-session92): the old free-string action list
+        out.push({ type: entry, delayDays: 0 });
+      }
+    }
+    return out;
   } catch {
     return [];
   }
@@ -51,10 +86,9 @@ export async function GET(req: NextRequest) {
       workflows: workflows.map((w) => ({
         id: w.id,
         name: w.name,
-        module: w.module,
-        trigger: w.trigger,
-        conditions: parseList(w.conditions),
-        actions: parseList(w.actions),
+        triggerType: w.triggerType,
+        targetDepartment: w.targetDepartment ?? "",
+        actions: parseActions(w.actions),
         active: w.active,
         executions: w.executions,
         createdAt: w.createdAt,
@@ -75,9 +109,8 @@ export async function POST(req: NextRequest) {
     const workflow = await db.workflow.create({
       data: {
         name: data.name,
-        module: data.module,
-        trigger: data.trigger,
-        conditions: JSON.stringify(data.conditions),
+        triggerType: data.triggerType,
+        targetDepartment: data.targetDepartment || "",
         actions: JSON.stringify(data.actions),
         active: data.active,
         executions: 0,
@@ -107,9 +140,8 @@ export async function PATCH(req: NextRequest) {
       where: { id },
       data: {
         ...(data.name !== undefined ? { name: data.name } : {}),
-        ...(data.module !== undefined ? { module: data.module } : {}),
-        ...(data.trigger !== undefined ? { trigger: data.trigger } : {}),
-        ...(data.conditions !== undefined ? { conditions: JSON.stringify(data.conditions) } : {}),
+        ...(data.triggerType !== undefined ? { triggerType: data.triggerType } : {}),
+        ...(data.targetDepartment !== undefined ? { targetDepartment: data.targetDepartment } : {}),
         ...(data.actions !== undefined ? { actions: JSON.stringify(data.actions) } : {}),
         ...(data.active !== undefined ? { active: data.active } : {}),
       },

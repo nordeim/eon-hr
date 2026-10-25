@@ -43,6 +43,7 @@ interface PayrollRow {
   employeeId: string;
   period: string;
   basicSalary: number;
+  overtimeHours?: number; // session92 R92-G
   allowances: number;
   bonus: number;
   deductions: number;
@@ -472,6 +473,7 @@ function PayrollDialog({
     employeeId: string;
     period: string;
     basicSalary: number;
+    overtimeHours: number;
     allowances: number;
     bonus: number;
     deductions: number;
@@ -481,86 +483,94 @@ function PayrollDialog({
   // Initial form state is derived from `record` at mount; the parent remounts
   // this dialog via key={editing ? editing.id : "new"} so re-opening with a
   // different record resets the form without a prefill effect.
+  // Session92 (R92-G): the REF's grouped dialog contract (672x600,
+  // "Add Payroll Record") — the allowances/deductions ride in sub-inputs
+  // (Housing/Transport/Food/Other; Late Days/Absent Days/Unpaid Leave/
+  // Loans/Insurance/Other) summed at submit.
   const [form, setForm] = React.useState(() => ({
     employeeId: record?.employeeId ?? "",
     period: record?.period ?? defaultPeriod,
     basic: record ? String(record.basicSalary / 100) : "0",
-    allowances: record ? String(record.allowances / 100) : "0",
+    overtimeHours: record ? String(record.overtimeHours ?? 0) : "0",
+    housing: "0", transport: "0", food: "0", allowanceOther: "0",
+    lateDays: "0", absentDays: "0", unpaidLeave: "0", loans: "0", insurance: "0", deductionOther: "0",
+    // carried through on edit (the dialog never edits these — the REF has
+    // no bonus/status fields in this dialog)
     bonus: record ? String(record.bonus / 100) : "0",
-    deductions: record ? String(record.deductions / 100) : "0",
     status: record?.status ?? "draft",
   }));
 
-  const preview =
-    (Number(form.basic) || 0) + (Number(form.allowances) || 0) + (Number(form.bonus) || 0) -
-    (Number(form.deductions) || 0);
+  const allowancesSum =
+    (Number(form.housing) || 0) + (Number(form.transport) || 0) +
+    (Number(form.food) || 0) + (Number(form.allowanceOther) || 0);
+  const deductionsSum =
+    (Number(form.lateDays) || 0) + (Number(form.absentDays) || 0) +
+    (Number(form.unpaidLeave) || 0) + (Number(form.loans) || 0) +
+    (Number(form.insurance) || 0) + (Number(form.deductionOther) || 0);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const basic = toMinor(form.basic);
-    const allowances = toMinor(form.allowances);
-    const bonus = toMinor(form.bonus);
-    const deductions = toMinor(form.deductions);
-    if (basic === null || allowances === null || bonus === null || deductions === null) {
-      return;
-    }
-    if (basic + allowances + bonus - deductions < 0) return;
+    if (basic === null) return;
+    const allowances = toMinor(String(allowancesSum));
+    const deductions = toMinor(String(deductionsSum));
+    if (allowances === null || deductions === null) return;
+    if (basic + allowances + deductions > 0 && basic + allowances - deductions < 0) return;
     const saved = await onSave({
       employeeId: form.employeeId,
       period: form.period,
       basicSalary: basic,
+      overtimeHours: Number(form.overtimeHours) || 0,
       allowances,
-      bonus,
+      bonus: record?.bonus ?? 0,
       deductions,
-      status: form.status,
+      status: record?.status ?? "draft",
     });
     if (saved) onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{record ? "Edit Payroll Record" : "Add Payroll"}</DialogTitle>
+          <DialogTitle>{record ? "Edit Payroll Record" : "Add Payroll Record"}</DialogTitle>
           <DialogDescription>
             {record ? "Update the salary components for this period." : "Create a payroll record for an employee."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-employee">Employee</Label>
-              <Select
-                value={form.employeeId}
-                onValueChange={(v) => setForm({ ...form, employeeId: v })}
-                required
-              >
-                <SelectTrigger id="pay-employee">
-                  <SelectValue placeholder="Select employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.firstName} {emp.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-period">Period</Label>
-              <Input
-                id="pay-period"
-                type="month"
-                required
-                value={form.period}
-                onChange={(e) => setForm({ ...form, period: e.target.value })}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="pay-employee">Employee *</Label>
+            <Select
+              value={form.employeeId}
+              onValueChange={(v) => setForm({ ...form, employeeId: v })}
+              required
+            >
+              <SelectTrigger id="pay-employee">
+                <SelectValue placeholder="Select employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.firstName} {emp.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="pay-period">Month *</Label>
+            <Input
+              id="pay-period"
+              type="month"
+              required
+              value={form.period}
+              onChange={(e) => setForm({ ...form, period: e.target.value })}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-basic">Basic Salary (SAR)</Label>
+              <Label htmlFor="pay-basic">Basic Salary</Label>
               <Input
                 id="pay-basic"
                 type="number"
@@ -572,69 +582,49 @@ function PayrollDialog({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-allowances">Allowances (SAR)</Label>
+              <Label htmlFor="pay-overtime">Overtime Hours</Label>
               <Input
-                id="pay-allowances"
+                id="pay-overtime"
                 type="number"
                 min="0"
-                step="0.01"
-                value={form.allowances}
-                onChange={(e) => setForm({ ...form, allowances: e.target.value })}
+                step="1"
+                value={form.overtimeHours}
+                onChange={(e) => setForm({ ...form, overtimeHours: e.target.value })}
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-bonus">Bonus (SAR)</Label>
-              <Input
-                id="pay-bonus"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.bonus}
-                onChange={(e) => setForm({ ...form, bonus: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-deductions">Deductions (SAR)</Label>
-              <Input
-                id="pay-deductions"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.deductions}
-                onChange={(e) => setForm({ ...form, deductions: e.target.value })}
-              />
+
+          {/* Session92 (R92-G): the REF's grouped Allowances block. */}
+          <div className="flex flex-col gap-2">
+            <Label>Allowances</Label>
+            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-secondary/30 p-3">
+              <Input aria-label="Housing" type="number" min="0" step="0.01" placeholder="Housing" value={form.housing} onChange={(e) => setForm({ ...form, housing: e.target.value })} />
+              <Input aria-label="Transport" type="number" min="0" step="0.01" placeholder="Transport" value={form.transport} onChange={(e) => setForm({ ...form, transport: e.target.value })} />
+              <Input aria-label="Food" type="number" min="0" step="0.01" placeholder="Food" value={form.food} onChange={(e) => setForm({ ...form, food: e.target.value })} />
+              <Input aria-label="Other" type="number" min="0" step="0.01" placeholder="Other" value={form.allowanceOther} onChange={(e) => setForm({ ...form, allowanceOther: e.target.value })} />
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-lg border bg-secondary/40 px-3 py-2">
-            <span className="text-sm text-muted-foreground">Net salary</span>
-            <span className="text-sm font-semibold text-foreground">
-              {formatSar(Math.round(preview * 100))}
-            </span>
+
+          {/* Session92 (R92-G): the REF's grouped Deductions block. */}
+          <div className="flex flex-col gap-2">
+            <Label>Deductions</Label>
+            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-secondary/30 p-3">
+              <Input aria-label="Late Days" type="number" min="0" step="0.01" placeholder="Late Days" value={form.lateDays} onChange={(e) => setForm({ ...form, lateDays: e.target.value })} />
+              <Input aria-label="Absent Days" type="number" min="0" step="0.01" placeholder="Absent Days" value={form.absentDays} onChange={(e) => setForm({ ...form, absentDays: e.target.value })} />
+              <Input aria-label="Unpaid Leave" type="number" min="0" step="0.01" placeholder="Unpaid Leave" value={form.unpaidLeave} onChange={(e) => setForm({ ...form, unpaidLeave: e.target.value })} />
+              <Input aria-label="Loans" type="number" min="0" step="0.01" placeholder="Loans" value={form.loans} onChange={(e) => setForm({ ...form, loans: e.target.value })} />
+              <Input aria-label="Insurance" type="number" min="0" step="0.01" placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
+              <Input aria-label="Other" type="number" min="0" step="0.01" placeholder="Other" value={form.deductionOther} onChange={(e) => setForm({ ...form, deductionOther: e.target.value })} />
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="pay-status">Status</Label>
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-              <SelectTrigger id="pay-status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button variant="green" type="submit" disabled={saving}>
+            <Button variant="green" type="submit" disabled={saving || !form.employeeId}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-              {record ? "Save Changes" : "Add Payroll"}
+              {record ? "Save Changes" : "Create Payroll"}
             </Button>
           </DialogFooter>
         </form>

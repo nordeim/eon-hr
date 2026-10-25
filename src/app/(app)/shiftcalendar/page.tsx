@@ -538,7 +538,8 @@ function AssignShiftDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>
-      <DialogContent className="max-w-lg">
+      {/* Session92 (R92-L): the REF's Assign Shift is 448 wide (max-w-md). */}
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Assign Shift</DialogTitle>
           <DialogDescription>

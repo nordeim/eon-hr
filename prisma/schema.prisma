@@ -173,6 +173,7 @@ model LeaveRequest {
   endDate     DateTime
   days        Int
   reason      String?
+  attachmentName String? // the Supporting Document file's name (session92 R92-E: the REF's optional upload)
   status      String    @default("pending") // pending | approved | rejected | cancelled
   approverId  String?
   decidedAt   DateTime?
@@ -254,9 +255,11 @@ model PayrollRecord {
   employeeId  String
   period      String // "2026-10"
   basicSalary Int       @default(0)
+  overtimeHours Int      @default(0) // session92 R92-G: the REF's Add Payroll Record field
   allowances  Int       @default(0)
   bonus       Int       @default(0)
   deductions  Int       @default(0)
+  notes       String? // session92 R92-M: the payslip dialog's Notes field
   netSalary   Int       @default(0)
   status      String    @default("draft") // draft | approved | paid
   paidAt      DateTime?
@@ -381,6 +384,9 @@ model OffboardingProcess {
   id          String    @id @default(cuid())
   employeeId  String
   lastDay     DateTime
+  noticeDate    DateTime? // session92 R92-K: the REF's dialog field
+  terminationDate DateTime? // session92 R92-K: the REF's dialog field
+  finalSettlement Int? // session92 R92-K: the REF's dialog field (SAR minor units)
   reason      String?
   status      String    @default("in_progress") // in_progress | completed | cancelled
   checklist   String    @default("[]") // JSON [{title, done}]
@@ -467,7 +473,8 @@ model Goal {
   createdById String?
   title       String
   description String?
-  category    String    @default("performance") // performance | development | okr | kpi
+  category    String    @default("productivity") // productivity | quality | skills | leadership | innovation (session92 R92-I: the REF's five)
+  priority    String    @default("medium") // low | medium | high | critical (session92 R92-I: the REF's dialog field)
   targetValue Int?
   progress    Int       @default(0) // 0..100
   status      String    @default("on_track") // on_track | at_risk | behind | completed
@@ -482,10 +489,11 @@ model Goal {
 model ReviewCycle {
   id          String    @id @default(cuid())
   name        String
-  type        String    @default("annual") // annual | quarterly | probation | 360
+  type        String    @default("annual") // annual | quarterly | probation | promotion | 360 (session92 R92-J: the REF's raw five)
   status      String    @default("not_started") // not_started | in_progress | completed
   periodStart DateTime?
   periodEnd   DateTime?
+  reviewDate  DateTime? // session92 R92-J: the REF's dialog Review Date field
   createdAt   DateTime  @default(now())
   reviews     Review[]
 }
@@ -655,10 +663,12 @@ model AIMessage {
 model Workflow {
   id         String              @id @default(cuid())
   name       String
-  module     String              @default("general") // leave | expense | recruitment | general
-  trigger    String              @default("manual") // manual | on_create | on_status_change | scheduled
+  module     String              @default("general") // legacy (pre-session92)
+  trigger    String              @default("manual") // legacy (pre-session92)
+  triggerType String             @default("new_employee_onboarding") // new_employee_onboarding | employee_offboarding | work_anniversary | birthday | probation_end | contract_renewal (session92 R92-D: the REF's event vocabulary)
+  targetDepartment String? // "" = all (the REF's "Leave empty for all")
   conditions String              @default("[]")
-  actions    String              @default("[]")
+  actions    String              @default("[]") // JSON [{type, delayDays, message}] (session92 R92-D: the REF's action list)
   active     Boolean             @default(false)
   executions Int                 @default(0)
   createdAt  DateTime            @default(now())

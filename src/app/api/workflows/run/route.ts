@@ -18,7 +18,17 @@ export async function POST(req: NextRequest) {
     let actions: string[] = [];
     try {
       const parsed: unknown = JSON.parse(workflow.actions || "[]");
-      if (Array.isArray(parsed)) actions = parsed.filter((a): a is string => typeof a === "string");
+      if (Array.isArray(parsed)) {
+        actions = parsed.map((a) => {
+          if (typeof a === "string") return a; // legacy rows
+          if (typeof a === "object" && a !== null && "type" in a) {
+            const it = a as { type?: unknown; delayDays?: unknown };
+            const t = typeof it.type === "string" ? it.type : "action";
+            return typeof it.delayDays === "number" && it.delayDays > 0 ? `${t} (+${it.delayDays}d)` : t;
+          }
+          return "action";
+        });
+      }
     } catch {
       actions = [];
     }
@@ -31,7 +41,8 @@ export async function POST(req: NextRequest) {
         workflowId: workflow.id,
         status: "success",
         detail:
-          `Executed "${workflow.name}" (${workflow.module} module, ${workflow.trigger} trigger)` +
+          `Executed "${workflow.name}" (${workflow.triggerType} trigger)` +
+          (workflow.targetDepartment ? `, ${workflow.targetDepartment} department` : "") +
           (actions.length > 0 ? ` — ${actions.length} action(s): ${actions.join(", ")}` : " — no actions defined"),
         startedAt: now,
         completedAt: now,

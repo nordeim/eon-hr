@@ -7,9 +7,11 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 
 const CycleInput = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
-  type: z.enum(["annual", "quarterly", "probation", "360"]).default("annual"),
+  type: z.enum(["quarterly", "annual", "probation", "promotion", "360"]).default("annual"), // session92 R92-J: the REF's raw five
   periodStart: z.string().optional().or(z.literal("")),
   periodEnd: z.string().optional().or(z.literal("")),
+  reviewDate: z.string().optional().or(z.literal("")), // session92 R92-J: the REF's dialog Review Date
+  employeeId: z.string().optional().or(z.literal("")), // session92 R92-J: the REF's dialog Employee (creates the first review)
 });
 
 const CyclePatch = z.object({
@@ -48,6 +50,7 @@ export async function GET(req: NextRequest) {
         status: c.status,
         periodStart: c.periodStart,
         periodEnd: c.periodEnd,
+        reviewDate: c.reviewDate,
         createdAt: c.createdAt,
         reviews: c.reviews.map((r) => ({
           id: r.id,
@@ -82,9 +85,22 @@ export async function POST(req: NextRequest) {
         status: "not_started",
         periodStart: data.periodStart ? new Date(data.periodStart) : null,
         periodEnd: data.periodEnd ? new Date(data.periodEnd) : null,
+        reviewDate: data.reviewDate ? new Date(data.reviewDate) : null,
       },
       select: { id: true },
     });
+
+    // Session92 (R92-J): the REF's dialog picks an Employee — the Create &
+    // Notify semantics create the employee's first review row in the cycle
+    // (the signed-in admin/hr user is the reviewer).
+    if (data.employeeId) {
+      const employee = await db.employee.findUnique({ where: { id: data.employeeId } });
+      if (!employee) return err("NOT_FOUND", "Employee not found");
+      await db.review.create({
+        data: { cycleId: cycle.id, employeeId: employee.id, reviewerId: user.id, status: "not_started" },
+        select: { id: true },
+      });
+    }
     return ok({ cycle });
   });
 }

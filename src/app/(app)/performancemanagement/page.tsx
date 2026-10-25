@@ -70,7 +70,10 @@ interface EmployeeOption {
 }
 
 const GOAL_STATUS_OPTIONS = ["on_track", "at_risk", "behind", "completed"];
-const GOAL_CATEGORIES = ["performance", "development", "okr", "kpi"];
+// Session92 (R92-I): the REF's live dialog set — Productivity, Quality,
+// Skills, Leadership, Innovation (live-read from the 672x498 dialog).
+const GOAL_CATEGORIES = ["productivity", "quality", "skills", "leadership", "innovation"];
+const GOAL_PRIORITIES = ["low", "medium", "high", "critical"];
 
 function labelize(v: string): string {
   return v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -449,11 +452,11 @@ function NewGoalDialog({
   onOpenChange: (o: boolean) => void;
   onSave: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const [form, setForm] = React.useState({ employeeId: "", title: "", description: "", category: "performance", dueDate: "" });
+  const [form, setForm] = React.useState({ employeeId: "", title: "", description: "", category: "productivity", priority: "medium", dueDate: "" });
 
   React.useEffect(() => {
     if (open) {
-      setForm({ employeeId: employees[0]?.id ?? "", title: "", description: "", category: "performance", dueDate: "" });
+      setForm({ employeeId: employees[0]?.id ?? "", title: "", description: "", category: "productivity", priority: "medium", dueDate: "" });
     }
   }, [open, employees]);
 
@@ -465,6 +468,7 @@ function NewGoalDialog({
       title: form.title.trim(),
       description: form.description.trim(),
       category: form.category,
+      priority: form.priority,
       dueDate: form.dueDate,
     });
     if (saved) onOpenChange(false);
@@ -472,7 +476,7 @@ function NewGoalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Set New Goal</DialogTitle>
           <DialogDescription>Define a measurable goal for an employee.</DialogDescription>
@@ -497,6 +501,10 @@ function NewGoalDialog({
             <Label htmlFor="goal-title">Goal Title</Label>
             <Input id="goal-title" required maxLength={140} placeholder="e.g. Close 20 enterprise deals" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="goal-desc">Description</Label>
+            <Textarea id="goal-desc" maxLength={500} rows={3} placeholder="How will this goal be measured?" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="goal-category">Category</Label>
@@ -514,13 +522,24 @@ function NewGoalDialog({
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="goal-due">Due Date</Label>
-              <Input id="goal-due" type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+              <Label htmlFor="goal-priority">Priority</Label>
+              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+                <SelectTrigger id="goal-priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GOAL_PRIORITIES.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {labelize(p)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="goal-desc">Description (optional)</Label>
-            <Textarea id="goal-desc" maxLength={500} rows={3} placeholder="How will this goal be measured?" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <Label htmlFor="goal-due">Target Date</Label>
+            <Input id="goal-due" type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Loader2, CalendarDays, Plane } from "lucide-react";
+import { Plus, Loader2, CalendarDays, Plane, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,6 +68,7 @@ export default function LeaveManagementPage() {
   const [requests, setRequests] = React.useState<LeaveRequestRow[]>([]);
   const [balances, setBalances] = React.useState<LeaveBalanceRow[]>([]);
   const [leaveTypes, setLeaveTypes] = React.useState<LeaveTypeOption[]>([]);
+  const [employees, setEmployees] = React.useState<{ id: string; name: string; code: string }[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   const [dialogOpen, setDialogOpen] = React.useState(() => params.get("new") === "1");
@@ -87,6 +88,7 @@ export default function LeaveManagementPage() {
           setRequests(json.data.requests);
           setBalances(json.data.balances);
           setLeaveTypes(json.data.leaveTypes);
+          setEmployees(json.data.employees ?? []);
         } else {
           toast.toast({ title: "Failed to load", description: json.error?.message, variant: "error" });
         }
@@ -213,6 +215,7 @@ export default function LeaveManagementPage() {
         key={`new-leave-${dialogSeq}`}
         open={dialogOpen}
         leaveTypes={leaveTypes}
+        employees={employees}
         saving={saving}
         onOpenChange={setDialogOpen}
         onSave={createRequest}
@@ -226,45 +229,84 @@ export default function LeaveManagementPage() {
 function NewLeaveRequestDialog({
   open,
   leaveTypes,
+  employees,
   saving,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
   leaveTypes: LeaveTypeOption[];
+  employees: { id: string; name: string; code: string }[];
   saving: boolean;
   onOpenChange: (o: boolean) => void;
   onSave: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
+  // Session92 (R92-E): the REF's Create Leave Request contract (the
+  // /allleaverequests live-read, 672x582) — Employee, Leave Type, Total
+  // Days, Start/End Date, Reason, Supporting Document (Optional).
   const [form, setForm] = React.useState(() => ({
+    employeeId: "",
     leaveTypeName: leaveTypes[0]?.name ?? "",
+    totalDays: "",
     startDate: "",
     endDate: "",
     reason: "",
   }));
+  const [attachment, setAttachment] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (open) {
+      setForm({
+        employeeId: employees[0]?.id ?? "",
+        leaveTypeName: leaveTypes[0]?.name ?? "",
+        totalDays: "",
+        startDate: "",
+        endDate: "",
+        reason: "",
+      });
+      setAttachment("");
+    }
+  }, [open, employees, leaveTypes]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const saved = await onSave({
+      employeeId: form.employeeId || undefined,
       leaveTypeName: form.leaveTypeName || leaveTypes[0]?.name || "",
       startDate: form.startDate,
       endDate: form.endDate,
       reason: form.reason,
+      attachmentName: attachment || undefined,
     });
     if (saved) onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
-            New Leave Request
+            Create Leave Request
           </DialogTitle>
           <DialogDescription>Submit a leave request for approval.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="my-leave-employee">Employee</Label>
+            <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
+              <SelectTrigger id="my-leave-employee">
+                <SelectValue placeholder="Select employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.name} ({e.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="my-leave-type">Leave Type</Label>
             <Select value={form.leaveTypeName} onValueChange={(v) => setForm({ ...form, leaveTypeName: v })}>
@@ -279,6 +321,18 @@ function NewLeaveRequestDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="my-leave-days">Total Days</Label>
+            <Input
+              id="my-leave-days"
+              type="number"
+              min={1}
+              max={365}
+              placeholder="e.g. 5"
+              value={form.totalDays}
+              onChange={(e) => setForm({ ...form, totalDays: e.target.value })}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
@@ -311,6 +365,24 @@ function NewLeaveRequestDialog({
               value={form.reason}
               onChange={(e) => setForm({ ...form, reason: e.target.value })}
             />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="my-leave-attachment">Supporting Document (Optional)</Label>
+            <div className="flex items-center gap-2">
+              <input
+                id="my-leave-attachment"
+                type="file"
+                className="sr-only"
+                onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? "")}
+              />
+              <Button type="button" variant="outline" onClick={() => document.getElementById("my-leave-attachment")?.click()}>
+                <Upload className="mr-2" aria-hidden="true" />
+                Upload Document
+              </Button>
+              {attachment ? (
+                <span className="text-sm text-muted-foreground truncate">{attachment}</span>
+              ) : null}
+            </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -3235,10 +3235,11 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     expect(compliancePage).toContain('>Expiring ≤ 7 days</div>');
   });
 
-  it("R35-C3: the documents API accepts REF's five types (+ the model's default fallback)", () => {
-    expect(documentsApi).toContain(
-      'const DOC_TYPES = ["iqama", "visa", "passport", "contract", "probation", "other"] as const;'
-    );
+  it("R35-C3 (session92 amendment): the documents API accepts the dialog's TEN-type taxonomy (R92-F) + the compliance/legacy union", () => {
+    expect(documentsApi).toContain('"national_id", "passport", "iqama", "visa", "medical_certificate"');
+    expect(documentsApi).toContain('"driving_license", "work_permit", "education_certificate"');
+    expect(documentsApi).toContain('"professional_license", "other"');
+    expect(documentsApi).toContain('// legacy values (pre-session92 rows)');
   });
 
   it("R35-D1: the 404 headings — 72px/300 slate-300 + 24px/500 slate-800 in the measured stack (divider bar + space-y-3 block)", () => {
@@ -7441,5 +7442,129 @@ describe("session 91 — the open-state inventory round (R91-A/B/C)", () => {
 
   it("R91-B6: the StaffRequest schema carries the REF's amount field", () => {
     expect(schema).toContain("amount      Int?");
+  });
+});
+
+describe("session92 — the dialog-interior inventory round", () => {
+  const schema = read("prisma", "schema.prisma");
+  const wfPage = read("src", "app", "(app)", "workflowautomation", "page.tsx");
+  const wfApi = read("src", "app", "api", "workflows", "route.ts");
+  const leavePage = read("src", "app", "(app)", "allleaverequests", "page.tsx");
+  const lmPage = read("src", "app", "(app)", "leavemanagement", "page.tsx");
+  const docPage = read("src", "app", "(app)", "documenttracker", "page.tsx");
+  const payPage = read("src", "app", "(app)", "payroll", "page.tsx");
+  const pmPage = read("src", "app", "(app)", "payrollmodule", "page.tsx");
+  const tmPage = read("src", "app", "(app)", "taskmanager", "page.tsx");
+  const perfPage = read("src", "app", "(app)", "performancemanagement", "page.tsx");
+  const evalPage = read("src", "app", "(app)", "evaluations", "page.tsx");
+  const offPage = read("src", "app", "(app)", "offboarding", "page.tsx");
+  const scPage = read("src", "app", "(app)", "shiftcalendar", "page.tsx");
+
+  it("R92-A/B/C: requestsettings limit selects offer the REF's sets", () => {
+    const src = read("src", "app", "(app)", "requestsettings", "page.tsx");
+    expect(src).toContain('<SelectItem value="tools_equipment">Tools &amp; Equipment</SelectItem>');
+    expect(src).toContain('<SelectItem value="all_categories">All Categories</SelectItem>');
+    expect(src).toContain('<SelectItem value="daily">Daily</SelectItem>');
+    expect(src).toContain('<SelectItem value="annual">Annual</SelectItem>');
+    expect(src).not.toContain('"Quarterly"');
+    expect(src).toContain('<SelectItem value="specific_employee">Specific Employee</SelectItem>');
+    expect(src).not.toContain('"Per Department"');
+  });
+
+  it("R92-D: the workflow dialog offers the REF's six trigger events + four action types", () => {
+    expect(wfPage).toContain('{ value: "new_employee_onboarding", label: "New Employee Onboarding" }');
+    expect(wfPage).toContain('{ value: "contract_renewal", label: "Contract Renewal" }');
+    expect(wfPage).toContain('{ value: "send_email", label: "Send Email" }');
+    expect(wfPage).toContain('{ value: "assign_template", label: "Assign Template" }');
+    expect(wfPage).toContain('Leave empty for all');
+    expect(wfPage).toContain('Add Action');
+    expect(wfPage).toContain('Welcome to the team!');
+    expect(wfPage).not.toContain('"Manual trigger"');
+    expect(wfApi).toContain('const TRIGGER_TYPES = [');
+    expect(wfApi).toContain('const ACTION_TYPES = ["send_email", "create_task", "send_notification", "assign_template"] as const;');
+  });
+
+  it("R92-E: both leave dialogs render the REF's field contract (Employee, Total Days, the upload)", () => {
+    for (const src of [leavePage, lmPage]) {
+      expect(src).toContain('Create Leave Request');
+      expect(src).toContain('Total Days</Label>');
+      expect(src).toContain('Supporting Document (Optional)');
+      expect(src).toContain('Upload Document');
+      expect(src).toContain('max-w-2xl');
+    }
+    expect(schema).toContain("attachmentName String?");
+    expect(read("prisma", "seed.ts")).toContain('"Personal Leave"');
+    expect(read("prisma", "seed.ts")).toContain('"Emergency Leave"');
+    expect(read("prisma", "seed.ts")).toContain('"Paternity Leave"');
+  });
+
+  it("R92-F: the documenttracker dialog offers the REF's ten-type taxonomy + Document Number", () => {
+    expect(docPage).toContain('{ value: "national_id", label: "National ID" }');
+    expect(docPage).toContain('{ value: "medical_certificate", label: "Medical Certificate" }');
+    expect(docPage).toContain('{ value: "professional_license", label: "Professional License" }');
+    expect(docPage).toContain('Document Number</Label>');
+    expect(docPage).toContain('placeholder="e.g. A123456"');
+    expect(docPage).toContain('Save Document');
+    expect(docPage).not.toContain('Pending upload (no file yet)');
+  });
+
+  it("R92-G: the payroll dialog renders the REF's grouped form (no Bonus/Status fields)", () => {
+    expect(payPage).toContain('Overtime Hours</Label>');
+    expect(payPage).toContain('placeholder="Housing"');
+    expect(payPage).toContain('placeholder="Transport"');
+    expect(payPage).toContain('placeholder="Late Days"');
+    expect(payPage).toContain('placeholder="Absent Days"');
+    expect(payPage).toContain('placeholder="Unpaid Leave"');
+    expect(payPage).toContain('placeholder="Loans"');
+    expect(payPage).toContain('placeholder="Insurance"');
+    expect(payPage).toContain('"Create Payroll"');
+    expect(payPage).not.toContain('Bonus (SAR)</Label>');
+    expect(schema).toContain("overtimeHours Int      @default(0)");
+  });
+
+  it("R92-H: the Create Task dialog labels Task Title + Assign To (no Status/Project selects)", () => {
+    expect(tmPage).toContain('Task Title</Label>');
+    expect(tmPage).toContain('Assign To</Label>');
+    expect(tmPage).toContain('Create Task');
+    expect(tmPage).not.toContain('task-status');
+    expect(tmPage).not.toContain('task-project');
+  });
+
+  it("R92-I: the goal dialog offers the REF's category five + priority + Target Date", () => {
+    expect(perfPage).toContain('const GOAL_CATEGORIES = ["productivity", "quality", "skills", "leadership", "innovation"];');
+    expect(perfPage).toContain('const GOAL_PRIORITIES = ["low", "medium", "high", "critical"];');
+    expect(perfPage).toContain('Target Date</Label>');
+    expect(perfPage).not.toContain('"performance", "development", "okr", "kpi"');
+    expect(schema).toMatch(/priority    String    @default\("medium"\)/);
+  });
+
+  it("R92-J: the review dialog offers the REF's raw five + Review Period/Date + Create & Notify", () => {
+    expect(evalPage).toContain('{ value: "promotion", label: "promotion" }');
+    expect(evalPage).toContain('e.g. Q2 2025, Annual 2025');
+    expect(evalPage).toContain('Create &amp; Notify');
+    expect(evalPage).not.toContain('Cycle Name');
+    expect(schema).toContain("reviewDate  DateTime?");
+  });
+
+  it("R92-K: the offboarding dialog renders the REF's field set", () => {
+    expect(offPage).toContain('Notice Date</Label>');
+    expect(offPage).toContain('Termination Date</Label>');
+    expect(offPage).toContain('Final Settlement (SAR)</Label>');
+    expect(offPage).toContain('Start Offboarding Process');
+    expect(schema).toContain("noticeDate    DateTime?");
+    expect(schema).toContain("finalSettlement Int?");
+  });
+
+  it("R92-L: the Assign Shift dialog carries the REF's 448 width", () => {
+    expect(scPage).toContain('Session92 (R92-L): the REF\'s Assign Shift is 448 wide (max-w-md).');
+    expect(scPage).toContain('<DialogContent className="max-w-md">');
+  });
+
+  it("R92-M: the payslip dialog renders the REF's Bonus + Notes + Generate Payslip", () => {
+    expect(pmPage).toContain('Bonus (SAR)</Label>');
+    expect(pmPage).toContain('placeholder="Optional notes..."');
+    expect(pmPage).toContain('"Generate Payslip"');
+    expect(pmPage).not.toContain('Basic Salary (SAR)</Label>');
+    expect(schema).toContain("notes       String? // session92 R92-M");
   });
 });

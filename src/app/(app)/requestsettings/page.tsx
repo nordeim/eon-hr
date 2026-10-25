@@ -47,6 +47,14 @@ interface ConfigRow {
  * REF-side zero-data); Add Limit keeps an in-memory limit list
  * (REF's button is inert; no schema model is forced for it).
  */
+const LIMIT_CATEGORY_LABELS: Record<string, string> = {
+  finance: "Finance", hr: "HR", it: "IT", operations: "Operations",
+  tools_equipment: "Tools & Equipment", other: "Other", all_categories: "All Categories",
+};
+const LIMIT_PERIOD_LABELS: Record<string, string> = {
+  daily: "Daily", weekly: "Weekly", monthly: "Monthly", annual: "Annual",
+};
+
 export default function RequestSettingsPage() {
   const toast = useToast();
   const [loading, setLoading] = React.useState(true);
@@ -240,11 +248,15 @@ export default function RequestSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Session92 (R92-A): the REF's live set — the staffrequests
+                      category vocabulary + All Categories, in the REF's order. */}
                   <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="it">IT</SelectItem>
                   <SelectItem value="hr">HR</SelectItem>
-                  <SelectItem value="facilities">Facilities</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="it">IT</SelectItem>
+                  <SelectItem value="operations">Operations</SelectItem>
+                  <SelectItem value="tools_equipment">Tools &amp; Equipment</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="all_categories">All Categories</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={limitPeriod} onValueChange={setLimitPeriod}>
@@ -252,9 +264,11 @@ export default function RequestSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Session92 (R92-B): the REF's live set. */}
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
                 </SelectContent>
               </Select>
               <Input placeholder="Sub-type (e.g. petty_cash)" value={limitSubType} onChange={(e) => setLimitSubType(e.target.value)} aria-label="Limit sub-type" />
@@ -265,8 +279,9 @@ export default function RequestSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Session92 (R92-C): the REF's live set. */}
                   <SelectItem value="all_staff">All Staff</SelectItem>
-                  <SelectItem value="per_department">Per Department</SelectItem>
+                  <SelectItem value="specific_employee">Specific Employee</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="dark" onClick={onAddLimit}>
@@ -284,7 +299,7 @@ export default function RequestSettingsPage() {
                 {limits.map((l, i) => (
                   <li key={i} className="text-sm text-slate-700">
                     {l.name}
-                    {l.subType ? ` · ${l.subType}` : ""} · {l.category} · {l.period} · {l.scope === "all_staff" ? "All Staff" : "Per Department"}
+                    {l.subType ? ` · ${l.subType}` : ""} · {LIMIT_CATEGORY_LABELS[l.category] ?? l.category} · {LIMIT_PERIOD_LABELS[l.period] ?? l.period} · {l.scope === "all_staff" ? "All Staff" : "Specific Employee"}
                     {l.maxRequests ? ` · max ${l.maxRequests} requests` : ""}
                     {l.maxAmount ? ` · max ${l.maxAmount} SAR` : ""}
                   </li>

@@ -9,7 +9,8 @@ const GoalInput = z.object({
   employeeId: z.string().min(1, "Employee is required"),
   title: z.string().trim().min(1, "Title is required").max(140),
   description: z.string().trim().max(500).optional().or(z.literal("")),
-  category: z.enum(["performance", "development", "okr", "kpi"]).default("performance"),
+  category: z.enum(["productivity", "quality", "skills", "leadership", "innovation", "performance", "development", "okr", "kpi"]).default("productivity"),
+  priority: z.enum(["low", "medium", "high", "critical"]).default("medium"), // session92 R92-I
   targetValue: z.number().int().min(0).max(1_000_000).optional(),
   dueDate: z.string().optional().or(z.literal("")),
 });
@@ -17,7 +18,8 @@ const GoalInput = z.object({
 const GoalPatch = z.object({
   title: z.string().trim().min(1).max(140).optional(),
   description: z.string().trim().max(500).optional().or(z.literal("")),
-  category: z.enum(["performance", "development", "okr", "kpi"]).optional(),
+  category: z.enum(["productivity", "quality", "skills", "leadership", "innovation", "performance", "development", "okr", "kpi"]).optional(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
   progress: z.number().int().min(0).max(100).optional(),
   status: z.enum(["on_track", "at_risk", "behind", "completed"]).optional(),
   dueDate: z.string().optional().or(z.literal("")),
@@ -32,6 +34,7 @@ const GOAL_SELECT = {
   title: true,
   description: true,
   category: true,
+  priority: true,
   targetValue: true,
   progress: true,
   status: true,
@@ -54,6 +57,7 @@ export async function GET(req: NextRequest) {
         title: g.title,
         description: g.description,
         category: g.category,
+        priority: g.priority,
         targetValue: g.targetValue,
         progress: g.progress,
         status: g.status,
@@ -86,6 +90,7 @@ export async function POST(req: NextRequest) {
         title: data.title,
         description: data.description || null,
         category: data.category,
+        priority: data.priority,
         targetValue: data.targetValue ?? null,
         progress: 0,
         status: "on_track",

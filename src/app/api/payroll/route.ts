@@ -9,9 +9,11 @@ const PayrollInput = z.object({
   employeeId: z.string().min(1, "Employee is required"),
   period: z.string().regex(/^\d{4}-\d{2}$/, "Period must be in YYYY-MM format"),
   basicSalary: z.number().int().min(0, "Basic salary cannot be negative").max(1_000_000_000),
+  overtimeHours: z.number().int().min(0).max(1000).default(0), // session92 R92-G: the REF's dialog field
   allowances: z.number().int().min(0, "Allowances cannot be negative").max(1_000_000_000).default(0),
   bonus: z.number().int().min(0, "Bonus cannot be negative").max(1_000_000_000).default(0),
   deductions: z.number().int().min(0, "Deductions cannot be negative").max(1_000_000_000).default(0),
+  notes: z.string().trim().max(500).optional().or(z.literal("")), // session92 R92-M
   status: z.enum(["draft", "approved", "paid"]).default("draft"),
 });
 
@@ -70,9 +72,11 @@ export async function POST(req: NextRequest) {
         employeeId: data.employeeId,
         period: data.period,
         basicSalary: data.basicSalary,
+        overtimeHours: data.overtimeHours,
         allowances: data.allowances,
         bonus: data.bonus,
         deductions: data.deductions,
+        notes: data.notes || null,
         netSalary: netOf(data.basicSalary, data.allowances, data.bonus, data.deductions),
         status: data.status,
         paidAt: data.status === "paid" ? new Date() : null,

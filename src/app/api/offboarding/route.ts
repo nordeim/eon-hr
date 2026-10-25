@@ -47,6 +47,9 @@ function serializeChecklist(items: ChecklistItem[]): string {
 const OffboardingInput = z.object({
   employeeId: z.string().min(1, "Employee is required"),
   lastDay: z.string().min(1, "Last working day is required"),
+  noticeDate: z.string().optional().or(z.literal("")), // session92 R92-K
+  terminationDate: z.string().optional().or(z.literal("")), // session92 R92-K
+  finalSettlement: z.number().int().min(0).max(1_000_000_000).optional(), // session92 R92-K (SAR minor units)
   reason: z.string().trim().max(500).optional().or(z.literal("")),
   checklist: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
 });
@@ -89,12 +92,19 @@ export async function POST(req: NextRequest) {
 
     const lastDay = new Date(data.lastDay);
     if (Number.isNaN(lastDay.getTime())) return err("VALIDATION", "Enter a valid last working day");
+    const noticeDate = data.noticeDate ? new Date(data.noticeDate) : null;
+    if (data.noticeDate && Number.isNaN(noticeDate!.getTime())) return err("VALIDATION", "Enter a valid notice date");
+    const terminationDate = data.terminationDate ? new Date(data.terminationDate) : null;
+    if (data.terminationDate && Number.isNaN(terminationDate!.getTime())) return err("VALIDATION", "Enter a valid termination date");
 
     const titles = data.checklist && data.checklist.length > 0 ? data.checklist : DEFAULT_CHECKLIST;
     const process = await db.offboardingProcess.create({
       data: {
         employeeId: data.employeeId,
         lastDay,
+        noticeDate, // session92 R92-K
+        terminationDate, // session92 R92-K
+        finalSettlement: data.finalSettlement ?? null, // session92 R92-K
         reason: data.reason || null,
         status: "in_progress",
         checklist: serializeChecklist(titles.map((title) => ({ title, done: false }))),

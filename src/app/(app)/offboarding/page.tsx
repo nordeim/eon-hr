@@ -5,7 +5,6 @@ import { CalendarDays, CheckCircle2, Loader2, Plus, Trash2, UserMinus, Users, XC
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
@@ -68,7 +67,10 @@ export default function OffboardingPage() {
   const [loading, setLoading] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({ employeeId: "", lastDay: "", reason: "" });
+  // Session92 (R92-K): the REF's live dialog contract (512x372, "Start
+  // Offboarding Process") — Employee, Notice Date, Last Working Day,
+  // Termination Date, Final Settlement (SAR).
+  const [form, setForm] = React.useState({ employeeId: "", noticeDate: "", lastDay: "", terminationDate: "", finalSettlement: "" });
 
   const load = React.useCallback(async () => {
     try {
@@ -100,7 +102,9 @@ export default function OffboardingPage() {
         body: JSON.stringify({
           employeeId: form.employeeId,
           lastDay: form.lastDay,
-          reason: form.reason,
+          noticeDate: form.noticeDate || undefined,
+          terminationDate: form.terminationDate || undefined,
+          finalSettlement: form.finalSettlement ? Math.round(Number(form.finalSettlement) * 100) : undefined,
         }),
       });
       const json = await res.json();
@@ -114,7 +118,7 @@ export default function OffboardingPage() {
         variant: "success",
       });
       setDialogOpen(false);
-      setForm({ employeeId: "", lastDay: "", reason: "" });
+      setForm({ employeeId: "", noticeDate: "", lastDay: "", terminationDate: "", finalSettlement: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -331,7 +335,7 @@ export default function OffboardingPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>New Offboarding</DialogTitle>
+            <DialogTitle>Start Offboarding Process</DialogTitle>
             <DialogDescription>
               Start an offboarding journey — a checklist of exit tasks is created automatically.
             </DialogDescription>
@@ -353,6 +357,15 @@ export default function OffboardingPage() {
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="off-notice">Notice Date</Label>
+              <Input
+                id="off-notice"
+                type="date"
+                value={form.noticeDate}
+                onChange={(e) => setForm({ ...form, noticeDate: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="off-lastday">Last Working Day</Label>
               <Input
                 id="off-lastday"
@@ -363,13 +376,24 @@ export default function OffboardingPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="off-reason">Reason</Label>
-              <Textarea
-                id="off-reason"
-                rows={3}
-                placeholder="e.g. Resignation — new opportunity, end of contract…"
-                value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              <Label htmlFor="off-termination">Termination Date</Label>
+              <Input
+                id="off-termination"
+                type="date"
+                value={form.terminationDate}
+                onChange={(e) => setForm({ ...form, terminationDate: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="off-settlement">Final Settlement (SAR)</Label>
+              <Input
+                id="off-settlement"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 12500.00"
+                value={form.finalSettlement}
+                onChange={(e) => setForm({ ...form, finalSettlement: e.target.value })}
               />
             </div>
             <DialogFooter>

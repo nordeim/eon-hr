@@ -88,6 +88,25 @@ async function main() {
     update: { quotaDays: 70, color: "#8b5cf6" },
     create: { name: "Maternity Leave", quotaDays: 70, color: "#8b5cf6" },
   });
+  // Session92 (R92-E): the REF's leave dialog offers SEVEN types — the three
+  // below were missing from the seed. No balances (the REF's own zero-quota
+  // state for non-core types).
+  const personal = await prisma.leaveType.upsert({
+    where: { name: "Personal Leave" },
+    update: { quotaDays: 0, color: "#f59e0b" },
+    create: { name: "Personal Leave", quotaDays: 0, color: "#f59e0b" },
+  });
+  const emergency = await prisma.leaveType.upsert({
+    where: { name: "Emergency Leave" },
+    update: { quotaDays: 0, color: "#ef4444" },
+    create: { name: "Emergency Leave", quotaDays: 0, color: "#ef4444" },
+  });
+  const paternity = await prisma.leaveType.upsert({
+    where: { name: "Paternity Leave" },
+    update: { quotaDays: 3, color: "#06b6d4" },
+    create: { name: "Paternity Leave", quotaDays: 3, color: "#06b6d4" },
+  });
+  void personal; void emergency; void paternity;
 
   // Leave balances for the demo employee — matches the dashboard cards.
   await prisma.leaveBalance.upsert({

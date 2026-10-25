@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Play, Plus, Sparkles, SquareCheckBig, Trash2, Workflow as WorkflowIcon, Zap } from "lucide-react";
+import { Loader2, Play, Plus, SquareCheckBig, Trash2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -27,39 +26,48 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { useToast } from "@/components/ui/toast";
 
+interface WorkflowActionItem {
+  type: string;
+  delayDays: number;
+  message?: string;
+}
+
 interface Workflow {
   id: string;
   name: string;
-  module: string;
-  trigger: string;
-  conditions: string[];
-  actions: string[];
+  triggerType: string;
+  targetDepartment: string;
+  actions: WorkflowActionItem[];
   active: boolean;
   executions: number;
   createdAt: string;
 }
 
-const MODULES = [
-  { value: "general", label: "General", variant: "secondary" as const },
-  { value: "leave", label: "Leave", variant: "info" as const },
-  { value: "expense", label: "Expense", variant: "warning" as const },
-  { value: "recruitment", label: "Recruitment", variant: "purple" as const },
+// Session92 (R92-D): the REF's live dialog vocabulary — the six lifecycle
+// events + the four action types, live-read from the Create Automated
+// Workflow dialog (768×617).
+const TRIGGER_TYPES = [
+  { value: "new_employee_onboarding", label: "New Employee Onboarding" },
+  { value: "employee_offboarding", label: "Employee Offboarding" },
+  { value: "work_anniversary", label: "Work Anniversary" },
+  { value: "birthday", label: "Birthday" },
+  { value: "probation_end", label: "Probation End" },
+  { value: "contract_renewal", label: "Contract Renewal" },
 ];
 
-const TRIGGERS = [
-  { value: "manual", label: "Manual trigger" },
-  { value: "on_create", label: "When a record is created" },
-  { value: "on_status_change", label: "When a status changes" },
-  { value: "scheduled", label: "On a schedule" },
+const ACTION_TYPES = [
+  { value: "send_email", label: "Send Email" },
+  { value: "create_task", label: "Create Task" },
+  { value: "send_notification", label: "Send Notification" },
+  { value: "assign_template", label: "Assign Template" },
 ];
 
-function moduleBadge(module: string) {
-  const found = MODULES.find((m) => m.value === module);
-  return { label: found?.label ?? module, variant: found?.variant ?? ("secondary" as const) };
+function triggerTypeLabel(triggerType: string) {
+  return TRIGGER_TYPES.find((t) => t.value === triggerType)?.label ?? triggerType;
 }
 
-function triggerLabel(trigger: string): string {
-  return TRIGGERS.find((t) => t.value === trigger)?.label ?? trigger;
+function actionTypeLabel(type: string) {
+  return ACTION_TYPES.find((a) => a.value === type)?.label ?? type;
 }
 
 export default function WorkflowAutomationPage() {
@@ -237,13 +245,12 @@ export default function WorkflowAutomationPage() {
            tuple REF never emits). */
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {workflows.map((workflow) => {
-            const mod = moduleBadge(workflow.module);
             return (
               <div key={workflow.id} className="flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">{workflow.name}</p>
-                    <p className="text-xs text-muted-foreground">{triggerLabel(workflow.trigger)}</p>
+                    <p className="text-xs text-muted-foreground">{triggerTypeLabel(workflow.triggerType)}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <Switch
@@ -256,19 +263,18 @@ export default function WorkflowAutomationPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={mod.variant}>{mod.label}</Badge>
-                  {workflow.conditions.map((c) => (
-                    <Badge key={c} variant="outline">
-                      {c}
-                    </Badge>
-                  ))}
+                  <Badge variant="secondary">{triggerTypeLabel(workflow.triggerType)}</Badge>
+                  {workflow.targetDepartment ? (
+                    <Badge variant="outline">{workflow.targetDepartment}</Badge>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-medium text-muted-foreground">Then:</span>
-                  {workflow.actions.map((a) => (
-                    <Badge key={a} variant="secondary">
-                      {a}
+                  {workflow.actions.map((a, i) => (
+                    <Badge key={i} variant="secondary">
+                      {actionTypeLabel(a.type)}
+                      {a.delayDays > 0 ? ` (+${a.delayDays}d)` : ""}
                     </Badge>
                   ))}
                 </div>
@@ -317,112 +323,132 @@ function NewWorkflowDialog({
   onOpenChange: (o: boolean) => void;
   onSave: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
+  // Session92 (R92-D): the REF's live dialog contract (768x617,
+  // "Create Automated Workflow") — Workflow Name, Trigger Type (the six
+  // lifecycle events), Target Department (Optional), and the Actions
+  // builder (Action Type + Delay (days) + Email Message + Add Action).
   const [form, setForm] = React.useState({
     name: "",
-    module: "general",
-    trigger: "manual",
-    conditions: "",
-    actions: "",
-    active: false,
+    triggerType: "new_employee_onboarding",
+    targetDepartment: "",
   });
+  const [actions, setActions] = React.useState<WorkflowActionItem[]>([
+    { type: "send_email", delayDays: 0, message: "" },
+  ]);
 
   React.useEffect(() => {
     if (open) {
-      setForm({ name: "", module: "general", trigger: "manual", conditions: "", actions: "", active: false });
+      setForm({ name: "", triggerType: "new_employee_onboarding", targetDepartment: "" });
+      setActions([{ type: "send_email", delayDays: 0, message: "" }]);
     }
   }, [open]);
 
+  function setAction(i: number, patch: Partial<WorkflowActionItem>) {
+    setActions((as) => as.map((a, j) => (j === i ? { ...a, ...patch } : a)));
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const conditions = form.conditions
-      .split(",")
-      .map((c) => c.trim())
-      .filter(Boolean);
-    const actions = form.actions
-      .split(",")
-      .map((a) => a.trim())
-      .filter(Boolean);
-    const saved = await onSave({ name: form.name.trim(), module: form.module, trigger: form.trigger, conditions, actions, active: form.active });
+    const saved = await onSave({
+      name: form.name.trim(),
+      triggerType: form.triggerType,
+      targetDepartment: form.targetDepartment.trim(),
+      actions: actions.map((a) => ({
+        type: a.type,
+        delayDays: Number(a.delayDays) || 0,
+        ...(a.message && a.message.trim() ? { message: a.message.trim() } : {}),
+      })),
+      active: true,
+    });
     if (saved) onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create Workflow</DialogTitle>
-          <DialogDescription>Define a trigger, conditions and automated actions.</DialogDescription>
+          <DialogTitle>Create Automated Workflow</DialogTitle>
+          <DialogDescription>Automate HR processes on lifecycle events.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="wf-name">Workflow Name</Label>
-            <Input id="wf-name" required maxLength={120} placeholder="e.g. Auto-approve small expenses" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wf-module">Module</Label>
-              <Select value={form.module} onValueChange={(v) => setForm({ ...form, module: v })}>
-                <SelectTrigger id="wf-module">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODULES.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wf-trigger">Trigger</Label>
-              <Select value={form.trigger} onValueChange={(v) => setForm({ ...form, trigger: v })}>
-                <SelectTrigger id="wf-trigger">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TRIGGERS.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Input id="wf-name" required maxLength={120} placeholder="e.g., Welcome New Hires" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="wf-conditions">Conditions (comma-separated)</Label>
-            <Textarea
-              id="wf-conditions"
-              rows={2}
-              placeholder="e.g. amount &lt; 500 SAR, department is Sales"
-              value={form.conditions}
-              onChange={(e) => setForm({ ...form, conditions: e.target.value })}
-            />
+            <Label htmlFor="wf-trigger-type">Trigger Type</Label>
+            <Select value={form.triggerType} onValueChange={(v) => setForm({ ...form, triggerType: v })}>
+              <SelectTrigger id="wf-trigger-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TRIGGER_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="wf-actions">Actions (comma-separated)</Label>
-            <Textarea
-              id="wf-actions"
-              rows={2}
-              placeholder="e.g. notify finance, flag for audit"
-              value={form.actions}
-              onChange={(e) => setForm({ ...form, actions: e.target.value })}
-            />
+            <Label htmlFor="wf-department">Target Department (Optional)</Label>
+            <Input id="wf-department" maxLength={120} placeholder="Leave empty for all" value={form.targetDepartment} onChange={(e) => setForm({ ...form, targetDepartment: e.target.value })} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border bg-secondary/30 p-3">
-            <div>
-              <Label htmlFor="wf-active">Activate immediately</Label>
-              <p className="text-xs text-muted-foreground">Inactive workflows only run manually.</p>
-            </div>
-            <Switch id="wf-active" checked={form.active} onCheckedChange={(checked: boolean) => setForm({ ...form, active: checked })} />
+
+          <div className="flex flex-col gap-3">
+            <Label>Actions</Label>
+            {actions.map((a, i) => (
+              <div key={i} className="flex flex-col gap-2 rounded-lg border bg-secondary/30 p-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`wf-action-type-${i}`}>Action Type</Label>
+                  <Select value={a.type} onValueChange={(v) => setAction(i, { type: v })}>
+                    <SelectTrigger id={`wf-action-type-${i}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACTION_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`wf-delay-${i}`}>Delay (days)</Label>
+                  <Input
+                    id={`wf-delay-${i}`}
+                    type="number"
+                    min={0}
+                    max={365}
+                    value={a.delayDays === 0 ? "" : a.delayDays}
+                    onChange={(e) => setAction(i, { delayDays: Number(e.target.value) || 0 })}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`wf-message-${i}`}>Email Message</Label>
+                  <Input
+                    id={`wf-message-${i}`}
+                    maxLength={500}
+                    placeholder="Welcome to the team!"
+                    value={a.message ?? ""}
+                    onChange={(e) => setAction(i, { message: e.target.value })}
+                  />
+                </div>
+              </div>
+            ))}
+            <Button type="button" variant="outline" className="w-fit" onClick={() => setActions((as) => [...as, { type: "send_email", delayDays: 0, message: "" }])}>
+              <Plus className="mr-2" aria-hidden="true" />
+              Add Action
+            </Button>
           </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
               Create Workflow
             </Button>
           </DialogFooter>

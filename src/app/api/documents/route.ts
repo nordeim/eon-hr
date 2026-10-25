@@ -11,7 +11,16 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 
 // Session 36 (R35-C): REF's Saudi document-type taxonomy (live-measured on
 // the compliance All Types select) + the model's default fallback.
-const DOC_TYPES = ["iqama", "visa", "passport", "contract", "probation", "other"] as const;
+// Session92 (R92-F): the documenttracker DIALOG's taxonomy live-read from
+// the REF — TEN types in this order. The compliance page keeps its own
+// verified filter set (a different surface); the union accepts both.
+const DOC_TYPES = [
+  "national_id", "passport", "iqama", "visa", "medical_certificate",
+  "driving_license", "work_permit", "education_certificate",
+  "professional_license", "other",
+  // legacy values (pre-session92 rows)
+  "contract", "id", "certificate", "medical", "probation",
+] as const;
 
 const DocInput = z.object({
   employeeId: z.string().trim().min(1, "Employee is required"),

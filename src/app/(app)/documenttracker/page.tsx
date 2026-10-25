@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { BellRing, CircleCheckBig, CircleX, FileText, Loader2, Pencil, Plus, Search, Trash2, TriangleAlert } from "lucide-react";
+import { BellRing, CircleCheckBig, CircleX, FileText, Loader2, Pencil, Plus, Search, Trash2, TriangleAlert, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -57,13 +56,18 @@ interface EmployeeOption {
   code: string;
 }
 
+// Session92 (R92-F): the REF's live dialog taxonomy (576x528, the Add
+// Document dialog's type select) — TEN types in the REF's order.
 const DOC_TYPES = [
-  { value: "contract", label: "Contract" },
-  { value: "id", label: "ID" },
+  { value: "national_id", label: "National ID" },
   { value: "passport", label: "Passport" },
+  { value: "iqama", label: "Iqama" },
   { value: "visa", label: "Visa" },
-  { value: "certificate", label: "Certificate" },
-  { value: "medical", label: "Medical" },
+  { value: "medical_certificate", label: "Medical Certificate" },
+  { value: "driving_license", label: "Driving License" },
+  { value: "work_permit", label: "Work Permit" },
+  { value: "education_certificate", label: "Education Certificate" },
+  { value: "professional_license", label: "Professional License" },
   { value: "other", label: "Other" },
 ];
 
@@ -408,11 +412,11 @@ function DocumentDialog({
   const [form, setForm] = React.useState(() => ({
     employeeId: editing?.employeeId ?? employees[0]?.id ?? "",
     name: editing?.name ?? "",
-    type: editing?.type ?? "contract",
+    type: editing?.type ?? "",
     issueDate: editing?.issueDate ? editing.issueDate.slice(0, 10) : "",
     expiryDate: editing?.expiryDate ? editing.expiryDate.slice(0, 10) : "",
     notes: editing?.notes ?? "",
-    pendingUpload: editing?.status === "pending_upload",
+    fileUrl: editing?.fileUrl ?? "",
   }));
 
   async function submit(e: React.FormEvent) {
@@ -420,18 +424,18 @@ function DocumentDialog({
     const saved = await onSave({
       employeeId: form.employeeId,
       name: form.name,
-      type: form.type,
+      type: form.type || "other",
       issueDate: form.issueDate,
       expiryDate: form.expiryDate,
       notes: form.notes,
-      ...(form.pendingUpload ? { status: "pending_upload" } : {}),
+      fileUrl: form.fileUrl || undefined,
     });
     if (saved) onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{editing ? "Edit Document" : "Add Document"}</DialogTitle>
           <DialogDescription>
@@ -455,42 +459,33 @@ function DocumentDialog({
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="doc-name">Document Name</Label>
+            <Label htmlFor="doc-type">Document Type *</Label>
+            {/* Radix renders the placeholder only at value=undefined ("" is an
+                actual value) — the session92 R92-F empty-state trigger reads
+                "Select type" like the REF's. */}
+            <Select value={form.type || undefined} onValueChange={(v) => setForm({ ...form, type: v })}>
+              <SelectTrigger id="doc-type">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {DOC_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="doc-name">Document Number</Label>
             <Input
               id="doc-name"
               required
               maxLength={140}
-              placeholder="e.g. Employment Contract"
+              placeholder="e.g. A123456"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="doc-type">Type</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                <SelectTrigger id="doc-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOC_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="doc-pending"
-                checked={form.pendingUpload}
-                onCheckedChange={(checked) => setForm({ ...form, pendingUpload: checked === true })}
-              />
-              <Label htmlFor="doc-pending" className="cursor-pointer font-normal">
-                Pending upload (no file yet)
-              </Label>
-            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
@@ -513,6 +508,24 @@ function DocumentDialog({
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
+            <Label htmlFor="doc-file">Upload Document</Label>
+            <div className="flex items-center gap-2">
+              <input
+                id="doc-file"
+                type="file"
+                className="sr-only"
+                onChange={(e) => setForm({ ...form, fileUrl: e.target.files?.[0]?.name ?? "" })}
+              />
+              <Button type="button" variant="outline" onClick={() => document.getElementById("doc-file")?.click()}>
+                <Upload className="mr-2" aria-hidden="true" />
+                Choose File
+              </Button>
+              {form.fileUrl ? (
+                <span className="text-sm text-muted-foreground truncate">{form.fileUrl}</span>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="doc-notes">Notes</Label>
             <Textarea
               id="doc-notes"
@@ -528,7 +541,7 @@ function DocumentDialog({
             </Button>
             <Button type="submit" disabled={saving || !form.employeeId}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-              {editing ? "Save Changes" : "Add Document"}
+              {editing ? "Save Changes" : "Save Document"}
             </Button>
           </DialogFooter>
         </form>

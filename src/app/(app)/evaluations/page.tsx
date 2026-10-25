@@ -75,11 +75,14 @@ interface Goal {
   employeeName: string;
 }
 
+// Session92 (R92-J): the REF's live dialog set — the RAW lowercase five,
+// live-read from the Create Performance Review dialog (512x396).
 const CYCLE_TYPES = [
-  { value: "annual", label: "Annual" },
-  { value: "quarterly", label: "Quarterly" },
-  { value: "probation", label: "Probation" },
-  { value: "360", label: "360°" },
+  { value: "quarterly", label: "quarterly" },
+  { value: "annual", label: "annual" },
+  { value: "probation", label: "probation" },
+  { value: "promotion", label: "promotion" },
+  { value: "360", label: "360" },
 ];
 
 const EVAL_TYPES: Record<string, string> = {
@@ -97,6 +100,7 @@ export default function EvaluationsPage() {
   const toast = useToast();
   const [cycles, setCycles] = React.useState<ReviewCycle[]>([]);
   const [evaluations, setEvaluations] = React.useState<Evaluation[]>([]);
+  const [employees, setEmployees] = React.useState<{ id: string; firstName: string; lastName: string }[]>([]);
   const [goals, setGoals] = React.useState<Goal[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState<string | null>(null);
@@ -106,14 +110,17 @@ export default function EvaluationsPage() {
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [cyclesRes, evaluationsRes, goalsRes] = await Promise.all([
+      const [cyclesRes, evaluationsRes, goalsRes, employeesRes] = await Promise.all([
         fetch("/api/review-cycles"),
         fetch("/api/evaluations"),
         fetch("/api/goals"),
+        fetch("/api/employees"),
       ]);
       const cyclesJson = await cyclesRes.json();
       const evaluationsJson = await evaluationsRes.json();
       const goalsJson = await goalsRes.json();
+      const employeesJson = await employeesRes.json();
+      if (employeesJson.ok) setEmployees(employeesJson.data.employees);
       if (cyclesJson.ok) setCycles(cyclesJson.data.cycles);
       else toast.toast({ title: "Failed to load review cycles", description: cyclesJson.error?.message, variant: "error" });
       if (evaluationsJson.ok) setEvaluations(evaluationsJson.data.evaluations);
@@ -458,7 +465,7 @@ export default function EvaluationsPage() {
         </TabsContent>
       </Tabs>
 
-      <NewReviewDialog open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreateCycle} />
+      <NewReviewDialog employees={employees} open={dialogOpen} saving={saving} onOpenChange={setDialogOpen} onSave={onCreateCycle} />
     </div>
     </div>
   );
@@ -466,28 +473,34 @@ export default function EvaluationsPage() {
 
 function NewReviewDialog({
   open,
+  employees,
   saving,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  employees: { id: string; firstName: string; lastName: string }[];
   saving: boolean;
   onOpenChange: (o: boolean) => void;
   onSave: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const [form, setForm] = React.useState({ name: "", type: "annual", periodStart: "", periodEnd: "" });
+  // Session92 (R92-J): the REF's live dialog contract (512x396, "Create
+  // Performance Review") — Employee *, Review Period * (text "e.g. Q2 2025,
+  // Annual 2025"), Review Type (the raw lowercase five), Review Date, and
+  // the Create & Notify footer.
+  const [form, setForm] = React.useState({ employeeId: "", name: "", type: "annual", reviewDate: "" });
 
   React.useEffect(() => {
-    if (open) setForm({ name: "", type: "annual", periodStart: "", periodEnd: "" });
+    if (open) setForm({ employeeId: employees[0]?.id ?? "", name: "", type: "annual", reviewDate: "" });
   }, [open]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const saved = await onSave({
+      employeeId: form.employeeId || undefined,
       name: form.name.trim(),
       type: form.type,
-      periodStart: form.periodStart,
-      periodEnd: form.periodEnd,
+      reviewDate: form.reviewDate,
     });
     if (saved) onOpenChange(false);
   }
@@ -496,13 +509,28 @@ function NewReviewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New Review</DialogTitle>
+          <DialogTitle>Create Performance Review</DialogTitle>
           <DialogDescription>Create a review cycle with a review period.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="review-name">Cycle Name</Label>
-            <Input id="review-name" required maxLength={120} placeholder="e.g. FY2027 Annual Review" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Label htmlFor="review-employee">Employee *</Label>
+            <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })}>
+              <SelectTrigger id="review-employee">
+                <SelectValue placeholder="Select employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.firstName} {emp.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="review-period">Review Period *</Label>
+            <Input id="review-period" required maxLength={120} placeholder="e.g. Q2 2025, Annual 2025" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="review-type">Review Type</Label>
@@ -519,15 +547,9 @@ function NewReviewDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-start">Period Start</Label>
-              <Input id="review-start" type="date" value={form.periodStart} onChange={(e) => setForm({ ...form, periodStart: e.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-end">Period End</Label>
-              <Input id="review-end" type="date" value={form.periodEnd} onChange={(e) => setForm({ ...form, periodEnd: e.target.value })} />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="review-date">Review Date</Label>
+            <Input id="review-date" type="date" value={form.reviewDate} onChange={(e) => setForm({ ...form, reviewDate: e.target.value })} />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -535,7 +557,7 @@ function NewReviewDialog({
             </Button>
             <Button type="submit" disabled={saving}>
               {saving ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
-              Create Review
+              Create &amp; Notify
             </Button>
           </DialogFooter>
         </form>

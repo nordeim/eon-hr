@@ -79,6 +79,7 @@ export default function TaskManagerPage() {
   const toast = useToast();
   const [tasks, setTasks] = React.useState<TaskRow[]>([]);
   const [projects, setProjects] = React.useState<ProjectRow[]>([]);
+  const [employees, setEmployees] = React.useState<{ id: string; name: string }[]>([]);
   const [view, setView] = React.useState<"kanban" | "projects">("kanban");
   const [loading, setLoading] = React.useState(true);
 
@@ -112,6 +113,7 @@ export default function TaskManagerPage() {
       .then((res) => res.json())
       .then((json) => {
         if (json.ok) {
+          setEmployees(json.data.employees ?? []);
           setTasks(json.data.tasks);
           setProjects(json.data.projects);
         } else {
@@ -556,6 +558,7 @@ export default function TaskManagerPage() {
 
       <TaskDialog
         key={`task-${dialogSeq}`}
+        employees={employees}
         open={taskDialogOpen}
         projects={projects}
         saving={saving}
@@ -579,36 +582,44 @@ export default function TaskManagerPage() {
 function TaskDialog({
   open,
   projects,
+  employees,
   saving,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
   projects: ProjectRow[];
+  employees: { id: string; name: string }[];
   saving: boolean;
   onOpenChange: (o: boolean) => void;
   onSave: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
+  // Session92 (R92-H): the REF's live dialog contract (512x498, "Create
+  // Task") — Task Title, Description, Assign To (employee select),
+  // Priority, Due Date. The Status + Project selects are retired (new
+  // tasks land in the first column; the kanban DnD assigns projects).
   const [form, setForm] = React.useState({
     title: "",
     description: "",
-    status: "backlog",
     priority: "medium",
     assignee: "",
     dueDate: "",
-    projectId: "none",
   });
+
+  React.useEffect(() => {
+    if (open) setForm({ title: "", description: "", priority: "medium", assignee: "", dueDate: "" });
+  }, [open]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const saved = await onSave({
       title: form.title,
       description: form.description,
-      status: form.status,
+      status: "backlog",
       priority: form.priority,
       assignee: form.assignee,
       dueDate: form.dueDate,
-      projectId: form.projectId === "none" ? "" : form.projectId,
+      projectId: "",
     });
     if (saved) onOpenChange(false);
   }
@@ -617,12 +628,12 @@ function TaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New Task</DialogTitle>
+          <DialogTitle>Create Task</DialogTitle>
           <DialogDescription>Create a task and add it to the Kanban board.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="task-title">Title</Label>
+            <Label htmlFor="task-title">Task Title</Label>
             <Input
               id="task-title"
               required
@@ -642,73 +653,44 @@ function TaskDialog({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="task-status">Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger id="task-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COLUMNS.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="task-priority">Priority</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
-                <SelectTrigger id="task-priority">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIORITIES.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {labelize(p)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="task-assignee">Assignee</Label>
-              <Input
-                id="task-assignee"
-                placeholder="Who owns this?"
-                value={form.assignee}
-                onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="task-due">Due Date</Label>
-              <Input
-                id="task-due"
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-              />
-            </div>
-          </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="task-project">Project</Label>
-            <Select value={form.projectId} onValueChange={(v) => setForm({ ...form, projectId: v })}>
-              <SelectTrigger id="task-project">
+            <Label htmlFor="task-priority">Priority</Label>
+            <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+              <SelectTrigger id="task-priority">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No project</SelectItem>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
+                {PRIORITIES.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {labelize(p)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="task-assignee">Assign To</Label>
+            <Select value={form.assignee} onValueChange={(v) => setForm({ ...form, assignee: v })}>
+              <SelectTrigger id="task-assignee">
+                <SelectValue placeholder="Select employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((e) => (
+                  <SelectItem key={e.id} value={e.name}>
+                    {e.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="task-due">Due Date</Label>
+            <Input
+              id="task-due"
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

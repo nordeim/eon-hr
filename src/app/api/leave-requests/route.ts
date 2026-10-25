@@ -15,6 +15,8 @@ const LeaveCreate = z.object({
   startDate: z.string().trim().min(1, "Start date is required"),
   endDate: z.string().trim().min(1, "End date is required"),
   reason: z.string().trim().max(500).optional().or(z.literal("")),
+  employeeId: z.string().optional().or(z.literal("")), // session92 R92-E: the REF's dialog Employee select (admin/hr may file for others)
+  attachmentName: z.string().trim().max(300).optional().or(z.literal("")), // session92 R92-E: the Supporting Document's name
 });
 
 const REQUEST_SELECT = {
@@ -46,10 +48,22 @@ export async function GET(req: NextRequest) {
       select: REQUEST_SELECT,
     });
 
-    const leaveTypes = await db.leaveType.findMany({
+    const leaveTypesRaw = await db.leaveType.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, quotaDays: true, color: true },
     });
+    // Session92 (R92-E): the REF's popper order — Annual, Sick, Personal,
+    // Emergency, Unpaid, Maternity, Paternity (live-read; NOT alphabetical).
+    const LEAVE_TYPE_ORDER = [
+      "Annual Leave", "Sick Leave", "Personal Leave", "Emergency Leave",
+      "Unpaid Leave", "Maternity Leave", "Paternity Leave",
+    ];
+    const leaveTypes = [
+      ...leaveTypesRaw
+        .filter((t) => LEAVE_TYPE_ORDER.includes(t.name))
+        .sort((a, b) => LEAVE_TYPE_ORDER.indexOf(a.name) - LEAVE_TYPE_ORDER.indexOf(b.name)),
+      ...leaveTypesRaw.filter((t) => !LEAVE_TYPE_ORDER.includes(t.name)),
+    ];
 
     let balances: {
       leaveTypeId: string;
@@ -79,12 +93,25 @@ export async function GET(req: NextRequest) {
       total: requests.length,
     };
 
+    // Session92 (R92-E): the REF's dialog Employee select (the all-requests
+    // surface; admin/hr may file for anyone, others file for themselves —
+    // the POST guards the role).
+    const employees = await db.employee.findMany({
+      orderBy: { createdAt: "asc" },
+      select: { id: true, firstName: true, lastName: true, employeeId: true },
+    });
+
     return ok({
       requests,
       stats: mine ? null : stats,
       canApprove: ["admin", "hr"].includes(user.role),
       leaveTypes,
       balances,
+      employees: employees.map((e) => ({
+        id: e.id,
+        name: [e.firstName, e.lastName].filter(Boolean).join(" ") || e.employeeId,
+        code: e.employeeId,
+      })),
     });
   });
 }
@@ -114,14 +141,27 @@ export async function POST(req: NextRequest) {
     const leaveType = await db.leaveType.findUnique({ where: { name: data.leaveTypeName } });
     if (!leaveType) return err("NOT_FOUND", "Leave type not found");
 
+    // Session92 (R92-E): the dialog's Employee select — admin/hr may file for
+    // another employee; everyone else files for their own profile.
+    let targetEmployeeId = user.employeeId;
+    if (data.employeeId && data.employeeId !== user.employeeId) {
+      if (user.role !== "admin" && user.role !== "hr" && user.role !== "manager") {
+        return err("FORBIDDEN", "You may only submit leave requests for yourself");
+      }
+      const target = await db.employee.findUnique({ where: { id: data.employeeId } });
+      if (!target) return err("NOT_FOUND", "Employee not found");
+      targetEmployeeId = target.id;
+    }
+
     const request = await db.leaveRequest.create({
       data: {
-        employeeId: user.employeeId,
+        employeeId: targetEmployeeId,
         leaveTypeId: leaveType.id,
         startDate: start,
         endDate: end,
         days: daysBetween(start, end),
         reason: data.reason || null,
+        attachmentName: data.attachmentName || null,
         status: "pending",
       },
       select: { id: true, days: true },

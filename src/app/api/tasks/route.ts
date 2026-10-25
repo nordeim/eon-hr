@@ -57,7 +57,7 @@ export async function GET() {
     const { user, response } = await requireUser();
     if (!user) return response;
 
-    const [tasks, projects] = await Promise.all([
+    const [tasks, projects, employees] = await Promise.all([
       db.task.findMany({
         // Session 28 (R27-B): position asc with the createdAt desc tiebreak —
         // untouched columns (all positions equal) keep the newest-first
@@ -85,8 +85,20 @@ export async function GET() {
           createdAt: true,
         },
       }),
+      // Session92 (R92-H): the REF's dialog Assign To employee select.
+      db.employee.findMany({
+        orderBy: { createdAt: "asc" },
+        select: { id: true, firstName: true, lastName: true, employeeId: true },
+      }),
     ]);
-    return ok({ tasks, projects });
+    return ok({
+      tasks,
+      projects,
+      employees: employees.map((e) => ({
+        id: e.id,
+        name: [e.firstName, e.lastName].filter(Boolean).join(" ") || e.employeeId,
+      })),
+    });
   });
 }
 
