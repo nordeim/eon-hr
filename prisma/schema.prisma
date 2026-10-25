@@ -331,6 +331,12 @@ model Candidate {
   cvUrl        String?
   cvText       String? // extracted text for AI scoring
   stage        String   @default("applied") // applied | interviewing | offer | hired | rejected
+  // Session 91 (R91-C): the REF's candidate contract — the Add Applicant
+  // dialog's Experience (years) + Source fields + the Cover Letter
+  // textarea (live-measured on the REF: 512×522, the seven labels).
+  experience   Int? // years
+  source       String? // direct | bayt | linkedin | facebook | referral | website
+  coverLetter  String?
   // Session 29 (R28-A): the within-stage ordering superset — the same
   // position-column pattern as Task (session 28 / R27-B). All existing
   // rows backfill to 0; the appliedAt desc tiebreak preserves the
@@ -538,11 +544,16 @@ model Asset {
 model StaffRequest {
   id          String   @id @default(cuid())
   userId      String
-  category    String   @default("general") // general | it | hr | facilities | finance | admin
+  category    String   @default("it") // finance | hr | it | operations | tools_equipment | other (session 91: the REF's live inventory)
   title       String
   description String?
   priority    String   @default("medium") // low | medium | high | urgent
-  status      String   @default("pending") // pending | in_progress | resolved | rejected
+  status      String   @default("pending") // pending | l1_approved | l2_approved | approved | rejected | completed (session 91: the REF's workflow vocabulary)
+  // Session 91 (R91-B): the REF's StaffRequest entity carries an amount
+  // field (its hrreports group-by + table column prove it live). Nullable —
+  // the REF's own New Request dialog is broken so no input surface exists
+  // to measure; the report renders "—" at null.
+  amount      Int?
   response    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

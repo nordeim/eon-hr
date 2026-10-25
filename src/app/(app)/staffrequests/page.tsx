@@ -52,23 +52,40 @@ interface StaffRequest {
   mine: boolean;
 }
 
+/* Session 91 (R91-A): the REF's live option inventories — the open-state
+ * read on the REF's filters (the r90-C discipline extended). The clone's
+ * General/Facilities/Admin categories and the In Progress/Resolved statuses
+ * were inventions outside the REF's vocabulary. */
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
-  { value: "general", label: "General" },
-  { value: "it", label: "IT" },
-  { value: "hr", label: "HR" },
-  { value: "facilities", label: "Facilities" },
   { value: "finance", label: "Finance" },
-  { value: "admin", label: "Admin" },
+  { value: "hr", label: "HR" },
+  { value: "it", label: "IT" },
+  { value: "operations", label: "Operations" },
+  { value: "tools_equipment", label: "Tools & Equipment" },
+  { value: "other", label: "Other" },
 ];
 
+/* The REF's two-level approval workflow — the L1 → L2 → Approved chain
+ * (the REF's own dialog is broken so the flow's UI is unverifiable; the
+ * vocabulary + the Start-advances/Respond-completes mapping keeps every
+ * reachable state inside the filter set — the coherence rule). */
 const STATUSES = [
   { value: "all", label: "All Status" },
   { value: "pending", label: "Pending" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "resolved", label: "Resolved" },
+  { value: "l1_approved", label: "L1 Approved" },
+  { value: "l2_approved", label: "L2 Approved" },
+  { value: "approved", label: "Approved" },
   { value: "rejected", label: "Rejected" },
+  { value: "completed", label: "Completed" },
 ];
+
+/* The approval chain the Start button advances through. */
+const NEXT_APPROVAL_STEP: Record<string, string> = {
+  pending: "l1_approved",
+  l1_approved: "l2_approved",
+  l2_approved: "approved",
+};
 
 const PRIORITIES = ["low", "medium", "high", "urgent"];
 
@@ -164,19 +181,24 @@ export default function StaffRequestsPage() {
   }
 
   async function onStart(request: StaffRequest) {
-    setBusy(request.id + "in_progress");
+    /* Session 91 (R91-A): the Start button ADVANCES the REF's approval
+     * chain (pending → L1 → L2 → Approved) — the old in_progress target
+     * fell outside the REF's filter vocabulary. */
+    const next = NEXT_APPROVAL_STEP[request.status];
+    if (!next) return;
+    setBusy(request.id + next);
     try {
       const res = await fetch(`/api/staff-requests?id=${request.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "in_progress", response: `Started working on "${request.title}".` }),
+        body: JSON.stringify({ status: next, response: `Approval advanced to "${next.replace(/_/g, " ").replace(/\b\w/, (c) => c.toUpperCase())}" for "${request.title}".` }),
       });
       const json = await res.json();
       if (!json.ok) {
         toast.toast({ title: "Update failed", description: json.error?.message, variant: "error" });
         return;
       }
-      toast.toast({ title: "Request in progress", variant: "success" });
+      toast.toast({ title: "Approval advanced", variant: "success" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -185,7 +207,7 @@ export default function StaffRequestsPage() {
     }
   }
 
-  async function onRespond(request: StaffRequest, respondStatus: "resolved" | "rejected", response: string) {
+  async function onRespond(request: StaffRequest, respondStatus: "completed" | "rejected", response: string) {
     setBusy(request.id + respondStatus);
     try {
       const res = await fetch(`/api/staff-requests?id=${request.id}`, {
@@ -199,9 +221,9 @@ export default function StaffRequestsPage() {
         return false;
       }
       toast.toast({
-        title: respondStatus === "resolved" ? "Request resolved" : "Request rejected",
+        title: respondStatus === "completed" ? "Request completed" : "Request rejected",
         description: `${request.requesterName} will see your response.`,
-        variant: respondStatus === "resolved" ? "success" : "info",
+        variant: respondStatus === "completed" ? "success" : "info",
       });
       setResponding(null);
       await load();
@@ -362,32 +384,32 @@ export default function StaffRequestsPage() {
                     <TableCell className="whitespace-nowrap text-muted-foreground">{timeAgo(request.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {request.status === "pending" ? (
+                        {NEXT_APPROVAL_STEP[request.status] ? (
                           <Button
                             size="iconSm"
                             variant="ghost"
-                            aria-label={`Start ${request.title}`}
-                            disabled={busy === request.id + "in_progress"}
+                            aria-label={`Advance ${request.title}`}
+                            disabled={busy === request.id + NEXT_APPROVAL_STEP[request.status]}
                             onClick={() => onStart(request)}
                           >
-                            {busy === request.id + "in_progress" ? (
+                            {busy === request.id + NEXT_APPROVAL_STEP[request.status] ? (
                               <Loader2 className="animate-spin" aria-hidden="true" />
                             ) : (
                               <Play aria-hidden="true" />
                             )}
                           </Button>
                         ) : null}
-                        {request.status === "pending" || request.status === "in_progress" ? (
+                        {request.status !== "completed" && request.status !== "rejected" ? (
                           <>
                             <Button
                               size="iconSm"
                               variant="ghost"
                               className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                              aria-label={`Resolve ${request.title}`}
-                              disabled={busy === request.id + "resolved"}
+                              aria-label={`Complete ${request.title}`}
+                              disabled={busy === request.id + "completed"}
                               onClick={() => setResponding(request)}
                             >
-                              {busy === request.id + "resolved" ? (
+                              {busy === request.id + "completed" ? (
                                 <Loader2 className="animate-spin" aria-hidden="true" />
                               ) : (
                                 <CheckCircle2 aria-hidden="true" />
@@ -446,13 +468,13 @@ function NewRequestDialog({
 }) {
   const [form, setForm] = React.useState({
     title: "",
-    category: "general",
+    category: "it",
     priority: "medium",
     description: "",
   });
 
   React.useEffect(() => {
-    if (open) setForm({ title: "", category: "general", priority: "medium", description: "" });
+    if (open) setForm({ title: "", category: "it", priority: "medium", description: "" });
   }, [open]);
 
   async function submit(e: React.FormEvent) {
@@ -538,15 +560,15 @@ function RespondDialog({
   request: StaffRequest | null;
   busy: string | null;
   onClose: () => void;
-  onRespond: (request: StaffRequest, status: "resolved" | "rejected", response: string) => Promise<boolean>;
+  onRespond: (request: StaffRequest, status: "completed" | "rejected", response: string) => Promise<boolean>;
 }) {
   const [response, setResponse] = React.useState("");
-  const [mode, setMode] = React.useState<"resolved" | "rejected">("resolved");
+  const [mode, setMode] = React.useState<"completed" | "rejected">("completed");
 
   React.useEffect(() => {
     if (request) {
       setResponse("");
-      setMode("resolved");
+      setMode("completed");
     }
   }, [request]);
 
@@ -571,12 +593,12 @@ function RespondDialog({
                 <Button
                   type="button"
                   size="sm"
-                  variant={mode === "resolved" ? "default" : "outline"}
-                  onClick={() => setMode("resolved")}
-                  aria-pressed={mode === "resolved"}
+                  variant={mode === "completed" ? "default" : "outline"}
+                  onClick={() => setMode("completed")}
+                  aria-pressed={mode === "completed"}
                 >
                   <CheckCircle2 aria-hidden="true" />
-                  Resolve
+                  Complete
                 </Button>
                 <Button
                   type="button"
@@ -598,7 +620,7 @@ function RespondDialog({
                 maxLength={2000}
                 rows={3}
                 placeholder={
-                  mode === "resolved"
+                  mode === "completed"
                     ? "e.g. Approved — new hardware arrives Monday"
                     : "e.g. Outside the budget for this quarter"
                 }
@@ -612,7 +634,7 @@ function RespondDialog({
               </Button>
               <Button type="submit" variant={mode === "rejected" ? "destructive" : "default"} disabled={busy === request.id + mode || response.trim().length === 0}>
                 {busy === request.id + mode ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
-                {mode === "resolved" ? "Resolve Request" : "Reject Request"}
+                {mode === "completed" ? "Complete Request" : "Reject Request"}
               </Button>
             </DialogFooter>
           </form>

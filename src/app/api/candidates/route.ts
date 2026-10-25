@@ -92,6 +92,11 @@ const CandidateInput = z.object({
   name: z.string().trim().min(1, "Candidate name is required").max(120),
   email: z.string().trim().email("Enter a valid email").optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
+  // Session 91 (R91-C): the REF's Add Applicant contract — Experience
+  // (years), Source (the six-value set), Cover Letter.
+  experience: z.coerce.number().int().min(0).max(60).optional().nullable(),
+  source: z.enum(["direct", "bayt", "linkedin", "facebook", "referral", "website"]).optional(),
+  coverLetter: z.string().trim().max(4000).optional().or(z.literal("")),
   cvText: z.string().min(1, "Paste the CV text to analyze").max(20_000).optional(),
   notes: z.string().trim().max(1000).optional().or(z.literal("")),
 });
@@ -171,6 +176,9 @@ export async function POST(req: NextRequest) {
         phone: data.phone || null,
         cvText: data.cvText ?? null,
         stage: "applied",
+        experience: data.experience ?? null,
+        source: data.source ?? null,
+        coverLetter: data.coverLetter || null,
         aiScore: aiScore ?? null,
         skillsMatch: skillsMatch ?? null,
         notes: data.notes || null,

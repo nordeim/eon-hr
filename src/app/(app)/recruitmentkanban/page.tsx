@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Plus, ChevronDown, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -65,6 +65,18 @@ const COLUMNS = [
   { stage: "rejected", label: "Rejected", chip: "bg-red-100 text-red-700", column: "rounded-lg border-2 bg-red-50 border-red-200 p-3 min-h-[400px]" },
 ];
 
+/* Session 91 (R91-C): the REF's Add Applicant Source options (live-read
+ * from the open select — Direct, Bayt, Linkedin, Facebook, Referral,
+ * Website — Bayt being the Saudi job board, the app's market). */
+const SOURCE_OPTIONS = [
+  { value: "direct", label: "Direct" },
+  { value: "bayt", label: "Bayt" },
+  { value: "linkedin", label: "Linkedin" },
+  { value: "facebook", label: "Facebook" },
+  { value: "referral", label: "Referral" },
+  { value: "website", label: "Website" },
+];
+
 function labelize(v: string): string {
   return v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -79,7 +91,15 @@ export default function RecruitmentKanbanPage() {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({ name: "", email: "", jobId: "", stage: "applied" });
+  const [form, setForm] = React.useState({
+    name: "",
+    email: "",
+    phone: "",
+    experience: "",
+    jobId: "",
+    source: "direct",
+    coverLetter: "",
+  });
   /* Session 28 (R27-A): the pipeline drag-drop superset. REF ships zero
      draggables on /recruitmentkanban (re-verified round 27) — the clone
      wires real HTML5 DnD onto the existing onMove stage PATCH. dragCandId
@@ -128,6 +148,11 @@ export default function RecruitmentKanbanPage() {
     if (!form.name.trim() || !form.jobId) return;
     setSaving(true);
     try {
+      /* Session 91 (R91-C): the REF's Add Applicant contract — the seven
+       * fields (Full Name, Email, Phone, Experience (years), Job Posting,
+       * Source, Cover Letter). New applicants land in the first column
+       * ("applied") — the REF's dialog carries NO Stage field (the old
+       * select was a clone invention). */
       const res = await fetch("/api/candidates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,6 +160,10 @@ export default function RecruitmentKanbanPage() {
           jobPostingId: form.jobId,
           name: form.name,
           email: form.email,
+          phone: form.phone,
+          experience: form.experience === "" ? null : Number(form.experience),
+          source: form.source,
+          coverLetter: form.coverLetter,
         }),
       });
       const json = await res.json();
@@ -142,18 +171,9 @@ export default function RecruitmentKanbanPage() {
         toast.toast({ title: "Failed to add applicant", description: json.error?.message, variant: "error" });
         return;
       }
-      // Server creates candidates in "applied"; move immediately if another
-      // stage was chosen in the dialog.
-      if (form.stage !== "applied") {
-        await fetch(`/api/candidates?id=${json.data.candidate.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stage: form.stage }),
-        });
-      }
       toast.toast({ title: "Applicant added", description: `${form.name} is in the pipeline.`, variant: "success" });
       setDialogOpen(false);
-      setForm({ name: "", email: "", jobId: "", stage: "applied" });
+      setForm({ name: "", email: "", phone: "", experience: "", jobId: "", source: "direct", coverLetter: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -487,8 +507,14 @@ export default function RecruitmentKanbanPage() {
             <DialogDescription>Add a candidate to the hiring pipeline.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onAddApplicant} className="flex flex-col gap-4">
+            {/* Session 91 (R91-C): the REF's Add Applicant field contract —
+                live-measured on the REF (512×522): Full Name *, Email *,
+                Phone, Experience (years), Job Posting, Source, Cover
+                Letter. The old Stage select was a clone invention (the
+                REF's dialog has no stage field — new applicants land in
+                the first column). */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ka-name">Full Name</Label>
+              <Label htmlFor="ka-name">Full Name *</Label>
               <Input
                 id="ka-name"
                 required
@@ -498,10 +524,11 @@ export default function RecruitmentKanbanPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ka-email">Email (optional)</Label>
+              <Label htmlFor="ka-email">Email *</Label>
               <Input
                 id="ka-email"
                 type="email"
+                required
                 placeholder="name@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -509,7 +536,30 @@ export default function RecruitmentKanbanPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="ka-job">Job</Label>
+                <Label htmlFor="ka-phone">Phone</Label>
+                <Input
+                  id="ka-phone"
+                  placeholder="+966 5X XXX XXXX"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ka-experience">Experience (years)</Label>
+                <Input
+                  id="ka-experience"
+                  type="number"
+                  min={0}
+                  max={60}
+                  placeholder="e.g. 5"
+                  value={form.experience}
+                  onChange={(e) => setForm({ ...form, experience: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ka-job">Job Posting</Label>
                 <Select value={form.jobId} onValueChange={(v) => setForm({ ...form, jobId: v })}>
                   <SelectTrigger id="ka-job">
                     <SelectValue placeholder="Select job" />
@@ -524,20 +574,31 @@ export default function RecruitmentKanbanPage() {
                 </Select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="ka-stage">Stage</Label>
-                <Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: v })}>
-                  <SelectTrigger id="ka-stage">
+                <Label htmlFor="ka-source">Source</Label>
+                <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
+                  <SelectTrigger id="ka-source">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {COLUMNS.map((c) => (
-                      <SelectItem key={c.stage} value={c.stage}>
-                        {c.label}
+                    {SOURCE_OPTIONS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="ka-cover">Cover Letter</Label>
+              <Textarea
+                id="ka-cover"
+                rows={4}
+                maxLength={4000}
+                placeholder="Tell us why you're a great fit"
+                value={form.coverLetter}
+                onChange={(e) => setForm({ ...form, coverLetter: e.target.value })}
+              />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>

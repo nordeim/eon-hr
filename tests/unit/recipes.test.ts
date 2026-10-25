@@ -1943,8 +1943,10 @@ describe("session-23 scroll-dimension recipes (parity round 22 — the scroll di
   });
 
   it("R22-E: the hrreports table th is the compact uppercase recipe with lowercase DOM texts + a header-only table at 0 records (REF: 33px th, no empty state — card 139px)", () => {
-    // the lowercase DOM texts live in the TABLE_HEADERS const (the CSV export keeps the uppercase literals)
-    expect(hrreportsPage).toContain('const TABLE_HEADERS = ["full name", "job title", "department id", "employment status", "employment type", "start date"]');
+    /* Session 91 (R91-B) amendment: the headers moved into the per-entity
+       contract (the REF's four-entity builder) — the employees' row keeps
+       the same lowercase texts the pin was written against. */
+    expect(hrreportsPage).toContain('headers: ["full name", "job title", "department id", "employment status", "employment type", "start date"]');
     const tableIdx = hrreportsPage.indexOf("<TableHead");
     expect(tableIdx).toBeGreaterThan(-1);
     const tableBlock = hrreportsPage.slice(tableIdx, tableIdx + 500);
@@ -7323,5 +7325,121 @@ describe("session 90 — the select family (R90-A/R90-B/R90-C)", () => {
   it("R90-C2: the assetmanagement status select offers Returned + Pending Return (the REF's five)", () => {
     const src = read("src", "app", "(app)", "assetmanagement", "page.tsx");
     expect(src).toContain('["all", "available", "assigned", "returned", "pending_return"]');
+  });
+});
+
+// ============================================================ session 91
+
+describe("session 91 — the open-state inventory round (R91-A/B/C)", () => {
+  const staffrequests = read("src", "app", "(app)", "staffrequests", "page.tsx");
+  const hrreports = read("src", "app", "(app)", "hrreports", "page.tsx");
+  const hrReportsApi = read("src", "app", "api", "hr-reports", "route.ts");
+  const recruitment = read("src", "app", "(app)", "recruitment", "page.tsx");
+  const kanban = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+  const schema = read("prisma", "schema.prisma");
+  const badge = read("src", "components", "shared", "status-badge.tsx");
+
+  it("R91-A1: staffrequests categories are the REF's seven (the open-state read)", () => {
+    expect(staffrequests).toContain('value: "finance", label: "Finance"');
+    expect(staffrequests).toContain('value: "operations", label: "Operations"');
+    expect(staffrequests).toContain('value: "tools_equipment", label: "Tools & Equipment"');
+    expect(staffrequests).toContain('value: "other", label: "Other"');
+    expect(staffrequests).not.toContain('value: "general"');
+    expect(staffrequests).not.toContain('value: "facilities"');
+    expect(staffrequests).not.toContain('value: "admin"');
+  });
+
+  it("R91-A2: staffrequests statuses are the REF's two-level approval workflow", () => {
+    expect(staffrequests).toContain('value: "l1_approved", label: "L1 Approved"');
+    expect(staffrequests).toContain('value: "l2_approved", label: "L2 Approved"');
+    expect(staffrequests).toContain('value: "completed", label: "Completed"');
+    expect(staffrequests).not.toContain('value: "in_progress"');
+    expect(staffrequests).not.toContain('value: "resolved"');
+    // the approval chain the Start button advances through
+    expect(staffrequests).toContain('pending: "l1_approved"');
+    expect(staffrequests).toContain('l1_approved: "l2_approved"');
+    expect(staffrequests).toContain('l2_approved: "approved"');
+  });
+
+  it("R91-A3: the StatusBadge map carries the two new approval members", () => {
+    expect(badge).toContain('l1_approved: { label: "L1 Approved", variant: "info" }');
+    expect(badge).toContain('l2_approved: { label: "L2 Approved", variant: "purple" }');
+  });
+
+  it("R91-B1: hrreports offers the REF's four report entities", () => {
+    expect(hrreports).toContain('{ value: "employees", label: "Employees" }');
+    expect(hrreports).toContain('{ value: "staff-requests", label: "Staff Requests" }');
+    expect(hrreports).toContain('{ value: "expense-claims", label: "Expense Claims" }');
+    expect(hrreports).toContain('{ value: "leave-requests", label: "Leave Requests" }');
+  });
+
+  it("R91-B2: the entity-dependent group-by sets match the REF's live reads", () => {
+    expect(hrreports).toContain('{ value: "job_title", label: "job title" }');
+    expect(hrreports).toContain('{ value: "department_id", label: "department id" }');
+    expect(hrreports).toContain('{ value: "start_date", label: "start date" }');
+    expect(hrreports).toContain('{ value: "created_date", label: "created date" }');
+    expect(hrreports).toContain('{ value: "expense_type", label: "expense type" }');
+    expect(hrreports).toContain('{ value: "leave_type", label: "leave type" }');
+    expect(hrreports).toContain('{ value: "end_date", label: "end date" }');
+  });
+
+  it("R91-B3: the status union is the REF's constant six + the Bar/Line/Pie order", () => {
+    expect(hrreports).toContain('["all", "pending", "approved", "rejected", "active", "completed"]');
+    const bar = hrreports.indexOf('{ value: "bar", label: "Bar Chart" }');
+    const line = hrreports.indexOf('{ value: "line", label: "Line Chart" }');
+    const pie = hrreports.indexOf('{ value: "pie", label: "Pie Chart" }');
+    expect(bar).toBeGreaterThan(-1);
+    expect(line).toBeGreaterThan(bar);
+    expect(pie).toBeGreaterThan(line);
+  });
+
+  it("R91-B4: the group-by carries a still-valid selection across entity switches (the carry-if-valid rule)", () => {
+    expect(hrreports).toContain("stillValid");
+    expect(hrreports).toContain('setGroupBy("")');
+  });
+
+  it("R91-B5: the report RUNS only when a group is chosen (the 0/0/0 initial state)", () => {
+    expect(hrReportsApi).toContain("hasGroup");
+    expect(hrReportsApi).toMatch(/stats: \{ totalRecords: 0, uniqueGroups: 0, activeCount: 0 \}/);
+  });
+
+  it("R91-C1: the recruitment status filter is the REF's seven raw lowercase values", () => {
+    expect(recruitment).toContain('"new",');
+    expect(recruitment).toContain('"reviewed",');
+    expect(recruitment).toContain('"shortlisted",');
+    expect(recruitment).toContain('"interview scheduled",');
+    expect(recruitment).toContain('"offered",');
+    // the stage→status mapping predicate
+    expect(recruitment).toContain('applied: "new"');
+    expect(recruitment).toContain('interviewing: "interview scheduled"');
+    expect(recruitment).toContain('offer: "offered"');
+  });
+
+  it("R91-C2: the recruitment sort offers the REF's three modes", () => {
+    expect(recruitment).toContain('{ value: "appliedAt", label: "Application Date" }');
+    expect(recruitment).toContain('{ value: "experience", label: "Experience" }');
+  });
+
+  it("R91-C3: the Add Applicant dialog is the REF's seven-field contract (no Stage field)", () => {
+    expect(kanban).toContain('Full Name *</Label>');
+    expect(kanban).toContain('Email *</Label>');
+    expect(kanban).toContain('Phone</Label>');
+    expect(kanban).toContain('Experience (years)</Label>');
+    expect(kanban).toContain('Job Posting</Label>');
+    expect(kanban).toContain('Source</Label>');
+    expect(kanban).toContain('Cover Letter</Label>');
+    expect(kanban).not.toContain('ka-stage');
+    expect(kanban).toContain('{ value: "bayt", label: "Bayt" }');
+    expect(kanban).toContain('{ value: "referral", label: "Referral" }');
+  });
+
+  it("R91-C4: the Candidate schema carries the REF's experience/source/coverLetter fields", () => {
+    expect(schema).toContain("experience   Int? // years");
+    expect(schema).toMatch(/source\s+String\? \/\/ direct \| bayt \| linkedin \| facebook \| referral \| website/);
+    expect(schema).toContain("coverLetter  String?");
+  });
+
+  it("R91-B6: the StaffRequest schema carries the REF's amount field", () => {
+    expect(schema).toContain("amount      Int?");
   });
 });

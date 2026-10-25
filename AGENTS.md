@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 944 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 494 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 963 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 512 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -5706,3 +5706,26 @@ Gates: lint 0/0 · tsc ✓ · 941/941 unit · build ✓ · **E2E 494/494** (the 
 **The verification:** the cross-side sheet comparison reads IDENTICAL recipes both sides (the sheet y=262 h=582; the handle; the h2; the list classes; 12 options both sides; the selected blue-50 + the Check) · the RTL mobile re-capture: assetmanagement **6 hot/max245 → 2 hot/max11 (MINOR — the chevron now mirrors)** · the mobile-menu cycle GREEN on the remediated build (open → Training LMS → /training → the auto-close superset) · **Gates: lint 0/0 · tsc ✓ · 950/950 unit · build ✓ 116/116 · E2E 501/501** (the 494 standing + the 7 session90 pins, 8.8m, zero flakes) · DB pristine · `.env.example` re-verified · **the evidence chain 1453-1467 (10 PNGs) → 1615 tracked PNGs**. The plan: `docs/remediation-plan-session90.md`; the narrative: `docs/session_208.md`; the SKILL §102 (v3.77.0).
 
 **The r91 queue:** the dropdown-menu family's responsive-swap question (the select was verified this round; the dropdowns were not), the other pages' option inventories cross-side (the open-state read), the dark-band data residuals' re-reads, the recharts-version grid class (the standing watch), the 60th-or-newer login ladder (the re-armed watch).
+
+## Session 91 / Parity Round 90 — the open-state inventory round (v3.78.0)
+
+**The frontier:** the r90 close-out's queue — the dropdown-menu family's responsive question + the other pages' option inventories (the open-state read generalized from r90's assetmanagement probe to the whole filtered surface) + the standing watches.
+
+**THE OPENING READ:** the **61ST LOGIN DEPLOY detected** (login JS `index-CrrEG27W` → `index-34zv7ZR0`; CSS + app QUIET) → the full standing ladder GREEN: the fresh login pair **BYTE-IDENTICAL** (`69aa4241efa1` — the 61st NON-VISUAL) + standing 5/5 + sweep 12/12 + verify-r49 13/13 + verify-r45 13/13 + Turnstile 0 · the experiment probe (`tagline`, two fresh visitors).
+
+**THE DROPDOWN-MENU FAMILY'S RESPONSIVE QUESTION — ANSWERED: NO SWAP (the classification finding).** The user menu probed cross-side at 390×844 through the drawer: the REF opens the STANDARD Radix popper (x=79 y=714 w=192 h=74, `dir="ltr"`, the shadcn recipe, "My Profile"/"Logout") — the LOC IDENTICAL. The r90-B bottom-sheet swap is select-family-only. Pinned R91-D1 (the guard). **The probe's traps:** the Radix dropdown opens on POINTERDOWN (synthetic clicks fail silently on menu triggers — the native CDP click via the snapshot `@ref` refs required) · agent-browser 0.39's XPath selectors broken (`//button` → "Element not found" — the snapshot-ref path is the working form) · the EAGAIN daemon bounce (the cleanup + re-auth protocol).
+
+**THE SYSTEMATIC INVENTORY SWEEP (both sides, every combobox opened + read):** attendance + compliancedashboard AT PARITY · the loans dialog CLOSED at parity (the 4 loan types + the 672×698 geometry + the seven labels identical) · the recruitment job filter = the documented data-volume class (the REF's 3-job tenant vs the clone's jobless seed).
+
+**THE THREE DEFECTS, ALL TDD-FIXED (RED 10/10 as designed → GREEN 12/12):**
+- **R91-A the staffrequests option inventories** — the REF's CATEGORY seven (All/Finance/HR/IT/Operations/Tools & Equipment/Other vs the clone's General/Facilities/Admin inventions) + the STATUS workflow seven (Pending/L1 Approved/L2 Approved/Approved/Rejected/Completed vs the clone's In Progress/Resolved) + the vocabulary coherence fix (the Start button advances pending→l1_approved→l2_approved→approved; the Respond dialog completes/rejects — every reachable state inside the filter set) + the API PATCH enum + the Zod category enum + the StatusBadge l1/l2 members.
+- **R91-B the hrreports FOUR-ENTITY report builder** (the round's biggest member) — the REF reports over Employees/Staff Requests/Expense Claims/Leave Requests with entity-dependent group-bys + table headers (the live-read contract table), the constant 6-value status union (per-entity matching; out-of-vocabulary values match nothing), the Bar/Line/Pie order, the carry-if-valid groupBy, and the run-only-when-grouped contract (the 0/0/0 initial state the old API achieved by accidental validation-rejection — restored explicitly). The StaffRequest schema gained `amount Int?` (the REF's entity field, proven by its group-by + table column; nullable — the REF's own dialog is broken so no input surface).
+- **R91-C the recruitment inventories + the Add Applicant contract** — the table filter's 7 RAW lowercase statuses (new/reviewed/shortlisted/interview scheduled/offered/hired/rejected — the REF's separate pipeline vocabulary vs the kanban's 5-stage `stage` field) + the stage→status mapping predicate + the 3-mode sort (AI Score/Application Date/Experience) + the Add Applicant dialog rebuilt to the REF's seven fields (Full Name*/Email*/Phone/Experience (years)/Job Posting/Source/Cover Letter — the Source set Direct/Bayt/Linkedin/Facebook/Referral/Website; the clone's Stage select was an invention — new applicants land in "applied") + the Candidate schema's experience/source/coverLetter fields.
+
+**THE REF-BROKEN FINDING:** the REF's staffrequests New Request dialog mounts then instantly closes (its open path's `Error creating audit log: 403` — the REF's own backend denies the audit write). The dialog's interior is unverifiable on the REF; the FILTER sets are the ground truth; the clone's working dialog stays the functional superset.
+
+**The verification:** the live post-fix re-read (all three surfaces' option sets matching the REF verbatim + the entity-switch headers + the mobile sheet on the new selects + the mobile-menu cycle GREEN) · **the evidence chain 1469-1483** (8 PNGs) → **1623 tracked PNGs**.
+
+Gates: lint 0/0 · tsc ✓ · **963/963 unit** (950 + 13 R91 pins) · build ✓ 116/116 · **E2E 512/512** (the 501 standing + the 11 new, 9.4m, zero flakes — after the two GREEN-phase regressions retired: the R88-E1 grid-only form + the R61-A 0/0/0 stats, both riding the run-only-when-grouped contract) · DB pristine.
+
+**The r92 queue:** the remaining unopened surfaces (the dialogs' interior selects beyond loans — the requestsettings approver chain, the workflowautomation forms), the seed-data parity question (the REF's 3-job tenant vs the clone's jobless seed — the data-volume class, a scoped decision), the dark-band data residuals, the recharts grid class (the standing watch), the 61st-or-newer login ladder (re-armed).

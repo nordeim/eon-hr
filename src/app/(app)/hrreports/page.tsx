@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,18 +23,20 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
-import { formatDate } from "@/lib/utils";
 import { ReportChart, type GroupPoint, type ReportChartType } from "./charts";
 
+/* Session 91 (R91-B): the REF's FOUR-ENTITY report builder — the open-state
+ * read on the REF's selects found Employees / Staff Requests / Expense
+ * Claims / Leave Requests with entity-dependent group-by fields + table
+ * columns, the constant 6-value status union (All, Pending, Approved,
+ * Rejected, Active, Completed — per-entity matching; values outside an
+ * entity's vocabulary match nothing), and the Bar/Line/Pie chart order.
+ * The group-by trigger CARRIES a still-valid selection across entity
+ * switches (live-observed: "status" survived employees → staff-requests). */
+
 interface ReportRecord {
-  fullName: string;
-  jobTitle: string | null;
-  department: string | null;
-  employmentStatus: string;
-  employmentType: string;
-  startDate: string | null;
+  cells: (string | null)[];
 }
 
 interface ReportResponse {
@@ -43,19 +45,66 @@ interface ReportResponse {
   records: ReportRecord[];
 }
 
-const GROUP_OPTIONS = [
-  { value: "status", label: "Status" },
-  { value: "department", label: "Department" },
-  { value: "type", label: "Type" },
-] as const;
+type SourceKey = "employees" | "staff-requests" | "expense-claims" | "leave-requests";
+
+const SOURCE_OPTIONS: { value: SourceKey; label: string }[] = [
+  { value: "employees", label: "Employees" },
+  { value: "staff-requests", label: "Staff Requests" },
+  { value: "expense-claims", label: "Expense Claims" },
+  { value: "leave-requests", label: "Leave Requests" },
+];
+
+/** The per-entity contract — the REF's live group-by fields + table headers
+ * (read from the open selects; the lowercase labels verbatim). */
+const ENTITY_CONTRACT: Record<SourceKey, { groups: { value: string; label: string }[]; headers: string[] }> = {
+  employees: {
+    groups: [
+      { value: "job_title", label: "job title" },
+      { value: "department_id", label: "department id" },
+      { value: "employment_status", label: "employment status" },
+      { value: "employment_type", label: "employment type" },
+      { value: "start_date", label: "start date" },
+    ],
+    headers: ["full name", "job title", "department id", "employment status", "employment type", "start date"],
+  },
+  "staff-requests": {
+    groups: [
+      { value: "category", label: "category" },
+      { value: "status", label: "status" },
+      { value: "priority", label: "priority" },
+      { value: "amount", label: "amount" },
+      { value: "created_date", label: "created date" },
+    ],
+    headers: ["employee name", "category", "status", "priority", "amount", "created date"],
+  },
+  "expense-claims": {
+    groups: [
+      { value: "expense_type", label: "expense type" },
+      { value: "amount", label: "amount" },
+      { value: "status", label: "status" },
+      { value: "date", label: "date" },
+    ],
+    headers: ["employee name", "expense type", "amount", "status", "date"],
+  },
+  "leave-requests": {
+    groups: [
+      { value: "leave_type", label: "leave type" },
+      { value: "status", label: "status" },
+      { value: "start_date", label: "start date" },
+      { value: "end_date", label: "end date" },
+    ],
+    headers: ["employee name", "leave type", "status", "start date", "end date"],
+  },
+};
 
 const CHART_OPTIONS = [
   { value: "bar", label: "Bar Chart" },
-  { value: "pie", label: "Pie Chart" },
   { value: "line", label: "Line Chart" },
+  { value: "pie", label: "Pie Chart" },
 ] as const;
 
-const STATUS_OPTIONS = ["all", "active", "on_leave", "suspended", "terminated"] as const;
+/* Session 91: the REF's constant status union across ALL entities. */
+const STATUS_OPTIONS = ["all", "pending", "approved", "rejected", "active", "completed"] as const;
 
 function labelize(v: string): string {
   return v === "all" ? "All" : v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -65,7 +114,7 @@ function escapeCsv(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
-function downloadCsv(filename: string, rows: (string | number | null)[][]): void {
+function downloadCsv(filename: string, rows: string[][]) {
   const csv = rows.map((row) => row.map((cell) => escapeCsv(String(cell ?? ""))).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -78,31 +127,9 @@ function downloadCsv(filename: string, rows: (string | number | null)[][]): void
   URL.revokeObjectURL(url);
 }
 
-const CSV_HEADERS = ["FULL NAME", "JOB TITLE", "DEPARTMENT ID", "EMPLOYMENT STATUS", "EMPLOYMENT TYPE", "START DATE"];
-
-// Session 23 (R22-E): the table renders REF's compact recipe — lowercase DOM
-// texts uppercased by CSS (`px-3 py-2 text-left text-xs font-semibold
-// text-slate-600 uppercase`, 33px th). The CSV export keeps the uppercase
-// literals (file format).
-const TABLE_HEADERS = ["full name", "job title", "department id", "employment status", "employment type", "start date"];
-
-function recordsToCsv(records: ReportRecord[]): (string | number | null)[][] {
-  return [
-    CSV_HEADERS,
-    ...records.map((r) => [
-      r.fullName,
-      r.jobTitle,
-      r.department,
-      r.employmentStatus,
-      r.employmentType,
-      r.startDate ? r.startDate.slice(0, 10) : null,
-    ]),
-  ];
-}
-
 export default function HRReportsPage() {
   const toast = useToast();
-  const [source, setSource] = React.useState("employees");
+  const [source, setSource] = React.useState<SourceKey>("employees");
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
   // Session 14 (R13-L): the reference's Group By trigger renders EMPTY
@@ -113,6 +140,20 @@ export default function HRReportsPage() {
 
   const [data, setData] = React.useState<ReportResponse | null>(null);
   const [loading, setLoading] = React.useState(true);
+
+  /* Session 91: the carry-if-valid rule — an entity switch keeps the
+   * groupBy when the new entity's field set still contains it, else
+   * resets to "" (live-observed: "status" survived the employees →
+   * staff-requests switch on the REF). */
+  function switchSource(next: SourceKey) {
+    setSource((prev) => {
+      if (prev !== next) {
+        const stillValid = ENTITY_CONTRACT[next].groups.some((g) => g.value === groupBy);
+        if (!stillValid) setGroupBy("");
+      }
+      return next;
+    });
+  }
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -141,12 +182,15 @@ export default function HRReportsPage() {
     return () => window.clearTimeout(t);
   }, [load]);
 
+  const contract = ENTITY_CONTRACT[source];
+
   function exportCsv() {
     if (!data || data.records.length === 0) {
       toast.toast({ title: "Nothing to export", description: "No records match the current filters.", variant: "info" });
       return;
     }
-    downloadCsv("hr-report.csv", recordsToCsv(data.records));
+    const headers = contract.headers.map((h) => h.toUpperCase());
+    downloadCsv("hr-report.csv", [headers, ...data.records.map((r) => r.cells.map((c) => c ?? ""))]);
     toast.toast({
       title: "Export ready",
       description: `${data.records.length} records exported to CSV.`,
@@ -155,7 +199,8 @@ export default function HRReportsPage() {
   }
 
   const stats = data?.stats ?? { totalRecords: 0, uniqueGroups: 0, activeCount: 0 };
-  const groupLabel = GROUP_OPTIONS.find((g) => g.value === groupBy)?.label ?? "Status";
+  const groupLabel = contract.groups.find((g) => g.value === groupBy)?.label ?? "Status";
+  const entityLabel = SOURCE_OPTIONS.find((s) => s.value === source)?.label ?? "Employees";
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -192,20 +237,22 @@ export default function HRReportsPage() {
           field divs (no flex wrapper — the inline label + newline
           whitespace replicate the REF's 64px line-box stacking),
           `text-xs text-slate-500 font-medium` labels, mt-1 controls.
-          Card 106px tall. Our Status Filter rides as the sixth column —
-          a documented superset that fills the row without growing the
-          card. */}
+          Card 106px tall. */}
       <Card>
         <CardContent className="p-5">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
               <Label htmlFor="hr-source" className="text-xs text-slate-500">Data Source</Label>
-              <Select value={source} onValueChange={setSource}>
+              <Select value={source} onValueChange={(v) => switchSource(v as SourceKey)}>
                 <SelectTrigger id="hr-source" className="mt-1 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="employees">Employees</SelectItem>
+                  {SOURCE_OPTIONS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -235,7 +282,7 @@ export default function HRReportsPage() {
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  {GROUP_OPTIONS.map((g) => (
+                  {contract.groups.map((g) => (
                     <SelectItem key={g.value} value={g.value}>
                       {g.label}
                     </SelectItem>
@@ -288,7 +335,7 @@ export default function HRReportsPage() {
           description) and the chart renders unconditionally (320px). */}
       <Card>
         <div className="flex flex-col space-y-1.5 p-6">
-          <div className="font-semibold tracking-tight text-base">{`Employees by ${groupLabel.toLowerCase()}`}</div>
+          <div className="font-semibold tracking-tight text-base">{`${entityLabel} by ${groupBy ? groupLabel : "status"}`}</div>
         </div>
         <CardContent className="p-6 pt-0">
           <ReportChart data={data?.groups ?? []} type={chartType} />
@@ -318,13 +365,14 @@ export default function HRReportsPage() {
           ) : (
             /* Session 23 (R22-E): at 0 records REF renders the HEADER ROW
                ONLY — no empty state, no empty row (card 139px measured).
-               The table always renders; the body is empty without records. */
+               The table always renders; the body is empty without records.
+               Session 91: the headers + rows are the ENTITY's contract. */
             <Table>
               <TableHeader>
                 {/* R56-D: REF's thead row — border-b bg-slate-50 (computed
                     rgb(248,250,252), 33px, inert: no hover tint). */}
                 <tr className="border-b bg-slate-50">
-                  {TABLE_HEADERS.map((header) => (
+                  {contract.headers.map((header) => (
                     <TableHead key={header} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase">
                       {header}
                     </TableHead>
@@ -333,17 +381,12 @@ export default function HRReportsPage() {
               </TableHeader>
               <TableBody>
                 {data?.records.map((r, i) => (
-                  <TableRow key={`${r.fullName}-${i}`}>
-                    <TableCell className="font-medium text-foreground">{r.fullName}</TableCell>
-                    <TableCell className="text-muted-foreground">{r.jobTitle ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{r.department ?? "—"}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={r.employmentStatus} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={r.employmentType} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(r.startDate)}</TableCell>
+                  <TableRow key={`${r.cells[0] ?? "row"}-${i}`}>
+                    {r.cells.map((cell, j) => (
+                      <TableCell key={j} className={j === 0 ? "font-medium text-foreground" : "text-muted-foreground"}>
+                        {cell ?? "—"}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))}
               </TableBody>

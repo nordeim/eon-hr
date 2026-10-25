@@ -61,7 +61,9 @@ export const ExpenseInput = z.object({
 });
 
 export const StaffRequestInput = z.object({
-  category: z.enum(["general", "it", "hr", "facilities", "finance", "admin"]).default("general"),
+  // Session 91 (R91-A): the REF's live category inventory (the open-state
+  // read on the REF's filter — General/Facilities/Admin were inventions).
+  category: z.enum(["finance", "hr", "it", "operations", "tools_equipment", "other"]).default("it"),
   title: z.string().trim().min(1, "Title is required").max(140),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),

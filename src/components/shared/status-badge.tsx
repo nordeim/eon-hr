@@ -14,6 +14,9 @@ const STATUS_MAP: Record<string, { label: string; variant: "success" | "warning"
   cancelled: { label: "Cancelled", variant: "secondary" },
   draft: { label: "Draft", variant: "secondary" },
   in_progress: { label: "In Progress", variant: "info" },
+  // staff requests (session 91: the REF's two-level approval workflow)
+  l1_approved: { label: "L1 Approved", variant: "info" },
+  l2_approved: { label: "L2 Approved", variant: "purple" },
   // employees
   on_leave: { label: "On Leave", variant: "warning" },
   suspended: { label: "Suspended", variant: "destructive" },

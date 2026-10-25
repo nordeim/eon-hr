@@ -68,6 +68,8 @@ interface CandidateRow {
   email: string | null;
   phone: string | null;
   stage: string;
+  experience: number | null;
+  source: string | null;
   aiScore: number | null;
   skillsMatch: number | null;
   notes: string | null;
@@ -77,6 +79,39 @@ interface CandidateRow {
 
 const STAGES = ["applied", "interviewing", "offer", "hired", "rejected"];
 const TYPE_OPTIONS = ["full_time", "part_time", "contract", "intern"];
+
+/* Session 91 (R91-C): the REF's table-filter STATUS vocabulary — the 7
+ * lowercase raw values live-read from the REF's open filter (its kanban
+ * uses the 5-stage `stage` field; the table filter uses this separate
+ * pipeline vocabulary). The stage→status mapping predicate keeps the
+ * clone's 5-stage pipeline filterable through the REF's set (reviewed /
+ * shortlisted have no clone stage — they match nothing, the same effective
+ * behavior as the REF's zero-candidate data). */
+const CANDIDATE_STATUSES = [
+  "new",
+  "reviewed",
+  "shortlisted",
+  "interview scheduled",
+  "offered",
+  "hired",
+  "rejected",
+] as const;
+
+const STAGE_TO_STATUS: Record<string, string> = {
+  applied: "new",
+  interviewing: "interview scheduled",
+  offer: "offered",
+  hired: "hired",
+  rejected: "rejected",
+};
+
+/* The REF's three sort modes (live-read: AI Score, Application Date,
+ * Experience). */
+const SORT_OPTIONS = [
+  { value: "default", label: "AI Score" },
+  { value: "appliedAt", label: "Application Date" },
+  { value: "experience", label: "Experience" },
+] as const;
 
 function labelize(v: string): string {
   return v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -144,10 +179,14 @@ export default function RecruitmentPage() {
     let list = candidates.filter(
       (c) =>
         (jobFilter === "all" || c.jobPostingId === jobFilter) &&
-        (statusFilter === "all" || c.stage === statusFilter)
+        (statusFilter === "all" || (STAGE_TO_STATUS[c.stage] ?? c.stage) === statusFilter)
     );
     if (scoreSort === "aiScore") {
       list = [...list].sort((a, b) => (b.aiScore ?? -1) - (a.aiScore ?? -1));
+    } else if (scoreSort === "appliedAt") {
+      list = [...list].sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
+    } else if (scoreSort === "experience") {
+      list = [...list].sort((a, b) => (b.experience ?? -1) - (a.experience ?? -1));
     }
     return list;
   }, [candidates, jobFilter, statusFilter, scoreSort]);
@@ -383,20 +422,26 @@ export default function RecruitmentPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                {STAGES.map((s) => (
+                {/* Session 91 (R91-C): the REF's raw seven — the lowercase
+                    values verbatim (live-read from the REF's open filter). */}
+                {CANDIDATE_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {labelize(s)}
+                    {s}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={scoreSort} onValueChange={setScoreSort}>
-              <SelectTrigger className="w-40" aria-label="Sort by AI score">
+              <SelectTrigger className="w-40" aria-label="Sort candidates">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">AI Score</SelectItem>
-                <SelectItem value="aiScore">AI Score: High to Low</SelectItem>
+                {/* Session 91 (R91-C): the REF's three sort modes. */}
+                {SORT_OPTIONS.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <span className="text-sm text-slate-500 ml-auto">

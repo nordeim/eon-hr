@@ -7,7 +7,14 @@ import { StaffRequestInput } from "@/lib/validation";
 // Staff requests across departments — submit, track, resolve/reject.
 
 const PatchInput = z.object({
-  status: z.enum(["in_progress", "resolved", "rejected"], { message: "Invalid status transition" }),
+  // Session 91 (R91-A): the REF's workflow vocabulary — the approval chain
+  // (l1/l2/approved), the terminal completed, and rejected. The clone's old
+  // in_progress/resolved pair fell OUTSIDE the REF's filter set (a request
+  // in those states was invisible to every filter except All Status).
+  status: z.enum(
+    ["l1_approved", "l2_approved", "approved", "completed", "rejected"],
+    { message: "Invalid status transition" },
+  ),
   response: z
     .string()
     .trim()
@@ -88,7 +95,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// PATCH /api/staff-requests?id= — start / resolve / reject with a response message
+// PATCH /api/staff-requests?id= — advance the approval chain / complete / reject with a response message
 export async function PATCH(req: NextRequest) {
   return guard(async () => {
     const { user, response } = await requireRole(["admin", "hr", "manager"]);
