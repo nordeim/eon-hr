@@ -501,10 +501,12 @@ export default function RecruitmentKanbanPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {/* Session 93 (R93-G): the REF's BARE form (512×522, live-read) —
+            NO description under the title, NO input placeholders, the
+            Cover Letter textarea at THREE rows. */}
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Applicant</DialogTitle>
-            <DialogDescription>Add a candidate to the hiring pipeline.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onAddApplicant} className="flex flex-col gap-4">
             {/* Session 91 (R91-C): the REF's Add Applicant field contract —
@@ -518,7 +520,6 @@ export default function RecruitmentKanbanPage() {
               <Input
                 id="ka-name"
                 required
-                placeholder="e.g. Sara Almutairi"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
@@ -529,7 +530,6 @@ export default function RecruitmentKanbanPage() {
                 id="ka-email"
                 type="email"
                 required
-                placeholder="name@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
@@ -539,7 +539,6 @@ export default function RecruitmentKanbanPage() {
                 <Label htmlFor="ka-phone">Phone</Label>
                 <Input
                   id="ka-phone"
-                  placeholder="+966 5X XXX XXXX"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
@@ -551,7 +550,6 @@ export default function RecruitmentKanbanPage() {
                   type="number"
                   min={0}
                   max={60}
-                  placeholder="e.g. 5"
                   value={form.experience}
                   onChange={(e) => setForm({ ...form, experience: e.target.value })}
                 />
@@ -593,9 +591,8 @@ export default function RecruitmentKanbanPage() {
               <Label htmlFor="ka-cover">Cover Letter</Label>
               <Textarea
                 id="ka-cover"
-                rows={4}
+                rows={3}
                 maxLength={4000}
-                placeholder="Tell us why you're a great fit"
                 value={form.coverLetter}
                 onChange={(e) => setForm({ ...form, coverLetter: e.target.value })}
               />

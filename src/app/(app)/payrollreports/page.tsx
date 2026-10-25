@@ -17,6 +17,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
 /* Session 87 (R87-C) + Session 88 (R88-D3): the Report Filters title
@@ -120,6 +127,63 @@ export default function PayrollReportsPage() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
   const [employee, setEmployee] = React.useState("all");
+
+  /* Session 93 (R93-E): the REF's Send Payslips via WhatsApp DIALOG —
+     live-read 2026-10-25 (672×310): the Select Payroll Month label + the
+     month input + Send All on one row, a data-driven payslip area below
+     (the REF's zero-tenant line "No payrolls found for {period}"), and
+     a Close footer. The clone lists the month's real records (the
+     functional superset). */
+  const [payslipOpen, setPayslipOpen] = React.useState(false);
+  const [payslipMonth, setPayslipMonth] = React.useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [payslipRecords, setPayslipRecords] = React.useState<PayrollRow[] | null>(null);
+  const [payslipLoading, setPayslipLoading] = React.useState(false);
+
+  const loadPayslips = React.useCallback(async (period: string) => {
+    setPayslipLoading(true);
+    try {
+      const res = await fetch(`/api/payroll?period=${encodeURIComponent(period)}`);
+      const json = await res.json();
+      if (json.ok) {
+        setPayslipRecords(
+          (json.data.records ?? []).map(
+            (r: { id: string; period: string; basicSalary: number; deductions: number; netSalary: number; status: string; employee: { firstName: string; lastName: string } }) => ({
+              id: r.id,
+              period: r.period,
+              employeeName: `${r.employee.firstName} ${r.employee.lastName}`.trim(),
+              basicSalary: r.basicSalary,
+              grossPay: r.basicSalary,
+              deductions: r.deductions,
+              netPay: r.netSalary,
+              status: r.status,
+            }),
+          ),
+        );
+      } else {
+        setPayslipRecords([]);
+      }
+    } catch {
+      setPayslipRecords([]);
+    } finally {
+      setPayslipLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (payslipOpen) void loadPayslips(payslipMonth);
+  }, [payslipOpen, payslipMonth, loadPayslips]);
+
+  function sendAllPayslips() {
+    toast.toast({
+      title: "Payslips queued",
+      description: `WhatsApp dispatch logged for ${payslipMonth}.`,
+      variant: "success",
+    });
+    setPayslipOpen(false);
+  }
 
   React.useEffect(() => {
     (async () => {
@@ -353,9 +417,10 @@ export default function PayrollReportsPage() {
               /* REF's CTA (live-measured): shadow h-9 px-4 py-2
                  bg-green-600 hover:bg-green-700 TEXT-WHITE gap-2 — no
                  gradient (bgImage: none; bg-none suppresses the default
-                 variant's blue CTA gradient — the documented mitigation). */
+                 variant's blue CTA gradient — the documented mitigation).
+                 Session 93 (R93-E): the click opens the 672 dialog. */
               className="bg-none shadow h-9 px-4 py-2 bg-green-600 hover:bg-none hover:bg-green-700 text-white"
-              onClick={() => toast.toast({ title: "Payslips queued", description: "WhatsApp dispatch logged.", variant: "success" })}
+              onClick={() => setPayslipOpen(true)}
             >
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
               Send Payslips via WhatsApp
@@ -367,12 +432,60 @@ export default function PayrollReportsPage() {
         <div className="md:hidden">
           <Button
             className="bg-none shadow h-9 px-4 py-2 w-full bg-green-600 hover:bg-none hover:bg-green-700 text-white"
-            onClick={() => toast.toast({ title: "Payslips queued", description: "WhatsApp dispatch logged.", variant: "success" })}
+            onClick={() => setPayslipOpen(true)}
           >
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
             Send Payslips via WhatsApp
           </Button>
         </div>
+
+        {/* Session 93 (R93-E): the Send Payslips dialog — the REF's 672×310
+            contract. */}
+        <Dialog open={payslipOpen} onOpenChange={setPayslipOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Send Payslips via WhatsApp</DialogTitle>
+            </DialogHeader>
+            <div className="flex items-end gap-3">
+              <div className="flex-1 flex flex-col gap-2">
+                <Label htmlFor="payslip-month">Select Payroll Month</Label>
+                <Input
+                  id="payslip-month"
+                  type="month"
+                  value={payslipMonth}
+                  onChange={(e) => setPayslipMonth(e.target.value)}
+                  className="w-48"
+                />
+              </div>
+              <Button type="button" onClick={sendAllPayslips}>
+                Send All
+              </Button>
+            </div>
+            <div className="min-h-[96px] rounded-lg border border-dashed border-slate-200 p-4">
+              {payslipLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                </div>
+              ) : payslipRecords && payslipRecords.length > 0 ? (
+                <ul className="space-y-2">
+                  {payslipRecords.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700">{r.employeeName}</span>
+                      <span className="text-slate-500">{r.period} · Net {(r.netPay / 100).toFixed(2)} SAR</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-500 py-4 text-center">No payrolls found for {payslipMonth}</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setPayslipOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* REF's filter card: the Label above the w-full select */}
         <Card className="border-slate-200 shadow-sm">

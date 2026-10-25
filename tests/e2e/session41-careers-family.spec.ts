@@ -19,6 +19,12 @@ import { expect, test } from "@playwright/test";
 
 test.describe("session-41 careers family (authed)", () => {
   test("the empty board renders the icon-over-line zero card — the briefcase + the recovery line + the card-carried padding", async ({ page }) => {
+    /* Session 93 (R93-H): the seed carries the REF's three-job tenant (one
+       ACTIVE) — the zero-state family pins via the route intercept (the
+       with-data tests count the seeded job in instead). */
+    await page.route("**/api/jobs*", async (route) => {
+      await route.fulfill({ json: { ok: true, data: { jobs: [] } } });
+    });
     await page.goto("/careers");
     await expect(page.getByRole("heading", { name: "Find Your Dream Job" })).toBeVisible();
 
@@ -55,6 +61,10 @@ test.describe("session-41 careers family (authed)", () => {
   });
 
   test("the board content wrapper carries the tall rhythm; the count row is the between-aligned flex wrapper", async ({ page }) => {
+    /* Session 93 (R93-H): the intercept — see the zero-card test above. */
+    await page.route("**/api/jobs*", async (route) => {
+      await route.fulfill({ json: { ok: true, data: { jobs: [] } } });
+    });
     await page.goto("/careers");
     await expect(page.getByRole("heading", { name: "0 Open Positions" })).toBeVisible();
 
@@ -87,7 +97,7 @@ test.describe("session-41 careers family (authed)", () => {
         department: "Engineering",
         location: "Jeddah",
         type: "full_time",
-        status: "open",
+        status: "active",
         salaryRange: "12000-15000",
         description: longDescription,
       },
@@ -98,7 +108,7 @@ test.describe("session-41 careers family (authed)", () => {
 
     try {
       await page.goto("/careers");
-      await expect(page.getByRole("heading", { name: "1 Open Position" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "2 Open Positions" })).toBeVisible();
 
       const card = await page.evaluate(() => {
         const grid = [...document.querySelectorAll("div")].find(
@@ -144,14 +154,16 @@ test.describe("session-41 careers family (authed)", () => {
 
   test("the apply CTA routes to the external page with the org + job slugs and the page resolves them (the superset)", async ({ page }) => {
     const post = await page.request.post("/api/jobs", {
-      data: { title: "Senior Test Engineer", company: "Acme Rockets", department: "Engineering", location: "Remote", type: "full_time", status: "open" },
+      data: { title: "Senior Test Engineer", company: "Acme Rockets", department: "Engineering", location: "Remote", type: "full_time", status: "active" },
     });
     const json = await post.json();
     const jobId = json.data?.job?.id ?? json.data?.id;
 
     try {
       await page.goto("/careers");
-      await page.getByRole("button", { name: "View Details & Apply" }).click();
+      /* Session 93 (R93-H): the seeded job's card renders too — scope to
+         the POSTED card (the first: postedAt DESC). */
+      await page.getByRole("button", { name: "View Details & Apply" }).first().click();
       await expect(page).toHaveURL(/\/externaljobapplication\?org=acme-rockets&job=senior-test-engineer$/);
       await expect(page.getByRole("heading", { name: "Job Opportunities" })).toBeVisible();
       // the superset: the page lists the param-resolved job
@@ -168,7 +180,7 @@ test.describe("session-41 careers family (authed)", () => {
 
   test("the search-filtered zero renders its own message", async ({ page }) => {
     const post = await page.request.post("/api/jobs", {
-      data: { title: "Senior Test Engineer", company: "Acme Rockets", type: "full_time", status: "open" },
+      data: { title: "Senior Test Engineer", company: "Acme Rockets", type: "full_time", status: "active" },
     });
     const json = await post.json();
     const jobId = json.data?.job?.id ?? json.data?.id;

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Briefcase, Building2, CircleCheckBig, FileSearch, Filter, Loader2, MapPin, Plus, Sparkles, Trash2, TrendingUp, UserPlus, Users } from "lucide-react";
+import { Briefcase, CircleCheckBig, FileSearch, Filter, Loader2, Plus, Sparkles, Trash2, TrendingUp, Upload, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/components/ui/toast";
-import { initials, timeAgo } from "@/lib/utils";
+import { initials, timeAgo, cn } from "@/lib/utils";
 
 interface JobRow {
   id: string;
@@ -79,6 +79,16 @@ interface CandidateRow {
 
 const STAGES = ["applied", "interviewing", "offer", "hired", "rejected"];
 const TYPE_OPTIONS = ["full_time", "part_time", "contract", "intern"];
+/* Session 93 (R93-B): the REF's Post New Job Employment Type — the four
+   with the -ship member (live-read: Full Time/Part Time/Contract/Internship;
+   the employee WIZARD's set carries "Intern" instead — the REF's own
+   per-surface divergence, preserved verbatim). */
+const POSTJOB_TYPE_LABELS: Record<string, string> = {
+  full_time: "Full Time",
+  part_time: "Part Time",
+  contract: "Contract",
+  intern: "Internship",
+};
 
 /* Session 91 (R91-C): the REF's table-filter STATUS vocabulary — the 7
  * lowercase raw values live-read from the REF's open filter (its kanban
@@ -127,15 +137,19 @@ export default function RecruitmentPage() {
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [scoreSort, setScoreSort] = React.useState("default");
 
-  const [jobDialogOpen, setJobDialogOpen] = React.useState(false);
+  /* Session 93 (R93-B): Post New Job renders an INLINE FORM SECTION on the
+     Applicants tab (between the tab bar and the filter row), not a dialog;
+     the tabs become controlled so Upload CV can deep-link to the CV tab. */
+  const [tab, setTab] = React.useState("applicants");
+  const [showJobForm, setShowJobForm] = React.useState(false);
   const [jobSaving, setJobSaving] = React.useState(false);
   const [jobForm, setJobForm] = React.useState({
     title: "",
     department: "",
     location: "",
     type: "full_time",
-    openings: "1",
     description: "",
+    requirements: "",
   });
 
   // AI CV upload tab state
@@ -167,7 +181,9 @@ export default function RecruitmentPage() {
   }, [load]);
 
   const stats = React.useMemo(() => {
-    const activeJobs = jobs.filter((j) => j.status === "open").length;
+    /* Session 93 (R93-H): the REF's stat counts ACTIVE jobs (the draft
+        postings stay out of the number — the REF's own 1/0/0 tenant). */
+    const activeJobs = jobs.filter((j) => j.status === "active").length;
     const shortlisted = candidates.filter((c) => c.stage === "interviewing" || c.stage === "offer").length;
     const scored = candidates.filter((c) => c.aiScore !== null);
     const avgScore =
@@ -193,8 +209,6 @@ export default function RecruitmentPage() {
 
   async function onCreateJob(e: React.FormEvent) {
     e.preventDefault();
-    const openings = Number(jobForm.openings);
-    if (!Number.isInteger(openings) || openings < 1 || openings > 99) return;
     setJobSaving(true);
     try {
       const res = await fetch("/api/jobs", {
@@ -205,8 +219,8 @@ export default function RecruitmentPage() {
           department: jobForm.department,
           location: jobForm.location,
           type: jobForm.type,
-          openings,
           description: jobForm.description,
+          requirements: jobForm.requirements,
         }),
       });
       const json = await res.json();
@@ -214,9 +228,9 @@ export default function RecruitmentPage() {
         toast.toast({ title: "Failed to post job", description: json.error?.message, variant: "error" });
         return;
       }
-      toast.toast({ title: "Job posted", description: `${jobForm.title} is now accepting applicants.`, variant: "success" });
-      setJobDialogOpen(false);
-      setJobForm({ title: "", department: "", location: "", type: "full_time", openings: "1", description: "" });
+      toast.toast({ title: "Job created", description: `${jobForm.title} was saved as a draft posting.`, variant: "success" });
+      setShowJobForm(false);
+      setJobForm({ title: "", department: "", location: "", type: "full_time", description: "", requirements: "" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -226,7 +240,9 @@ export default function RecruitmentPage() {
   }
 
   async function onToggleJobStatus(job: JobRow) {
-    const status = job.status === "open" ? "paused" : "open";
+    /* Session 93 (R93-H): the REF's vocabulary — draft ↔ active (publish /
+       unpublish; the functional superset over the REF's static cards). */
+    const status = job.status === "active" ? "draft" : "active";
     try {
       const res = await fetch(`/api/jobs?id=${job.id}`, {
         method: "PATCH",
@@ -238,7 +254,7 @@ export default function RecruitmentPage() {
         toast.toast({ title: "Update failed", description: json.error?.message, variant: "error" });
         return;
       }
-      toast.toast({ title: status === "open" ? "Job reopened" : "Job paused", variant: "success" });
+      toast.toast({ title: status === "active" ? "Job published" : "Job unpublished", variant: "success" });
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -362,7 +378,7 @@ export default function RecruitmentPage() {
              identical cross-side). The glyph identity was invisible to
              the color/text censuses (the r63 lesson class) — the
              cross-side pixel diff surfaced it. */
-          <Button variant="indigoBlue" onClick={() => setJobDialogOpen(true)}>
+          <Button variant="indigoBlue" onClick={() => setShowJobForm(true)}>
             <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
             Post New Job
           </Button>
@@ -380,7 +396,7 @@ export default function RecruitmentPage() {
         <StatCard variant="compact" label="Avg AI Score" value={stats.avgScore === null ? "—" : `${stats.avgScore}`} icon={<TrendingUp className="w-5 h-5 text-purple-600" aria-hidden="true" />} tileClassName="bg-purple-100" />
       </div>
 
-      <Tabs defaultValue="applicants" className="space-y-6">
+      <Tabs value={tab} onValueChange={setTab} className="space-y-6">
         {/* Session 15 (R14-A): the reference pill is the default
             shrink-wrapped TabsList + bg-white border border-slate-200
             (439×36); the first two triggers carry 12px lucide icons
@@ -397,6 +413,93 @@ export default function RecruitmentPage() {
             gap-3 items-center bg-white p-4 rounded-xl border — with a 16px
             Filter icon (session 61), w-48/w-40/w-40 selects and the ml-auto count. */}
         <TabsContent value="applicants" className="mt-6 space-y-4">
+          {/* Session 93 (R93-B): the REF's Post New Job — an INLINE FORM
+              CARD (rounded-xl border bg-card border-slate-200 shadow-xl, the
+              indigo→blue gradient header) inserted between the tab bar and
+              the filter row; the table stays visible below. */}
+          {showJobForm ? (
+            <div className="rounded-xl border bg-card text-card-foreground border-slate-200 shadow-xl">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+                <div className="font-semibold leading-none tracking-tight">Post New Job</div>
+              </div>
+              <form onSubmit={onCreateJob} className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="job-title">Job Title *</Label>
+                    <Input
+                      id="job-title"
+                      required
+                      value={jobForm.title}
+                      onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="job-department">Department *</Label>
+                    <Input
+                      id="job-department"
+                      required
+                      value={jobForm.department}
+                      onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="job-location">Location</Label>
+                    <Input
+                      id="job-location"
+                      value={jobForm.location}
+                      onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="job-type">Employment Type</Label>
+                    <Select value={jobForm.type} onValueChange={(v) => setJobForm({ ...jobForm, type: v })}>
+                      <SelectTrigger id="job-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TYPE_OPTIONS.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {POSTJOB_TYPE_LABELS[t]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="job-description">Job Description *</Label>
+                  <Textarea
+                    id="job-description"
+                    required
+                    rows={4}
+                    value={jobForm.description}
+                    onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="job-requirements">Requirements</Label>
+                  <Textarea
+                    id="job-requirements"
+                    rows={3}
+                    placeholder="List required skills, experience, qualifications..."
+                    value={jobForm.requirements}
+                    onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setShowJobForm(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={jobSaving}>
+                    {jobSaving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                    Create Job
+                  </Button>
+                </div>
+              </form>
+            </div>
+          ) : null}
           <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl border border-slate-200">
             {/* Session 61 (R61-V): REF's filter row leads with the
                 Filter glyph in authored slate-400 (rgb(148,163,184)
@@ -703,6 +806,13 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- Job Postings ---------------- */}
+        {/* Session 93 (R93-H): the REF's job-postings card (live HTML read
+            2026-10-25) — the header p-6/border-b carries the text-lg
+            title + the "dept · location" second line + the status badge;
+            the p-4 body carries the line-clamp-2 description + the
+            applicants/Upload CV footer row. The badge is the REF's own
+            inline recipe (rounded-md, semibold, RAW lowercase text):
+            draft = slate-100/slate-600, active = green-100/green-700. */}
         <TabsContent value="jobs" className="mt-6 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border bg-card py-16 shadow-sm">
@@ -715,7 +825,7 @@ export default function RecruitmentPage() {
                 title="No job postings"
                 description="Post your first job to start collecting applicants."
                 action={
-                  <Button variant="dark" onClick={() => setJobDialogOpen(true)}>
+                  <Button variant="dark" onClick={() => setShowJobForm(true)}>
                     <Plus className="mr-2" aria-hidden="true" />
                     Post New Job
                   </Button>
@@ -723,52 +833,73 @@ export default function RecruitmentPage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {jobs.map((job) => (
-                <div key={job.id} className="flex flex-col gap-3 rounded-xl border bg-card p-5 shadow-sm">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-foreground">{job.title}</p>
-                      <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                        <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        {job.department ?? "—"}
-                      </p>
+                <div
+                  key={job.id}
+                  className="rounded-xl border bg-card text-card-foreground shadow border-slate-200 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold tracking-tight text-lg">{job.title}</div>
+                        <p className="text-sm text-slate-500">
+                          {[job.department, job.location].filter(Boolean).join(" · ") || "—"}
+                        </p>
+                      </div>
+                      {/* the REF's badge recipe — RAW lowercase status text */}
+                      <div
+                        className={cn(
+                          "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold border-transparent",
+                          job.status === "active" ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600",
+                        )}
+                      >
+                        {job.status}
+                      </div>
                     </div>
-                    <StatusBadge status={job.status} />
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge status={job.type} />
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-                      {job.location ?? "Remote"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">· {job.openings} opening{job.openings === 1 ? "" : "s"}</span>
-                  </div>
-                  {job.description ? (
-                    <p className="line-clamp-2 text-sm text-muted-foreground">{job.description}</p>
-                  ) : null}
-                  <div className="flex items-center justify-between border-t pt-3">
-                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" aria-hidden="true" />
-                      {job._count?.candidates ?? 0} applicant{(job._count?.candidates ?? 0) === 1 ? "" : "s"}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onToggleJobStatus(job)}
-                      >
-                        {job.status === "open" ? "Pause" : "Reopen"}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="iconSm"
-                        aria-label={`Delete job ${job.title}`}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                        onClick={() => onDeleteJob(job)}
-                      >
-                        <Trash2 aria-hidden="true" />
-                      </Button>
+                  <div className="p-4">
+                    {job.description ? (
+                      <p className="text-sm text-slate-600 line-clamp-2 mb-3">{job.description}</p>
+                    ) : (
+                      <p className="text-sm text-slate-600 line-clamp-2 mb-3">No description provided.</p>
+                    )}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">
+                        {job._count?.candidates ?? 0} applicants
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {/* the REF's Upload CV is inert on click — the clone
+                            keeps the visible contract and wires the superset:
+                            jump to the AI CV Upload tab with the job
+                            preselected. */}
+                        <Button
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => {
+                            setCvJobId(job.id);
+                            setTab("cvupload");
+                          }}
+                        >
+                          <Upload className="w-3 h-3 mr-1" aria-hidden="true" /> Upload CV
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onToggleJobStatus(job)}
+                        >
+                          {job.status === "active" ? "Unpublish" : "Publish"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="iconSm"
+                          aria-label={`Delete job ${job.title}`}
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => onDeleteJob(job)}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -777,97 +908,6 @@ export default function RecruitmentPage() {
           )}
         </TabsContent>
       </Tabs>
-
-      {/* New Job dialog */}
-      <Dialog open={jobDialogOpen} onOpenChange={setJobDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Post New Job</DialogTitle>
-            <DialogDescription>Create a job posting that applicants and CV scoring will target.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={onCreateJob} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="job-title">Job Title</Label>
-              <Input
-                id="job-title"
-                required
-                placeholder="e.g. Senior Frontend Engineer"
-                value={jobForm.title}
-                onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="job-department">Department</Label>
-                <Input
-                  id="job-department"
-                  placeholder="e.g. Engineering"
-                  value={jobForm.department}
-                  onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="job-location">Location</Label>
-                <Input
-                  id="job-location"
-                  placeholder="e.g. Riyadh"
-                  value={jobForm.location}
-                  onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="job-type">Type</Label>
-                <Select value={jobForm.type} onValueChange={(v) => setJobForm({ ...jobForm, type: v })}>
-                  <SelectTrigger id="job-type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TYPE_OPTIONS.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {labelize(t)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="job-openings">Openings</Label>
-                <Input
-                  id="job-openings"
-                  type="number"
-                  min="1"
-                  max="99"
-                  step="1"
-                  required
-                  value={jobForm.openings}
-                  onChange={(e) => setJobForm({ ...jobForm, openings: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="job-description">Description</Label>
-              <Textarea
-                id="job-description"
-                rows={4}
-                placeholder="Responsibilities, requirements and keywords for CV matching…"
-                value={jobForm.description}
-                onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setJobDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={jobSaving}>
-                {jobSaving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Post Job
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
     </div>
   );

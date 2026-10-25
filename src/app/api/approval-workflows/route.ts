@@ -14,15 +14,34 @@ import { ok, err, guard, requireUser, requireRole, parseBody } from "@/lib/api";
 /* Session 36 (R35-F3): the five types of REF's Create Approval
    Workflow dialog (measured: Leave/Expense/Loan/Payroll/Recruitment).
    The first three predate this round; loans/payroll/recruitment joined
-   with the dialog. */
-const APPLIES_TO = ["leave_requests", "expenses", "staff_requests", "loans", "payroll", "recruitment"] as const;
+   with the dialog.
+   Session 93 (R93-C): the workflowconfigpage editor's Applies To —
+   Staff Requests | Expense Claims (the REF's live combobox read; the
+   legacy expense value stays for the settings dialog's pinned flow). */
+const APPLIES_TO = ["leave_requests", "expenses", "staff_requests", "loans", "payroll", "recruitment", "expense_claims"] as const;
+
+/* Session 93 (R93-C): the REF's workflowconfigpage editor sends the
+   level-object array + the amount window + categories; the settings page's
+   pinned dialog still posts the legacy number shape. The Zod union accepts
+   both; the conditions JSON carries whichever shape arrived. */
+const LevelInput = z.object({
+  name: z.string().trim().max(120).optional().or(z.literal("")),
+  approverType: z.string().trim().max(60).optional().or(z.literal("")),
+  approverEmails: z.string().trim().max(500).optional().or(z.literal("")),
+  autoApproveHours: z.number().min(0).max(8760).optional(),
+});
 
 const WorkflowInput = z.object({
   name: z.string().trim().min(1, "Workflow name is required").max(120),
-  levels: z.number().int().min(1, "At least one level").max(3, "Maximum 3 levels"),
+  levels: z
+    .union([z.number().int().min(1, "At least one level").max(3, "Maximum 3 levels"), z.array(LevelInput).min(1, "At least one level").max(6)])
+    .default(1),
   appliesTo: z.enum(APPLIES_TO),
-  threshold: z.number().min(0, "Threshold cannot be negative"), // SAR, converted to minor units
+  threshold: z.number().min(0, "Threshold cannot be negative").default(0), // SAR, converted to minor units
   active: z.boolean().default(false),
+  minAmount: z.number().min(0).optional(),
+  maxAmount: z.number().min(0).optional(),
+  categories: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
 const WorkflowPatch = WorkflowInput.partial();
@@ -34,12 +53,16 @@ const MODULE_BY_APPLIES: Record<(typeof APPLIES_TO)[number], string> = {
   loans: "general",
   payroll: "general",
   recruitment: "recruitment",
+  expense_claims: "expense",
 };
 
 interface Conditions {
-  levels?: number;
+  levels?: number | { name?: string; approverType?: string; approverEmails?: string; autoApproveHours?: number }[];
   appliesTo?: (typeof APPLIES_TO)[number];
   threshold?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  categories?: string;
 }
 
 function parseConditions(raw: string): Conditions {
@@ -65,10 +88,13 @@ export async function GET() {
         return {
           id: w.id,
           name: w.name,
-          levels: typeof c.levels === "number" ? c.levels : 1,
+          levels: Array.isArray(c.levels) ? c.levels.length : typeof c.levels === "number" ? c.levels : 1,
           appliesTo:
             c.appliesTo && (APPLIES_TO as readonly string[]).includes(c.appliesTo) ? c.appliesTo : "leave_requests",
           threshold: typeof c.threshold === "number" ? c.threshold : 0,
+          minAmount: typeof c.minAmount === "number" ? c.minAmount : undefined,
+          maxAmount: typeof c.maxAmount === "number" ? c.maxAmount : undefined,
+          categories: c.categories ?? "",
           active: w.active,
           executions: w.executions,
           createdAt: w.createdAt,
@@ -95,8 +121,11 @@ export async function POST(req: NextRequest) {
           levels: data.levels,
           appliesTo: data.appliesTo,
           threshold: Math.round(data.threshold * 100),
+          ...(data.minAmount !== undefined ? { minAmount: Math.round(data.minAmount * 100) } : {}),
+          ...(data.maxAmount !== undefined ? { maxAmount: Math.round(data.maxAmount * 100) } : {}),
+          ...(data.categories ? { categories: data.categories } : {}),
         }),
-        actions: JSON.stringify([{ type: "approve_chain", levels: data.levels }]),
+        actions: JSON.stringify([{ type: "approve_chain", levels: Array.isArray(data.levels) ? data.levels.length : data.levels }]),
         active: data.active,
       },
       select: { id: true },
@@ -130,8 +159,8 @@ export async function PATCH(req: NextRequest) {
     if (!data) return bad;
 
     const current = parseConditions(existing.conditions);
-    const merged: Required<Conditions> = {
-      levels: data.levels ?? (typeof current.levels === "number" ? current.levels : 1),
+    const merged: Conditions = {
+      levels: data.levels ?? (typeof current.levels === "number" || Array.isArray(current.levels) ? current.levels : 1),
       appliesTo: data.appliesTo ?? current.appliesTo ?? "leave_requests",
       threshold:
         data.threshold !== undefined
@@ -139,6 +168,9 @@ export async function PATCH(req: NextRequest) {
           : typeof current.threshold === "number"
             ? current.threshold
             : 0,
+      ...(data.minAmount !== undefined ? { minAmount: Math.round(data.minAmount * 100) } : {}),
+      ...(data.maxAmount !== undefined ? { maxAmount: Math.round(data.maxAmount * 100) } : {}),
+      ...(data.categories !== undefined ? { categories: data.categories } : {}),
     };
 
     await db.workflow.update({

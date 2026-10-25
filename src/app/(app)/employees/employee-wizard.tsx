@@ -37,6 +37,9 @@ export interface WizardEmployee {
   bankName: string | null;
   iban: string | null;
   gosiNumber: string | null;
+  /* Session 93 (R93-A): the REF's step-3 Basic Salary (SAR) — minor units
+     (halalas) end to end; the wizard converts at the form boundary. */
+  baseSalary: number | null;
 }
 
 interface DepartmentOption {
@@ -61,7 +64,15 @@ const STEP_ICONS = [User, Briefcase, FileText, Paperclip] as const;
 
 const GENDER_OPTIONS = ["male", "female"] as const;
 const EMPLOYMENT_TYPES = ["full_time", "part_time", "contract", "intern"] as const;
-const CONTRACT_TYPES = ["indefinite", "fixed_term"] as const;
+/* Session 93 (R93-A): the REF's step-3 Contract Type — the FOUR options
+   (live-read 2026-10-25; the clone offered two). */
+const CONTRACT_TYPES = ["indefinite", "fixed_term", "probation", "internship"] as const;
+const CONTRACT_TYPE_LABELS: Record<(typeof CONTRACT_TYPES)[number], string> = {
+  indefinite: "Indefinite",
+  fixed_term: "Fixed Term",
+  probation: "Probation",
+  internship: "Internship",
+};
 
 const EMPTY_FORM = {
   firstName: "",
@@ -82,6 +93,7 @@ const EMPTY_FORM = {
   managerId: "",
   contractType: "indefinite",
   contractStart: "",
+  baseSalary: "",
   bankName: "",
   iban: "",
   gosiNumber: "",
@@ -116,6 +128,7 @@ function prefilledForm(employee: WizardEmployee | null): FormState {
     managerId: employee.managerId ?? "",
     contractType: employee.contractType ?? "indefinite",
     contractStart: isoDate(employee.contractStart),
+    baseSalary: employee.baseSalary != null ? String(Math.round(employee.baseSalary / 100)) : "",
     bankName: employee.bankName ?? "",
     iban: employee.iban ?? "",
     gosiNumber: employee.gosiNumber ?? "",
@@ -248,10 +261,10 @@ export function EmployeeWizard({
         managerId: form.managerId,
         contractType: form.contractType,
         contractStart: form.contractStart || form.startDate,
+        baseSalary: form.baseSalary.trim() === "" ? 0 : Math.round(Number(form.baseSalary) * 100),
         bankName: form.bankName.trim(),
         iban: form.iban.trim(),
         gosiNumber: form.gosiNumber.trim(),
-        baseSalary: 0,
       };
       if (!employee && form.onboardingTemplateId) {
         payload.onboardingTemplateId = form.onboardingTemplateId;
@@ -372,16 +385,19 @@ export function EmployeeWizard({
                   ) : null}
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Field id="w-fullname" label="Full Name" required>
-                    <Input id="w-fullname" required value={form.firstName} onChange={(e) => set("firstName", e.target.value)} />
+                    {/* Session 93 (R93-A): the REF's step-1 placeholders
+                        (live-read: John Doe / john@company.com /
+                        john@personal.com / +966 5XX XXX XXX). */}
+                    <Input id="w-fullname" required placeholder="John Doe" value={form.firstName} onChange={(e) => set("firstName", e.target.value)} />
                   </Field>
                   <Field id="w-email" label="Work Email" required>
-                    <Input id="w-email" type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} />
+                    <Input id="w-email" type="email" required placeholder="john@company.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
                   </Field>
                   <Field id="w-private" label="Private Email">
-                    <Input id="w-private" type="email" value={form.privateEmail} onChange={(e) => set("privateEmail", e.target.value)} />
+                    <Input id="w-private" type="email" placeholder="john@personal.com" value={form.privateEmail} onChange={(e) => set("privateEmail", e.target.value)} />
                   </Field>
                   <Field id="w-phone" label="Phone Number">
-                    <Input id="w-phone" type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                    <Input id="w-phone" type="tel" placeholder="+966 5XX XXX XXX" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
                   </Field>
                   <Field id="w-dob" label="Date of Birth">
                     <Input id="w-dob" type="date" value={form.dateOfBirth} onChange={(e) => set("dateOfBirth", e.target.value)} />
@@ -417,7 +433,7 @@ export function EmployeeWizard({
               ) : step === 1 ? (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Field id="w-title" label="Job Title" required>
-                    <Input id="w-title" required value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} />
+                    <Input id="w-title" required placeholder="Software Engineer" value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} />
                   </Field>
                   <Field id="w-dept" label="Department">
                     <Select value={form.departmentId} onValueChange={(v) => set("departmentId", v)}>
@@ -450,7 +466,11 @@ export function EmployeeWizard({
                   <Field id="w-start" label="Start Date" required>
                     <Input id="w-start" type="date" required value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
                   </Field>
-                  <Field id="w-manager" label="Manager" className="sm:col-span-2">
+                  {/* Session 93 (R93-A): the REF's label is "Reports To" in
+                      the LEFT column (x=433, the same as Job Title — the
+                      right cell at its row stays empty), not a spanned
+                      "Manager". */}
+                  <Field id="w-manager" label="Reports To">
                     <Select value={form.managerId} onValueChange={(v) => set("managerId", v)}>
                       <SelectTrigger id="w-manager">
                         <SelectValue placeholder="Select manager" />
@@ -466,6 +486,10 @@ export function EmployeeWizard({
                   </Field>
                 </div>
               ) : step === 2 ? (
+                /* Session 93 (R93-A): the REF's step-3 field order —
+                   (Contract Type, Contract Start Date), (Basic Salary,
+                   Bank Name), (IBAN, GOSI Number) — 3 rows × 2 cols,
+                   NO col-spans. */
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Field id="w-contract-type" label="Contract Type">
                     <Select value={form.contractType} onValueChange={(v) => set("contractType", v)}>
@@ -475,7 +499,7 @@ export function EmployeeWizard({
                       <SelectContent>
                         {CONTRACT_TYPES.map((t) => (
                           <SelectItem key={t} value={t}>
-                            {t === "indefinite" ? "Indefinite" : "Fixed Term"}
+                            {CONTRACT_TYPE_LABELS[t]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -484,13 +508,23 @@ export function EmployeeWizard({
                   <Field id="w-contract-start" label="Contract Start Date">
                     <Input id="w-contract-start" type="date" value={form.contractStart} onChange={(e) => set("contractStart", e.target.value)} />
                   </Field>
+                  <Field id="w-salary" label="Basic Salary (SAR)">
+                    <Input
+                      id="w-salary"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={form.baseSalary}
+                      onChange={(e) => set("baseSalary", e.target.value)}
+                    />
+                  </Field>
                   <Field id="w-bank" label="Bank Name">
                     <Input id="w-bank" value={form.bankName} onChange={(e) => set("bankName", e.target.value)} />
                   </Field>
                   <Field id="w-iban" label="IBAN">
                     <Input id="w-iban" value={form.iban} onChange={(e) => set("iban", e.target.value)} />
                   </Field>
-                  <Field id="w-gosi" label="GOSI Number" className="sm:col-span-2">
+                  <Field id="w-gosi" label="GOSI Number">
                     <Input id="w-gosi" value={form.gosiNumber} onChange={(e) => set("gosiNumber", e.target.value)} />
                   </Field>
                 </div>

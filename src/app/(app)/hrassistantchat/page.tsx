@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/components/ui/toast";
@@ -34,6 +42,9 @@ export default function HrAssistantChatPage() {
   const [messagesLoading, setMessagesLoading] = React.useState(false);
   const [draft, setDraft] = React.useState("");
   const [thinking, setThinking] = React.useState(false);
+  /* Session 93 (R93-F): the Start New Chat dialog state. */
+  const [newChatOpen, setNewChatOpen] = React.useState(false);
+  const [newChatName, setNewChatName] = React.useState("");
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const prevCountRef = React.useRef(0);
@@ -86,12 +97,12 @@ export default function HrAssistantChatPage() {
 
   const active = chats.find((c) => c.id === activeId) ?? null;
 
-  async function onNewChat() {
+  async function onNewChat(projectName?: string) {
     try {
       const res = await fetch("/api/ai-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify(projectName && projectName.trim() ? { title: projectName.trim() } : {}),
       });
       const json = await res.json();
       if (!json.ok) {
@@ -149,6 +160,44 @@ export default function HrAssistantChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
+      {/* Session 93 (R93-F): the REF's Start New Chat dialog — 512×172,
+          "Project name (optional)" + Cancel/Create. */}
+      <Dialog open={newChatOpen} onOpenChange={setNewChatOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Start New Chat</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            <Input
+              placeholder="Project name (optional)"
+              value={newChatName}
+              onChange={(e) => setNewChatName(e.target.value)}
+              aria-label="Project name (optional)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void onNewChat(newChatName);
+                  setNewChatOpen(false);
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setNewChatOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                void onNewChat(newChatName);
+                setNewChatOpen(false);
+              }}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <PageHeader
         /* Session 49 (R48-A2): the bare family — REF renders the hero
          *  block as a DIRECT child of the content wrapper (no hero row).
@@ -176,7 +225,17 @@ export default function HrAssistantChatPage() {
       <div className="grid lg:grid-cols-4 gap-6 h-[calc(100vh-250px)]">
         {/* chat list */}
         <div className="flex flex-col space-y-4 lg:col-span-1">
-          <Button variant="purple" className="w-full" onClick={onNewChat}>
+          {/* Session 93 (R93-F): the REF's New Chat opens a Start New Chat
+              dialog (512×172 — "Project name (optional)" + Cancel/Create)
+              before creating; the clone fired the POST directly. */}
+          <Button
+            variant="purple"
+            className="w-full"
+            onClick={() => {
+              setNewChatName("");
+              setNewChatOpen(true);
+            }}
+          >
             <Plus className="mr-2" aria-hidden="true" />
             New Chat
           </Button>

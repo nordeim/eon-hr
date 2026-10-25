@@ -6221,8 +6221,10 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
     expect(docPage()).toContain('<Button variant="blue" onClick={openNewDialog}>');
     /* Session 60 (R60-E) amendment: the workflowconfig + notifprefs sites
        carry REF's literal text-white (live-measured both themes); the
-       r58 authoring kept the variant's primary-foreground. */
-    expect(wfPage()).toContain('<Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>');
+       r58 authoring kept the variant's primary-foreground.
+       Session 93 (R93-C) amendment: the click now opens the full-page
+       EDITOR (setEditorOpen), not the dialog. */
+    expect(wfPage()).toContain('<Button variant="blue" className="text-white" onClick={() => setEditorOpen(true)}>');
     expect(wfPage()).not.toContain('className="bg-blue-600 text-white hover:bg-blue-700"');
     expect(kanbanPage()).toContain('<Button variant="blue" onClick={() => setDialogOpen(true)}>');
     expect(notifPage()).toContain('<Button variant="blue" className="text-white" onClick={onSavePreferences}');
@@ -6239,7 +6241,9 @@ describe("CTA-fill recipe family (session 58, R58-1..23 — REF's five fills vs 
 
   it("R58-16..18: the gradient one-offs — recruitment REVERSED, expenses pink, assets green (the bg-none bug)", () => {
     // recruitment Post New Job: from-indigo-600 to-blue-600 (the REVERSED endpoints)
-    expect(recruitPage()).toMatch(/<Button variant="indigoBlue" onClick=\{\(\) => setJobDialogOpen\(true\)\}>/);
+    /* Session 93 (R93-B) amendment: the click now reveals the INLINE FORM
+       SECTION (setShowJobForm), not a dialog. */
+    expect(recruitPage()).toMatch(/<Button variant="indigoBlue" onClick=\{\(\) => setShowJobForm\(true\)\}>/);
     // expenses New Expense: REF's purple-600 to pink-600 (the existing pink variant)
     expect(expPage()).toContain('<Button variant="pink" onClick={() => setDialogOpen(true)}>');
     // assets Add Asset: the green variant — the bg-none/v3-utilities authoring
@@ -7566,5 +7570,97 @@ describe("session92 — the dialog-interior inventory round", () => {
     expect(pmPage).toContain('"Generate Payslip"');
     expect(pmPage).not.toContain('Basic Salary (SAR)</Label>');
     expect(schema).toContain("notes       String? // session92 R92-M");
+  });
+});
+
+describe("session93 — the unscanned creation surfaces round", () => {
+  const schema = read("prisma", "schema.prisma");
+  const wizard = read("src", "app", "(app)", "employees", "employee-wizard.tsx");
+  const recruitPage = read("src", "app", "(app)", "recruitment", "page.tsx");
+  const jobsApi = read("src", "app", "api", "jobs", "route.ts");
+  const wfcPage = read("src", "app", "(app)", "workflowconfigpage", "page.tsx");
+  const wfApi = read("src", "app", "api", "approval-workflows", "route.ts");
+  const scheduleBtn = read("src", "app", "(app)", "advancedanalytics", "schedule-report-button.tsx");
+  const prPage = read("src", "app", "(app)", "payrollreports", "page.tsx");
+  const chatPage = read("src", "app", "(app)", "hrassistantchat", "page.tsx");
+  const kanbanPage = read("src", "app", "(app)", "recruitmentkanban", "page.tsx");
+  const careersPage = read("src", "app", "(app)", "careers", "page.tsx");
+
+  it("R93-A: the wizard's step contracts — the four placeholders, Reports To, the Contract Type four, Basic Salary", () => {
+    expect(wizard).toContain('placeholder="John Doe"');
+    expect(wizard).toContain('placeholder="john@company.com"');
+    expect(wizard).toContain('placeholder="john@personal.com"');
+    expect(wizard).toContain('placeholder="+966 5XX XXX XXX"');
+    expect(wizard).toContain('label="Reports To"');
+    expect(wizard).not.toContain('label="Manager"');
+    expect(wizard).toContain('internship: "Internship"');
+    expect(wizard).toContain('label="Basic Salary (SAR)"');
+    expect(wizard).toContain('placeholder="0"');
+    // the payload converts at the form boundary (minor units)
+    expect(wizard).toContain("Math.round(Number(form.baseSalary) * 100)");
+  });
+
+  it("R93-B: Post New Job renders the INLINE form (shadow-xl + the gradient header + Create Job), not a dialog", () => {
+    expect(recruitPage).toContain("border-slate-200 shadow-xl");
+    expect(recruitPage).toContain("bg-gradient-to-r from-indigo-50 to-blue-50");
+    expect(recruitPage).toContain('placeholder="List required skills, experience, qualifications..."');
+    expect(recruitPage).toContain("Create Job");
+    expect(recruitPage).not.toContain("Post Job</Button>");
+    expect(jobsApi).toContain("requirements:");
+  });
+
+  it("R93-C: the workflowconfigpage editor — Applies To two, the Approver Type six, the levels builder, the union API", () => {
+    expect(wfcPage).toContain('placeholder="e.g. Finance Approval"');
+    expect(wfcPage).toContain('placeholder="e.g. 500"');
+    expect(wfcPage).toContain('placeholder="e.g. 10000"');
+    expect(wfcPage).toContain('placeholder="finance, hr, it"');
+    expect(wfcPage).toContain('"Staff Requests"');
+    expect(wfcPage).toContain('"Expense Claims"');
+    expect(wfcPage).toContain('"Specific User(s)"');
+    expect(wfcPage).toContain('"Department Head"');
+    expect(wfcPage).toContain('"Any Admin"');
+    expect(wfcPage).toContain('placeholder="Level name (e.g. Line Manager)"');
+    expect(wfcPage).toContain("Save Workflow");
+    expect(wfApi).toContain('"expense_claims"');
+    expect(wfApi).toContain("z.array(LevelInput)");
+  });
+
+  it("R93-D: the Schedule Recurring Report dialog's full contract", () => {
+    expect(scheduleBtn).toContain('Schedule Recurring Report</DialogTitle>');
+    expect(scheduleBtn).toContain('Report Name</Label>');
+    expect(scheduleBtn).toContain("Attendance");
+    expect(scheduleBtn).toContain("Headcount");
+    expect(scheduleBtn).toContain('placeholder="email@company.com"');
+    expect(scheduleBtn).toContain('Schedule Report\n          </Button>');
+    expect(scheduleBtn).not.toContain("Automatically deliver");
+  });
+
+  it("R93-E/F: the payslips + new-chat dialogs", () => {
+    expect(prPage).toContain('Send Payslips via WhatsApp');
+    expect(prPage).toContain('Select Payroll Month');
+    expect(prPage).toContain("Send All");
+    expect(prPage).toContain("No payrolls found for");
+    expect(chatPage).toContain('Start New Chat</DialogTitle>');
+    expect(chatPage).toContain('placeholder="Project name (optional)"');
+  });
+
+  it("R93-G: the Add Applicant bare form — no description, no placeholders, three rows", () => {
+    expect(kanbanPage).not.toContain("Add a candidate to the hiring pipeline");
+    expect(kanbanPage).not.toContain('placeholder="e.g. Sara Almutairi"');
+    expect(kanbanPage).not.toContain('placeholder="name@example.com"');
+    expect(kanbanPage).toContain("rows={3}");
+  });
+
+  it("R93-H: the draft|active vocabulary, the card recipe, and the seed's tenant", () => {
+    expect(jobsApi).toContain('z.enum(["draft", "active"]).default("draft")');
+    expect(recruitPage).toContain("bg-green-100 text-green-700");
+    expect(recruitPage).toContain("bg-slate-100 text-slate-600");
+    expect(recruitPage).toContain("applicants");
+    expect(recruitPage).toContain("> Upload CV");
+    expect(careersPage).toContain("/api/jobs?status=active");
+    expect(read("prisma", "seed.ts")).toContain('"job-hrmanager"');
+    expect(read("prisma", "seed.ts")).toContain('"job-hrdirector"');
+    expect(read("prisma", "seed.ts")).toContain('"job-sysadmin"');
+    expect(schema).toContain('draft | active (session93 R93-H');
   });
 });

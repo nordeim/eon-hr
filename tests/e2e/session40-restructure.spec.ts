@@ -84,9 +84,11 @@ const AUTHED = test.describe("session-40 shell + input + careers (authed)", () =
   });
 
   test("careers org view — chips navigate to ?org= with the org h2 + back button", async ({ page }) => {
-    // seed one open job with a company (the chips' source since round 40)
+    // seed one active job with a company (the chips' source since round 40).
+    // Session 93 (R93-H): the REF's draft|active vocabulary + the seeded
+    // System Admin (active, company "Company") — the board counts TWO.
     const post = await page.request.post("/api/jobs", {
-      data: { title: "Senior Test Engineer", company: "Acme Rockets", department: "Engineering", location: "Remote", type: "full_time", status: "open", salaryRange: "12000-15000" },
+      data: { title: "Senior Test Engineer", company: "Acme Rockets", department: "Engineering", location: "Remote", type: "full_time", status: "active", salaryRange: "12000-15000" },
     });
     const json = await post.json();
     expect(json.ok).toBe(true);
@@ -96,8 +98,8 @@ const AUTHED = test.describe("session-40 shell + input + careers (authed)", () =
       await page.goto("/careers");
       const chip = page.getByRole("button", { name: "Acme Rockets", exact: true });
       await expect(chip).toBeVisible();
-      // the count heading: 1 Open Position (singular)
-      await expect(page.getByRole("heading", { name: "1 Open Position" })).toBeVisible();
+      // the count heading: the seeded System Admin + the posted job
+      await expect(page.getByRole("heading", { name: "2 Open Positions" })).toBeVisible();
 
       await chip.click();
       await expect(page).toHaveURL(/\/careers\?org=acme-rockets$/);

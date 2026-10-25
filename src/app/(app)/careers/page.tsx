@@ -57,7 +57,11 @@ export default function CareersPage() {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/jobs?status=open");
+        /* Session 93 (R93-H): the REF's public board lists only ACTIVE
+           postings (its draft/active vocabulary; the badge keeps the
+           careers page's own "Open" label — the REF's public card reads
+           "Open" too). */
+        const res = await fetch("/api/jobs?status=active");
         const json = await res.json();
         if (json.ok) setJobs(json.data.jobs);
         else toast.toast({ title: "Failed to load openings", description: json.error?.message, variant: "error" });

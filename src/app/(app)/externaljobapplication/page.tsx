@@ -40,7 +40,9 @@ export default function ExternalJobApplicationPage() {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/jobs?status=open");
+        /* Session 93 (R93-H): the REF's draft|active vocabulary — the public
+           pages list only ACTIVE postings. */
+        const res = await fetch("/api/jobs?status=active");
         const json = await res.json();
         if (json.ok) setJobs(json.data.jobs);
         else toast.toast({ title: "Failed to load positions", description: json.error?.message, variant: "error" });

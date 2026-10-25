@@ -8,9 +8,17 @@ const JobInput = z.object({
   department: z.string().trim().max(80).optional().or(z.literal("")),
   location: z.string().trim().max(120).optional().or(z.literal("")),
   type: z.enum(["full_time", "part_time", "contract", "intern"]).default("full_time"),
-  status: z.enum(["open", "paused", "closed"]).default("open"),
+  /* Session93 (R93-H): the REF's status vocabulary — draft | active (its
+     Job Postings cards render the raw lowercase badges; the public board
+     lists only active). New postings start as drafts (publish is the
+     card action). */
+  status: z.enum(["draft", "active"]).default("draft"),
   openings: z.number().int().min(1, "At least one opening").max(99).default(1),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
+  /* Session93 (R93-B): the REF's Post New Job form's Requirements textarea —
+     appended to the stored description blob (the REF's own descriptions
+     inline their responsibilities). */
+  requirements: z.string().trim().max(2000).optional().or(z.literal("")),
   company: z.string().trim().max(120).optional().or(z.literal("")),
   salaryRange: z.string().trim().max(60).optional().or(z.literal("")),
 });
@@ -48,7 +56,7 @@ export async function POST(req: NextRequest) {
         type: data.type,
         status: data.status,
         openings: data.openings,
-        description: data.description || null,
+        description: [data.description || "", data.requirements || ""].filter(Boolean).join("\n\n") || null,
         company: data.company || null,
         salaryRange: data.salaryRange || null,
       },

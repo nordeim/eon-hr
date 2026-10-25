@@ -61,6 +61,11 @@ test.describe("orphan routes (session 32)", () => {
   });
 
   test("/externaljobapplication renders the Briefcase empty state", async ({ page }) => {
+    /* Session 93 (R93-H): the seed carries the REF's three-job tenant (one
+       ACTIVE) — the public zero-state pins via the API route-intercept. */
+    await page.route("**/api/jobs*", async (route) => {
+      await route.fulfill({ json: { ok: true, data: { jobs: [] } } });
+    });
     await page.goto("/externaljobapplication");
     await expect(page.getByRole("heading", { name: "Job Opportunities" })).toBeVisible();
     await expect(page.getByText("Join our team and make an impact")).toBeVisible();
@@ -69,6 +74,11 @@ test.describe("orphan routes (session 32)", () => {
   });
 
   test("/careers renders the hero + the search input + the zero-data card", async ({ page }) => {
+    /* Session 93 (R93-H): the intercept — see the externaljobapplication
+       test above. */
+    await page.route("**/api/jobs*", async (route) => {
+      await route.fulfill({ json: { ok: true, data: { jobs: [] } } });
+    });
     await page.goto("/careers");
     await expect(page.getByRole("heading", { name: "Find Your Dream Job" })).toBeVisible();
     await expect(page.getByText("Explore opportunities from top companies powered by EonHR")).toBeVisible();

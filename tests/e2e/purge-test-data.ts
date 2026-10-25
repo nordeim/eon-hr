@@ -85,6 +85,15 @@ async function main(): Promise<void> {
   // session-61 note; they must precede the employee sweep)
   // Session 57 (R57-B): the wall media spec posts with attachments —
   // sweep the posts and orphaned db/uploads files.
+  // Session 93 (R93-F): chat specs create chats (titled probes + the
+  // fallback-titled "New Chat") and the ai-chat API has no DELETE route —
+  // no spec seeds chats, so every chat row is a leftover. Sweep all (the
+  // messages cascade FK-wise first).
+  await db.aIMessage.deleteMany({});
+  const goneChats = await db.aIChat.deleteMany({});
+  if (goneChats.count > 0) {
+    console.log(`[purge] removed ${goneChats.count} leftover chat(s)`);
+  }
   const gonePosts = await db.post.deleteMany({
     where: { OR: [{ content: { contains: "e2e-media-post" } }, { mediaUrl: { not: null } }] },
   });

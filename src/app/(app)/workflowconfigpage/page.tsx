@@ -1,20 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Plus, Settings2, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -50,18 +42,52 @@ const APPLIES_TO_LABEL: Record<string, string> = {
   staff_requests: "Staff Requests",
 };
 
+/* Session 93 (R93-C): the REF's workflowconfigpage editor — live-read
+ * 2026-10-25. Applies To offers exactly TWO (Staff Requests / Expense
+ * Claims); the Approver Type combobox offers the REF's SIX (its own
+ * entity list + the four approver kinds). */
+const EDITOR_APPLIES_TO = [
+  { value: "staff_requests", label: "Staff Requests" },
+  { value: "expense_claims", label: "Expense Claims" },
+];
+
+const APPROVER_TYPES = [
+  "Staff Requests",
+  "Expense Claims",
+  "Specific User(s)",
+  "Department Head",
+  "Direct Manager",
+  "Any Admin",
+] as const;
+
+interface EditorLevel {
+  name: string;
+  approverType: string;
+  approverEmails: string;
+  autoApproveHours: string;
+}
+
+const BLANK_LEVEL: EditorLevel = { name: "", approverType: "Specific User(s)", approverEmails: "", autoApproveHours: "0" };
+
 export default function WorkflowConfigPage() {
   const toast = useToast();
   const [workflows, setWorkflows] = React.useState<WorkflowRow[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  /* Session 93 (R93-C): the REF's New Workflow opens a FULL-PAGE EDITOR
+   * (the list swaps away — the employees wizard pattern), not a dialog. */
+  const [editorOpen, setEditorOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [form, setForm] = React.useState({
     name: "",
-    levels: "2",
-    appliesTo: "leave_requests",
-    threshold: "0",
+    appliesTo: "staff_requests",
+    active: true,
+    minAmount: "",
+    maxAmount: "",
+    categories: "",
   });
+  const [levels, setLevels] = React.useState<EditorLevel[]>([
+    { name: "Line Manager", approverType: "Direct Manager", approverEmails: "", autoApproveHours: "0" },
+  ]);
 
   const load = React.useCallback(async () => {
     try {
@@ -80,14 +106,13 @@ export default function WorkflowConfigPage() {
     void load();
   }, [load]);
 
-  async function onCreate() {
+  function setLevel(i: number, patch: Partial<EditorLevel>) {
+    setLevels((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  }
+
+  async function onSaveWorkflow() {
     if (!form.name.trim()) {
       toast.toast({ title: "Workflow name is required", variant: "info" });
-      return;
-    }
-    const threshold = Number(form.threshold);
-    if (!Number.isFinite(threshold) || threshold < 0) {
-      toast.toast({ title: "Invalid threshold", description: "Enter a non-negative SAR amount.", variant: "info" });
       return;
     }
     setSaving(true);
@@ -97,10 +122,17 @@ export default function WorkflowConfigPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
-          levels: Number(form.levels),
           appliesTo: form.appliesTo,
-          threshold,
-          active: true,
+          active: form.active,
+          ...(form.minAmount.trim() !== "" ? { minAmount: Number(form.minAmount) } : {}),
+          ...(form.maxAmount.trim() !== "" ? { maxAmount: Number(form.maxAmount) } : {}),
+          categories: form.categories.trim(),
+          levels: levels.map((l) => ({
+            name: l.name.trim(),
+            approverType: l.approverType,
+            approverEmails: l.approverEmails.trim(),
+            ...(l.autoApproveHours.trim() !== "" ? { autoApproveHours: Number(l.autoApproveHours) } : {}),
+          })),
         }),
       });
       const json = await res.json();
@@ -109,8 +141,9 @@ export default function WorkflowConfigPage() {
         return;
       }
       toast.toast({ title: "Workflow created", description: `${form.name.trim()} is now configured.`, variant: "success" });
-      setDialogOpen(false);
-      setForm({ name: "", levels: "2", appliesTo: "leave_requests", threshold: "0" });
+      setEditorOpen(false);
+      setForm({ name: "", appliesTo: "staff_requests", active: true, minAmount: "", maxAmount: "", categories: "" });
+      setLevels([{ name: "Line Manager", approverType: "Direct Manager", approverEmails: "", autoApproveHours: "0" }]);
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -165,6 +198,184 @@ export default function WorkflowConfigPage() {
     }
   }
 
+  // ---------------- the editor view (the REF's full-page New Workflow) ----------------
+  if (editorOpen) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Back to workflows"
+            onClick={() => setEditorOpen(false)}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <h1 className="text-2xl font-semibold text-foreground">New Workflow</h1>
+        </div>
+
+        {/* the base contract: name + applies-to + the active switch, then
+            the amount window + categories (the REF's live geometry:
+            2-col rows at y=109/142, then 248/324). */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="wf-name">Workflow Name</Label>
+            <Input
+              id="wf-name"
+              placeholder="e.g. Finance Approval"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="wf-applies">Applies To</Label>
+            <Select value={form.appliesTo} onValueChange={(v) => setForm({ ...form, appliesTo: v })}>
+              <SelectTrigger id="wf-applies">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EDITOR_APPLIES_TO.map((a) => (
+                  <SelectItem key={a.value} value={a.value}>
+                    {a.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 mt-6">
+          <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} id="wf-active" />
+          <Label htmlFor="wf-active">Active</Label>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div className="space-y-2">
+            <Label htmlFor="wf-min">Min Amount (SAR)</Label>
+            <Input
+              id="wf-min"
+              type="number"
+              min="0"
+              placeholder="e.g. 500"
+              value={form.minAmount}
+              onChange={(e) => setForm({ ...form, minAmount: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="wf-max">Max Amount (SAR)</Label>
+            <Input
+              id="wf-max"
+              type="number"
+              min="0"
+              placeholder="e.g. 10000"
+              value={form.maxAmount}
+              onChange={(e) => setForm({ ...form, maxAmount: e.target.value })}
+            />
+          </div>
+        </div>
+        <div className="space-y-2 mt-6">
+          <Label htmlFor="wf-categories">Categories (comma separated, blank = all)</Label>
+          <Input
+            id="wf-categories"
+            placeholder="finance, hr, it"
+            value={form.categories}
+            onChange={(e) => setForm({ ...form, categories: e.target.value })}
+          />
+        </div>
+
+        {/* the levels builder — the REF's bordered sub-cards: the blue
+            numbered circle + the name input (w-48) + the trash button; the
+            level grid carries Approver Type + Auto-approve (+ the
+            Approver Emails field for the Specific User(s) type). */}
+        <div className="space-y-4 mt-8">
+          {levels.map((level, i) => (
+            <div key={i} className="border border-slate-200 rounded-lg p-4 bg-white">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {i + 1}
+                  </div>
+                  <input
+                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-48"
+                    placeholder="Level name (e.g. Line Manager)"
+                    aria-label={`Level ${i + 1} name`}
+                    value={level.name}
+                    onChange={(e) => setLevel(i, { name: e.target.value })}
+                  />
+                </div>
+                {levels.length > 1 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-9 w-9 text-red-400 hover:text-red-600"
+                    aria-label={`Remove level ${i + 1}`}
+                    onClick={() => setLevels((prev) => prev.filter((_, idx) => idx !== i))}
+                  >
+                    <Trash2 aria-hidden="true" />
+                  </Button>
+                ) : null}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-slate-500">Approver Type</Label>
+                  <Select value={level.approverType} onValueChange={(v) => setLevel(i, { approverType: v })}>
+                    <SelectTrigger className="mt-1" aria-label={`Level ${i + 1} approver type`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APPROVER_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {level.approverType === "Specific User(s)" ? (
+                  <div>
+                    <Label className="text-xs text-slate-500">Approver Emails (comma separated)</Label>
+                    <input
+                      className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      placeholder="email1@company.com, email2@company.com"
+                      aria-label={`Level ${i + 1} approver emails`}
+                      value={level.approverEmails}
+                      onChange={(e) => setLevel(i, { approverEmails: e.target.value })}
+                    />
+                  </div>
+                ) : null}
+                <div>
+                  <Label className="text-xs text-slate-500">Auto-approve after (hours, 0 = disabled)</Label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    aria-label={`Level ${i + 1} auto-approve hours`}
+                    value={level.autoApproveHours}
+                    onChange={(e) => setLevel(i, { autoApproveHours: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+          <Button type="button" variant="outline" onClick={() => setLevels((prev) => [...prev, { ...BLANK_LEVEL }])}>
+            <Plus className="mr-2" aria-hidden="true" />
+            Add Level
+          </Button>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-8">
+          <Button type="button" variant="outline" onClick={() => setEditorOpen(false)}>
+            Cancel
+          </Button>
+          <Button type="button" disabled={saving} onClick={() => void onSaveWorkflow()}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            Save Workflow
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------- the list view (the standing card-list superset) ----------------
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <PageHeader
@@ -184,8 +395,9 @@ export default function WorkflowConfigPage() {
              blue-600 — live-measured, the CTA-fill census. Session 60
              (R60-E): REF authors text-white here (literal — 255,255,255
              both themes, live-measured; the other blue sites keep the
-             flipping primary-foreground token). */
-          <Button variant="blue" className="text-white" onClick={() => setDialogOpen(true)}>
+             flipping primary-foreground token).
+             Session 93 (R93-C): the click swaps to the FULL-PAGE EDITOR. */
+          <Button variant="blue" className="text-white" onClick={() => setEditorOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             New Workflow
           </Button>
@@ -211,7 +423,7 @@ export default function WorkflowConfigPage() {
           {/* Session 66 (R66-K): the CTA carries mt-4 DIRECTLY (REF's
               authored form — the census read the button's own 16px top
               margin; the wrapper div is retired). */}
-          <Button variant="blue" className="mt-4 text-white" onClick={() => setDialogOpen(true)}>
+          <Button variant="blue" className="mt-4 text-white" onClick={() => setEditorOpen(true)}>
             <Plus className="mr-2" aria-hidden="true" />
             Create First Workflow
           </Button>
@@ -314,87 +526,6 @@ export default function WorkflowConfigPage() {
           ))}
         </div>
       )}
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>New Workflow</DialogTitle>
-            <DialogDescription>Define an approval chain and when it applies.</DialogDescription>
-          </DialogHeader>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void onCreate();
-            }}
-          >
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wf-name">Workflow Name</Label>
-              <Input
-                id="wf-name"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Two-step leave approval"
-                maxLength={120}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="wf-levels">Approval Levels</Label>
-                <Select value={form.levels} onValueChange={(v) => setForm({ ...form, levels: v })}>
-                  <SelectTrigger id="wf-levels">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 level</SelectItem>
-                    <SelectItem value="2">2 levels</SelectItem>
-                    <SelectItem value="3">3 levels</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="wf-applies">Applies To</Label>
-                <Select value={form.appliesTo} onValueChange={(v) => setForm({ ...form, appliesTo: v })}>
-                  <SelectTrigger id="wf-applies">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {APPLIES_TO.map((a) => (
-                      <SelectItem key={a.value} value={a.value}>
-                        {a.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wf-threshold">Approver Threshold (SAR)</Label>
-              <Input
-                id="wf-threshold"
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.threshold}
-                onChange={(e) => setForm({ ...form, threshold: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Requests above this amount require the full approval chain.
-              </p>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="mr-2" aria-hidden="true" />}
-                Create Workflow
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

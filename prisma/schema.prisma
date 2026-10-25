@@ -316,7 +316,7 @@ model JobPosting {
   department   String?
   location     String?
   type         String      @default("full_time")
-  status       String      @default("open") // open | paused | closed
+  status       String      @default("draft") // draft | active (session93 R93-H: the REF's Job Postings vocabulary; the public careers board lists only active)
   description  String?
   openings     Int         @default(1)
   company      String? // R40-H: the public board's chips + the card's second line (REF's chips are companies)
