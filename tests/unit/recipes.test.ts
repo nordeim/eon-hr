@@ -1263,8 +1263,8 @@ describe("small pins: hrreports status + shiftcalendar (session 14, R13-L)", () 
 describe("recruitment tab pill + trigger icons (session 15, R14-A)", () => {
   const page = read("src", "app", "(app)", "recruitment", "page.tsx");
 
-  it("tab pill is the shrink-wrap + bg-white border recipe (439px; session 66 R66-E amendment: the mb-0! member — the v4 space-y root gives the inline-flex List a bottom margin that never collapses with the content mt, doubling the gap; the R22-B kill pattern)", () => {
-    expect(page).toMatch(/TabsList className="mb-0! bg-white border border-slate-200"/);
+  it("tab pill is the shrink-wrap + bg-white border recipe (439px; session 66 R66-E amendment: the mb-0! member — the v4 space-y root gives the inline-flex List a bottom margin that never collapses with the content mt, doubling the gap; the R22-B kill pattern; session 95 amendment: +flex-wrap — the three labels' 471px min-content overflowed the 390 viewport, the REF renders an EMPTY #root below ~640 on this route so the wrap is the clean superset, dormant at desktop)", () => {
+    expect(page).toMatch(/TabsList className="mb-0! bg-white border border-slate-200 flex-wrap"/);
     expect(page).not.toMatch(/<TabsList>\s*$/);
   });
 
@@ -7139,10 +7139,10 @@ describe("Margin/gap census (session 66, R66-A..S — parity round 65: margin + 
     expect(src).not.toContain("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3");
   });
 
-  it("R66-E: the Radix tab pages ride REF's space-y rhythm — the root space-y-6, the TabsList mb-0! (the v4 inline-flex mb never collapses with the content mt — the R22-B pattern), the mt-6 content", () => {
+  it("R66-E: the Radix tab pages ride REF's space-y rhythm — the root space-y-6, the TabsList mb-0! (the v4 inline-flex mb never collapses with the content mt — the R22-B pattern), the mt-6 content (session 95: the recruitment pill carries +flex-wrap — the mobile min-content overflow fix)", () => {
     const src = pg66("recruitment");
     expect(src).toMatch(/<Tabs[^>]*space-y-6/);
-    expect(src).toContain('<TabsList className="mb-0! bg-white border border-slate-200">');
+    expect(src).toContain('<TabsList className="mb-0! bg-white border border-slate-200 flex-wrap">');
     expect(src).not.toContain("mt-6 flex flex-col gap-4");
     expect(src).toContain("mt-6 space-y-4");
     const ev = pg66("evaluations");
@@ -7685,5 +7685,42 @@ describe("session94 — the with-data applicant-pipeline round", () => {
   it("R94-B: next.config.ts serves the CAPITALIZED routes via URL-unchanged rewrites (the R51-A precedent)", () => {
     expect(nextConfig).toContain('{ source: "/Careers", destination: "/careers" }');
     expect(nextConfig).toContain('{ source: "/ExternalJobApplication", destination: "/externaljobapplication" }');
+  });
+});
+
+describe("session95 — the with-data recruitment-family round", () => {
+  const recruitmentPage = read("src", "app", "(app)", "recruitment", "page.tsx");
+
+  it("R95-A: the AI CV Upload tab's stacked contract — the Select Job Position label + the w-96 select + the placeholder", () => {
+    expect(recruitmentPage).toContain("Select Job Position");
+    expect(recruitmentPage).toContain("Choose a job posting...");
+    expect(recruitmentPage).toContain("w-full max-w-96 mt-2");
+  });
+
+  it("R95-A: the job options carry the REF's {title} — {dept} em-dash format", () => {
+    expect(recruitmentPage).toContain("{job.title} — {job.department}");
+  });
+
+  it("R95-A: the CONDITIONAL dropzone — the disabled at-rest form + the active indigo form", () => {
+    expect(recruitmentPage).toContain(
+      "text-center py-12 text-slate-400 bg-white rounded-xl border border-dashed border-slate-300"
+    );
+    expect(recruitmentPage).toContain("Select a job position above to start uploading CVs");
+    expect(recruitmentPage).toContain(
+      "border-2 border-dashed border-indigo-200 rounded-xl p-8 text-center hover:border-indigo-400 hover:bg-indigo-50 transition-colors cursor-pointer"
+    );
+    expect(recruitmentPage).toContain("Upload Candidate CV");
+    expect(recruitmentPage).toContain("PDF, DOC, DOCX — AI will parse &amp; score automatically");
+  });
+
+  it("R95-A: the hidden file input with the REF's accept set", () => {
+    expect(recruitmentPage).toContain('accept=".pdf,.doc,.docx"');
+    expect(recruitmentPage).toContain("extractTextFromFile");
+  });
+
+  it("R95-A: the paste-form inventions retired (no CV Text textarea, no Candidate Name field)", () => {
+    expect(recruitmentPage).not.toContain('id="cv-text"');
+    expect(recruitmentPage).not.toContain('id="cv-name"');
+    expect(recruitmentPage).not.toContain("Analyze CV");
   });
 });

@@ -42,6 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/page-header";
+import { deriveCandidateName, extractTextFromFile } from "@/lib/cv-text";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -153,12 +154,10 @@ export default function RecruitmentPage() {
   });
 
   // AI CV upload tab state
-  const [cvName, setCvName] = React.useState("");
-  const [cvEmail, setCvEmail] = React.useState("");
   const [cvJobId, setCvJobId] = React.useState("");
-  const [cvText, setCvText] = React.useState("");
   const [analyzing, setAnalyzing] = React.useState(false);
   const [analysis, setAnalysis] = React.useState<{ name: string; job: string; aiScore: number; skillsMatch: number; matchedKeywords: string[] } | null>(null);
+  const cvFileRef = React.useRef<HTMLInputElement>(null);
 
   const load = React.useCallback(async () => {
     try {
@@ -312,16 +311,33 @@ export default function RecruitmentPage() {
     }
   }
 
-  async function onAnalyzeCv(e: React.FormEvent) {
-    e.preventDefault();
-    if (!cvJobId || !cvName.trim() || !cvText.trim()) return;
+  /* Session 95 (R95-A): the REF's AI CV Upload tab is a FILE-UPLOAD surface
+     — "Upload Candidate CV / PDF, DOC, DOCX — AI will parse & score
+     automatically" with the hidden .pdf/.doc/.docx input (live-captured on
+     the REF). The superset flow: the filename stem becomes the candidate
+     name, the text is extracted client-side (zero-dependency — the
+     DecompressionStream .docx/.pdf readers in src/lib/cv-text.ts), and the
+     deterministic keyword-overlap API scores it. */
+  async function onCvFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-uploading the same file
+    if (!file || !cvJobId) return;
     setAnalyzing(true);
     setAnalysis(null);
     try {
+      const cvText = await extractTextFromFile(file);
+      if (!cvText) {
+        toast.toast({
+          title: "Couldn't read the CV text",
+          description: "Try a text-based PDF, DOCX, or DOC file.",
+          variant: "error",
+        });
+        return;
+      }
       const res = await fetch("/api/candidates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobPostingId: cvJobId, name: cvName, email: cvEmail, cvText }),
+        body: JSON.stringify({ jobPostingId: cvJobId, name: deriveCandidateName(file.name), email: "", cvText }),
       });
       const json = await res.json();
       if (!json.ok) {
@@ -343,9 +359,6 @@ export default function RecruitmentPage() {
         description: `${candidate.name} scored ${candidate.aiScore ?? 0}/100 and was added to the pipeline.`,
         variant: "success",
       });
-      setCvName("");
-      setCvEmail("");
-      setCvText("");
       await load();
     } catch {
       toast.toast({ title: "Network error", variant: "error" });
@@ -402,7 +415,12 @@ export default function RecruitmentPage() {
             (439×36); the first two triggers carry 12px lucide icons
             (users / sparkles) with gap-1 — the compliance trigger
             recipe (190/131/108 live-measured). */}
-        <TabsList className="mb-0! bg-white border border-slate-200">
+        {/* Session 95: flex-wrap — below the pill's 439px min-content the
+            three labels otherwise force a 471px page min-content at mobile
+            (the REF renders an EMPTY #root below ~640 on this route — the
+            documented REF-broken mobile set; the superset wraps cleanly
+            instead of scrolling). Desktop is untouched (487 < 768). */}
+        <TabsList className="mb-0! bg-white border border-slate-200 flex-wrap">
           <TabsTrigger value="applicants" className="gap-1"><Users className="h-3 w-3" aria-hidden="true" /> Applicants &amp; Ranking</TabsTrigger>
           <TabsTrigger value="cvupload" className="gap-1"><Sparkles className="h-3 w-3" aria-hidden="true" /> AI CV Upload</TabsTrigger>
           <TabsTrigger value="jobs">Job Postings</TabsTrigger>
@@ -682,83 +700,83 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         {/* ---------------- AI CV Upload ---------------- */}
+        {/* Session 95 (R95-A): the REF's tab REBUILT to its live-captured
+            contract — a single STACKED column (NOT the invented 2-col grid):
+            (1) the "Select Job Position" label + the w-96 combobox (the
+            placeholder "Choose a job posting...", the options
+            "{title} — {dept}" for ALL jobs incl. drafts, no default
+            selection — verified 3x on fresh loads); (2) the CONDITIONAL
+            dropzone — with no job the DISABLED form (slate-300 dashes, the
+            slate-300 upload icon, "Select a job position above to start
+            uploading CVs"), with a job the ACTIVE indigo form
+            (border-indigo-200 dashes, the indigo-400 icon, "Upload
+            Candidate CV" + "PDF, DOC, DOCX — AI will parse & score
+            automatically", the hidden .pdf/.doc/.docx input; h168 at rest).
+            The superset: uploading a file extracts the text client-side
+            (src/lib/cv-text.ts) and renders the analysis result below —
+            only after an upload (the interviewassistant AI-Analysis
+            pattern; the REF's own post-upload surface is unreadable — its
+            creation paths are the documented 403-broken class). */}
         <TabsContent value="cvupload" className="mt-6 space-y-4">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border bg-card p-5 shadow-sm">
-              <div className="flex flex-col gap-1 pb-4">
-                <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-                  AI CV Upload
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Paste a CV and pick a job — the CV is scored with a keyword-overlap heuristic against the posting.
-                </p>
+          {/* text-base leading-6 + the trigger's mt-2 = the REF's rendered
+              geometry (its v3 space-y-2 puts margin-top on the BLOCK button;
+              v4's margin-block-end on the INLINE label is layout-inert — the
+              documented trap #6, restored with the explicit second-child mt) */}
+          <div className="text-base leading-6">
+            <Label htmlFor="cv-job">Select Job Position</Label>
+            <Select value={cvJobId} onValueChange={setCvJobId}>
+              <SelectTrigger id="cv-job" className="w-full max-w-96 mt-2">
+                <SelectValue placeholder="Choose a job posting..." />
+              </SelectTrigger>
+              <SelectContent>
+                {jobs.map((job) => (
+                  <SelectItem key={job.id} value={job.id}>
+                    {job.title} — {job.department}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-4">
+            {cvJobId ? (
+              <div
+                role="button"
+                tabIndex={0}
+                className="border-2 border-dashed border-indigo-200 rounded-xl p-8 text-center hover:border-indigo-400 hover:bg-indigo-50 transition-colors cursor-pointer"
+                onClick={() => cvFileRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") cvFileRef.current?.click();
+                }}
+              >
+                <Upload className="w-10 h-10 text-indigo-400 mx-auto mb-3" aria-hidden="true" />
+                <p className="font-semibold text-slate-700 mb-1">Upload Candidate CV</p>
+                <p className="text-sm text-slate-500">PDF, DOC, DOCX — AI will parse &amp; score automatically</p>
+                <input
+                  ref={cvFileRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={onCvFile}
+                />
               </div>
-              <form onSubmit={onAnalyzeCv} className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cv-name">Candidate Name</Label>
-                    <Input
-                      id="cv-name"
-                      required
-                      placeholder="Full name"
-                      value={cvName}
-                      onChange={(e) => setCvName(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cv-email">Email (optional)</Label>
-                    <Input
-                      id="cv-email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={cvEmail}
-                      onChange={(e) => setCvEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cv-job">Job</Label>
-                  <Select value={cvJobId} onValueChange={setCvJobId}>
-                    <SelectTrigger id="cv-job">
-                      <SelectValue placeholder="Select job posting" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {jobs.map((job) => (
-                        <SelectItem key={job.id} value={job.id}>
-                          {job.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cv-text">CV Text</Label>
-                  <Textarea
-                    id="cv-text"
-                    rows={8}
-                    required
-                    placeholder="Paste the full CV text here — skills, experience, education…"
-                    value={cvText}
-                    onChange={(e) => setCvText(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" disabled={analyzing || jobs.length === 0}>
-                  {analyzing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
-                  Analyze CV
-                </Button>
-                {jobs.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Post a job first to analyze CVs against it.</p>
-                ) : null}
-              </form>
-            </div>
-
-            <div className="rounded-xl border bg-card p-5 shadow-sm">
-              <div className="flex flex-col gap-1 pb-4">
-                <h2 className="text-base font-semibold text-foreground">Analysis Result</h2>
-                <p className="text-sm text-muted-foreground">Score summary for the last analyzed CV.</p>
+            ) : (
+              <div className="text-center py-12 text-slate-400 bg-white rounded-xl border border-dashed border-slate-300">
+                <Upload className="w-10 h-10 mx-auto mb-3 text-slate-300" aria-hidden="true" />
+                <p>Select a job position above to start uploading CVs</p>
               </div>
-              {analysis ? (
+            )}
+            {analyzing ? (
+              <div className="flex items-center justify-center py-6" aria-live="polite">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="ml-2 text-sm text-muted-foreground">Parsing &amp; scoring the CV…</span>
+              </div>
+            ) : null}
+            {analysis ? (
+              <div className="rounded-xl border bg-card p-5 shadow-sm">
+                <div className="flex flex-col gap-1 pb-4">
+                  <h2 className="text-base font-semibold text-foreground">Analysis Result</h2>
+                  <p className="text-sm text-muted-foreground">Score summary for the last analyzed CV.</p>
+                </div>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between gap-4 rounded-lg border bg-secondary/30 p-4">
                     <div className="min-w-0">
@@ -794,14 +812,8 @@ export default function RecruitmentPage() {
                     <p className="text-sm text-muted-foreground">No job keywords matched — the CV may target a different role.</p>
                   )}
                 </div>
-              ) : (
-                <EmptyState
-                  icon={<FileSearch className="h-6 w-6" aria-hidden="true" />}
-                  title="No analysis yet"
-                  description="Paste a CV on the left and click Analyze CV."
-                />
-              )}
-            </div>
+              </div>
+            ) : null}
           </div>
         </TabsContent>
 
