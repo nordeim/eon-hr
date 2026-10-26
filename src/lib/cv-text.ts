@@ -120,7 +120,13 @@ async function extractPdfText(file: File): Promise<string> {
     const start = m.index + m[0].length;
     const end = ascii.indexOf("endstream", start);
     if (end < 0) break;
-    streamRe.lastIndex = end;
+    // Session 98 (R98-A): skip past the WHOLE "endstream" token. The old
+    // `lastIndex = end` re-matched the "stream" INSIDE "endstream" (end-
+    // **stream**\r\n), so every chunk after the first started at the
+    // PREVIOUS endstream — object-dict garbage + the next stream's bytes —
+    // failed to inflate, and every stream after the first was silently
+    // lost (a multi-page CV yielded page 1 only).
+    streamRe.lastIndex = end + "endstream".length;
     let text = "";
     // the EOL immediately before "endstream" is not part of the data —
     // try the chunk as-is, then with the trailing EOL stripped (real
@@ -147,10 +153,47 @@ async function extractPdfText(file: File): Promise<string> {
   return parts.join("\n");
 }
 
-/** Pulls the literal strings out of a content stream's text-showing operators. */
+/**
+ * Pulls the literal strings out of a content stream's text-showing operators.
+ */
 function pdfTextOperators(content: string): string {
   const out: string[] = [];
-  const unescape = (s: string) => s.replace(/\\([()\\])/g, "$1").replace(/\\n/g, " ");
+  // Session 98 (R98-B): the octal-escape class — how Word/Acrobat write the
+  // non-ASCII characters CVs are full of (\227 = em-dash, \351 = é, curly
+  // quotes \223/\224 — all WinAnsiEncoding). The old unescape left them as
+  // literal "\227" garbage. The single-pass alternation is REQUIRED: a
+  // sequential replace cannot tell \\053 (escaped backslash + literal
+  // digits) from \053 (octal escape) — the alternation consumes the whole
+  // escaped-backslash match before the octal branch can misread its tail.
+  // 0x80-0x9F decode through the WinAnsi delta map (cp1252 — the curly-
+  // quote/em-dash block where WinAnsi diverges from Latin-1); everything
+  // else is Latin-1; control characters become spaces (they carry no CV
+  // text and read as garbage downstream).
+  const WIN_ANSI_HIGH: Record<number, string> = {
+    0x80: "\u20AC", 0x82: "\u201A", 0x83: "\u0192", 0x84: "\u201E", 0x85: "\u2026",
+    0x86: "\u2020", 0x87: "\u2021", 0x88: "\u02C6", 0x89: "\u2030", 0x8a: "\u0160",
+    0x8b: "\u2039", 0x8c: "\u0152", 0x8e: "\u017D", 0x91: "\u2018", 0x92: "\u2019",
+    0x93: "\u201C", 0x94: "\u201D", 0x95: "\u2022", 0x96: "\u2013", 0x97: "\u2014",
+    0x98: "\u02DC", 0x99: "\u2122", 0x9a: "\u0161", 0x9b: "\u203A", 0x9c: "\u0153",
+    0x9e: "\u017E", 0x9f: "\u0178",
+  };
+  const unescape = (s: string) =>
+    s.replace(
+      /\\(?:([0-7]{1,3})|([nrtbf])|([()\\])|(\r?\n))/g,
+      (_match: string, oct?: string, ws?: string, lit?: string, eol?: string): string => {
+        if (oct !== undefined) {
+          const code = parseInt(oct, 8) % 256; // 1-3 octal digits, mod 256 per spec
+          const high = WIN_ANSI_HIGH[code];
+          if (high !== undefined) return high;
+          // printable ASCII + the Latin-1 letters (0xA0-0xFF: é ñ ü …);
+          // DEL and the unmapped C1 controls carry no CV text → space
+          return (code >= 32 && code < 127) || code >= 0xa0 ? String.fromCharCode(code) : " ";
+        }
+        if (ws !== undefined) return " "; // \n \r \t \b \f → space (the \n contract kept)
+        if (lit !== undefined) return lit; // \( \) \\
+        return eol !== undefined ? "" : _match; // line continuation \<EOL>
+      }
+    );
   // Session 97 (R97-A): TWO alternatives, reading order preserved.
   //   1. (…) Tj|TJ|'|" — the string directly followed by the operator
   //      (the simple writer's form).

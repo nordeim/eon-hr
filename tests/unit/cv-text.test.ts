@@ -117,6 +117,80 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("Senior HR (Manager) with payroll");
   });
 
+  // Session 98 (R98-A): the multi-stream PDF — the real multi-page shape.
+  // The scan regex /stream\r?\n/g re-matched the "stream" INSIDE the
+  // previous "endstream", so every chunk after the first started at the
+  // PREVIOUS endstream (object-dict garbage + the next stream's bytes)
+  // and failed to inflate — page 2+ text was silently lost. The r97
+  // queue named it "the scanner handles it but it's never been pinned";
+  // the pin found the scanner does NOT handle it (the fixture-form blind
+  // spot, §109, one round deeper).
+  async function twoStreamPdf(): Promise<File> {
+    const content1 =
+      "BT /F1 12 Tf (Senior HR Manager with payroll, GOSI, and compliance skills) Tj ET";
+    const content2 =
+      "BT /F1 12 Tf (Second page: training, onboarding, and recruitment experience) Tj ET";
+    const deflate = async (s: string): Promise<Uint8Array> => {
+      const zlib = new CompressionStream("deflate");
+      return new Uint8Array(
+        await new Response(new Blob([s]).stream().pipeThrough(zlib)).arrayBuffer()
+      );
+    };
+    const d1 = await deflate(content1);
+    const d2 = await deflate(content2);
+    const enc = (s: string) => new TextEncoder().encode(s);
+    const parts: Uint8Array[] = [
+      enc("1 0 obj\n<< /Length " + d1.length + " >>\nstream\r\n"),
+      d1,
+      enc("\r\nendstream\r\nendobj\n"),
+      enc("2 0 obj\n<< /Length " + d2.length + " >>\nstream\r\n"),
+      d2,
+      enc("\r\nendstream\r\nendobj\ntrailer\n<< /Root 3 0 R >>\n%%EOF"),
+    ];
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts EVERY stream of a multi-stream (multi-page) PDF in reading order — R98-A", async () => {
+    const file = await twoStreamPdf();
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager"); // page 1
+    expect(text).toContain("Second page"); // page 2 — the stream the old scan lost
+    // reading order preserved across streams
+    expect(text.indexOf("Senior HR Manager")).toBeLessThan(text.indexOf("Second page"));
+  });
+
+  // Session 98 (R98-B): the octal-escape class — how Word/Acrobat write
+  // the non-ASCII characters CVs are full of (\227 = em-dash, \351 = é in
+  // WinAnsiEncoding; curly quotes \223/\224 the same family). The old
+  // unescape left them as literal "\227" garbage in the extracted text.
+  it("unescapes octal escapes (WinAnsi/Latin-1) in PDF strings — R98-B", async () => {
+    const file = await pdfWithContent(
+      "BT [(Senior HR Manager \\227 ten years of payroll, GOSI, r\\351sum\\351, compliance, and onboarding experience)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Manager \u2014 ten years"); // \227 → WinAnsi em-dash
+    expect(text).toContain("r\u00e9sum\u00e9"); // \351 → é (Latin-1 == WinAnsi here)
+    expect(text).not.toContain("\\227"); // no literal escape garbage remains
+    expect(text).not.toContain("\\351");
+  });
+
+  it("keeps an escaped backslash followed by digits literal (the \\\\ddd disambiguation)", async () => {
+    // \\\\ is an escaped backslash; the following "053" is literal text,
+    // NOT an octal escape — a sequential replace would corrupt it.
+    const file = await pdfWithContent(
+      "BT [(HR systems engineer \\\\053 payroll, GOSI, compliance, onboarding, and training skills)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\\053"); // the literal backslash + digits survive
+  });
+
   it("falls back to the printable scrub when nothing structured matches (the .doc / degenerate path)", async () => {
     // A NUL-interleaved (UTF-16LE-shaped) blob — what a legacy .doc looks
     // like when read as text. The scrub strips NULs and keeps the words.
