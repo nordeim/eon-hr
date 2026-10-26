@@ -145,4 +145,12 @@ cycle + the R90-B sheet re-verified if any tablist changes.
   pkill the shells, restart :3200 if it died) · the :3200 auth limiter
   (10 logins/15min) forces a server restart every ~10 scripted
   sessions.
+- **The push: PENDING the operator's SSH deploy key.** The commit
+  (`0f6e679`) is on local main with all gates green; the SSH wrapper
+  path is prepared (the paramiko shim at the workspace `bin/`, the
+  wrapper at `docs/ssh_git_wrapper_v3.py`), but the deploy key is not
+  present in this sandbox (operator-provided in past sessions, shredded
+  per the protocol, and not carried by the context summary). Per the
+  LOST-PUSH lesson the round is not landed until the push verifies —
+  materialize the key, dry-run, push, verify remote == local HEAD.
 
