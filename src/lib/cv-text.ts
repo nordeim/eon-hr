@@ -150,11 +150,28 @@ async function extractPdfText(file: File): Promise<string> {
 /** Pulls the literal strings out of a content stream's text-showing operators. */
 function pdfTextOperators(content: string): string {
   const out: string[] = [];
-  // (…) Tj — the single-string show; [ (…) (…) …] TJ — the array form
-  const re = /\(((?:\\.|[^\\()])*)\)\s*(?:Tj|TJ|'|")/g;
+  const unescape = (s: string) => s.replace(/\\([()\\])/g, "$1").replace(/\\n/g, " ");
+  // Session 97 (R97-A): TWO alternatives, reading order preserved.
+  //   1. (…) Tj|TJ|'|" — the string directly followed by the operator
+  //      (the simple writer's form).
+  //   2. [ … ] TJ — the ARRAY form the real-world writers (Word's
+  //      Save-as-PDF, Acrobat, kerned LaTeX) emit: the body is a sequence
+  //      of string atoms (…), positioning numbers, and whitespace; every
+  //      string atom is a text fragment. The body's atom grammar treats a
+  //      whole (…) group as one token so a ] inside a string cannot
+  //      terminate the array early.
+  const re =
+    /\(((?:\\.|[^\\()])*)\)\s*(?:Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ/g;
+  const strRe = /\(((?:\\.|[^\\()])*)\)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(content))) {
-    out.push(m[1].replace(/\\([()\\])/g, "$1").replace(/\\n/g, " "));
+    if (m[1] !== undefined) {
+      out.push(unescape(m[1]));
+    } else if (m[2] !== undefined) {
+      let s: RegExpExecArray | null;
+      strRe.lastIndex = 0;
+      while ((s = strRe.exec(m[2]))) out.push(unescape(s[1]));
+    }
   }
   return out.join(" ");
 }

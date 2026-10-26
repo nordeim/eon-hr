@@ -12,8 +12,8 @@ High-signal operating notes for AI coding agents working in this repo. Read
 | Dev server | `bun run dev` (port 3000) |
 | Lint | `bun run lint` |
 | Typecheck | `bun run typecheck` |
-| Unit tests | `bun run test` (Vitest, 963 specs) |
-| E2E tests | `bun run test:e2e` (Playwright, 512 specs — needs `bun run build` first; the runner does NOT build for you) |
+| Unit tests | `bun run test` (Vitest, 998 specs) |
+| E2E tests | `bun run test:e2e` (Playwright, 549 specs — needs `bun run build` first; the runner does NOT build for you) |
 | Production build | `bun run build` (standalone output at `.next/standalone/`) |
 | Push schema | `bun run db:push` |
 | Seed | `bun run db:seed` |
@@ -5822,3 +5822,19 @@ Gates: lint 0/0 · tsc ✓ · **995/995 unit** (984 + 6 cv-text + 5 R95 pins; th
 **THE GATES:** lint 0/0 · tsc ✓ · 995/995 unit · build ✓ 116/116 · E2E 546 passed + 1 resource-pressure casualty re-verified 13/13 on the idle machine (the documented E2E-concurrency class; NO source changes this round — the opening baseline IS the closing gate) · DB pristine at close (the loading-probe user + the r96 test candidates swept) · the evidence chain (4 r96 PNGs).
 
 **THE ROUND'S TRAPS:** the bash double-quote `$` expansion silently emptied the login password (`"$Abcd1234"` through double quotes → `$Abcd` expands to empty — single-quote the password in every agent-browser fill) · the `//` comment inside an eval expression swallows the rest after the one-lining join (no comments inside eval strings) · the agent-browser thread exhaustion (EAGAIN on spawn) after rapid session cycling — the cleanup: pkill the headless shells, restart :3200 if it died, batch the browser work into fewer scripts · the :3200 auth limiter (10 logins/15min) forces a standalone restart every ~10 scripted sessions.
+
+## Session 97 / Parity Round 96 — the real-file CV-flow round (v3.84.0)
+
+**The frontier:** the r96 close-out's queue — the AI CV Upload tab's with-data flow with a REAL `.docx`/`.pdf` (until now E2E-exercised with a `.txt` only), the kanban within-column DnD (resolved COVERED by the existing spec on inspection), the REF-mobile-render sweep, and the standing watches.
+
+**THE OPENING READ:** the REF QUIET at the 65th deploy state (the login asset fingerprints unchanged — login JS `index-Cb4GrjTt.js`, CSS `index-ByKl99Mk.css`; no 66th deploy) → the FULL STANDING LADDER GREEN: the fresh login pair BYTE-IDENTICAL (`69aa4241…`) + standing 5/5 (the first run's drawer miss = the first-click absorption transient; the re-run clean) + sweep 12/12 + verify-r45 13/13 + verify-r49 13/13.
+
+**THE ROUND'S ONE DEFECT — R97-A the `.pdf` TJ-array extraction (VERIFIED, TDD-FIXED):** `src/lib/cv-text.ts`'s `pdfTextOperators` matched only strings DIRECTLY followed by a text operator (`(…) Tj|TJ|'|"`); real-world PDF writers (Word's Save-as-PDF, Acrobat, kerned LaTeX) emit the ARRAY form — `[(Senior HR Manager) -120 (with payroll)] TJ` — where the strings ride inside the brackets followed by positioning numbers. The old regex yielded ZERO strings on a TJ-array stream (empirically verified) → a real .pdf CV surfaced "Couldn't read the CV text" — the tab's core promise ("PDF, DOC, DOCX — AI will parse & score automatically") failed on the dominant real-world form. **The fix:** the two-alternative scan (the direct form + the full array form with the same unescape rules, reading order preserved) · RED 3/3 as designed → GREEN 9/9 (the GREEN-phase catch: the escaped-parens spec's first content ran UNDER the 40-alphanumeric guard — the fixture, not the regex, was short).
+
+**R97-B the real-file E2E (born-green 2/2, MUTATION-PROOFED):** the new `tests/e2e/session97-realfile-cvflow.spec.ts` drives a real-shaped `.docx` (the shared zip-fixture builder) and a TJ-carrying `.pdf` through the actual UI → the analysis card → the persisted API row (nonzero aiScore asserted) → the cleanup. The mutation proof (the pre-R97 regex restored): exactly 1 RED (the TJ spec) while the docx spec stayed green — unique teeth.
+
+**THE STANDING CLASSIFICATIONS RE-VERIFIED (no clone change):** the REF-broken mobile set HOLDS (hrreports + interviewassistant empty `#root`; employeeselfservice the loading shell; employeedetail the empty shell; /recruitment renders at 390 — the r96 retirement holds) · the REF's Add Applicant creation STILL BROKEN (the dialog opens 512×522 with the seven labels; the Job Posting combobox opens an EMPTY listbox — count 0) · the mobile-nav cross-side pair PARITY (the REF's 28px `lucide-panel-left` hamburger + its 288px fixed drawer byte-match the clone's contract) · the kanban within-column DnD COVERED · the patch watch HOLD at ^16.4.2 (16.4.3 published) · TW-v4 oklch clean · secrets zero.
+
+**THE GATES:** lint 0/0 · tsc ✓ · 998/998 unit (995 + 3 R97 pins) · build ✓ 116/116 · E2E 549/549 (the 547 standing + the 2 new; the final gate ALONE) · DB pristine at close (candidates 0) · the evidence chain (11 r97 PNGs; the analysis card VLM-verified).
+
+**THE ROUND'S TRAPS:** the `offsetParent` visibility fallacy (Chrome reports `offsetParent === null` for `position:fixed` portals — Radix dialogs/drawers read as ABSENT; the fixed-aware check: `getBoundingClientRect().width > 0` + the computed position) · the agent-browser text-selector syntax (the Playwright-style `>> text=` chaining is NOT agent-browser syntax — those clicks fail silently; the snapshot-ref click is the reliable path) · the `$`-password double-quote trap re-fired once (the `fill` + single-quoted shell words is the standing cure) · the first-click absorption (the standing audit's 4/5 first run → 5/5 re-run; the tab clicks need a selected-state verify + re-click) · the :3200 lifecycle pair (the auth limiter restart + the EADDRINUSE pkill settle ≥2-3s).

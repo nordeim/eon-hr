@@ -68,6 +68,55 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("payroll");
   });
 
+  // Session 97 (R97-A): the TJ ARRAY form — the dominant text operator in
+  // real-world PDFs (Word's Save-as-PDF, Acrobat, kerned LaTeX). The
+  // strings ride inside [ (…) -120 (…) ] TJ where each is followed by
+  // positioning numbers and ], NOT by the operator itself.
+  async function pdfWithContent(content: string): Promise<File> {
+    const zlib = new CompressionStream("deflate");
+    const deflated = new Uint8Array(
+      await new Response(new Blob([content]).stream().pipeThrough(zlib)).arrayBuffer()
+    );
+    const head = new TextEncoder().encode("stream\r\n");
+    const tail = new TextEncoder().encode("\r\nendstream\r\nendobj");
+    const pdf = new Uint8Array(2 + head.length + deflated.length + tail.length);
+    pdf.set(new Uint8Array([0x3c, 0x3c]), 0);
+    pdf.set(head, 2);
+    pdf.set(deflated, 2 + head.length);
+    pdf.set(tail, 2 + head.length + deflated.length);
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts the strings inside a TJ array (the real-world PDF form — R97-A)", async () => {
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(Senior HR Manager) -120 (with payroll, GOSI, and compliance skills)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager");
+    expect(text).toContain("payroll, GOSI, and compliance skills");
+  });
+
+  it("extracts a mixed Tj + TJ stream keeping both operators' strings", async () => {
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (Jane Doe) Tj [(Senior HR Manager) -250 (with GOSI)] TJ [(and payroll)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Jane Doe");
+    expect(text).toContain("Senior HR Manager");
+    expect(text).toContain("with GOSI");
+    expect(text).toContain("and payroll");
+  });
+
+  it("unescapes parentheses inside TJ array strings", async () => {
+    // the content runs past the 40-alphanumeric guard (a bare short string
+    // would surface "" for the right reason — the guard, not the regex)
+    const file = await pdfWithContent(
+      "BT [(Senior HR \\(Manager\\) with payroll, GOSI, onboarding, and compliance skills)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR (Manager) with payroll");
+  });
+
   it("falls back to the printable scrub when nothing structured matches (the .doc / degenerate path)", async () => {
     // A NUL-interleaved (UTF-16LE-shaped) blob — what a legacy .doc looks
     // like when read as text. The scrub strips NULs and keeps the words.

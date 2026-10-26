@@ -4,7 +4,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 # Eon HR
 
-a 1542-spec test pyramid (995 unit + 547 E2E
+a 1547-spec test pyramid (998 unit + 549 E2E
 **Tech Stack:** Next.js 16 (App Router, standalone output) · React 19 · TypeScript 5 (strict) · Tailwind CSS 4 (CSS-first) · Radix UI primitives · Prisma 6 + SQLite · Zod 4 · Recharts 2 · Vitest 5 · Playwright 1.63
 
 ## Core Identity & Purpose
