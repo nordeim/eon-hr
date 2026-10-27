@@ -118,7 +118,8 @@ const apiGet = run(`agent-browser --session ${S} eval "fetch('/api/candidates').
 console.log("api row:", apiGet.trim().slice(0, 160));
 const row = (() => { try { return JSON.parse(apiGet.trim().replace(/^"|"$/g, "").replace(/\\"/g, '"')); } catch { return null; } })();
 if (row?.id) {
-  const del = run(`agent-browser --session ${S} eval "fetch('/api/candidates?id=${'$'}{row.id}'`, {method:'DELETE'}).then(r=>r.status)")`);
+  const delCmd = `agent-browser --session ${S} eval "fetch('/api/candidates?id=${row.id}', {method:'DELETE'}).then(r=>r.status)"`;
+  const del = run(delCmd);
   console.log("cleanup DELETE:", del.trim().slice(0, 40));
 }
 run(`agent-browser --session ${S} close`);

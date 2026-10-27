@@ -52,7 +52,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 | Validation | Zod | 4.x | Every API boundary |
 | State | React hooks + per-page local state | — | Server is the source of truth |
 | Unit tests | Vitest | 5.x | Pure seams (db-path, auth, utils, design tokens, shell recipes) |
-| E2E tests | Playwright | 1.63 | 555 specs across auth, nav (61 routes — the full registry), mobile, dashboard, inline 4-step wizard CRUD, kanban drag-drop (cross-column + within-column reorder) + 
+| E2E tests | Playwright | 1.63 | 556 specs across auth, nav (61 routes — the full registry), mobile, dashboard, inline 4-step wizard CRUD, kanban drag-drop (cross-column + within-column reorder) + 
 | + the session-62 dark-mode border-color family spec (14 — R62-A..K, computed border truth, both themes where applicable: the Customize button riding the flipping border-input pair (the retired session-3 frozen literal), the checkbox border literal pair (light #171717 / dark #fafafa — the both-theme bug on the wrong token), the four palette pins rendering rgb() (green-200, amber-200, cyan-300 + the cyan-50 hover fill), the unflipping border-slate-200 card family in dark (the loans + offboarding empty-state rewrites, the hrletters/analytics/profile/compliance cards, the attendance Report-Type 3-level shape + the stat cards' hover:shadow-lg members), the attendance action-button trio (cyan-300/slate-300/blue-300 + the per-color hovers), the recruitmentkanban per-stage column pairs inside the flex-shrink-0 w-64 wrappers, the shiftcalendar th border-b + the weekend variant, the thead-row recipes (assetmanagement/payrollmodule slate-200/slate-50 on the row; recruitment's thead-level border with the neutralized inner tr), the profile role badge's DIV tag, the compliance severity cards' two-level shape + the At-Risk overflow-hidden, the textarea resize-none) |
 | + the session-63 light-mode text-color family spec (6 — R63-A..F, computed text truth, both themes where applicable: the payroll search placeholder riding REF's muted literal pair (light #737373 / dark #a3a3a3 — the token's slate-500 tint retired), the hrreports empty Group By trigger's foreground pair (light #0a0a0a / dark #fafafa — the instance override carrying BOTH variant members over the base's R37-E neutral literal), the profile kicker subtitle's flipping pair at 390×844 (slate-500 light / slate-400 dark — the r61 dark-only pin amended), the shiftcalendar assign affordance's Plus icon + the unflipping slate-300, the summary header's Users icon + the foreground pair + the pb-3, the recruitment AI Score th's TrendingUp icon inside the flex wrapper) |
 | + the session-64 light-mode border census + input-family probes spec (6 — R64-A..F, computed truth: the iconed-search paddings (payroll 40px / payrollmodule, documenttracker, assetmanagement 36px — typed text now clears the absolute left-3 icon), the placeholder-text surfaces (the compliance "Search employee...", the recruitmentkanban "Search applicants...", the interviewassistant verbatim observations textarea, the tenantsetup "Acme Corporation"/"admin@acme.com" example pair), and the round's border-census truth pin (the payroll search input rides the border-input token pair — light rgb(229,229,229) / dark rgb(38,38,38))) |
@@ -142,8 +142,8 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (1028 specs: db-path, auth, utils, tokens, cv-text, session-5..102 recipes)
-bun run test:e2e      # Playwright E2E (555 specs) — boots the production standalone server
+bun run test          # Vitest unit layer (1034 specs: db-path, auth, utils, tokens, cv-text, session-5..103 recipes)
+bun run test:e2e      # Playwright E2E (556 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit
 ```

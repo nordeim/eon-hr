@@ -783,4 +783,120 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     const text = await extractTextFromFile(file);
     expect(text).toContain("payroll specialist with compliance");
   });
+
+  // Session 103 (R103-B/C): the Google Docs/Skia + LuaTeX real-writer round —
+  // the 9th and 10th writer families (gdocs-cv-template.pdf, Producer "Skia/PDF
+  // m158 Google Docs Renderer"; martino-lualatex.pdf, Producer "LuaTeX-0.80.0")
+  // carry their word positioning in the Tm TRANSLATION, which the walk
+  // blind-reset. The Skia form: every word its own BT block — a FLIPPED
+  // axis-aligned Tm + a CONSTANT-baseline Td (-14.2578125 on every word) + a
+  // hex Tj, with the line geometry in the enclosing q…cm…Q block — the ty≠0
+  // rule fired a newline for EVERY word (word-per-line soup) and the same-BT
+  // split-word continuations ("COMP" Td(47.6875,0) "ANY") fired the ≥1-em
+  // gap rule ("COMP ANY"). The LuaTeX form: every word AND every glyph its
+  // own Tm — the blind reset space-joined every letter (1,012 letter-soup
+  // runs, every keyword dead).
+  it("joins the Skia form's words with spaces through the constant-baseline Td (the Google Docs word-per-line fix — R103-B)", async () => {
+    // the real gdocs shape: Tm(1 0 0 -1 ex ey) + Td(tx, -14.25) per word,
+    // explicit space-glyph pieces between words (the tx = the offset from
+    // the line origin — verbatim from the real file's MCID 4 block)
+    const word = (w: string, tx: number) =>
+      `BT /F1 16 Tf 1 0 0 -1 465.14063 1.10218716 Tm ${tx} -14.2578125 Td (${w}) Tj ET`;
+    const content = [
+      word("securely", 0),
+      word(" ", 45.7),
+      word("support", 49.7),
+      word(" ", 105.4),
+      word("specialist", 109.4),
+      word(" ", 187.6),
+      word("platform", 191.6),
+      word(" ", 253.4),
+      word("systems", 257.4),
+      word(" ", 312.8),
+      word("admin", 316.8),
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("securely support specialist platform"); // ← RED before the fix: "securely\n \nsupport" (every word on its own line)
+    expect(text).toContain("platform systems admin"); // the tail words through the same join
+  });
+
+  it("joins the Skia same-BT split-word continuations in a space-glyph stream (the R103-C conditional)", async () => {
+    // the real gdocs split shape: (s) then Td(40.2, 0) then (ystems) inside
+    // ONE BT block — the tx is exactly the preceding part's width (the
+    // kern-pair shaping split). The stream writes explicit space pieces
+    // (the Skia/LO convention: word gaps are glyphs, never bare moves), so
+    // the bare em-gap move is a CONTINUATION — the assembly-time
+    // conditional joins it.
+    const content = [
+      "BT /F1 16 Tf 1 0 0 -1 100 50 Tm 0 -14.25 Td (payroll admin compliance training onboarding experience) Tj ET",
+      "BT /F1 16 Tf 1 0 0 -1 100 50 Tm 300 -14.25 Td ( ) Tj ET",
+      "BT /F1 16 Tf 1 0 0 -1 100 50 Tm 304 -14.25 Td (s) Tj 40.2 0 Td (ystems) Tj ET",
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("systems"); // ← RED before the fix: "s" and "ystems" split by the ≥1-em gap rule
+  });
+
+  it("assembles per-glyph Tm blocks into words (the LuaTeX form — R103-B)", async () => {
+    // the real martino-luatex shape: every glyph its own BT+Tm block, the
+    // letter advances at 0.45–0.55 em, the word gaps at 1.2+ em (a
+    // single-code TJ array in the real file — a literal Tj here, the same
+    // operator walk)
+    const glyph = (ch: string, x: number) =>
+      `BT /F1 10 Tf 1 0 0 1 ${x} 650 Tm (${ch}) Tj ET`;
+    const xs = { t: 100, e: 105, c: 110, h: 114.5, n: 119, o: 123.5, l: 128, g: 137, y: 141.5, a: 160, d: 165, m: 170.5, i: 173.5 };
+    const content = [
+      "BT /F1 12 Tf 1 0 0 1 100 700 Tm (payroll specialist compliance onboarding training experience) Tj ET",
+      glyph("t", xs.t), glyph("e", xs.e), glyph("c", xs.c), glyph("h", xs.h), glyph("n", xs.n),
+      glyph("o", xs.o), glyph("l", xs.l), glyph("o", 132.5), glyph("g", xs.g), glyph("y", xs.y),
+      glyph("a", xs.a), glyph("d", xs.d), glyph("m", xs.m), glyph("i", xs.i), glyph("n", 176.5),
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("technology admin"); // ← RED before the fix: "t e c h n o l o g y  a d m i n" (every letter spaced)
+  });
+
+  it("keeps the pdfTeX per-line Tm steps as line breaks through the fresh-run baseline suppression (the R103-B guard)", async () => {
+    // the arXiv form: a Tm per line + a Td(0, -1.2em) baseline — the line
+    // signal lives in the Tm-origin dy (the suppression of the fresh-run
+    // Td's ty must not lose it)
+    const content = [
+      "BT /F1 10 Tf 1 0 0 1 100 700 Tm 0 -12 Td (payroll admin compliance first line) Tj ET",
+      "BT /F1 10 Tf 1 0 0 1 100 688 Tm 0 -12 Td (training onboarding second line) Tj ET",
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("first line\ntraining"); // the per-line Tm dy (-1.2 em) keeps its newline
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("keeps the standing reset for ROTATED Tm matrices (the IRS sideways-label form — the R103-B guard)", async () => {
+    // the real IRS f1040 form: /T1_0 with a rotated matrix (0 7 -6.9999 0 …)
+    // — the origin-delta math has no meaning there; the rotated branch must
+    // keep the standing blind-reset behavior and not break the next
+    // axis-aligned run
+    const content = [
+      "BT /T1_0 1 Tf 0 7 -6.9999 0 41.598 748.001 Tm (Form) Tj ET",
+      "BT /T1_1 1 Tf 24 0 0 24 43.2 748.062 Tm (1040 payroll admin compliance training onboarding specialist experience guard) Tj ET",
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Form");
+    expect(text).toContain("1040 payroll admin compliance");
+  });
+
+  it("never joins TJ-array internal numeric gaps in a space-glyph stream (the fromKern restriction — the arXiv regression guard)", async () => {
+    // the prototype's own dead end, pinned: pdfTeX writes a FEW standalone
+    // space pieces in some streams — the first draft's "any space piece ⇒
+    // all gaps join" conditional fused 350 arXiv words through their -322
+    // TJ-internal numeric gaps. A TJ-internal NUMBER is the writer's
+    // explicit kern/gap intent and is NEVER conditional — only Td/Tm
+    // move-driven gaps are.
+    const content =
+      "BT /F1 12 Tf (payroll admin compliance training onboarding experience guard words here) Tj ( ) Tj [(wordgap) -322 (separated)] TJ ET";
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("wordgap separated"); // the numeric gap keeps its space even though the stream writes space pieces
+  });
 });

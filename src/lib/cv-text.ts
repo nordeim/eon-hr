@@ -231,9 +231,13 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
  * A text-showing piece with its leading separator (R100-A) and its font
  * name (R102-B): the separator is decided by the POSITIONING between shows,
  * and the hex decode by the font's OWN ToUnicode CMap when the file's
- * object structure resolves it.
+ * object structure resolves it. R103: a piece whose " " separator came from
+ * a ty=0 em-gap between shows carries condGap — in streams that write
+ * EXPLICIT space glyphs (the Skia/LO convention: word gaps are glyphs, never
+ * bare moves) those gaps are split-word continuations and resolve to joins
+ * at assembly time (the R103-C conditional).
  */
-type TextPiece = { sep: string; font?: string } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
+type TextPiece = { sep: string; font?: string; condGap?: boolean } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
 
 /**
  * Pulls the text operands out of a content stream's text-showing operators
@@ -289,30 +293,49 @@ function pdfTextPieces(content: string): TextPiece[] {
   let pendingTy = 0; // accumulated ty since the last show
   let moved = false; // any positioning operator since the last show?
   let backward = false; // any backwards (tx < 0) move?
+  // The R103-B absolute-position state: the LAST axis-aligned Tm's origin
+  // (e,f) in user space — the separator between two Tm-separated shows comes
+  // from the ORIGIN-TO-ORIGIN delta (the Google Docs/Skia form: every word
+  // its own BT block, Tm + a constant-baseline Td; the LuaTeX form: every
+  // word/glyph its own Tm). A Td arriving BEFORE any show in a fresh run
+  // (shownSinceTm=false) carries a BASELINE placement, not a line move — the Skia
+  // constant-baseline class (the -14.26 ty on every word) must not fire the
+  // newline rule; line moves between shows keep the standing ty rule.
+  let lastTm: { x: number; y: number } | null = null;
+  let shownSinceTm = true; // a show since the last Tm? (true initially — Tm-less streams keep the ty rule)
   const reset = () => {
     pendingEm = 0;
     pendingTy = 0;
     moved = false;
     backward = false;
   };
-  const push = (piece: { kind: "lit"; text: string } | { kind: "hex"; hex: string }) => {
+  // fromKern: the gap was decided by a TJ-ARRAY INTERNAL NUMBER (the writer's
+  // explicit numeric kern/gap intent — pdfTeX's -322 class) — never a
+  // conditional; only Td/Tm-driven gaps (positioning moves, which the
+  // space-glyph writers use for split-word continuations) are conditional.
+  const push = (piece: { kind: "lit"; text: string } | { kind: "hex"; hex: string }, fromKern = false) => {
     let sep = " "; // the standing join: adjacent shows separate
+    let condGap = false;
     if (moved) {
       if (pendingTy !== 0) sep = "\n"; // a line move is a line break
-      else if (backward || pendingEm >= 1.0) sep = " "; // a word gap / backstep
-      else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
+      else if (backward || pendingEm >= 1.0) {
+        sep = " "; // a word gap / backstep
+        condGap = !backward && !fromKern; // a forward MOVE-driven em-gap MIGHT be a split-word continuation (R103-C)
+      } else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
     }
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
-    pieces.push({ sep, font: curFont, ...piece });
+    pieces.push({ sep, font: curFont, ...(condGap ? { condGap: true } : {}), ...piece });
     reset();
+    shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
   };
   // The operator walk, left to right — the alternation order guarantees a
   // string/array match consumes its whole body before any inner fragment
   // could re-match (the same guarantee the old single regex relied on):
   //   1: Tf size | 2,3: Td/TD tx,ty | the T* line-op | 4,5: literal show +
-  //   operator | 6: the TJ-array body | 7,8: hex show + operator | Tm
+  //   operator | 6: the TJ-array body | 7,8: hex show + operator | 9-14: the
+  //   Tm operands a b c d e f (the R103-B position-aware form)
   const ops =
-    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|Tm/g;
+    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
   let m: RegExpExecArray | null;
   while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
@@ -325,7 +348,10 @@ function pdfTextPieces(content: string): TextPiece[] {
     if (m[2] !== undefined) {
       const tx = parseFloat(m[2]);
       pendingEm += Math.abs(tx) / effSize;
-      pendingTy += parseFloat(m[3]);
+      // R103-B: a Td BEFORE any show in the fresh run carries a baseline
+      // placement (the Skia constant-baseline class) — its ty is not a line
+      // move; between shows the ty keeps the standing line-move rule
+      if (shownSinceTm) pendingTy += parseFloat(m[3]);
       moved = true;
       if (tx < 0) backward = true;
       continue;
@@ -369,7 +395,7 @@ function pdfTextPieces(content: string): TextPiece[] {
             moved = true;
             pendingEm = kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
           }
-          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] });
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] }, kern !== 0);
           kern = 0;
         } else {
           kern += parseFloat(a[3]);
@@ -387,9 +413,50 @@ function pdfTextPieces(content: string): TextPiece[] {
       }
       continue;
     }
-    // Tm — an absolute reposition starts a new run: the pending move (if
-    // any) is superseded, the next show takes the default space
-    reset();
+    // Tm (R103-B) — the position-aware reposition. The six operands are the
+    // text matrix; for an AXIS-ALIGNED matrix (|b|,|c| ≈ 0) the translation
+    // (e,f) is the new run's origin in user space, and the ORIGIN-TO-ORIGIN
+    // delta from the last axis-aligned Tm decides the separator exactly like
+    // a between-shows move:
+    //   |dy| / (size·|d|) ≥ 0.5 em → a line move (pdfTeX's per-line Tm steps,
+    //     the cross-paragraph jumps)
+    //   a backwards or ≥ 1.0 em dx → a word gap
+    //   a forward dx under 1.0 em → a glyph continuation (the join — the
+    //     LuaTeX per-glyph form: "N", "o", "v" each in their own Tm block)
+    // A ROTATED matrix (|b| or |c| significant — the IRS's sideways labels)
+    // keeps the standing blind reset (and drops the origin track): the delta
+    // math has no meaning there. The Skia same-line words share the SAME Tm
+    // origin (delta 0,0) and their gaps ride the Td's own em accumulation;
+    // the Skia constant-baseline Td ty is suppressed by the shownSinceTm rule.
+    {
+      const a = parseFloat(m[9]);
+      const b = parseFloat(m[10]);
+      const c = parseFloat(m[11]);
+      const d = parseFloat(m[12]);
+      const e = parseFloat(m[13]);
+      const f = parseFloat(m[14]);
+      const axisAligned = Math.abs(b) < 0.01 && Math.abs(c) < 0.01 && Math.abs(a) > 0.01 && Math.abs(d) > 0.01;
+      reset();
+      shownSinceTm = false; // in a fresh run — the FIRST Td's ty is a baseline placement, not a line move
+      if (axisAligned) {
+        if (lastTm) {
+          const emDx = (e - lastTm.x) / (effSize * Math.abs(a));
+          const emDy = (f - lastTm.y) / (effSize * Math.abs(d));
+          if (Math.abs(emDy) >= 0.5) {
+            pendingTy = 1; // a line move
+            moved = true;
+          } else {
+            pendingEm = Math.abs(emDx);
+            moved = emDx !== 0;
+            if (emDx < 0) backward = true;
+          }
+        }
+        lastTm = { x: e, y: f };
+      } else {
+        lastTm = null; // rotated — the origin track is meaningless until the next axis-aligned Tm
+      }
+      continue;
+    }
   }
   return pieces;
 }
@@ -538,9 +605,21 @@ async function extractPdfText(file: File): Promise<string> {
     }
     return cmaps;
   };
-  const parts = pending.map((pieces) =>
-    pieces.map((p) => p.sep + (p.kind === "hex" ? decodeHexString(p.hex, cmapsFor(p.font)) : p.text)).join("")
-  );
+  // R103-C: the space-glyph conditional. Streams that write EXPLICIT
+  // standalone space-glyph pieces (the Skia/LO convention: word gaps are
+  // glyphs, never bare positioning moves) encode their split-word
+  // continuations as bare em-gap moves — the condGap pieces resolve to JOINS
+  // there (the space pieces themselves carry the word separation), while
+  // streams without space glyphs (the IRS/pdfTeX convention: gaps ride the
+  // moves) keep every gap. The decode happens first so the standalone-space
+  // detection sees the decoded text.
+  const parts = pending.map((pieces) => {
+    const decoded = pieces.map((p) => ({ p, text: p.kind === "hex" ? decodeHexString(p.hex, cmapsFor(p.font)) : p.text }));
+    const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^\s+$/.test(text));
+    return decoded
+      .map(({ p, text }) => (p.condGap && hasSpaceGlyphs ? "" : p.sep) + text)
+      .join("");
+  });
   return parts.join("\n");
 }
 
