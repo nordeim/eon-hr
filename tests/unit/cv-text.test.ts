@@ -191,6 +191,222 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("\\053"); // the literal backslash + digits survive
   });
 
+  // Session 99 (R99-A): the stream-delimiter matrix. The r98 close-out's
+  // queue named the space forms ("some writers emit `stream \r\n` with a
+  // space"); the probe found the bare-CR form lost too. The old regex
+  // /stream\r?\n/g required the EOL IMMEDIATELY after the keyword — every
+  // variant below lost the WHOLE stream (extraction "" on a file any
+  // viewer reads fine).
+  async function pdfWithDelimiter(delim: string, content: string): Promise<File> {
+    const zlib = new CompressionStream("deflate");
+    const deflated = new Uint8Array(
+      await new Response(new Blob([content]).stream().pipeThrough(zlib)).arrayBuffer()
+    );
+    const head = new TextEncoder().encode(delim);
+    const tail = new TextEncoder().encode("\r\nendstream\r\nendobj");
+    const pdf = new Uint8Array(2 + head.length + deflated.length + tail.length);
+    pdf.set(new TextEncoder().encode("<<"), 0);
+    pdf.set(head, 2);
+    pdf.set(deflated, 2 + head.length);
+    pdf.set(tail, 2 + head.length + deflated.length);
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts every stream-delimiter variant (space forms + bare CR) — R99-A", async () => {
+    const content =
+      "BT /F1 12 Tf (Senior HR Manager with payroll, GOSI, compliance, and onboarding skills) Tj ET";
+    // the two standard forms stay green (the regression members)…
+    for (const delim of ["stream\r\n", "stream\n"]) {
+      const text = await extractTextFromFile(await pdfWithDelimiter(delim, content));
+      expect(text).toContain("Senior HR Manager");
+    }
+    // …and the three lost variants come back (the RED members)
+    for (const delim of ["stream\r", "stream \r\n", "stream \n"]) {
+      const text = await extractTextFromFile(await pdfWithDelimiter(delim, content));
+      expect(text).toContain("Senior HR Manager"); // ← RED before the fix: ""
+    }
+  });
+
+  it("never treats the stream inside endstream as a stream start (the R98-A guard, hardened)", async () => {
+    // a PDF whose FIRST stream is space-delimited and whose endstream is
+    // followed by a space+CRLF — the shape where a naive space-tolerant
+    // regex could re-match inside "endstream \r\n" and garble the walk
+    const content1 =
+      "BT /F1 12 Tf (Senior HR Manager with payroll, GOSI, compliance, and onboarding skills) Tj ET";
+    const content2 =
+      "BT /F1 12 Tf (Second page: training, recruitment, and administration experience) Tj ET";
+    const deflate = async (s: string): Promise<Uint8Array> => {
+      const zlib = new CompressionStream("deflate");
+      return new Uint8Array(
+        await new Response(new Blob([s]).stream().pipeThrough(zlib)).arrayBuffer()
+      );
+    };
+    const d1 = await deflate(content1);
+    const d2 = await deflate(content2);
+    const enc = (s: string) => new TextEncoder().encode(s);
+    const parts: Uint8Array[] = [
+      enc("1 0 obj\n<< /Length " + d1.length + " >>\nstream \r\n"), // space delimiter
+      d1,
+      enc("\r\nendstream \r\nendobj\n"), // endstream followed by space+CRLF
+      enc("2 0 obj\n<< /Length " + d2.length + " >>\nstream \r\n"),
+      d2,
+      enc("\r\nendstream \r\nendobj\n%%EOF"),
+    ];
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    const file = new File([pdf], "resume.pdf", { type: "application/pdf" });
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager");
+    expect(text).toContain("Second page"); // both streams, reading order
+    expect(text.indexOf("Senior HR Manager")).toBeLessThan(text.indexOf("Second page"));
+  });
+
+  // Session 99 (R99-B): hex strings + subset-font ToUnicode CMaps — the
+  // real-writer pin. The round's downloaded W3C dummy.pdf (a REAL,
+  // unencrypted, text-carrying PDF) extracted 0 chars: its content stream
+  // writes text as <01020303> Tj (hex, not literal) and its hex bytes are
+  // GLYPH INDICES mapped to characters by a trailing bfchar CMap stream
+  // (<01>→D, <02>→u, <03>→m… spelling "Dummy PDF file").
+  async function multiPartPdf(streams: { delim?: string; content: string }[]): Promise<File> {
+    const deflate = async (s: string): Promise<Uint8Array> => {
+      const zlib = new CompressionStream("deflate");
+      return new Uint8Array(
+        await new Response(new Blob([s]).stream().pipeThrough(zlib)).arrayBuffer()
+      );
+    };
+    const enc = (s: string) => new TextEncoder().encode(s);
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < streams.length; i++) {
+      const d = await deflate(streams[i].content);
+      parts.push(enc(`${i + 1} 0 obj\n<< /Length ${d.length} >>\n${streams[i].delim ?? "stream\r\n"}`));
+      parts.push(d);
+      parts.push(enc("\r\nendstream\r\nendobj\n"));
+    }
+    parts.push(enc("trailer\n<< /Root 3 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts hex-string text through a trailing bfchar ToUnicode CMap (the W3C dummy.pdf shape) — R99-B", async () => {
+    // glyph 05 = space; every distinct letter gets its own glyph code;
+    // the CV-shaped body runs past the 40-alnum guard through the map
+    const glyphFor: Record<string, string> = {};
+    const codes: string[] = [];
+    const words = "Dummy PDF file Senior HR Manager with payroll GOSI compliance and onboarding skills";
+    for (const ch of words) {
+      if (ch === " ") {
+        codes.push("05");
+        continue;
+      }
+      let code = Object.keys(glyphFor).find((k) => glyphFor[k] === ch);
+      if (!code) {
+        code = (0x10 + Object.keys(glyphFor).length).toString(16).padStart(2, "0");
+        glyphFor[code] = ch;
+      }
+      codes.push(code);
+    }
+    const cmapLines = Object.entries(glyphFor)
+      .map(([c, ch]) => `<${c}> <${ch.charCodeAt(0).toString(16).padStart(4, "0").toUpperCase()}>`)
+      .join("\n");
+    const cmap = [
+      "/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap",
+      "/CIDSystemInfo<< /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def",
+      "/CMapName/Adobe-Identity-UCS def\n/CMapType 2 def",
+      "1 begincodespacerange\n<00> <FF>\nendcodespacerange",
+      `${Object.keys(glyphFor).length + 1} beginbfchar`,
+      `<05> <0020>\n${cmapLines}`,
+      "endbfchar\nendcmap\nend",
+    ].join("\n");
+    const hexText = codes.join("");
+    const file = await multiPartPdf([
+      { content: `BT /F1 12 Tf <${hexText}> Tj ET` }, // hex, no literal anywhere
+      { content: cmap }, // the CMap rides AFTER the content stream (dummy.pdf order)
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Dummy PDF file");
+    expect(text).toContain("payroll");
+    expect(text).toContain("onboarding");
+  });
+
+  it("extracts hex atoms inside TJ arrays in reading order (mixed with literals)", async () => {
+    // [<…> -120 (…)] TJ — hex atoms ride inside the array body today but
+    // the atom walk only collected (…) groups; the hex atoms were dropped.
+    // The literals alone clear the 40-alnum guard, so the RED pins the hex
+    // atoms specifically (the r97 fixture-length lesson): "training" and
+    // "and development" appear ONLY in the hex atoms.
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(Senior HR Manager with GOSI, compliance, onboarding, administration, recruitment experience) -250 <747261696E696E67>] TJ [<20616E6420646576656C6F706D656E74> (skills listed here)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager"); // the literal (old-code green)
+    expect(text).toContain("recruitment experience");
+    expect(text).toContain("training"); // ← RED before the fix: the hex atom dropped
+    expect(text).toContain("and development"); // ← RED before the fix: the leading hex atom
+    expect(text).toContain("skills listed here");
+  });
+
+  it("decodes hex-encoded Latin-1 text without a CMap (the Word-style hex form)", async () => {
+    // <44756D6D79…> Tj — hex-encoded WinAnsi/Latin-1, no ToUnicode map:
+    // printable bytes kept, the WinAnsi high block mapped, controls → space.
+    // The hex is computed from the string (ASCII → latin1 hex is identity).
+    const body = "Dummy PDF file with payroll and GOSI compliance onboarding";
+    const hex = Buffer.from(body, "latin1").toString("hex").toUpperCase();
+    const file = await pdfWithContent(`BT /F1 12 Tf <${hex}> Tj ET`);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Dummy PDF file");
+    expect(text).toContain("payroll and GOSI");
+  });
+
+  it("decodes through bfrange CMaps (base-offset and array forms)", async () => {
+    // bfrange base-offset: 20..27 map to 0041..0048 (A..H);
+    // bfrange array: 30..32 map to [0050 0051 0052] (P Q R)
+    const cmap = [
+      "/CIDInit/ProcSet findresource begin\nbegincmap",
+      "1 begincodespacerange\n<00> <FF>\nendcodespacerange",
+      "1 beginbfrange\n<20> <27> <0041>\nendbfrange",
+      "1 beginbfrange\n<30> <32> [<0050> <0051> <0052>]\nendbfrange",
+      "endcmap\nend",
+    ].join("\n");
+    const file = await multiPartPdf([
+      // A B C H P Q R repeated — the mapped yield clears the 40-alnum guard
+      { content: "BT /F1 12 Tf <202122273031322021222730313220212227303132202122273031322021222730313220212227303132> Tj ET" },
+      { content: cmap },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ABCH");
+    expect(text).toContain("PQR");
+  });
+
+  it("decodes 2-byte codes through an Identity-H-shaped CMap (the CID form)", async () => {
+    // codespace <0000> <FFFF> → 2-byte codes; 0001→'H', 0002→'R', 0003→' '
+    const cmap = [
+      "/CIDInit/ProcSet findresource begin\nbegincmap",
+      "1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange",
+      "3 beginbfchar\n<0001> <0048>\n<0002> <0052>\n<0003> <0020>\nendbfchar",
+      "endcmap\nend",
+    ].join("\n");
+    // 21 code triples (0001 0002 0003) = "HR HR … HR" — 42 alnums, past
+    // the 40-alnum guard (the r97 fixture-length lesson)
+    const body = "000100020003".repeat(21);
+    const file = await multiPartPdf([
+      { content: `BT /F1 12 Tf <${body}> Tj ET` },
+      { content: cmap },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("HR HR HR HR");
+  });
+
   it("falls back to the printable scrub when nothing structured matches (the .doc / degenerate path)", async () => {
     // A NUL-interleaved (UTF-16LE-shaped) blob — what a legacy .doc looks
     // like when read as text. The scrub strips NULs and keeps the words.

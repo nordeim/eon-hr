@@ -1,4 +1,4 @@
-**Version:** 3.85.0 (session-98 — the multi-stream + octal-escape CV-flow round: the r97 queue's two named CV-flow candidates BOTH pinned, BOTH verified defects, BOTH TDD-fixed — R98-A the MULTI-STREAM scan bug (the scan regex re-matched the "stream" INSIDE "endstream", so every chunk after the first started at the PREVIOUS endstream and failed to inflate → every stream after the first silently lost; a multi-page CV yielded page 1 only; the r97 queue's 'the scanner handles it' assumption was WRONG — the §109 fixture-form blind spot one round deeper, every layer's fixture single-stream; the fix: skip past the whole endstream token) · R98-B the OCTAL-ESCAPE class (Word/Acrobat write non-ASCII as \ddd octal escapes under WinAnsiEncoding — \227 em-dash, \351 é, curly quotes; the old unescape left literal garbage; the fix: the single-pass alternation — octal mod-256 + the WinAnsi 0x80–0x9F delta map + Latin-1 0xA0–0xFF + \n\r\t\b\f → space + the line continuation — with the \\053-vs-\053 disambiguation pinned by a born-green guard spec; a sequential replace cannot tell them apart) · R98-C the lint gate vs generated Playwright artifacts (a failed E2E run's trace bundles in test-results/ broke lint — now eslint-ignored) · the 66TH login deploy classified NON-VISUAL (both fingerprints moved, the pair byte-identical 69aa4241…) + the full ladder green (5/5 + 12/12 + 13/13 + 13/13) · the REF-broken mobile set holds · the mobile-nav cross-side pair PARITY (the fixed-aware read) · THE ROUND'S TRAPS: the STALE SERVED BUILD (the mutation proof's restore ended with the standalone still serving the mutation build — the live verify 'failed' until grep found the reverted pattern; a restore MUST end with a REBUILD) · the self-fulfilling diagnostic · the page-1-under-guard coincidence (the live fixture's first page insufficient on its own — a passing analysis proves the later pages extracted) · the //-comment-in-eval trap re-fired · 3.84.0 (session-97 — the real-file CV-flow round: R97-A the .pdf TJ-array extraction — the two-alternative scan, reading order preserved; R97-B the real-file E2E born-green 2/2 mutation-proofed · 3.83.0 (session-96 — the with-applicants superset-interiors round: the parity-first mobile-overflow doctrine) · 3.82.0 (session-95 — the with-data recruitment-family round: the invented-surface trap, the AI CV Upload tab rebuilt verbatim + the zero-dependency file-parse superset) · 3.81.0 (session-94) · 3.80.0 (session-93) · 3.79.0 (session-92) · 3.78.0 (session-91) · 3.77.0 (session-90) · 3.76.0 (session-89) · 3.75.0 (session-88) · **Last updated:** 2026-10-27)
+**Version:** 3.86.0 (session-99 — the stream-delimiter + hex-string/CMap CV-flow round: the r98 queue's two named edges BOTH pinned, BOTH verified defects, BOTH TDD-fixed — R99-A the DELIMITER MATRIX (the old /stream\r?\n/g required the EOL immediately after the keyword; bare-CR and every space form — `stream \r\n`, `stream \n`, `stream\r` — lost the WHOLE stream; the fix: /stream[ \t]*(?:\r\n|\r|\n)/g + the end-prefix guard hardening the R98-A class) · R99-B the HEX-STRING + ToUnicode-CMap class (a REAL downloaded W3C dummy.pdf extracted 0 chars — hex strings <01020303> Tj carrying GLYPH INDICES mapped by a trailing bfchar CMap; the fix: the third operator alternative + hex atoms in TJ arrays + the two-phase walk collecting CMaps + CMap-first decode with the Latin-1 fallback; an arXiv paper gained 3,808 chars of pdfTeX hex text; an encrypted PDF correctly still yields nothing) · the mutation-proof TWO-BY-TWO design (the R99-A spec pins the delimiter fix alone, the R99-B spec pins the hex fix alone — each revert exactly 1 RED per layer) · the fixture-length guard lesson round three (a mapped-glyph fixture's yield must be counted, not its input length) · 3.85.0 (session-98 — the multi-stream + octal-escape CV-flow round) · 3.84.0 (session-97 — the real-file CV-flow round) · 3.83.0 (session-96) · 3.82.0 (session-95) · 3.81.0 (session-94) · 3.80.0 (session-93) · 3.79.0 (session-92) · 3.78.0 (session-91) · 3.77.0 (session-90) · 3.76.0 (session-89) · 3.75.0 (session-88) · **Last updated:** 2026-10-27)
 > **State:** 998 unit + 549 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -5898,3 +5898,70 @@ the dead E2E boot (the recurring chromium-binary reinstall trap) put
 (`test-results/`, `playwright-report/`) belong in the eslint ignores
 alongside `.next/` and `node_modules/` — the ignores list must cover
 everything the toolchain writes that is not source.
+
+## §111. The delimiter-matrix + hex/CMap round (session 99) — test the writer forms you have never seen, and the guard-length lesson round three
+
+**The lesson: a "real-writer pin" must use REAL files, not just more
+crafted fixtures — the queue asked for "a real Acrobat-produced PDF" and
+the round's downloaded ground truth found a defect class no crafted
+fixture had ever exercised.** The r98 queue named two CV-flow edges: the
+space-form stream delimiters ("some writers emit `stream \r\n` with a
+space") and a real-writer PDF. The delimiter probe verified the first
+in minutes (four variants silently lost: bare-CR `stream\r`, and every
+space form). The real-PDF leg downloaded three REAL PDFs and ran them
+through the pipeline: an arXiv paper extracted fine (112,092 chars —
+literal strings), an encrypted one correctly yielded nothing — and the
+W3C's `dummy.pdf`, a real, unencrypted, text-carrying PDF, extracted
+**zero characters**. Its writer form: HEX strings (`<01020303> Tj`)
+whose bytes are GLYPH INDICES, mapped to characters by a trailing
+`beginbfchar` ToUnicode CMap stream — two legal, common PDF forms the
+literal-only extractor had never seen. No amount of crafted-fixture
+iteration would have surfaced them; only real files did.
+
+**The fix pattern, three parts.** (1) The delimiter regex generalizes
+to `/stream[ \t]*(?:\r\n|\r|\n)/g` — optional spaces/tabs between the
+keyword and the EOL, all three EOL forms — PLUS a guard: a match whose
+three preceding characters are `end` is the keyword inside
+`end**stream**`, never a stream start (belt-and-suspenders for the §110
+R98-A class; the +9 lastIndex skip stays). (2) The operator walk gains
+a third alternative — `<hex> Tj|TJ|'|" ` — and the TJ-array atom walk
+extracts `<hex>` atoms alongside `(…)` atoms in reading order (the hex
+atoms already rode INSIDE the array body's plain character class; the
+extraction just never collected them). (3) The stream walk becomes
+TWO-PHASE: an inflated stream carrying `beginbfchar`/`beginbfrange` is
+COLLECTED as a code→string map (the codespacerange decides 1-byte vs
+2-byte codes; bfchar pairs, bfrange base-offset and array forms; dst is
+UTF-16BE) instead of being mined for text, and hex atoms decode AFTER
+the whole file is walked — a file's CMap stream can FOLLOW its content
+streams (the dummy.pdf has the CMap last). Decode priority: CMap-first
+(the first map covering ALL the string's codes — a ToUnicode map is the
+writer's own glyph truth), then the hex-encoded Latin-1/WinAnsi
+fallback (the Word-style `<44756D6D79>` form).
+
+**The fixture-length guard lesson, round three.** The 2-byte CID spec's
+first draft mapped an "HR HR HR…" body and failed GREEN for the WRONG
+reason: eleven HR pairs are 22 alphanumerics — under the 40-alnum
+meaningfulness guard — so the extraction correctly returned `""` and
+the assertion died on the guard, not the decode. The r97/r98 form of
+this trap keeps recurring because a mapped-glyph fixture multiplies
+small strings: when a fixture's text is generated through a MAP, count
+the mapped yield's alphanumerics, not the input's character count. The
+cure is always the same: lengthen the fixture, never the guard.
+
+**The encrypted-PDF classification is itself a pin.** A downloaded
+encrypted PDF (`/Encrypt` in the trailer) yields zero from the
+extractor — and that is CORRECT best-effort behavior (the UI surfaces
+"Couldn't read the CV text"; the file's streams are encrypted after
+compression, so inflation fails). Pin the real-file ground truth as a
+three-way classification: literal-string PDFs extract, hex/CMap PDFs
+extract through the map, encrypted PDFs correctly do not — and keep the
+encrypted leg OUT of the defect ledger.
+
+**The mutation-proof design for two-fix rounds.** When one round fixes
+two independent defects, the E2E fixtures must isolate them: the
+R99-A spec uses space delimiters with LITERAL strings (reverting the
+hex fix leaves it green); the R99-B spec uses standard delimiters with
+hex/CMap text (reverting the delimiter fix leaves it green). Each
+mutation then produces EXACTLY one RED at each layer — a clean
+two-by-two proof matrix, and a reverted fix can never hide behind its
+sibling still being present.
