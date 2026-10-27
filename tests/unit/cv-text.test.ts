@@ -563,17 +563,13 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("Self-Speculative Decoding"); // ← RED before the fix: "Speculativ e"
   });
 
-  it("splits the TJ kern/gap boundary at 0.1 em (99 thousandths joins, 100 gaps)", async () => {
-    // the threshold census: every real writer's kern lives at ≤ 92 thousandths
-    // and every observed gap at ≥ 120 (pdfTeX 209–442) — 100 = 0.1 em, the
-    // typographic kern boundary, sits in the empty band between
-    const file = await pdfWithContent(
-      "BT /F1 12 Tf [(wordwordword) 99 (joinjoinjoin)] TJ [(gapgapgap) 100 (separated)] TJ [(payroll admin compliance training onboarding experience platform listed here for the guard)] TJ ET"
-    );
-    const text = await extractTextFromFile(file);
-    expect(text).toContain("wordwordwordjoinjoinjoin"); // ← RED before the fix: "wordwordword joinjoinjoin"
-    expect(text).toContain("gapgapgap separated"); // 100 = the threshold → a gap (green today and after)
-  });
+  // The r101 boundary spec (99 joins / 100 gaps, sign-blind) was REDESIGNED
+  // at session 102 (R102-C): the real LibreOffice files write the classic
+  // T-overhang kerns as POSITIVE +110…+149 thousandths, which the sign-blind
+  // rule read as word gaps ("T eam", "T ool", "T ables" — 471 artifacts on
+  // the real writer guide). The sign census: every REAL word gap is NEGATIVE.
+  // The sign-aware redesign lives in the session-102 block below ("splits
+  // the TJ kern/gap boundary by SIGN at 0.1 em").
 
   it("sums consecutive TJ numbers before the threshold test (the spec's array form)", async () => {
     // the PDF spec allows multiple consecutive numbers between atoms — they
@@ -650,5 +646,141 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(deriveCandidateName("john-smith-cv.pdf")).toBe("john smith cv");
     expect(deriveCandidateName("resume_jane_doe.docx")).toBe("resume jane doe");
     expect(deriveCandidateName("plain")).toBe("plain");
+  });
+
+  // Session 102 (R102-A/B/C): the LibreOffice real-writer round — the 8th
+  // writer family (LibreOffice 26.2 / PDF 2.0, pinned on the real Writer +
+  // Calc guides) exposed three defect classes: (A) the non-content-stream
+  // crash — a 26MB /Subtype /Image stream's binary garbage blows the V8
+  // regex stack inside pdfTextPieces and kills the WHOLE file's extraction;
+  // (B) the font-scoped CMap decode — 15 subset fonts each restart glyph
+  // codes at <01>, and the first-covering-CMap rule decodes every font's
+  // atoms through the wrong map (gibberish); (C) the T-overhang kerns —
+  // LibreOffice writes the classic T-lowercase kerns as POSITIVE +110…+149
+  // thousandths, which the r101 |sum| rule read as word gaps ("T eam").
+  async function pdfWithObjects(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const encS = (s: string) => new TextEncoder().encode(s);
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([obj.stream]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("skips /Image and binary streams without losing the text (the LibreOffice crash — R102-A)", async () => {
+    // the real writer-guide shape: a /Subtype /Image object carrying
+    // text-op-shaped decoys, a dict-less binary stream (the ratio-gate
+    // member), and a real content stream. Before the fix the garbage
+    // streams' decoys polluted the yield (and at the real file's 26MB
+    // scale the regex walk itself dies in a RangeError).
+    const file = await pdfWithObjects([
+      { raw: "/Type /Catalog /Pages 2 0 R" },
+      {
+        dict: "/Type /XObject /Subtype /Image /Width 2000 /Height 4000 /ColorSpace /DeviceRGB",
+        stream: "(IMAGEGARBAGE999) Tj ".repeat(200),
+      },
+      {
+        dict: "/Filter /FlateDecode",
+        stream: "\uFFFD\uFFFD\uFFFD".repeat(1200) + " (TEXTGARBAGE888) Tj " + "\uFFFD\uFFFD\uFFFD".repeat(1200),
+      },
+      {
+        dict: "/Filter /FlateDecode",
+        stream: "BT /F1 12 Tf (Senior HR Manager with payroll and compliance skills) Tj ET",
+      },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager with payroll"); // ← the real text survives
+    expect(text).not.toContain("IMAGEGARBAGE999"); // ← RED before the fix: the image decoys pollute
+    expect(text).not.toContain("TEXTGARBAGE888"); // ← RED before the fix: the binary decoys pollute
+  });
+
+  it("decodes each font's hex atoms through its OWN ToUnicode CMap (the 15-font subset form — R102-B)", async () => {
+    // the real LibreOffice form: every subset font restarts its glyph codes
+    // at <01>. F1's CMap maps 01→"A"; F2's maps 01→"B". The standing
+    // first-covering rule decoded BOTH through F1's map ("A A"); the fix
+    // resolves the /F-name → font object → /ToUnicode object chain.
+    const cmap = (code: string, ch: string) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo<< /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName/Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfchar\n<${code}> <${ch}>\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 8 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap("01", "0041") },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /SubsetOne /ToUnicode 2 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap("01", "0042") },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /SubsetTwo /ToUnicode 4 0 R >>" },
+      { raw: "<< /Font << /F1 3 0 R /F2 5 0 R >> >>" },
+      { raw: "<< /Type /Page /Resources 6 0 R >>" },
+      {
+        dict: "/Filter /FlateDecode",
+        stream: "BT /F1 12 Tf <01> Tj 20 0 Td /F2 12 Tf <01> Tj ET\nBT /F3 12 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET",
+      },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("A B"); // ← RED before the fix: "A A" (both through F1's map — F1's CMap covers the code)
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing literal (F3 has no CMap — the literal path)
+  });
+
+  it("joins TJ atoms across the POSITIVE T-overhang kerns (the LibreOffice form — R102-C)", async () => {
+    // verbatim from the real writer-guide stream: <05>18<01>110<0B> — F2's
+    // 05 is the SPACE GLYPH, 01 = "T": the +110 between the T-atom and the
+    // eam-atom is the classic T-lowercase overhang kern (~0.11 em in
+    // LiberationSans — the biggest kern class in common fonts). LibreOffice
+    // encodes word spaces as GLYPHS, never as numbers.
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(T) 110 (eam )] TJ [(T) 125 (ools )] TJ [(payroll admin compliance training onboarding specialist platform systems technology)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Team"); // ← RED before the fix: "T eam"
+    expect(text).toContain("Tools"); // ← RED before the fix: "T ools"
+  });
+
+  it("splits the TJ kern/gap boundary by SIGN at 0.1 em (-100 gaps, +100 joins — the R102-C redesign)", async () => {
+    // the r102 sign census (both real LibreOffice files, every inter-atom
+    // number): every REAL word gap is NEGATIVE (pdfTeX's -209…-442 glue,
+    // the R97 fixture's -120/-250) while the positive >= 100 class is
+    // kerns (LibreOffice's +110…+149 T-overhangs). The r101 |sum| rule
+    // read the positives as gaps — the r97 lesson, sixth application:
+    // real files override fixture assumptions.
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(wordwordword) 99 (joinjoinjoin)] TJ [(gapgapgap) -100 (separated)] TJ [(joinword) 100 (edword)] TJ [(payroll admin compliance training onboarding experience platform listed here for the guard)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("wordwordwordjoinjoinjoin"); // the sub-100 kern joins (unchanged)
+    expect(text).toContain("gapgapgap separated"); // the NEGATIVE 100 gap keeps its space (unchanged)
+    expect(text).toContain("joinwordedword"); // ← RED before the fix: "joinword edword" (the positive 100 joins — the LibreOffice T-kern class)
+  });
+
+  it("walks a pure-graphics stream without crashing and keeps the file's text (the content-gate guard)", async () => {
+    // a stream with no text operators contributes nothing — the gate must
+    // never turn that into a lost file
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog >>" },
+      { dict: "/Filter /FlateDecode", stream: "1 w\nq 0 0.028 595.276 841.861 re\nW* n\n50.95 388.139 m\n524.45 388.139 l\nh\nf*\nQ" },
+      {
+        dict: "/Filter /FlateDecode",
+        stream: "BT /F1 12 Tf (payroll specialist with compliance and onboarding training experience) Tj ET",
+      },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payroll specialist with compliance");
   });
 });

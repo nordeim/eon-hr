@@ -228,10 +228,12 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
 }
 
 /**
- * A text-showing piece with its leading separator (R100-A): the separator
- * is decided by the POSITIONING between shows, not joined blindly.
+ * A text-showing piece with its leading separator (R100-A) and its font
+ * name (R102-B): the separator is decided by the POSITIONING between shows,
+ * and the hex decode by the font's OWN ToUnicode CMap when the file's
+ * object structure resolves it.
  */
-type TextPiece = { sep: string } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
+type TextPiece = { sep: string; font?: string } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
 
 /**
  * Pulls the text operands out of a content stream's text-showing operators
@@ -256,6 +258,13 @@ type TextPiece = { sep: string } & ({ kind: "lit"; text: string } | { kind: "hex
  * pdfTeX's interword glue and the R97 fixture's -120; under is a kern and
  * the atoms join — the real Word/Adobe/pdfTeX writer forms; adjacent
  * atoms with no number keep the standing space join).
+ * Session 102 (R102-C): the SIGN rule — every REAL word gap in the corpus
+ * is NEGATIVE (pdfTeX's -209…-442 interword glue, the R97 fixture's
+ * -120), while LibreOffice writes the classic T-lowercase overhang kerns
+ * as POSITIVE +110…+149 thousandths (the biggest kern class in common
+ * fonts — "T eam" under the sign-blind rule). The gap fires only when
+ * the consecutive-number SUM is ≤ -100; positive sums (any magnitude)
+ * and small negatives join.
  */
 function pdfTextPieces(content: string): TextPiece[] {
   const pieces: TextPiece[] = [];
@@ -275,6 +284,7 @@ function pdfTextPieces(content: string): TextPiece[] {
     );
   // The position state, per the R100-A rule:
   let effSize = 1; // the last Tf size operand (the em denominator)
+  let curFont = ""; // the last Tf font NAME (the R102-B scoping key)
   let pendingEm = 0; // accumulated |tx| / effSize since the last show
   let pendingTy = 0; // accumulated ty since the last show
   let moved = false; // any positioning operator since the last show?
@@ -293,7 +303,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
     }
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
-    pieces.push({ sep, ...piece });
+    pieces.push({ sep, font: curFont, ...piece });
     reset();
   };
   // The operator walk, left to right — the alternation order guarantees a
@@ -307,6 +317,9 @@ function pdfTextPieces(content: string): TextPiece[] {
   while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
       effSize = parseFloat(m[1]) || 1;
+      // the font NAME rides the match's own text (zero regex-group churn):
+      // "/F1 16 Tf" → "F1" — the R102-B scoping key
+      curFont = (m[0].split(/\s+/)[0] || "").replace(/^\//, "");
       continue;
     }
     if (m[2] !== undefined) {
@@ -326,7 +339,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       const text = unescape(m[4]);
       if (m[5] === "'" || m[5] === '"') {
         // the next-line shows: always a line break, the pending move consumed
-        pieces.push({ sep: pieces.length === 0 ? "" : "\n", kind: "lit", text });
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text });
         reset();
       } else {
         push({ kind: "lit", text });
@@ -337,28 +350,29 @@ function pdfTextPieces(content: string): TextPiece[] {
       // The TJ array: the first atom takes the pending separator (the outer
       // Td/Tm state). The INTERNAL atoms' separator is decided by the
       // inter-atom NUMBERS — thousandths of text space (Session 101,
-      // R101-A): |sum| ≥ 100 (0.1 em — the typographic kern boundary) is a
-      // word gap (pdfTeX's 209–442 interword glue, the R97 fixture's -120);
-      // under is a KERN (Word ≤ 11, Adobe ≤ 92, pdfTeX ≤ 52 — the r101
-      // real-file census) and the atoms join with NO space — the blind
-      // space-join split every kerned word ("In for m ation", "Car eer",
-      // "Lay erSkip" — pinned on the real Word/Adobe/pdfTeX files).
-      // Consecutive numbers SUM (the spec allows them); adjacent atoms with
-      // NO number keep the standing space join; a trailing number is
-      // discarded (the outer walk's next operator sets fresh state).
+      // R101-A; Session 102, R102-C): the consecutive numbers' SUM ≤ -100
+      // (0.1 em leftward — pdfTeX's 209–442 interword glue, the R97
+      // fixture's -120) is a word gap; POSITIVE sums are KERNS at ANY
+      // magnitude (LibreOffice's +110…+149 T-overhangs — the r102 sign
+      // census: real gaps are negative, LibreOffice's word spaces ride as
+      // space GLYPHS, never as numbers) and the atoms join with NO space;
+      // a small negative sum is a kern too (Word's -4/+7 class). Adjacent
+      // atoms with NO number keep the standing space join; a trailing
+      // number is discarded (the outer walk's next operator sets fresh
+      // state).
       const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>|(-?[\d.]+)/g;
       let a: RegExpExecArray | null;
-      let kern = 0; // |sum| of consecutive numbers since the last atom
+      let kern = 0; // SIGNED sum of consecutive numbers since the last atom
       while ((a = atomRe.exec(m[6]))) {
         if (a[1] !== undefined || a[2] !== undefined) {
-          if (kern > 0) {
+          if (kern !== 0) {
             moved = true;
-            pendingEm = kern >= 100 ? 1.0 : 0; // the gap fires the space rule; a kern joins
+            pendingEm = kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
           }
           push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] });
           kern = 0;
         } else {
-          kern += Math.abs(parseFloat(a[3]));
+          kern += parseFloat(a[3]);
         }
       }
       continue;
@@ -366,7 +380,7 @@ function pdfTextPieces(content: string): TextPiece[] {
     if (m[7] !== undefined) {
       const hex = m[7];
       if (m[8] === "'" || m[8] === '"') {
-        pieces.push({ sep: pieces.length === 0 ? "" : "\n", kind: "hex", hex });
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "hex", hex });
         reset();
       } else {
         push({ kind: "hex", hex });
@@ -389,6 +403,22 @@ async function extractPdfText(file: File): Promise<string> {
   // decode only after every stream has been walked.
   const cmaps: CodeMap[] = [];
   const pending: TextPiece[][] = [];
+  // Session 102 (R102-B): the font chain — /F-name → font object →
+  // /ToUnicode object. Multi-font subset files (the real LibreOffice form:
+  // 15 fonts, every one restarting its glyph codes at <01>) need each
+  // font's atoms decoded through that font's OWN CMap; the first-covering
+  // rule reads them through the wrong map. All three scans ride the RAW
+  // ascii (object headers are never compressed in this writer family);
+  // the third link (objNum → CMap) fills in during the stream walk.
+  const fToObj = new Map<string, number>();
+  for (const fm of ascii.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fToObj.set(fm[1], parseInt(fm[2], 10));
+  const objToTu = new Map<number, number>();
+  for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
+    if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
+    const tu = fm[2].match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
+    if (tu) objToTu.set(parseInt(fm[1], 10), parseInt(tu[1], 10));
+  }
+  const tuToCmap = new Map<number, CodeMap>();
 
   // Session 99 (R99-A): the delimiter matrix — some writers emit
   // "stream \r\n" (a SPACE between the keyword and the EOL) and the bare-CR
@@ -402,6 +432,27 @@ async function extractPdfText(file: File): Promise<string> {
     // "end" is the keyword inside end**stream**, never a stream start —
     // even if a future edit moves the scan position before an endstream
     if (m.index >= 3 && ascii.startsWith("end", m.index - 3)) continue;
+    // R102-B: this stream's object number — the "N 0 obj" header at the
+    // START of the region between the last endobj and the stream keyword
+    // (the object's own dict region); an unanchored fallback covers the
+    // first object (no preceding endobj).
+    const dictStart = Math.max(0, ascii.lastIndexOf("endobj", m.index) + 6);
+    const dictRegion = ascii.slice(dictStart, m.index);
+    const objMatch = dictRegion.match(/^\s*(\d+)\s+0\s+obj\b/) ?? dictRegion.match(/(\d+)\s+0\s+obj\b/);
+    const objNum = objMatch ? parseInt(objMatch[1], 10) : -1;
+    // Session 102 (R102-A, leg 1): the PRE-INFLATE dict gate — a stream
+    // whose object dict declares /Subtype /Image or a /FontFile[23]? is
+    // never a content stream. The real LibreOffice writer guide carries
+    // 26MB/25MB/8.7MB image streams whose inflated binary garbage blows
+    // the V8 regex stack inside the operator walk (RangeError) and — with
+    // no per-stream guard — killed the WHOLE file's extraction. Skipping
+    // before the inflate is also ~5x faster on image-heavy files.
+    if (/\/Subtype\s*\/Image\b/.test(dictRegion) || /\/FontFile[23]?\b/.test(dictRegion)) {
+      const endSkip = ascii.indexOf("endstream", m.index + m[0].length);
+      if (endSkip < 0) break;
+      streamRe.lastIndex = endSkip + "endstream".length;
+      continue;
+    }
     const start = m.index + m[0].length;
     const end = ascii.indexOf("endstream", start);
     if (end < 0) break;
@@ -438,17 +489,57 @@ async function extractPdfText(file: File): Promise<string> {
     // collect it as a map, never mine it for text operators
     if (text.includes("beginbfchar") || text.includes("beginbfrange")) {
       const cm = parseToUnicode(text);
-      if (cm) cmaps.push(cm);
+      if (cm) {
+        cmaps.push(cm);
+        if (objNum >= 0) tuToCmap.set(objNum, cm); // the R102-B third link
+      }
       continue;
     }
-    const pieces = pdfTextPieces(text);
+    // Session 102 (R102-A, legs 2+3): only walk streams that LOOK like
+    // content — a real text-op shape, and a printable-dominant body (an
+    // even-stride sample over the WHOLE stream: a leading inline image
+    // must not disqualify the text that follows). Font programs and other
+    // binary that slipped past the dict gate never reach the regex; and
+    // the per-stream guard turns the pathological backtracking class into
+    // a skipped stream instead of a dead file.
+    if (!/(?:\)|\]|>)\s*(?:Tj|TJ|'|")/.test(text)) continue;
+    {
+      let printable = 0;
+      const samples = Math.min(text.length, 4096);
+      const stride = Math.max(1, Math.floor(text.length / samples));
+      let taken = 0;
+      for (let i = 0; i < text.length; i += stride) {
+        taken++;
+        const c = text.charCodeAt(i);
+        if ((c >= 32 && c < 127) || c === 10 || c === 13 || c === 9) printable++;
+      }
+      if (printable / taken < 0.6) continue;
+    }
+    let pieces: TextPiece[];
+    try {
+      pieces = pdfTextPieces(text);
+    } catch {
+      continue; // the stack-overflow class — one bad stream never kills the file
+    }
     if (pieces.length) pending.push(pieces);
   }
   // R100-A: each piece carries its own leading separator (decided by the
   // positioning between shows); the hex pieces decode through the collected
-  // CMaps (the two-phase R99-B contract)
+  // CMaps (the two-phase R99-B contract) — R102-B: through their OWN font's
+  // CMap first when the /F-name → font object → /ToUnicode chain resolves,
+  // with the standing first-covering walk as the fallback (files without
+  // the chain keep the previous behavior verbatim)
+  const cmapsFor = (font?: string): CodeMap[] => {
+    if (font) {
+      const obj = fToObj.get(font);
+      const tu = obj !== undefined ? objToTu.get(obj) : undefined;
+      const cm = tu !== undefined ? tuToCmap.get(tu) : undefined;
+      if (cm) return [cm, ...cmaps];
+    }
+    return cmaps;
+  };
   const parts = pending.map((pieces) =>
-    pieces.map((p) => p.sep + (p.kind === "hex" ? decodeHexString(p.hex, cmaps) : p.text)).join("")
+    pieces.map((p) => p.sep + (p.kind === "hex" ? decodeHexString(p.hex, cmapsFor(p.font)) : p.text)).join("")
   );
   return parts.join("\n");
 }

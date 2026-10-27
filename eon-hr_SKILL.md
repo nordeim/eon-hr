@@ -1,4 +1,4 @@
-**Version:** 3.88.0 (session-101 — the TJ-kern real-writer round: three NEW real files pinned the R97-fixture writer family — the real "Microsoft Word for Office 365" pitt-word.pdf extracted as LETTER SOUP ("Pitt In for m ation") because every writer family puts KERNING numbers (thousandths of text space: Word ≤ 11, Adobe ≤ 92, pdfTeX ≤ 52) between TJ atoms while the words' spaces ride INSIDE atoms, and pdfTeX additionally encodes word GAPS as numbers (209–442); the blind space-join split every kerned word into sub-3-char tokens the scorer drops; the fix: the 0.1-em threshold — the inter-atom numbers' |sum| ≥ 100 thousandths is a gap (the typographic kern boundary; the R97 fixture's -120 keeps its gap VERBATIM), under is a kern → join, consecutive numbers sum, adjacent atoms keep the standing join · R101-B the Tz/Ts operators CLASSIFIED defaults-only on the real corpus (watch) · R101-C the Type3 forms CLASSIFIED + pinned (Matplotlib's ASCII-valued /Differences decode through the standing Latin-1 path) · the E2E fixture audit discipline (compute the scorer's exact first-24 keywords live and audit every cluster against them BEFORE writing the spec — the space-placement catch: the trailing space rides INSIDE the last atom; the years-member leak: no scoring component may survive the mutation) · the E2E-layer stale-served-build (the §110 family round three: the playwright webServer serves the PREBUILT standalone — rebuild before every E2E run that follows a source change) · the exported-DATABASE_URL guard's THIRD leg (the :3200 server BOOT needs env -u too — the symptom: pages render but every API call answers Prisma Error 14) — preceded by 3.87.0 (session-100 — the per-glyph Tj+Td CV-flow round: the real-Acrobat-pin round's
+**Version:** 3.89.0 (session-102 — the LibreOffice real-writer round: the 8th writer family [LibreOffice 26.2 / PDF 2.0] exposed THREE stacked defect classes — R102-A the non-content-stream CRASH: a 26MB /Subtype /Image stream's inflated binary garbage blows the V8 regex stack inside the operator walk and, with no per-stream guard, killed the WHOLE file's extraction (the fix: the pre-inflate dict gate [/Subtype /Image + /FontFile streams are never content streams — the object dict is the region between the last endobj and the stream keyword], the post-inflate content gate [a real text-op shape + an even-stride printable ratio sampled over the WHOLE stream — a leading inline image must not disqualify the text that follows], and the per-stream try/catch) · R102-B the font-scoped CMap decode: 15 subset fonts each restart glyph codes at <01> and the first-covering rule decoded every font's atoms through the wrong map (the fix: the three-link chain /F-name → font object → /ToUnicode object → its own CMap, all three scans on the raw ascii; the Tf match text yields the font name — zero regex-group churn) · R102-C the TJ SIGN rule: LibreOffice writes the T-overhang kerns as POSITIVE +110…+149 thousandths which the sign-blind |sum| ≥ 100 rule read as word gaps ["T eam"]; the sign census: every REAL gap in the corpus is NEGATIVE [pdfTeX −209…−442, the R97 fixture −120] while LibreOffice's word spaces ride as space GLYPHS — the fix: the gap fires only when the consecutive-number SUM ≤ −100, positive sums join at any magnitude [exactly ONE r101 spec member flipped: the synthetic +100-positive-gap pin — the r97 lesson's sixth application] · the fixture-guard honesty rule [a discriminating fixture must clear the 40-alnum guard on BOTH sides of the mutation — the RED fires on the behavior, never the guard] · the agent-browser snapshot's ATTRIBUTE FORM [composite attribute lists like [expanded=false, ref=e60] — the match regex needs \[[^\]]*ref=, not \[ref=]) — preceded by 3.88.0 (session-101 — the TJ-kern real-writer round: three NEW real files pinned the R97-fixture writer family — the real "Microsoft Word for Office 365" pitt-word.pdf extracted as LETTER SOUP ("Pitt In for m ation") because every writer family puts KERNING numbers (thousandths of text space: Word ≤ 11, Adobe ≤ 92, pdfTeX ≤ 52) between TJ atoms while the words' spaces ride INSIDE atoms, and pdfTeX additionally encodes word GAPS as numbers (209–442); the blind space-join split every kerned word into sub-3-char tokens the scorer drops; the fix: the 0.1-em threshold — the inter-atom numbers' |sum| ≥ 100 thousandths is a gap (the typographic kern boundary; the R97 fixture's -120 keeps its gap VERBATIM), under is a kern → join, consecutive numbers sum, adjacent atoms keep the standing join · R101-B the Tz/Ts operators CLASSIFIED defaults-only on the real corpus (watch) · R101-C the Type3 forms CLASSIFIED + pinned (Matplotlib's ASCII-valued /Differences decode through the standing Latin-1 path) · the E2E fixture audit discipline (compute the scorer's exact first-24 keywords live and audit every cluster against them BEFORE writing the spec — the space-placement catch: the trailing space rides INSIDE the last atom; the years-member leak: no scoring component may survive the mutation) · the E2E-layer stale-served-build (the §110 family round three: the playwright webServer serves the PREBUILT standalone — rebuild before every E2E run that follows a source change) · the exported-DATABASE_URL guard's THIRD leg (the :3200 server BOOT needs env -u too — the symptom: pages render but every API call answers Prisma Error 14) — preceded by 3.87.0 (session-100 — the per-glyph Tj+Td CV-flow round: the real-Acrobat-pin round's
 > **State:** 1024 unit + 554 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
@@ -6118,3 +6118,72 @@ not a data bug. **The tell: pages render but every API call 500s with
 Error 14 — check the server process's environment before debugging the
 auth.** The guard now covers all three legs: CLI, build, and boot
 (`env -u DATABASE_URL` on each).
+
+## §114. The LibreOffice round (session 102) — the non-content-stream crash, the font-scoped decode, and the sign census
+
+**Test the STRUCTURE, not just the operators.** Six rounds of CV-flow
+hardening tested text operators (Tj/TJ/Td/Tm/Tz/Ts, literals, hex,
+CMaps, kerns) — and the 8th writer family broke on something none of
+them touch: **a 26MB `/Subtype /Image` stream whose binary garbage blew
+the V8 regex stack and killed the WHOLE file's extraction.** The
+extraction pipeline walked EVERY inflated stream as if it were content;
+image streams, font programs, and other binary objects are not content
+streams, and one of them took the entire yield down with a silent
+`RangeError`. **The three-leg fix:** (1) the pre-inflate DICT gate — a
+stream whose object dict (the region between the last `endobj` and the
+`stream` keyword) declares `/Subtype /Image` or `/FontFile[23]?` is
+never content; (2) the post-inflate CONTENT gate — a real text-op shape
+AND a printable ratio sampled with an EVEN STRIDE over the WHOLE stream
+(a head-only sample loses content streams with a leading inline image);
+(3) the per-stream try/catch — a pathological stream is skipped, never
+fatal. A yield of ZERO on a real file with embedded images or fonts is
+this class until proven otherwise.
+
+**Scope the decode to the FONT, not the file.** A multi-font subset file
+(LibreOffice embeds 15 fonts) has every font restarting its glyph codes
+at `<01>` — a "first CMap that covers the codes wins" rule decodes
+every font's atoms through the WRONG map and yields confident gibberish.
+**The fix is the three-link chain, all on the raw ascii** (object
+headers are never compressed in these writers): the resource dicts give
+`/F-name → font object`, the font dicts give `font object → /ToUnicode
+object`, and the stream walk (which now records each stream's OBJECT
+NUMBER via the endobj-bounded lookback) gives `object → its CMap`. The
+`Tf` operator's own match text yields the font name — `m[0].split()`
+on the matched string, zero regex-group churn. Keep the old behavior as
+the fallback for files without the chain: the regression net survives
+verbatim.
+
+**Census the SIGN, not just the magnitude.** The r101 kern/gap rule
+(`|sum| ≥ 100 thousandths = gap`) fell to a real writer in one round:
+LibreOffice writes the classic T-lowercase overhang kerns (genuinely
+~0.11 em — the biggest kern class in common fonts) as POSITIVE +110…+149,
+and the sign-blind rule split every capital-T word ("T eam", "T ool",
+"T ables" — 471 artifacts). **The sign census across the whole corpus:
+every REAL word gap is NEGATIVE (pdfTeX's −209…−442 glue, the R97
+fixture's −120/−250) while the positive ≥ 100 class is kerns.** The fix:
+the gap fires only when the consecutive-number SUM is ≤ −100; positive
+sums join at any magnitude. When a threshold rule falls to a new writer,
+re-census the DIMENSION you never varied — the sign, the direction, the
+units — before moving the number.
+
+**The mutation-proof fixture must clear the guard on BOTH sides.** A
+font-chain fixture whose yield is "A A" dies at the 40-alnum extraction
+guard: the RED fires for the WRONG reason (the guard, not the decode).
+Every discriminating fixture needs enough vocabulary to clear the guard
+under the fix AND under every mutation, so the assertion always fires on
+the behavior under test. And when a synthetic boundary pin flips (the
+r101 `+100`-positive-gap member — an assumption no real writer backed),
+redesign it to the real-evidence form and cite the census: that is the
+r97 lesson working as intended, not a regression.
+
+**The process traps this round:** the between-call process reap (round
+three — only the node-spawn detached protocol survives; nohup dies
+silently between bash calls) · the agent-browser snapshot's ATTRIBUTE
+FORM (composite lists like `[expanded=false, ref=e60]` — the match regex
+needs `\[[^\]]*ref=(\w+)\]`, not `\[ref=`) · the upload surface's
+CONDITIONAL RENDER (the file input exists only after the combobox
+selection — "Element not found" points at the combobox step) · the
+crash-class reproduction boundary (the real 26MB stream throws at an
+~11.9M-char prefix, but compact synthetic garbage does NOT throw — a
+mutation leg with no compact reproduction rides the unit layer; document
+the split).
