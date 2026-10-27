@@ -407,6 +407,118 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("HR HR HR HR");
   });
 
+  // Session 100 (R100-A): the per-glyph Tj+Td positioning form — the
+  // Acrobat/LiveCycle XFA writer class, pinned on the REAL IRS f1040 (PDF
+  // 1.7, 30 ObjStm objects). LiveCycle writes each glyph as its OWN (X)Tj
+  // show with a glyph-advance Td move between them (0.2–0.65 em) while
+  // word gaps are bigger Td moves (1.2+ em) and spaces ride INSIDE atoms
+  // ((IRA distributions )Tj). The old walk joined EVERY atom with " " —
+  // a per-glyph word extracted as letter soup and the scorer's tokenizer
+  // (<3-char tokens dropped) could never match a keyword. The fix: the
+  // position-aware join — em = |tx| / Tf_size (the Tm scale cancels);
+  // < 1.0 em same-line forward move → NO space; ≥ 1.0 em, backwards, or
+  // ty ≠ 0 → space / newline.
+  it("joins per-glyph Tj shows separated by glyph-advance Td moves into words (the Acrobat/LiveCycle form — R100-A)", async () => {
+    // the IRS f1040's verbatim shapes: per-glyph runs at 0.2–0.65 em,
+    // word gaps at 2.0+ em, whole-word label atoms, spaces inside atoms
+    const file = await pdfWithContent(
+      "BT /T1_0 1 Tf 6.79 0 0 7 472 676.002 Tm\n" +
+        "(S)Tj 0.641 0 Td (p)Tj 0.603 0 Td (o)Tj 0.603 0 Td (u)Tj 0.585 0 Td (s)Tj 0.529 0 Td (e)Tj\n" +
+        "2.356 0 Td (IRA distributions )Tj\n" +
+        "(A)Tj 0.62 0 Td (d)Tj 0.55 0 Td (m)Tj 0.65 0 Td (i)Tj 0.3 0 Td (n)Tj\n" +
+        "2.0 0 Td (p)Tj 0.62 0 Td (a)Tj 0.55 0 Td (y)Tj 0.52 0 Td (r)Tj 0.4 0 Td (o)Tj 0.58 0 Td (l)Tj 0.3 0 Td (l)Tj\n" +
+        "2.0 0 Td (s)Tj 0.5 0 Td (e)Tj 0.5 0 Td (n)Tj 0.55 0 Td (i)Tj 0.3 0 Td (o)Tj 0.55 0 Td (r)Tj\n" +
+        "1.8 0 Td (e)Tj 0.5 0 Td (x)Tj 0.55 0 Td (p)Tj 0.55 0 Td (e)Tj 0.5 0 Td (r)Tj 0.4 0 Td (i)Tj 0.3 0 Td (e)Tj 0.5 0 Td (n)Tj 0.55 0 Td (c)Tj 0.5 0 Td (e)Tj\n" +
+        "ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Spouse"); // ← RED before the fix: "S p o u s e"
+    expect(text).toContain("Admin"); // ← RED before the fix: "A d m i n"
+    expect(text).toContain("payroll"); // ← RED before the fix: "p a y r o l l"
+    expect(text).toContain("senior experience"); // ← RED before the fix: letter soup
+    expect(text).toContain("IRA distributions"); // the whole-word atom (old-code green member)
+  });
+
+  it("applies the em rule through the Tf size (a size-12 writer's point-unit Td moves)", async () => {
+    // /F1 12 Tf + identity Tm: the Td operands are POINT units — the em
+    // denominator must come from the Tf size (6.2/12 = 0.52 em joins;
+    // 14.5/12 = 1.21 em separates)
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf 1 0 0 1 72 720 Tm\n" +
+        "(p)Tj 6.2 0 Td (a)Tj 5.9 0 Td (y)Tj 6.1 0 Td (r)Tj 4.2 0 Td (o)Tj 5.8 0 Td (l)Tj 3.1 0 Td (l)Tj\n" +
+        "14.5 0 Td (admin)Tj 13.0 0 Td (specialist)Tj 15.2 0 Td (compliance)Tj 14.9 0 Td (training)Tj 13.8 0 Td (GOSI)Tj\n" +
+        "ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payroll admin"); // ← RED before the fix: "p a y r o l l admin"
+    expect(text).toContain("specialist compliance"); // whole-word atoms (old-code green member)
+    expect(text).toContain("training GOSI");
+  });
+
+  it("splits words at the 1.0-em boundary (0.9 em joins, 1.1 em separates)", async () => {
+    // the real form's classes: glyph advances ≤ 0.65 em, word gaps ≥ 1.2 em
+    // — the threshold pin. The long leading atom clears the 40-alnum guard
+    // so the extraction reaches the assertions.
+    const file = await pdfWithContent(
+      "BT /F1 10 Tf (HRIS administration onboarding payroll compliance GOSI training)Tj 20 0 Td (ab)Tj 9.0 0 Td (cd)Tj 11.0 0 Td (ef)Tj ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("abcd"); // ← RED before the fix: "ab cd"
+    expect(text).toContain("abcd ef"); // ← RED before the fix: "ab cd ef"
+  });
+
+  it("starts a new line at a ty≠0 Td move (the line-break rule)", async () => {
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (Admin specialist payroll experience)Tj 0 -14.4 Td (HRIS training onboarding GOSI compliance)Tj ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("experience\nHRIS"); // ← RED before the fix: "experience HRIS"
+  });
+
+  // Session 100 (R100-A) guards: the join fix must NOT eat the standing
+  // space semantics — adjacent shows with NO positioning between them and
+  // the TJ-array internals keep their spaces (the R97 fixture's -120 IS a
+  // word gap; over-joining would break the r97/r98/r99 regression net).
+  it("keeps the standing space join between adjacent shows with no positioning between them (the guard)", async () => {
+    // the body clears the 40-alnum guard (the r97 fixture-length lesson)
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (Senior HR Manager)Tj (with)Tj (payroll compliance GOSI training onboarding)Tj ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Manager with"); // a space, never "Managerwith"
+    expect(text).toContain("with payroll");
+  });
+
+  it("keeps the TJ-array internal space join (the R97 semantics — the over-fix guard)", async () => {
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(Senior HR Manager) -120 (with payroll, GOSI, and compliance skills)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Manager with payroll"); // the -120 keeps its space
+  });
+
+  // Session 100 (R100-B): the ObjStm/compressed-object form — the
+  // classification pin. ISO 32000-1 §7.5.7 FORBIDS stream objects inside
+  // object streams, so a compliant PDF's content streams are ALWAYS
+  // standalone stream…endstream objects (what the scanner walks) while the
+  // ObjStm bodies carry only dicts. Pinned on the REAL IRS f1040 (30
+  // ObjStm) and the arXiv paper (11 ObjStm): both extract. This fixture
+  // locks the walk green — the ObjStm body contributes NOTHING, the
+  // standalone content stream extracts.
+  it("extracts a PDF whose non-stream objects ride compressed object streams (the ObjStm form — R100-B pin)", async () => {
+    const objstmBody =
+      "12 dict begin\n" +
+      "6 0 obj\n<< /Type /Page /Parent 2 0 R /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n" +
+      "7 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n" +
+      "end";
+    const content = "BT /F1 12 Tf (HRIS administration onboarding payroll compliance GOSI training specialist)Tj ET";
+    const file = await multiPartPdf([{ content: objstmBody }, { content }]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("HRIS administration"); // the standalone content stream extracts
+    expect(text).not.toContain("Helvetica"); // the ObjStm body contributes nothing
+    expect(text).not.toContain("endobj"); // no dict garbage ever reaches the yield
+  });
+
   it("falls back to the printable scrub when nothing structured matches (the .doc / degenerate path)", async () => {
     // A NUL-interleaved (UTF-16LE-shaped) blob — what a legacy .doc looks
     // like when read as text. The scrub strips NULs and keeps the words.

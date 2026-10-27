@@ -1,5 +1,5 @@
-**Version:** 3.86.0 (session-99 — the stream-delimiter + hex-string/CMap CV-flow round: the r98 queue's two named edges BOTH pinned, BOTH verified defects, BOTH TDD-fixed — R99-A the DELIMITER MATRIX (the old /stream\r?\n/g required the EOL immediately after the keyword; bare-CR and every space form — `stream \r\n`, `stream \n`, `stream\r` — lost the WHOLE stream; the fix: /stream[ \t]*(?:\r\n|\r|\n)/g + the end-prefix guard hardening the R98-A class) · R99-B the HEX-STRING + ToUnicode-CMap class (a REAL downloaded W3C dummy.pdf extracted 0 chars — hex strings <01020303> Tj carrying GLYPH INDICES mapped by a trailing bfchar CMap; the fix: the third operator alternative + hex atoms in TJ arrays + the two-phase walk collecting CMaps + CMap-first decode with the Latin-1 fallback; an arXiv paper gained 3,808 chars of pdfTeX hex text; an encrypted PDF correctly still yields nothing) · the mutation-proof TWO-BY-TWO design (the R99-A spec pins the delimiter fix alone, the R99-B spec pins the hex fix alone — each revert exactly 1 RED per layer) · the fixture-length guard lesson round three (a mapped-glyph fixture's yield must be counted, not its input length) · 3.85.0 (session-98 — the multi-stream + octal-escape CV-flow round) · 3.84.0 (session-97 — the real-file CV-flow round) · 3.83.0 (session-96) · 3.82.0 (session-95) · 3.81.0 (session-94) · 3.80.0 (session-93) · 3.79.0 (session-92) · 3.78.0 (session-91) · 3.77.0 (session-90) · 3.76.0 (session-89) · 3.75.0 (session-88) · **Last updated:** 2026-10-27)
-> **State:** 998 unit + 549 E2E tests green, lint/typecheck/build
+**Version:** 3.87.0 (session-100 — the per-glyph Tj+Td CV-flow round: the real-Acrobat-pin round's find — the IRS f1040 (a real Acrobat/LiveCycle XFA form, 30 ObjStm) extracted as LETTER SOUP because LiveCycle writes each glyph as its own (X)Tj show with a glyph-advance Td move (0.2–0.65 em) between shows while word gaps are bigger Td moves (1.2+ em) and spaces ride INSIDE atoms; the blind space-join split every word into single letters the scorer's tokenizer drops; the fix: the POSITION-AWARE ATOM JOIN — em = |tx|/Tf_size (the Tm scale cancels), threshold 1.0 em, the sequential operator walk with Tf/Td/T*/Tm tracking, the TJ-array internals + adjacent shows keeping the standing space join VERBATIM (the over-fix guards) · R100-B the ObjStm form CLASSIFIED (ISO 32000-1 §7.5.7 forbids stream objects inside ObjStm — content streams are always standalone; both real ObjStm-bearing PDFs extract) + pinned · the mutation proof's TWO-BRANCH MATRIX (M1 the join neutralized → 3 unit RED + 1 E2E RED; M2 the ty rule → 1 unit RED, E2E green) · the E2E fixture discrimination lesson (the fix's payload must ride EXCLUSIVELY the new path) · the stale-served-process trap round two (pkill by the port string never matches — the port rides in the spawn ENV; kill by the server.js process) · 3.86.0 (session-99 — the stream-delimiter + hex-string/CMap round) — the stream-delimiter + hex-string/CMap CV-flow round: the r98 queue's two named edges BOTH pinned, BOTH verified defects, BOTH TDD-fixed — R99-A the DELIMITER MATRIX (the old /stream\r?\n/g required the EOL immediately after the keyword; bare-CR and every space form — `stream \r\n`, `stream \n`, `stream\r` — lost the WHOLE stream; the fix: /stream[ \t]*(?:\r\n|\r|\n)/g + the end-prefix guard hardening the R98-A class) · R99-B the HEX-STRING + ToUnicode-CMap class (a REAL downloaded W3C dummy.pdf extracted 0 chars — hex strings <01020303> Tj carrying GLYPH INDICES mapped by a trailing bfchar CMap; the fix: the third operator alternative + hex atoms in TJ arrays + the two-phase walk collecting CMaps + CMap-first decode with the Latin-1 fallback; an arXiv paper gained 3,808 chars of pdfTeX hex text; an encrypted PDF correctly still yields nothing) · the mutation-proof TWO-BY-TWO design (the R99-A spec pins the delimiter fix alone, the R99-B spec pins the hex fix alone — each revert exactly 1 RED per layer) · the fixture-length guard lesson round three (a mapped-glyph fixture's yield must be counted, not its input length) · 3.85.0 (session-98 — the multi-stream + octal-escape CV-flow round) · 3.84.0 (session-97 — the real-file CV-flow round) · 3.83.0 (session-96) · 3.82.0 (session-95) · 3.81.0 (session-94) · 3.80.0 (session-93) · 3.79.0 (session-92) · 3.78.0 (session-91) · 3.77.0 (session-90) · 3.76.0 (session-89) · 3.75.0 (session-88) · **Last updated:** 2026-10-27)
+> **State:** 1015 unit + 553 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -5965,3 +5965,101 @@ hex/CMap text (reverting the delimiter fix leaves it green). Each
 mutation then produces EXACTLY one RED at each layer — a clean
 two-by-two proof matrix, and a reverted fix can never hide behind its
 sibling still being present.
+
+## §112. The per-glyph Tj+Td round (session 100) — the position-aware join, the spec-impossible candidate, and the stale-served-process trap round two
+
+**The lesson: when a real-writer file "extracts" but the yield is
+garbage, the defect is in the JOIN, not the scan — and the only way to
+see it is to READ the extracted text, not just count its characters.**
+The r99 queue asked for "a real Acrobat-produced PDF" and the round
+downloaded the IRS f1040 (a real Acrobat/LiveCycle XFA form, PDF 1.7,
+30 ObjStm objects). The extraction returned 10,153 characters — by the
+round's standing yield-count metrics a PASS — but the text read
+`"F o r   t h e   y e a r"`: every word split into single letters. The
+writer form: LiveCycle emits each glyph as its OWN `(X)Tj` show with a
+glyph-advance `Td` move between shows (0.2–0.65 em), while word gaps are
+bigger `Td` moves (1.2+ em) and spaces ride INSIDE the atoms
+(`(IRA distributions )Tj`). The extractor's blind `" "-join` between
+atoms turned every per-glyph word into letter soup, and the scorer's
+tokenizer (sub-3-char tokens dropped) matched ZERO keywords — the floor
+score 5 on a perfectly readable CV. A yield COUNT would never have
+caught it; only reading the text did.
+
+**The fix pattern — the position-aware join.** The operator walk becomes
+a sequential state machine that returns separator-annotated pieces
+instead of a flat atom list. The critical unit resolution (empirical,
+from the real form's Td census): `em = |tx| / Tf_size` — the Tm scale
+CANCELS (device move = tx × Tm_a; one em = Tf_size × Tm_a), so the
+denominator is just the Tf font-size operand (default 1 — the LiveCycle
+writers set `/T1_5 1 Tf` and carry the real scale in the Tm). The rule
+at each show: a same-line forward move under 1.0 em joins WITHOUT a
+space (the glyph advance — the real form's intra-word moves run
+0.209–0.641 em, its word gaps 1.2–36.6 em; the threshold separates the
+classes with margin); a move ≥ 1.0 em, a backwards move, or a ty≠0 move
+separates (space / newline); `T*`/`'`/`"` are next-line shows; `Tm`
+resets to the default space. TWO invariants carry the regression net:
+the TJ-array INTERNALS keep their standing space join verbatim (their
+inter-atom numbers are thousandths of text space — a different unit
+system — and the R97 fixture's `-120` IS a word gap), and adjacent
+shows with NO positioning between them keep the standing space join.
+Both invariants get born-green guard specs (the over-fix guards) — a
+join fix that eats the standing spaces breaks the r97/r98/r99 net.
+
+**The spec-impossible candidate.** The queue also named "the
+ObjStm/compressed-object form — a PDF whose CONTENT streams ride inside
+ObjStm would still be lost." The real-file leg showed both
+ObjStm-bearing PDFs extracting fine — because ISO 32000-1 §7.5.7 FORBIDS
+stream objects inside object streams: a compliant PDF's content streams
+are ALWAYS standalone `stream…endstream` objects, exactly what the
+scanner walks. The queue's candidate described a spec-impossible file.
+The correct disposition is a CLASSIFICATION plus a regression PIN (the
+ObjStm-shaped unit fixture: the dict body contributes nothing, the
+standalone content stream extracts) — not a "fix" for a form no
+compliant writer emits. When a queue candidate resolves to
+spec-impossible, write the pin and spend the round's budget on the real
+defect the real file actually revealed.
+
+**The E2E fixture discrimination lesson (the r97 guard lesson, now at
+the E2E layer).** The first session100 E2E fixture carried whole-word
+atoms with matchable keywords alongside the per-glyph runs — and the
+spec PASSED with the fix reverted, because the whole-word atoms alone
+matched the job's keywords. A mutation proof's E2E fixture must carry
+the fix's payload EXCLUSIVELY through the new path: the redesigned
+fixture puts the ENTIRE vocabulary on per-glyph runs (the soup's own
+alnums still clear the 40-alnum extraction guard, so the flow reaches
+the assertions either way — and only the fixed join turns them into
+matchable words).
+
+**The stale-served-process trap, round two (the §110 family).** The
+:3200 server had been running since the PREVIOUS session's close — and
+every "reboot" in the round silently failed: `pkill -f "3200"` matches
+NOTHING because the port rides in the spawn ENV, not the command line;
+each new boot died EADDRINUSE while the stale server kept answering
+(the symptom: the live-verify flow failing in ways no code change could
+explain — the tab clicks not landing). The cure: kill by the
+SERVER.JS PROCESS (`pkill -f "standalone/server.js"`), verify `ps`
+shows zero survivors, then boot — and treat any inexplicable UI
+behavior on a long-lived dev server as a stale-process symptom first.
+
+**The round's smaller traps.** The accessible-name LEADING SPACE (the
+snapshot reads `- tab " AI CV Upload"` — an icon+text label renders a
+leading space; the exact-match regex silently never matched; the
+tolerant `\s*` form is required, and the flow must LOG whether the ref
+matched). The scorer's FIRST-24 KEYWORD CAP (`scoreCv` keeps only the
+first 24 unique non-stopword job tokens — "onboarding"/"HRIS" sit PAST
+the cap for the System Admin job; a documented scorer property the
+fixture design must respect). The synthetic-click inertness (a synthetic
+`element.click()` does NOT switch the clone's CONTROLLED Radix tabs —
+the controlled `onValueChange` needs the full pointer-event sequence;
+the agent-browser snapshot-ref click is the reliable path). And the
+fixture-length guard lesson, round four (a guard spec's own fixture must
+itself clear the guard — 21 alnums fails for the wrong reason). And the
+GUARD-CLEARING PAYLOAD'S LEAK CLASS: a mutation-proof E2E fixture that
+deliberately clears the extraction guard (so the failing flow still
+reaches the assertions) will POST its row in the failing runs too — the
+never-reached cleanup leaks it into the persistent e2e.db, breaking
+DOWNSTREAM specs (exact-order + zero-state) in LATER runs. The cure is
+the pre-clean beforeEach sweep (the /assets pattern): every spec whose
+payload survives its own failure mode needs it. The tell: two "unrelated"
+casualties failing together at the tail of an otherwise-green gate —
+check for a shared fixture row before suspecting the source.

@@ -227,18 +227,36 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
   return bytes.map(latin1Printable).join("");
 }
 
-/** A text-showing operand: a literal string (already unescaped) or raw hex. */
-type TextAtom = { kind: "lit"; text: string } | { kind: "hex"; hex: string };
+/**
+ * A text-showing piece with its leading separator (R100-A): the separator
+ * is decided by the POSITIONING between shows, not joined blindly.
+ */
+type TextPiece = { sep: string } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
 
 /**
- * Pulls the text operands out of a content stream's text-showing operators.
+ * Pulls the text operands out of a content stream's text-showing operators
+ * as separator-annotated pieces, reading order preserved.
  * Session 97 (R97-A): the literal forms — (…) Tj|TJ|'|" and the TJ array.
  * Session 99 (R99-B): the HEX forms — <…> Tj|TJ|'|" and hex atoms inside
  * TJ arrays (the W3C dummy.pdf / subset-font writer shape; the hex decodes
  * later, through the file's ToUnicode CMaps when they cover its codes).
+ * Session 100 (R100-A): the POSITION-AWARE JOIN — the Acrobat/LiveCycle
+ * XFA writers (pinned on the real IRS f1040) write each glyph as its own
+ * (X)Tj show with a glyph-advance Td move between shows (0.2–0.65 em),
+ * while word gaps are bigger Td moves (1.2+ em) and spaces ride INSIDE
+ * atoms. A blind " "-join turns such files into letter soup ("p a y r o
+ * l l") that no keyword matcher can score. The walk tracks the Tf size
+ * (the em denominator — the Tm scale cancels: em = |tx| / Tf_size) and
+ * the Td/TD moves between shows: a same-line forward move under 1.0 em
+ * joins WITHOUT a space (the glyph advance); ≥ 1.0 em, a backwards move,
+ * or a ty≠0 move separates (space / newline). With NO positioning between
+ * shows the standing space join holds, and the TJ-array INTERNALS keep
+ * their space join verbatim (their inter-atom numbers are thousandths of
+ * text space — a different unit system; the R97 fixture's -120 IS a word
+ * gap, pinned by the over-fix guard).
  */
-function pdfTextAtoms(content: string): TextAtom[] {
-  const atoms: TextAtom[] = [];
+function pdfTextPieces(content: string): TextPiece[] {
+  const pieces: TextPiece[] = [];
   // Session 98 (R98-B): the single-pass alternation unescape is REQUIRED: a
   // sequential replace cannot tell \\053 (escaped backslash + literal
   // digits) from \053 (octal escape) — the alternation consumes the whole
@@ -253,28 +271,92 @@ function pdfTextAtoms(content: string): TextAtom[] {
         return eol !== undefined ? "" : _match; // line continuation \<EOL>
       }
     );
-  // The three operand shapes, reading order preserved:
-  //   1. (…) Tj|TJ|'|" — the string directly followed by the operator
-  //   2. [ … ] TJ — the ARRAY form: a body of (…) atoms, <hex> atoms,
-  //      positioning numbers, and whitespace
-  //   3. <hex> Tj|TJ|'|" — the hex string directly followed by the operator
-  const re =
-    /\(((?:\\.|[^\\()])*)\)\s*(?:Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(?:Tj|TJ|'|")/g;
+  // The position state, per the R100-A rule:
+  let effSize = 1; // the last Tf size operand (the em denominator)
+  let pendingEm = 0; // accumulated |tx| / effSize since the last show
+  let pendingTy = 0; // accumulated ty since the last show
+  let moved = false; // any positioning operator since the last show?
+  let backward = false; // any backwards (tx < 0) move?
+  const reset = () => {
+    pendingEm = 0;
+    pendingTy = 0;
+    moved = false;
+    backward = false;
+  };
+  const push = (piece: { kind: "lit"; text: string } | { kind: "hex"; hex: string }) => {
+    let sep = " "; // the standing join: adjacent shows separate
+    if (moved) {
+      if (pendingTy !== 0) sep = "\n"; // a line move is a line break
+      else if (backward || pendingEm >= 1.0) sep = " "; // a word gap / backstep
+      else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
+    }
+    if (pieces.length === 0) sep = ""; // no leading separator on the first piece
+    pieces.push({ sep, ...piece });
+    reset();
+  };
+  // The operator walk, left to right — the alternation order guarantees a
+  // string/array match consumes its whole body before any inner fragment
+  // could re-match (the same guarantee the old single regex relied on):
+  //   1: Tf size | 2,3: Td/TD tx,ty | the T* line-op | 4,5: literal show +
+  //   operator | 6: the TJ-array body | 7,8: hex show + operator | Tm
+  const ops =
+    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|Tm/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(content))) {
+  while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
-      atoms.push({ kind: "lit", text: unescape(m[1]) });
-    } else if (m[2] !== undefined) {
+      effSize = parseFloat(m[1]) || 1;
+      continue;
+    }
+    if (m[2] !== undefined) {
+      const tx = parseFloat(m[2]);
+      pendingEm += Math.abs(tx) / effSize;
+      pendingTy += parseFloat(m[3]);
+      moved = true;
+      if (tx < 0) backward = true;
+      continue;
+    }
+    if (m[0] === "T*") {
+      moved = true;
+      pendingTy = 1; // the explicit next-line operator
+      continue;
+    }
+    if (m[4] !== undefined) {
+      const text = unescape(m[4]);
+      if (m[5] === "'" || m[5] === '"') {
+        // the next-line shows: always a line break, the pending move consumed
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", kind: "lit", text });
+        reset();
+      } else {
+        push({ kind: "lit", text });
+      }
+      continue;
+    }
+    if (m[6] !== undefined) {
+      // the TJ array: the first atom takes the pending separator, the
+      // internal atoms keep the standing space join (the R97 semantics)
       const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>/g;
       let a: RegExpExecArray | null;
-      while ((a = atomRe.exec(m[2]))) {
-        atoms.push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] });
+      while ((a = atomRe.exec(m[6]))) {
+        if (a[1] !== undefined) push({ kind: "lit", text: unescape(a[1]) });
+        else push({ kind: "hex", hex: a[2] });
       }
-    } else if (m[3] !== undefined) {
-      atoms.push({ kind: "hex", hex: m[3] });
+      continue;
     }
+    if (m[7] !== undefined) {
+      const hex = m[7];
+      if (m[8] === "'" || m[8] === '"') {
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", kind: "hex", hex });
+        reset();
+      } else {
+        push({ kind: "hex", hex });
+      }
+      continue;
+    }
+    // Tm — an absolute reposition starts a new run: the pending move (if
+    // any) is superseded, the next show takes the default space
+    reset();
   }
-  return atoms;
+  return pieces;
 }
 
 /** Concatenated text from a PDF's inflated content streams ((…) Tj / TJ arrays / hex strings). */
@@ -285,7 +367,7 @@ async function extractPdfText(file: File): Promise<string> {
   // content streams (the W3C dummy.pdf has the CMap last), so hex atoms
   // decode only after every stream has been walked.
   const cmaps: CodeMap[] = [];
-  const pending: TextAtom[][] = [];
+  const pending: TextPiece[][] = [];
 
   // Session 99 (R99-A): the delimiter matrix — some writers emit
   // "stream \r\n" (a SPACE between the keyword and the EOL) and the bare-CR
@@ -338,11 +420,14 @@ async function extractPdfText(file: File): Promise<string> {
       if (cm) cmaps.push(cm);
       continue;
     }
-    const atoms = pdfTextAtoms(text);
-    if (atoms.length) pending.push(atoms);
+    const pieces = pdfTextPieces(text);
+    if (pieces.length) pending.push(pieces);
   }
-  const parts = pending.map((atoms) =>
-    atoms.map((at) => (at.kind === "hex" ? decodeHexString(at.hex, cmaps) : at.text)).join(" ")
+  // R100-A: each piece carries its own leading separator (decided by the
+  // positioning between shows); the hex pieces decode through the collected
+  // CMaps (the two-phase R99-B contract)
+  const parts = pending.map((pieces) =>
+    pieces.map((p) => p.sep + (p.kind === "hex" ? decodeHexString(p.hex, cmaps) : p.text)).join("")
   );
   return parts.join("\n");
 }
