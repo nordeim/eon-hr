@@ -3481,8 +3481,15 @@ describe("session-36 footer-menu family + compliance selects + 404 + settings ta
     expect(notFoundPage).not.toContain("pb-40");
   });
 
-  it("R35-F12: the 404 Go Home carries REF's 16px Home icon at mr-2 (REF: 123×38 with it; the icon-less clone rendered 99px)", () => {
-    expect(notFoundPage).toContain('<Home className="h-4 w-4 mr-2"');
+  it("R35-F12 (session-104 amendment R104-A): the 404 Go Home carries REF's 16px home icon at mr-2 — REF's exact heroicons v1 outline home, inlined (ONE path, the stroke-width ON the path, no width/height attrs, the w-first class order)", () => {
+    // The r35 pin's INTENT survives (the 16px icon at mr-2, 123×38 with it);
+    // the FORM re-anchored at session 104: the live REF read at the 68th
+    // deploy state ships the heroicons v1 outline home — the lucide House
+    // (two paths, the stroke-width on the svg) retired at this site.
+    expect(notFoundPage).toContain('<svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">');
+    expect(notFoundPage).toContain('stroke-width="2"');
+    expect(notFoundPage).toContain('d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"');
+    expect(notFoundPage).not.toContain("<Home "); // the lucide import retired
   });
 
   it("R35-F13: the Logs empty carries REF's 48px FileText slate-300 icon above the line (live-measured; the census had recorded \"no icon\")", () => {

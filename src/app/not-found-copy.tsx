@@ -3,14 +3,18 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 
+import { unknownRouteSlug } from "@/lib/not-found-title";
+
 /**
  * Session 36 (R35-D): the 404 sentence + the per-route title. REF renders
  * 'The page "{full pathname}" could not be found in this application.'
  * (16px slate-600 leading-relaxed, the route in a quoted 500-weight
  * slate-700 span — the path WITHOUT the leading slash) and titles the page
- * "{LastSegment} | Eon HR" (the LAST path segment, first-letter
- * capitalized — measured: /nonexistentroute123 → "Nonexistentroute123 |
- * Eon HR", /foo/bar → "Bar | Eon HR").
+ * "{LastSegment} | Eon HR". Session 104 (R104-B): the slug transform is
+ * the pure seam src/lib/not-found-title.ts — the multi-word form
+ * Title-Cases every hyphen-separated word (REF-measured live at the 68th
+ * deploy state: "definitely-not-a-real-route-r104" → "Definitely Not A
+ * Real Route R104"); the r35 single-word pins survive verbatim.
  *
  * The Next metadata API cannot see the unmatched path server-side, so the
  * title comes from this client island. Two Next/React mechanics conspire
@@ -25,9 +29,7 @@ import { usePathname } from "next/navigation";
  */
 export function NotFoundCopy() {
   const pathname = usePathname() || "/";
-  const segments = pathname.replace(/^\//, "").split("/").filter(Boolean);
-  const last = segments[segments.length - 1] ?? "";
-  const slug = last.charAt(0).toUpperCase() + last.slice(1);
+  const slug = unknownRouteSlug(pathname);
   const title = slug ? `${slug} | Eon HR` : "Eon HR";
 
   React.useEffect(() => {

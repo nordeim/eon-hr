@@ -899,4 +899,132 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     const text = await extractTextFromFile(file);
     expect(text).toContain("wordgap separated"); // the numeric gap keeps its space even though the stream writes space pieces
   });
+
+  // Session 104 (R104-C/D): the XeTeX real-writer round — the 12th writer
+  // family (Tanmay_CV.pdf, Producer "xdvipdfmx \(20210318\)"; plus the 2026
+  // dvipdfmx manual and fontspec.pdf) exposed TWO defect classes: (C) every
+  // word its own BT block with an ABSOLUTE Td and NO Tm — same-line words
+  // share the identical ty, the next line's ty differs by the leading — and
+  // the walk (no BT awareness, shownSinceTm still true) fired the
+  // between-shows ty rule per word: word-per-line soup ("Zooked\nis\na\n…");
+  // (D) the R102-B font chain's fToObj is a LAST-WINS Map — a 60+-page doc
+  // (fontspec.pdf) names each page's fonts /F1…/F10, so every page's /F1
+  // atoms decoded through the LAST page's /F1 CMap ("Font selection for" →
+  // "Dnms rdkdbshnm knq").
+  it("joins the XeTeX per-word-BT absolute-Td form's words into lines (the word-per-line fix — R104-C)", async () => {
+    // the real Tanmay_CV.pdf shape: every word its own BT block —
+    // /F Tf tx ty Td [word] TJ ET — the SAME absolute ty for every word on
+    // a line (word origins spaced by the word widths + spaces), the next
+    // line's ty one leading lower. No Tm anywhere.
+    const word = (w: string, tx: number, ty: number) =>
+      `BT /F1 12 Tf ${tx} ${ty} Td (${w}) Tj ET`;
+    const content = [
+      word("securely", 20, 700),
+      word("support", 90, 700), // dx 70pt = 5.8em — a word gap
+      word("specialist", 160, 700), // dx 70pt — a word gap
+      word("systems", 250, 700), // dx 90pt — a word gap
+      word("training", 20, 683), // dy -17pt = 1.4em — a line move
+      word("onboarding", 95, 683), // dx 75pt — a word gap
+      word("compliance", 185, 683), // dx 90pt — a word gap
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    // ← RED before the fix: "securely\nsupport\nspecialist\nsystems\n…" —
+    // every word on its own line (the between-shows ty rule fired per word)
+    expect(text).toContain("securely support specialist systems");
+    expect(text).toContain("training onboarding compliance");
+    expect(text).toContain("specialist systems\ntraining"); // the line move between the lines
+  });
+
+  it("joins the XeTeX same-line sub-em fresh Tds (the glyph-continuation class — the narrow-word residual, by design)", async () => {
+    // the real form's bullet→word class: a narrow first piece whose origin
+    // delta from the previous word is under 1.0 em — a glyph continuation
+    // (the join), the same unthresholdable residual as the r103 LuaTeX
+    // narrow-ending word gaps (the two-pass width table watch)
+    const content = [
+      "BT /F1 12 Tf 20 700 Td (payroll) Tj ET",
+      "BT /F1 12 Tf 92 700 Td (admin) Tj ET", // dx 72pt = 6em — a word gap
+      "BT /F1 12 Tf 96 700 Td (compliance) Tj ET", // dx 4pt = 0.33em — a continuation
+      "BT /F1 12 Tf 170 700 Td (training) Tj ET", // dx 74pt — a word gap
+      "BT /F1 12 Tf 240 700 Td (onboarding) Tj ET", // dx 70pt — a word gap
+      "BT /F1 12 Tf 312 700 Td (specialist) Tj ET", // dx 72pt — a word gap
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payroll admin"); // the first ≥1em gap keeps its space (the join lands BELOW)
+    expect(text).toContain("training onboarding specialist"); // the ≥1em gaps keep their spaces
+    expect(text).toContain("admincompliance"); // ← the sub-em delta JOINS (the designed residual, pinned)
+  });
+
+  it("keeps pdfTeX's per-line absolute Tds as line breaks (the R104-C guard — the fresh-Td dy rule)", async () => {
+    // the pdfTeX form is the SAME shape with a different rhythm: one BT
+    // block per LINE, the whole line's text inside the TJ array, each
+    // line's absolute Td one leading apart — the dy rule must keep the
+    // newlines (the line moves) these always carried
+    const content = [
+      "BT /F1 10 Tf 134.765 657.632 Td [(payroll admin compliance first line) -322 (guard)] TJ ET",
+      "BT /F1 10 Tf 134.765 645.678 Td [(training onboarding second line) -250 (guard)] TJ ET",
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("first line guard");
+    expect(text).toContain("first line guard\ntraining"); // the 1.2em dy keeps its newline
+    expect(text).toContain("second line guard");
+  });
+
+  it("decodes each page's /F1 atoms through that page's OWN ToUnicode map (the multi-page F-name collision — R104-D)", async () => {
+    // the real fontspec.pdf shape: TWO resource dicts each naming a
+    // DIFFERENT font object /F1, each font with its OWN ToUnicode CMap.
+    // Font A's map covers codes 0001-0010 (the "systems support specialist
+    // platform securely training" letters); font B's map covers 0001-0010
+    // with DIFFERENT letters PLUS 0011-001D (its own "admin oriented
+    // management" letters — B-exclusive codes). The last-wins rule decoded
+    // EVERY /F1 atom through font B's map (font A's words came out
+    // garbled); the fix collects EVERY /F1 candidate and the
+    // first-FULLY-COVERING rule picks the atom's own page's map: A's words
+    // through A (A covers its codes), B's words through B (A does not
+    // cover 0011+).
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    // font A: the distinct letters of its vocabulary, codes 0001+
+    const aWords = ["systems", "support", "specialist", "platform", "securely", "training"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    // font B: the SAME codes map to WRONG letters, plus B-exclusive codes for its own words
+    const bWords = ["admin", "oriented", "management"];
+    const bLetters = [...new Set(bWords.join(""))];
+    const wrong = "qwzvxjk"; // the wrong letters for the colliding codes
+    const bPairs: [string, string][] = [];
+    aLetters.forEach((_, i) => bPairs.push([hex2(i + 1), uni(wrong[i % wrong.length])]));
+    const bCode = new Map(bLetters.map((ch, i) => [ch, hex2(0x11 + i)]));
+    bLetters.forEach((ch) => bPairs.push([bCode.get(ch)!, uni(ch)]));
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    // the content: ONE BT block, the two vocabularies as two TJ lines (the
+    // pdfTeX whole-line form — the words separated by TJ-array gap numbers,
+    // the lines by a between-shows Td; the fixture rides NO fresh-Td rule
+    // so the two fixes' mutation teeth stay isolated)
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const content = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))}\n0 -20 Td ${line(bWords.map((w) => [...w].map((ch) => bCode.get(ch)!)))} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 9 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — font B's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" },
+      { raw: "<< /Font << /F1 3 0 R >> >>" }, // obj 6 — page A's resources: /F1 = font A
+      { raw: "<< /Font << /F1 5 0 R >> >>" }, // obj 7 — page B's resources: /F1 = font B
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [] >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    // ← RED before the fix: the LAST /F1 mapping (font B) wins for BOTH
+    // vocabularies — font A's words decode through B's wrong letters
+    expect(text).toContain("systems support specialist");
+    expect(text).toContain("platform securely training");
+    expect(text).toContain("admin oriented management"); // B's own words through B
+    expect(text).not.toContain("qqq"); // the wrong-letter decode must not appear
+  });
 });

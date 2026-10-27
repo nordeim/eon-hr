@@ -303,6 +303,20 @@ function pdfTextPieces(content: string): TextPiece[] {
   // newline rule; line moves between shows keep the standing ty rule.
   let lastTm: { x: number; y: number } | null = null;
   let shownSinceTm = true; // a show since the last Tm? (true initially — Tm-less streams keep the ty rule)
+  // R104-C: the XeTeX form's run state. A BT begins a FRESH RUN: the first
+  // Td after it (with no Tm in between) carries an ABSOLUTE position (the
+  // xdvipdfmx form: every word its own BT block — same-ty words on a line,
+  // one leading between lines), and the ORIGIN-TO-ORIGIN delta from the
+  // last fresh Td drives the separator exactly like the R103-B Tm rule.
+  // btFresh: a show since the last BT? (true initially — BT-less streams
+  // keep the standing between-shows rules). tmInRun: a Tm since the last
+  // BT (the Skia/LuaTeX forms keep the r103-B rules verbatim — their Tds
+  // NEVER take the fresh path). freshTdTaken: only the FIRST Td of a run
+  // is absolute; later Tds in the same run are between-shows moves.
+  let btFresh = true;
+  let tmInRun = false;
+  let freshTdTaken = false;
+  let lastFreshTd: { x: number; y: number } | null = null;
   const reset = () => {
     pendingEm = 0;
     pendingTy = 0;
@@ -327,15 +341,19 @@ function pdfTextPieces(content: string): TextPiece[] {
     pieces.push({ sep, font: curFont, ...(condGap ? { condGap: true } : {}), ...piece });
     reset();
     shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
+    btFresh = false; // R104-C: the show ends the fresh run — the next Td is a between-shows move
   };
   // The operator walk, left to right — the alternation order guarantees a
   // string/array match consumes its whole body before any inner fragment
   // could re-match (the same guarantee the old single regex relied on):
-  //   1: Tf size | 2,3: Td/TD tx,ty | the T* line-op | 4,5: literal show +
-  //   operator | 6: the TJ-array body | 7,8: hex show + operator | 9-14: the
-  //   Tm operands a b c d e f (the R103-B position-aware form)
+  //   1: Tf size | 2,3: Td/TD tx,ty | the T* line-op | BT (R104-C — the
+  //   fresh-run marker) | 4,5: literal show + operator | 6: the TJ-array
+  //   body | 7,8: hex show + operator | 9-14: the Tm operands a b c d e f
+  //   (the R103-B position-aware form). The bare BT alternative carries
+  //   the same token-level exposure as the standing bare T* (a BT inside a
+  //   non-show string is unmeasured) — the standing design's class.
   const ops =
-    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
+    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
   let m: RegExpExecArray | null;
   while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
@@ -347,18 +365,62 @@ function pdfTextPieces(content: string): TextPiece[] {
     }
     if (m[2] !== undefined) {
       const tx = parseFloat(m[2]);
-      pendingEm += Math.abs(tx) / effSize;
-      // R103-B: a Td BEFORE any show in the fresh run carries a baseline
-      // placement (the Skia constant-baseline class) — its ty is not a line
-      // move; between shows the ty keeps the standing line-move rule
-      if (shownSinceTm) pendingTy += parseFloat(m[3]);
-      moved = true;
-      if (tx < 0) backward = true;
+      const ty = parseFloat(m[3]);
+      // R104-C: the FIRST Td of a fresh BT run with NO Tm in between is an
+      // ABSOLUTE placement (the xdvipdfmx per-word-BT form). The
+      // origin-to-origin delta from the last fresh Td drives the separator
+      // exactly like the R103-B Tm rule: |dy|/size ≥ 0.5 em → a line move
+      // (pdfTeX's per-line absolute Tds keep their newlines); same-ty →
+      // same-line: a backwards or ≥1.0-em dx → a word gap, a forward sub-em
+      // dx → a glyph continuation (the join — the narrow-word residual, the
+      // same unthresholdable class as the r103 LuaTeX word gaps). A Td
+      // after a Tm in the run (the Skia form) or between shows NEVER takes
+      // this path — the r103-B rules verbatim.
+      if (btFresh && !tmInRun && !freshTdTaken) {
+        freshTdTaken = true;
+        if (lastFreshTd) {
+          const emDx = (tx - lastFreshTd.x) / effSize;
+          const emDy = (ty - lastFreshTd.y) / effSize;
+          if (Math.abs(emDy) >= 0.5) {
+            pendingTy = 1; // a line move
+            moved = true;
+          } else {
+            pendingEm = Math.abs(emDx);
+            moved = emDx !== 0;
+            if (emDx < 0) backward = true;
+          }
+        } else if (pieces.length > 0) {
+          // the first absolute Td after prior text (a mixed-form stream):
+          // a conservative word gap — never fuse across the unknown gap
+          pendingEm = 1.0;
+          moved = true;
+        }
+        lastFreshTd = { x: tx, y: ty };
+      } else {
+        // the standing between-shows / post-Tm rules (verbatim)
+        pendingEm += Math.abs(tx) / effSize;
+        // R103-B: a Td BEFORE any show in the fresh run carries a baseline
+        // placement (the Skia constant-baseline class) — its ty is not a line
+        // move; between shows the ty keeps the standing line-move rule
+        if (shownSinceTm) pendingTy += ty;
+        moved = true;
+        if (tx < 0) backward = true;
+      }
       continue;
     }
     if (m[0] === "T*") {
       moved = true;
       pendingTy = 1; // the explicit next-line operator
+      continue;
+    }
+    if (m[0] === "BT") {
+      // R104-C: a fresh text run begins — the run state resets (the first
+      // Td after this, with no Tm in between, is absolute). The pending
+      // separator state is NOT reset: the next positioning operator (the
+      // fresh Td itself) decides it.
+      btFresh = true;
+      tmInRun = false;
+      freshTdTaken = false;
       continue;
     }
     if (m[4] !== undefined) {
@@ -438,6 +500,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       const axisAligned = Math.abs(b) < 0.01 && Math.abs(c) < 0.01 && Math.abs(a) > 0.01 && Math.abs(d) > 0.01;
       reset();
       shownSinceTm = false; // in a fresh run — the FIRST Td's ty is a baseline placement, not a line move
+      tmInRun = true; // R104-C: the Tm form — the run's Tds NEVER take the fresh-Td path (the r103-B rules verbatim)
       if (axisAligned) {
         if (lastTm) {
           const emDx = (e - lastTm.x) / (effSize * Math.abs(a));
@@ -477,8 +540,26 @@ async function extractPdfText(file: File): Promise<string> {
   // rule reads them through the wrong map. All three scans ride the RAW
   // ascii (object headers are never compressed in this writer family);
   // the third link (objNum → CMap) fills in during the stream walk.
-  const fToObj = new Map<string, number>();
-  for (const fm of ascii.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fToObj.set(fm[1], parseInt(fm[2], 10));
+  // R104-D: the /F-name → font-object chain, MULTI-CANDIDATE. The R102-B
+  // form kept ONE mapping per name (the LAST /F1 pair in the whole file) —
+  // a 60+-page doc (fontspec.pdf) names each page's fonts /F1…/F10, so
+  // every page's /F1 atoms decoded through the LAST page's /F1 CMap. The
+  // fix collects EVERY candidate IN FILE ORDER (the raw pairs by their
+  // match position, the ObjStm-carried pairs by their stream position —
+  // PDF 1.5+ files put page resource dicts and font objects inside
+  // compressed object streams, invisible to the raw scans) and the
+  // first-FULLY-COVERING rule in decodeHexString picks the atom's own
+  // page's map. Single-page files (the whole standing corpus) keep
+  // exactly one candidate — the previous behavior verbatim.
+  const fCandidates = new Map<string, { pos: number; obj: number }[]>();
+  const pushCandidate = (name: string, obj: number, pos: number) => {
+    const list = fCandidates.get(name) ?? [];
+    if (!list.some((c) => c.obj === obj)) list.push({ pos, obj });
+    fCandidates.set(name, list);
+  };
+  for (const fm of ascii.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+    pushCandidate(fm[1], parseInt(fm[2], 10), fm.index ?? 0);
+  }
   const objToTu = new Map<number, number>();
   for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
     if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
@@ -552,6 +633,40 @@ async function extractPdfText(file: File): Promise<string> {
       }
     }
     if (!text) continue;
+    // R104-D: the ObjStm harvest — PDF 1.5+ files put page resource dicts
+    // and font objects inside compressed object streams (fontspec.pdf:
+    // every page's /F1 → the same font object, the object's own body and
+    // its /ToUnicode link both ObjStm-carried) — invisible to the raw
+    // scans. The header (N pairs of "objNum bodyOffset", bodies at
+    // /First + offset) yields each inner object's body; font objects with
+    // /ToUnicode feed objToTu, and /F-name pairs feed the candidate list
+    // at this stream's file position. Stream objects cannot live inside
+    // an ObjStm (ISO 32000-1 §7.5.7 — the R100-B classification), so no
+    // content or CMap stream is ever missed by skipping these.
+    if (/\/Type\s*\/ObjStm\b/.test(dictRegion)) {
+      const firstMatch = dictRegion.match(/\/First\s+(\d+)/);
+      const hdr = text.match(/^\s*((?:\d+\s+\d+\s+)+)/);
+      if (firstMatch && hdr) {
+        const first = parseInt(firstMatch[1], 10);
+        const nums = hdr[1].trim().split(/\s+/).map(Number);
+        const entries: { obj: number; off: number }[] = [];
+        for (let i = 0; i + 1 < nums.length; i += 2) entries.push({ obj: nums[i], off: nums[i + 1] });
+        for (let i = 0; i < entries.length; i++) {
+          const start = first + entries[i].off;
+          const end = i + 1 < entries.length ? first + entries[i + 1].off : text.length;
+          if (start > end || end > text.length) continue;
+          const body = text.slice(start, end);
+          if (/\/Type\s*\/Font\b/.test(body)) {
+            const tu = body.match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
+            if (tu) objToTu.set(entries[i].obj, parseInt(tu[1], 10));
+          }
+          for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+            pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
+          }
+        }
+      }
+      continue; // an ObjStm is never itself a content or CMap stream
+    }
     // R99-B: a stream carrying bfchar/bfrange markers is a ToUnicode CMap —
     // collect it as a map, never mine it for text operators
     if (text.includes("beginbfchar") || text.includes("beginbfrange")) {
@@ -598,10 +713,21 @@ async function extractPdfText(file: File): Promise<string> {
   // the chain keep the previous behavior verbatim)
   const cmapsFor = (font?: string): CodeMap[] => {
     if (font) {
-      const obj = fToObj.get(font);
-      const tu = obj !== undefined ? objToTu.get(obj) : undefined;
-      const cm = tu !== undefined ? tuToCmap.get(tu) : undefined;
-      if (cm) return [cm, ...cmaps];
+      // R104-D: EVERY candidate for this /F-name in file order (the raw
+      // pairs and the ObjStm-carried pairs), each resolved through the
+      // objToTu/tuToCmap chain — the first-FULLY-COVERING rule in
+      // decodeHexString picks the atom's own page's map; the wrong-name
+      // maps from other pages rarely fully cover a multi-code atom
+      const cands = fCandidates.get(font);
+      if (cands?.length) {
+        const own = [...cands]
+          .sort((a, b) => a.pos - b.pos)
+          .map((c) => objToTu.get(c.obj))
+          .filter((tu): tu is number => tu !== undefined)
+          .map((tu) => tuToCmap.get(tu))
+          .filter((cm): cm is CodeMap => cm !== undefined);
+        if (own.length) return [...own, ...cmaps];
+      }
     }
     return cmaps;
   };

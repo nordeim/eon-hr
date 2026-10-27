@@ -1,0 +1,18 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto("http://127.0.0.1:3200/login");
+await page.fill('input[type=email]', "sepnetflix2023@outlook.com");
+await page.fill('input[type=password]', "$Abcd1234");
+await page.getByRole("button", { name: "Sign in" }).click();
+await page.waitForURL("http://127.0.0.1:3200/", { timeout: 15000 });
+await page.goto("http://127.0.0.1:3200/recruitment");
+await page.waitForTimeout(3000);
+await page.getByRole("tab", { name: "AI CV Upload" }).click();
+await page.waitForTimeout(1500);
+const panels = await page.locator('[role=tabpanel]').allInnerTexts();
+panels.forEach((p, i) => console.log(`panel[${i}] (first 250):`, JSON.stringify(p.slice(0, 250))));
+const combo = await page.getByRole("combobox").count();
+console.log("combobox count:", combo);
+await page.screenshot({ path: "/home/z/my-project/eon-hr/docs/screenshots/r104-cv-tab.png" });
+await browser.close();

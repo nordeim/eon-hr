@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Home } from "lucide-react";
 import { getSessionUser } from "@/lib/auth";
 import { AppShell } from "@/components/layout/app-shell";
 import { NotFoundCopy } from "./not-found-copy";
@@ -20,7 +19,10 @@ import { NotFoundCopy } from "./not-found-copy";
  *   missing icon: the clone rendered 99px, REF 123px) in a `pt-6`
  *   wrapper;
  * - the per-route title "{LastSegment} | Eon HR" (the client island sets
- *   it — the metadata API cannot see unmatched paths);
+ *   it — the metadata API cannot see unmatched paths); the multi-word
+ *   form Title-Cases every hyphen-separated word (session 104, R104-B:
+ *   "definitely-not-a-real-route-r104" → "Definitely Not A Real Route
+ *   R104 | Eon HR" — the pure seam src/lib/not-found-title.ts);
  * - logged-out visitors are REDIRECTED to /login (REF's guard behavior —
  *   the round-10 "unmeasurable" assumption, now measurable).
  */
@@ -48,14 +50,29 @@ export default async function NotFound() {
           </div>
           <div className="pt-6">
             {/* REF's Go Home: outline, white bg, slate-200 border,
-                rounded-lg (8px), 14px/500 slate-700, a 16px Home icon at
+                rounded-lg (8px), 14px/500 slate-700, a 16px home icon at
                 mr-2 (123×38 with it — the full hover + focus chain
-                measured). A real link — the navigation superset. */}
+                measured). A real link — the navigation superset.
+                Session 104 (R104-A): the icon IDENTITY re-measured live
+                at the 68th deploy state — REF ships the heroicons v1
+                outline home (ONE path, the stroke-width ON the path, NO
+                width/height attrs, the w-first "w-4 h-4 mr-2" class
+                order), inlined here verbatim; the lucide House (two
+                paths, the stroke-width on the svg) retired at this site —
+                the neo-crm D-194a3 cross-library icon doctrine's eon-hr
+                member. aria-hidden kept (the s19 a11y superset). */}
             <a
               href="/"
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
             >
-              <Home className="h-4 w-4 mr-2" aria-hidden="true" />
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
               Go Home
             </a>
           </div>

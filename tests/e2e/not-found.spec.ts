@@ -107,6 +107,48 @@ test.describe("the 404 page (session 36)", () => {
     expect(spanText).toBe('"foo/bar"');
     await expect(page).toHaveTitle("Bar | Eon HR");
   });
+
+  // Session 104 (R104-A/B): the 404 interior's arms re-measured live at the
+  // 68th deploy state — the neo-crm D-194 doctrine's eon-hr members. The Go
+  // Home icon IDENTITY (the r35 pin measured geometry only): REF ships the
+  // heroicons v1 outline home (ONE path, the stroke-width ON the path, NO
+  // width/height attrs, the w-first "w-4 h-4 mr-2" class order) — the lucide
+  // House (two paths, the stroke-width on the svg) retired. The multi-word
+  // title form: REF Title-Cases every hyphen-separated word of the last
+  // segment (the r35 fixtures were single-word — the blind spot).
+  test("the Go Home icon identity (REF's heroicons v1 outline home) and the multi-word title (session 104)", async ({ page }) => {
+    await page.goto("/definitely-not-a-real-route-r104");
+
+    const icon = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll("main a, main button")).find((b) =>
+        /Go Home/.test(b.textContent ?? "")
+      )!;
+      const svg = btn.querySelector("svg")!;
+      const path = svg.querySelector("path")!;
+      const bcs = getComputedStyle(svg);
+      return {
+        pathCount: svg.querySelectorAll("path").length,
+        svgStrokeWidth: svg.getAttribute("stroke-width"),
+        hasWH: svg.hasAttribute("width") || svg.hasAttribute("height"),
+        cls: svg.getAttribute("class"),
+        pathStrokeWidth: path.getAttribute("stroke-width"),
+        btnBox: Math.round(btn.getBoundingClientRect().width) + "x" + Math.round(btn.getBoundingClientRect().height),
+        iconW: Math.round(svg.getBoundingClientRect().width),
+        iconMr: bcs.marginRight,
+      };
+    });
+    expect(icon.pathCount).toBe(1); // ← RED before the fix: the lucide House = 2 paths
+    expect(icon.svgStrokeWidth).toBeNull(); // ← RED before: "2" on the svg
+    expect(icon.hasWH).toBe(false); // ← RED before: the lucide width/height attrs
+    expect(icon.cls).toBe("w-4 h-4 mr-2"); // ← RED before: the h-first lucide order
+    expect(icon.pathStrokeWidth).toBe("2");
+    expect(icon.btnBox).toBe("123x38"); // the r35 geometry pin survives
+    expect(icon.iconW).toBe(16);
+    expect(icon.iconMr).toBe("8px");
+
+    // the multi-word title (R104-B): every hyphen-separated word capitalized
+    await expect(page).toHaveTitle("Definitely Not A Real Route R104 | Eon HR"); // ← RED before: "Definitely-not-a-real-route-r104"
+  });
 });
 
 // Logged-out surface (the auth.spec.ts opt-out pattern — scoped to this

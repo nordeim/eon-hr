@@ -1,0 +1,15 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto("http://127.0.0.1:3200/login");
+await page.fill('input[type=email]', "sepnetflix2023@outlook.com");
+await page.fill('input[type=password]', "$Abcd1234");
+await page.getByRole("button", { name: "Sign in" }).click();
+await page.waitForURL("http://127.0.0.1:3200/", { timeout: 15000 });
+await page.goto("http://127.0.0.1:3200/recruitment");
+await page.waitForTimeout(3000);
+const tabs = await page.locator('[role=tab]').allInnerTexts().catch(() => ["none"]);
+console.log("tabs:", JSON.stringify(tabs));
+const panel = await page.locator('[role=tabpanel]').allInnerTexts().catch(() => ["none"]);
+console.log("panel count:", panel.length, "| first 200:", JSON.stringify((panel[0] || "").slice(0, 200)));
+await browser.close();
