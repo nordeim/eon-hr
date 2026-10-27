@@ -1,5 +1,5 @@
-**Version:** 3.87.0 (session-100 — the per-glyph Tj+Td CV-flow round: the real-Acrobat-pin round's find — the IRS f1040 (a real Acrobat/LiveCycle XFA form, 30 ObjStm) extracted as LETTER SOUP because LiveCycle writes each glyph as its own (X)Tj show with a glyph-advance Td move (0.2–0.65 em) between shows while word gaps are bigger Td moves (1.2+ em) and spaces ride INSIDE atoms; the blind space-join split every word into single letters the scorer's tokenizer drops; the fix: the POSITION-AWARE ATOM JOIN — em = |tx|/Tf_size (the Tm scale cancels), threshold 1.0 em, the sequential operator walk with Tf/Td/T*/Tm tracking, the TJ-array internals + adjacent shows keeping the standing space join VERBATIM (the over-fix guards) · R100-B the ObjStm form CLASSIFIED (ISO 32000-1 §7.5.7 forbids stream objects inside ObjStm — content streams are always standalone; both real ObjStm-bearing PDFs extract) + pinned · the mutation proof's TWO-BRANCH MATRIX (M1 the join neutralized → 3 unit RED + 1 E2E RED; M2 the ty rule → 1 unit RED, E2E green) · the E2E fixture discrimination lesson (the fix's payload must ride EXCLUSIVELY the new path) · the stale-served-process trap round two (pkill by the port string never matches — the port rides in the spawn ENV; kill by the server.js process) · 3.86.0 (session-99 — the stream-delimiter + hex-string/CMap round) — the stream-delimiter + hex-string/CMap CV-flow round: the r98 queue's two named edges BOTH pinned, BOTH verified defects, BOTH TDD-fixed — R99-A the DELIMITER MATRIX (the old /stream\r?\n/g required the EOL immediately after the keyword; bare-CR and every space form — `stream \r\n`, `stream \n`, `stream\r` — lost the WHOLE stream; the fix: /stream[ \t]*(?:\r\n|\r|\n)/g + the end-prefix guard hardening the R98-A class) · R99-B the HEX-STRING + ToUnicode-CMap class (a REAL downloaded W3C dummy.pdf extracted 0 chars — hex strings <01020303> Tj carrying GLYPH INDICES mapped by a trailing bfchar CMap; the fix: the third operator alternative + hex atoms in TJ arrays + the two-phase walk collecting CMaps + CMap-first decode with the Latin-1 fallback; an arXiv paper gained 3,808 chars of pdfTeX hex text; an encrypted PDF correctly still yields nothing) · the mutation-proof TWO-BY-TWO design (the R99-A spec pins the delimiter fix alone, the R99-B spec pins the hex fix alone — each revert exactly 1 RED per layer) · the fixture-length guard lesson round three (a mapped-glyph fixture's yield must be counted, not its input length) · 3.85.0 (session-98 — the multi-stream + octal-escape CV-flow round) · 3.84.0 (session-97 — the real-file CV-flow round) · 3.83.0 (session-96) · 3.82.0 (session-95) · 3.81.0 (session-94) · 3.80.0 (session-93) · 3.79.0 (session-92) · 3.78.0 (session-91) · 3.77.0 (session-90) · 3.76.0 (session-89) · 3.75.0 (session-88) · **Last updated:** 2026-10-27)
-> **State:** 1015 unit + 553 E2E tests green, lint/typecheck/build
+**Version:** 3.88.0 (session-101 — the TJ-kern real-writer round: three NEW real files pinned the R97-fixture writer family — the real "Microsoft Word for Office 365" pitt-word.pdf extracted as LETTER SOUP ("Pitt In for m ation") because every writer family puts KERNING numbers (thousandths of text space: Word ≤ 11, Adobe ≤ 92, pdfTeX ≤ 52) between TJ atoms while the words' spaces ride INSIDE atoms, and pdfTeX additionally encodes word GAPS as numbers (209–442); the blind space-join split every kerned word into sub-3-char tokens the scorer drops; the fix: the 0.1-em threshold — the inter-atom numbers' |sum| ≥ 100 thousandths is a gap (the typographic kern boundary; the R97 fixture's -120 keeps its gap VERBATIM), under is a kern → join, consecutive numbers sum, adjacent atoms keep the standing join · R101-B the Tz/Ts operators CLASSIFIED defaults-only on the real corpus (watch) · R101-C the Type3 forms CLASSIFIED + pinned (Matplotlib's ASCII-valued /Differences decode through the standing Latin-1 path) · the E2E fixture audit discipline (compute the scorer's exact first-24 keywords live and audit every cluster against them BEFORE writing the spec — the space-placement catch: the trailing space rides INSIDE the last atom; the years-member leak: no scoring component may survive the mutation) · the E2E-layer stale-served-build (the §110 family round three: the playwright webServer serves the PREBUILT standalone — rebuild before every E2E run that follows a source change) · the exported-DATABASE_URL guard's THIRD leg (the :3200 server BOOT needs env -u too — the symptom: pages render but every API call answers Prisma Error 14) — preceded by 3.87.0 (session-100 — the per-glyph Tj+Td CV-flow round: the real-Acrobat-pin round's
+> **State:** 1024 unit + 554 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -6063,3 +6063,58 @@ the pre-clean beforeEach sweep (the /assets pattern): every spec whose
 payload survives its own failure mode needs it. The tell: two "unrelated"
 casualties failing together at the tail of an otherwise-green gate —
 check for a shared fixture row before suspecting the source.
+
+
+## §113. The TJ-kern round (session 101) — the kern/gap threshold, the fixture audit discipline, and the guard's third leg
+
+**The fixture-form blind spot, round five.** The R97 round designed its TJ
+fixture from an IMAGINED writer ("the -120 IS the word gap") — and the
+imaginary semantics survived four rounds of green gates because no real
+file of that writer family had ever been run. The r101 real-file leg
+(Word-365, Adobe-PDF-Library, iText — three NEW writers in one round)
+showed the truth in minutes: real writers put KERNING numbers between TJ
+atoms (≤ 92 thousandths across every family) and the spaces INSIDE atoms;
+only pdfTeX writes gap numbers (209–442). The R97 fixture's -120 sat in
+the no-man's-land between the classes — and the fix's 0.1-em threshold
+(100 thousandths — the typographic kern boundary) kept the fixture green
+VERBATIM by coincidence of its placement. **The rule: a fixture's writer
+semantics are a HYPOTHESIS until a real file of that writer family pins
+them; when the real file lands, run the census and reconcile.**
+
+**The threshold census method.** Before choosing a threshold, dump EVERY
+inter-atom number from EVERY inflated stream of the real corpus and sort
+them — the classes separate visually (kerns ≤ 92, gaps ≥ 209) and the
+empty band between them is where the threshold goes. A threshold with
+evidence on both sides (a margin above the kern class AND below the gap
+class) survives future writers; a threshold fitted to one file does not.
+
+**The E2E fixture audit discipline.** Compute the scorer's EXACT keyword
+set live (the real STOPWORDS, the real tokenize, the real seeded job) and
+audit every fixture token against it BEFORE writing the spec — simulate
+both the fix and the mutation and assert the discrimination numbers. Two
+catches this round came from the audit alone: (1) the word-trailing space
+must ride INSIDE the last atom — outside it, the fixed build FUSES the
+words and a passing assertion rides the fragile whole-fused-token prefix
+match; (2) NO scoring component may survive the mutation — the "5 years"
+pair's +10 pushed the mutated aiScore past the assertion and silently
+broke the proof. **A mutation-proof fixture is only as strong as its
+weakest surviving component.**
+
+**The E2E-layer stale-served-build (the §110 family, round three).** The
+playwright webServer runs the PREBUILT `.next/standalone/server.js` — a
+source fix does not reach the E2E until a rebuild. The symptom is
+diabolical: the born-green run fails EXACTLY like the mutation (the
+pre-fix build behaves as the blind join). The discipline: REBUILD before
+every E2E run that follows a source change — the same rule as :3200, now
+at the E2E layer.
+
+**The exported-DATABASE_URL guard's third leg.** The guard was known for
+the Prisma CLI and the `next build` legs; this round the :3200 server BOOT
+inherited the sandbox's exported `file:/home/z/my-project/db/custom.db`
+(a nonexistent path) and every API call answered Prisma Error 14 "Unable
+to open the database file" — while the PAGES rendered fine (the health
+check green, the HTML served), so the failure looked like an auth bug,
+not a data bug. **The tell: pages render but every API call 500s with
+Error 14 — check the server process's environment before debugging the
+auth.** The guard now covers all three legs: CLI, build, and boot
+(`env -u DATABASE_URL` on each).

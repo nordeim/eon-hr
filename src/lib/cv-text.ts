@@ -250,10 +250,12 @@ type TextPiece = { sep: string } & ({ kind: "lit"; text: string } | { kind: "hex
  * the Td/TD moves between shows: a same-line forward move under 1.0 em
  * joins WITHOUT a space (the glyph advance); ≥ 1.0 em, a backwards move,
  * or a ty≠0 move separates (space / newline). With NO positioning between
- * shows the standing space join holds, and the TJ-array INTERNALS keep
- * their space join verbatim (their inter-atom numbers are thousandths of
- * text space — a different unit system; the R97 fixture's -120 IS a word
- * gap, pinned by the over-fix guard).
+ * shows the standing space join holds, and the TJ-array INTERNALS decide
+ * their separators by the inter-atom numbers' |sum| against the 0.1-em
+ * kern boundary (Session 101, R101-A: ≥ 100 thousandths is a word gap —
+ * pdfTeX's interword glue and the R97 fixture's -120; under is a kern and
+ * the atoms join — the real Word/Adobe/pdfTeX writer forms; adjacent
+ * atoms with no number keep the standing space join).
  */
 function pdfTextPieces(content: string): TextPiece[] {
   const pieces: TextPiece[] = [];
@@ -332,13 +334,32 @@ function pdfTextPieces(content: string): TextPiece[] {
       continue;
     }
     if (m[6] !== undefined) {
-      // the TJ array: the first atom takes the pending separator, the
-      // internal atoms keep the standing space join (the R97 semantics)
-      const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>/g;
+      // The TJ array: the first atom takes the pending separator (the outer
+      // Td/Tm state). The INTERNAL atoms' separator is decided by the
+      // inter-atom NUMBERS — thousandths of text space (Session 101,
+      // R101-A): |sum| ≥ 100 (0.1 em — the typographic kern boundary) is a
+      // word gap (pdfTeX's 209–442 interword glue, the R97 fixture's -120);
+      // under is a KERN (Word ≤ 11, Adobe ≤ 92, pdfTeX ≤ 52 — the r101
+      // real-file census) and the atoms join with NO space — the blind
+      // space-join split every kerned word ("In for m ation", "Car eer",
+      // "Lay erSkip" — pinned on the real Word/Adobe/pdfTeX files).
+      // Consecutive numbers SUM (the spec allows them); adjacent atoms with
+      // NO number keep the standing space join; a trailing number is
+      // discarded (the outer walk's next operator sets fresh state).
+      const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>|(-?[\d.]+)/g;
       let a: RegExpExecArray | null;
+      let kern = 0; // |sum| of consecutive numbers since the last atom
       while ((a = atomRe.exec(m[6]))) {
-        if (a[1] !== undefined) push({ kind: "lit", text: unescape(a[1]) });
-        else push({ kind: "hex", hex: a[2] });
+        if (a[1] !== undefined || a[2] !== undefined) {
+          if (kern > 0) {
+            moved = true;
+            pendingEm = kern >= 100 ? 1.0 : 0; // the gap fires the space rule; a kern joins
+          }
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] });
+          kern = 0;
+        } else {
+          kern += Math.abs(parseFloat(a[3]));
+        }
       }
       continue;
     }

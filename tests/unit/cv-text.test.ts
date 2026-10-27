@@ -519,6 +519,119 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).not.toContain("endobj"); // no dict garbage ever reaches the yield
   });
 
+  // Session 101 (R101-A): the TJ-array INTERNAL kerns — pinned on three NEW
+  // real writers (the r101 real-file leg): Word for Office 365 (pitt), the
+  // Adobe PDF Library (tisch), and pdfTeX (arXiv — the standing corpus file
+  // re-read). All three write TJ arrays whose inter-atom numbers are KERNING
+  // adjustments in thousandths of text space (Word ≤ 11, Adobe ≤ 92, pdfTeX
+  // ≤ 52) while the words' SPACES ride INSIDE atoms — pdfTeX additionally
+  // encodes word GAPS as numbers (209–442). The blind space-join split every
+  // kerned word ("In for m ation", "Car eer", "Lay erSkip"). The fix: the
+  // 0.1-em threshold — |N| ≥ 100 thousandths is a gap (the typographic kern
+  // boundary; the R97 fixture's -120 stays a gap), under is a kern → join.
+  it("joins TJ atoms across kerning numbers (the real Word writer form — R101-A)", async () => {
+    // verbatim from the real pitt-word.pdf stream (the Office-365 writer):
+    // [(In)-4(for)7(m)-6(ation)-2( T)-2(e)4(c)4(h)-3(n)-3(o)10(logy)] TJ
+    const file = await pdfWithContent(
+      "BT /F2 12 Tf [(Pitt)] TJ ET BT /F2 12 Tf [(In)-4(for)7(m)-6(ation)-2( T)-2(e)4(c)4(h)-3(n)-3(o)10(logy)] TJ ET BT /F1 12 Tf [(tec)6(hnology.pi)-3(tt)-3(.e)4(du)] TJ ET BT /F1 12 Tf [(La)5(st Upda)3(ted: 11/01/)-3(19)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Information Technology"); // ← RED before the fix: "In for m ation T e c h n o logy"
+    expect(text).toContain("technology.pitt.edu"); // ← RED before the fix: "tec hnology.pi tt .e du"
+    expect(text).toContain("Last Updated: 11/01/19"); // ← RED before the fix: "La st Upda ted: 11/01/ 19"
+  });
+
+  it("joins TJ atoms across the Adobe PDF Library kerns (the tisch writer form)", async () => {
+    // verbatim from the real tisch-resume.pdf stream: the +18 kerns inside
+    // "Office" and "Career" (the InDesign family writes positive kerns)
+    const file = await pdfWithContent(
+      "BT /T1_1 1 Tf 9 0 0 9 243.36 65.682 Tm [(Tisch Of)18(fice of Car)18(eer Development)]TJ ET BT /T1_2 1 Tf 0 -1.417 TD [(726 Br)18(oadway)92(, 2nd Floor)]TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Tisch Office of Career Development"); // ← RED before the fix: "Car eer"
+    expect(text).toContain("726 Broadway, 2nd Floor"); // ← RED before the fix: "Br oadway)92(, 2nd Floor" splits
+  });
+
+  it("joins pdfTeX kerns while keeping its numeric word gaps (the arXiv writer form)", async () => {
+    // verbatim from the real arXiv stream: the +25 kern inside "LayerSkip"
+    // and the -322/-211 GAP numbers between words (pdfTeX's interword glue)
+    const file = await pdfWithContent(
+      "BT /F41 18.1831 Tf 87.797 696.158 Td [(Lay)25(erSkip:)-322(Enabling)-211(Early)-211(Exit)-211(Inference)-211(and)]TJ 0 -19.343 Td [(Self-Speculativ)25(e)-211(Decoding)]TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("LayerSkip: Enabling Early Exit Inference and"); // ← RED before the fix: "Lay erSkip:"
+    expect(text).toContain("Self-Speculative Decoding"); // ← RED before the fix: "Speculativ e"
+  });
+
+  it("splits the TJ kern/gap boundary at 0.1 em (99 thousandths joins, 100 gaps)", async () => {
+    // the threshold census: every real writer's kern lives at ≤ 92 thousandths
+    // and every observed gap at ≥ 120 (pdfTeX 209–442) — 100 = 0.1 em, the
+    // typographic kern boundary, sits in the empty band between
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(wordwordword) 99 (joinjoinjoin)] TJ [(gapgapgap) 100 (separated)] TJ [(payroll admin compliance training onboarding experience platform listed here for the guard)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("wordwordwordjoinjoinjoin"); // ← RED before the fix: "wordwordword joinjoinjoin"
+    expect(text).toContain("gapgapgap separated"); // 100 = the threshold → a gap (green today and after)
+  });
+
+  it("sums consecutive TJ numbers before the threshold test (the spec's array form)", async () => {
+    // the PDF spec allows multiple consecutive numbers between atoms — they
+    // SUM: -30 + -30 = 60 thousandths = a kern → join; each alone is sub-100
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(ad)4(min)4(istration )] TJ [(HR)3(IS )] TJ [(compliance training onboarding specialist platform payroll admin experience systems technology securely here)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("administration"); // ← RED before the fix: "ad min istration"
+    expect(text).toContain("HRIS"); // ← RED before the fix: "HR IS"
+  });
+
+  it("joins hex atoms across TJ kerns (the hex-in-array kern path)", async () => {
+    // <61 62> = "ab", kern 18, <63 64> = "cd", no number, <65 66> = "ef":
+    // the kern joins, the adjacency keeps the standing space join
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(payroll admin compliance training onboarding specialist platform experience listed)] TJ [<61 62> 18 <63 64> <65 66>] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("abcd"); // ← RED before the fix: "ab cd"
+  });
+
+  // Session 101 (R101-A) guards: the kern fix must NOT eat the standing
+  // space semantics — adjacent atoms with NO number between them keep the
+  // space join, and the ≥100 gap numbers keep theirs (the over-fix guards).
+  it("keeps the standing space join between adjacent TJ atoms with no number (the guard)", async () => {
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(Senior HR Manager) (with payroll, GOSI, and compliance skills)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Manager with payroll"); // a space, never "Managerwith"
+  });
+
+  it("keeps the TJ gap numbers' spaces (the pdfTeX gap class — the over-fix guard)", async () => {
+    // pdfTeX's -322 interword glue is a GAP: the kern join must never fuse
+    // across it (the r100 over-fix pattern applied at the array layer)
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf [(payroll admin) -322 (specialist compliance) -250 (training onboarding)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payroll admin specialist compliance training onboarding"); // the gaps keep their spaces
+  });
+
+  // Session 101 (R101-C): the Type3-font classification pin — the arXiv
+  // paper's 7 Type3 fonts (the Matplotlib pdf backend) declare
+  // /Subtype /Type3 with /Encoding /Differences arrays that map ASCII-valued
+  // codes to the standard Latin glyph names (43 /plus, 48 /zero …), so their
+  // literal shows carry bytes that already decode correctly through the
+  // standing Latin-1 path. A non-ASCII /Differences remap would need the
+  // Differences parse — no real file in the corpus has one (the watch).
+  it("extracts a Type3-declared font's literal shows (the Matplotlib form — R101-C pin)", async () => {
+    const file = await pdfWithContent(
+      "BT /T3_0 9.9626 Tf 1 0 0 1 103.473 129.118 Tm (stochastic depth training with early exit inference layers) Tj ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("stochastic depth training"); // the Type3 shape extracts via the literal path
+  });
+
   it("falls back to the printable scrub when nothing structured matches (the .doc / degenerate path)", async () => {
     // A NUL-interleaved (UTF-16LE-shaped) blob — what a legacy .doc looks
     // like when read as text. The scrub strips NULs and keeps the words.
