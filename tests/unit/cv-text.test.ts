@@ -1169,4 +1169,124 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("skia beta"); // ← RED before the fix: "skiabeta" (the stale-origin sub-em join)
     expect(text).not.toContain("skiabeta");
   });
+
+  // Session 106 (R106-A): the page-tree chain's real-file activation. The
+  // R105-C fixture used a raw page with a SCALAR /Contents — but BOTH real
+  // xdvipdfmx builds (fontspec v2.9h, 71 pages; the dvipdfmx manual, 50
+  // pages) carry 100% of their pages inside ObjStms with the /Contents[N 0 R]
+  // ARRAY form and /Resources references that are THEMSELVES ObjStm-carried.
+  // The scalar regex matched neither file's pages — the page map was empty
+  // and every atom rode the file-order candidate chain (fontspec's title
+  // 'F' stolen by EBGaramond's map: "Dont selection" where pdftotext reads
+  // "Font selection"). Two specs: (1) the raw-pass array form with inline
+  // fonts; (2) the real fontspec shape — an ObjStm-carried page with a
+  // referenced ObjStm-carried /Resources.
+  it("binds a raw /Contents[N 0 R] array-form page to its own font map (the raw-pass array form — R106-A)", async () => {
+    // the R105-C collision shape, ARRAY /Contents: page B's resource pair
+    // leads the candidate chain in file order, so without the page binding
+    // page A's atoms decode through page B's wrong letters ("Dont
+    // selection" — the real fontspec residual class)
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const aWords = ["font", "selection", "for", "the", "xelatex", "writer", "package", "manual"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    const bWords = ["unicode", "mapping", "tables"];
+    const bLetters = [...new Set(bWords.join(""))];
+    const wrong = "qwzvxjk";
+    const bPairs: [string, string][] = [];
+    aLetters.forEach((_, i) => bPairs.push([hex2(i + 1), uni(wrong[i % wrong.length])]));
+    const bCode = new Map(bLetters.map((ch, i) => [ch, hex2(0x20 + i)]));
+    bLetters.forEach((ch) => bPairs.push([bCode.get(ch)!, uni(ch)]));
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const contentA = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))} ET`;
+    const contentB = `BT /F1 12 Tf 20 700 Td ${line(bWords.map((w) => [...w].map((ch) => bCode.get(ch)!)))} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" }, // obj 3
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — font B's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" }, // obj 5
+      // page B FIRST in file order — its /F1 candidate (font 5) leads the chain;
+      // the /Contents ARRAY form (the real xdvipdfmx writer shape)
+      { raw: "<< /Type /Page /Contents[9 0 R] /Resources << /Font << /F1 5 0 R >> >> >>" }, // obj 6
+      { raw: "<< /Type /Page /Contents [8 0 R] /Resources << /Font << /F1 3 0 R >> >> >>" }, // obj 7 — space after the key, both tolerated
+      { dict: "/Filter /FlateDecode", stream: contentA }, // obj 8 — page A's content
+      { dict: "/Filter /FlateDecode", stream: contentB }, // obj 9 — page B's content
+      { raw: "<< /Type /Pages /Kids [6 0 R 7 0 R] >>" }, // obj 10
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection"); // ← RED before the fix: page A's atoms decode through page B's wrong letters
+    expect(text).toContain("xelatex writer");
+    expect(text).toContain("unicode mapping tables"); // B's own words — correct on both sides
+  });
+
+  it("resolves an ObjStm-carried page's referenced ObjStm-carried /Resources (the real fontspec shape — R106-A)", async () => {
+    // the measured real-file form: the /Type /Page object rides an ObjStm
+    // with /Resources 20 0 R (a REFERENCE — no inline fonts) and
+    // /Contents[8 0 R] (the array form); the resources object (obj 20)
+    // rides a LATER ObjStm; a decoy /F1 → wrong-font pair sits in the raw
+    // ascii BEFORE both. Without the three legs (the array form, the ObjStm
+    // objFonts feed, the post-walk pendingRes resolution) the page never
+    // binds and the decoy's map steals the atom
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const aWords = ["font", "selection", "for", "the", "xelatex", "writer", "package", "manual"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    const wrong = "qwzvxjk";
+    const bPairs: [string, string][] = aLetters.map((_, i) => [hex2(i + 1), uni(wrong[i % wrong.length])]);
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const content = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))} ET`;
+    // a real ObjStm builder: the header (objNum off) pairs, /First = the
+    // header length, the bodies concatenated after it
+    const buildObjStm = (entries: { obj: number; body: string }[]): { dict: string; stream: string } => {
+      const bodyLens = entries.map((e) => e.body.length + 1);
+      let headerLen = -1;
+      for (let guard = 0; guard < 8; guard++) {
+        const parts: string[] = [];
+        let acc = 0;
+        for (let i = 0; i < entries.length; i++) {
+          parts.push(`${entries[i].obj} ${acc} `);
+          acc += bodyLens[i];
+        }
+        const h = parts.join("").length;
+        if (h === headerLen) {
+          return { dict: `/Type /ObjStm /N ${entries.length} /First ${h} /Filter /FlateDecode`, stream: parts.join("") + entries.map((e) => e.body + "\n").join("") };
+        }
+        headerLen = h;
+      }
+      throw new Error("header length did not converge");
+    };
+    const objstmPage = buildObjStm([
+      { obj: 30, body: "<< /Type /Page /Parent 11 0 R /Resources 20 0 R /Contents[8 0 R] >>" },
+    ]);
+    const objstmRes = buildObjStm([
+      { obj: 20, body: "<< /Font << /F1 3 0 R >> >>" },
+    ]);
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 11 0 R >>" }, // obj 1
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" }, // obj 3 — the page's OWN font
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — the decoy's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" }, // obj 5 — the decoy font
+      { raw: "<< /Font << /F1 5 0 R >> >>" }, // obj 6 — the decoy pair: LEADS the candidate chain in file order
+      { dict: objstmPage.dict, stream: objstmPage.stream }, // obj 7 — the ObjStm carrying the page (obj 30)
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 8 — the page's content stream
+      { dict: objstmRes.dict, stream: objstmRes.stream }, // obj 9 — the LATER ObjStm carrying the resources (obj 20)
+      { raw: "<< >>" }, // obj 10 — filler
+      { raw: "<< /Type /Pages /Kids [30 0 R] >>" }, // obj 11
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection"); // ← RED before the fix: the decoy's map steals the atom ("Dont selection")
+    expect(text).toContain("xelatex writer");
+  });
 });

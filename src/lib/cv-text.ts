@@ -673,29 +673,45 @@ async function extractPdfText(file: File): Promise<string> {
   // (single-page and tree-less files keep the previous behavior verbatim).
   // The region scan (obj header → endobj) tolerates the doubly-nested
   // /Resources << /Font << /F1 N 0 R >> >> shape the dict-pattern cannot.
+  // R106-A: the real-file activation. BOTH real xdvipdfmx builds (fontspec
+  // v2.9h, 71 pages; the dvipdfmx manual, 50 pages) carry 100% of their
+  // pages inside ObjStms, 100% with the /Contents[N 0 R] ARRAY form (the
+  // scalar regex matched NEITHER file — pageFonts was empty and every atom
+  // rode the file-order candidate chain: fontspec's title 'F' stolen by
+  // EBGaramond's map, "Dont selection"), and 100% with /Resources
+  // references that are THEMSELVES ObjStm-carried (the raw-pass-only
+  // deferred resolution resolved nothing). Three legs: the contentsRefs
+  // helper (array + scalar + multi-ref), the ObjStm objFonts feed, and the
+  // pendingRes resolution moved AFTER the stream walk.
   const pageFonts = new Map<number, Map<string, number>>(); // content objNum → /F-name → font objNum
+  const objFonts = new Map<number, Map<string, number>>(); // resources objNum → /F-name → font objNum
+  const pendingRes: { contents: number[]; res: number }[] = [];
+  // the /Contents value's object refs: the ARRAY form [4 0 R 5 0 R] (every
+  // ref — a page's content may span streams; a shared stream is last-wins,
+  // the rare form) or the scalar form 4 0 R (the single ref)
+  const contentsRefs = (body: string): number[] => {
+    const at = body.indexOf("/Contents");
+    if (at < 0) return [];
+    const after = body.slice(at + "/Contents".length);
+    const br = after.match(/^\s*\[([^\]]*)\]/);
+    if (br) return [...br[1].matchAll(/(\d+)\s+\d+\s+R/g)].map((x) => parseInt(x[1], 10));
+    const sc = after.match(/^\s*(\d+)\s+\d+\s+R/);
+    return sc ? [parseInt(sc[1], 10)] : [];
+  };
   {
-    const objFonts = new Map<number, Map<string, number>>(); // resources objNum → /F-name → font objNum
-    const pendingRes: { contents: number; res: number }[] = [];
     for (const rm of ascii.matchAll(/(\d+)\s+0\s+obj\s*([\s\S]*?)endobj/g)) {
       const body = rm[2];
       const fonts = new Map<string, number>();
       for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
       if (/\/Type\s*\/Page\b/.test(body)) {
-        const contents = body.match(/\/Contents\s+(\d+)\s+0\s+R/);
-        if (!contents) continue;
+        const refs = contentsRefs(body);
+        if (!refs.length) continue;
         const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
-        if (fonts.size) pageFonts.set(parseInt(contents[1], 10), fonts);
-        else if (res) pendingRes.push({ contents: parseInt(contents[1], 10), res: parseInt(res[1], 10) });
+        if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
+        else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
       } else if (fonts.size) {
         objFonts.set(parseInt(rm[1], 10), fonts);
       }
-    }
-    // the referenced-resources pages resolve after the whole pass (the
-    // resources object may follow its page in the file)
-    for (const p of pendingRes) {
-      const fonts = objFonts.get(p.res);
-      if (fonts) pageFonts.set(p.contents, fonts);
     }
   }
   const tuToCmap = new Map<number, CodeMap>();
@@ -794,16 +810,27 @@ async function extractPdfText(file: File): Promise<string> {
             const bf = body.match(/\/BaseFont\s*\/([\w#+-]+)/); // R105-B
             if (bf) objBaseFont.set(entries[i].obj, (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
           }
-          // R105-C: ObjStm-carried page objects register their content
-          // stream's font map (inline fonts only — a page whose /Resources
-          // is a separate reference resolves through the raw pass)
+          // R105-C + R106-A: ObjStm-carried page objects register their
+          // content streams' font map — inline fonts directly (the r105
+          // form), a referenced /Resources through the deferred resolution
+          // (the real fontspec/dvipdfmx form: the resources object itself
+          // rides an ObjStm, often a LATER one)
           if (/\/Type\s*\/Page\b/.test(body)) {
-            const contents = body.match(/\/Contents\s+(\d+)\s+0\s+R/);
-            if (contents) {
+            const refs = contentsRefs(body);
+            if (refs.length) {
               const fonts = new Map<string, number>();
               for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
-              if (fonts.size) pageFonts.set(parseInt(contents[1], 10), fonts);
+              const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
+              if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
+              else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
             }
+          } else {
+            // R106-A: an ObjStm-carried /Resources body (the /Font pairs
+            // dict) feeds the deferred resolution — the raw pass cannot see
+            // it, and the fontspec pages reference exactly these
+            const fonts = new Map<string, number>();
+            for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+            if (fonts.size) objFonts.set(entries[i].obj, fonts);
           }
           for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
             pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
@@ -849,6 +876,14 @@ async function extractPdfText(file: File): Promise<string> {
       continue; // the stack-overflow class — one bad stream never kills the file
     }
     if (pieces.length) pending.push({ objNum, pieces });
+  }
+  // R106-A: the referenced-/Resources pages resolve AFTER the whole stream
+  // walk — the resources object may ride an ObjStm the walk meets LATER
+  // than the page's own ObjStm (the real fontspec ordering), and the
+  // ObjStm objFonts feed above only fills during the walk
+  for (const p of pendingRes) {
+    const fonts = objFonts.get(p.res);
+    if (fonts) p.contents.forEach((c) => pageFonts.set(c, fonts));
   }
   // R100-A: each piece carries its own leading separator (decided by the
   // positioning between shows); the hex pieces decode through the collected
