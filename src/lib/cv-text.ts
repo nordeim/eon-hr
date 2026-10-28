@@ -16,11 +16,47 @@ function isMeaningful(text: string): boolean {
   return alnum.length >= MIN_ALPHANUMERIC;
 }
 
+/**
+ * The per-stream inflated-output budget (R105-A). The R102-A dict gate skips
+ * /Image and /FontFile streams BEFORE the inflate, but every other stream
+ * type (ObjStm, Form, Metadata, content) inflated to completion before any
+ * gate could reject it — a crafted deflate bomb inside an ObjStm expanded
+ * unbounded in the tab (the client-side self-DoS; the session-105 audit's
+ * M-1). 8MB is two orders of magnitude above the largest legitimate
+ * content/ObjStm/CMap stream in the 12-writer corpus and far below the 26MB
+ * image streams that never reach inflate. An over-budget stream throws —
+ * the callers' standing best-effort catches turn it into "" and the
+ * per-stream `continue` contract holds (one bomb never kills the file).
+ */
+const MAX_INFLATED_BYTES = 8 * 1024 * 1024;
+
 async function inflate(bytes: Uint8Array, format: "deflate-raw" | "deflate"): Promise<Uint8Array> {
   const stream = new Blob([bytes as BlobPart])
     .stream()
     .pipeThrough(new DecompressionStream(format));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+  // the streaming byte budget: read chunk-wise and abort the producer the
+  // moment the accumulated output crosses the cap — the bomb never
+  // materializes (a plain arrayBuffer() would inflate it whole first)
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    total += value.length;
+    if (total > MAX_INFLATED_BYTES) {
+      await reader.cancel().catch(() => {});
+      throw new Error("inflate budget exceeded");
+    }
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,6 +172,62 @@ interface CodeMap {
   codeLen: 1 | 2;
   map: Map<number, string>;
 }
+
+// Session 105 (R105-B): the standard-14 marker tables — a simple font whose
+// /BaseFont names ZapfDingbats or Symbol (and whose codes no ToUnicode map
+// covers) decodes through its STANDARD encoding (PDF 32000-1 Annex D), never
+// the Latin-1 fallback: ZapfDingbats <33> is ✓ U+2713 (not "3"), Symbol <41>
+// is Α U+0391. Reduced to the single-byte range real PDFs use; the
+// private-use composition extenders (Symbol's 0x60 radicalex) are omitted —
+// glyph-composition internals, never CV text.
+const ZAPF_DINGBATS: Record<number, string> = {
+  0x20: " ",
+  0x21: "\u2701", 0x22: "\u2702", 0x23: "\u2703", 0x24: "\u2704", 0x25: "\u260E", 0x26: "\u2706",
+  0x27: "\u2707", 0x28: "\u2708", 0x29: "\u2709", 0x2a: "\u261B", 0x2b: "\u261E", 0x2c: "\u270C",
+  0x2d: "\u270D", 0x2e: "\u270E", 0x2f: "\u270F",
+  0x30: "\u2710", 0x31: "\u2711", 0x32: "\u2712", 0x33: "\u2713", 0x34: "\u2714", 0x35: "\u2715",
+  0x36: "\u2716", 0x37: "\u2717", 0x38: "\u2718", 0x39: "\u2719", 0x3a: "\u271A", 0x3b: "\u271B",
+  0x3c: "\u271C", 0x3d: "\u271D", 0x3e: "\u271E", 0x3f: "\u271F",
+  0x40: "\u2720", 0x41: "\u2721", 0x42: "\u2722", 0x43: "\u2723", 0x44: "\u2724", 0x45: "\u2725",
+  0x46: "\u2726", 0x47: "\u2727", 0x48: "\u2605", 0x49: "\u2606", 0x4a: "\u272A", 0x4b: "\u272B",
+  0x4c: "\u272C", 0x4d: "\u272D", 0x4e: "\u272E", 0x4f: "\u272F",
+  0x50: "\u2730", 0x51: "\u2731", 0x52: "\u2732", 0x53: "\u2733", 0x54: "\u2734", 0x55: "\u2735",
+  0x56: "\u2736", 0x57: "\u2737", 0x58: "\u2738", 0x59: "\u2739", 0x5a: "\u273A", 0x5b: "\u273B",
+  0x5c: "\u273C", 0x5d: "\u273D", 0x5e: "\u273E", 0x5f: "\u273F",
+  0x60: "\u2740", 0x61: "\u2741", 0x62: "\u2742", 0x63: "\u2743", 0x64: "\u2744", 0x65: "\u2745",
+  0x66: "\u2746", 0x67: "\u2747", 0x68: "\u2748", 0x69: "\u2749", 0x6a: "\u274A", 0x6b: "\u274B",
+  0x6c: "\u25CF", 0x6d: "\u274D", 0x6e: "\u25A0", 0x6f: "\u274F",
+  0x70: "\u2750", 0x71: "\u2751", 0x72: "\u2752", 0x73: "\u25B2", 0x74: "\u25BC", 0x75: "\u25C6",
+  0x76: "\u2756", 0x77: "\u25A0", 0x78: "\u2758", 0x79: "\u2759", 0x7a: "\u275A", 0x7b: "\u275B",
+  0x7c: "\u275C", 0x7d: "\u275D", 0x7e: "\u275E",
+};
+
+const SYMBOL_FONT: Record<number, string> = {
+  0x20: " ", 0x21: "!", 0x22: "\u2200", 0x23: "#", 0x24: "\u2203", 0x25: "%", 0x26: "&",
+  0x27: "\u2201", 0x28: "(", 0x29: ")", 0x2a: "\u2217", 0x2b: "+", 0x2c: ",", 0x2d: "\u2212",
+  0x2e: ".", 0x2f: "/",
+  0x30: "0", 0x31: "1", 0x32: "2", 0x33: "3", 0x34: "4", 0x35: "5", 0x36: "6", 0x37: "7",
+  0x38: "8", 0x39: "9",
+  0x3a: ":", 0x3b: ";", 0x3c: "<", 0x3d: "=", 0x3e: ">", 0x3f: "\u2250", 0x40: "\u224C",
+  0x41: "\u0391", 0x42: "\u0392", 0x43: "\u03A7", 0x44: "\u0394", 0x45: "\u0395", 0x46: "\u03A6",
+  0x47: "\u0393", 0x48: "\u0397", 0x49: "\u0399", 0x4a: "\u03D1", 0x4b: "\u039A", 0x4c: "\u039B",
+  0x4d: "\u039C", 0x4e: "\u039D", 0x4f: "\u039F",
+  0x50: "\u03A0", 0x51: "\u0398", 0x52: "\u03A1", 0x53: "\u03A3", 0x54: "\u03A4", 0x55: "\u03A5",
+  0x56: "\u03C2", 0x57: "\u03A9", 0x58: "\u039E", 0x59: "\u03A8", 0x5a: "\u0396",
+  0x5b: "[", 0x5c: "\u2234", 0x5d: "]", 0x5e: "\u22A5", 0x5f: "_",
+  0x61: "\u03B1", 0x62: "\u03B2", 0x63: "\u03C7", 0x64: "\u03B4", 0x65: "\u03B5", 0x66: "\u03C6",
+  0x67: "\u03B3", 0x68: "\u03B7", 0x69: "\u03B9", 0x6a: "\u03D5", 0x6b: "\u03BA", 0x6c: "\u03BB",
+  0x6d: "\u03BC", 0x6e: "\u03BD", 0x6f: "\u03BF",
+  0x70: "\u03C0", 0x71: "\u03B8", 0x72: "\u03C1", 0x73: "\u03C3", 0x74: "\u03C4", 0x75: "\u03C5",
+  0x76: "\u03D6", 0x77: "\u03C9", 0x78: "\u03BE", 0x79: "\u03C8", 0x7a: "\u03B6",
+  0x7b: "{", 0x7c: "|", 0x7d: "}", 0x7e: "\u223C",
+};
+
+/** The marker tables keyed by lowercased /BaseFont name (subset "ABCDEF+" prefixes stripped). */
+const MARKER_TABLES: Record<string, CodeMap> = {
+  zapfdingbats: { codeLen: 1, map: new Map(Object.entries(ZAPF_DINGBATS).map(([k, v]) => [Number(k), v])) },
+  symbol: { codeLen: 1, map: new Map(Object.entries(SYMBOL_FONT).map(([k, v]) => [Number(k), v])) },
+};
 
 /** Decodes a UTF-16BE hex payload (the CMap dst form) into a string. */
 function utf16be(hex: string): string {
@@ -501,6 +593,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       reset();
       shownSinceTm = false; // in a fresh run — the FIRST Td's ty is a baseline placement, not a line move
       tmInRun = true; // R104-C: the Tm form — the run's Tds NEVER take the fresh-Td path (the r103-B rules verbatim)
+      lastFreshTd = null; // R105-D (L-2): the Tm form's geometry is Tm-tracked — a later fresh BT's absolute Td must not delta against this stale pre-Tm origin (the mixed XeTeX+Skia hazard; the conservative word-gap branch takes over)
       if (axisAligned) {
         if (lastTm) {
           const emDx = (e - lastTm.x) / (effSize * Math.abs(a));
@@ -532,7 +625,9 @@ async function extractPdfText(file: File): Promise<string> {
   // content streams (the W3C dummy.pdf has the CMap last), so hex atoms
   // decode only after every stream has been walked.
   const cmaps: CodeMap[] = [];
-  const pending: TextPiece[][] = [];
+  // R105-C: each stream's pieces carry their stream's object number — the
+  // page-tree chain resolves the stream's OWN page's font map at assembly
+  const pending: { objNum: number; pieces: TextPiece[] }[] = [];
   // Session 102 (R102-B): the font chain — /F-name → font object →
   // /ToUnicode object. Multi-font subset files (the real LibreOffice form:
   // 15 fonts, every one restarting its glyph codes at <01>) need each
@@ -561,10 +656,47 @@ async function extractPdfText(file: File): Promise<string> {
     pushCandidate(fm[1], parseInt(fm[2], 10), fm.index ?? 0);
   }
   const objToTu = new Map<number, number>();
+  // R105-B: font object → lowercased /BaseFont name (subset "ABCDEF+"
+  // prefixes stripped) — the standard-14 marker lookup (ZapfDingbats/Symbol)
+  const objBaseFont = new Map<number, string>();
   for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
     if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
     const tu = fm[2].match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
     if (tu) objToTu.set(parseInt(fm[1], 10), parseInt(tu[1], 10));
+    const bf = fm[2].match(/\/BaseFont\s*\/([\w#+-]+)/);
+    if (bf) objBaseFont.set(parseInt(fm[1], 10), (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
+  }
+  // R105-C: the page tree — /Type /Page objects bind a CONTENT STREAM to the
+  // page's own /F-name → font-object mapping (inline in the page dict or via
+  // a referenced /Resources object). Assembly resolves each stream's atoms
+  // through ITS page's map FIRST; the candidate chain stays the fallback
+  // (single-page and tree-less files keep the previous behavior verbatim).
+  // The region scan (obj header → endobj) tolerates the doubly-nested
+  // /Resources << /Font << /F1 N 0 R >> >> shape the dict-pattern cannot.
+  const pageFonts = new Map<number, Map<string, number>>(); // content objNum → /F-name → font objNum
+  {
+    const objFonts = new Map<number, Map<string, number>>(); // resources objNum → /F-name → font objNum
+    const pendingRes: { contents: number; res: number }[] = [];
+    for (const rm of ascii.matchAll(/(\d+)\s+0\s+obj\s*([\s\S]*?)endobj/g)) {
+      const body = rm[2];
+      const fonts = new Map<string, number>();
+      for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+      if (/\/Type\s*\/Page\b/.test(body)) {
+        const contents = body.match(/\/Contents\s+(\d+)\s+0\s+R/);
+        if (!contents) continue;
+        const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
+        if (fonts.size) pageFonts.set(parseInt(contents[1], 10), fonts);
+        else if (res) pendingRes.push({ contents: parseInt(contents[1], 10), res: parseInt(res[1], 10) });
+      } else if (fonts.size) {
+        objFonts.set(parseInt(rm[1], 10), fonts);
+      }
+    }
+    // the referenced-resources pages resolve after the whole pass (the
+    // resources object may follow its page in the file)
+    for (const p of pendingRes) {
+      const fonts = objFonts.get(p.res);
+      if (fonts) pageFonts.set(p.contents, fonts);
+    }
   }
   const tuToCmap = new Map<number, CodeMap>();
 
@@ -659,6 +791,19 @@ async function extractPdfText(file: File): Promise<string> {
           if (/\/Type\s*\/Font\b/.test(body)) {
             const tu = body.match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
             if (tu) objToTu.set(entries[i].obj, parseInt(tu[1], 10));
+            const bf = body.match(/\/BaseFont\s*\/([\w#+-]+)/); // R105-B
+            if (bf) objBaseFont.set(entries[i].obj, (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
+          }
+          // R105-C: ObjStm-carried page objects register their content
+          // stream's font map (inline fonts only — a page whose /Resources
+          // is a separate reference resolves through the raw pass)
+          if (/\/Type\s*\/Page\b/.test(body)) {
+            const contents = body.match(/\/Contents\s+(\d+)\s+0\s+R/);
+            if (contents) {
+              const fonts = new Map<string, number>();
+              for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+              if (fonts.size) pageFonts.set(parseInt(contents[1], 10), fonts);
+            }
           }
           for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
             pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
@@ -703,7 +848,7 @@ async function extractPdfText(file: File): Promise<string> {
     } catch {
       continue; // the stack-overflow class — one bad stream never kills the file
     }
-    if (pieces.length) pending.push(pieces);
+    if (pieces.length) pending.push({ objNum, pieces });
   }
   // R100-A: each piece carries its own leading separator (decided by the
   // positioning between shows); the hex pieces decode through the collected
@@ -711,25 +856,42 @@ async function extractPdfText(file: File): Promise<string> {
   // CMap first when the /F-name → font object → /ToUnicode chain resolves,
   // with the standing first-covering walk as the fallback (files without
   // the chain keep the previous behavior verbatim)
+  // R105-D (L-4): the per-font memo — the candidate chain re-sorted and
+  // re-resolved per hex piece before; assembly resolves each font once.
+  const cmapsForMemo = new Map<string, CodeMap[]>();
   const cmapsFor = (font?: string): CodeMap[] => {
-    if (font) {
-      // R104-D: EVERY candidate for this /F-name in file order (the raw
-      // pairs and the ObjStm-carried pairs), each resolved through the
-      // objToTu/tuToCmap chain — the first-FULLY-COVERING rule in
-      // decodeHexString picks the atom's own page's map; the wrong-name
-      // maps from other pages rarely fully cover a multi-code atom
-      const cands = fCandidates.get(font);
-      if (cands?.length) {
-        const own = [...cands]
-          .sort((a, b) => a.pos - b.pos)
-          .map((c) => objToTu.get(c.obj))
-          .filter((tu): tu is number => tu !== undefined)
-          .map((tu) => tuToCmap.get(tu))
-          .filter((cm): cm is CodeMap => cm !== undefined);
-        if (own.length) return [...own, ...cmaps];
+    if (!font) return cmaps;
+    const memo = cmapsForMemo.get(font);
+    if (memo) return memo;
+    let chain: CodeMap[] | null = null;
+    // R104-D: EVERY candidate for this /F-name in file order (the raw
+    // pairs and the ObjStm-carried pairs), each resolved through the
+    // objToTu/tuToCmap chain — the first-FULLY-COVERING rule in
+    // decodeHexString picks the atom's own page's map; the wrong-name
+    // maps from other pages rarely fully cover a multi-code atom
+    const cands = fCandidates.get(font);
+    if (cands?.length) {
+      const own: CodeMap[] = [];
+      for (const c of [...cands].sort((a, b) => a.pos - b.pos)) {
+        const tu = objToTu.get(c.obj);
+        if (tu !== undefined) {
+          const cm = tuToCmap.get(tu);
+          if (cm) own.push(cm);
+        } else {
+          // R105-B: a marker font (ZapfDingbats/Symbol) with no ToUnicode
+          // decodes through its STANDARD encoding table
+          const bf = objBaseFont.get(c.obj);
+          if (bf) {
+            const mk = MARKER_TABLES[bf];
+            if (mk) own.push(mk);
+          }
+        }
       }
+      if (own.length) chain = [...own, ...cmaps];
     }
-    return cmaps;
+    const out = chain ?? cmaps;
+    cmapsForMemo.set(font, out);
+    return out;
   };
   // R103-C: the space-glyph conditional. Streams that write EXPLICIT
   // standalone space-glyph pieces (the Skia/LO convention: word gaps are
@@ -739,8 +901,31 @@ async function extractPdfText(file: File): Promise<string> {
   // streams without space glyphs (the IRS/pdfTeX convention: gaps ride the
   // moves) keep every gap. The decode happens first so the standalone-space
   // detection sees the decoded text.
-  const parts = pending.map((pieces) => {
-    const decoded = pieces.map((p) => ({ p, text: p.kind === "hex" ? decodeHexString(p.hex, cmapsFor(p.font)) : p.text }));
+  const parts = pending.map(({ objNum, pieces }) => {
+    // R105-C: this stream's OWN page's font map resolves first; the
+    // candidate chain stays the fallback (the page-tree chain — the
+    // fontspec.pdf fully-covering collision class)
+    const pageMap = pageFonts.get(objNum);
+    const localFor = (font?: string): CodeMap[] => {
+      if (font && pageMap) {
+        const fontObj = pageMap.get(font);
+        if (fontObj !== undefined) {
+          const tu = objToTu.get(fontObj);
+          if (tu !== undefined) {
+            const cm = tuToCmap.get(tu);
+            if (cm) return [cm, ...cmapsFor(font)];
+          } else {
+            const bf = objBaseFont.get(fontObj); // R105-B on the page path
+            if (bf) {
+              const mk = MARKER_TABLES[bf];
+              if (mk) return [mk, ...cmapsFor(font)];
+            }
+          }
+        }
+      }
+      return cmapsFor(font);
+    };
+    const decoded = pieces.map((p) => ({ p, text: p.kind === "hex" ? decodeHexString(p.hex, localFor(p.font)) : p.text }));
     const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^\s+$/.test(text));
     return decoded
       .map(({ p, text }) => (p.condGap && hasSpaceGlyphs ? "" : p.sep) + text)

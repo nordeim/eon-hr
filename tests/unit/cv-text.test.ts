@@ -1027,4 +1027,146 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("admin oriented management"); // B's own words through B
     expect(text).not.toContain("qqq"); // the wrong-letter decode must not appear
   });
+
+  // Session 105 (R105): the inflate budget round — four defect classes:
+  // (A) the inflate has NO output cap (the audit's M-1: a crafted deflate
+  // bomb inside a NON-image stream — an ObjStm/Form stream passes the
+  // R102-A dict gate — expands unbounded in the tab; the fix: the streaming
+  // byte budget, 8MB, two orders above every legitimate stream in the
+  // 12-writer corpus); (B) the no-ToUnicode simple-font marker decode (the
+  // r105 queue's Dingbats class: /BaseFont /ZapfDingbats's <33> is
+  // ✓ U+2713, not "3" — the standard-14 tables as static CodeMaps);
+  // (C) the page-tree-aware font chain (the fontspec.pdf one-letter
+  // residual: two pages' /F1 maps BOTH fully cover an atom's codes while
+  // mapping them differently — the candidate chain's file order picks the
+  // wrong one; the fix resolves the content stream's OWN page's mapping
+  // through the /Type /Page tree); (D) the two hardenings — lastFreshTd
+  // cleared when a Tm run intervenes (a mixed XeTeX+Skia stream must not
+  // delta against a stale origin) and the cmapsFor memo.
+  it("aborts a stream whose inflated output exceeds the budget without losing the file's real text (the deflate-bomb guard — R105-A)", async () => {
+    // a NON-image stream (passes the R102-A dict gate — the fixed path, the
+    // §116 fixture lesson) carrying ~8.8MB of text-op-shaped content: before
+    // the fix the whole body inflates and its decoys pollute the yield;
+    // after, the budget aborts the inflate and the per-stream continue
+    // contract keeps the real stream's text
+    const bomb = "(BOMBGARBAGE777) Tj ".repeat(420_000);
+    const file = await pdfWithObjects([
+      { raw: "/Type /Catalog /Pages 3 0 R" },
+      { dict: "/Filter /FlateDecode", stream: bomb },
+      {
+        dict: "/Filter /FlateDecode",
+        stream: "BT /F1 12 Tf (Senior HR Manager with payroll and compliance skills) Tj ET",
+      },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Manager with payroll"); // the real stream's text survives
+    expect(text).not.toContain("BOMBGARBAGE777"); // ← RED before the fix: the bomb inflates fully and pollutes
+  });
+
+  it("decodes a ZapfDingbats font's hex atoms through the standard marker table (the no-ToUnicode simple font — R105-B)", async () => {
+    // /BaseFont /ZapfDingbats, NO /ToUnicode: <33> is ✓ (U+2713) and <34> is
+    // ✔ — the resume-decoration class — never the Latin-1 "34" fallback
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /ZapfDingbats >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      {
+        dict: "/Filter /FlateDecode",
+        stream:
+          "BT /F1 12 Tf <3334> Tj ET\nBT /F2 12 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET",
+      },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F2 5 0 R >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u2713\u2714"); // ← RED before the fix: "34" through the Latin-1 fallback
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing literal
+  });
+
+  it("decodes a Symbol font's hex atoms through the standard marker table (the Greek-letter class — R105-B twin)", async () => {
+    // /BaseFont /Symbol, NO /ToUnicode: <41> is Α (U+0391) and <61> is α —
+    // the technical-resume Greek class — never the Latin-1 "Aa"
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Symbol >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      {
+        dict: "/Filter /FlateDecode",
+        stream:
+          "BT /F1 12 Tf <4161> Tj ET\nBT /F2 12 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET",
+      },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F2 5 0 R >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u0391\u03B1"); // ← RED before the fix: "Aa" through the Latin-1 fallback
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing literal
+  });
+
+  it("resolves each page's /F1 atoms through that page's OWN font map — the page-tree chain (the fully-covering collision — R105-C)", async () => {
+    // the fontspec.pdf residual class: TWO pages each name their font /F1,
+    // and BOTH fonts' ToUnicode maps FULLY cover the same code set while
+    // mapping it to DIFFERENT letters (the first-covering blind spot — the
+    // R104-D fixture discriminated by B-exclusive codes, this one removes
+    // that tell). Page B's resource dict appears FIRST in file order, so the
+    // candidate chain decodes page A's atoms through page B's map — the
+    // "Dont selection" residual; the page tree binds each content stream to
+    // ITS page's mapping.
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const aWords = ["font", "selection", "for", "the", "xelatex", "writer"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    // font B's map: the SAME codes → WRONG letters (both maps fully cover
+    // the collision set), plus B's own words at B-exclusive codes
+    const bWords = ["unicode", "mapping", "tables"];
+    const bLetters = [...new Set(bWords.join(""))];
+    const wrong = "qwzvxjk";
+    const bPairs: [string, string][] = [];
+    aLetters.forEach((_, i) => bPairs.push([hex2(i + 1), uni(wrong[i % wrong.length])]));
+    const bCode = new Map(bLetters.map((ch, i) => [ch, hex2(0x20 + i)]));
+    bLetters.forEach((ch) => bPairs.push([bCode.get(ch)!, uni(ch)]));
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const contentA = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))} ET`;
+    const contentB = `BT /F1 12 Tf 20 700 Td ${line(bWords.map((w) => [...w].map((ch) => bCode.get(ch)!)))} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" }, // obj 3
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — font B's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" }, // obj 5
+      // page B FIRST in file order — its /F1 candidate (font 5) leads the chain
+      { raw: "<< /Type /Page /Contents 9 0 R /Resources << /Font << /F1 5 0 R >> >> >>" }, // obj 6
+      { raw: "<< /Type /Page /Contents 8 0 R /Resources << /Font << /F1 3 0 R >> >> >>" }, // obj 7
+      { dict: "/Filter /FlateDecode", stream: contentA }, // obj 8 — page A's content
+      { dict: "/Filter /FlateDecode", stream: contentB }, // obj 9 — page B's content
+      { raw: "<< /Type /Pages /Kids [6 0 R 7 0 R] >>" }, // obj 10
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection"); // ← RED before the fix: page A's atoms decode through page B's wrong letters
+    expect(text).toContain("xelatex writer");
+    expect(text).toContain("unicode mapping tables"); // B's own words — correct on both sides
+  });
+
+  it("does not delta a fresh BT's absolute Td against a stale pre-Tm origin (the mixed-form hardening — R105-D)", async () => {
+    // XeTeX word → Skia Tm word → XeTeX word: the THIRD block's fresh Td
+    // must not delta against the FIRST block's origin (the Tm form
+    // intervened — the stale-origin hazard, the audit's L-2). Without the
+    // clear the 0.5-em dx joins "beta" onto the Skia word ("skiabeta");
+    // with it the conservative word gap separates them.
+    const content = [
+      "BT /F1 12 Tf 20 700 Td (alpha) Tj ET",
+      "BT /F1 12 Tf 1 0 0 1 500 100 Tm (skia) Tj ET",
+      "BT /F1 12 Tf 26 698 Td (beta) Tj ET",
+      "BT /F1 12 Tf 20 100 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET",
+    ].join("\n");
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("skia beta"); // ← RED before the fix: "skiabeta" (the stale-origin sub-em join)
+    expect(text).not.toContain("skiabeta");
+  });
 });
