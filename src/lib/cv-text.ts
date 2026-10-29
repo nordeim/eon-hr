@@ -540,14 +540,49 @@ function pdfTextPieces(content: string): TextPiece[] {
       // atoms with NO number keep the standing space join; a trailing
       // number is discarded (the outer walk's next operator sets fresh
       // state).
+      //
+      // Session 107 (R107-A): the DISPLAY-TRACKING signature — a TJ array
+      // where EVERY consecutive atom pair carries a kern, ALL the kerns
+      // fall in (-200,-100], ALL the atoms are single-glyph (single-CID
+      // hex or single-char literal), and the count ≥ 4. Measured on the
+      // real LibreOffice Calc guide's cover: the 26pt title and 20pt
+      // subtitle kern EVERY letter at -113..-154 (the display tracking)
+      // while the WORD gaps ride space-GLYPH atoms — the ≤ -100 gap rule
+      // split every letter ("C a l c   G u i d e" where pdftotext reads
+      // "Calc Guide"). The naive band conditional is refuted by the
+      // prototype (it joins xdvipdfmx's -150..-196 interword glue and
+      // pdfTeX's -161..-185 math thin-spaces — pdftotext reads both
+      // spaced); the signature's four conditions reject every other
+      // measured shape: the glue arrays ride multi-CID word chunks, the
+      // math arrays are 2–3 atoms or coverage-broken, the R97 -120 rides
+      // multi-char literals, the pdfTeX -322 glue is ≤ -200.
       const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>|(-?[\d.]+)/g;
+      let displayTracked = false;
+      {
+        const items: { lit: boolean; v: string; kern: number }[] = [];
+        let p: RegExpExecArray | null;
+        let preKern = 0;
+        while ((p = atomRe.exec(m[6]))) {
+          if (p[1] !== undefined || p[2] !== undefined) {
+            items.push({ lit: p[1] !== undefined, v: (p[1] ?? p[2])!, kern: preKern });
+            preKern = 0;
+          } else preKern += parseFloat(p[3]);
+        }
+        displayTracked =
+          items.length >= 4 &&
+          items.every((x, i) => i === 0 || (x.kern <= -100 && x.kern > -200)) &&
+          items.every((x) => (x.lit ? x.v.length === 1 : x.v.replace(/\s+/g, "").length <= 4));
+      }
+      atomRe.lastIndex = 0;
       let a: RegExpExecArray | null;
       let kern = 0; // SIGNED sum of consecutive numbers since the last atom
       while ((a = atomRe.exec(m[6]))) {
         if (a[1] !== undefined || a[2] !== undefined) {
           if (kern !== 0) {
             moved = true;
-            pendingEm = kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
+            // R107-A: a display-tracked array's kerns are TRACKING, not gaps
+            // — the atoms join (the space glyphs carry the word separation)
+            pendingEm = !displayTracked && kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
           }
           push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] }, kern !== 0);
           kern = 0;
@@ -653,6 +688,10 @@ async function extractPdfText(file: File): Promise<string> {
     fCandidates.set(name, list);
   };
   for (const fm of ascii.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+    // R107-B: the dict KEY \Font is never a font NAME (no writer selects
+    // "/Font 12 Tf") — excluding it stops the false pair from polluting
+    // the candidate chain
+    if (fm[1] === "Font") continue;
     pushCandidate(fm[1], parseInt(fm[2], 10), fm.index ?? 0);
   }
   const objToTu = new Map<number, number>();
@@ -686,6 +725,22 @@ async function extractPdfText(file: File): Promise<string> {
   const pageFonts = new Map<number, Map<string, number>>(); // content objNum → /F-name → font objNum
   const objFonts = new Map<number, Map<string, number>>(); // resources objNum → /F-name → font objNum
   const pendingRes: { contents: number[]; res: number }[] = [];
+  // R107-B: the third page-form — the referenced /Font dict. Two shapes:
+  // (a) the page carries /Resources << /Font N 0 R >> (INLINE resources
+  // whose /Font VALUE is a reference — the measured lo-calc cover form);
+  // (b) the page carries /Resources R 0 R where obj R = << /Font N 0 R >>
+  // (the referenced-resources two-hop — the measured 545-page lo-calc
+  // form). The old F-pair scan captured the dict KEY "Font" as a font
+  // name for both shapes — a false pair that blocked every resolution.
+  // The cure: the "Font" key exclusion everywhere + the fontRefOf link map
+  // (a body carrying /Font N 0 R records objNum→N) + the pendingFontRef
+  // queue for shape (a), both resolved after the walk like pendingRes.
+  const pendingFontRef: { contents: number[]; fontRef: number }[] = [];
+  const fontRefOf = new Map<number, number>(); // resources objNum → the /Font ref's target
+  const inlineFontRef = (body: string): number | null => {
+    const fm = body.match(/\/Resources\s*<<\s*\/Font\s+(\d+)\s+0\s+R/);
+    return fm ? parseInt(fm[1], 10) : null;
+  };
   // the /Contents value's object refs: the ARRAY form [4 0 R 5 0 R] (every
   // ref — a page's content may span streams; a shared stream is last-wins,
   // the rare form) or the scalar form 4 0 R (the single ref)
@@ -702,15 +757,20 @@ async function extractPdfText(file: File): Promise<string> {
     for (const rm of ascii.matchAll(/(\d+)\s+0\s+obj\s*([\s\S]*?)endobj/g)) {
       const body = rm[2];
       const fonts = new Map<string, number>();
-      for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+      for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+        if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
       if (/\/Type\s*\/Page\b/.test(body)) {
         const refs = contentsRefs(body);
         if (!refs.length) continue;
         const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
+        const fontRef = inlineFontRef(body);
         if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
         else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
-      } else if (fonts.size) {
-        objFonts.set(parseInt(rm[1], 10), fonts);
+        else if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R107-B shape (a)
+      } else {
+        if (fonts.size) objFonts.set(parseInt(rm[1], 10), fonts);
+        const fr = body.match(/\/Font\s+(\d+)\s+0\s+R/); // R107-B shape (b): the link
+        if (fr) fontRefOf.set(parseInt(rm[1], 10), parseInt(fr[1], 10));
       }
     }
   }
@@ -815,24 +875,34 @@ async function extractPdfText(file: File): Promise<string> {
           // form), a referenced /Resources through the deferred resolution
           // (the real fontspec/dvipdfmx form: the resources object itself
           // rides an ObjStm, often a LATER one)
+          // R107-B: the third form — INLINE /Resources with a REFERENCED
+          // /Font value (the measured lo-calc cover shape) queues the
+          // pendingFontRef resolution
           if (/\/Type\s*\/Page\b/.test(body)) {
             const refs = contentsRefs(body);
             if (refs.length) {
               const fonts = new Map<string, number>();
-              for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+              for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+                if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
               const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
+              const fontRef = inlineFontRef(body);
               if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
               else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
+              else if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R107-B shape (a)
             }
           } else {
             // R106-A: an ObjStm-carried /Resources body (the /Font pairs
             // dict) feeds the deferred resolution — the raw pass cannot see
             // it, and the fontspec pages reference exactly these
             const fonts = new Map<string, number>();
-            for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) fonts.set(fm[1], parseInt(fm[2], 10));
+            for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+              if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
             if (fonts.size) objFonts.set(entries[i].obj, fonts);
+            const fr = body.match(/\/Font\s+(\d+)\s+0\s+R/); // R107-B shape (b): the link
+            if (fr) fontRefOf.set(entries[i].obj, parseInt(fr[1], 10));
           }
           for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+            if (fm[1] === "Font") continue; // R107-B: the key exclusion
             pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
           }
         }
@@ -881,8 +951,21 @@ async function extractPdfText(file: File): Promise<string> {
   // walk — the resources object may ride an ObjStm the walk meets LATER
   // than the page's own ObjStm (the real fontspec ordering), and the
   // ObjStm objFonts feed above only fills during the walk
+  // R107-B: the TWO-HOP — when the resources object's own body carries a
+  // referenced /Font (obj R = << /Font N 0 R >>, the 545-page lo-calc
+  // form), the direct objFonts lookup misses and the fontRefOf link
+  // reaches the font dict — and the pendingFontRef queue (the
+  // inline-/Resources referenced-/Font pages) resolves the same way
   for (const p of pendingRes) {
-    const fonts = objFonts.get(p.res);
+    let fonts = objFonts.get(p.res);
+    if (!fonts) {
+      const fr = fontRefOf.get(p.res);
+      if (fr !== undefined) fonts = objFonts.get(fr);
+    }
+    if (fonts) p.contents.forEach((c) => pageFonts.set(c, fonts));
+  }
+  for (const p of pendingFontRef) {
+    const fonts = objFonts.get(p.fontRef);
     if (fonts) p.contents.forEach((c) => pageFonts.set(c, fonts));
   }
   // R100-A: each piece carries its own leading separator (decided by the

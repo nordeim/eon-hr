@@ -70,5 +70,8 @@
     "@prisma/client",
     "prisma",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "zod": "^4.6.7"
+  }
 }

@@ -340,4 +340,52 @@ test.describe("mobile page kicker (session 6, re-pinned session 9)", () => {
     await expect(sidebar).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "Dashboard" })).toBeVisible();
   });
+
+  // Session 107 (R107-C): the drawer-open SPINE FREEZE — the neo-crm
+  // session-196 doctrine transfer. The standing battery pinned the sheet's
+  // width/height and the item rhythm, but NOT the interior spine boxes: a
+  // computed-margin regression (the s177 defect class — an mb-2 sneaking
+  // onto the brand header) would keep every standing gate green. This leg
+  // freezes the measured drawer-open spine at TRUE 390×844.
+  test("the drawer-open spine boxes are frozen (the s196 doctrine — R107-C)", async ({ page }) => {
+    await page.goto("/dashboard"); // this describe has no beforeEach — navigate explicitly
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const panel = page.getByRole("dialog", { name: "Navigation menu" });
+    await expect(panel).toBeVisible();
+    // the drawer's 500ms enter animation must settle before the box reads
+    // (the drawer-swipe spec's standing idiom — mid-flight the sheet reads
+    // x=-122 and every box is in motion)
+    await page.waitForTimeout(700);
+    // the starved-read idiom: poll until the element's box exists, then read
+    const readBox = async (sel: string) => {
+      await expect
+        .poll(async () => ((await panel.locator(sel).first().boundingBox()) ? "1" : "0"), { timeout: 10_000 })
+        .toBe("1");
+      const bb = await panel.locator(sel).first().boundingBox();
+      return [Math.round(bb?.x ?? -1), Math.round(bb?.y ?? -1), Math.round(bb?.width ?? -1), Math.round(bb?.height ?? -1)].join(",");
+    };
+    // the measured ledger (scripts/r107-spine-measure.mjs, TRUE 390×844):
+    // sheet 0,0,288,844 · brand header 0,0,287,89 · h2 "EonHR" 76,25,187,23
+    // · p "Demo" 76,47,187,16 · nav scroll block 0,89,287,634 · the "Main
+    // Menu" label 20,109,247,32 · the item UL 20,141,247,516 · the footer
+    // block 0,723,287,121 · the user button 16,792,255,36
+    // the sheet is the panel itself (no descendant locator)
+    const sheet = await panel.boundingBox();
+    expect([Math.round(sheet?.x ?? -1), Math.round(sheet?.y ?? -1), Math.round(sheet?.width ?? -1), Math.round(sheet?.height ?? -1)].join(",")).toBe("0,0,288,844");
+    // the brand header block (the FIRST of the three gap-2 columns: header,
+    // nav, footer — the measured census)
+    expect(await readBox("div.flex.flex-col.gap-2 >> nth=0")).toBe("0,0,287,89");
+    // the h2 + the subtitle
+    expect(await readBox("h2.font-bold")).toBe("76,25,187,23");
+    expect(await readBox("p.text-xs")).toBe("76,47,187,16");
+    // the nav scroll block
+    expect(await readBox("div.flex.min-h-0.flex-1")).toBe("0,89,287,634");
+    // the "Main Menu" label + the item list
+    expect(await readBox("div.flex.h-8")).toBe("20,109,247,32");
+    expect(await readBox("ul")).toBe("20,141,247,516");
+    // the footer block (the THIRD gap-2 column — nth=1 is the nav wrapper)
+    expect(await readBox("div.flex.flex-col.gap-2 >> nth=2")).toBe("0,723,287,121");
+    // the user button
+    expect(await readBox("button:has-text('sepnetflix2023')")).toBe("16,792,255,36");
+  });
 });

@@ -1289,4 +1289,160 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("font selection"); // ← RED before the fix: the decoy's map steals the atom ("Dont selection")
     expect(text).toContain("xelatex writer");
   });
+
+  // Session 107 (R107-A): the LO display-tracking class. The re-sourced Calc
+  // guide's cover title extracts as letter-split soup — "C a l c   G u i d e"
+  // — because LibreOffice's display typography kerns (−113..−154 thousandths,
+  // measured on the real cover) fire the kern ≤ −100 word-gap rule between
+  // every letter, while the WORD gaps ride space-GLYPH atoms (<05> decodes to
+  // " "). The naive band conditional is refuted by the prototype (it joins
+  // xdvipdfmx's interword glue and pdfTeX's math thin-spaces); the
+  // discriminator is the per-array display-tracking SIGNATURE: every
+  // consecutive pair kerned, ALL kerns in (−200,−100], ALL atoms
+  // single-glyph, count ≥ 4.
+  it("joins a display-tracked TJ array's letters (the LO cover form — R107-A)", async () => {
+    // the measured cover shape: 1-byte hex codes, a CMap mapping 01→C …
+    // 05→space … 0A→e, and a TJ array with a −113..−116 kern between EVERY
+    // pair (the display tracking). Body text clears the 40-alnum guard on
+    // both sides of the mutation (the split letters are still alnums).
+    const cmapPairs = (pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<00> <FF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0");
+    const title = "Calc Guide";
+    const letters = [...new Set(title)].filter((c) => c !== " ");
+    const code = new Map(letters.map((ch, i) => [ch, (i + 1).toString(16).toUpperCase().padStart(2, "0")]));
+    code.set(" ", (letters.length + 1).toString(16).toUpperCase().padStart(2, "0")); // a non-colliding code (the real cover's 05-shape, 0A here)
+    const cmap = cmapPairs([...code.entries()].map(([ch, c]) => [c, uni(ch)]));
+    // the measured form: <01>-116<02>-116<03>-113<04>-116<05>-113<06>-115<07>-114<08>-113<09>-114<0A>
+    const kerns = [-116, -116, -113, -116, -113, -115, -114, -113, -114];
+    const titleArray = `[${[...title].map((ch, i) => `<${code.get(ch)!}>${i < kerns.length ? kerns[i] : ""}`).join("")}] TJ`;
+    const content =
+      `BT /F1 26 Tf 33.5 687.689 Td ${titleArray} ET\n` +
+      `BT /F2 13 Tf 33.5 603.789 Td (senior payroll compliance onboarding training for the spreadsheet specialist suite) Tj ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap }, // obj 2 — F1's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /DisplayTitle /ToUnicode 2 0 R >>" }, // obj 3
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 4 — the cover content
+      { raw: "<< /Type /Page /Contents[4 0 R] /Resources << /Font << /F1 3 0 R >> >> >>" }, // obj 5
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 6
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Calc Guide"); // ← RED before the fix: "C a l c   G u i d e" (every letter split by the tracking kerns)
+    expect(text).toContain("senior payroll compliance"); // the body text rides the standing rules
+  });
+
+  it("keeps the xdvipdfmx interword glue's gaps (the multi-CID guard — R107-A)", async () => {
+    // the fontspec form (measured): whole words ride as MULTI-CID hex chunks
+    // with a −194 kern between every pair — the kerns ARE the interword
+    // glue (pdftotext reads the words spaced). The single-glyph condition of
+    // the display signature rejects it; removing that condition (the M2
+    // mutation) must fuse the words.
+    const cmapPairs = (pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const words = ["font", "selection", "for", "xelatex", "writer", "packages", "and", "manuals"];
+    const letters = [...new Set(words.join(""))];
+    const code = new Map(letters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmap = cmapPairs(letters.map((ch) => [code.get(ch)!, uni(ch)]));
+    const chunk = (w: string) => `<${[...w].map((ch) => code.get(ch)!).join("")}>`;
+    const line = `[${words.map(chunk).join("-194")}] TJ`;
+    const content = `BT /F1 9.9626 Tf 72.727 -63.761 Td ${line} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap }, // obj 2
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /XeFont /ToUnicode 2 0 R >>" }, // obj 3
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 4
+      { raw: "<< /Type /Page /Contents[4 0 R] /Resources << /Font << /F1 3 0 R >> >> >>" }, // obj 5
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 6
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection for"); // the −194 glue keeps its spaces (a multi-CID chunk is never display tracking)
+    expect(text).toContain("xelatex writer packages");
+  });
+
+  it("keeps the pdfTeX math thin-spaces' gaps (the atom-count guard — R107-A)", async () => {
+    // the arXiv form (measured): single-char literal atoms with −161..−185
+    // kerns between punctuation and variables — 2- and 3-atom arrays. The
+    // ≥4-atom condition of the display signature rejects them; removing it
+    // (the M3 mutation) must join the math.
+    const content =
+      "BT /F1 9.9626 Tf 70.866 718.258 Td [(J)65(a)-161(b)-161(c)] TJ [(;) -167 (Y)] TJ ET\n" +
+      "BT /F1 9.9626 Tf 70.866 700 Td (senior payroll compliance onboarding training specialist) Tj ET";
+    const file = await pdfWithContent(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("a b c"); // the 3-atom math array keeps its thin-space gaps
+    expect(text).toContain("; Y"); // the 2-atom form keeps its gap
+  });
+
+  // Session 107 (R107-B): the third page-form blind spot — the referenced
+  // /Font dict inside INLINE /Resources (the measured lo-calc cover shape:
+  // /Resources << /Font 4234 0 R >>), and the two-hop form (the measured
+  // 545-page shape: /Resources N 0 R where obj N = << /Font 4234 0 R >>).
+  // The F-pair regex captures the dict KEY "Font" as a font name — a false
+  // pair that blocks both resolutions. Benign in the current corpus (single
+  // candidates) but a live vector for the R102-B multi-candidate class.
+  it("binds a page's inline-/Resources referenced /Font dict (the cover form — R107-B)", async () => {
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const aWords = ["font", "selection", "for", "the", "xelatex", "writer", "package", "manual"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    const wrong = "qwzvxjk";
+    const bPairs: [string, string][] = aLetters.map((_, i) => [hex2(i + 1), uni(wrong[i % wrong.length])]);
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const content = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" }, // obj 3 — the page's OWN font
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — the decoy's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" }, // obj 5 — the decoy font
+      { raw: "<< /Font << /F1 5 0 R >> >>" }, // obj 6 — the decoy pair: LEADS the candidate chain in file order
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 7 — the page's content
+      { raw: "<< /Type /Page /Contents[7 0 R] /Resources << /Font 9 0 R >> >>" }, // obj 8 — the INLINE resources with a REFERENCED /Font dict
+      { raw: "<< /F1 3 0 R >>" }, // obj 9 — the font dict (the /Font ref's target)
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" }, // obj 10
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection"); // ← RED before the fix: the decoy's map steals the atom (the page never binds)
+    expect(text).toContain("xelatex writer");
+  });
+
+  it("resolves the two-hop /Resources → /Font reference (the 545-page form — R107-B)", async () => {
+    const cmapPairs = (name: string, pairs: [string, string][]) =>
+      `/CIDInit/ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName/${name} def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${pairs.length} beginbfchar\n${pairs.map(([c, u]) => `<${c}> <${u}>`).join("\n")}\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+    const uni = (ch: string) => ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+    const aWords = ["font", "selection", "for", "the", "xelatex", "writer", "package", "manual"];
+    const aLetters = [...new Set(aWords.join(""))];
+    const aCode = new Map(aLetters.map((ch, i) => [ch, hex2(i + 1)]));
+    const cmapA = cmapPairs("FontA-UTF16", aLetters.map((ch) => [aCode.get(ch)!, uni(ch)]));
+    const wrong = "qwzvxjk";
+    const bPairs: [string, string][] = aLetters.map((_, i) => [hex2(i + 1), uni(wrong[i % wrong.length])]);
+    const cmapB = cmapPairs("FontB-UTF16", bPairs);
+    const line = (codes: string[][]) => `[${codes.map((w) => `<${w.join("")}> -322 `).join("")}] TJ`;
+    const content = `BT /F1 12 Tf 20 700 Td ${line(aWords.map((w) => [...w].map((ch) => aCode.get(ch)!)))} ET`;
+    const file = await pdfWithObjects([
+      { raw: "<< /Type /Catalog /Pages 10 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // obj 2 — font A's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontA /ToUnicode 2 0 R >>" }, // obj 3 — the page's OWN font
+      { dict: "/Filter /FlateDecode", stream: cmapB }, // obj 4 — the decoy's ToUnicode
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /FontB /ToUnicode 4 0 R >>" }, // obj 5 — the decoy font
+      { raw: "<< /Font << /F1 5 0 R >> >>" }, // obj 6 — the decoy pair: LEADS the candidate chain
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 7 — the page's content
+      { raw: "<< /Type /Page /Contents[7 0 R] /Resources 9 0 R >>" }, // obj 8 — the REFERENCED /Resources (the 545-page form)
+      { raw: "<< /Font 11 0 R >>" }, // obj 9 — the resources object: its /Font VALUE is a reference
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" }, // obj 10
+      { raw: "<< /F1 3 0 R >>" }, // obj 11 — the font dict (the /Font ref's target)
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("font selection"); // ← RED before the fix: the false "Font" pair blocks the resolution, the decoy steals
+    expect(text).toContain("xelatex writer");
+  });
 });
