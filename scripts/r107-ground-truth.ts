@@ -10,9 +10,14 @@ import { execSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// export HEAD's extractor
+// export HEAD's extractor — through a VARIABLE path: a literal "/tmp/…"
+// import specifier makes tsc (and the build's type-check phase) fail on
+// any fresh workspace where the /tmp file does not exist (the R108-A
+// fresh-clone gate break; the variable form keeps the gate
+// environment-independent while bun still resolves the module at runtime)
 execSync("git show HEAD:src/lib/cv-text.ts > /tmp/r107-head-cv-text", { cwd: "/home/z/my-project/eon-hr" });
-const headMod = await import("/tmp/r107-head-cv-text");
+const headPath = "/tmp/r107-head-cv-text";
+const headMod = (await import(headPath)) as { extractTextFromFile: (f: File) => Promise<string> };
 const { extractTextFromFile } = await import("../src/lib/cv-text");
 
 const files: [string, string, number][] = [

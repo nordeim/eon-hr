@@ -229,6 +229,51 @@ const MARKER_TABLES: Record<string, CodeMap> = {
   symbol: { codeLen: 1, map: new Map(Object.entries(SYMBOL_FONT).map(([k, v]) => [Number(k), v])) },
 };
 
+// Session 108 (R108-B): the MacRoman high block — the macOS Quartz writer
+// (Producer "… Quartz PDFContext", the 13th writer family) declares
+// /Encoding /MacRomanEncoding on its fonts and carries its typographic
+// characters as RAW single-byte literals in Flate-compressed content
+// streams: MacRoman 0xD5 is ' U+2019 (the right single quote), 0xD4 the
+// left, 0xD0/0xD1 the en/em dashes — NOT the Latin-1 readings. The
+// authoritative 0x80-0xFF zone (the canonical Apple mapping, = PDF 32000-1
+// Annex D's Mac OS Roman table). The "a font that NAMES its encoding is
+// its own ToUnicode" doctrine (the R105-B marker precedent's second
+// member): the marker fires ONLY on the font's OWN declaration — a
+// ToUnicode CMap still wins (the writer's own truth), and a font
+// declaring WinAnsi (or nothing) keeps the standing Latin-1 path (the
+// WinAnsi raw-literal class stays the documented watch).
+const MAC_ROMAN_HIGH: Record<number, string> = {
+  0x80: "\u00C4", 0x81: "\u00C5", 0x82: "\u00C7", 0x83: "\u00C9", 0x84: "\u00D1", 0x85: "\u00D6",
+  0x86: "\u00DC", 0x87: "\u00E1", 0x88: "\u00E0", 0x89: "\u00E2", 0x8a: "\u00E4", 0x8b: "\u00E3",
+  0x8c: "\u00E5", 0x8d: "\u00E7", 0x8e: "\u00E9", 0x8f: "\u00E8", 0x90: "\u00EA", 0x91: "\u00EB",
+  0x92: "\u00ED", 0x93: "\u00EC", 0x94: "\u00EE", 0x95: "\u00EF", 0x96: "\u00F1", 0x97: "\u00F3",
+  0x98: "\u00F2", 0x99: "\u00F4", 0x9a: "\u00F6", 0x9b: "\u00F5", 0x9c: "\u00FA", 0x9d: "\u00F9",
+  0x9e: "\u00FB", 0x9f: "\u00FC", 0xa0: "\u2020", 0xa1: "\u00B0", 0xa2: "\u00A2", 0xa3: "\u00A3",
+  0xa4: "\u00A7", 0xa5: "\u2022", 0xa6: "\u00B6", 0xa7: "\u00DF", 0xa8: "\u00AE", 0xa9: "\u00A9",
+  0xaa: "\u2122", 0xab: "\u00B4", 0xac: "\u00A8", 0xad: "\u2260", 0xae: "\u00C6", 0xaf: "\u00D8",
+  0xb0: "\u221E", 0xb1: "\u00B1", 0xb2: "\u2264", 0xb3: "\u2265", 0xb4: "\u00A5", 0xb5: "\u00B5",
+  0xb6: "\u2202", 0xb7: "\u2211", 0xb8: "\u220F", 0xb9: "\u03C0", 0xba: "\u222B", 0xbb: "\u00AA",
+  0xbc: "\u00BA", 0xbd: "\u03A9", 0xbe: "\u00E6", 0xbf: "\u00F8", 0xc0: "\u00BF", 0xc1: "\u00A1",
+  0xc2: "\u00AC", 0xc3: "\u221A", 0xc4: "\u0192", 0xc5: "\u2248", 0xc6: "\u2206", 0xc7: "\u00AB",
+  0xc8: "\u00BB", 0xc9: "\u2026", 0xca: "\u00A0", 0xcb: "\u00C0", 0xcc: "\u00C3", 0xcd: "\u00D5",
+  0xce: "\u0152", 0xcf: "\u0153", 0xd0: "\u2013", 0xd1: "\u2014", 0xd2: "\u201C", 0xd3: "\u201D",
+  0xd4: "\u2018", 0xd5: "\u2019", 0xd6: "\u00F7", 0xd7: "\u25CA", 0xd8: "\u00FF", 0xd9: "\u0178",
+  0xda: "\u2044", 0xdb: "\u20AC", 0xdc: "\u2039", 0xdd: "\u203A", 0xde: "\uFB01", 0xdf: "\uFB02",
+  0xe0: "\u2021", 0xe1: "\u00B7", 0xe2: "\u201A", 0xe3: "\u201E", 0xe4: "\u2030", 0xe5: "\u00C2",
+  0xe6: "\u00CA", 0xe7: "\u00C1", 0xe8: "\u00CB", 0xe9: "\u00C8", 0xea: "\u00CD", 0xeb: "\u00CE",
+  0xec: "\u00CF", 0xed: "\u00CC", 0xee: "\u00D3", 0xef: "\u00D4", 0xf0: "\uF8FF", 0xf1: "\u00D2",
+  0xf2: "\u00DA", 0xf3: "\u00DB", 0xf4: "\u00D9", 0xf5: "\u0131", 0xf6: "\u02C6", 0xf7: "\u02DC",
+  0xf8: "\u00AF", 0xf9: "\u02D8", 0xfa: "\u02D9", 0xfb: "\u02DA", 0xfc: "\u00B8", 0xfd: "\u02DD",
+  0xfe: "\u02DB", 0xff: "\u02C7",
+};
+// the marker CodeMap: the printable ASCII zone is identity (a hex atom's
+// WHOLE byte range must be covered for decodeHexString's covering rule to
+// pick the map); the high zone is the MacRoman table
+const MAC_ROMAN_MAP = new Map<number, string>();
+for (let c = 0x20; c <= 0x7f; c++) MAC_ROMAN_MAP.set(c, String.fromCharCode(c));
+for (const [k, v] of Object.entries(MAC_ROMAN_HIGH)) MAC_ROMAN_MAP.set(Number(k), v);
+const MAC_ROMAN_CMAP: CodeMap = { codeLen: 1, map: MAC_ROMAN_MAP };
+
 /** Decodes a UTF-16BE hex payload (the CMap dst form) into a string. */
 function utf16be(hex: string): string {
   const h = hex.length % 4 === 0 ? hex : hex.padStart(Math.ceil(hex.length / 4) * 4, "0");
@@ -694,16 +739,42 @@ async function extractPdfText(file: File): Promise<string> {
     if (fm[1] === "Font") continue;
     pushCandidate(fm[1], parseInt(fm[2], 10), fm.index ?? 0);
   }
+  // R108-B: the /Font-dict-region name collector — the macOS Quartz writer
+  // names its fonts /Tc1 /Tc2 (NOT /F…: the standing F\w+ pair regex never
+  // binds them). The pairs live inside /Font << … >> dict regions where
+  // every `Name N 0 R` pair IS a font binding by construction (a colorspace
+  // or xobject pair elsewhere in the resources never matches). The R107-B
+  // "Font" key exclusion kept — a font named exactly "Font" is always the
+  // dict key.
+  for (const rm of ascii.matchAll(/\/Font\s*<<\s*([\w#+\-/\s]+)>>/g)) {
+    for (const fm of rm[1].matchAll(/\/([\w#+-]+)\s+(\d+)\s+0\s+R/g)) {
+      if (fm[1] === "Font") continue;
+      pushCandidate(fm[1], parseInt(fm[2], 10), rm.index + (fm.index ?? 0));
+    }
+  }
+  // R108-B: the /Font-dict-region name collector — the macOS Quartz writer
+  // names its fonts /Tc1 /Tc2 (NOT /F…: the standing F\w+ pair regex never
+  // binds them). The pairs live inside /Font << … >> dict regions where
+  // every `Name N 0 R` pair IS a font binding by construction (a colorspace
+  // or xobject pair elsewhere in the resources never matches). The R107-B
+  // "Font" key exclusion kept — a font named exactly "Font" is always the
+  // dict key.
   const objToTu = new Map<number, number>();
   // R105-B: font object → lowercased /BaseFont name (subset "ABCDEF+"
   // prefixes stripped) — the standard-14 marker lookup (ZapfDingbats/Symbol)
   const objBaseFont = new Map<number, string>();
+  // R108-B: font objects DECLARING /Encoding /MacRomanEncoding — the named
+  // encoding feeds the MAC_ROMAN marker through the candidate chain (a
+  // real ToUnicode still wins; WinAnsi/undeclared fonts keep the Latin-1
+  // path — the over-application guard)
+  const objMacRoman = new Set<number>();
   for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
     if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
     const tu = fm[2].match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
     if (tu) objToTu.set(parseInt(fm[1], 10), parseInt(tu[1], 10));
     const bf = fm[2].match(/\/BaseFont\s*\/([\w#+-]+)/);
     if (bf) objBaseFont.set(parseInt(fm[1], 10), (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
+    if (/\/Encoding\s*\/MacRomanEncoding\b/.test(fm[2])) objMacRoman.add(parseInt(fm[1], 10));
   }
   // R105-C: the page tree — /Type /Page objects bind a CONTENT STREAM to the
   // page's own /F-name → font-object mapping (inline in the page dict or via
@@ -829,11 +900,17 @@ async function extractPdfText(file: File): Promise<string> {
     const chunk = bytes.subarray(start, chunkEnd);
     for (const trimmed of [chunk, bytes.subarray(start, end)]) {
       try {
-        text = new TextDecoder().decode(await inflate(trimmed, "deflate"));
+        // R108-B LEG A: the latin1 decode — PDF content streams are BYTE
+        // strings, not UTF-8; the TextDecoder default corrupted every
+        // byte >= 0x80 in a literal atom to U+FFFD before the decode tables
+        // ever saw it (the 13th-writer Quartz class: the fonts declare
+        // MacRomanEncoding and byte 0xD5 IS the right single quote). The
+        // .docx XML paths above stay UTF-8 — XML is UTF-8 by spec.
+        text = new TextDecoder("latin1").decode(await inflate(trimmed, "deflate"));
         break;
       } catch {
         try {
-          text = new TextDecoder().decode(await inflate(trimmed, "deflate-raw"));
+          text = new TextDecoder("latin1").decode(await inflate(trimmed, "deflate-raw"));
           break;
         } catch {
           text = "";
@@ -869,7 +946,22 @@ async function extractPdfText(file: File): Promise<string> {
             if (tu) objToTu.set(entries[i].obj, parseInt(tu[1], 10));
             const bf = body.match(/\/BaseFont\s*\/([\w#+-]+)/); // R105-B
             if (bf) objBaseFont.set(entries[i].obj, (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
+            if (/\/Encoding\s*\/MacRomanEncoding\b/.test(body)) objMacRoman.add(entries[i].obj); // R108-B
           }
+          // R108-B: the ObjStm side of the /Font-dict-region collector — an
+          // ObjStm-carried resources body's /Font << … >> pairs feed the
+          // candidate chain at the stream's file position (the Quartz
+          // general-name form, ObjStm-carried)
+          for (const fm2 of body.matchAll(/\/Font\s*<<\s*([\w#+\-/\s]+)>>/g)) {
+            for (const fm of fm2[1].matchAll(/\/([\w#+-]+)\s+(\d+)\s+0\s+R/g)) {
+              if (fm[1] === "Font") continue;
+              pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
+            }
+          }
+          // R108-B: the ObjStm side of the /Font-dict-region collector — an
+          // ObjStm-carried resources body's /Font << … >> pairs feed the
+          // candidate chain at the stream's file position (the Quartz
+          // general-name form, ObjStm-carried)
           // R105-C + R106-A: ObjStm-carried page objects register their
           // content streams' font map — inline fonts directly (the r105
           // form), a referenced /Resources through the deferred resolution
@@ -1003,6 +1095,11 @@ async function extractPdfText(file: File): Promise<string> {
             const mk = MARKER_TABLES[bf];
             if (mk) own.push(mk);
           }
+          // R108-B: a font DECLARING /Encoding /MacRomanEncoding with no
+          // ToUnicode decodes through the MacRoman table (the Quartz
+          // 13th-writer class — a font that NAMES its encoding is its own
+          // ToUnicode)
+          if (objMacRoman.has(c.obj)) own.push(MAC_ROMAN_CMAP);
         }
       }
       if (own.length) chain = [...own, ...cmaps];
@@ -1043,7 +1140,23 @@ async function extractPdfText(file: File): Promise<string> {
       }
       return cmapsFor(font);
     };
-    const decoded = pieces.map((p) => ({ p, text: p.kind === "hex" ? decodeHexString(p.hex, localFor(p.font)) : p.text }));
+    // R108-B LEG B: the literal remap — a literal piece's HIGH BYTES remap
+    // through the font's NAMED encoding when its chain resolves the MacRoman
+    // marker (the hex atoms get it through decodeHexString's covering rule;
+    // the literal path needs the explicit pass). A font without the
+    // declaration keeps its bytes verbatim (the WinAnsi guard).
+    // R108-B LEG B: the literal remap — a literal piece's HIGH BYTES remap
+    // through the font's NAMED encoding when its chain resolves the MacRoman
+    // marker (the hex atoms get it through decodeHexString's covering rule;
+    // the literal path needs the explicit pass). A font without the
+    // declaration keeps its bytes verbatim (the WinAnsi guard).
+    const decoded = pieces.map((p) => {
+      if (p.kind === "hex") return { p, text: decodeHexString(p.hex, localFor(p.font)) };
+      if (p.font && localFor(p.font).includes(MAC_ROMAN_CMAP) && /[\u0080-\u00ff]/.test(p.text)) {
+        return { p, text: p.text.replace(/[\u0080-\u00ff]/g, (c) => MAC_ROMAN_HIGH[c.charCodeAt(0)] ?? c) };
+      }
+      return { p, text: p.text };
+    });
     const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^\s+$/.test(text));
     return decoded
       .map(({ p, text }) => (p.condGap && hasSpaceGlyphs ? "" : p.sep) + text)

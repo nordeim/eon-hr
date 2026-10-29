@@ -1445,4 +1445,121 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("font selection"); // ← RED before the fix: the false "Font" pair blocks the resolution, the decoy steals
     expect(text).toContain("xelatex writer");
   });
+
+  // Session 108 (R108-B): the macOS Quartz 13th-writer round — the sourced
+  // longer.pdf (Producer "macOS Version 26.5 (Build 25F71) Quartz
+  // PDFContext", Bear-authored, PDF 1.3) exposed TWO stacked decode defects:
+  // [LEG A] every INFLATED content stream decoded through `new TextDecoder()`
+  // — the UTF-8 DEFAULT — so any byte >= 0x80 in a literal atom became U+FFFD
+  // before the decode tables ever saw it (the outer raw scan already used
+  // latin1; the inflated path silently bypassed it); [LEG B] the fonts
+  // declare /Encoding /MacRomanEncoding and the high bytes are the MacRoman
+  // block — 0xD5 is \u2019 (the right single quote), never \u00D5 —
+  // pdftotext reads "There's". The fixture helper: a latin1-stream variant
+  // of pdfWithObjects (the raw byte per char — a high byte in the stream
+  // must deflate as ITS byte, not its UTF-8 encoding).
+  const encS = (s: string) => new TextEncoder().encode(s); // local (the pdfWithObjects copy is scoped to another describe)
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("decodes the MacRoman high byte in a compressed stream's literal (the Quartz quote — R108-B LEG A+B)", async () => {
+    // the measured atom sequence from the real file's stream: the quote is a
+    // RAW single-byte atom (0xD5) inside a Flate stream, kerned -0.1..35.5
+    // (all joins) — the word reads "There's" where pdftotext agrees
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [(\\() -0.1 (T) 0.2 (h) 0.2 (e) 0.5 (r) 10.2 (e) 35.5 (\u00D5) 18.1 (s ) 0.5 (g) -0.4 (o) 0.4 (i) 0.2 (n) 0.2 (g)] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /AAAAAC+BearSansUI-Regular /Encoding /MacRomanEncoding /FirstChar 32 /LastChar 213 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("There\u2019s going"); // RED before the fix: "There\ufffd going" (the UTF-8 stream decode) / "There\u00D5s going" (LEG A alone)
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing body text (both sides of every mutation)
+  });
+
+  it("keeps a compressed stream's raw high byte as its Latin-1 char (no declaration — R108-B LEG A)", async () => {
+    // LEG A alone: a high byte with NO MacRoman declaration survives as its
+    // Latin-1 codepoint — never the U+FFFD a UTF-8 decode produces
+    const content =
+      "BT /F1 12 Tf 20 700 Td (\u00C7) Tj 0 20 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u00C7"); // RED before the fix: U+FFFD (the UTF-8 default decode)
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("does NOT remap a non-MacRoman font's high byte (the WinAnsi guard — R108-B)", async () => {
+    // the over-application guard: a font declaring /Encoding
+    // /WinAnsiEncoding (or nothing) keeps the Latin-1 reading — the MacRoman
+    // remap fires ONLY on the declared encoding (the WinAnsi raw-literal
+    // class stays the documented watch)
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [(T) 0.2 (h) 0.2 (e) 0.5 (r) 10.2 (e) 35.5 (\u00D5) 18.1 (s )] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /SomeWinAnsiFont /Encoding /WinAnsiEncoding /FirstChar 32 /LastChar 255 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("There\u00D5s"); // RED before the fix: U+FFFD; a Latin-1 reading after LEG A; \u2019 ONLY if LEG B over-applies
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("decodes the MacRoman font's hex atoms through the marker map (the cmapsFor leg — R108-B)", async () => {
+    // the hex form: single-byte hex atoms under the MacRoman font — the
+    // cmapsFor marker chain covers 0x20-0xFF, so <D5> reads U+2019 through
+    // decodeHexString's covering rule (the literal remap is not involved)
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [<54> 0.2 <68> 0.2 <65> 0.5 <72> 10.2 <65> 35.5 <D5> 18.1 <73>] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /AAAAAC+BearSansUI-Regular /Encoding /MacRomanEncoding /FirstChar 32 /LastChar 213 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("There\u2019s"); // RED before the fix: "There\u00D5s" (the hex path decodes through latin1Printable — no marker in the chain)
+    expect(text).toContain("payroll admin compliance");
+  });
 });
