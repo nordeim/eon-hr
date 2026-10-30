@@ -221,6 +221,25 @@ const SYMBOL_FONT: Record<number, string> = {
   0x70: "\u03C0", 0x71: "\u03B8", 0x72: "\u03C1", 0x73: "\u03C3", 0x74: "\u03C4", 0x75: "\u03C5",
   0x76: "\u03D6", 0x77: "\u03C9", 0x78: "\u03BE", 0x79: "\u03C8", 0x7a: "\u03B6",
   0x7b: "{", 0x7c: "|", 0x7d: "}", 0x7e: "\u223C",
+  // Session 109 (R109-C): the authoritative high zone — PDF 32000-1 Annex
+  // D.6, generated through the AGL (the canonical Adobe glyph readings,
+  // never hand-reconstructed; verified slot-by-slot against an all-bytes
+  // probe PDF read through pdftotext). The PUA corporate slots
+  // (registerserif/sans etc.) normalize to the base chars. The old table
+  // ended at 0x7E — the ReportLab bullet (\267 = 0xB7, the 'bullet' glyph)
+  // fell to the latin1Printable fallback and read · the Latin-1 middle
+  // dot, not • U+2022.
+  0xa1: "\u03D2", 0xa2: "\u2032", 0xa3: "\u2264", 0xa4: "\u2044", 0xa5: "\u221E", 0xa6: "\u0192",
+  0xa7: "\u2663", 0xa8: "\u2666", 0xa9: "\u2665", 0xaa: "\u2660", 0xab: "\u2194", 0xac: "\u2190",
+  0xad: "\u2191", 0xae: "\u2192", 0xaf: "\u2193", 0xb0: "\u00B0", 0xb1: "\u00B1", 0xb2: "\u2033",
+  0xb3: "\u2265", 0xb4: "\u00D7", 0xb5: "\u221D", 0xb6: "\u2202", 0xb7: "\u2022", 0xb8: "\u00F7",
+  0xb9: "\u2260", 0xba: "\u2261", 0xbb: "\u2248", 0xbc: "\u2026", 0xc0: "\u2135", 0xc1: "\u2111",
+  0xc2: "\u211C", 0xc3: "\u2118", 0xc4: "\u2297", 0xc5: "\u2295", 0xc6: "\u2205", 0xc7: "\u2229",
+  0xc8: "\u222A", 0xc9: "\u2283", 0xca: "\u2287", 0xcb: "\u2284", 0xcc: "\u2282", 0xcd: "\u2286",
+  0xce: "\u2208", 0xcf: "\u2209", 0xd0: "\u2220", 0xd1: "\u2207", 0xd2: "\u00AE", 0xd3: "\u00A9",
+  0xd4: "\u2122", 0xd5: "\u220F", 0xd6: "\u221A", 0xd7: "\u22C5", 0xd8: "\u00AC", 0xd9: "\u2227",
+  0xda: "\u2228", 0xdb: "\u21D4", 0xdc: "\u21D0", 0xdd: "\u21D1", 0xde: "\u21D2", 0xdf: "\u21D3",
+  0xe0: "\u25CA", 0xe2: "\u00AE", 0xe3: "\u00A9", 0xe4: "\u2122", 0xe5: "\u2211",
 };
 
 /** The marker tables keyed by lowercased /BaseFont name (subset "ABCDEF+" prefixes stripped). */
@@ -273,6 +292,67 @@ const MAC_ROMAN_MAP = new Map<number, string>();
 for (let c = 0x20; c <= 0x7f; c++) MAC_ROMAN_MAP.set(c, String.fromCharCode(c));
 for (const [k, v] of Object.entries(MAC_ROMAN_HIGH)) MAC_ROMAN_MAP.set(Number(k), v);
 const MAC_ROMAN_CMAP: CodeMap = { codeLen: 1, map: MAC_ROMAN_MAP };
+
+// Session 109 (R109-D): the MacRoman literal remap in the cp1252 CHAR
+// space. THE DISCOVERY: the WHATWG Encoding Standard maps the "latin1"
+// label to windows-1252 — `new TextDecoder("latin1")` decodes byte 0x87 as
+// ‡ U+2021, NOT U+0087 — in every runtime (bun, node, and the browsers the
+// client-side extractor runs in). The r108 literal remap matched
+// [\u0080-\u00ff], a class the C1-zone bytes NEVER land in (their cp1252
+// readings live outside it): MacRoman 0x87 (á) and 0x80 (Ä) read "‡€".
+// This map takes the char each byte BECOMES through the WHATWG decode →
+// the MacRoman reading, so the literal pass works in both zones (identity
+// entries collapse to no-ops; the QUARTZ 0xD5 quote behavior is verbatim).
+const MAC_ROMAN_LIT_REMAP = new Map<string, string>();
+for (let b = 0x80; b <= 0xff; b++) {
+  const target = MAC_ROMAN_HIGH[b];
+  if (target === undefined) continue;
+  const ch = WIN_ANSI_HIGH[b] ?? String.fromCharCode(b); // the WHATWG "latin1" reading of the byte
+  if (ch !== target) MAC_ROMAN_LIT_REMAP.set(ch, target);
+}
+
+// Session 109 (R109-A): the ASCII85Decode filter — ISO 32000-1 §7.4.2.
+// ReportLab's default stream armor (the 14th writer family: /Filter
+// [ /ASCII85Decode /FlateDecode ] on 138 of the user guide's 147 streams).
+// Whitespace is never data; 'z' is a full zero group (only between groups);
+// '~>' ends the data; a final partial group of n chars yields n-1 bytes
+// (padded with 'u', the max char); the Adobe '<~' prefix is tolerated.
+// The base-85 weight: 85^4 = 52,200,625 (a digit-typoed constant decodes to
+// the right LENGTH with every byte wrong — caught by the python
+// base64.a85decode reference diff).
+function ascii85Decode(input: Uint8Array): Uint8Array {
+  const out: number[] = [];
+  let group: number[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    if (c === 32 || c === 9 || c === 10 || c === 13 || c === 12 || c === 0) continue; // whitespace is never data
+    if (c === 60 && out.length === 0 && group.length === 0 && i + 1 < input.length && input[i + 1] === 126) {
+      i++; // the optional Adobe '<~' prefix
+      continue;
+    }
+    if (c === 126) break; // '~' — the EOD ('~>') marker
+    if (c === 122 && group.length === 0) {
+      out.push(0, 0, 0, 0); // 'z' — a full zero group
+      continue;
+    }
+    if (c < 33 || c > 117) throw new Error("ascii85: bad char"); // '!'..'u'
+    group.push(c - 33);
+    if (group.length === 5) {
+      const v = group[0] * 52200625 + group[1] * 614125 + group[2] * 7225 + group[3] * 85 + group[4];
+      out.push((v >>> 24) & 0xff, (v >>> 16) & 0xff, (v >>> 8) & 0xff, v & 0xff);
+      group = [];
+    }
+  }
+  if (group.length) {
+    // the FINAL partial group: pad with 'u' (84) to five, decode, keep n-1
+    const n = group.length;
+    while (group.length < 5) group.push(84);
+    const v = group[0] * 52200625 + group[1] * 614125 + group[2] * 7225 + group[3] * 85 + group[4];
+    const bytes = [(v >>> 24) & 0xff, (v >>> 16) & 0xff, (v >>> 8) & 0xff, v & 0xff];
+    for (let i = 0; i < n - 1; i++) out.push(bytes[i]);
+  }
+  return Uint8Array.from(out);
+}
 
 /** Decodes a UTF-16BE hex payload (the CMap dst form) into a string. */
 function utf16be(hex: string): string {
@@ -898,15 +978,37 @@ async function extractPdfText(file: File): Promise<string> {
     if (ascii.charCodeAt(chunkEnd - 2) === 13 && ascii.charCodeAt(chunkEnd - 1) === 10) chunkEnd -= 2;
     else if (ascii.charCodeAt(chunkEnd - 1) === 10 || ascii.charCodeAt(chunkEnd - 1) === 13) chunkEnd -= 1;
     const chunk = bytes.subarray(start, chunkEnd);
+    // Session 109 (R109-A): the FILTER-AWARE decode — the stream's own
+    // /Filter chain (from its dict region, already computed for the R102-A
+    // image gate) decides the decode order: an /ASCII85Decode declaration
+    // strips the armor FIRST (the ReportLab 14th-writer default), then
+    // FlateDecode inflates when also declared (the array order is the
+    // decode order per ISO 32000-1 §7.4); an ASCII85-only stream's decoded
+    // bytes ARE the content. No declaration → the standing best-effort
+    // inflate-only behavior (the uncompressed-content watch stays
+    // documented, unexercised by the corpus).
+    const hasA85 = /\/ASCII85Decode|\/A85\b/.test(dictRegion);
+    const hasFlate = /\/FlateDecode/.test(dictRegion);
     for (const trimmed of [chunk, bytes.subarray(start, end)]) {
       try {
+        let payload: Uint8Array = trimmed;
+        if (hasA85) {
+          payload = ascii85Decode(trimmed);
+          if (!hasFlate) {
+            text = new TextDecoder("latin1").decode(payload);
+            break;
+          }
+        }
         // R108-B LEG A: the latin1 decode — PDF content streams are BYTE
         // strings, not UTF-8; the TextDecoder default corrupted every
         // byte >= 0x80 in a literal atom to U+FFFD before the decode tables
         // ever saw it (the 13th-writer Quartz class: the fonts declare
         // MacRomanEncoding and byte 0xD5 IS the right single quote). The
-        // .docx XML paths above stay UTF-8 — XML is UTF-8 by spec.
-        text = new TextDecoder("latin1").decode(await inflate(trimmed, "deflate"));
+        // .docx XML paths above stay UTF-8 — XML is UTF-8 by spec. (The
+        // "latin1" label is the WHATWG alias for windows-1252 — the r109
+        // discovery; a byte 0x80-0x9F decodes to its cp1252 char, which is
+        // exactly the WinAnsi reading those fonts intend.)
+        text = new TextDecoder("latin1").decode(await inflate(payload, "deflate"));
         break;
       } catch {
         try {
@@ -1152,8 +1254,28 @@ async function extractPdfText(file: File): Promise<string> {
     // declaration keeps its bytes verbatim (the WinAnsi guard).
     const decoded = pieces.map((p) => {
       if (p.kind === "hex") return { p, text: decodeHexString(p.hex, localFor(p.font)) };
-      if (p.font && localFor(p.font).includes(MAC_ROMAN_CMAP) && /[\u0080-\u00ff]/.test(p.text)) {
-        return { p, text: p.text.replace(/[\u0080-\u00ff]/g, (c) => MAC_ROMAN_HIGH[c.charCodeAt(0)] ?? c) };
+      if (p.font && localFor(p.font).includes(MAC_ROMAN_CMAP) && /[^\u0000-\u007f]/.test(p.text)) {
+        // R109-D: the cp1252 CHAR-space remap — a MacRoman byte 0x80–0x9F
+        // arrives as its WHATWG-"latin1" (= windows-1252) char (0x87 → ‡
+        // U+2021), which the old [\u0080-\u00ff] class never matched; the
+        // map takes every high byte's DECODED char → the MacRoman reading
+        // (the identity zone's entries are no-ops by construction — the
+        // QUARTZ 0xD5 quote behavior verbatim)
+        return { p, text: [...p.text].map((c) => MAC_ROMAN_LIT_REMAP.get(c) ?? c).join("") };
+      }
+      // Session 109 (R109-C): the marker-font LITERAL remap — a literal
+      // whose font chain resolves a Symbol/ZapfDingbats marker map remaps
+      // through it under the covering discipline (every char covered, else
+      // the literal stays verbatim — a misbound multi-char word never
+      // garbles). The marker tables previously fired only on HEX atoms
+      // (decodeHexString's covering rule); the ReportLab bullets are
+      // (\267) Tj LITERALS under /F4 = Symbol — pdftotext reads •.
+      if (p.font) {
+        for (const mk of Object.values(MARKER_TABLES)) {
+          if (localFor(p.font).includes(mk) && [...p.text].every((c) => mk.map.has(c.charCodeAt(0)))) {
+            return { p, text: [...p.text].map((c) => mk.map.get(c.charCodeAt(0)) ?? c).join("") };
+          }
+        }
       }
       return { p, text: p.text };
     });

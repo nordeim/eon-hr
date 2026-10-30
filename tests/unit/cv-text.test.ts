@@ -1562,4 +1562,227 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("There\u2019s"); // RED before the fix: "There\u00D5s" (the hex path decodes through latin1Printable — no marker in the chain)
     expect(text).toContain("payroll admin compliance");
   });
+
+  // Session 109 (R109-A/B/C): the ReportLab 14th-writer round — the sourced
+  // user guide (Producer "ReportLab PDF Library - (opensource", 565,444
+  // bytes, md5 0f64df85…) exposed THREE stacked defects: [R109-A] 138 of its
+  // 147 streams declare /Filter [ /ASCII85Decode /FlateDecode ] and the
+  // extractor had NO ASCII85Decode leg — the armored bytes failed to
+  // inflate and EVERY content stream was silently dropped (0 chars from a
+  // 213,156-alnum document); [R109-B] the fonts declare /Encoding
+  // /WinAnsiEncoding (15+ base-14, no ToUnicode) and carry cp1252
+  // typographic chars as RAW literal bytes — 0x97 is — U+2014, not U+0097
+  // (pdftotext reads "To die—to sleep"); [R109-C] the bullets are
+  // (\267) Tj octal literals under /Symbol — the marker tables fired only
+  // on HEX atoms and SYMBOL_FONT had no high zone at all (0xB7 read · the
+  // Latin-1 middle dot, not • U+2022).
+  const encA = (s: string) => new TextEncoder().encode(s);
+  const encL2 = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+  // the fixture's own ASCII85 ARMOR encoder (the fixture-must-exercise-the-
+  // fixed-path lesson, tenth application: a hand-written armored string is
+  // frozen bytes; the encoder proves the decoder handles real armor —
+  // full groups, the z zero-group, the partial final group, the ~>> EOD)
+  const a85 = (bytes: Uint8Array): string => {
+    let out = "";
+    for (let i = 0; i < bytes.length; i += 4) {
+      const chunk = bytes.subarray(i, i + 4);
+      const n = chunk.length;
+      let v = 0;
+      for (let j = 0; j < 4; j++) v = v * 256 + (chunk[j] ?? 0);
+      if (v === 0 && n === 4) {
+        out += "z";
+        continue;
+      }
+      const g: number[] = [];
+      for (let j = 0; j < 5; j++) {
+        g.unshift(v % 85);
+        v = Math.floor(v / 85);
+      }
+      out += g.map((c) => String.fromCharCode(c + 33)).join("").slice(0, n + 1);
+    }
+    return out + "~>";
+  };
+  async function pdfWithA85Streams(
+    objects: ({ raw: string } | { dict: string; stream: string; flate?: boolean })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encA(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        let payload = encL2(obj.stream);
+        if (obj.flate !== false) {
+          payload = new Uint8Array(
+            await new Response(new Blob([payload]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+          );
+        }
+        const armored = a85(payload);
+        parts.push(encA(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${armored.length} >>\nstream\r\n`));
+        parts.push(encA(armored));
+        parts.push(encA("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encA("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts an ASCII85+Flate stacked-filter stream (the ReportLab armor — R109-A)", async () => {
+    // the measured ReportLab shape: /Filter [ /ASCII85Decode /FlateDecode ]
+    // on the content stream; the extractor previously fed the ARMORED bytes
+    // straight to inflate → failed → the stream silently dropped
+    const content =
+      "BT /F1 12 Tf 14.4 TL 20 700 Td (ReportLab PDF Library) Tj T* (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithA85Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter [ /ASCII85Decode /FlateDecode ]", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ReportLab PDF Library"); // RED before the fix: the extraction is EMPTY
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing body text
+  });
+
+  it("extracts an ASCII85-only stream (no Flate — R109-A)", async () => {
+    // the A85-alone leg: /Filter /ASCII85Decode with UNCOMPRESSED content —
+    // the decoded bytes ARE the content
+    const content =
+      "BT /F1 12 Tf 20 700 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithA85Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /ASCII85Decode", stream: content, flate: false },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payroll admin compliance"); // RED before the fix: EMPTY
+  });
+
+  it("remaps a WinAnsi font's raw C1 literals through cp1252 (the em-dash/quote — R109-B)", async () => {
+    // the measured ReportLab shape: the fonts declare /Encoding
+    // /WinAnsiEncoding (no ToUnicode) and the typographic chars are RAW
+    // single-byte atoms — 0x97 is — U+2014 ("To die—to sleep", the
+    // pdftotext reading), 0x92 the right quote
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [(T) 0.2 (o) 0.2 ( die) 35.5 (\u0097) 18.1 (to sleep)] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc2 1 Tf [(It) 35.5 (\u0092) 18.1 (s the rub)] TJ ET\n" +
+      "BT 11 0 0 -11 45 300 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding /FirstChar 32 /LastChar 255 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("To die\u2014to sleep"); // RED before the fix: the raw U+0097 control char rides the output verbatim
+    expect(text).toContain("It\u2019s the rub"); // RED before the fix: U+0092
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("keeps a WinAnsi font's high Latin-1 zone verbatim (the C1 boundary guard — R109-B)", async () => {
+    // WinAnsi = Latin-1 above 0x9F: a raw 0xD5 stays Õ (the remap is the C1
+    // zone ONLY); the MacRoman font's 0xD5 keeps its ' remap (the r108
+    // behavior) — both legs of the zone boundary
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [(There) 35.5 (\u00D5) 18.1 (s)] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc3 1 Tf [(There) 35.5 (\u00D5) 18.1 (s)] TJ ET\n" +
+      "BT 11 0 0 -11 45 300 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding /FirstChar 32 /LastChar 255 >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /AAAAAC+BearSansUI-Regular /Encoding /MacRomanEncoding /FirstChar 32 /LastChar 213 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R /Tc3 3 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("There\u00D5s"); // the WinAnsi leg: 0xD5 OUTSIDE the C1 remap zone — stays Õ (born green; RED only if the remap over-applies)
+    expect(text).toContain("There\u2019s"); // the MacRoman control: the r108 remap unchanged
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("decodes a Symbol font's high-zone octal literal as the bullet (R109-C)", async () => {
+    // the measured ReportLab bullet: (\267) Tj = 0xB7 under /F4 = Symbol —
+    // pdftotext reads • U+2022; the old table had NO high zone (0xB7 fell
+    // to the latin1Printable fallback → · U+00B7)
+    const content =
+      "BT /F4 10 Tf 18 2 Td (\\267) Tj ET\n" +
+      "BT /F1 10 Tf 54 2 Td (What is ReportLab all about, and why should I use it?) Tj ET\n" +
+      "BT /F1 10 Tf 20 40 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Symbol >>" },
+      { raw: "<< /Font << /F1 2 0 R /F4 3 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u2022"); // RED before the fix: "·" U+00B7 (no high zone in the Symbol table)
+    expect(text).toContain("What is ReportLab all about"); // the bullet's item
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("remaps a Symbol font's ASCII-zone literals through the marker map (the covering discipline — R109-C)", async () => {
+    // the marker-font LITERAL path: under a real Symbol font the ASCII bytes
+    // ARE glyph codes — (ab) reads αβ; the marker tables previously fired
+    // only on HEX atoms (decodeHexString's covering rule). Born-green guard:
+    // the ASCII zone has always been in the table — this member isolates
+    // the remap PASS from the high-zone addition
+    const content =
+      "BT /F4 10 Tf 18 2 Td (ab) Tj ET\n" +
+      "BT /F1 10 Tf 20 40 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Symbol >>" },
+      { raw: "<< /Font << /F1 2 0 R /F4 3 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u03B1\u03B2"); // RED before the marker-literal pass: "ab" rides verbatim
+    expect(text).toContain("payroll admin compliance"); // the non-Symbol font's text stays verbatim
+  });
+
+  it("remaps a MacRoman font's C1-zone literals through MacRoman (the cp1252-escape fix — R109-D)", async () => {
+    // THE r109 DISCOVERY: TextDecoder("latin1") is the WHATWG alias for
+    // windows-1252 — byte 0x87 decodes to ‡ U+2021, NOT U+0087 — so the
+    // r108 remap's [\u0080-\u00ff] class NEVER MATCHES the C1-zone bytes
+    // (their cp1252 readings live outside it): MacRoman 0x87 = á and
+    // 0x80 = Ä read "‡€" today. The identity zone (0xA0–0xFF) is unaffected
+    // (cp1252 = Latin-1 there — the r108 QUARTZ pin holds). The fix maps
+    // the cp1252 CHAR space back through MacRoman.
+    const content =
+      "BT 11 0 0 -11 45 222 Tm /Tc2 1 Tf [(caf) 35.5 (\u00E9) 18.1 35.5 (\u0087\u0080) 0.2 (grande)] TJ ET\n" +
+      "BT 11 0 0 -11 45 260 Tm /Tc2 1 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /AAAAAC+BearSansUI-Regular /Encoding /MacRomanEncoding /FirstChar 32 /LastChar 213 >>" },
+      { raw: "<< /Font << /Tc2 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u00E1\u00C4"); // RED before the fix: the C1-zone pair reads \u2021\u20AC ("\u2021\u20AC") — their cp1252 chars escape the [\u0080-\u00ff] remap class
+    expect(text).toContain("payroll admin compliance");
+  });
 });
