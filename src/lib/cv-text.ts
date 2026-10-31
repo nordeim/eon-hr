@@ -293,6 +293,21 @@ for (let c = 0x20; c <= 0x7f; c++) MAC_ROMAN_MAP.set(c, String.fromCharCode(c));
 for (const [k, v] of Object.entries(MAC_ROMAN_HIGH)) MAC_ROMAN_MAP.set(Number(k), v);
 const MAC_ROMAN_CMAP: CodeMap = { codeLen: 1, map: MAC_ROMAN_MAP };
 
+// Session 110 (R110-C): the WinAnsi named-encoding marker — the R108-B
+// "a font that NAMES its encoding is its own ToUnicode" doctrine's third
+// member. The 15th-writer Prawn glyph-table pages render the WinAnsi table
+// itself under /F1.0 = Helvetica /Encoding /WinAnsiEncoding with NO
+// ToUnicode: the glyph column's <a1> atom fell to the all-cmaps
+// first-covering walk and the Iosevka cmap's 0xa1→° U+00B0 won (the WRONG
+// glyph — pdftotext reads ¡, the WinAnsi reading). The map mirrors
+// latin1Printable EXACTLY (the cp1252 high zone + identity + the control
+// scrub): a byte no cmap covers already reads latin1Printable, so the
+// marker is a NO-OP for uncovered atoms and only SHADOWS the wrong-cmap
+// coverings that would otherwise win first.
+const WIN_ANSI_MAP = new Map<number, string>();
+for (let c = 0; c <= 0xff; c++) WIN_ANSI_MAP.set(c, latin1Printable(c));
+const WIN_ANSI_CMAP: CodeMap = { codeLen: 1, map: WIN_ANSI_MAP };
+
 // Session 109 (R109-D): the MacRoman literal remap in the cp1252 CHAR
 // space. THE DISCOVERY: the WHATWG Encoding Standard maps the "latin1"
 // label to windows-1252 — `new TextDecoder("latin1")` decodes byte 0x87 as
@@ -398,8 +413,19 @@ function parseToUnicode(text: string): CodeMap | null {
       });
     }
     // the base-offset form: <lo> <hi> <dst> — each code maps to dst + offset
+    // R110-E: the base-offset pass runs on the ARRAY-FREE block text. The
+    // old global pass re-matched array ELEMENT TRIPLES as ranges: the
+    // Prawn 15th-writer Greek cmap's array form <20><35>[<0020><20ac>
+    // <1f55>…] correctly mapped 0x22→ὕ U+1F55, and then the element run
+    // <0020><20ac><1f55> matched the base-offset shape (lo=0x20,
+    // hi=0x20AC, dst=0x1F55) and OVERWROTE 0x20..0x201F with
+    // ὕὖὗ὘… — the Greek-Extended garbage that read "ὗ὘Ὑ὚" where
+    // pdftotext reads "ὕαλον ϕαγεῖν". Stripping the bracket-delimited
+    // element lists before the pass makes the re-match impossible; the
+    // array handling above and the base-offset handling here stay
+    // verbatim otherwise.
     const offRe = /<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]{1,4})>/g;
-    while ((r = offRe.exec(m[1]))) {
+    while ((r = offRe.exec(m[1].replace(/\[[^\]]*\]/g, " ")))) {
       const lo = parseInt(r[1], 16);
       const hi = parseInt(r[2], 16);
       const base = parseInt(r[3], 16);
@@ -812,7 +838,7 @@ async function extractPdfText(file: File): Promise<string> {
     if (!list.some((c) => c.obj === obj)) list.push({ pos, obj });
     fCandidates.set(name, list);
   };
-  for (const fm of ascii.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+  for (const fm of ascii.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
     // R107-B: the dict KEY \Font is never a font NAME (no writer selects
     // "/Font 12 Tf") — excluding it stops the false pair from polluting
     // the candidate chain
@@ -826,8 +852,8 @@ async function extractPdfText(file: File): Promise<string> {
   // or xobject pair elsewhere in the resources never matches). The R107-B
   // "Font" key exclusion kept — a font named exactly "Font" is always the
   // dict key.
-  for (const rm of ascii.matchAll(/\/Font\s*<<\s*([\w#+\-/\s]+)>>/g)) {
-    for (const fm of rm[1].matchAll(/\/([\w#+-]+)\s+(\d+)\s+0\s+R/g)) {
+  for (const rm of ascii.matchAll(/\/Font\s*<<\s*([\w#+\-./\s]+)>>/g)) {
+    for (const fm of rm[1].matchAll(/\/(F\w+(?:\.\w+)*|[\w#+.-]+)\s+(\d+)\s+0\s+R/g)) {
       if (fm[1] === "Font") continue;
       pushCandidate(fm[1], parseInt(fm[2], 10), rm.index + (fm.index ?? 0));
     }
@@ -848,6 +874,10 @@ async function extractPdfText(file: File): Promise<string> {
   // real ToUnicode still wins; WinAnsi/undeclared fonts keep the Latin-1
   // path — the over-application guard)
   const objMacRoman = new Set<number>();
+  // R110-C: font objects DECLARING /Encoding /WinAnsiEncoding — the named
+  // encoding feeds the WIN_ANSI marker through the candidate chain (a real
+  // ToUnicode still wins; the MacRoman marker's exact discipline)
+  const objWinAnsi = new Set<number>();
   for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
     if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
     const tu = fm[2].match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
@@ -855,6 +885,7 @@ async function extractPdfText(file: File): Promise<string> {
     const bf = fm[2].match(/\/BaseFont\s*\/([\w#+-]+)/);
     if (bf) objBaseFont.set(parseInt(fm[1], 10), (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
     if (/\/Encoding\s*\/MacRomanEncoding\b/.test(fm[2])) objMacRoman.add(parseInt(fm[1], 10));
+    if (/\/Encoding\s*\/WinAnsiEncoding\b/.test(fm[2])) objWinAnsi.add(parseInt(fm[1], 10)); // R110-C
   }
   // R105-C: the page tree — /Type /Page objects bind a CONTENT STREAM to the
   // page's own /F-name → font-object mapping (inline in the page dict or via
@@ -908,7 +939,7 @@ async function extractPdfText(file: File): Promise<string> {
     for (const rm of ascii.matchAll(/(\d+)\s+0\s+obj\s*([\s\S]*?)endobj/g)) {
       const body = rm[2];
       const fonts = new Map<string, number>();
-      for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+      for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
         if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
       if (/\/Type\s*\/Page\b/.test(body)) {
         const refs = contentsRefs(body);
@@ -989,6 +1020,23 @@ async function extractPdfText(file: File): Promise<string> {
     // documented, unexercised by the corpus).
     const hasA85 = /\/ASCII85Decode|\/A85\b/.test(dictRegion);
     const hasFlate = /\/FlateDecode/.test(dictRegion);
+    // R110-A: a stream whose dict declares NO /Filter key at all is
+    // UNCOMPRESSED — its bytes ARE the content (ISO 32000-1 §7.4: /Filter
+    // names the filters applied, in order; no key, no filter — the oldest
+    // PDF form). The 15th-writer Prawn class: 182 of 189 streams raw, the
+    // content AND the ToUnicode CMaps both, and the standing best-effort
+    // inflate failed on every one — `if (!text) continue` silently dropped
+    // them all (0 chars extracted). The LAST-RESORT form: the r95-era
+    // fixtures pin the OPPOSITE undeclared case — a dict-stub stream
+    // (no /Filter) carrying DEFLATED bytes — so the raw reading fires
+    // ONLY after BOTH inflate attempts fail on an undeclared stream; a
+    // dict that declares /Filter with ANY spelling or abbreviation
+    // (/Fl, /AHx, an empty array) never takes the raw reading at all.
+    // The downstream gates (text-op shape + printable-dominant, the
+    // R102-A legs 2+3) still vet every raw stream before the operator
+    // walk — binary that slipped past the dict gate never reaches the
+    // regex.
+    const hasFilter = /\/Filter\b/.test(dictRegion);
     for (const trimmed of [chunk, bytes.subarray(start, end)]) {
       try {
         let payload: Uint8Array = trimmed;
@@ -1015,6 +1063,13 @@ async function extractPdfText(file: File): Promise<string> {
           text = new TextDecoder("latin1").decode(await inflate(trimmed, "deflate-raw"));
           break;
         } catch {
+          // R110-A: undeclared AND both inflates failed — the bytes ARE
+          // the content (the Prawn raw form; the r95 deflated-undeclared
+          // class already succeeded at one of the inflates above)
+          if (!hasFilter) {
+            text = new TextDecoder("latin1").decode(trimmed);
+            break;
+          }
           text = "";
         }
       }
@@ -1049,13 +1104,14 @@ async function extractPdfText(file: File): Promise<string> {
             const bf = body.match(/\/BaseFont\s*\/([\w#+-]+)/); // R105-B
             if (bf) objBaseFont.set(entries[i].obj, (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
             if (/\/Encoding\s*\/MacRomanEncoding\b/.test(body)) objMacRoman.add(entries[i].obj); // R108-B
+            if (/\/Encoding\s*\/WinAnsiEncoding\b/.test(body)) objWinAnsi.add(entries[i].obj); // R110-C
           }
           // R108-B: the ObjStm side of the /Font-dict-region collector — an
           // ObjStm-carried resources body's /Font << … >> pairs feed the
           // candidate chain at the stream's file position (the Quartz
           // general-name form, ObjStm-carried)
-          for (const fm2 of body.matchAll(/\/Font\s*<<\s*([\w#+\-/\s]+)>>/g)) {
-            for (const fm of fm2[1].matchAll(/\/([\w#+-]+)\s+(\d+)\s+0\s+R/g)) {
+          for (const fm2 of body.matchAll(/\/Font\s*<<\s*([\w#+\-./\s]+)>>/g)) {
+            for (const fm of fm2[1].matchAll(/\/(F\w+(?:\.\w+)*|[\w#+.-]+)\s+(\d+)\s+0\s+R/g)) {
               if (fm[1] === "Font") continue;
               pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
             }
@@ -1076,7 +1132,7 @@ async function extractPdfText(file: File): Promise<string> {
             const refs = contentsRefs(body);
             if (refs.length) {
               const fonts = new Map<string, number>();
-              for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+              for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
                 if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
               const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
               const fontRef = inlineFontRef(body);
@@ -1089,13 +1145,13 @@ async function extractPdfText(file: File): Promise<string> {
             // dict) feeds the deferred resolution — the raw pass cannot see
             // it, and the fontspec pages reference exactly these
             const fonts = new Map<string, number>();
-            for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g))
+            for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
               if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
             if (fonts.size) objFonts.set(entries[i].obj, fonts);
             const fr = body.match(/\/Font\s+(\d+)\s+0\s+R/); // R107-B shape (b): the link
             if (fr) fontRefOf.set(entries[i].obj, parseInt(fr[1], 10));
           }
-          for (const fm of body.matchAll(/\/(F\w+)\s+(\d+)\s+0\s+R/g)) {
+          for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
             if (fm[1] === "Font") continue; // R107-B: the key exclusion
             pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
           }
@@ -1202,6 +1258,10 @@ async function extractPdfText(file: File): Promise<string> {
           // 13th-writer class — a font that NAMES its encoding is its own
           // ToUnicode)
           if (objMacRoman.has(c.obj)) own.push(MAC_ROMAN_CMAP);
+          // R110-C: the WinAnsi twin — a font DECLARING
+          // /Encoding /WinAnsiEncoding with no ToUnicode decodes through
+          // the cp1252 table (the Prawn glyph-table class)
+          if (objWinAnsi.has(c.obj)) own.push(WIN_ANSI_CMAP);
         }
       }
       if (own.length) chain = [...own, ...cmaps];
@@ -1237,6 +1297,9 @@ async function extractPdfText(file: File): Promise<string> {
               const mk = MARKER_TABLES[bf];
               if (mk) return [mk, ...cmapsFor(font)];
             }
+            // R110-C: the WinAnsi named-encoding marker on the page path
+            // (the Prawn glyph-table form: the table font is page-bound)
+            if (objWinAnsi.has(fontObj)) return [WIN_ANSI_CMAP, ...cmapsFor(font)];
           }
         }
       }
@@ -1279,7 +1342,22 @@ async function extractPdfText(file: File): Promise<string> {
       }
       return { p, text: p.text };
     });
-    const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^\s+$/.test(text));
+    // R110-D: the census is SPACE-only — a word-separation space GLYPH is
+    // U+0020. The old /^\s+$/ also counted U+00A0 runs (NBSP pieces), and
+    // the 15th-writer Prawn class fell in: its Iosevka code font maps
+    // 0xCA→U+00A0 and writes NBSP runs (indentation — a NON-BREAKING
+    // space, a typographic unit, never a word separator), so every Prawn
+    // stream read hasSpaceGlyphs=true and the R103-C join fired on the
+    // CHART AXIS TICKS — 14-em absolute repositionings that are separate
+    // visual elements, not split-word continuations ("100.0200.0300.0").
+    // Measured across the 8-member corpus: every standing member's
+    // space-glyph convention rides U+0020 (arXiv 113/113, IRS 129/129,
+    // QUARTZ 469/469, ReportLab 315/315; LO Calc 123,382 U+0020 vs 25
+    // NBSP — its census never rode the NBSPs); Prawn is 530/530 NBSP,
+    // ZERO U+0020 — a no-space-glyph writer whose gaps ride the moves.
+    // The join class (the Skia/LO split-word continuation) keeps its
+    // U+0020 census verbatim; NBSP-only streams keep every gap.
+    const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^ +$/.test(text));
     return decoded
       .map(({ p, text }) => (p.condGap && hasSpaceGlyphs ? "" : p.sep) + text)
       .join("");

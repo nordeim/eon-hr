@@ -1785,4 +1785,220 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("\u00E1\u00C4"); // RED before the fix: the C1-zone pair reads \u2021\u20AC ("\u2021\u20AC") — their cp1252 chars escape the [\u0080-\u00ff] remap class
     expect(text).toContain("payroll admin compliance");
   });
+
+  // Session 110 (R110-A/B/C/D/E): the Prawn 15th-writer round — the sourced
+  // Prawn manual (Producer "Prawn", 2,099,393 bytes, md5 699ebcab…, 129
+  // pages) exposed FIVE stacked defects: [R110-A] 182 of its 189 streams
+  // declare NO /Filter at all (the oldest PDF form — Ruby's Prawn writes
+  // content and ToUnicode CMaps both uncompressed) and the extractor's
+  // best-effort inflate failed on every one — `if (!text) continue`
+  // silently dropped them ALL (0 chars from an 83,632-alnum document);
+  // [R110-B] the font resources are DOTTED /F-names (/F3.0, /F4.1, even
+  // /F21.1 — two dots) and the standing F\w+ pair regex never bound them
+  // (F\w+ stops at the dot), so every atom rode the all-cmaps
+  // first-covering walk and MIXED-FONT pages misdecoded (the Jigmo CJK
+  // segments read as their latin1 code chars — pdftotext reads 972 CJK
+  // chars); [R110-C] the glyph-table pages render the WinAnsi table under
+  // Helvetica /Encoding /WinAnsiEncoding with no ToUnicode and the
+  // first-covering walk picked the Iosevka cmap's 0xa1→° (pdftotext reads
+  // ¡, the WinAnsi reading — the R108-B named-encoding doctrine's third
+  // member); [R110-D] the code font's "space" is NBSP (U+00A0, code 0xCA)
+  // — the R103-C space-glyph census /^\s+$/ counted NBSP runs as word-gap
+  // glyphs, so every stream read hasSpaceGlyphs=true and the join fired
+  // on 14-em CHART AXIS TICK repositionings ("100.0200.0300.0");
+  // [R110-E] parseToUnicode's base-offset bfrange pass ran GLOBALLY over
+  // the block — array ELEMENT triples (<0020><20ac><1f55> inside a […])
+  // re-matched as a range (lo=0x20, hi=0x20AC) and OVERWROTE the array's
+  // own entries with Greek-Extended garbage (the polytonic Greek demo
+  // read "ὗ὘Ὑ὚" where pdftotext reads "ὕαλον ϕαγεῖν").
+  async function pdfWithRawStreams(
+    objects: ({ raw: string } | { dict?: string; stream: string })[]
+  ): Promise<File> {
+    // the Prawn shape: NO /Filter at all — the stream bytes ARE the content
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const payload = encL(obj.stream);
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict ?? ""} /Length ${payload.length} >>\nstream\n`));
+        parts.push(payload);
+        parts.push(encS("\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  it("extracts an UNCOMPRESSED content stream (no /Filter — R110-A)", async () => {
+    // the measured Prawn shape: the content stream declares NO /Filter —
+    // its bytes ARE the content; the old best-effort inflate failed and
+    // the stream was silently dropped
+    const content =
+      "BT /F1 12 Tf 20 700 Td (Prawn Document Generation) Tj ET\n" +
+      "BT /F1 12 Tf 20 680 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const file = await pdfWithRawStreams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { stream: content }, // NO /Filter key at all
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Prawn Document Generation"); // RED before the fix: the extraction is EMPTY
+    expect(text).toContain("payroll admin compliance"); // the guard-clearing body text
+  });
+
+  it("harvests an UNCOMPRESSED ToUnicode CMap (no /Filter — R110-A)", async () => {
+    // the CMap leg: Prawn writes its ToUnicode CMaps raw too — a raw CMap
+    // + raw content; the hex atoms decode through the harvested map
+    const content =
+      "BT /F1 12 Tf 20 700 Td <4242424242> Tj ET\n" +
+      "BT /F1 12 Tf 20 680 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const cmap =
+      "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n" +
+      "/CMapName /Adobe-Identity-UCS def\n1 begincodespacerange\n<00><ff>\nendcodespacerange\n" +
+      "1 beginbfchar\n<42><0061>\nendbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop end end\n";
+    const file = await pdfWithRawStreams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /ToUnicode 3 0 R >>" },
+      { stream: cmap }, // the RAW CMap (no /Filter)
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { stream: content }, // the RAW content
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("aaaaa"); // RED before the fix: <42> falls to the latin1 fallback "BBBBB" — the raw CMap was never harvested
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("binds DOTTED /F-name font resources (the Prawn /F3.0 form — R110-B)", async () => {
+    // the measured Prawn shape: the page's /Font << /F3.0 2 0 R /F4.0 3 0 R >>
+    // carries DOTTED names — the standing F\w+ pair regex never bound them,
+    // so the atom under /F3.0 rode the all-cmaps first-covering walk and the
+    // WRONG font's cmap won. Two fonts, two conflicting maps for the same
+    // code: the atom must read through its OWN font's map.
+    const content =
+      "BT /F3.0 12 Tf 20 700 Td <21> Tj ET\n" +
+      "BT /F1 12 Tf 20 680 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const cmapRight =
+      "begincmap\n1 begincodespacerange\n<00><ff>\nendcodespacerange\n" +
+      "1 beginbfchar\n<21><0061>\nendbfchar\nendcmap\n"; // /F3.0's own map: 0x21 → a
+    const cmapWrong =
+      "begincmap\n1 begincodespacerange\n<00><ff>\nendcodespacerange\n" +
+      "1 beginbfchar\n<21><005A>\nendbfchar\nendcmap\n"; // the OTHER font's map: 0x21 → Z (Z appears nowhere else in the fixture)
+    // Flate streams (the leg isolates from R110-A: at HEAD the extraction
+    // WORKS — the dotted name just never binds, so the all-cmaps
+    // first-covering walk picks the WRONG map: the wrong font's cmap rides
+    // EARLIER in file order, exactly the real file's shape)
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /BBBBBB+Wrong /ToUnicode 3 0 R >>" }, // obj 2 — the wrong font FIRST
+      { dict: "/Filter /FlateDecode", stream: cmapWrong }, // obj 3 — its cmap rides earlier in the walk
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /AAAAAA+Right /ToUnicode 5 0 R >>" }, // obj 4 — /F3.0's own font
+      { dict: "/Filter /FlateDecode", stream: cmapRight }, // obj 5 — its cmap (later in the walk)
+      { raw: "<< /Font << /F3.0 4 0 R /F9.0 2 0 R >> >>" }, // the DOTTED binding (page-inline)
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 7 0 R /Resources 6 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("a"); // RED before the fix: "Z" — the dotted name never binds, the wrong font's map first-covers
+    expect(text).toContain("payroll admin compliance");
+    expect(text).not.toContain("Z"); // the wrong map must never win
+  });
+
+  it("decodes a WinAnsi font's hex atoms through the cp1252 table (the glyph-table class — R110-C)", async () => {
+    // the measured Prawn glyph-table shape: the table's glyph column is
+    // drawn under Helvetica /Encoding /WinAnsiEncoding with NO ToUnicode —
+    // the hex atom <a1> is ¡ (the WinAnsi reading), but the file's OTHER
+    // fonts carry cmaps that cover 0xa1 with different glyphs and the
+    // first-covering walk picked one (the Iosevka 0xa1→° on the real
+    // file). The named-encoding marker must win.
+    const content =
+      "BT /F1 10 Tf 20 700 Td <a1> Tj ET\n" +
+      "BT /F1 10 Tf 20 680 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const cmapWrong =
+      "begincmap\n1 begincodespacerange\n<00><ff>\nendcodespacerange\n" +
+      "1 beginbfchar\n<a1><00b0>\nendbfchar\nendcmap\n"; // the other font's 0xa1 → ° (the hazard)
+    // Flate streams (the leg isolates from R110-A: at HEAD the wrong cmap
+    // covers — the named-encoding marker is the only missing piece)
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>" }, // no ToUnicode — the named encoding is its own
+      { dict: "/Filter /FlateDecode", stream: cmapWrong },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /CCCCCC+Other /ToUnicode 3 0 R >>" },
+      { raw: "<< /Font << /F1 2 0 R /F9 4 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 6 0 R /Resources 5 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u00A1"); // RED before the fix: "\u00B0" — the wrong cmap first-covers the code
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("keeps move-driven gaps in NBSP-only streams (the chart-tick class — R110-D)", async () => {
+    // the measured Prawn shape: the code font's "space" is NBSP (U+00A0,
+    // code 0xCA) — its NBSP-only runs made the R103-C space-glyph census
+    // fire and every condGap piece JOINED, fusing the 14-em-apart chart
+    // axis ticks ("100.0200.0"). A word-separation space GLYPH is U+0020;
+    // NBSP is a non-breaking space — a no-space-glyph stream keeps its gaps.
+    const content =
+      "BT /F1 12 Tf 20 700 Td (\u00A0\u00A0) Tj ET\n" + // the NBSP run (indentation — never a word separator)
+      "BT 20 680 Td /F1 7 Tf (100.0) Tj ET\n" +
+      "BT 120 680 Td /F1 7 Tf (200.0) Tj ET\n" + // 100/7 = 14.3-em forward move on the same line — a word gap
+      "BT 20 660 Td /F1 12 Tf (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    // Flate streams (the leg isolates from R110-A: at HEAD the census
+    // fires on the NBSP run and the ticks JOIN)
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 5 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources 3 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("100.0 200.0"); // RED before the fix: "100.0200.0" — the NBSP census joined the ticks
+    expect(text).toContain("payroll admin compliance");
+  });
+
+  it("keeps ARRAY-form bfrange entries intact against the base-offset re-parse (R110-E)", async () => {
+    // the measured Prawn Greek cmap: <20><35>[<0020><20ac><1f55><03b1>…] —
+    // the ARRAY form maps 0x21→€ 0x22→ὕ 0x23→α; the old GLOBAL base-offset
+    // pass re-matched the element TRIPLE <0020><20ac><1f55> as a range
+    // (lo=0x20, hi=0x20AC, dst=0x1F55) and overwrote 0x20..0x201F with
+    // consecutive Greek-Extended garbage
+    const content =
+      "BT /F1 12 Tf 20 700 Td <222324> Tj ET\n" + // ὕ α λ through the array entries
+      "BT /F1 12 Tf 20 680 Td (payroll admin compliance training onboarding specialist platform systems technology) Tj ET";
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<00><ff>\nendcodespacerange\n" +
+      "1 beginbfrange\n<20><35>[<0020><20ac><1f55><03b1><03bb><03bf>]\nendbfrange\nendcmap\n";
+    // Flate streams (the leg isolates from R110-A: at HEAD the cmap
+    // harvests — the re-parsed triple then overwrites the array entries)
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /DDDDDD+Greek /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap }, // the array-form cmap (the element-triple hazard inside)
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("\u1F55\u03B1\u03BB"); // RED before the fix: the Greek-Extended garbage "\u1F57\u1F58\u1F59" — the re-parsed triple overwrote the array
+    expect(text).toContain("payroll admin compliance");
+  });
 });
