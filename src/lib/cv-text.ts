@@ -1747,6 +1747,27 @@ async function extractPdfText(file: File): Promise<string> {
     let outTail = ""; // the last emitted char — the R115-C whitespace check (a regex on the growing out would be O(n^2))
     decoded.forEach(({ p, text, genuine }, i) => {
       let sep = p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep;
+      // R116-A: THE CM-CARRIED LINE MOVE — a positioned piece pair whose
+      // DEVICE-space y-delta >= 0.5 em (the max-ps denominator — the hoist
+      // repair's tolerance precedent) is a line move regardless of WHICH
+      // operator carried the position (the Typst q/cm/BT form: every word
+      // its own flipped block, the `cm` translation feeding only the R112-A
+      // position stamps, never the walk's separator tracker — so a line
+      // move read as the standing " " join where every positional reader
+      // reads a newline). The upgrade fires ONLY on a " " separator — never
+      // on a join (the condGap/kern resolutions above stand), never on an
+      // existing "\n" — and only when BOTH pieces carry position stamps
+      // (the unpositioned BT-default class stays blind). Sub-em deltas keep
+      // the space (the arXiv math-accent class rides sub-em device deltas
+      // and every reader keeps them same-line — the r115 refutation
+      // constraint, measured: the Typst line steps are 0.75+ em, the accent
+      // deltas sub-0.5).
+      if (sep === " " && i > 0 && p.py !== undefined && p.ps !== undefined) {
+        const q = decoded[i - 1].p;
+        if (q.py !== undefined && q.ps !== undefined) {
+          if (Math.abs(p.py - q.py) >= 0.5 * Math.max(q.ps, p.ps)) sep = "\n";
+        }
+      }
       if (sep === " ") {
         if (i > 0 && (isSpaceRun(i - 1) || prevTrail(i - 1))) sep = ""; // R115-A tail / R115-B
         else if (genuine && text.length > 0 && /^ +$/.test(text)) sep = ""; // R115-A head

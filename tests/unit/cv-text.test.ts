@@ -1166,7 +1166,11 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     ].join("\n");
     const file = await pdfWithContent(content);
     const text = await extractTextFromFile(file);
-    expect(text).toContain("skia beta"); // ← RED before the fix: "skiabeta" (the stale-origin sub-em join)
+    // R116-A supersedes the separator FORM here: the skia→beta pair's
+    // DEVICE y-delta (100 → 698, ~50 em at 12pt) is a true line move, and
+    // the cm-carried rule upgrades the conservative word gap to a newline.
+    // The R105-D CORE guard is unchanged: the stale-origin JOIN never fires.
+    expect(text).toContain("skia\nbeta"); // ← RED before the R105-D fix: "skiabeta" (the stale-origin sub-em join)
     expect(text).not.toContain("skiabeta");
   });
 
@@ -2914,5 +2918,160 @@ describe("cv-text — the Typst positioned-space duality class (session 115)", (
     ]);
     const text = await extractTextFromFile(file);
     expect(text).toContain("design \nand organizational"); // born-green: the newline survives the trailing space
+  });
+});
+
+describe("cv-text — the cm-carried line-structure class (session 116)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  const PAD = "payroll admin compliance training onboarding specialist platform experience";
+
+  // the Typst block builder: every word its own q/cm/BT block, the flip-y
+  // carried by BOTH the cm and the Tm (the double flip cancels — the R112-A
+  // tracker stamps the untranslated (tx, ty) as the device position)
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${text}) Tj\nET\nQ`;
+
+  // Session 116 (R116-A): THE CM-CARRIED LINE MOVE. The Typst engine places
+  // every word as its own q/cm/BT block — the `cm` translation carries the
+  // line position but NEVER feeds the walk's separator tracker (it only
+  // concatenates the CTM for the R112-A position stamps), so a line move
+  // reads as the STANDING " " join where every positional reader reads a
+  // newline. The fix: at assembly, a positioned piece pair whose DEVICE-space
+  // y-delta >= 0.5 em (max-ps denominator) upgrades its " " separator to a
+  // line break — never a join, never an existing newline.
+  it("breaks the line between cm-positioned blocks a line step apart (the Typst body form — R116-A)", async () => {
+    // two 9pt blocks 24 units apart (2.67 em) — pdftotext reads a newline
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" + typstBlock(50, 700, 9, "First") + "\n" + typstBlock(50, 676, 9, "Second");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("First\nSecond"); // RED before the fix: "First Second" (the standing join)
+  });
+
+  it("breaks the line across a size change (the Typst header-to-contacts step — R116-A)", async () => {
+    // the 32pt header at y 792.4873 and the 9pt contacts line at y 768.3653 —
+    // the measured resume geometry: dy 24.12 / max(32, 9) = 0.754 em >= 0.5
+    const content =
+      typstBlock(219.8, 792.4873, 32, PAD) + "\n" + typstBlock(219.8, 792.4873, 32, "John") + "\n" +
+      typstBlock(257.9, 768.3653, 9, "Senior");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John\nSenior"); // RED before the fix: "John Senior"
+  });
+
+  // the born-green guards — the upgrade must NEVER fire on these forms
+
+  it("keeps the space between same-line cm-positioned blocks (the same-line keep — R116-A)", async () => {
+    // the header-grid words share the line (dy = 0) — the standing join is
+    // the correct reading; the R115-A collapse family still applies
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" + typstBlock(50, 700, 12, "John") + "\n" + typstBlock(200, 700, 12, "Smith");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith"); // born-green: same-line pieces never break
+    expect(text).not.toContain("John\nSmith");
+  });
+
+  it("keeps the space across a sub-em y-delta (the arXiv accent guard — R116-A)", async () => {
+    // the r115 REFUTATION constraint: the arXiv math accents ride SUB-EM
+    // device deltas above their base words and pdftotext reads them
+    // same-line — a delta under the 0.5-em threshold must never break
+    const content =
+      typstBlock(50, 750, 12, PAD) + "\n" + typstBlock(50, 700.0, 12, "wide") + "\n" + typstBlock(54, 696.4, 12, "hat");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("wide hat"); // born-green: 3.6/12 = 0.3 em — under the threshold, no break
+    expect(text).not.toContain("wide\nhat");
+  });
+
+  it("keeps the glyph-advance join across a device line shift (the join guard — R116-A)", async () => {
+    // the upgrade fires ONLY on " " separators: a sub-em Td glyph-advance
+    // JOIN between shows (the R100-A form) keeps its join even when a cm
+    // between the blocks shifted the device baseline a full line step —
+    // re-breaking joins is the r115 refutation's mirror class
+    const content =
+      `q\n1 0 0 -1 50 750 cm\nBT 0 Tr /f0 9 Tf 1 0 0 -1 0 0 Tm (${PAD}) Tj\nET\nQ\n` +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /f0 12 Tf 1 0 0 -1 0 0 Tm (First) Tj\nET\nQ\n` +
+      `1 0 0 1 0 -20 cm\n` +
+      `BT 0 Tr /f0 12 Tf 1 0 0 -1 0 0 Tm 3 0 Td (Second) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("FirstSecond"); // born-green: the 0.25-em Td join survives the 20-unit device shift
+  });
+
+  it("keeps the standing space when the following block carries no position stamp (the unpositioned guard — R116-A)", async () => {
+    // the R112-A stamps require an EXPLICIT Tm/Td line matrix — a BT block
+    // at the default origin is deliberately unpositioned (the XFA-XML
+    // garbage class) and the rule never fires on it, even after a stamped
+    // piece a full line step away (a stamp-less pair is not a positioned
+    // pair; the unguarded form would treat the missing stamp as origin 0)
+    const content =
+      `BT /F1 12 Tf (${PAD}) Tj ET\n` +
+      `BT /F1 12 Tf 1 0 0 1 50 700 Tm (First) Tj ET\n` +
+      `BT /F1 12 Tf (Second) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("First Second"); // born-green: no second stamp, no upgrade — the standing join
+    expect(text).not.toContain("First\nSecond");
   });
 });
