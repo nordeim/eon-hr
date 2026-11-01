@@ -2002,3 +2002,204 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("payroll admin compliance");
   });
 });
+
+
+// ---------------------------------------------------------------------------
+// Session 111 (R111-A/B/C'): the 16th-writer Typst class — Identity-H codes
+// in LITERAL strings, lowercase font names, and raw nested parens
+// ---------------------------------------------------------------------------
+describe("cv-text — the Typst 16th-writer class (session 111)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // the shared 16th-writer fixture shape: a Type0 Identity-H font whose
+  // ToUnicode maps code i+1 → phrase[i] (the Typst per-glyph subset form),
+  // a page binding /F1 to it, and a content stream writing the codes —
+  // the phrase rides the 40-alnum readability guard (the r97 lesson)
+  const PHRASE = "JohnSmithSeniorHRManagerPayrollGOSIComplianceOnboarding";
+  // codes 40/41 are the PAREN bytes — the raw-byte form skips them so its
+  // RED stays R111-A's own defect, not the nested-paren leg's (isolation)
+  const codeFor = (i: number) => (i + 1 >= 40 ? i + 3 : i + 1);
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const octalLiteral = () =>
+    [...PHRASE].map((_, i) => `\\000\\${codeFor(i).toString(8).padStart(3, "0")}`).join("");
+  const rawByteLiteral = () =>
+    [...PHRASE].map((_, i) => String.fromCharCode(0, codeFor(i))).join("");
+
+  it("decodes 2-byte Identity-H codes written as OCTAL-ESCAPED LITERALS through the font's own ToUnicode (R111-A)", async () => {
+    // the measured Typst form: every show is a literal string whose octal
+    // escapes carry the 2-byte codes — (\000\001\000\002…) is "John…"
+    // under the font's Identity-H ToUnicode. The literal path decoded
+    // per-byte through latin1Printable — control bytes to spaces.
+    const content = `BT /F1 12 Tf (${octalLiteral()}) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Libertinus /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("JohnSmithSeniorHRManager"); // RED before the fix: the per-byte latin1 scrub reads spaces
+  });
+
+  it("decodes 2-byte Identity-H codes written as RAW BYTES in literals (the arXiv literal-CID region — R111-A)", async () => {
+    // the arXiv member's latent class: raw control bytes inside literal
+    // strings (not octal-escaped) carrying 2-byte codes — HEAD read the
+    // per-byte soup (raw NULs + low bytes as latin1 chars)
+    // the real arXiv shape: the raw-code literals ride LONG ASCII operator
+    // sequences (the printable-dominant stream guard passes on the whole)
+    const content =
+      `BT /F1 12 Tf (${rawByteLiteral()}) Tj ET\n` +
+      "BT /F1 12 Tf (with plain ascii operators around the coded runs for the printable dominant stream guard) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Libertinus /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("JohnSmithSeniorHRManager"); // RED before the fix: the raw control bytes scrubbed per-byte
+  });
+
+  it("binds LOWERCASE /f0 font names through the page tree (the Typst swapped-page-dict form — R111-B)", async () => {
+    // the measured Typst shape: two pages whose resources bind the SAME
+    // lowercase name /f0 to DIFFERENT fonts — page 1 to the font whose map
+    // spells the WRONG letters, page 2 to the font whose map spells the
+    // phrase. The uppercase-F page-tree scan never bound /f0, so page 2's
+    // atoms rode the file-order candidate chain and the FIRST (wrong) map
+    // covered. Both maps cover the same code range (the collision class).
+    const wrongPairs = [...PHRASE].map((_, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <005A>`).join("\n");
+    const cmapA =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${wrongPairs}\nendbfchar\nendcmap\n`; // every code → "Z"
+    const hexAtoms = [...PHRASE].map((_, i) => codeFor(i).toString(16).padStart(4, "0")).join("");
+    const content = `BT /f0 12 Tf <${hexAtoms}> Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 9 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /BBBBBB+Wrong /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA }, // the WRONG map (first in file order)
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Right /Encoding /Identity-H /ToUnicode 5 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() }, // the RIGHT map (page 2's own font)
+      { raw: "<< /Font << /f0 2 0 R >> >>" }, // page 1 resources: f0 → the wrong font
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Font << /f0 4 0 R >> >>" }, // page 2 resources: f0 → the right font
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [11 0 R 12 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 7 0 R /Resources 6 0 R >>" },
+      { raw: "<< /Type /Page /Contents 9 0 R /Resources 8 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("JohnSmith"); // RED before the fix: the wrong page's "ZZZ…" map covered first
+  });
+
+  it("reads literals carrying RAW NESTED PARENS inside TJ arrays (the Typst code-byte form — R111-C)", async () => {
+    // the measured Typst quirk: subset-font code bytes 0x28/0x29 — the (
+    // and ) glyphs inside words — emitted RAW inside literal strings (a
+    // PDF-spec violation pdf.js and pdftotext tolerate by nesting depth).
+    // The flat string alternative ended the literal at the inner ) and the
+    // array body then died at the orphaned paren — whole paragraphs lost.
+    const content =
+      "BT /F1 12 Tf [(Senior HR Ma(nager) with payroll, GOSI, onboarding, and compliance skills)] TJ ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Senior HR Ma(nager) with payroll"); // RED before the fix: the array body died at the raw inner paren
+  });
+
+  it("keeps 1-byte-font literals VERBATIM when a foreign 2-byte CMap would cover their byte pairs (the dvipdfmx false-cover guard — R111-A narrowing)", async () => {
+    // the blast-radius class: a literal under a plain 1-byte font whose
+    // ASCII bytes pair into a foreign Identity-H map's codes — the loose
+    // first-covering walk (the global fallback) would read "XY" for "Te…"
+    // the foreign map covers EVERY byte pair of the whole literal (the
+    // full-coverage rule is what makes the naive global-chain decode fire)
+    const LIT5 = "TeamHRwithpayrollGOSIonboardingandcomplianceskills";
+    const pairs5 = [...LIT5]
+      .map((c, i) => `<${(i % 2 === 0 ? c.charCodeAt(0) * 256 + LIT5.charCodeAt(i + 1) : 0).toString(16).padStart(4, "0")}>`)
+      .filter((x) => x !== "<0000>");
+    const seen5 = new Set();
+    const uniqPairs5 = pairs5.filter((x) => (seen5.has(x) ? false : (seen5.add(x), true)));
+    const cmapA =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${uniqPairs5.length} beginbfchar\n${uniqPairs5.map((x, i) => `${x} <${(0x58 + (i % 2)).toString(16).padStart(4, "0")}>`).join("\n")}\nendbfchar\nendcmap\n`;
+    const content = `BT /F2 12 Tf (${LIT5}) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /BBBBBB+Foreign /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapA },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" }, // F2: a plain 1-byte font, no ToUnicode
+      { raw: "<< /Font << /F1 2 0 R /F2 4 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 6 0 R /Resources 5 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("TeamHRwithpayroll"); // born-green pin: the own-binding narrowing keeps the literal verbatim (the naive global chain would read XYXY…)
+  });
+
+  it("keeps single-glyph XFA-style literals verbatim under a 2-byte-mapped font (the odd-length guard — R111-A)", async () => {
+    // the IRS/Acrobat XFA form: every glyph its own (X)Tj literal with a
+    // glyph-advance Td (0.2-0.65 em at 12pt joins — the R100-A form). The
+    // odd raw length can never pair — the standing per-glyph reading holds
+    const content =
+      "BT /F1 12 Tf (T) Tj 2.5 0 Td (e) Tj 2.3 0 Td (a) Tj 2.9 0 Td (m) Tj ET\n" +
+      "BT /F1 12 Tf (with payroll, GOSI, onboarding, and compliance skills) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /DDDDDD+Glyph /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Team"); // born-green pin: the per-glyph literals read through the standing join
+    expect(text).toContain("with payroll");
+  });
+});

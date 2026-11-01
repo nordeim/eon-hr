@@ -149,7 +149,9 @@ test("R88-B1: the attendancedashboard header carries the month input (w-40, the 
   // department select, value the current month.
   expect(read!.w).toBe(160);
   expect(read!.h).toBe(36);
-  expect(read!.val).toBe("2026-10");
+  // the month input carries the CURRENT month (the date-rollover coupling)
+  const now = new Date();
+  expect(read!.val).toBe(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
 });
 
 test("R88-B2: the Daily Attendance Trend renders the REF's geometry + tick cadence", async ({ page }) => {

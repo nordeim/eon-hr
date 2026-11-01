@@ -250,7 +250,9 @@ test.describe("session-88 mobile-band cross-side — the remediated surfaces", (
   test("R88-H: the shiftcalendar table min-width is 700px", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await page.goto("/shiftcalendar");
-    await page.waitForSelector("text=October 2026");
+    // the calendar title carries the CURRENT month (the date-rollover coupling)
+    const calTitle = `${new Date().toLocaleString("en-US", { month: "long" })} ${new Date().getFullYear()}`;
+    await page.waitForSelector(`text=${calTitle}`);
     const read = await page.evaluate(() => {
       const t = document.querySelector("table");
       if (!t) return null;

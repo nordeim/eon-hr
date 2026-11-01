@@ -480,7 +480,7 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
  * bare moves) those gaps are split-word continuations and resolve to joins
  * at assembly time (the R103-C conditional).
  */
-type TextPiece = { sep: string; font?: string; condGap?: boolean } & ({ kind: "lit"; text: string } | { kind: "hex"; hex: string });
+type TextPiece = { sep: string; font?: string; condGap?: boolean } & ({ kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string });
 
 /**
  * Pulls the text operands out of a content stream's text-showing operators
@@ -529,6 +529,29 @@ function pdfTextPieces(content: string): TextPiece[] {
         return eol !== undefined ? "" : _match; // line continuation \<EOL>
       }
     );
+  // R111-A: the RAW byte string — escapes resolved to TRUE bytes (octal to
+  // the byte value, ws shortforms to the control byte, escaped delimiters
+  // to the literal char, EOL continuation to nothing), NO printable scrub.
+  // The 2-byte Identity-H codes a CID writer carries in LITERAL strings
+  // survive only here — unescape's latin1Printable turns every control
+  // byte into a space and destroys the code pairing.
+  const unescapeRaw = (s2: string): string => {
+    const re = /\\(?:([0-7]{1,3})|([nrtbf])|([()\\])|(\r?\n))/g;
+    let out = "";
+    let last = 0;
+    let m2: RegExpExecArray | null;
+    while ((m2 = re.exec(s2))) {
+      out += s2.slice(last, m2.index);
+      if (m2[1] !== undefined) out += String.fromCharCode(parseInt(m2[1], 8) % 256);
+      else if (m2[2] !== undefined)
+        out += String.fromCharCode(m2[2] === "n" ? 10 : m2[2] === "r" ? 13 : m2[2] === "t" ? 9 : m2[2] === "b" ? 8 : 12);
+      else if (m2[3] !== undefined) out += m2[3];
+      last = re.lastIndex;
+    }
+    out += s2.slice(last);
+    return out;
+  };
+
   // The position state, per the R100-A rule:
   let effSize = 1; // the last Tf size operand (the em denominator)
   let curFont = ""; // the last Tf font NAME (the R102-B scoping key)
@@ -570,7 +593,7 @@ function pdfTextPieces(content: string): TextPiece[] {
   // explicit numeric kern/gap intent — pdfTeX's -322 class) — never a
   // conditional; only Td/Tm-driven gaps (positioning moves, which the
   // space-glyph writers use for split-word continuations) are conditional.
-  const push = (piece: { kind: "lit"; text: string } | { kind: "hex"; hex: string }, fromKern = false) => {
+  const push = (piece: { kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string }, fromKern = false) => {
     let sep = " "; // the standing join: adjacent shows separate
     let condGap = false;
     if (moved) {
@@ -596,7 +619,7 @@ function pdfTextPieces(content: string): TextPiece[] {
   //   the same token-level exposure as the standing bare T* (a BT inside a
   //   non-show string is unmeasured) — the standing design's class.
   const ops =
-    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()])*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()])*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
+    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
   let m: RegExpExecArray | null;
   while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
@@ -668,12 +691,13 @@ function pdfTextPieces(content: string): TextPiece[] {
     }
     if (m[4] !== undefined) {
       const text = unescape(m[4]);
+      const rawText = unescapeRaw(m[4]);
       if (m[5] === "'" || m[5] === '"') {
         // the next-line shows: always a line break, the pending move consumed
-        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text });
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text, raw: rawText });
         reset();
       } else {
-        push({ kind: "lit", text });
+        push({ kind: "lit", text, raw: rawText });
       }
       continue;
     }
@@ -707,7 +731,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       // measured shape: the glue arrays ride multi-CID word chunks, the
       // math arrays are 2–3 atoms or coverage-broken, the R97 -120 rides
       // multi-char literals, the pdfTeX -322 glue is ≤ -200.
-      const atomRe = /\(((?:\\.|[^\\()])*)\)|<([0-9A-Fa-f\s]+)>|(-?[\d.]+)/g;
+      const atomRe = /\(((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*)\)|<([0-9A-Fa-f\s]+)>|(-?[\d.]+)/g;
       let displayTracked = false;
       {
         const items: { lit: boolean; v: string; kern: number }[] = [];
@@ -735,7 +759,7 @@ function pdfTextPieces(content: string): TextPiece[] {
             // — the atoms join (the space glyphs carry the word separation)
             pendingEm = !displayTracked && kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
           }
-          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]) } : { kind: "hex", hex: a[2] }, kern !== 0);
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, kern !== 0);
           kern = 0;
         } else {
           kern += parseFloat(a[3]);
@@ -838,7 +862,7 @@ async function extractPdfText(file: File): Promise<string> {
     if (!list.some((c) => c.obj === obj)) list.push({ pos, obj });
     fCandidates.set(name, list);
   };
-  for (const fm of ascii.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
+  for (const fm of ascii.matchAll(/\/([Ff]\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
     // R107-B: the dict KEY \Font is never a font NAME (no writer selects
     // "/Font 12 Tf") — excluding it stops the false pair from polluting
     // the candidate chain
@@ -939,7 +963,7 @@ async function extractPdfText(file: File): Promise<string> {
     for (const rm of ascii.matchAll(/(\d+)\s+0\s+obj\s*([\s\S]*?)endobj/g)) {
       const body = rm[2];
       const fonts = new Map<string, number>();
-      for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
+      for (const fm of body.matchAll(/\/([Ff]\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
         if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
       if (/\/Type\s*\/Page\b/.test(body)) {
         const refs = contentsRefs(body);
@@ -1132,7 +1156,7 @@ async function extractPdfText(file: File): Promise<string> {
             const refs = contentsRefs(body);
             if (refs.length) {
               const fonts = new Map<string, number>();
-              for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
+              for (const fm of body.matchAll(/\/([Ff]\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
                 if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
               const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
               const fontRef = inlineFontRef(body);
@@ -1145,13 +1169,13 @@ async function extractPdfText(file: File): Promise<string> {
             // dict) feeds the deferred resolution — the raw pass cannot see
             // it, and the fontspec pages reference exactly these
             const fonts = new Map<string, number>();
-            for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
+            for (const fm of body.matchAll(/\/([Ff]\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g))
               if (fm[1] !== "Font") fonts.set(fm[1], parseInt(fm[2], 10)); // R107-B: the key exclusion
             if (fonts.size) objFonts.set(entries[i].obj, fonts);
             const fr = body.match(/\/Font\s+(\d+)\s+0\s+R/); // R107-B shape (b): the link
             if (fr) fontRefOf.set(entries[i].obj, parseInt(fr[1], 10));
           }
-          for (const fm of body.matchAll(/\/(F\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
+          for (const fm of body.matchAll(/\/([Ff]\w+(?:\.\w+)*)\s+(\d+)\s+0\s+R/g)) {
             if (fm[1] === "Font") continue; // R107-B: the key exclusion
             pushCandidate(fm[1], parseInt(fm[2], 10), m.index + (fm.index ?? 0));
           }
@@ -1283,6 +1307,37 @@ async function extractPdfText(file: File): Promise<string> {
     // candidate chain stays the fallback (the page-tree chain — the
     // fontspec.pdf fully-covering collision class)
     const pageMap = pageFonts.get(objNum);
+    // R111-A: the OWN-BINDING chain — the pageMap + candidate resolutions
+    // (real font bindings), never the global all-cmaps fallback: the loose
+    // first-covering walk produced the dvipdfmx/IRS false-cover class (a
+    // literal whose bytes happened to pair into a foreign CJK map's codes).
+    const ownChainFor = (font?: string): CodeMap[] => {
+      if (!font) return [];
+      const out: CodeMap[] = [];
+      const pageMap = pageFonts.get(objNum);
+      if (pageMap) {
+        const fontObj = pageMap.get(font);
+        if (fontObj !== undefined) {
+          const tu = objToTu.get(fontObj);
+          if (tu !== undefined) {
+            const cm = tuToCmap.get(tu);
+            if (cm) out.push(cm);
+          }
+        }
+        if (out.length) return out;
+      }
+      const cands = fCandidates.get(font);
+      if (cands?.length) {
+        for (const c of [...cands].sort((a, b) => a.pos - b.pos)) {
+          const tu = objToTu.get(c.obj);
+          if (tu !== undefined) {
+            const cm = tuToCmap.get(tu);
+            if (cm) out.push(cm);
+          }
+        }
+      }
+      return out;
+    };
     const localFor = (font?: string): CodeMap[] => {
       if (font && pageMap) {
         const fontObj = pageMap.get(font);
@@ -1317,6 +1372,25 @@ async function extractPdfText(file: File): Promise<string> {
     // declaration keeps its bytes verbatim (the WinAnsi guard).
     const decoded = pieces.map((p) => {
       if (p.kind === "hex") return { p, text: decodeHexString(p.hex, localFor(p.font)) };
+      // R111-A: the LITERAL-form CID decode — a literal whose font's OWN
+      // binding chain resolves a codeLen-2 CMap that FULLY covers its
+      // byte-paired codes decodes through it (the Typst 16th-writer class:
+      // Identity-H codes as octal-escaped literals, not hex atoms). The
+      // full-coverage guard keeps every 1-byte-font literal verbatim.
+      if (p.kind === "lit" && p.raw && p.raw.length >= 2 && p.raw.length % 2 === 0) {
+        const chain = ownChainFor(p.font);
+        for (const cm of chain) {
+          if (cm.codeLen !== 2) continue;
+          const codes: number[] = [];
+          let covered = true;
+          for (let i = 0; i < p.raw.length; i += 2) {
+            const c = p.raw.charCodeAt(i) * 256 + p.raw.charCodeAt(i + 1);
+            if (!cm.map.has(c)) { covered = false; break; }
+            codes.push(c);
+          }
+          if (covered) return { p, text: codes.map((c) => cm.map.get(c) ?? "").join("") };
+        }
+      }
       if (p.font && localFor(p.font).includes(MAC_ROMAN_CMAP) && /[^\u0000-\u007f]/.test(p.text)) {
         // R109-D: the cp1252 CHAR-space remap — a MacRoman byte 0x80–0x9F
         // arrives as its WHATWG-"latin1" (= windows-1252) char (0x87 → ‡

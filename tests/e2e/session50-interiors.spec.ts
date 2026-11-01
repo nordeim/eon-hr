@@ -126,7 +126,10 @@ test.describe("session-50 deep interiors", () => {
   test("R50-A1+B5: payrollmodule — the calculator glyph, the slate-400 search icon, and the bare th family", async ({ page }) => {
     await page.goto("/payrollmodule");
     await expect(page.getByRole("heading", { name: "Payroll Module" })).toBeVisible();
-    await expect(page.getByText(/No payslips for October/)).toBeVisible();
+    // the current month is dynamic (the date-rollover coupling — the spec
+    // pinned "October" literally and flaked on the Nov 1 boundary)
+    const monthName = new Date().toLocaleString("en-US", { month: "long" });
+    await expect(page.getByText(new RegExp(`No payslips for ${monthName}`))).toBeVisible();
     const info = await page.evaluate(() => {
       const norm = (c: string | null) => (c || "").replace(/\s+/g, " ").trim();
       const genBtn = [...document.querySelectorAll("button")].find((b) => b.textContent?.trim() === "Generate All");
