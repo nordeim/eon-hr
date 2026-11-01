@@ -471,6 +471,36 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
 }
 
 /**
+ * R114-B: whether a HEX piece's leading code is the writer's OWN space — the
+ * first byte IS 0x20, or a FULLY-COVERING cmap declares the first code
+ * U+0020 (the same covering discipline as decodeHexString). A leading space
+ * that survives only through the printable scrub (a control byte the
+ * fallback remaps) is NOT genuine — the kern's separator must stand there
+ * (the pdfTeX fi-ligature class: the \034 glyph remaps to a space, and the
+ * kern gap before it is a REAL word gap).
+ */
+function hexLeadingIsSpace(hexRaw: string, cmaps: CodeMap[]): boolean {
+  const hex = hexRaw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
+  const padded = hex.length % 2 ? hex + "0" : hex;
+  if (!padded) return false;
+  const bytes: number[] = [];
+  for (let i = 0; i < padded.length; i += 2) bytes.push(parseInt(padded.slice(i, i + 2), 16));
+  if (bytes[0] === 0x20) return true; // the 1-byte space byte
+  for (const cm of cmaps) {
+    if (cm.codeLen === 2) {
+      if (bytes.length < 2 || bytes.length % 2) continue;
+      let covered = true;
+      for (let i = 0; i < bytes.length; i += 2) if (!cm.map.has(bytes[i] * 256 + bytes[i + 1])) { covered = false; break; }
+      if (covered) return cm.map.get(bytes[0] * 256 + bytes[1]) === " ";
+    } else {
+      if (!bytes.every((b) => cm.map.has(b))) continue;
+      return cm.map.get(bytes[0]) === " ";
+    }
+  }
+  return false;
+}
+
+/**
  * A text-showing piece with its leading separator (R100-A) and its font
  * name (R102-B): the separator is decided by the POSITIONING between shows,
  * and the hex decode by the font's OWN ToUnicode CMap when the file's
@@ -481,7 +511,7 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
  * at assembly time (the R103-C conditional).
  */
 type TextPiece =
-  { sep: string; font?: string; condGap?: boolean; px?: number; py?: number; ps?: number }
+  { sep: string; font?: string; condGap?: boolean; condKern?: boolean; px?: number; py?: number; ps?: number }
   & ({ kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string });
 
 /**
@@ -631,7 +661,7 @@ function pdfTextPieces(content: string): TextPiece[] {
   // explicit numeric kern/gap intent — pdfTeX's -322 class) — never a
   // conditional; only Td/Tm-driven gaps (positioning moves, which the
   // space-glyph writers use for split-word continuations) are conditional.
-  const push = (piece: { kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string }, fromKern = false) => {
+  const push = (piece: { kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string }, fromKern = false, kernGap = false) => {
     let sep = " "; // the standing join: adjacent shows separate
     let condGap = false;
     if (moved) {
@@ -643,7 +673,7 @@ function pdfTextPieces(content: string): TextPiece[] {
     }
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
     const pos = curPos();
-    pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...piece });
+    pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...(kernGap ? { condKern: true } : {}), ...piece });
     reset();
     shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
     btFresh = false; // R104-C: the show ends the fresh run — the next Td is a between-shows move
@@ -816,13 +846,19 @@ function pdfTextPieces(content: string): TextPiece[] {
       let sawNum = false; // R113-A: an explicit NUMBER token since the last atom — even a net-zero one (the WeasyPrint per-glyph 0) is the writer's contiguous-placement intent; only the ABSENCE of a number keeps the standing space join (the W3C dummy.pdf shape)
       while ((a = atomRe.exec(m[6]))) {
         if (a[1] !== undefined || a[2] !== undefined) {
+          // R114-B: the kern word-gap branch marker — the fpdf2 class writes
+          // the gap DOUBLY (a ≤ -100 kern AND a leading space glyph in the
+          // next atom); the marker collapses the separator at assembly when
+          // the atom's leading space is the writer's OWN (a cmap-declared
+          // U+0020 or a real 0x20 byte — never the printable-scrub remap)
+          const kernGap = kern !== 0 && !displayTracked && kern <= -100;
           if (kern !== 0 || sawNum) {
             moved = true;
             // R107-A: a display-tracked array's kerns are TRACKING, not gaps
             // — the atoms join (the space glyphs carry the word separation)
-            pendingEm = !displayTracked && kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary, or an explicit zero) joins
+            pendingEm = kernGap ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary, or an explicit zero) joins
           }
-          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, sawNum);
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, sawNum, kernGap);
           kern = 0;
           sawNum = false;
         } else {
@@ -1369,18 +1405,56 @@ async function extractPdfText(file: File): Promise<string> {
     // binary that slipped past the dict gate never reach the regex; and
     // the per-stream guard turns the pathological backtracking class into
     // a skipped stream instead of a dead file.
+    // Session 114 (R114-A): the census measures the stream's SYNTAX —
+    // operators, numbers, names — never the payload bytes inside LITERAL
+    // strings. The 19th-writer fpdf2 class writes 2-byte Identity-H codes
+    // as RAW control bytes in literals (high byte 0x00 — half the literal
+    // bytes are NULs), and the whole-stream sample read a genuine content
+    // stream at 51.8% printable → under the 60% gate → the WHOLE file read
+    // 0 characters. The literal spans are collected with a LINEAR
+    // depth-tracked scan (a regex mask would re-introduce the pathological
+    // backtracking class this guard exists to prevent); sampled positions
+    // inside a span are skipped, and an unclosed span is discarded (binary
+    // junk with a stray `(` never masks the tail — the paren-free decoy
+    // class stays rejected, and random binary keeps its non-printable
+    // majority outside the spans too).
     if (!/(?:\)|\]|>)\s*(?:Tj|TJ|'|")/.test(text)) continue;
     {
       let printable = 0;
+      const spans: [number, number][] = [];
+      {
+        let depth = 0;
+        let start = -1;
+        for (let i = 0; i < text.length; i++) {
+          const c = text.charCodeAt(i);
+          if (c === 92) { i++; continue; } // an escaped char — the next byte is payload
+          if (c === 40) { if (depth === 0) start = i; depth++; continue; }
+          if (c === 41 && depth > 0) {
+            depth--;
+            if (depth === 0 && start >= 0) { spans.push([start, i + 1]); start = -1; }
+          }
+        }
+      }
+      const inSpan = (i: number): boolean => {
+        let lo = 0, hi = spans.length - 1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          if (i < spans[mid][0]) hi = mid - 1;
+          else if (i >= spans[mid][1]) lo = mid + 1;
+          else return true;
+        }
+        return false;
+      };
       const samples = Math.min(text.length, 4096);
       const stride = Math.max(1, Math.floor(text.length / samples));
       let taken = 0;
       for (let i = 0; i < text.length; i += stride) {
+        if (inSpan(i)) continue; // literal payload — the syntax census skips it
         taken++;
         const c = text.charCodeAt(i);
         if ((c >= 32 && c < 127) || c === 10 || c === 13 || c === 9) printable++;
       }
-      if (printable / taken < 0.6) continue;
+      if (taken === 0 || printable / taken < 0.6) continue;
     }
     let pieces: TextPiece[];
     try {
@@ -1541,7 +1615,8 @@ async function extractPdfText(file: File): Promise<string> {
     // the literal path needs the explicit pass). A font without the
     // declaration keeps its bytes verbatim (the WinAnsi guard).
     const decoded = pieces.map((p) => {
-      if (p.kind === "hex") return { p, text: decodeHexString(p.hex, localFor(p.font)) };
+      if (p.kind === "hex")
+        return { p, text: decodeHexString(p.hex, localFor(p.font)), genuine: hexLeadingIsSpace(p.hex, localFor(p.font)) };
       // R111-A: the LITERAL-form CID decode — a literal whose font's OWN
       // binding chain resolves a codeLen-2 CMap that FULLY covers its
       // byte-paired codes decodes through it (the Typst 16th-writer class:
@@ -1558,7 +1633,11 @@ async function extractPdfText(file: File): Promise<string> {
             if (!cm.map.has(c)) { covered = false; break; }
             codes.push(c);
           }
-          if (covered) return { p, text: codes.map((c) => cm.map.get(c) ?? "").join("") };
+          if (covered) {
+            const text = codes.map((c) => cm.map.get(c) ?? "").join("");
+            // R114-B: the cmap branch's leading space IS the writer's own — the ToUnicode declared it
+            return { p, text, genuine: text.startsWith(" ") };
+          }
         }
       }
       if (p.font && localFor(p.font).includes(MAC_ROMAN_CMAP) && /[^\u0000-\u007f]/.test(p.text)) {
@@ -1584,7 +1663,8 @@ async function extractPdfText(file: File): Promise<string> {
           }
         }
       }
-      return { p, text: p.text };
+      // R114-B: the non-cmap lit branches — genuine iff the raw's FIRST byte IS the space byte
+      return { p, text: p.text, genuine: p.raw !== undefined && p.raw.charCodeAt(0) === 0x20 };
     });
     // R110-D: the census is SPACE-only — a word-separation space GLYPH is
     // U+0020. The old /^\s+$/ also counted U+00A0 runs (NBSP pieces), and
@@ -1603,7 +1683,7 @@ async function extractPdfText(file: File): Promise<string> {
     // U+0020 census verbatim; NBSP-only streams keep every gap.
     const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^ +$/.test(text));
     return decoded
-      .map(({ p, text }) => (p.condGap && hasSpaceGlyphs ? "" : p.sep) + text)
+      .map(({ p, text, genuine }) => (p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep) + text)
       .join("");
   });
   return parts.join("\n");
