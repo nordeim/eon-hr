@@ -480,7 +480,9 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
  * bare moves) those gaps are split-word continuations and resolve to joins
  * at assembly time (the R103-C conditional).
  */
-type TextPiece = { sep: string; font?: string; condGap?: boolean } & ({ kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string });
+type TextPiece =
+  { sep: string; font?: string; condGap?: boolean; px?: number; py?: number; ps?: number }
+  & ({ kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string });
 
 /**
  * Pulls the text operands out of a content stream's text-showing operators
@@ -552,6 +554,42 @@ function pdfTextPieces(content: string): TextPiece[] {
     return out;
   };
 
+  // R112-A: the DEVICE-SPACE position tracker — the hoist repair's eyes.
+  // Maintains the CTM (cm concatenation — the operand applies BEFORE the
+  // standing transform, empirically pinned on the Chromium specimen — with
+  // a q/Q stack) and the text-line matrix (BT resets to identity, Tm sets
+  // it, Td composes its translation inside it). Every show stamps its
+  // device-space origin (px, py) + device font size (ps). Y is exact
+  // (only Td/Tm move the baseline; T*/TL and the implicit show-width
+  // advance stay untracked — the two-pass per-letter width table is the
+  // standing deferred item — so T*-positioned streams read position-flat
+  // and the repair conservatively never fires on them); X carries the
+  // show-width drift — adequate for the same-line tiebreak, nothing finer.
+  // A rotated/sheared composed matrix (the IRS sideways labels) or a piece
+  // riding the BT-default origin (the XFA-XML garbage class) returns null
+  // and goes unpositioned — the repair never fires on either.
+  type Mat = [number, number, number, number, number, number];
+  const mul = (m1: Mat, m2: Mat): Mat => [
+    m1[0] * m2[0] + m1[2] * m2[1],
+    m1[1] * m2[0] + m1[3] * m2[1],
+    m1[0] * m2[2] + m1[2] * m2[3],
+    m1[1] * m2[2] + m1[3] * m2[3],
+    m1[0] * m2[4] + m1[2] * m2[5] + m1[4],
+    m1[1] * m2[4] + m1[3] * m2[5] + m1[5],
+  ];
+  let ctm: Mat = [1, 0, 0, 1, 0, 0];
+  const ctmStack: Mat[] = [];
+  let tlm: Mat = [1, 0, 0, 1, 0, 0];
+  let tlmExplicit = false; // a Tm/Td placed the line matrix since the stream start / the last BT?
+  const curPos = (): { px: number; py: number; ps: number } | null => {
+    if (!tlmExplicit) return null; // the BT-default origin — not a layout position
+    const e = mul(ctm, tlm);
+    if (Math.abs(e[1]) > 0.01 || Math.abs(e[2]) > 0.01) return null; // rotated/sheared
+    const ps = Math.abs(e[3]) * effSize;
+    if (!Number.isFinite(ps) || ps <= 0) return null;
+    return { px: e[4], py: e[5], ps };
+  };
+
   // The position state, per the R100-A rule:
   let effSize = 1; // the last Tf size operand (the em denominator)
   let curFont = ""; // the last Tf font NAME (the R102-B scoping key)
@@ -604,7 +642,8 @@ function pdfTextPieces(content: string): TextPiece[] {
       } else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
     }
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
-    pieces.push({ sep, font: curFont, ...(condGap ? { condGap: true } : {}), ...piece });
+    const pos = curPos();
+    pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...piece });
     reset();
     shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
     btFresh = false; // R104-C: the show ends the fresh run — the next Td is a between-shows move
@@ -619,7 +658,7 @@ function pdfTextPieces(content: string): TextPiece[] {
   //   the same token-level exposure as the standing bare T* (a BT inside a
   //   non-show string is unmeasured) — the standing design's class.
   const ops =
-    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm/g;
+    /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+cm|\bq\b|\bQ\b/g;
   let m: RegExpExecArray | null;
   while ((m = ops.exec(content))) {
     if (m[1] !== undefined) {
@@ -632,6 +671,8 @@ function pdfTextPieces(content: string): TextPiece[] {
     if (m[2] !== undefined) {
       const tx = parseFloat(m[2]);
       const ty = parseFloat(m[3]);
+      tlm = mul(tlm, [1, 0, 0, 1, tx, ty]); // R112-A: the line origin moves
+      tlmExplicit = true;
       // R104-C: the FIRST Td of a fresh BT run with NO Tm in between is an
       // ABSOLUTE placement (the xdvipdfmx per-word-BT form). The
       // origin-to-origin delta from the last fresh Td drives the separator
@@ -687,6 +728,26 @@ function pdfTextPieces(content: string): TextPiece[] {
       btFresh = true;
       tmInRun = false;
       freshTdTaken = false;
+      tlm = [1, 0, 0, 1, 0, 0]; // R112-A: BT resets the text-line matrix (PDF §9.4.1)
+      tlmExplicit = false;
+      continue;
+    }
+    if (m[15] !== undefined) {
+      // R112-A: cm CONCATENATES — the operand applies before the standing
+      // transform (CTM' = CTM x M; pinned on the Chromium flip+scale stack)
+      ctm = mul(ctm, [
+        parseFloat(m[15]), parseFloat(m[16]), parseFloat(m[17]),
+        parseFloat(m[18]), parseFloat(m[19]), parseFloat(m[20]),
+      ]);
+      continue;
+    }
+    if (m[0] === "q") {
+      if (ctmStack.length < 256) ctmStack.push(ctm); // bounded — an adversarial stream cannot grow it forever
+      continue;
+    }
+    if (m[0] === "Q") {
+      const prevCtm = ctmStack.pop();
+      if (prevCtm) ctm = prevCtm;
       continue;
     }
     if (m[4] !== undefined) {
@@ -694,7 +755,8 @@ function pdfTextPieces(content: string): TextPiece[] {
       const rawText = unescapeRaw(m[4]);
       if (m[5] === "'" || m[5] === '"') {
         // the next-line shows: always a line break, the pending move consumed
-        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text, raw: rawText });
+        const pos = curPos();
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text, raw: rawText, ...(pos ?? {}) });
         reset();
       } else {
         push({ kind: "lit", text, raw: rawText });
@@ -770,7 +832,8 @@ function pdfTextPieces(content: string): TextPiece[] {
     if (m[7] !== undefined) {
       const hex = m[7];
       if (m[8] === "'" || m[8] === '"') {
-        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "hex", hex });
+        const pos = curPos();
+        pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "hex", hex, ...(pos ?? {}) });
         reset();
       } else {
         push({ kind: "hex", hex });
@@ -800,6 +863,8 @@ function pdfTextPieces(content: string): TextPiece[] {
       const e = parseFloat(m[13]);
       const f = parseFloat(m[14]);
       const axisAligned = Math.abs(b) < 0.01 && Math.abs(c) < 0.01 && Math.abs(a) > 0.01 && Math.abs(d) > 0.01;
+      tlm = [a, b, c, d, e, f]; // R112-A: Tm sets the line matrix verbatim
+      tlmExplicit = true;
       reset();
       shownSinceTm = false; // in a fresh run — the FIRST Td's ty is a baseline placement, not a line move
       tmInRun = true; // R104-C: the Tm form — the run's Tds NEVER take the fresh-Td path (the r103-B rules verbatim)
@@ -825,6 +890,107 @@ function pdfTextPieces(content: string): TextPiece[] {
     }
   }
   return pieces;
+}
+
+// R112-A: the HOISTED-PREFIX REPAIR — the Chromium/Skia print pipeline (the
+// 17th writer family: headless-Chromium page.pdf(), the modern "Download
+// CV" path) paints FLOATED boxes before the in-flow content, so the stream
+// reads every float first regardless of its layout position (a right-floated
+// date column hoists above the candidate's name; pdftotext emits the merged
+// reading order). The repair re-merges the hoisted run when — and only when
+// — the full seven-guard signature fires:
+//   (a) every piece carries a device position (axis-aligned matrices, an
+//       explicit Tm/Td placement — never the BT-default origin);
+//   (b) the FIRST clear ascent (>= 25 device units) in the y sequence bounds
+//       the prefix — the jump back to the main flow's top. Later ascents
+//       inside the suffix are irrelevant (the suffix never reorders: the
+//       Chromium specimen's own skills section is column-count-2, and its
+//       column break must not veto the repair);
+//   (c) the hoisted run is at most TWO-THIRDS of the stream's pieces
+//       — the suffix it merges into must be a substantial flow, not a
+//       trailing header (the ReportLab TOC pages paint the TOC body first
+//       and the running header LAST: k=67 of 70 = 96% on the full pages,
+//       k=7..9 of 10..12 = 70-75% on the tail fragments). A plain
+//       majority bound misfired on the SHORT-CV probe class (a floated
+//       date column at 53% of a one-page stream — floats are not minority
+//       content on short documents);
+//   (d) the suffix's first y sits ABOVE every hoisted piece by the margin —
+//       the main flow starts at the page top. A 2-column layout's second
+//       column starts at the SAME height as the first: blocked (pdftotext
+//       reads columns in stream order too);
+//   (e) the suffix CONTINUES the flow — its second piece within a normal
+//       step of its first (>= -75): a lone top-edge-clipped glyph at the
+//       ascent (the QUARTZ stray, dropping -222 back into the page) is
+//       furniture, not a flow's start;
+//   (f) the suffix STARTS at its own top — pieces[k].py is the suffix's
+//       maximum. A running header riding mid-suffix above the ascent's
+//       landing (the ReportLab figure pages) or a scaled 2000+-unit figure
+//       space (the arXiv streams) is scattered furniture, not a flow;
+//   (g) the hoisted run sits in the page's READING BAND — its top at or
+//       above a quarter of the flow's top. A run at the page floor is the
+//       footer class (the LO Calc "Index | 545" footer paints first at
+//       y=60 of a 688-high flow — a verified pdftotext improvement left to
+//       stream order by the conservative bar), and a run at the origin is
+//       XFA-XML garbage the walk matched incidentally.
+// The merge: the prefix (stream order, stably) merges into the UNTOUCHED
+// suffix; a prefix piece drains in when it sits above the suffix head, or
+// same-line (0.35-em tolerance) with a smaller x. Relocated BLOCK HEADS
+// (the run's first piece, or a new y / a backwards x within the run)
+// carry "\n" seps; glyph continuations keep theirs; the output's first
+// piece normalizes to "".
+const HOIST_ASCENT = 25;
+function repairHoistedPrefix(pieces: TextPiece[]): TextPiece[] {
+  const n = pieces.length;
+  if (n < 4) return pieces;
+  if (!pieces.every((p) => p.px !== undefined && p.py !== undefined && p.ps !== undefined)) return pieces;
+  // (b): the FIRST clear ascent bounds the prefix
+  let ascentAt = -1;
+  for (let i = 0; i + 1 < n; i++) {
+    if (pieces[i + 1].py! - pieces[i].py! >= HOIST_ASCENT) {
+      ascentAt = i;
+      break;
+    }
+  }
+  if (ascentAt === -1) return pieces;
+  const k = ascentAt + 1; // the suffix starts here
+  if (k > (2 / 3) * n) return pieces; // (c) the suffix-substance guard
+  // (e): the suffix must CONTINUE the flow
+  if (k + 1 >= n || pieces[k + 1].py! - pieces[k].py! < -3 * HOIST_ASCENT) return pieces;
+  const suffixTop = pieces[k].py!;
+  const prefixTop = Math.max(...pieces.slice(0, k).map((p) => p.py!));
+  if (suffixTop <= prefixTop + HOIST_ASCENT) return pieces; // (d) the flow starts above every float
+  // (f): the suffix starts at its own top
+  for (let i = k + 1; i < n; i++) if (pieces[i].py! > pieces[k].py!) return pieces;
+  // (g): the reading band
+  if (prefixTop < 0.25 * suffixTop) return pieces;
+  // the block heads within the prefix: the first piece, or a new y / a
+  // backwards x relative to the previous prefix piece
+  const head = new Set<number>([0]);
+  for (let i = 1; i < k; i++) {
+    const eps = 0.35 * Math.max(pieces[i - 1].ps!, pieces[i].ps!);
+    if (Math.abs(pieces[i].py! - pieces[i - 1].py!) > eps || pieces[i].px! < pieces[i - 1].px! - eps) head.add(i);
+  }
+  const out: TextPiece[] = [];
+  let pi = 0;
+  for (let si = k; si < n; si++) {
+    const s = pieces[si];
+    while (pi < k) {
+      const p = pieces[pi];
+      const eps = 0.35 * Math.max(p.ps!, s.ps!);
+      const dy = p.py! - s.py!;
+      if (dy > eps || (dy >= -eps && p.px! < s.px!)) {
+        out.push(head.has(pi) ? { ...p, sep: "\n" } : p);
+        pi++;
+      } else break;
+    }
+    out.push(s);
+  }
+  while (pi < k) {
+    out.push(head.has(pi) ? { ...pieces[pi], sep: "\n" } : pieces[pi]);
+    pi++;
+  }
+  if (out.length && out[0].sep !== "") out[0] = { ...out[0], sep: "" };
+  return out;
 }
 
 /** Concatenated text from a PDF's inflated content streams ((…) Tj / TJ arrays / hex strings). */
@@ -1302,7 +1468,8 @@ async function extractPdfText(file: File): Promise<string> {
   // streams without space glyphs (the IRS/pdfTeX convention: gaps ride the
   // moves) keep every gap. The decode happens first so the standalone-space
   // detection sees the decoded text.
-  const parts = pending.map(({ objNum, pieces }) => {
+  const parts = pending.map(({ objNum, pieces: rawPieces }) => {
+    const pieces = repairHoistedPrefix(rawPieces); // R112-A: the hoisted-float merge (a no-op unless the seven-guard signature fires)
     // R105-C: this stream's OWN page's font map resolves first; the
     // candidate chain stays the fallback (the page-tree chain — the
     // fontspec.pdf fully-covering collision class)

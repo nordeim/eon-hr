@@ -2202,4 +2202,228 @@ describe("cv-text — the Typst 16th-writer class (session 111)", () => {
     expect(text).toContain("Team"); // born-green pin: the per-glyph literals read through the standing join
     expect(text).toContain("with payroll");
   });
+
+  // Session 112 (R112-A): the HOISTED-PREFIX REPAIR — the Chromium/Skia
+  // print pipeline (the 17th writer family: headless-Chromium page.pdf(),
+  // the modern "Download CV" path) paints FLOATED boxes BEFORE the in-flow
+  // content, so the stream reads every float first regardless of its layout
+  // position (a right-floated date column hoists above the candidate's
+  // name; pdftotext emits the merged reading order). The repair re-merges
+  // the hoisted run under a seven-guard signature; the fixtures below pin
+  // each leg with the measured Chromium geometry (outer flip cm .24 0 0
+  // -.24 0 842.88 + inner scale cm 3.125 … — device y = 842.88 -
+  // .24*(215.625 + 3.125*f)).
+  it("merges the hoisted float run back into reading order (the Chromium print form — R112-A)", async () => {
+    // floats FIRST (Tm f=313/455 — device y 556/450), then the main flow
+    // from the page top (f=39 — device y 762) descending — the measured
+    // shape of a genuine Chromium print's content stream
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      "BT /F4 12.66 Tf 1 0 0 -1 565 313 Tm (Mar 2021 dash Present floating date line one) Tj ET\n" +
+      "BT /F4 12.66 Tf 1 0 0 -1 558 455 Tm (Jun 2016 dash Feb 2021 second floating dates) Tj ET\n" +
+      "BT /F5 29.3 Tf 1 0 0 -1 8 39 Tm (John Smith Senior HR Manager resume header) Tj ET\n" +
+      "BT /F4 14 Tf 1 0 0 -1 8 100 Tm (john.smith@example.com contact details line) Tj ET\n" +
+      "BT /F4 14 Tf 1 0 0 -1 8 141 Tm (SUMMARY section heading of the document) Tj ET\n" +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith Senior HR Manager");
+    expect(text).toContain("Mar 2021 dash Present");
+    expect(text).toContain("Jun 2016 dash Feb 2021");
+    // RED at HEAD: the floats read FIRST (stream order) — "Mar 2021" at 0,
+    // the name after them; the repair lands them at their layout position
+    // (below the SUMMARY heading, above nothing — the page's low mid)
+    expect(text.indexOf("John Smith")).toBeLessThan(text.indexOf("Mar 2021"));
+    expect(text.indexOf("SUMMARY")).toBeLessThan(text.indexOf("Mar 2021"));
+  });
+
+  it("orders a same-line float after the flow text it shares the line with (the x tiebreak — R112-A)", async () => {
+    // the entry line: flow text from x=8, the floated date at x=565 — the
+    // SAME device y (both Tm f=313); Chromium emits the float first, the
+    // merged reading orders the line by x (flow 51.75 < float 469.8)
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      "BT /F4 12.66 Tf 1 0 0 -1 565 313 Tm (EntryDateFloat right side label) Tj ET\n" +
+      "BT /F5 29.3 Tf 1 0 0 -1 8 39 Tm (John Smith Senior HR Manager resume header top) Tj ET\n" +
+      "BT /F4 14 Tf 1 0 0 -1 8 70 Tm (The subtitle line under the header here) Tj ET\n" +
+      "BT /F4 14 Tf 1 0 0 -1 8 313 Tm (Senior HR Manager entry line with enough words) Tj ET\n" +
+      "BT /F4 14 Tf 1 0 0 -1 8 400 Tm (Bullet points below the entry line follow here) Tj ET\n" +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("EntryDateFloat");
+    // RED at HEAD: the float reads before the entry line it belongs beside
+    expect(text.indexOf("Senior HR Manager entry line")).toBeLessThan(text.indexOf("EntryDateFloat"));
+    // and the float still reads before the line BELOW it
+    expect(text.indexOf("EntryDateFloat")).toBeLessThan(text.indexOf("Bullet points"));
+  });
+
+  it("keeps a two-column layout in stream order (the column guards — R112-A minority + suffix-above)", async () => {
+    // column 1 descends the full height, then the ascent back to the top
+    // opens column 2 — the second column starts at the SAME height as the
+    // first (suffixTop == prefixTop) and the run is half the stream: both
+    // column guards veto the merge, exactly like the arXiv 2-column pages
+    const col = (x: number, f: number, w: string) =>
+      `BT /F1 12 Tf 1 0 0 -1 ${x} ${f} Tm (${w}) Tj ET\n`;
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      col(8, 39, "ColumnOneFirst line of the left column text") +
+      col(8, 100, "ColumnOneSecond line of the left column here") +
+      col(8, 141, "ColumnOneThird line of the left column ends") +
+      col(300, 39, "ColumnTwoFirst line of the right column text") +
+      col(300, 100, "ColumnTwoSecond line of the right column here") +
+      col(300, 141, "ColumnTwoThird line of the right column ends") +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    // born-green pin: the WHOLE first column precedes the second (a merge
+    // would interleave the two by line)
+    expect(text.indexOf("ColumnOneThird")).toBeLessThan(text.indexOf("ColumnTwoFirst"));
+  });
+
+  it("keeps a lone top-edge stray in stream order (the step2 guard — R112-A)", async () => {
+    // the QUARTZ class: a clipped glyph at the very top edge (device y 816,
+    // above the flow's top) drawn mid-stream, then the flow drops -196 back
+    // does not CONTINUE from its start (pdftotext reads the stray late and
+    // so must we)
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 33 Tm (FlowTopLine the first line of the flow) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 100 Tm (FlowSecondLine the second line here) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 400 -33 Tm (TopEdgeStray the clipped stray) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 355 Tm (FlowResumes the flow continues below) Tj ET\n" +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("TopEdgeStray");
+    // born-green pin: the stray reads where the writer painted it (a merge
+    // would hoist it above the flow's top line)
+    expect(text.indexOf("FlowTopLine")).toBeLessThan(text.indexOf("TopEdgeStray"));
+  });
+
+  it("keeps figure-label furniture in stream order when a running header rides above the flow (the suffix-max guard — R112-A)", async () => {
+    // the ReportLab class: the "(0,0) the Origin" label paints first, then
+    // higher figure labels, then the page's running header ABOVE them all —
+    // the ascent lands mid-furniture, and the suffix's own max sits above
+    // its start: that suffix is scattered furniture, not a flow
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 213 Tm (OriginLabel the origin marker text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 150 160 Tm (InchesLabel the second marker text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 200 55 Tm (TopMarker the third marker higher) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 10 Tm (RunningHeader the page header line top) Tj ET\n" +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("OriginLabel");
+    // born-green pin: the label reads where the writer painted it
+    expect(text.indexOf("OriginLabel")).toBeLessThan(text.indexOf("InchesLabel"));
+  });
+
+  it("keeps a page-floor footer in stream order (the reading-band guard — R112-A)", async () => {
+    // the LO Calc class: the page footer paints FIRST at the page floor
+    // (device y 118 of a 762-high flow — below a quarter of the flow's
+    // top). The verified improvement exists (pdftotext reads the footer at
+    // its layout position) but the conservative bar keeps standing members
+    // byte-identical — the footer class stays stream-ordered
+    const content =
+      "q 0.24 0 0 -0.24 0 842.88 cm q 3.125 0 0 3.125 190.625 215.625 cm\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 900 Tm (PageFooterNum the footer paints first) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 39 Tm (FlowHead the flow starts at the top) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 100 Tm (FlowBody the body of the flow here) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 8 141 Tm (FlowTail the flow continues below) Tj ET\n" +
+      "Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("PageFooterNum");
+    // born-green pin: the footer keeps its stream position (the band guard
+    // vetoes the merge; removing it would drop the footer to the end)
+    expect(text.indexOf("PageFooterNum")).toBeLessThan(text.indexOf("FlowHead"));
+  });
+
+  it("keeps stream order when any piece rides the BT-default origin (the explicit-positioning guard — R112-A)", async () => {
+    // the IRS XFA class: XML payload the walk matches incidentally, drawn
+    // with NO Tm/Td since its BT — the identity line matrix is not a layout
+    // position. One such piece anywhere in the stream disables the repair
+    // plain user-space Tms (no cm — the identity CTM puts the BT-default
+    // piece at the origin (0,0), exactly the IRS XFA class)
+    const content =
+      "BT /F4 12.66 Tf 1 0 0 1 565 556 Tm (FloatOne the hoisted float text) Tj ET\n" +
+      "BT /F4 12.66 Tf 1 0 0 1 558 450 Tm (FloatTwo the second hoisted float) Tj ET\n" +
+      "BT /F5 29.3 Tf 1 0 0 1 8 762 Tm (FlowTop the flow starts at the top) Tj ET\n" +
+      "BT /F5 14 Tf 1 0 0 1 8 738 Tm (FlowNext the flow continues below it) Tj ET\n" +
+      "BT /F1 12 Tf (UnpositionedTail the XFA style garbage) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("FloatOne");
+    expect(text).toContain("UnpositionedTail");
+    // born-green pin: the whole stream keeps stream order (the repair is
+    // disabled — removing the guard would merge the floats after FlowNext)
+    expect(text.indexOf("FloatOne")).toBeLessThan(text.indexOf("FlowTop"));
+  });
+
+  it("keeps a trailing running header in stream order (the suffix-substance guard — R112-A)", async () => {
+    // the ReportLab TOC class: the TOC body paints first, the running
+    // header LAST (k=8 of 11 on the tail fragments — the suffix is 3
+    // pieces, 27% of the stream): the hoisted-run bound vetoes the merge
+    const content =
+      "BT /F1 12 Tf 1 0 0 1 8 746 Tm (TocEntryFirst the first toc line here) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 716 Tm (TocEntrySecond the second toc line) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 686 Tm (TocEntryThird the third toc line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 656 Tm (TocEntryFourth the fourth toc line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 626 Tm (TocEntryFifth the fifth toc line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 596 Tm (TocEntrySixth the sixth toc line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 566 Tm (TocEntrySeventh the seventh line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 8 536 Tm (TocEntryEighth the eighth line text) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 400 800 Tm (RunningHeaderTail the header paints last) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 400 780 Tm (PageNumber the page number piece) Tj ET\n" +
+      "BT /F1 12 Tf 1 0 0 1 400 760 Tm (ChapterMark the chapter mark piece) Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("RunningHeaderTail");
+    // born-green pin: the header keeps its stream position (a merge would
+    // hoist it above the whole TOC body)
+    expect(text.indexOf("TocEntryFirst")).toBeLessThan(text.indexOf("RunningHeaderTail"));
+  });
+
 });
