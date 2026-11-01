@@ -2001,6 +2001,85 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
     expect(text).toContain("\u1F55\u03B1\u03BB"); // RED before the fix: the Greek-Extended garbage "\u1F57\u1F58\u1F59" — the re-parsed triple overwrote the array
     expect(text).toContain("payroll admin compliance");
   });
+
+  // Session 113 (R113-A): the EXPLICIT-ZERO KERN — WeasyPrint (the 18th
+  // writer family, the Python HTML-to-PDF engine behind many CV/invoice
+  // pipelines) writes every glyph as its own hex atom with an explicit 0
+  // kern between pairs: [<4A>0<6F>0<68>0<6E>…] TJ is "John". The measured
+  // specimen read alnums EXACT (692/692) as LETTER SOUP ("J o h n   S m i
+  // t h") — the count-pin blind spot class, the second consecutive round.
+  // The root cause: the TJ-array internals' `kern !== 0` conflated an
+  // explicit NUMBER token (even a net-zero one — the writer's contiguous
+  // placement intent) with the ABSENCE of a number (the W3C dummy.pdf
+  // shape, whose adjacent atoms keep the standing space join). The fix:
+  // sawNum — a number token since the last atom triggers the kern
+  // decision (a 0 sum joins), only the token-free adjacency keeps the
+  // space join.
+  it("joins per-glyph hex atoms across explicit zero kerns (the WeasyPrint form — R113-A)", async () => {
+    // the measured WeasyPrint array shape: single-glyph hex atoms, an
+    // explicit 0 between every pair, the space glyph <20> carrying the
+    // word gap — at HEAD this reads "J o h n   S m i t h !"
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (payroll admin compliance training onboarding specialist platform experience) Tj " +
+      "[<4A>0<6F>0<68>0<6E>0<20>0<53>0<6D>0<69>0<74>0<68>0<21>] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith!"); // RED at HEAD: "J o h n   S m i t h !"
+  });
+
+  it("extracts a WeasyPrint stream slice with the flip Tm and a mid-word kern (the real shape — R113-A)", async () => {
+    // the genuine stream anatomy: the page-flip Tm (1 0 0 -1 x y), the
+    // fractional Tf size, per-glyph zero kerns, one real positive kern
+    // (54 — the display overhang), the space glyph, and the line move to
+    // the next run's Tm
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf 1 0 0 -1 68.47 107.61 Tm (payroll admin compliance training onboarding specialist platform experience) Tj " +
+      "[<4A>0<6F>0<68>0<6E>0<20>0<53>0<6D>0<69>0<74>0<68>] TJ ET\n" +
+      "BT /F1 12 Tf 1 0 0 -1 68.47 130.00 Tm [<53>0<65>0<6E>0<69>0<6F>0<72> 54 <20>0<48>0<52>] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith"); // RED at HEAD: the soup
+    expect(text).toContain("Senior HR"); // the 54 kern joins, the space glyph carries the gap
+    expect(text.indexOf("John Smith")).toBeLessThan(text.indexOf("Senior HR")); // the Tm line move keeps its newline
+  });
+
+  it("joins atoms across consecutive numbers summing to zero (the token-presence rule — R113-A)", async () => {
+    // the rule's purest edge: the SUM decides gap-vs-kern, the TOKEN
+    // PRESENCE triggers the decision — [(Joh) -5 5 (n…)] carries number
+    // tokens summing to 0, a contiguous placement the old `kern !== 0`
+    // read as the token-free adjacency (a space)
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (payroll admin compliance training onboarding specialist platform experience) Tj " +
+      "[(Joh) -5 5 (n Smi) -3 3 (th)] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith"); // RED at HEAD: "Joh n Smi th"
+  });
+
+  it("keeps the space join between atoms with no number after a kerned pair (the reset leg — R113-A guard)", async () => {
+    // the over-fix guard: the 18 kern joins its atoms, the FOLLOWING
+    // adjacency (no number token) keeps the standing space join — the
+    // sawNum flag must reset at every atom push
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (payroll admin compliance training onboarding specialist platform experience) Tj " +
+      "[<61 62> 18 <63 64> <65 66>] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("abcd"); // the kern joins (standing R101-A)
+    expect(text).toContain("cd ef"); // the token-free adjacency keeps its space
+  });
+
+  it("keeps a numeric word gap inside a zero-kern array (the mixed form — R113-A guard)", async () => {
+    // a real gap number rides alongside the zero kerns: the -322 glue
+    // keeps its space, the 0 kerns join — the trigger must not flatten
+    // the threshold's distinction
+    const file = await pdfWithContent(
+      "BT /F1 12 Tf (payroll admin compliance training onboarding specialist platform experience) Tj " +
+      "[<70> -322 <71>0<72>0<73>] TJ ET"
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("p q"); // the -322 gap keeps its space (born-green at HEAD: "p q r s"; post-fix: "p qrs")
+  });
 });
 
 

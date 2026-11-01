@@ -813,18 +813,21 @@ function pdfTextPieces(content: string): TextPiece[] {
       atomRe.lastIndex = 0;
       let a: RegExpExecArray | null;
       let kern = 0; // SIGNED sum of consecutive numbers since the last atom
+      let sawNum = false; // R113-A: an explicit NUMBER token since the last atom — even a net-zero one (the WeasyPrint per-glyph 0) is the writer's contiguous-placement intent; only the ABSENCE of a number keeps the standing space join (the W3C dummy.pdf shape)
       while ((a = atomRe.exec(m[6]))) {
         if (a[1] !== undefined || a[2] !== undefined) {
-          if (kern !== 0) {
+          if (kern !== 0 || sawNum) {
             moved = true;
             // R107-A: a display-tracked array's kerns are TRACKING, not gaps
             // — the atoms join (the space glyphs carry the word separation)
-            pendingEm = !displayTracked && kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary) joins
+            pendingEm = !displayTracked && kern <= -100 ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary, or an explicit zero) joins
           }
-          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, kern !== 0);
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, sawNum);
           kern = 0;
+          sawNum = false;
         } else {
           kern += parseFloat(a[3]);
+          sawNum = true;
         }
       }
       continue;
