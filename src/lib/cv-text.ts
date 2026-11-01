@@ -479,13 +479,41 @@ function decodeHexString(hexRaw: string, cmaps: CodeMap[]): string {
  * (the pdfTeX fi-ligature class: the \034 glyph remaps to a space, and the
  * kern gap before it is a REAL word gap).
  */
+function hexTrailingIsSpace(hexRaw: string, cmaps: CodeMap[]): boolean {
+  const hex = hexRaw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
+  const padded = hex.length % 2 ? hex + "0" : hex;
+  if (!padded) return false;
+  const bytes: number[] = [];
+  for (let i = 0; i < padded.length; i += 2) bytes.push(parseInt(padded.slice(i, i + 2), 16));
+  // The cmap-covering branches run FIRST — a 2-byte code whose LOW byte is 0x20
+  // (the fontspec class: code 0x0020 mapping to "?") is NOT the writer's space;
+  // the bare byte check is the FALLBACK (the uncoded path — latin1Printable maps
+  // a real 0x20 byte to a space).
+  for (const cm of cmaps) {
+    if (cm.codeLen === 2) {
+      if (bytes.length < 2 || bytes.length % 2) continue;
+      let covered = true;
+      for (let i = 0; i < bytes.length; i += 2) if (!cm.map.has(bytes[i] * 256 + bytes[i + 1])) { covered = false; break; }
+      if (covered) return cm.map.get(bytes[bytes.length - 2] * 256 + bytes[bytes.length - 1]) === " ";
+    } else {
+      if (!bytes.every((b) => cm.map.has(b))) continue;
+      return cm.map.get(bytes[bytes.length - 1]) === " ";
+    }
+  }
+  return bytes[bytes.length - 1] === 0x20; // the 1-byte space byte — the uncoded fallback
+}
+
 function hexLeadingIsSpace(hexRaw: string, cmaps: CodeMap[]): boolean {
   const hex = hexRaw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
   const padded = hex.length % 2 ? hex + "0" : hex;
   if (!padded) return false;
   const bytes: number[] = [];
   for (let i = 0; i < padded.length; i += 2) bytes.push(parseInt(padded.slice(i, i + 2), 16));
-  if (bytes[0] === 0x20) return true; // the 1-byte space byte
+  // R115: the cmap-covering branches run FIRST — a 2-byte code whose HIGH byte
+  // is 0x20 (0x20XX — an arbitrary subset-code mapping) is NOT the writer's
+  // space; the bare byte check is the FALLBACK (the uncoded path). The r114
+  // byte-first order was a latent misfire class that never fired on the r114
+  // corpus (the fpdf2 leading spaces ride real cmap-declared 0x0020 codes).
   for (const cm of cmaps) {
     if (cm.codeLen === 2) {
       if (bytes.length < 2 || bytes.length % 2) continue;
@@ -497,7 +525,7 @@ function hexLeadingIsSpace(hexRaw: string, cmaps: CodeMap[]): boolean {
       return cm.map.get(bytes[0]) === " ";
     }
   }
-  return false;
+  return bytes[0] === 0x20; // the 1-byte space byte — the uncoded fallback
 }
 
 /**
@@ -1616,7 +1644,7 @@ async function extractPdfText(file: File): Promise<string> {
     // declaration keeps its bytes verbatim (the WinAnsi guard).
     const decoded = pieces.map((p) => {
       if (p.kind === "hex")
-        return { p, text: decodeHexString(p.hex, localFor(p.font)), genuine: hexLeadingIsSpace(p.hex, localFor(p.font)) };
+        return { p, text: decodeHexString(p.hex, localFor(p.font)), genuine: hexLeadingIsSpace(p.hex, localFor(p.font)), trail: hexTrailingIsSpace(p.hex, localFor(p.font)) };
       // R111-A: the LITERAL-form CID decode — a literal whose font's OWN
       // binding chain resolves a codeLen-2 CMap that FULLY covers its
       // byte-paired codes decodes through it (the Typst 16th-writer class:
@@ -1636,7 +1664,8 @@ async function extractPdfText(file: File): Promise<string> {
           if (covered) {
             const text = codes.map((c) => cm.map.get(c) ?? "").join("");
             // R114-B: the cmap branch's leading space IS the writer's own — the ToUnicode declared it
-            return { p, text, genuine: text.startsWith(" ") };
+            // R115-B: the TRAILING space is too (the kern/sep duality's mirror form)
+            return { p, text, genuine: text.startsWith(" "), trail: text.endsWith(" ") };
           }
         }
       }
@@ -1664,7 +1693,8 @@ async function extractPdfText(file: File): Promise<string> {
         }
       }
       // R114-B: the non-cmap lit branches — genuine iff the raw's FIRST byte IS the space byte
-      return { p, text: p.text, genuine: p.raw !== undefined && p.raw.charCodeAt(0) === 0x20 };
+      // R115-B: trail iff the raw's LAST byte IS the space byte (the trailing-glyph duality)
+      return { p, text: p.text, genuine: p.raw !== undefined && p.raw.charCodeAt(0) === 0x20, trail: p.raw !== undefined && p.raw.length > 0 && p.raw.charCodeAt(p.raw.length - 1) === 0x20 };
     });
     // R110-D: the census is SPACE-only — a word-separation space GLYPH is
     // U+0020. The old /^\s+$/ also counted U+00A0 runs (NBSP pieces), and
@@ -1682,9 +1712,52 @@ async function extractPdfText(file: File): Promise<string> {
     // The join class (the Skia/LO split-word continuation) keeps its
     // U+0020 census verbatim; NBSP-only streams keep every gap.
     const hasSpaceGlyphs = decoded.some(({ text }) => text.length > 0 && /^ +$/.test(text));
-    return decoded
-      .map(({ p, text, genuine }) => (p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep) + text)
-      .join("");
+    // R115 — THE POSITIONED-SPACE DUALITY FAMILY (the Typst form round — the 16th
+    // writer's count-exact FORM defects the r111 count-only pins missed; the count-pin
+    // blind spot class, the FOURTH consecutive round — the form probes caught it). The writer emits its OWN word separators (cmap-declared
+    // U+0020 or a real 0x20 byte — the R114-B genuine discipline, never the
+    // printable-scrub remap) while the separator machinery ALSO fires " " —
+    // the doubled-gap forms. Three assembly-space collapse rules, each removing
+    // ONLY a " " separator or a redundant space-run text (never "\n", never a
+    // join, never a scrub-class space — the pdfTeX \034 guard keeps its double).
+    // The EMPTY-piece rule was REFUTED by measurement (the fontspec TOC leaders:
+    // an empty glyph run's separator is a real layout gap pdftotext keeps):
+    //   R115-A  a piece whose ENTIRE text is the writer's own space (a
+    //           POSITIONED space run — the Typst header grid "John"|" "|"Smith")
+    //           IS the separator: its own " " sep collapses, and the FOLLOWING
+    //           piece's " " sep collapses (the separation was already emitted).
+    //   R115-B  a piece whose text ENDS with the writer's own space (the
+    //           TRAILING-glyph form — the r115-queued hunt class: Typst's
+    //           justified paragraphs write every word gap as the word atom's
+    //           trailing space glyph + an adjustment kern; the squeeze kerns
+    //           (<= -100) fire our word-gap rule and double with the glyph)
+    //           collapses the NEXT piece's " " sep.
+    //   R115-C  a space run contributes nothing when the output already ends
+    //           whitespace (consecutive space runs — the contacts separator
+    //           "  " written as two space-glyph pieces).
+    const isSpaceRun = (i: number): boolean => {
+      const d = decoded[i] as { genuine?: boolean; text: string } | undefined;
+      return d !== undefined && d.genuine === true && d.text.length > 0 && /^ +$/.test(d.text);
+    };
+    const prevTrail = (i: number): boolean => {
+      const d = decoded[i] as { trail?: boolean } | undefined;
+      return d !== undefined && d.trail === true;
+    };
+    let out = "";
+    let outTail = ""; // the last emitted char — the R115-C whitespace check (a regex on the growing out would be O(n^2))
+    decoded.forEach(({ p, text, genuine }, i) => {
+      let sep = p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep;
+      if (sep === " ") {
+        if (i > 0 && (isSpaceRun(i - 1) || prevTrail(i - 1))) sep = ""; // R115-A tail / R115-B
+        else if (genuine && text.length > 0 && /^ +$/.test(text)) sep = ""; // R115-A head
+      }
+      let emit = text;
+      if (isSpaceRun(i) && (outTail === " " || outTail === "\n")) emit = ""; // R115-C
+      out += sep + emit;
+      const tail = sep + emit;
+      if (tail.length > 0) outTail = tail[tail.length - 1];
+    });
+    return out;
   });
   return parts.join("\n");
 }

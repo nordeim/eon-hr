@@ -2719,3 +2719,200 @@ describe("cv-text — the fpdf2 19th-writer class (session 114)", () => {
     expect(text).not.toContain("Talent  Acquisition"); // the join must not double
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 115 (R115-A/B/C): the Typst positioned-space duality round — the
+// duality family: the standalone space-glyph run sandwiched between standing
+// joins, the TRAILING-space-in-previous-atom kern duality (the r115-queued
+// hunt class), the consecutive space runs, and the hex-trailing cmap-first
+// order (the fontspec guard)
+// ---------------------------------------------------------------------------
+describe("cv-text — the Typst positioned-space duality class (session 115)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // the shared pad (the standing r113 fixture-padding guard: the yield gate
+  // needs >= 40 alnums)
+  const PAD = "payroll admin compliance training onboarding specialist platform experience";
+
+  // Session 115 (R115-A): THE POSITIONED SPACE RUN. The Typst engine places
+  // every header-grid word as its own repositioned run (q/cm/BT blocks, the
+  // text matrix at origin) and writes the word separator as a STANDALONE
+  // space-glyph run between them — the standing-join separators around the
+  // space run read "John" | " " | "Smith" as THREE separators. The fix: a
+  // piece whose ENTIRE text is the writer's OWN space IS the separator — its
+  // own " " sep collapses and the FOLLOWING piece's " " sep collapses.
+  it("collapses the sandwich around a standalone genuine space run (the Typst header grid — R115-A)", async () => {
+    const content = `BT /F1 12 Tf (${PAD}) Tj (John) Tj ( ) Tj (Smith) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith"); // RED before the fix: "John   Smith" (the tripled gap)
+    expect(text).not.toContain("John  "); // no doubled gap anywhere around the name
+  });
+
+  // Session 115 (R115-C): THE CONSECUTIVE SPACE RUNS. The Typst contacts
+  // separator ("  " between phone and email) is TWO standalone space-glyph
+  // pieces — the first carries the separation, the second contributes
+  // nothing (the output already ends whitespace).
+  it("collapses consecutive genuine space runs to a single separation (the contacts separator — R115-C)", async () => {
+    const content = `BT /F1 12 Tf (${PAD}) Tj (John) Tj ( ) Tj ( ) Tj (Smith) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("John Smith"); // RED before the fix: "John    Smith" (the quadrupled gap)
+  });
+
+  // Session 115 (R115-B): THE TRAILING-SPACE-IN-PREVIOUS-ATOM DUALITY — the
+  // r115-queued hunt class, MEASURED on the Typst justified paragraphs: every
+  // word gap is written as the word atom's TRAILING space glyph (a real 0x20
+  // byte) PLUS an adjustment kern; the justification SQUEEZE kerns (<= -100)
+  // fire the word-gap rule and double with the glyph.
+  it("collapses the kern gap when the previous atom ends with a real space byte (the 1-byte trailing form — R115-B)", async () => {
+    const content = `BT /F1 12 Tf (${PAD}) Tj [(design ) -120.5(and organizational)] TJ ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("design and organizational"); // RED before the fix: "design  and" (the doubled gap)
+  });
+
+  it("collapses the kern gap for HEX atoms whose trailing code the cmap declares a space (the hex trailing form — R115-B)", async () => {
+    // the same duality in the hex-atom spelling: [<design codes + space
+    // code> -150 <and codes>] under a codeLen-2 ToUnicode
+    const w1 = "design";
+    const w2 = "and organizational"; // the internal space rides its own code (0031)
+    const pairs: string[] = [];
+    w1.split("").forEach((c, i) => pairs.push(`<${(i + 1).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`));
+    pairs.push(`<0030> <0020>`);
+    pairs.push(`<0031> <0020>`);
+    let code = 20;
+    const codeOf: string[] = [];
+    for (const c of w2) {
+      if (c === " ") codeOf.push("0031");
+      else {
+        pairs.push(`<${code.toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`);
+        codeOf.push(code.toString(16).padStart(4, "0"));
+        code++;
+      }
+    }
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${pairs.length} beginbfchar\n${pairs.join("\n")}\nendbfchar\nendcmap\n`;
+    const hex1 = w1.split("").map((_, i) => (i + 1).toString(16).padStart(4, "0")).join("") + "0030";
+    const hex2 = codeOf.join("");
+    const content = `BT /F1 12 Tf (${PAD}) Tj [<${hex1}> -150 <${hex2}>] TJ ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+LibSans /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("design and organizational"); // RED before the fix: the doubled gap
+  });
+
+  // the born-green guards — the collapse must NEVER fire on these forms
+
+  it("keeps the kern gap when the previous atom's trailing space is a scrubbed control byte (the trailing scrub guard — R115-B)", async () => {
+    // the arXiv byte-identity guard's TRAILING mirror: pdfTeX's fi-ligature
+    // glyph (the \\034 control byte) remaps to a space through the printable
+    // scrub — NOT the writer's own space, so the kern's separator stands
+    const content = `BT /F1 12 Tf (${PAD}) Tj [(ne\\034) -378 (tuning)] TJ ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ne  tuning"); // born-green: the scrub-class trailing gap keeps BOTH separators
+  });
+
+  it("keeps the kern gap when a 2-byte code's LOW byte is 0x20 but the cmap maps it to a non-space (the fontspec guard — the cmap-first order)", async () => {
+    // the fontspec TOC class measured in-round: the hex atom ends with the
+    // code 0x0020 whose ToUnicode maps to "?" (an arbitrary subset-code
+    // assignment) — the bare 0x20 BYTE check on a 2-byte code's low byte is
+    // NOT the writer's space; without the cmap-first order the separator
+    // collapses and the words FUSE
+    const w1 = "fonts";
+    const w2 = "dotleader";
+    const pairs: string[] = [];
+    w1.split("").forEach((c, i) => pairs.push(`<${(i + 1).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`));
+    pairs.push(`<0020> <003f>`); // the code 0x0020 (whose LOW byte is 0x20) maps to "?" — NOT a space
+    w2.split("").forEach((c, i) => pairs.push(`<${(20 + i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`));
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${pairs.length} beginbfchar\n${pairs.join("\n")}\nendbfchar\nendcmap\n`;
+    const hex1 = w1.split("").map((_, i) => (i + 1).toString(16).padStart(4, "0")).join("") + "0020";
+    const hex2 = w2.split("").map((_, i) => (20 + i).toString(16).padStart(4, "0")).join("");
+    const content = `BT /F1 12 Tf (${PAD}) Tj [<${hex1}> -150 <${hex2}>] TJ ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+LibSans /Encoding /Identity-H /ToUnicode 3 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap },
+      { raw: "<< /Font << /F1 2 0 R >> >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources 4 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fonts? dotleader"); // born-green: the separator stands (the byte-first misfire would read "fonts?dotleader" — FUSED)
+  });
+
+  it("keeps the line move after a trailing genuine space (the newline guard — R115-B)", async () => {
+    // a trailing space followed by a LINE MOVE keeps its newline — the
+    // collapse fires only on " " separators, never on "\\n"
+    const content = `BT /F1 12 Tf (${PAD}) Tj [(design )] TJ 0 -14 Td (and organizational) Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("design \nand organizational"); // born-green: the newline survives the trailing space
+  });
+});
