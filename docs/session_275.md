@@ -1,0 +1,17 @@
+# Session 118 — Round Close Summary
+
+**Session 118 / Parity Round 117 — THE ICON-ANCHORED SUB-THRESHOLD COLUMN ROUND — complete and pushed to `main` as `c421ac5`** (remote-verified via the SSH wrapper + the paramiko shim; the operator key shredded; the working tree clean).
+
+## The round in summary
+
+**The hunt** (the r118 queue's lead class): the Typst contacts phone|email pair that pdftotext reads on separate lines while our extraction joined them. **The measurement REFUTED THE QUEUE'S OWN HYPOTHESIS** — "an empty-text icon glyph between two tiny-gap blocks; NOT gap-driven" is dead: the controlled-variant census (the recompiled modern-cv specimen, the separator/icon row patched per variant) proved the split is **gap-driven** (the no-icons variant still splits; the icons-without-separator variant joins; text-glyph "icons" split identically; the separator bisect puts the poppler word-gap boundary at 0.944 em joining / 1.056 em splitting; the single-word vertical bridge does not rescue the join).
+
+**The artifact join exposed**: the definitive separation-band census (on `pdftotext -bbox-layout` — poppler's own block/line/word analysis, zero output matching) found NO joined numeric pair anywhere in the Prawn output — the r117 "11.78 em Prawn chart-tick join" (the calibration's highest measured join) was a nearest-word matching artifact; the "ReportLab cover 33.6-em trailless join" re-verified as a cross-page adjacency.
+
+**The cure (R118-A)**: the icon-anchored walk-back census measured the fire surface — exactly the 4 Typst contacts pairs (SPLIT at 1.06/2.43 em) plus ONE refutation (the Skia em-dash at 0.89 em, JOIN) and zero candidates on every other corpus member. The rule: a zero-alnum content anchor at a same-baseline block boundary whose walk-back content block sits ≥ 0.95 em behind upgrades the separator to a clean "\n"; the icon then joins the FOLLOWING content at its sub-threshold gap — pdftotext's exact `<icon> email` line form.
+
+**The second material — the neo-crm s208 transfer**: the doc-claim totality census found the count axis STALE ("54 route handlers" / "47 Prisma models" / "49 endpoints" / "46 routes" — fossils from the initial commit that rode 85+ sessions); D-118a cured the six live-section claims, D-118b pinned the structural live-census (the route/handler/model counts read LIVE from the tree) + the command arm, both mutation-proven.
+
+**The discipline held**: RED 3/3 + 5 born-green guards → GREEN 1135/1135 → the mutation matrix exact (M1 3 · M2 2 · M3 1 · M4 3; the doc-pin DM1 1 · DM2 1); **all 7 corpus pins BYTE-IDENTICAL with zero drift**; the 16 family members exact (the Skia em-dash join preserved); the Typst family +1 clean newline each — the contacts split cured, the alnum streams identical HEAD↔final; the live UI verify passed (name-first, **contactsSplit TRUE in the stored cvText**, DB pristine).
+
+**Gates**: lint 0/0 · tsc ✓ · 1135/1135 unit · build ✓ · E2E 559/559 (a clean 11.1m run) · DB pristine. Mobile-nav pair **PARITY** (the user's named focus), no Tailwind v4 regression; the 82nd deploy non-visual (login-side-only); the neo-crm layer at s208 (consumed); the patch watch HOLD at ^16.4.2 with the November 3 security release scheduled (tomorrow). The r119 queue is armed in the worklog — the sub-13 em alnum-rich toward-splits (now armed with this round's census data), the ReportLab TOC dot-order divergence, and the security-release bump decision lead it.
