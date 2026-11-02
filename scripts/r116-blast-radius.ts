@@ -9,7 +9,7 @@ import { execSync } from "node:child_process";
 import crypto from "node:crypto";
 
 const head = await import("/home/z/my-project/eon-hr/src/lib/cv-text");
-const proto = await import("/tmp/r116-proto/cv-text");
+const proto = await import("./protos/cv-text-proto");
 const md5 = (s: string) => crypto.createHash("md5").update(s).digest("hex").slice(0, 8);
 const na = (s: string) => s.replace(/[^A-Za-z0-9]/g, "");
 const nl = (s: string) => (s.match(/\n/g) || []).length;

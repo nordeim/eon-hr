@@ -58,3 +58,6 @@ reference/
 
 # npm side-effect lockfile (the repo pins with bun.lock; local npm installs are ephemeral)
 package-lock.json
+
+# the vitest JSON reporter output (the mutation runner) — never commit
+.vitest/

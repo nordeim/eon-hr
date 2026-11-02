@@ -3760,3 +3760,328 @@ describe("cv-text — the sub-13 em alnum-rich threshold class (session 119)", (
     expect(text).not.toContain("\n\n");
   });
 });
+
+describe("cv-text — the width-blind elimination class (session 120)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // a simple font whose /Widths rides a SEPARATE array object — the Prawn
+  // embedded-font / arXiv Type1 form (every used code 500 units wide)
+  const W500 = Array.from({ length: 96 }, () => "500").join(" ");
+  const W200 = Array.from({ length: 96 }, () => "200").join(" ");
+  const indirectWidthsFont = { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /TestPlus /FirstChar 32 /LastChar 127 /Widths 9 0 R >>" };
+  const widthsArrayObj = { raw: `[${W500}]` };
+  // the same font with the widths INLINE — the specs that must be
+  // meaningful at HEAD (the kern/leader/icon/Tw forms) need WORKING
+  // width tracking before the round's cures
+  const inlineWidthsFont = { raw: `<< /Type /Font /Subtype /TrueType /BaseFont /TestPlus /FirstChar 32 /LastChar 127 /Widths [${W500}] >>` };
+
+  const block = (x: number, y: number, size: number, text: string) =>
+    `BT /f0 ${size} Tf ${x} ${y} Td (${text}) Tj ET`;
+
+  // ---- R120-A: the indirect /Widths form (the Prawn/arXiv class) ----
+  it("resolves a /Widths INDIRECT reference to a raw array object (R120-A)", async () => {
+    // "payrollcompliancetraining" (25 chars x 500/1000 x 10 = 125pt) at
+    // (50,700) tracks to 175; the right block at 230 -> (230-175)/10 =
+    // 5.5 em — the column class. At HEAD the indirect /Widths never
+    // parses (the font is width-blind, the rule cannot fire) and the pair
+    // reads JOINED
+    const content =
+      block(50, 700, 10, "payrollcompliancetraining") + "\n" +
+      block(230, 700, 10, "onboardingspecialist");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      indirectWidthsFont, // obj 2 — /Widths 9 0 R
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" }, // obj 5
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj, // obj 9 — the indirect width array
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payrollcompliancetraining\nonboardingspecialist"); // ← RED at HEAD: joined
+  });
+
+  it("keeps a real inline /Widths winning over a same-font indirect ref (the precedence guard — R120-A)", async () => {
+    // the font carries an INLINE array (every code 200 — narrow): the
+    // tracked end 50 + 25x2 = 100; the right block at 230 -> 13 em —
+    // splits on the INLINE table; the deferred parse must NOT override it
+    const content =
+      block(50, 700, 10, "payrollcompliancetraining") + "\n" +
+      block(230, 700, 10, "onboardingspecialist");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { raw: `<< /Type /Font /Subtype /TrueType /BaseFont /TestPlus /FirstChar 32 /LastChar 127 /Widths [${W200}] >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj, // obj 9 — the losing indirect table (all 500s)
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payrollcompliancetraining\nonboardingspecialist"); // the inline table drives — 13 em
+  });
+
+  // ---- R120-A: the indirect /W form, the array ObjStm-carried (dvipdfmx/fontspec) ----
+  it("resolves a CID descendant's /W INDIRECT reference from an ObjStm-carried array (R120-A)", async () => {
+    // the dvipdfmx real form: the Type0 parent + the CID descendant + the
+    // descendant's /W pointing at a SEPARATE object that rides an ObjStm.
+    // Codes <0001>=a <0002>=b …; every code 500 units. The left word (21
+    // CIDs x 500/1000 x 10 = 105pt) at (50,700) tracks to 155; the right
+    // block at 210 -> 5.5 em — the column class
+    const letters = "abcdefgh";
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${letters.length} beginbfchar\n${[...letters].map((c, i) => `<000${i + 1}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`).join("\n")}\nendbfchar\nendcmap\n`;
+    const wTriple = [...letters].map((_, i) => `000${i + 1} 000${i + 1} 500`).join(" ");
+    const hex = (n: number) => n.toString(16).padStart(4, "0");
+    const left = Array.from({ length: 21 }, (_, i) => hex((i % 2) + 1)).join("");
+    const right = Array.from({ length: 21 }, (_, i) => hex((i % 2) + 3)).join("");
+    const content =
+      `BT /f0 10 Tf 50 700 Td <${left}> Tj ET\n` +
+      `BT /f0 10 Tf 210 700 Td <${right}> Tj ET`;
+    // the ObjStm carrying the /W array object (obj 12)
+    const arrBody = `[${wTriple}]`;
+    const entries = [{ obj: 12, body: arrBody }];
+    const bodyLens = entries.map((e) => e.body.length + 1);
+    let headerLen = -1;
+    let objstmStream = "";
+    for (let guard = 0; guard < 8; guard++) {
+      const parts: string[] = [];
+      let acc = 0;
+      for (let i = 0; i < entries.length; i++) {
+        parts.push(`${entries[i].obj} ${acc} `);
+        acc += bodyLens[i];
+      }
+      const h = parts.join("").length;
+      if (h === headerLen) {
+        objstmStream = parts.join("") + entries.map((e) => e.body + "\n").join("");
+        break;
+      }
+      headerLen = h;
+    }
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" }, // obj 1
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /TestPlus /Encoding /Identity-H /ToUnicode 6 0 R /DescendantFonts [7 0 R] >>" }, // obj 2
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" }, // obj 5
+      { dict: "/Filter /FlateDecode", stream: cmap }, // obj 6 — the ToUnicode
+      { raw: "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /TestPlus /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 500 /W 12 0 R >>" }, // obj 7 — the descendant, /W INDIRECT
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      { dict: `/Type /ObjStm /N 1 /First ${headerLen} /Filter /FlateDecode`, stream: objstmStream }, // obj 12 — the ObjStm carrying the /W array (inner obj 12)
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ababababababababababa\ncdcdcdcdcdcdcdcdcdcdc"); // ← RED at HEAD: the descendant is width-blind, joined
+  });
+
+  // ---- R120-B: the general-name font bindings (the WeasyPrint class) ----
+  it("binds a pure-pair-dict font resource referenced two hops from the page (R120-B)", async () => {
+    // the WeasyPrint real form: the page references /Resources 8 0 R;
+    // obj 8 carries /Font 9 0 R (the link); obj 9 IS the pure pair dict
+    // << /BAWKYD 2 0 R >>; the content selects /BAWKYD (the subset-tag
+    // name — never /F-prefixed). The widths ride the Type0 descendant's
+    // inline /W: the left word (21 CIDs x 500/1000 x 10 = 105pt) at
+    // (50,700) tracks to 155; the right block at 210 -> 5.5 em
+    const letters = "abcdefgh";
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${letters.length} beginbfchar\n${[...letters].map((c, i) => `<000${i + 1}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`).join("\n")}\nendbfchar\nendcmap\n`;
+    const wTriple = [...letters].map((_, i) => `000${i + 1} 000${i + 1} 500`).join(" ");
+    const hex = (n: number) => n.toString(16).padStart(4, "0");
+    const left = Array.from({ length: 21 }, (_, i) => hex((i % 2) + 1)).join("");
+    const right = Array.from({ length: 21 }, (_, i) => hex((i % 2) + 3)).join("");
+    const content =
+      `BT /BAWKYD 10 Tf 50 700 Td <${left}> Tj ET\n` +
+      `BT /BAWKYD 10 Tf 210 700 Td <${right}> Tj ET`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" }, // obj 1
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /BAWKYD+DejaVu /Encoding /Identity-H /ToUnicode 6 0 R /DescendantFonts [7 0 R] >>" }, // obj 2
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources 8 0 R >>" }, // obj 5 — the referenced resources
+      { dict: "/Filter /FlateDecode", stream: cmap }, // obj 6
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /BAWKYD+DejaVu /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 500 /W [${wTriple}] >>` }, // obj 7 — inline /W
+      { raw: "<< /Font 9 0 R >>" }, // obj 8 — the resources: the /Font link
+      { raw: "<< /BAWKYD 2 0 R >>" }, // obj 9 — the PURE PAIR DICT
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ababababababababababa\ncdcdcdcdcdcdcdcdcdcdc"); // ← RED at HEAD: BAWKYD never binds, blind, joined
+  });
+
+  // ---- R120-C: the pageMap-less fallback ----
+  it("resolves widths through the candidate chain when the part has no page map (R120-C)", async () => {
+    // the orphan-stream class: the page carries NO /Resources at all; the
+    // /f0 pair appears only in an unreferenced dict (the candidate chain's
+    // feed). The width post-pass falls back to the first width-carrying
+    // candidate
+    const content =
+      block(50, 700, 10, "payrollcompliancetraining") + "\n" +
+      block(230, 700, 10, "onboardingspecialist");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      indirectWidthsFont, // obj 2 — /Widths 9 0 R
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R >>" }, // obj 5 — NO /Resources
+      { raw: "<< >>" }, { raw: "<< >>" },
+      { raw: "<< /Font << /f0 2 0 R >> >>" }, // obj 8 — the unreferenced pair dict (the candidate feed)
+      widthsArrayObj, // obj 9
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payrollcompliancetraining\nonboardingspecialist"); // ← RED at HEAD: widthFor requires the page map
+  });
+
+  it("keeps a page map that lacks the font blind (the misbind guard — R120-C)", async () => {
+    // the page binds f0 to a font WITHOUT widths (the misbind signal);
+    // the candidate chain knows a width-carrying /f0 elsewhere — the
+    // fallback must NOT fire (a page map exists, the font is missing from
+    // it: the fontspec collision class)
+    const content =
+      block(50, 700, 10, "payrollcompliancetraining") + "\n" +
+      block(230, 700, 10, "onboardingspecialist");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /TrueType /BaseFont /NoWidths >>" }, // obj 2 — the page's own f0: NO widths
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" }, // obj 5
+      { raw: "<< >>" }, { raw: "<< >>" },
+      { raw: "<< /Font << /f0 2 0 R >> >>" }, // obj 8 — the candidate chain's f0 → the SAME widthless font
+      widthsArrayObj, // obj 9 — a width array no font references
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payrollcompliancetraining onboardingspecialist"); // blind — the pair reads joined (never a misfire)
+    expect(text).not.toContain("payrollcompliancetraining\nonboardingspecialist");
+  });
+
+  // ---- R120-D: the TJ kern-sign ----
+  it("advances a TJ word-gap kern to the RIGHT (ISO 32000-1 9.4.3 — R120-D)", async () => {
+    // [(payrollcompliance) -400 (onboardingspecialist)] TJ in one block:
+    // the -400 kern moves the pen +4pt (the spec's NEGATED displacement).
+    // "payrollcompliance" (17x500/1000x10 = 85pt) ends 135; the kern +4;
+    // "onboardingspecialist" (20x5 = 100pt) ends 239. The next block at
+    // 259 -> (259-239)/10 = 2.0 em — the TRUE intra-line continuation,
+    // JOINED. The sign-inverted tracker reads the end at 231 -> 2.8 em ->
+    // a PHANTOM column split
+    const content =
+      `BT /f0 10 Tf 50 700 Td [(payrollcompliance) -400 (onboardingspecialist)] TJ ET\n` +
+      block(259, 700, 10, "trainingspecplatform");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      inlineWidthsFont, // obj 2 — /Widths 9 0 R (all 500s)
+      { dict: "/Filter /FlateDecode", stream: content }, // obj 3
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" }, // obj 4
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" }, // obj 5
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj, // obj 9
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("onboardingspecialist trainingspecplatform"); // ← RED at HEAD: the phantom split fires
+    expect(text).not.toContain("onboardingspecialist\ntrainingspecplatform");
+  });
+
+  // ---- R120-E: the leader-run guard ----
+  it("keeps a TOC dot-leader anchor on the line (the per-dot repositioned form — R120-E)", async () => {
+    // the IRS form: the entry "payrollcompliancetrainingonboardingspecialist"
+    // (46 x 500/1000 x 10 = 230pt at 50, ends 280) + individually
+    // repositioned dots at 295, 306, 317 (1.1 em steps — the leader run).
+    // The first dot sits 1.5 em from the entry — the R118-A anchor band —
+    // but a LEADER bridges the row: pdftotext reads the whole row same-line
+    const content =
+      block(50, 700, 10, "payrollcompliancetrainingonboardingspecialist") + "\n" +
+      block(295, 700, 10, ".") + "\n" +
+      block(306, 700, 10, ".") + "\n" +
+      block(317, 700, 10, ".") + "\n" +
+      block(500, 700, 10, "36");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      inlineWidthsFont,
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj,
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("payrollcompliancetrainingonboardingspecialist . . ."); // ← RED at HEAD: the anchor rule splits before the first dot
+    expect(text).not.toContain("specialist\n.");
+  });
+
+  it("keeps the icon anchor firing when the anchor leads DIFFERENT content (the icon class — R120-E guard)", async () => {
+    // the control: an anchor at the same 3 em band followed by DIFFERENT
+    // content (the Typst contacts form) — the split still fires
+    const content =
+      block(50, 700, 10, "phonenumberpayrollcompliance") + "\n" +
+      block(220, 700, 10, "\uF0E0") + "\n" +
+      block(225, 700, 10, "mailaddressonboarding");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      inlineWidthsFont,
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj,
+    ]);
+    const text = await extractTextFromFile(file);
+    // the anchor glyph is the literal's 0xE0 byte (cp1252 à) — a zero-alnum
+    // content anchor; the SPLIT lands before it and it joins the following
+    // content at its sub-threshold gap (the R118-A measured form)
+    expect(text).toContain("phonenumberpayrollcompliance\nàmailaddressonboarding");
+    expect(text).not.toContain("phonenumberpayrollcompliance à");
+  });
+
+  // ---- R120-F: the Tw word-spacing advance ----
+  it("adds the Tw word spacing to the space glyphs' advance (R120-F)", async () => {
+    // the Prawn form: 0.4 Tw + real 0x20 bytes inside the atom.
+    // "payroll compliance onboarding specialist platform" (45 alnum chars
+    // x 500/1000 x 10 = 225pt + 4 spaces x 0.4 x 10 = 16pt) at (50,700)
+    // tracks to 311; the right block at 325 -> 1.4 em — the TRUE
+    // intra-line continuation, JOINED. The Tw-blind tracker reads the end
+    // at 295 -> 3.0 em -> the phantom split fires
+    const content =
+      `BT /f0 10 Tf 0.4 Tw 50 700 Td (payroll compliance onboarding specialist platform) Tj ET\n` +
+      block(325, 700, 10, "trainingspec");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      inlineWidthsFont,
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+      { raw: "<< >>" }, { raw: "<< >>" }, { raw: "<< >>" },
+      widthsArrayObj,
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("platform trainingspec"); // ← RED at HEAD: the Tw-blind phantom split fires
+    expect(text).not.toContain("platform\ntrainingspec");
+  });
+});

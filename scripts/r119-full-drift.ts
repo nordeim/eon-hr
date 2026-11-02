@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import crypto from "node:crypto";
-const mod = await import("/tmp/r119-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 const modOld = await import("/home/z/my-project/eon-hr/src/lib/cv-text");
 const members: [string, string][] = [
   ["/tmp/r106-corpus/arxiv-2404.16710.pdf", "arXiv"],

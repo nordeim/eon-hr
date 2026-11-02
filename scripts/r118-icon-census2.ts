@@ -10,7 +10,7 @@
 import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 
-const mod = await import("/tmp/r118-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 type P = { text: string; px?: number; py?: number; ps?: number; bx?: number; sep?: string; genuine?: boolean; font?: string; condGap?: boolean; condKern?: boolean };
 const piecesOf = async (path: string): Promise<P[]> => {
   (globalThis as unknown as { __r118pieces: P[] }).__r118pieces = [];

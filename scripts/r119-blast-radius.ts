@@ -7,7 +7,7 @@ import { execSync } from "node:child_process";
 
 // NOTE: this census rides the r119 PROTO (the real source carries no piece-dump
 // hook); the proto mirrors the shipped R119-A/R119-B source exactly.
-const mod = await import("/tmp/r119-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 type S = { px?: number; py?: number; ps?: number; bx?: number; condGap?: boolean; condKern?: boolean };
 type P = { p?: S; text: string; genuine?: boolean; trail?: boolean };
 const piecesOf = async (path: string): Promise<P[]> => {

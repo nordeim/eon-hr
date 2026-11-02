@@ -2,7 +2,7 @@
 // (the icon-bridged phone|email split). Usage: bun /tmp/r118-hunt-measure.ts
 import { readFileSync } from "node:fs";
 
-const mod = await import("/tmp/r118-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 const raw = readFileSync("/tmp/typst-cv/resume.pdf");
 const out = await mod.extractTextFromFile(new File([new Uint8Array(raw)], "m.pdf"));
 const pieces = (globalThis as unknown as { __r118pieces: Array<{ p: Record<string, number | boolean | undefined>; text: string; genuine?: boolean; sep?: string }> }).__r118pieces;

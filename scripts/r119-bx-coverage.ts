@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-const mod = await import("/tmp/r119-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 type S = { px?: number; py?: number; ps?: number; bx?: number };
 type P = { p?: S; text: string };
 const members: [string, string][] = [

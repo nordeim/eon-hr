@@ -59,7 +59,7 @@ const pdf = await pdfWithLatin1Streams([
 ]);
 writeFileSync("/tmp/r117-tick.pdf", pdf);
 
-const mod = await import("/tmp/r117-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 const dbg = mod.__r117DebugPieces as { text: string; px?: number; py?: number; ps?: number; sep: string; bx?: number }[];
 const text = await mod.extractTextFromFile(new File([readFileSync("/tmp/r117-tick.pdf")], "m.pdf"));
 console.log("extraction:", JSON.stringify(text));

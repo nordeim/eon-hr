@@ -6,7 +6,7 @@
 import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 
-const mod = await import("/tmp/r117-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 const dbg = mod.__r117DebugPieces as { text: string; px?: number; py?: number; ps?: number }[];
 dbg.length = 0;
 const raw = readFileSync("/tmp/r106-corpus/arxiv-2404.16710.pdf");

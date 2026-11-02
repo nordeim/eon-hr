@@ -6,7 +6,7 @@
 // Usage: bun scripts/r117-2d-truth.ts
 import { readFileSync } from "node:fs";
 
-const mod = await import("/tmp/r117-proto/cv-text");
+const mod = await import("./protos/cv-text-proto");
 const dbg = mod.__r117DebugPieces as { text: string; px?: number; py?: number; ps?: number }[];
 
 async function dump(path: string) {
