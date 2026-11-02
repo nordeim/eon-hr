@@ -1,0 +1,38 @@
+# Session 118 — Execution Transcript
+
+The round's working log, as it happened (the progress narration for the next round's context).
+
+1. Workspace refreshed (`git pull` fast-forward to `b06f475` — the session_273 transcript log). Task plan set; core docs read (CLAUDE whole-file, README, the r117 plan + session_272/273 + the worklog tail).
+2. Baseline gates at HEAD confirmed: lint 0/0 · tsc ✓ · **1125/1125 unit** — exactly the documented session-117 close state. The corpus verified at HEAD (all 7 pins + the 4 Typst members + the 16 family members exact).
+3. The opening read — the 82nd-deploy watch: the login JS moved (`l0vUUttr`→`OLDXOew4`), the CSS held (`CapATpwD`), the render **BYTE-IDENTICAL** to the standing 69aa baseline → login-side-only, non-visual (the churn pattern's twelfth repeat). The app-side census: QUIET at the r42 baseline.
+4. The mobile-nav pair (the user's named focus): **PARITY** — identical geometry both sides; the REF stay-open regression persists (thirteenth deploy), the clone keeps the auto-close superset; no Tailwind v4 regression.
+5. The audit legs: R117-A re-verified structurally at HEAD; **neo-crm shipped s208** (the doc-claim totality census — a NEW layer beyond the s207 the last round saw); the advisory census unchanged; the patch watch — 16.4.3 still latest, the November 3 security release not yet landed (the ^16.4.2 HOLD stands).
+6. THE HUNT begins: the contacts row anatomy decoded from the raw stream — the same-baseline block chain `[phone-icon][space][phone][space][space][mail-icon][space][email]`, the icons decoding to PUA codepoints (U+F098/U+F0E0) in BOTH readers.
+7. The controlled-variant census built (the modern-cv template copied locally, the separator/icon row patched per variant, typst 0.15.1): **the queue's "not gap-driven" hypothesis REFUTED** — v2 (no icons) still splits, v3 (no separator) joins, v4 (text glyphs) splits identically; the w1–w5 separator bisect puts the boundary at 0.944–1.056 em; the a1–a4 bridge words don't rescue the join; the b1–b2 column-aligned tables don't reproduce the Prawn joins.
+8. The poppler source fetch failed (GitLab anti-bot) — the empirical route taken instead (the house discipline: measured, not theorized).
+9. THE DEFINITIVE SEPARATION-BAND CENSUS on `pdftotext -bbox-layout` (poppler's own analysis, zero matching): the Typst family joins ≤ 0.80 em / splits ≥ 1.06 em; corpus-wide the pure threshold is dead (arXiv 2.05 em joins; sub-em splits elsewhere). **The r117 "11.78 em Prawn chart-tick join" exposed as a measurement artifact** — no joined numeric pair exists in the Prawn output. The "ReportLab cover 33.6-em join" re-verified as a cross-page adjacency.
+10. THE ICON-ANCHORED WALK-BACK CENSUS (the v2 form, after the v1 adjacent-block form read the gap as 0): the fire surface — the 4 Typst contacts pairs (SPLIT, verified) + the Skia em-dash at 0.89 em (JOIN, verified) + ZERO candidates on every other member. **The threshold sits at 0.95 em.**
+11. The remediation plan written (docs/remediation-plan-session118.md) and validated against the codebase (the R117-A insertion point, the test fixture patterns).
+12. THE TDD ROUND: the session-118 describe appended (8 specs) — RED 3/3 (the split-asserting trio) + 5 born-green guards. The R118-A implementation (the icon pre-pass + the emission extensions). **GREEN 8/8 → 1133/1133 full.** The mutation matrix exact: M1 3 · M2 2 · M3 1 · M4 3 (the M2 signature measured — BOTH sub-threshold guards fire; the matrix script's expectations corrected to the measured forms).
+13. THE SECOND MATERIAL: the doc-claim totality census (the s208 method adapted) — the path axis clean, the command axis clean, **the count axis STALE: 54/47/49/46 vs the live 57/48/57/61**. The D-118b pin written (RED on the stale counts — the exact designed failure), the D-118a cures applied (six live-section flips), the command-arm regex fixed (`[a-z0-9:]+` — "test:e2e" carries a digit), **GREEN 5/5 → 1135/1135**. The doc-pin mutations exact (DM1 1 · DM2 1 — the first run's restore-path bug caught and cured: restore to the EXACT filename).
+14. THE REAL-FILE GROUND TRUTH: all 7 corpus pins byte-identical (zero drift); the 16 family members exact (the Skia em-dash preserved); the Typst family +1 clean newline each; the alnum streams identical HEAD↔final (the resume cert-order drift verified PRE-EXISTING); the " \n" counts unchanged.
+15. The build gate: two type errors caught and fixed (a census-script typo + the pkg type in the doc-family test). Build ✓; :3200 rebooted on the new build.
+16. THE LIVE UI VERIFY: the first scripted runs hit two traps — the probe-path mismatch (the sed replaced the upload path) and the in-memory login rate limiter (10/15-min — five runs tripped it). The manual debug run proved the pipeline (the candidate stored with **contactsSplit TRUE**); the server restart cleared the limiter; the eval-escape mangling cured with fromCharCode. **The final scripted run: name-first, zero U+FFFD, aiScore 23, contactsSplit TRUE; the sweep by the REAL ids; the DB pristine (1/1/0/3/2/0).**
+17. The screenshots: the desktop set (login, dashboard, employees, recruitment, loans + the CV tab with a real tab click) + the earlier probe/nav-pair captures — **12 r118 PNGs, all verified non-blank**.
+18. The E2E gate launched detached; the docs layer worked in parallel (the count lockstep 1135 + 559 = 1694 across CLAUDE/README/AGENTS; the AGENTS session-118 layer; the SKILL v4.5.0 §130; the narrative session_274; the plan's ToDo updated; the worklog round-117 entry with the r119 queue armed).
+19. **E2E: 559/559 — a clean 11.1m run. ALL GATES GREEN.**
+20. The main round commit `c421ac5` + the SSH-wrapper push (the paramiko shim, the dry-run first, the remote verified `main @ c421ac5 == local HEAD`). The close-summary (session_275) and this transcript (session_276) follow as the close-log commits.
+
+## Round summary
+
+**Session 118 / Parity Round 117 — THE ICON-ANCHORED SUB-THRESHOLD COLUMN ROUND — pushed to `main`** (`c421ac5` + the close logs, remote refs verified, keys shredded, tree clean).
+
+**The hunt**: the queue's icon hypothesis refuted by the controlled-variant census (the split is gap-driven; the poppler boundary at ~1 em); the r117 calibration's load-bearing "join" exposed as a nearest-word artifact (the bbox-layout census); the icon-anchored fire surface measured — the 4 Typst contacts pairs + the Skia em-dash refutation, zero candidates elsewhere.
+
+**The cure (R118-A)**: the zero-alnum anchor at a same-baseline block boundary, the walk-back gap ≥ 0.95 em, the clean "\n" emission — pdftotext's exact `<icon> email` line form, under the R117-A guards verbatim.
+
+**The second material**: the neo-crm s208 doc-claim totality census transferred — the 85+-session-stale count fossils (54/47/49/46) cured and pinned (the structural live-census + the command arm, mutation-proven).
+
+**The verification**: RED 3/3 → GREEN **1135/1135** → the mutation matrices exact; **all 7 corpus pins byte-identical with zero drift**; the 16 family members exact; the Typst family +1 clean newline each; the live UI verify passed (contactsSplit TRUE in the stored cvText, DB pristine); **E2E 559/559** (11.1m); the mobile-nav pair **PARITY** (no Tailwind v4 regression); the 82nd deploy non-visual.
+
+**Next steps when you're ready**: the r119 queue is armed in the worklog — the sub-13 em alnum-rich toward-splits (the "Jun 2018" 5.1 em pair + the ReportLab 8.7–9.4 em table rows, armed with this round's census data), the ReportLab TOC dot-order divergence, and the November 3 security-release bump decision lead it.
