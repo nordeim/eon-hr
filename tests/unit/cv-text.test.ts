@@ -3281,3 +3281,248 @@ describe("cv-text — the same-line x-gap column class (session 117)", () => {
     expect(text).not.toContain("SeniorHRManager TechCorp");
   });
 });
+
+describe("cv-text — the icon-anchored sub-threshold column class (session 118)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // The phrase carries the PUA icon glyphs (U+F098 the phone icon, U+F0E0
+  // the envelope — the measured ToUnicode targets on the real resume) and
+  // the em-dash (U+2014 — the Skia guard's zero-alnum join); every char
+  // maps to its own 2-byte code through the ToUnicode (the R111-A literal
+  // form) and the descendant's /W carries each code's width in the TYPST
+  // TRIPLE FORM (the space 250, every other glyph 500 — the icons ride the
+  // same 500 as the letters; the geometry below absorbs the difference).
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const ICON_MAIL = "\uF0E0";
+  const ICON_PHONE = "\uF098";
+  const EMDASH = "\u2014";
+  const PHRASE = `${PAD} ${ICON_PHONE} ${ICON_MAIL} ${EMDASH} phonenumber mailaddress emword dashword nextword trail`;
+  const codeFor = (i: number) => i + 1;
+  const spaceCodes = new Set([...PHRASE].map((c, i) => (c === " " ? codeFor(i) : -1)).filter((x) => x >= 0));
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const wTriple = () =>
+    [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} ${spaceCodes.has(codeFor(i)) ? 250 : 500}`).join(" ");
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+
+  const fontFixture = (content: string, descendantExtra = `/DW 500 /W [${wTriple()}]`) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /AAAAAA+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantExtra} >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // Session 118 (R118-A): THE ICON-ANCHORED SUB-THRESHOLD COLUMN SPLIT. The
+  // Typst contacts row — measured end-to-end this round (the controlled-
+  // variant census refuting the queue's icon hypothesis: the split is
+  // GAP-driven; the icons are neither required (the no-icons variant
+  // splits) nor sufficient (the no-separator variant joins)) — reads in
+  // pdftotext as "<phone-icon> +1 (555) 010-9911" / blank /
+  // "<mail-icon> john.smith@example.com" while the standing extraction
+  // joins all six blocks onto one line. The poppler word-gap boundary sits
+  // at ~1 em (the separator bisect: 0.944 em joins, 1.056 em splits); the
+  // icon-anchored walk-back census measured the corpus fire surface — the
+  // Typst contacts pairs SPLIT at 1.06/2.43 em, the Skia em-dash JOINS at
+  // 0.89 em, every other member ZERO candidates. The rule: a zero-alnum
+  // content block (an icon/symbol/punctuation anchor — never a space run)
+  // at a same-baseline block boundary whose walk-back content block sits
+  // >= 0.95 em behind upgrades the separator to a clean newline; the icon
+  // then joins the FOLLOWING content at its sub-threshold gap, exactly as
+  // pdftotext reads the line.
+  it("breaks the line at the icon-anchored contacts boundary (the Typst phone|mail form — R118-A)", async () => {
+    // the measured resume geometry: the 9pt phone at 46.75 (11 codes x
+    // 500/1000 x 9 = 49.5pt wide -> true end 96.25), the two space-run
+    // blocks (the 5pt separator box between them), the mail icon at 105.75
+    // — the walk-back gap (105.75 - 96.25)/9 = 1.06 em >= 0.95 -> the split
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(40, 700, 9, ICON_PHONE) + "\n" +
+      typstBlock(44.5, 700, 9, " ") + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(103.5, 700, 9, " ") + "\n" +
+      typstBlock(105.75, 700, 9, ICON_MAIL) + "\n" +
+      typstBlock(110.25, 700, 9, " ") + "\n" +
+      typstBlock(112.5, 700, 9, "mailaddress");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`${ICON_PHONE} phonenumber\n${ICON_MAIL} mailaddress`); // RED before the fix: one joined line
+    expect(text).not.toContain(`phonenumber ${ICON_MAIL}`);
+  });
+
+  it("breaks the line at the wider icon-anchored gap (the resume2 2.43 em form — R118-A)", async () => {
+    // the resume2/coverletter2 class: the same contacts anatomy at a
+    // 2.43 em walk-back gap (the wider separator) — the split fires there
+    // too (pdftotext reads the pair on separate lines on all four members)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(40, 700, 9, ICON_PHONE) + "\n" +
+      typstBlock(44.5, 700, 9, " ") + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(101, 700, 9, " ") + "\n" +
+      typstBlock(118.12, 700, 9, ICON_MAIL) + "\n" +
+      typstBlock(122.62, 700, 9, " ") + "\n" +
+      typstBlock(124.87, 700, 9, "mailaddress");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`${ICON_PHONE} phonenumber\n${ICON_MAIL} mailaddress`); // RED before the fix
+    expect(text).not.toContain(`phonenumber ${ICON_MAIL}`);
+  });
+
+  // the born-green guards — the split must NEVER fire on these forms
+
+  it("keeps the space before a sub-threshold symbol block (the Skia em-dash guard — R118-A)", async () => {
+    // the measured Skia CV join: the em-dash block 0.89 em past the content
+    // end — pdftotext keeps "Senior HR Manager — TechCorp Inc." joined; the
+    // threshold sits above it (0.95) and below the Typst splits (1.06)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(46.75, 700, 9, "emword") + "\n" +
+      typstBlock(73.75, 700, 9, " ") + "\n" +
+      typstBlock(81.76, 700, 9, EMDASH) + "\n" +
+      typstBlock(86.26, 700, 9, " ") + "\n" +
+      typstBlock(88.51, 700, 9, "dashword");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`emword ${EMDASH} dashword`); // born-green: 0.89 em < 0.95 — no split
+    expect(text).not.toContain(`emword\n${EMDASH}`);
+  });
+
+  it("keeps the space at the no-separator icon form (the 0.5 em guard — R118-A)", async () => {
+    // the controlled-variant v3 form: the icons WITHOUT the separator box —
+    // the walk-back gap 0.5 em (the two space runs only) joins in pdftotext
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(40, 700, 9, ICON_PHONE) + "\n" +
+      typstBlock(44.5, 700, 9, " ") + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(98.5, 700, 9, " ") + "\n" +
+      typstBlock(100.75, 700, 9, ICON_MAIL) + "\n" +
+      typstBlock(105.25, 700, 9, " ") + "\n" +
+      typstBlock(107.5, 700, 9, "mailaddress");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`phonenumber ${ICON_MAIL} mailaddress`); // born-green: 0.5 em < 0.95 — no split
+    expect(text).not.toContain(`phonenumber\n${ICON_MAIL}`);
+  });
+
+  it("keeps the space when the fonts widths are unresolvable (the blind guard — R118-A)", async () => {
+    // the R117-A blind discipline verbatim: without a parseable /W the
+    // walk-back end is undefined and the rule never fires (a missing table
+    // never misfires, it only cures less)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(40, 700, 9, ICON_PHONE) + "\n" +
+      typstBlock(44.5, 700, 9, " ") + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(103.5, 700, 9, " ") + "\n" +
+      typstBlock(105.75, 700, 9, ICON_MAIL) + "\n" +
+      typstBlock(110.25, 700, 9, " ") + "\n" +
+      typstBlock(112.5, 700, 9, "mailaddress");
+    const file = await fontFixture(content, "");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`phonenumber ${ICON_MAIL} mailaddress`); // born-green: blind — no split
+  });
+
+  it("keeps the space before an alnum block at a sub-13 em gap (the anchor guard — R118-A)", async () => {
+    // the "Jun 2018" class: an ALNUM-RICH right block at 2 em — the anchor
+    // is the zero-alnum icon class only; the alnum-rich sub-13 em toward-
+    // splits stay joined (the r119 queue keeps them with this round's
+    // census data)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(103.5, 700, 9, " ") + "\n" +
+      typstBlock(114.25, 700, 9, "nextword");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("phonenumber nextword"); // born-green: the anchor guard — no split
+    expect(text).not.toContain("phonenumber\nnextword");
+  });
+
+  it("reads a single newline at a cross-line icon pair (the R116-A interplay — R118-A)", async () => {
+    // the icon BOTH a line step below and a gap right: the R116-A y-delta
+    // rule breaks the line; the R118-A never doubles it (the adjacent-piece
+    // baseline check rejects the cross-line walk-back)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(118.12, 660, 9, ICON_MAIL) + "\n" +
+      typstBlock(122.62, 660, 9, " ") + "\n" +
+      typstBlock(124.87, 660, 9, "mailaddress");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`phonenumber \n${ICON_MAIL}`); // the standing R116-A form — ONE newline
+    expect(text).not.toContain(`\n\n${ICON_MAIL}`);
+    expect(text).not.toContain(`phonenumber ${ICON_MAIL}`);
+  });
+
+  it("reads a single newline at an icon 13+ em away (the R117-A interplay — R118-A)", async () => {
+    // an icon at a >= 13 em walk-back gap: the R117-A's alnum guard rejects
+    // (the icon carries none) and the R118-A form fires — ONE newline, the
+    // clean emission, never doubled
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(46.75, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(103.5, 700, 9, " ") + "\n" +
+      typstBlock(218.25, 700, 9, ICON_MAIL) + "\n" +
+      typstBlock(222.75, 700, 9, " ") + "\n" +
+      typstBlock(225, 700, 9, "mailaddress");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`phonenumber\n${ICON_MAIL} mailaddress`); // the icon split — single, clean
+    expect(text).not.toContain("\n\n");
+  });
+});

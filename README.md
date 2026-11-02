@@ -76,7 +76,7 @@ Eon HR is a full-stack human-resources workspace that replicates and extends a r
 │   │   ├── 📄 page.tsx             # Auth-aware root redirect
 │   │   ├── 📂 login/               # Social + email sign-in
 │   │   ├── 📂 (app)/               # 61 auth-guarded module routes (the full REF registry)
-│   │   └── 📂 api/                 # 54 route handlers (ActionResult envelope)
+│   │   └── 📂 api/                 # 57 route handlers (ActionResult envelope)
 │   ├── 📂 components/
 │   │   ├── 📂 ui/                  # 15 shadcn-style primitives
 │   │   ├── 📂 layout/              # Sidebar, mobile drawer, bottom tabs
@@ -142,7 +142,7 @@ These are the only two variables the codebase reads — see `.env.example`.
 ## Testing
 
 ```bash
-bun run test          # Vitest unit layer (1125 specs: db-path, auth, utils, tokens, cv-text, env-face, doc-family, session-5..117 recipes)
+bun run test          # Vitest unit layer (1135 specs: db-path, auth, utils, tokens, cv-text, env-face, doc-family, session-5..118 recipes)
 bun run test:e2e      # Playwright E2E (559 specs) — boots the production standalone server
 bun run lint          # ESLint (Next 16 + TypeScript rules)
 bun run typecheck     # tsc --noEmit

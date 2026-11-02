@@ -17,15 +17,26 @@
 //       (the s206 scoping rule) — only the LIVE sections are pinned.
 //   it-3 THE REVERSE ARM — the docs never claim a dependency the codebase
 //       does not carry (the phantom-version check).
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import path from "node:path";
 
 const repo = path.resolve(import.meta.dirname, "../..");
 const read = (p: string) => readFileSync(path.join(repo, p), "utf8");
+const join = (...p: string[]) => path.join(...p);
+const walk = (dir: string): string[] => {
+  const out: string[] = [];
+  for (const e of readdirSync(dir)) {
+    const p = path.join(dir, e);
+    if (statSync(p).isDirectory()) out.push(...walk(p));
+    else out.push(p);
+  }
+  return out;
+};
 const pkg = JSON.parse(read("package.json")) as {
   devDependencies: Record<string, string>;
   dependencies: Record<string, string>;
+  scripts: Record<string, string>;
 };
 
 describe("doc-family — the stack + count doc claims pin (session 115, the s206/s207 transfer)", () => {
@@ -106,4 +117,70 @@ describe("doc-family — the stack + count doc claims pin (session 115, the s206
       expect(major, `the CLAUDE ${dep} major must match package.json`).toBe(liveMajor);
     }
   });
+
+  // Session 118 (D-118b — the neo-crm s208 DOC-CLAIM TOTALITY CENSUS
+  // transferred): the STRUCTURAL LIVE-CENSUS. The genus: the stack and
+  // count pins above guard the version/test axes, but NOTHING guarded the
+  // structural counts — the route/handler/model claims rode 85+ sessions
+  // stale (the initial commit's "46 routes, 49 API handlers, 45 models"
+  // fossils: the live docs claimed 54 route handlers / 47 Prisma models /
+  // 49 endpoints against a tree carrying 57 / 48 / 57 at this round's
+  // census). The pin reads the counts LIVE from the tree (the app-route
+  // walk, the API route-file walk, the schema model walk) and asserts the
+  // LIVE doc faces carry exactly them — either face drifting goes RED (a
+  // route added without the doc flip, or a doc flipped without the code).
+  it("keeps the structural count claims live against the tree (the route/handler/model census — D-118b, the s208 transfer)", () => {
+    const appRoutes = readdirSync(join(repo, "src/app/(app)"))
+      .filter((d) => statSync(join(repo, "src/app/(app)", d)).isDirectory())
+      .filter((d) => existsSync(join(repo, "src/app/(app)", d, "page.tsx"))).length;
+    const apiFiles = walk(join(repo, "src/app/api")).filter((p) => p.endsWith("/route.ts")).length;
+    const models = (read("prisma/schema.prisma").match(/^model /gm) ?? []).length;
+
+    // the census sanity: the walks must see the real tree (never a vacuous
+    // pass — a broken walker reading 0 would "match" a zeroed doc claim)
+    expect(appRoutes).toBeGreaterThanOrEqual(60);
+    expect(apiFiles).toBeGreaterThanOrEqual(50);
+    expect(models).toBeGreaterThanOrEqual(45);
+
+    const claude = read("CLAUDE.md");
+    const readme = read("README.md");
+    const pad = read("Project_Architecture_Document.md");
+
+    // CLAUDE: the identity line ("all N endpoints"), the architecture line
+    // ("N route handlers"), the database line ("N Prisma models")
+    expect(claude, `CLAUDE must claim all ${apiFiles} endpoints (live: ${apiFiles})`)
+      .toContain(`all ${apiFiles} endpoints`);
+    expect(claude, `CLAUDE must claim ${apiFiles} route handlers (live: ${apiFiles})`)
+      .toContain(`${apiFiles} route handlers`);
+    expect(claude, `CLAUDE must claim ${models} Prisma models (live: ${models})`)
+      .toContain(`${models} Prisma models`);
+
+    // README: the structure tree's api comment ("# N route handlers")
+    expect(readme, `README's structure tree must carry ${apiFiles} route handlers`)
+      .toContain(`# ${apiFiles} route handlers`);
+
+    // PAD §3 (the live stack table): "N routes and N endpoints"
+    expect(pad, `PAD's stack table must carry ${appRoutes} routes and ${apiFiles} endpoints`)
+      .toContain(`${appRoutes} routes and ${apiFiles} endpoints`);
+
+    // the stale-form bans: the fossil claims stay dead on every live face
+    expect(claude).not.toContain("54 route handlers");
+    expect(claude).not.toContain("47 Prisma models");
+    expect(claude).not.toContain("49 endpoints");
+    expect(readme).not.toContain("54 route handlers");
+    expect(pad).not.toContain("One envelope for 49 endpoints");
+  });
+
+  it("resolves every bun-run command claim in the live docs (the command arm — D-118b)", () => {
+    const scripts = pkg.scripts as Record<string, string>;
+    const claimed = new Set<string>();
+    for (const doc of [read("README.md"), read("CLAUDE.md")]) {
+      for (const m of doc.matchAll(/bun run ([a-z0-9:]+)/g)) claimed.add(m[1]);
+    }
+    expect(claimed.size).toBeGreaterThanOrEqual(8); // the walk must see the real claims
+    for (const cmd of claimed) {
+      expect(scripts[cmd], `the docs' bun run ${cmd} must resolve in package.json scripts`).toBeDefined();
+    }
+  });
 });
+

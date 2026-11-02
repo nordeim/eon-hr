@@ -82,7 +82,7 @@ This PAD is the single source of truth for how Eon HR is built, why each decisio
 |---|---|---|---|
 | Framework | Next.js (App Router) | 16.x | Route handlers + server components + standalone output for container-free deploys; dev-origin protection configurable |
 | UI runtime | React | 19.x | Required by Next 16; server components + islands model |
-| Language | TypeScript | 5.x strict | Compile-time contract across 46 routes and 49 endpoints |
+| Language | TypeScript | 5.x strict | Compile-time contract across 61 routes and 57 endpoints |
 | Styling | Tailwind CSS | 4.x | CSS-first `@theme` (no config file) — but engine-level v3→v4 differences require the trap pins in §5.1 |
 | Primitives | Radix UI + CVA + tailwind-merge | current | Accessible behaviors (dialog, select, tabs) without hand-rolled focus management |
 | Charts | Recharts | 2.x | Composable SVG charts; client islands with serializable props |
@@ -107,7 +107,7 @@ This PAD is the single source of truth for how Eon HR is built, why each decisio
 
 - **Context:** Mutations come from 30+ interactive client pages; the mutation seam must be uniform, testable, and role-gateable.
 - **Decision:** Every mutation is a route handler under `src/app/api/*` returning `ApiResult<T> = { ok: true, data } | { ok: false, error: { code, message, fieldErrors? } }` via `src/lib/api.ts` helpers.
-- **Rationale:** One envelope for 49 endpoints; `curl`-able and Playwright-`request`-able without a DOM; explicit `requireRole()` gates outside try/catch (redirect-throwing guards must not be swallowed); field errors flow straight into form UX.
+- **Rationale:** One envelope for 57 endpoints; `curl`-able and Playwright-`request`-able without a DOM; explicit `requireRole()` gates outside try/catch (redirect-throwing guards must not be swallowed); field errors flow straight into form UX.
 - **Consequences:** Positive — a uniform contract the E2E auth setup exercises directly; negative — one fetch per mutation rather than collocation, and the client owns optimistic UI.
 - **Alternatives Rejected:** Server Actions (collocation is nice but the boundary is harder to test uniformly and error semantics are framework-shaped); tRPC (adds a client runtime for little gain in an App Router codebase).
 

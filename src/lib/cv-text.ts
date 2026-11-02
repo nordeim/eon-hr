@@ -1976,6 +1976,68 @@ async function extractPdfText(file: File): Promise<string> {
       for (const c of consumed) dropText.add(c);
       if (decoded[j] !== undefined && (decoded[j] as { trail?: boolean }).trail === true) stripTrail.add(j);
     }
+    // R118-A: THE ICON-ANCHORED SUB-THRESHOLD COLUMN SPLIT — the pre-pass
+    // (session 118, the Typst contacts class). pdftotext breaks the line at
+    // the phone→mail-icon boundary of the contacts row (the controlled-
+    // variant census measured the split GAP-driven, not icon-driven: the
+    // no-icons variant still splits, the icons-without-separator variant
+    // joins, text-glyph "icons" split identically — the poppler word-gap
+    // boundary sits at ~1 em; the separator bisect read 0.944 em joining
+    // and 1.056 em splitting). The corpus fire surface (the icon-anchored
+    // walk-back census): the Typst contacts pairs SPLIT at 1.06/2.43 em,
+    // the Skia em-dash JOINS at 0.89 em, every other member ZERO
+    // candidates — the threshold sits at 0.95 em, inside the measured
+    // band. The rule: a ZERO-ALNUM CONTENT block (an icon/symbol/
+    // punctuation anchor — text.trim() non-empty, no [A-Za-z0-9]; never a
+    // space run) at a same-baseline BLOCK BOUNDARY whose walk-back content
+    // block A (skipping the intervening genuine space runs) carries a
+    // width-tracked end sits >= 0.95 em behind the anchor upgrades the
+    // separator to a CLEAN "\n" — the consumed space runs emit nothing
+    // (the R117-A dropText form), a left trail strips when present, and
+    // the icon then joins the FOLLOWING content at its sub-threshold gap
+    // (the measured 0.25 em icon→email boundary keeps its space — pdftotext's
+    // exact "<icon> email" line form). The alnum-rich sub-13 em class
+    // (the "Jun 2018" 5.1 em pair, the ReportLab 8.7-9.4 em table rows)
+    // stays joined — the anchor is the license, not the gap.
+    const iconSplit = new Array<boolean>(decoded.length).fill(false);
+    const iconDrop = new Set<number>(); // the space runs an icon split consumes
+    for (let i = 1; i < decoded.length; i++) {
+      const d = decoded[i] as { p: { px?: number; py?: number; ps?: number; condGap?: boolean; condKern?: boolean }; text: string; genuine?: boolean };
+      const p = d.p;
+      if (p.px === undefined || p.py === undefined || p.ps === undefined) continue;
+      // the anchor: a zero-alnum content block — an icon/symbol/punctuation
+      // glyph, never a space run (those trim to nothing) and never alnum
+      // content (the R117-A territory above 13 em; the anchor class below)
+      const bTxt = d.text ?? "";
+      if (bTxt.trim().length === 0) continue;
+      if (/[A-Za-z0-9]/.test(bTxt)) continue;
+      // the adjacent piece must share the anchor's baseline (a cross-line
+      // icon pair is the R116-A territory — never doubled)
+      const e = decoded[i - 1] as { p: { px?: number; py?: number; ps?: number }; text: string };
+      const q = e.p;
+      if (q.px === undefined || q.py === undefined || q.ps === undefined) continue;
+      if (Math.abs(q.py - p.py) >= 0.5 * Math.max(q.ps, p.ps)) continue;
+      // the walk-back over consecutive genuine space runs to the content block A
+      let j = i - 1;
+      while (j >= 0) {
+        const dj = decoded[j] as { genuine?: boolean; text: string };
+        if (dj.genuine === true && dj.text.length > 0 && /^ +$/.test(dj.text)) { j--; continue; }
+        break;
+      }
+      if (j < 0) continue;
+      const a = decoded[j] as { p: { px?: number; py?: number; ps?: number; bx?: number }; text: string; trail?: boolean };
+      const ap = a.p;
+      if (ap.px === undefined || ap.py === undefined || ap.ps === undefined || ap.bx === undefined) continue;
+      if (Math.abs(ap.px - p.px) < 0.01) continue; // the same block — no boundary
+      if (Math.abs(ap.py - p.py) >= 0.5 * Math.max(ap.ps, p.ps)) continue; // A sits on another line
+      const gapEm = (p.px - ap.bx) / Math.max(ap.ps, p.ps);
+      if (gapEm < 0.95) continue; // the Skia em-dash band stays joined (0.89 em measured)
+      if (p.condGap && hasSpaceGlyphs) continue; // a join never upgrades (the R117-A guard form)
+      if (p.condKern && d.genuine) continue; // the kern collapse never upgrades
+      iconSplit[i] = true;
+      for (let k = j + 1; k < i; k++) iconDrop.add(k); // the consumed space runs — applied ONLY on success
+      if (a.trail === true) stripTrail.add(j); // the clean form when the left block trails
+    }
     decoded.forEach(({ p, text, genuine }, i) => {
       let sep = p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep;
       // R116-A: THE CM-CARRIED LINE MOVE — a positioned piece pair whose
@@ -2004,9 +2066,10 @@ async function extractPdfText(file: File): Promise<string> {
         else if (genuine && text.length > 0 && /^ +$/.test(text)) sep = ""; // R115-A head
       }
       if (upgrade[i]) sep = "\n"; // R117-A: the column move overrides the R115 collapses (the space separation it consumed rides the newline)
+      if (iconSplit[i]) sep = "\n"; // R118-A: the icon-anchored split overrides the R115 collapses (the consumed space runs ride the newline)
       let emit = text;
-      if (dropText.has(i)) emit = ""; // R117-A: the consumed space-run separator
-      else if (stripTrail.has(i)) emit = text.replace(/ +$/, ""); // R117-A: the newline replaces the writer's trailing space
+      if (dropText.has(i) || iconDrop.has(i)) emit = ""; // R117-A/R118-A: the consumed space-run separators
+      else if (stripTrail.has(i)) emit = text.replace(/ +$/, ""); // R117-A/R118-A: the newline replaces the writer's trailing space
       if (emit === text && isSpaceRun(i) && (outTail === " " || outTail === "\n")) emit = ""; // R115-C
       out += sep + emit;
       const tail = sep + emit;
