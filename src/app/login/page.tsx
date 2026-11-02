@@ -426,7 +426,7 @@ function LoginForm() {
                 none; the icons sit at 85/85/98 on their own text widths)
                 — and the label span-wrapped. */}
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200 -ml-4">
@@ -435,7 +435,7 @@ function LoginForm() {
               <span>Continue with Google</span>
             </button>
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200">
@@ -444,7 +444,7 @@ function LoginForm() {
               <span>Continue with Microsoft</span>
             </button>
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200">
@@ -454,15 +454,17 @@ function LoginForm() {
             </button>
             </div>
 
-            {/* REF's or-divider (session-39): one continuous 1px slate-200
-                line (absolutely positioned, vertically centered) with the
-                centered "or" chip on a white bg — NOT two line segments. */}
+            {/* REF's or-divider (session-39; session-121 chip amendment): one
+                continuous 1px slate-200 line (absolutely positioned, vertically
+                centered — the 85th deploy kept the LINE slate) with the centered
+                "or" chip on a white bg — NOT two line segments. The chip TEXT
+                moved to the neutral #5D5D5D in the 85th deploy (was slate-500). */}
             <div className="relative my-6" role="separator" aria-label="or">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div data-orientation="horizontal" role="none" className="shrink-0 h-[1px] w-full bg-slate-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-slate-500 font-medium tracking-wider">or</span>
+                <span className="bg-white px-3 text-[#5D5D5D] font-medium tracking-wider">or</span>
               </div>
             </div>
 

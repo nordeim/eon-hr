@@ -566,6 +566,19 @@ type WidthEntry = { codeLen: 1 | 2; map: Map<number, number>; def: number | unde
  * group as pairs — unless EVERY group of three carries its CID twice
  * (k k w — the Typst writer's form, structurally disjoint from any real
  * pair sequence: the pair reading of it yields a non-ascending CID run).
+ * R121-A: the strict k-k-w check is RETIRED as the only triple detector —
+ * the Typst writer also emits RANGE triples (`cfirst clast w` with
+ * cfirst < clast — consecutive subset CIDs sharing a width; resume2's
+ * `15 16 480`), which kill the strict check and drop the table into the
+ * pair reading (garbage: the widths interleave as fake CIDs, and a
+ * range-covered code goes missing from the map — with /DW 0 the whole
+ * block goes width-blind; the resume2 intra-block under-tracking class).
+ * The range reading fires only when EVERY group validates (cfirst ≤ clast,
+ * w > 0, the groups strictly ascend without overlap) AND the pair reading
+ * is INVALID (a real `c w` pair sequence reads as ascending CIDs; the
+ * triple sequence's pair reading descends) — the two readings are
+ * structurally disjoint under that pair-validity check, so a standing
+ * pairs member keeps its pair parse verbatim.
  */
 function parseWidthsArray(w: string): Map<number, number> | null {
   const toks = w.match(/\[|\]|-?[\d.]+/g);
@@ -579,6 +592,29 @@ function parseWidthsArray(w: string): Map<number, number> | null {
       if (triple) {
         for (let i = 0; i < nums.length; i += 3) out.set(nums[i], nums[i + 2]);
         return out;
+      }
+      // R121-A: THE RANGE-TRIPLE READING — cfirst clast w groups (the Typst
+      // range-run class). Valid only when every group carries cfirst ≤
+      // clast and w > 0, the groups strictly ascend (group i's cfirst >
+      // group i-1's clast — no overlap), AND the pair reading is invalid
+      // (some pair-CID descends or a pair width is non-positive). The
+      // expansion assigns the shared width to every CID in [cfirst, clast].
+      let ranges = true;
+      for (let i = 0; i < nums.length; i += 3) {
+        const a = nums[i], b = nums[i + 1], wv = nums[i + 2];
+        if (!(a <= b) || !(wv > 0) || (i > 0 && !(a > nums[i - 2]))) { ranges = false; break; } // nums[i-2] = the previous group's clast — strictly ascending, no overlap
+      }
+      if (ranges) {
+        let pairsValid = true;
+        for (let i = 0; i + 2 < nums.length; i += 2) {
+          if (!(nums[i + 2] > nums[i]) || !(nums[i + 1] > 0)) { pairsValid = false; break; }
+        }
+        if (!pairsValid) {
+          for (let i = 0; i < nums.length; i += 3) {
+            for (let c = nums[i]; c <= nums[i + 1]; c++) out.set(c, nums[i + 2]);
+          }
+          return out;
+        }
       }
     }
     for (let i = 0; i + 1 < nums.length; i += 2) out.set(nums[i], nums[i + 1]);

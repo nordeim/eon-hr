@@ -3811,10 +3811,10 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(btn).not.toContain("transition-colors");
   });
 
-  it("R38-F1: the three social buttons are REF's family (session-40 amendment — the redeploy DROPPED the type attr: REF renders no type on any of the three; they sit outside the form so it was inert), REF's exact class list with text-[16px] + group", () => {
+  it("R38-F1: the three social buttons are REF's family (session-40 amendment — the redeploy DROPPED the type attr: REF renders no type on any of the three; they sit outside the form so it was inert; session-121 amendment — the 85th deploy moved the family from cool slate to warm neutrals: text #0F0E0E, border #E9E6E0, hover #F1EEEA/#DDD8D2), REF's exact class list with text-[16px] + group", () => {
     expect(
       login39.match(
-        /className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3\.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
+        /className="w-full flex items-center justify-center gap-3 bg-white text-\[#0F0E0E\] px-5 py-3\.5 rounded-xl border border-\[#E9E6E0\] hover:bg-\[#F1EEEA\] hover:border-\[#DDD8D2\] hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
       )?.length
     ).toBe(3);
     expect(login39.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
@@ -3847,13 +3847,13 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39).toMatch(/<span className="font-medium text-slate-700">Sign up<\/span>/);
   });
 
-  it("R38-K1: the or-divider is REF's continuous-line + white-chip pattern (the absolute 1px slate-200 line + the centered bg-white px-3 chip in slate-500 — the clone's segmented divider rendered the 'or' in slate-400)", () => {
+  it("R38-K1: the or-divider is REF's continuous-line + white-chip pattern (the absolute 1px slate-200 line + the centered bg-white px-3 chip; session-121 amendment — the 85th deploy moved the chip TEXT from slate-500 to the neutral #5D5D5D; the LINE stays slate-200)", () => {
     expect(login39).toMatch(/<div className="relative my-6" role="separator" aria-label="or">/);
     expect(login39).toMatch(
       /<div data-orientation="horizontal" role="none" className="shrink-0 h-\[1px\] w-full bg-slate-200" \/>/
     );
     expect(login39).toMatch(
-      /<span className="bg-white px-3 text-slate-500 font-medium tracking-wider">or<\/span>/
+      /<span className="bg-white px-3 text-\[#5D5D5D\] font-medium tracking-wider">or<\/span>/
     );
   });
 
@@ -3909,9 +3909,9 @@ describe("session-40 shell restructure + input migration + careers org-view (par
 
   // --- A. the login redeploy re-audit ---
 
-  it("R39-A1: the three social buttons carry NO type attribute (the redeploy's change — REF renders type:null on all three; the buttons sit outside the form so the attribute was inert)", () => {
+  it("R39-A1: the three social buttons carry NO type attribute (the redeploy's change — REF renders type:null on all three; the buttons sit outside the form so the attribute was inert; session-121 amendment — the class anchor carries the 85th-deploy warm text #0F0E0E)", () => {
     expect(login40.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
-    expect(login40.match(/className="w-full flex items-center justify-center gap-3 bg-white text-slate-700/g)?.length).toBe(3);
+    expect(login40.match(/className="w-full flex items-center justify-center gap-3 bg-white text-\[#0F0E0E\]/g)?.length).toBe(3);
   });
 
   it("R39-B1: the theme boot is LOGIN-INERT — REF's login preserves darkMode/app_lang but never applies html.dark/dir (live-probed both sides); the boot returns early on /login BEFORE either applier", () => {

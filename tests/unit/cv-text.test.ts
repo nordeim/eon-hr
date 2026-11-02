@@ -4085,3 +4085,168 @@ describe("cv-text — the width-blind elimination class (session 120)", () => {
     expect(text).not.toContain("platform\ntrainingspec");
   });
 });
+
+describe("cv-text — the /W range-triple elimination class (session 121)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // The resume2 anatomy (the r121 hunt): the Typst /W table with ONE RANGE
+  // triple (`15 16 485` on the real member — consecutive subset CIDs that
+  // share a width). The r117 strict k-k-w detection requires nums[i] ===
+  // nums[i+1] on EVERY group, so the range triple kills it and the pair
+  // fallback reads the triple sequence as interleaved garbage — on the real
+  // member the body text under-advances ~45% (the tracked end 259.7 vs the
+  // true 435.8) and, with /DW 0, a range-covered code missing from the
+  // garbage pair map blinds the whole block (no bx — the column rule cannot
+  // fire). The measured standing watch: resume2's pair reads 22.21 em vs
+  // the true 4.99.
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}abcd fhi`;
+  const codeFor = (i: number) => i + 1;
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  // the /W table: the pad codes as k-k-w, then the fixture codes — with
+  // ONE RANGE TRIPLE over "cd" (codes 63 64, both 480 — the resume2
+  // `15 16 485` class), the space at 250
+  const wRangeTriple = () => {
+    const toks: string[] = [];
+    for (let i = 0; i < PHRASE.length; i++) {
+      const c = codeFor(i);
+      if (c === 63) toks.push("63 64 480"); // the RANGE triple (cd share 480)
+      else if (c === 64) continue; // consumed by the range
+      else toks.push(`${c} ${c} ${PHRASE[i] === " " ? 250 : 500}`);
+    }
+    return toks.join(" ");
+  };
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+
+  const fontFixture = (content: string, descendantExtra = `/DW 0 /W [${wRangeTriple()}]`) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /BBBBBB+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /BBBBBB+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantExtra} >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- R121-A: the range-triple /W table (the resume2 class) ----
+  it("expands a /W RANGE triple and keeps the column rule armed (R121-A)", async () => {
+    // "abcd f" (codes 61-66: 500+500+480+480+250+500 = 2710/1000 x 10 =
+    // 27.1pt) at (50,700) tracks to 77.1; "hi" at 110 -> (110-77.1)/10 =
+    // 3.29 em >= 2.5 -> the column split. At HEAD the range triple kills
+    // the strict detection; the pair fallback's garbage map MISSES code 64
+    // ('d' — the range's end landed as a pair VALUE), and /DW 0 blinds the
+    // block (no bx) -> the pair reads JOINED — the resume2 under-tracking
+    // class, at its intra-block root
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(50, 700, 10, "abcd f") + "\n" +
+      typstBlock(110, 700, 10, "hi");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("abcd f\nhi"); // ← RED at HEAD: the range-covered code blinds the block, the pair joins
+  });
+
+  it("keeps a sub-threshold pair JOINED under the range-triple table (the over-reach guard — R121-A)", async () => {
+    // the same table, the geometry pulled in: the correct 2710-sum tracks
+    // the end to 77.1; "hi" at 95 -> (95-77.1)/10 = 1.79 em < 2.5 -> the
+    // TRUE intra-line continuation stays JOINED. A mis-expanded range
+    // (say d at 1000 -> end 82.3 -> 1.27 em, still joined) cannot flip
+    // this case — but an over-firing rule would
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(50, 700, 10, "abcd f") + "\n" +
+      typstBlock(95, 700, 10, "hi");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("abcd f hi");
+    expect(text).not.toContain("abcd f\nhi");
+  });
+
+  /* The both-valid ambiguity (an in-round design finding): a /W sequence
+     where BOTH the pair reading and the range reading validate
+     (`61 62 63 64 65 66` — pairs {61:62,63:64,65:66}, ranges 61-62->63 +
+     64-65->66) yields near-identical maps wherever the coverages overlap,
+     and the only divergence (a range-gap code going missing under the
+     range reading) requires the pair keys to skip codes — which makes the
+     pair sequence itself non-covering for any realistic fixture text.
+     The pairs preference (the standing behavior) is therefore
+     behaviorally indistinguishable on this class — the pair-validity
+     guard is belt-and-suspenders, pinned by the mutation matrix's M3
+     arm (the sync arm only) rather than a spec. */
+
+  // ---- R121-A: the pair-form preservation (the discrimination guard) ----
+  it("keeps a PURE ascending /W pair sequence reading as pairs (the standing spec form — R121-A)", async () => {
+    // the measured "spec c w" pairs class: codes 59 600 60 700 61 800 …
+    // for the fixture glyphs ("abc" = codes 59-61 — the 58-char pad owns
+    // 1-58). As ranges this reads (59,600,60)(700,61,800) — the second
+    // group's 700 > 61 fails cfirst<=clast, so the range reading MUST
+    // self-reject and the pair reading stands: "abc" (59-61, 600+700+800
+    // = 2100/1000 x 10 = 21pt) at (50,700) tracks to 71; "hi" at 100 ->
+    // 2.9 em -> the split fires on the PAIR widths
+    const pairW = () => {
+      const toks: string[] = [];
+      for (let i = 0; i < PHRASE.length; i++) {
+        const c = codeFor(i);
+        if (c >= 59) toks.push(`${c} ${600 + (c - 59) * 100}`);
+      }
+      return toks.join(" ");
+    };
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(50, 700, 10, "abc") + "\n" +
+      typstBlock(100, 700, 10, "hi");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 0 /W [${pairW()}] >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("abc\nhi"); // the pair widths carry the split
+  });
+});
