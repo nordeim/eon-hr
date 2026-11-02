@@ -3075,3 +3075,209 @@ describe("cv-text — the cm-carried line-structure class (session 116)", () => 
     expect(text).not.toContain("First\nSecond");
   });
 });
+
+describe("cv-text — the same-line x-gap column class (session 117)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // The phrase carries spaces AT the trail positions the fixtures need; every
+  // char (spaces included) maps to its own 2-byte code through the ToUnicode
+  // (the R111-A literal-CID form), and the descendant's /W carries each code's
+  // width in the TYPST TRIPLE FORM (k k w — measured on the real resume: 255
+  // numbers, CID k → w_k, the space 250, letters 500).
+  // the pad prefix rides every fixture (the 40-alnum readability guard, the
+  // r97 lesson) — its own block at a line above the fixture geometry
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}experience SeniorHRManager TechCorp Mar2021Present nextword ticks trail`;
+  const codeFor = (i: number) => i + 1;
+  const spaceCodes = new Set([...PHRASE].map((c, i) => (c === " " ? codeFor(i) : -1)).filter((x) => x >= 0));
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const wTriple = () =>
+    [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} ${spaceCodes.has(codeFor(i)) ? 250 : 500}`).join(" ");
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  // the Typst block form (the R116-A builder): every element its own
+  // q/cm/BT block, the flip-y carried by BOTH the cm and the Tm
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+
+  const fontFixture = (content: string, descendantExtra = `/DW 500 /W [${wTriple()}]`) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /AAAAAA+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantExtra} >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // Session 117 (R117-A): THE SAME-LINE X-GAP COLUMN MOVE. The Typst entry
+  // layout places the company/dates/year/university at a BLOCK BOUNDARY on
+  // the SAME baseline, a true device-space x-gap of 15+ em past the left
+  // block's GLYPH-ACCURATE end (the /W width table) — pdftotext reads a
+  // line break there; the stream-order walk read the standing " " join.
+  // The fix: at assembly, a stamped pair at a block boundary (different
+  // stamp origins) on the same baseline whose left block's width-tracked
+  // end sits >= 13 em left of the right block's origin upgrades its " "
+  // separator to "\n". Never a join, never an existing newline, and only
+  // when the left side carries the writer's own trailing space (the
+  // R115-B trail / the R115-A space run) and the right side carries real
+  // alphanumeric content (the IRS bare-period refutation).
+  it("breaks the line between same-baseline blocks a column apart (the Typst title|company form — R117-A)", async () => {
+    // the measured resume geometry: the 12pt title at 50 (15 codes × 500/1000
+    // × 12 = 90pt wide → true end 140), the trailing-space block at 150 (the
+    // 250/1000 × 11 space → end 152.75), the 11pt company at 508.8 — the gap
+    // (508.8 − 152.75)/11 = 32.4 em >= 13 → the column move
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+      typstBlock(150, 700, 11, " ") + "\n" +
+      typstBlock(508.8, 700, 11, "TechCorp");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // RED before the fix: "SeniorHRManager TechCorp" (the standing join)
+  });
+
+  it("breaks the line at a direct trail-carrying block boundary (the Typst description|dates form — R117-A)", async () => {
+    // the justified-line form: the 10pt line block ends with its own trailing
+    // space (10 letters × 500 + 250 = 5250/1000 × 10 = 52.5pt → true end
+    // 42.5 + 52.5 = 95), the 10pt dates at 483.8 — the gap
+    // (483.8 − 95)/10 = 38.9 em >= 13 → the column move (the R115-B trail
+    // would have collapsed the separator; the upgrade overrides it and the
+    // trailing space strips — the line lands clean, never " \n")
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(42.5, 560, 10, "experience ") + "\n" +
+      typstBlock(483.8, 560, 10, "Mar2021Present");
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("experience\nMar2021Present"); // RED before the fix: "experience Mar2021Present"
+    expect(text).not.toContain("experience \nMar2021Present"); // the clean form
+  });
+
+  // the born-green guards — the upgrade must NEVER fire on these forms
+
+  it("keeps the space between trail-carrying blocks under the threshold (the Prawn tick guard — R117-A)", async () => {
+    // the measured Prawn chart-tick class: 8pt tick labels 11.78 em apart —
+    // the highest measured true-gap JOIN in the corpus; the threshold sits
+    // at 13 em, over the join band (<= 11.78) and under the split band
+    // (>= 15.1)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 8, "ticks ") + "\n" +
+      typstBlock(144.2, 700, 8, "nextword"); // (144.2 − (50 + 6×500/1000×8 − 250/1000×8 …)) ≈ 11.7 em — under
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("ticks nextword"); // born-green: 11.7 em < 13 — no break
+    expect(text).not.toContain("ticks\nnextword");
+  });
+
+  it("keeps the space between blocks with no writer trailing space (the trail guard — R117-A)", async () => {
+    // the measured ReportLab cover refutation: "User Guide" → "Table of
+    // contents" — a 33.6 em true-gap pair pdftotext JOINS because the left
+    // block carries NO trailing space; only the writer's OWN space (the
+    // R115-B trail or the R115-A space run) licenses the column move
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 10, "SeniorHRManager") + "\n" + // no trailing space: 15×500/1000×10 = 75pt → end 125
+      typstBlock(508, 700, 10, "TechCorp"); // gap (508−125)/10 = 38.3 em — over the threshold, but NO trail
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager TechCorp"); // born-green: no trail, no column move
+    expect(text).not.toContain("SeniorHRManager\nTechCorp");
+  });
+
+  it("keeps the space when the font's widths are unresolvable (the blind guard — R117-A)", async () => {
+    // a Type0 font whose encoding is NOT Identity-H (Identity-V — the
+    // vertical form) has no parseable code→width path: the advance cursor
+    // stays blind and the rule never fires, whatever the geometry
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+      typstBlock(150, 700, 11, " ") + "\n" +
+      typstBlock(508.8, 700, 11, "TechCorp");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-V /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /AAAAAA+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 500 /W [${wTriple()}] >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager TechCorp"); // born-green: blind widths — the standing join
+    expect(text).not.toContain("SeniorHRManager\nTechCorp");
+  });
+
+  it("keeps the move-driven join across a device column shift (the join guard — R117-A)", async () => {
+    // the upgrade fires ONLY on " " separators: a sub-em Td glyph-advance
+    // JOIN between shows keeps its join even when the pair's true gap is a
+    // full column width — re-breaking joins is the r115 refutation class
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /f0 9 Tf 1 0 0 -1 0 0 Tm (${codesFor("SeniorHRManager")}) Tj\nET\nQ\n` +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /f0 9 Tf 1 0 0 -1 0 0 Tm 3 0 Td (${codesFor("TechCorp")}) Tj ET`;
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManagerTechCorp"); // born-green: the 0.33-em Td join survives (no " " to upgrade)
+  });
+
+  it("reads a single newline at a cross-line column pair (the R116-A interplay — R117-A)", async () => {
+    // a pair BOTH a line step AND a column apart: the R116-A y-delta rule
+    // breaks the line; the R117-A never doubles it (the " "-only upgrade
+    // sees the already-broken separator, and a line step is not a column)
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+      typstBlock(150, 700, 11, " ") + "\n" +
+      typstBlock(508.8, 660, 11, "TechCorp"); // 40/11 = 3.6 em below — the R116-A line step
+    const file = await fontFixture(content);
+    const text = await extractTextFromFile(file);
+    // the standing R116-A form: the space piece's text precedes the line
+    // break — ONE newline, never doubled, never re-broken by the column rule
+    expect(text).toContain("SeniorHRManager \nTechCorp");
+    expect(text).not.toContain("SeniorHRManager\n\nTechCorp");
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+});

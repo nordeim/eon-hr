@@ -539,8 +539,71 @@ function hexLeadingIsSpace(hexRaw: string, cmaps: CodeMap[]): boolean {
  * at assembly time (the R103-C conditional).
  */
 type TextPiece =
-  { sep: string; font?: string; condGap?: boolean; condKern?: boolean; px?: number; py?: number; ps?: number }
+  { sep: string; font?: string; condGap?: boolean; condKern?: boolean; px?: number; py?: number; ps?: number; bx?: number; kv?: number }
   & ({ kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string });
+
+/**
+ * R117-A: the per-font WIDTH TABLE — a font object's code→width map (in
+ * 1/1000 text-space units), parsed from the CID /W array (all three
+ * measured forms: the spec `c w` pairs, the spec `c [w1 w2 …]` arrays,
+ * and the Typst `c c w` triples — 255 numbers on the real resume, CID k →
+ * w_k, validated against the bbox ground truth: the space 250, digits
+ * 465, letters 431–839) or the simple-font /Widths array (+ /FirstChar,
+ * the descriptor's /MissingWidth). `codeLen` is 2 for Identity-H Type0
+ * fonts (the 2-byte CID pairing), 1 for simple fonts. A font whose widths
+ * cannot be parsed (or an encoding the pairing cannot serve — Identity-V)
+ * simply has NO entry: the advance post-pass leaves its blocks' `bx`
+ * undefined and the R117-A column rule stays blind on them (the
+ * conservative guard — a missing table never misfires, it only cures
+ * less).
+ */
+type WidthEntry = { codeLen: 1 | 2; map: Map<number, number>; def: number | undefined };
+
+/**
+ * Parses a /W array's content into a code→width map. The token walk
+ * handles the two spec forms and the Typst triple form: a number followed
+ * by a bracket is the array form (CIDs c..c+n−1); otherwise the numbers
+ * group as pairs — unless EVERY group of three carries its CID twice
+ * (k k w — the Typst writer's form, structurally disjoint from any real
+ * pair sequence: the pair reading of it yields a non-ascending CID run).
+ */
+function parseWidthsArray(w: string): Map<number, number> | null {
+  const toks = w.match(/\[|\]|-?[\d.]+/g);
+  if (!toks || toks.length === 0) return null;
+  const out = new Map<number, number>();
+  if (!toks.includes("[")) {
+    const nums = toks.map(Number);
+    if (nums.length % 3 === 0 && nums.length >= 3) {
+      let triple = true;
+      for (let i = 0; i < nums.length; i += 3) if (nums[i] !== nums[i + 1] || !(nums[i + 2] > 0)) { triple = false; break; }
+      if (triple) {
+        for (let i = 0; i < nums.length; i += 3) out.set(nums[i], nums[i + 2]);
+        return out;
+      }
+    }
+    for (let i = 0; i + 1 < nums.length; i += 2) out.set(nums[i], nums[i + 1]);
+    return out;
+  }
+  let i = 0;
+  while (i < toks.length) {
+    if (toks[i] === "[" || toks[i] === "]") { i++; continue; }
+    const c = Number(toks[i]);
+    i++;
+    if (i < toks.length && toks[i] === "[") {
+      i++;
+      let cid = c;
+      while (i < toks.length && toks[i] !== "]") {
+        if (toks[i] !== "[") out.set(cid++, Number(toks[i]));
+        i++;
+      }
+      i++;
+    } else if (i < toks.length && toks[i] !== "]") {
+      out.set(c, Number(toks[i]));
+      i++;
+    }
+  }
+  return out;
+}
 
 /**
  * Pulls the text operands out of a content stream's text-showing operators
@@ -689,7 +752,7 @@ function pdfTextPieces(content: string): TextPiece[] {
   // explicit numeric kern/gap intent — pdfTeX's -322 class) — never a
   // conditional; only Td/Tm-driven gaps (positioning moves, which the
   // space-glyph writers use for split-word continuations) are conditional.
-  const push = (piece: { kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string }, fromKern = false, kernGap = false) => {
+  const push = (piece: { kind: "lit"; text: string; raw?: string } | { kind: "hex"; hex: string }, fromKern = false, kernGap = false, kernVal = 0) => {
     let sep = " "; // the standing join: adjacent shows separate
     let condGap = false;
     if (moved) {
@@ -701,7 +764,7 @@ function pdfTextPieces(content: string): TextPiece[] {
     }
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
     const pos = curPos();
-    pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...(kernGap ? { condKern: true } : {}), ...piece });
+    pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...(kernGap ? { condKern: true } : {}), ...(kernVal !== 0 ? { kv: kernVal } : {}), ...piece });
     reset();
     shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
     btFresh = false; // R104-C: the show ends the fresh run — the next Td is a between-shows move
@@ -886,7 +949,7 @@ function pdfTextPieces(content: string): TextPiece[] {
             // — the atoms join (the space glyphs carry the word separation)
             pendingEm = kernGap ? 1.0 : 0; // the negative gap fires the space rule; a kern (either sign, under the boundary, or an explicit zero) joins
           }
-          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, sawNum, kernGap);
+          push(a[1] !== undefined ? { kind: "lit", text: unescape(a[1]), raw: unescapeRaw(a[1]) } : { kind: "hex", hex: a[2] }, sawNum, kernGap, kern); // R117-A: the kern rides the piece for the advance post-pass
           kern = 0;
           sawNum = false;
         } else {
@@ -1135,6 +1198,39 @@ async function extractPdfText(file: File): Promise<string> {
   // encoding feeds the WIN_ANSI marker through the candidate chain (a real
   // ToUnicode still wins; the MacRoman marker's exact discipline)
   const objWinAnsi = new Set<number>();
+  // R117-A: the per-font WIDTH TABLES — keyed by font object. Type0 fonts
+  // (Identity-H) resolve through /DescendantFonts to the CID /W + /DW
+  // (the parent's key — the page binds the parent); simple fonts read
+  // /Widths + /FirstChar + /MissingWidth. The parse covers the three
+  // measured /W forms (pairs, arrays, the Typst c-c-w triples — see
+  // parseWidthsArray). A font with no parseable widths carries NO entry —
+  // its blocks stay blind to the R117-A column rule.
+  const objWidths = new Map<number, WidthEntry>();
+  const objDescendant = new Map<number, { desc: number; identityH: boolean }>(); // Type0 font obj → descendant obj
+  const readWidthsFromFontBody = (objNum: number, body: string) => {
+    if (/\/Subtype\s*\/Type0\b/.test(body)) {
+      const df = body.match(/\/DescendantFonts\s*\[\s*(\d+)\s+0\s+R/);
+      if (df) objDescendant.set(objNum, { desc: parseInt(df[1], 10), identityH: /\/Encoding\s*\/Identity-H\b/.test(body) });
+      return; // the widths live on the descendant (merged in the post-walk pass)
+    }
+    const wsm = body.match(/\/W\s*\[([^\]]*)\]/);
+    if (wsm) {
+      const map = parseWidthsArray(wsm[1]);
+      const dw = body.match(/\/DW\s+(\d+)/);
+      if (map && map.size > 0) objWidths.set(objNum, { codeLen: 2, map, def: dw ? parseInt(dw[1], 10) : 1000 });
+      return;
+    }
+    const sm = body.match(/\/Widths\s*\[([^\]]*)\]/);
+    if (sm) {
+      const nums = (sm[1].match(/-?[\d.]+/g) ?? []).map(Number);
+      const fc = body.match(/\/FirstChar\s+(\d+)/);
+      const first = fc ? parseInt(fc[1], 10) : 0;
+      const map = new Map<number, number>();
+      nums.forEach((w, i) => map.set(first + i, w));
+      const mw = body.match(/\/MissingWidth\s+(\d+)/);
+      objWidths.set(objNum, { codeLen: 1, map, def: mw ? parseInt(mw[1], 10) : 0 });
+    }
+  };
   for (const fm of ascii.matchAll(/(\d+)\s+0\s+obj\s*<<([^<>]*(?:<<[^<>]*>>[^<>]*)*)>>/g)) {
     if (!/\/Type\s*\/Font\b/.test(fm[2])) continue;
     const tu = fm[2].match(/\/ToUnicode\s+(\d+)\s+0\s+R/);
@@ -1143,6 +1239,7 @@ async function extractPdfText(file: File): Promise<string> {
     if (bf) objBaseFont.set(parseInt(fm[1], 10), (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
     if (/\/Encoding\s*\/MacRomanEncoding\b/.test(fm[2])) objMacRoman.add(parseInt(fm[1], 10));
     if (/\/Encoding\s*\/WinAnsiEncoding\b/.test(fm[2])) objWinAnsi.add(parseInt(fm[1], 10)); // R110-C
+    readWidthsFromFontBody(parseInt(fm[1], 10), fm[2]); // R117-A
   }
   // R105-C: the page tree — /Type /Page objects bind a CONTENT STREAM to the
   // page's own /F-name → font-object mapping (inline in the page dict or via
@@ -1362,6 +1459,7 @@ async function extractPdfText(file: File): Promise<string> {
             if (bf) objBaseFont.set(entries[i].obj, (bf[1].split("+").pop() ?? bf[1]).toLowerCase());
             if (/\/Encoding\s*\/MacRomanEncoding\b/.test(body)) objMacRoman.add(entries[i].obj); // R108-B
             if (/\/Encoding\s*\/WinAnsiEncoding\b/.test(body)) objWinAnsi.add(entries[i].obj); // R110-C
+            readWidthsFromFontBody(entries[i].obj, body); // R117-A: the ObjStm-carried fonts' width tables
           }
           // R108-B: the ObjStm side of the /Font-dict-region collector — an
           // ObjStm-carried resources body's /Font << … >> pairs feed the
@@ -1565,6 +1663,16 @@ async function extractPdfText(file: File): Promise<string> {
     cmapsForMemo.set(font, out);
     return out;
   };
+  // R117-A: THE DESCENDANT MERGE — the Type0 parents' width entries resolve
+  // through /DescendantFonts to the CID descendants' /W tables (both may be
+  // raw-carried, ObjStm-carried, or split across the two; the merge runs
+  // after every walk). Only Identity-H parents merge (the 2-byte CID
+  // pairing; an Identity-V parent stays widthless — the blind guard).
+  for (const [parent, { desc, identityH }] of objDescendant) {
+    if (!identityH) continue;
+    const we = objWidths.get(desc);
+    if (we) objWidths.set(parent, we);
+  }
   // R103-C: the space-glyph conditional. Streams that write EXPLICIT
   // standalone space-glyph pieces (the Skia/LO convention: word gaps are
   // glyphs, never bare positioning moves) encode their split-word
@@ -1579,6 +1687,69 @@ async function extractPdfText(file: File): Promise<string> {
     // candidate chain stays the fallback (the page-tree chain — the
     // fontspec.pdf fully-covering collision class)
     const pageMap = pageFonts.get(objNum);
+    // R117-A: THE WIDTH-TABLE ADVANCE POST-PASS — each positioned block's
+    // projected end x. The pass runs here (after the whole stream walk) so
+    // the pageFonts map is fully resolved (the R106-A referenced-resources
+    // timing). Blocks group by their exact stamp origin (the pieces of one
+    // q/cm/BT context share (px, py)); within a block the advance
+    // accumulates the pieces' code widths (Σ width(code)/1000 × ps — the
+    // raw's byte pairs under a codeLen-2 Identity-H font, single bytes
+    // under a simple font) and the TJ kerns (kern/1000 × ps). ANY
+    // unresolvable piece — a font without a width table, a code the table
+    // does not cover (width 0 or missing with no default), an odd byte
+    // count under a 2-byte pairing — blinds the REST of the block (no bx):
+    // a missing table never misfires, it only cures less (the conservative
+    // guard). The kern on a piece applies from the block origin (a leading
+    // TJ number shifts the whole run; the trailing kern of a finished
+    // array is discarded with the walk's own standing rule).
+    const widthFor = (font?: string): WidthEntry | undefined => {
+      if (!font) return undefined;
+      const fo = pageMap?.get(font);
+      if (fo === undefined) return undefined;
+      return objWidths.get(fo);
+    };
+    {
+      let origin: number | null = null;
+      let originPy: number | null = null;
+      let adv = 0;
+      let blind = false;
+      for (const piece of pieces) {
+        if (piece.px === undefined || piece.ps === undefined) { blind = true; origin = null; continue; }
+        if (origin === null || originPy === null || Math.abs(piece.px - origin) > 0.01 || (piece.py !== undefined && Math.abs(piece.py - originPy) > 0.01)) {
+          origin = piece.px; originPy = piece.py ?? null; adv = 0; blind = false;
+        }
+        if (blind) continue;
+        const we = widthFor(piece.font);
+        if (!we) { blind = true; continue; }
+        if (piece.kv) adv += (piece.kv / 1000) * piece.ps;
+        let codes: number[] | null = null;
+        if (piece.kind === "lit") {
+          const raw = piece.raw ?? "";
+          if (we.codeLen === 2) {
+            if (raw.length === 0 || raw.length % 2 !== 0) { blind = true; continue; }
+            codes = [];
+            for (let i = 0; i < raw.length; i += 2) codes.push(raw.charCodeAt(i) * 256 + raw.charCodeAt(i + 1));
+          } else {
+            codes = [];
+            for (let i = 0; i < raw.length; i++) codes.push(raw.charCodeAt(i));
+          }
+        } else {
+          const hx = piece.hex.replace(/\s+/g, "");
+          const per = we.codeLen * 2;
+          if (hx.length === 0 || hx.length % per !== 0 || !/^[0-9A-Fa-f]+$/.test(hx)) { blind = true; continue; }
+          codes = [];
+          for (let i = 0; i < hx.length; i += per) codes.push(parseInt(hx.slice(i, i + per), 16));
+        }
+        let ok = true;
+        for (const c of codes) {
+          const w = we.map.get(c) ?? we.def;
+          if (w === undefined || w <= 0) { ok = false; break; }
+          adv += (w / 1000) * piece.ps;
+        }
+        if (!ok) { blind = true; continue; }
+        (piece as { bx?: number }).bx = origin + adv;
+      }
+    }
     // R111-A: the OWN-BINDING chain — the pageMap + candidate resolutions
     // (real font bindings), never the global all-cmaps fallback: the loose
     // first-covering walk produced the dvipdfmx/IRS false-cover class (a
@@ -1745,6 +1916,66 @@ async function extractPdfText(file: File): Promise<string> {
     };
     let out = "";
     let outTail = ""; // the last emitted char — the R115-C whitespace check (a regex on the growing out would be O(n^2))
+    // R117-A: THE SAME-LINE X-GAP COLUMN MOVE — the pre-pass. A stamped pair
+    // at a BLOCK BOUNDARY (different stamp origins) on the SAME baseline
+    // whose left block's width-tracked end (bx — the /W advance post-pass)
+    // sits >= 13 em left of the right block's origin is a COLUMN: pdftotext
+    // breaks the line there (measured on the Typst resume: the 7 column
+    // splits at true gaps 15.1-42.2 em — title|company, description|dates
+    // ×2, cert|year ×2, degree|university), while the highest true-gap JOIN
+    // in the corpus measures 11.78 em (the Prawn chart ticks) — the 13-em
+    // threshold sits in the measured separation band. Three guards, each
+    // born from a measured refutation: the TRAIL license (the left side
+    // carries the writer's OWN trailing space — the R115-B trail or the
+    // R115-A space run; the ReportLab cover's 33.6-em trailless join), the
+    // ALNUM right (>= 2 alphanumeric chars; the IRS "(See instructions.)"
+    // bare-period join at 39.8 em), and the JOIN guard (a condGap/condKern
+    // resolution never upgrades — the r115 re-breaking refutation). The
+    // upgrade REPLACES the writer's trailing-space separation with the
+    // newline (the space-run pieces emit nothing, the trail piece's
+    // trailing spaces strip) so the line lands CLEAN, exactly as pdftotext
+    // reads it — never " \n".
+    const upgrade = new Array<boolean>(decoded.length).fill(false);
+    const dropText = new Set<number>(); // the space-run pieces an upgrade consumes
+    const stripTrail = new Set<number>(); // the left pieces whose trailing writer-space the newline replaces
+    for (let i = 1; i < decoded.length; i++) {
+      const d = decoded[i] as { p: { px?: number; py?: number; ps?: number; bx?: number; condGap?: boolean; condKern?: boolean }; text: string; genuine?: boolean };
+      const e = decoded[i - 1] as { p: { px?: number; py?: number; ps?: number; bx?: number }; text: string };
+      const p = d.p, q = e.p;
+      if (p.px === undefined || p.py === undefined || p.ps === undefined) continue;
+      if (q.px === undefined || q.py === undefined || q.ps === undefined || q.bx === undefined) continue;
+      if (Math.abs(q.px - p.px) < 0.01) continue; // the same block — no boundary
+      if (Math.abs(q.py - p.py) >= 0.5 * Math.max(q.ps, p.ps)) continue; // a cross-line pair — the R116-A territory
+      const gapEm = (p.px - q.bx) / Math.max(q.ps, p.ps);
+      if (gapEm < 13) continue; // the Prawn tick band stays joined
+      // the trail license: walk back over consecutive space runs to the content piece
+      let j = i - 1;
+      let licensed = false;
+      const consumed: number[] = []; // the space runs the upgrade would consume — applied ONLY on success (a rejected upgrade must never drop text: the fusion class)
+      while (j >= 0) {
+        const dj = decoded[j] as { genuine?: boolean; text: string; trail?: boolean };
+        if (dj.genuine === true && dj.text.length > 0 && /^ +$/.test(dj.text)) { licensed = true; consumed.push(j); j--; continue; }
+        if (dj.trail === true) { licensed = true; }
+        break;
+      }
+      if (!licensed) continue;
+      // the alnum guard reads the right BLOCK's whole content — the right side's
+      // first piece may be a single-char TJ atom of a multi-char word (the
+      // resume's "T"+"e"+"chCorp"), so the count walks the stamp-mates forward
+      let alnumRight = 0;
+      for (let k = i; k < decoded.length; k++) {
+        const dk = decoded[k] as { p: { px?: number; py?: number }; text: string };
+        if (dk.p.px === undefined || dk.p.py === undefined) break;
+        if (Math.abs((dk.p.px ?? 0) - (p.px ?? 0)) > 0.01 || Math.abs(dk.p.py - p.py!) > 0.01) break; // the block ended
+        alnumRight += (dk.text.match(/[A-Za-z0-9]/g) ?? []).length;
+      }
+      if (alnumRight < 2) continue; // the bare-period refutation
+      if (p.condGap && hasSpaceGlyphs) continue; // a join never upgrades
+      if (p.condKern && d.genuine) continue; // the kern collapse never upgrades
+      upgrade[i] = true;
+      for (const c of consumed) dropText.add(c);
+      if (decoded[j] !== undefined && (decoded[j] as { trail?: boolean }).trail === true) stripTrail.add(j);
+    }
     decoded.forEach(({ p, text, genuine }, i) => {
       let sep = p.condGap && hasSpaceGlyphs ? "" : p.condKern && genuine ? "" : p.sep;
       // R116-A: THE CM-CARRIED LINE MOVE — a positioned piece pair whose
@@ -1772,8 +2003,11 @@ async function extractPdfText(file: File): Promise<string> {
         if (i > 0 && (isSpaceRun(i - 1) || prevTrail(i - 1))) sep = ""; // R115-A tail / R115-B
         else if (genuine && text.length > 0 && /^ +$/.test(text)) sep = ""; // R115-A head
       }
+      if (upgrade[i]) sep = "\n"; // R117-A: the column move overrides the R115 collapses (the space separation it consumed rides the newline)
       let emit = text;
-      if (isSpaceRun(i) && (outTail === " " || outTail === "\n")) emit = ""; // R115-C
+      if (dropText.has(i)) emit = ""; // R117-A: the consumed space-run separator
+      else if (stripTrail.has(i)) emit = text.replace(/ +$/, ""); // R117-A: the newline replaces the writer's trailing space
+      if (emit === text && isSpaceRun(i) && (outTail === " " || outTail === "\n")) emit = ""; // R115-C
       out += sep + emit;
       const tail = sep + emit;
       if (tail.length > 0) outTail = tail[tail.length - 1];
