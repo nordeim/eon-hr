@@ -242,7 +242,7 @@ DB pristine.
       in the stored cvText, name-first, zero U+FFFD, swept by the REAL id; the DB pristine
 - [x] Build ✓ (116/116) + the 10 screenshots (6 desktop + the mobile-nav pair BOTH
       sides, verified non-blank) + the E2E gate (the standing 559 net)
-- [x] The docs layer (this plan + the narrative docs/session_279.md + the
+- [x] The docs layer (this plan + the narrative docs/session_282.md + the
       AGENTS session-120 layer + the SKILL v4.7.0 §132 + the
       CLAUDE/README/AGENTS count lockstep 1158 + 559 = 1717 + the worklog round-119
       entry with the r121 queue armed)
