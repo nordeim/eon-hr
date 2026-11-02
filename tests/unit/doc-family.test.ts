@@ -171,6 +171,51 @@ describe("doc-family — the stack + count doc claims pin (session 115, the s206
     expect(pad).not.toContain("One envelope for 49 endpoints");
   });
 
+  // Session 119 (D-119b2 — the neo-crm s209 PUSH-RITUAL REMOTE CONTRACT
+  // transferred): the operational push pair (the SSH wrapper + its runbook)
+  // rode the SIBLING REPO's remote (task-management) from the initial
+  // scaffold — every round pushed safely only because the operator's briefs
+  // carry the explicit --remote (the AGENTS session-50 lesson documents the
+  // trap; the stale default was never cured — the correct-and-lucky genus).
+  // The pin reads the remote LIVE from both faces and asserts the canonical
+  // eon-hr contract; either face drifting goes RED.
+  it("carries the canonical eon-hr remote on the wrapper's live faces (the wrapper arm — D-119b2, the s209 transfer)", () => {
+    const wrapper = read("docs/ssh_git_wrapper_v3.py");
+    const canonical = "git@github.com:nordeim/eon-hr.git";
+
+    // DEFAULT_REMOTE read LIVE from the code (a stale default is the genus)
+    const dr = wrapper.match(/DEFAULT_REMOTE\s*=\s*"([^"]+)"/)?.[1];
+    expect(dr, "the wrapper must declare DEFAULT_REMOTE").toBeDefined();
+    expect(dr, `the wrapper's DEFAULT_REMOTE must be the canonical eon-hr remote (live: ${dr})`).toBe(canonical);
+
+    // the docstring's canonical-remote claim + the Options default
+    expect(wrapper, "the docstring must name the canonical remote").toContain(canonical);
+    expect(wrapper, "the Options default must name the canonical remote").toContain(`(default ${canonical})`);
+
+    // the stale-form ban: the sibling repo's remote never rides the wrapper
+    expect(wrapper).not.toContain("nordeim/task-management.git");
+  });
+
+  it("carries the canonical eon-hr remote on the runbook's claim sites (the runbook arm — D-119b2)", () => {
+    const runbook = read("docs/how-to-git-push-using-ssh-wrapper_SKILL.md");
+    const canonical = "git@github.com:nordeim/eon-hr.git";
+
+    // the purpose line, the expected-output block, the variants, the
+    // troubleshooting push-rights + ls-remote lines — every remote claim
+    const claims = runbook.match(/git\@github\.com:nordeim\/[a-z-]+\.git/g) ?? [];
+    expect(claims.length, "the runbook must carry SSH remote claims").toBeGreaterThanOrEqual(4);
+    for (const c of claims) {
+      expect(c, `every runbook remote claim must be the canonical eon-hr remote (live: ${c})`).toBe(canonical);
+    }
+
+    // the cd line checks out THIS repo
+    expect(runbook).toContain("cd eon-hr");
+
+    // the stale-form bans: the sibling repo's remote and folder never ride the runbook
+    expect(runbook).not.toContain("nordeim/task-management.git");
+    expect(runbook).not.toContain("cd task-management");
+  });
+
   it("resolves every bun-run command claim in the live docs (the command arm — D-118b)", () => {
     const scripts = pkg.scripts as Record<string, string>;
     const claimed = new Set<string>();

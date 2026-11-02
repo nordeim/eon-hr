@@ -11,7 +11,7 @@ exit-code semantics of v3 are otherwise unchanged.
 Why this exists
 ---------------
 The repo's canonical remote for pushes is the SSH URL
-(`git@github.com:nordeim/task-management.git`), but cloning happens over
+(`git@github.com:nordeim/eon-hr.git`), but cloning happens over
 HTTPS and sandbox/CI environments rarely have a resident `~/.ssh` identity.
 This wrapper lets an operator push without permanently installing a key:
 
@@ -41,7 +41,7 @@ Usage
 Options
 -------
   --remote <url>    SSH remote to push to
-                    (default git@github.com:nordeim/task-management.git)
+                    (default git@github.com:nordeim/eon-hr.git)
   --branch <name>   Branch to push (default: main — the operator contract for
                     this repo is main-only, no feature branches)
   --set-url         Also persist the SSH URL as origin's push URL in .git/config
@@ -99,7 +99,7 @@ import subprocess
 import sys
 import tempfile
 
-DEFAULT_REMOTE = "git@github.com:nordeim/task-management.git"
+DEFAULT_REMOTE = "git@github.com:nordeim/eon-hr.git"
 DEFAULT_BRANCH = "main"
 OPENSSH_BEGIN = "-----BEGIN OPENSSH PRIVATE KEY-----"
 OPENSSH_END = "-----END OPENSSH PRIVATE KEY-----"

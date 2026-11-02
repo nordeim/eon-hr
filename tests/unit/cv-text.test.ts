@@ -3197,34 +3197,39 @@ describe("cv-text — the same-line x-gap column class (session 117)", () => {
 
   // the born-green guards — the upgrade must NEVER fire on these forms
 
-  it("keeps the space between trail-carrying blocks under the threshold (the Prawn tick guard — R117-A)", async () => {
-    // the measured Prawn chart-tick class: 8pt tick labels 11.78 em apart —
-    // the highest measured true-gap JOIN in the corpus; the threshold sits
-    // at 13 em, over the join band (<= 11.78) and under the split band
-    // (>= 15.1)
+  it("breaks the line between trail-carrying blocks 2.5+ em apart (the Prawn tick form — R119-A, the r118 artifact refutation)", async () => {
+    // the r117 "11.78 em Prawn chart-tick join" — the calibration's
+    // load-bearing JOIN — was EXPOSED by the r118 bbox-layout census as a
+    // nearest-word measurement artifact: no joined numeric pair exists in
+    // the Prawn output (each tick its own line), and the r119 live drift
+    // ledger reads the cured Prawn ticks tick-per-line, matching pdftotext.
+    // The 11.7 em pair now breaks.
     const content =
       typstBlock(50, 750, 9, PAD) + "\n" +
       typstBlock(50, 700, 8, "ticks ") + "\n" +
-      typstBlock(144.2, 700, 8, "nextword"); // (144.2 − (50 + 6×500/1000×8 − 250/1000×8 …)) ≈ 11.7 em — under
+      typstBlock(144.2, 700, 8, "nextword"); // ≈ 11.7 em — the artifact-join band, measured SPLIT
     const file = await fontFixture(content);
     const text = await extractTextFromFile(file);
-    expect(text).toContain("ticks nextword"); // born-green: 11.7 em < 13 — no break
-    expect(text).not.toContain("ticks\nnextword");
+    expect(text).toContain("ticks\nnextword"); // the r119 cure — the artifact join is dead
+    expect(text).not.toContain("ticks nextword");
   });
 
-  it("keeps the space between blocks with no writer trailing space (the trail guard — R117-A)", async () => {
-    // the measured ReportLab cover refutation: "User Guide" → "Table of
-    // contents" — a 33.6 em true-gap pair pdftotext JOINS because the left
-    // block carries NO trailing space; only the writer's OWN space (the
-    // R115-B trail or the R115-A space run) licenses the column move
+  it("breaks the line between trailless blocks 2.5+ em apart (the trail-license retirement — R119-A, the r118 cross-page refutation)", async () => {
+    // the r117 trail license rode the ReportLab cover's "33.6-em trailless
+    // join" — refuted by the r118 census as a CROSS-PAGE adjacency ("User
+    // Guide" ends page 1; "Table of contents" opens page 2 — not a
+    // same-line join). The r119 piece-level census reads the trailless
+    // population in [2.5, 13) em all-SPLIT, and the ReportLab form-field
+    // tables cure through the retirement. The 38.3 em trailless pair now
+    // breaks.
     const content =
       typstBlock(50, 750, 9, PAD) + "\n" +
       typstBlock(50, 700, 10, "SeniorHRManager") + "\n" + // no trailing space: 15×500/1000×10 = 75pt → end 125
-      typstBlock(508, 700, 10, "TechCorp"); // gap (508−125)/10 = 38.3 em — over the threshold, but NO trail
+      typstBlock(508, 700, 10, "TechCorp"); // gap (508−125)/10 = 38.3 em — the license is retired
     const file = await fontFixture(content);
     const text = await extractTextFromFile(file);
-    expect(text).toContain("SeniorHRManager TechCorp"); // born-green: no trail, no column move
-    expect(text).not.toContain("SeniorHRManager\nTechCorp");
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // the r119 cure — the license is retired
+    expect(text).not.toContain("SeniorHRManager TechCorp");
   });
 
   it("keeps the space when the font's widths are unresolvable (the blind guard — R117-A)", async () => {
@@ -3523,6 +3528,235 @@ describe("cv-text — the icon-anchored sub-threshold column class (session 118)
     const file = await fontFixture(content);
     const text = await extractTextFromFile(file);
     expect(text).toContain(`phonenumber\n${ICON_MAIL} mailaddress`); // the icon split — single, clean
+    expect(text).not.toContain("\n\n");
+  });
+});
+
+describe("cv-text — the sub-13 em alnum-rich threshold class (session 119)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // ---- the Typst side (the /W-tracked trail form — the hunt specimen) ----
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const ICON_MAIL = "\uF0E0";
+  const PHRASE = `${PAD} onboardinghires Jun2018Feb2021 phonenumber ${ICON_MAIL} mailaddress nextword trail`;
+  const codeFor = (i: number) => i + 1;
+  const spaceCodes = new Set([...PHRASE].map((c, i) => (c === " " ? codeFor(i) : -1)).filter((x) => x >= 0));
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const wTriple = () =>
+    [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} ${spaceCodes.has(codeFor(i)) ? 250 : 500}`).join(" ");
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+  const typstFixture = (content: string) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /AAAAAA+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 500 /W [${wTriple()}] >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- the ReportLab side (the standard-14 convention — the table-row specimen) ----
+  // A simple Type1 Helvetica with NO /Widths (the viewer-supplies-metrics
+  // contract); the R119-B seeding supplies the AFM byte map. The geometry
+  // mirrors the real form-field tables: the label "fieldFlags" at 7pt
+  // tracks 10 chars x 427.9/1000 x 7 = 29.95pt.
+  const rlBlock = (x: number, y: number, size: number, text: string) =>
+    `BT /f0 ${size} Tf ${x} ${y} Td (${text}) Tj ET`;
+  const rlFixture = (content: string, fontRaw = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>") =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: fontRaw },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 3 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+  const RL_PAD_BLOCK = `${rlBlock(50, 750, 9, "payrolladmincompliancetrainingonboardingspecialistplatform")}\n`;
+
+  // Session 119 (R119-A + R119-B): THE SUB-13 EM ALNUM-RICH THRESHOLD DROP +
+  // THE STANDARD-14 WIDTH TABLES. The fresh separation census (poppler's own
+  // bbox-layout line membership): every join above 1 em lives in [1, 2.05]
+  // em, every pair >= 2.06 em splits — the R117-A 13 em threshold left the
+  // [2.5, 13) em band joined (the Typst description|"Jun 2018" pair at
+  // 4.80 em). The trail license is retired for the class (its load-bearing
+  // refutation — the ReportLab cover's 33.6-em trailless "join" — was a
+  // cross-page adjacency, killed by the r118 census). The standard-14
+  // convention (Helvetica/Times/Courier/Symbol/ZapfDingbats without
+  // /Widths) seeds from the AFM tables — the ReportLab form-field tables
+  // (8.7-9.4 em trailless cells) read cell-per-line like pdftotext.
+  it("breaks the line between same-baseline blocks 2.5-13 em apart (the Typst description|dates form — R119-A)", async () => {
+    // the measured resume geometry scaled to the fixture: the description
+    // "onboardinghires" at (50, 700, 10) tracks 16 x 500/1000 x 10 = 80pt
+    // -> end 130; the space run at 132; the date "Jun2018Feb2021" at
+    // (178, 700, 9) -> the walk-back gap (178 - 130)/10 = 4.8 em — the
+    // sub-13 em hunt class, previously joined
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 10, "onboardinghires") + "\n" +
+      typstBlock(132, 700, 10, " ") + "\n" +
+      typstBlock(178, 700, 9, "Jun2018Feb2021");
+    const file = await typstFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("onboardinghires\nJun2018Feb2021"); // the cure — the clean split, the space run consumed
+    expect(text).not.toContain("onboardinghires Jun2018Feb2021");
+    expect(text).not.toContain("onboardinghires \nJun2018Feb2021");
+  });
+
+  it("breaks the line between trailless standard-14 table cells (the ReportLab fieldFlags form — R119-A + R119-B)", async () => {
+    // the measured form-field table geometry: the label "fieldFlags" at
+    // (100, 700, 7) tracks 427.9/1000 x 7 = 29.95pt -> end 129.95; the
+    // description at (190, 700, 7) -> the TRAILLESS gap (190 - 129.95)/7 =
+    // 8.6 em; the default at (330, 700, 7) past the description's tracked
+    // end — pdftotext reads each cell on its own line
+    const content =
+      RL_PAD_BLOCK +
+      rlBlock(100, 700, 7, "fieldFlags") + "\n" +
+      rlBlock(190, 700, 7, "Blank separated field flags see below") + "\n" +
+      rlBlock(330, 700, 7, "required");
+    const file = await rlFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fieldFlags\nBlank separated field flags see below"); // the trailless label|description split
+    expect(text).toContain("below\nrequired"); // the description|default split
+    expect(text).not.toContain("fieldFlags Blank");
+  });
+
+  it("keeps the [1, 2.5) em band joined (the measured overlap zone — R119-A guard)", async () => {
+    // the arXiv max-join class: a same-baseline pair at 1.9 em — inside the
+    // [1, 2.05] em overlap band where joins live — keeps its space
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 10, "onboardinghires") + "\n" +
+      typstBlock(132, 700, 10, " ") + "\n" +
+      typstBlock(149, 700, 9, "Jun2018Feb2021"); // (149 - 130)/10 = 1.9 em — under the threshold
+    const file = await typstFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("onboardinghires Jun2018Feb2021"); // born-green: the overlap band stays joined
+    expect(text).not.toContain("onboardinghires\nJun2018Feb2021");
+  });
+
+  it("keeps an unknown base font without widths joined (the blind-font conservative guard — R119-B)", async () => {
+    // a font the AFM seeding does not know (an embedded name, no /Widths):
+    // no width table -> no bx -> no gap -> the standing join. A missing
+    // table never misfires, it only cures less.
+    const content =
+      RL_PAD_BLOCK +
+      rlBlock(100, 700, 7, "fieldFlags") + "\n" +
+      rlBlock(190, 700, 7, "Blank separated field flags see below");
+    const file = await rlFixture(content, "<< /Type /Font /Subtype /Type1 /BaseFont /AAAAAA+ObscureFace >>");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fieldFlags Blank separated field flags see below"); // born-green: blind widths — the standing join
+    expect(text).not.toContain("fieldFlags\nBlank");
+  });
+
+  it("keeps a parsed /Widths table authoritative over the AFM seeding (the real-font precedence guard — R119-B)", async () => {
+    // the same Helvetica geometry but WITH a parsed /Widths array whose
+    // wide advances push the tracked end past the right block's origin:
+    // the parsed table wins (the seeding is strictly additive), the gap
+    // reads negative, the pair stays joined
+    const content =
+      RL_PAD_BLOCK +
+      rlBlock(100, 700, 7, "fieldFlags") + "\n" +
+      rlBlock(190, 700, 7, "Blank separated field flags see below");
+    const widths = Array.from({ length: 256 }, () => 1500).join(" ");
+    const file = await rlFixture(
+      content,
+      `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding /FirstChar 0 /Widths [${widths}] >>`
+    );
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fieldFlags Blank separated field flags see below"); // born-green: 10 x 1.5 x 7 = 105 -> end 205 > 190 — no fire
+    expect(text).not.toContain("fieldFlags\nBlank");
+  });
+
+  it("keeps a 1-alnum right block joined (the between-rules guard — R119-A)", async () => {
+    // the alnum guard verbatim: the column rule needs >= 2 alphanumerics on
+    // the right, and the R118-A anchor rule needs ZERO (the icon/punctuation
+    // class — a bare period at 8.6 em splits through the ANCHOR path, the
+    // measured icon doctrine). A 1-alnum right block falls between the two
+    // rules and keeps its space (the real IRS bare-period class rides the
+    // width-blind fonts — its protection is the blindness itself)
+    const content =
+      RL_PAD_BLOCK +
+      rlBlock(100, 700, 7, "fieldFlags") + "\n" +
+      rlBlock(190, 700, 7, "a");
+    const file = await rlFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fieldFlags a"); // born-green: 1 alnum — neither the column nor the anchor rule
+    expect(text).not.toContain("fieldFlags\na");
+  });
+
+  it("keeps a cross-line pair on its standing newline (the R116-A interplay — R119-A guard)", async () => {
+    // a pair a full line step apart AND 8 em over: the same-baseline check
+    // (the R116-A territory) rejects the column rule — ONE newline, the
+    // standing form, never doubled
+    const content =
+      RL_PAD_BLOCK +
+      rlBlock(100, 700, 7, "fieldFlags") + "\n" +
+      rlBlock(190, 690, 7, "Blank separated field flags see below"); // 10/7 = 1.4 em below — a line step
+    const file = await rlFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("fieldFlags\nBlank separated field flags see below"); // the R116-A line step — not the column rule
+    expect(text).not.toContain("fieldFlags\n\nBlank");
+  });
+
+  it("reads a single newline at a zero-alnum anchor 2.5+ em away (the R118-A interplay — R119-A)", async () => {
+    // an icon-anchored pair in the new threshold band: the R119-A alnum
+    // guard rejects the icon (zero alnum) and the R118-A anchor path fires
+    // — the icon joins the FOLLOWING content, the walk-back split lands
+    // clean, never doubled
+    const content =
+      typstBlock(50, 750, 9, PAD) + "\n" +
+      typstBlock(50, 700, 9, "phonenumber") + "\n" +
+      typstBlock(96.25, 700, 9, " ") + "\n" +
+      typstBlock(103.5, 700, 9, " ") + "\n" +
+      typstBlock(146.25, 700, 9, ICON_MAIL) + "\n" + // (146.25 - 96.25)/9 = 5.6 em walk-back — the anchor band
+      typstBlock(150.75, 700, 9, " ") + "\n" +
+      typstBlock(153, 700, 9, "mailaddress");
+    const file = await typstFixture(content);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain(`phonenumber\n${ICON_MAIL} mailaddress`); // the anchor split — single, clean
     expect(text).not.toContain("\n\n");
   });
 });

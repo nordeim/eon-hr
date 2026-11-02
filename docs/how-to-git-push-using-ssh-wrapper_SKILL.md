@@ -1,7 +1,7 @@
 # How-To: Git Push Using the SSH Wrapper (`ssh_git_wrapper_v3.py`)
 
 **Purpose.** Push commits from this checkout to the canonical SSH remote
-`git@github.com:nordeim/task-management.git` using a deploy key that is
+`git@github.com:nordeim/eon-hr.git` using a deploy key that is
 **never stored inside the repository** (`.gitignore` rejects `*.key` and
 `ssh-key.txt`). The wrapper materializes the key into a 0600 temp file
 outside the repo, points `GIT_SSH_COMMAND` at it, authenticates, pushes
@@ -31,7 +31,7 @@ session, generalized.
 ## Field-tested sequence (what actually worked)
 
 ```bash
-cd task-management
+cd eon-hr
 # 0. Gates green and commits already on main (rules 1-3).
 
 # 1. Operator key -> a 0600 file in /tmp, NEVER inside the repo:
@@ -74,10 +74,10 @@ PY
 Expected wrapper output on the real push (v3.1):
 
 ```
-[ssh-git-wrapper] $ git push git@github.com:nordeim/task-management.git HEAD:refs/heads/main
+[ssh-git-wrapper] $ git push git@github.com:nordeim/eon-hr.git HEAD:refs/heads/main
 [ssh-git-wrapper] remote verified: refs/heads/main @ <sha> == local HEAD
 [ssh-git-wrapper] synced refs/remotes/origin/main -> <sha> (git status will now agree)
-[ssh-git-wrapper] OK — pushed HEAD -> git@github.com:nordeim/task-management.git refs/heads/main
+[ssh-git-wrapper] OK — pushed HEAD -> git@github.com:nordeim/eon-hr.git refs/heads/main
 [ssh-git-wrapper] temp key material shredded and removed
 ```
 
@@ -86,11 +86,11 @@ Expected wrapper output on the real push (v3.1):
 ```bash
 # Key piped on stdin (no key file on disk):
 cat /secure/path/to/id_ed25519 | python3 docs/ssh_git_wrapper_v3.py --key-stdin \
-  --remote git@github.com:nordeim/task-management.git
+  --remote git@github.com:nordeim/eon-hr.git
 
 # Key from an environment variable:
 SSH_KEY="$(cat /secure/id_ed25519)" python3 docs/ssh_git_wrapper_v3.py \
-  --remote git@github.com:nordeim/task-management.git
+  --remote git@github.com:nordeim/eon-hr.git
 
 # Persist the SSH URL as origin's push URL for future plain `git push`
 # (idempotent in v3.1 — only re-set when it actually differs):
@@ -157,7 +157,7 @@ the wrapper normally — nothing else changes.
 - **`no ssh binary on PATH`** — the wrapper's own preflight (step 0).
   Install an OpenSSH client, or deploy the Appendix A shim on PATH.
 - **`authentication pre-flight failed`** — the key is wrong, expired, or
-  lacks push rights on `nordeim/task-management`. With OpenSSH present:
+  lacks push rights on `nordeim/eon-hr`. With OpenSSH present:
   `ssh -i /secure/key -T git@github.com` (expect a greeting naming the
   repo). Without one, the cheapest equivalent is the wrapper's own
   `--dry-run` — it exercises exactly the same auth path and fails with the
@@ -173,7 +173,7 @@ the wrapper normally — nothing else changes.
   push** — a URL-based push never updates origin's remote-tracking ref. The
   wrapper syncs it automatically when the pushed remote is the same GitHub
   repository as `origin`; if you pushed somewhere else, verify manually:
-  `git ls-remote git@github.com:nordeim/task-management.git refs/heads/main`
+  `git ls-remote git@github.com:nordeim/eon-hr.git refs/heads/main`
   (shim on PATH) and compare with `git rev-parse HEAD`.
 - **The wrapper's own source looks corrupted when read through agent
   tooling** — some tool-output layers redact the OpenSSH BEGIN delimiter
@@ -186,9 +186,10 @@ the wrapper normally — nothing else changes.
 
 ## Relationship to the repo's git contract
 
-- AGENTS.md: clone remote is `https://github.com/nordeim/task-management.git`;
-  the SSH URL is the push target — this wrapper exists so an agent or CI
-  runner can push without a resident `~/.ssh` identity.
+- The canonical remote is `git@github.com:nordeim/eon-hr.git` (the SSH
+  push target; the clone URL is `https://github.com/nordeim/eon-hr.git`) —
+  this wrapper exists so an agent or CI runner can push without a resident
+  `~/.ssh` identity.
 - CLAUDE.md commit standards apply: Conventional Commits, atomic commits,
   never commit secrets.
 - The verification gate (AGENTS.md "clean check" order) is a precondition —
