@@ -4374,3 +4374,185 @@ describe("cv-text — the leader-dot line re-order class (session 122)", () => {
     expect(text).toContain(" .  .  .  .  . 6 1.1About thisdocument"); // the stream order stands
   });
 });
+
+describe("cv-text — the bare-number re-order classes (session 123)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "rl-toc-residual.pdf", { type: "application/pdf" });
+  }
+
+  // The ReportLab TOC residual anatomy (the r123 hunt, measured on the real
+  // member). TWO residual classes survived the r122 leader-dot cure:
+  //
+  // R123-A — THE SQUEEZED-NUMBER CLASS (the wrapped entry): a long TOC entry
+  // wraps, its leader dots squeeze to zero, and the page number paints as a
+  // BARE number at a TINY ps (the measured 8.3 row: "92" at px 511.5,
+  // ps 5.165607 = 0.43x the entry's ps 12) BEFORE the full entry (px 98,
+  // same baseline) whose tracked end bx 511.5 sits EXACTLY at the number's
+  // start (the gap-0 squeeze). pdftotext reads the number GLUED to the
+  // entry's last word — "8.3 DocPara(...escape=True)92".
+  //
+  // R123-B — THE CHAPTER-HEADER CLASS: the page number paints BEFORE the
+  // title at the FAR-RIGHT page-number column (the measured row: "6" at
+  // px 510.3, ps 14, before "Chapter 1 Introduction" at px 78, same
+  // baseline, the title's bx 218 — the gap 292.3 units = 20.9 em, the
+  // column band). pdftotext reads the title first, the number on its OWN
+  // line (the block assembly) — "Chapter 1 Introduction\n\n6".
+  //
+  // The fire-separation census (the bare-number pairs across the whole
+  // corpus): ReportLab 14 pairs (13 chapter rows + the squeezed row), IRS 1
+  // pair — the f1040 title "25" at px 298 ps 20 before "U.S. Individual
+  // Income Tax Return" at px 97.6 ps 12, the title's bx 283.8, the gap
+  // 1.18 em — INSIDE the contiguity band but the swap measures word-stream
+  // NEUTRAL (the split-year "20 25" construction), a pin drift without a
+  // toward verdict: the ps guard (the number's ps < the entry's ps) is
+  // load-bearing to keep the IRS member IDENTICAL. The two cures are
+  // disjoint on the gap axis (contiguity [-1, +3.5] em vs the column band
+  // >= 13 em — the R117-A threshold doctrine) and double-separated on ps.
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}Chapter 1 Introduction 1.1Wrapped entrytext  .  .  .  .  . 6 92 20 25 U.S.Individual IncomeTax leaderend`;
+  const codeFor = (i: number) => i + 1;
+  const spaceCodes = new Set([...PHRASE].map((c, i) => (c === " " ? codeFor(i) : -1)).filter((x) => x >= 0));
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const wTriple = () =>
+    [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} ${spaceCodes.has(codeFor(i)) ? 250 : 500}`).join(" ");
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+
+  const fontFixture = (content: string, descendantExtra = `/DW 500 /W [${wTriple()}]`) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantExtra} >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- R123-A: the squeezed-number re-order (the wrapped-entry class) ----
+  it("re-orders the squeezed bare number to the entry's end, GLUED (R123-A)", async () => {
+    // the measured 8.3-row geometry, scaled: the entry "1.1Wrapped
+    // entrytext" (19 codes x 500/1000 x 12 = 114pt wide) at (100, 700)
+    // ps 12 -> tracked end 214; the BARE number "92" at ps 5.2 (0.43x —
+    // the tiny-number squeeze) painted FIRST at (214, 700) — the gap-0
+    // contiguity. pdftotext reads "1.1Wrapped entrytext92" (the number
+    // glued to the entry's last word — the geometric adjacency); the
+    // stream order reads "92 1.1Wrapped entrytext".
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(220, 700, 5.2, "92") + "\n" +
+      typstBlock(100, 700, 12, "1.1Wrapped entrytext");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("1.1Wrapped entrytext92"); // ← RED at HEAD: the number paints first, joined with " "
+    expect(text).not.toContain("92 1.1Wrapped entrytext");
+  });
+
+  it("keeps the BOXED-PAIR number in stream order (the IRS year-box fire-separation guard — R123-B)", async () => {
+    // the measured IRS f1040 title row: TWO bare numbers — "20" then
+    // "25" — painted at the SAME origin (px 298, py 748.7, ps 20: the
+    // split-year box construction) BEFORE the title "U.S. Individual
+    // Income Tax Return" at ps 12, the title's end 1.18 em back. The
+    // chapter pass's ps axis alone does NOT block this pair (ps 20 >=
+    // 12) — THE BOXED-PAIR GUARD is the load-bearing refutation: a
+    // number immediately preceded by a same-origin piece is a boxed
+    // pair, never a page-number column. The swap there measures
+    // word-stream NEUTRAL (the split-year "20 25" form: pdftotext reads
+    // the glued "2025") — a pin drift without a toward verdict — so
+    // the IRS member stays IDENTICAL.
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(260, 700, 20, "20") + "\n" +
+      typstBlock(260, 700, 20, "25") + "\n" +
+      typstBlock(100, 700, 12, "U.S.Individual IncomeTax");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("25 U.S.Individual IncomeTax"); // the stream order stands — the boxed-pair guard
+    expect(text).not.toContain("U.S.Individual IncomeTax\n25");
+  });
+
+  // ---- R123-B: the chapter-header re-order (the number-before-title class) ----
+  it("re-orders the far-right bare number after the title, on its OWN line (R123-B)", async () => {
+    // the measured chapter-row geometry: the title "Chapter 1
+    // Introduction" (20 nonspace codes x 500 + 2 spaces x 250)/1000 x
+    // 14 = 147pt at (78, 674.9) ps 14 -> tracked end 225; the bare
+    // number "6" at ps 14 painted FIRST at (524, 674.9) — the gap 299
+    // units = 21.4 em, the FAR-RIGHT page-number column (the R117-A
+    // column band, >= 13 em). pdftotext reads "Chapter 1 Introduction"
+    // then the number on its own line.
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(524, 674.9, 14, "6") + "\n" +
+      typstBlock(78, 674.9, 14, "Chapter 1 Introduction");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("Chapter 1 Introduction\n6"); // ← RED at HEAD: the number paints first on the title's line
+    expect(text).not.toContain("6 Chapter 1 Introduction");
+  });
+
+  it("re-orders a mid-gap bare number at the entry's ps (the gap-axis refutation — R123-B)", async () => {
+    // the in-round refutation: the FIRST design guarded the gap (>= 13
+    // em, the R117-A column band) and the real member's LONG titles left
+    // gaps of 1-12.5 em (Chapter 5's title ends 1.01 em from its
+    // right-aligned number) — the gap axis is NOT the chapter class's
+    // invariant. A mid-gap number at the entry's OWN ps re-orders like
+    // any column number: the entry's tracked end 217, the number at
+    // (316, 700) ps 12 -> the gap 8.25 em — the rewritten doctrine.
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(316, 700, 12, "6") + "\n" +
+      typstBlock(100, 700, 12, "1.1Wrapped entrytext");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("1.1Wrapped entrytext\n6"); // the column re-order fires — the gap axis refuted
+    expect(text).not.toContain("6 1.1Wrapped entrytext");
+  });
+
+  it("keeps the r122 leader-dot class firing unchanged (the disjointness guard — R123-A/B)", async () => {
+    // the r122 dots-leader shape still re-orders after the two new
+    // bare-number passes join the pre-pass chain — the three shapes are
+    // pairwise disjoint (dots >= 2 vs bare digits vs neither).
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(230.4, 654.9, 12, " .  .  .  .  . 6") + "\n" +
+      typstBlock(98, 654.9, 12, "1.1Wrapped entrytext");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("1.1Wrapped entrytext  .  .  .  .  . 6");
+  });
+});

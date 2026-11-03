@@ -2227,6 +2227,117 @@ async function extractPdfText(file: File): Promise<string> {
       const tp = (decoded[i] as { p?: { sep?: string } }).p;
       if (tp) tp.sep = " ";
     }
+    // R123-A/B: THE BARE-NUMBER LINE RE-ORDERS — the pre-pass pair (session
+    // 123, the ReportLab TOC residuals that survived the r122 leader-dot
+    // cure). The TOC writer paints the page number BEFORE the entry in TWO
+    // residual shapes the dots-leader guard never matched (a bare number
+    // carries no dots):
+    //
+    // R123-A — THE SQUEEZED-NUMBER CLASS (the wrapped entry): a long TOC
+    // entry wraps, its leader dots squeeze to zero, and the page number
+    // paints as a BARE number at a TINY ps (the measured 8.3 row: "92" at
+    // px 511.5, ps 5.165607 = 0.43x the entry's ps 12) before the full
+    // entry whose tracked end bx sits EXACTLY at the number's start (the
+    // gap-0 squeeze). The contiguity window is the r122 band verbatim, and
+    // the ps guard is load-bearing: the IRS f1040 title pair ("25" at ps
+    // 20 before "U.S. Individual Income Tax Return" at ps 12, the title's
+    // end 1.18 em back) ALSO sits in the contiguity band, and the swap
+    // there measures word-stream NEUTRAL (the split-year "20 25" form:
+    // pdftotext reads the glued "2025") — a pin drift without a toward
+    // verdict. Only the TINY number fires: np.ps < ep.ps.
+    //
+    // R123-B — THE CHAPTER-HEADER CLASS: the page number paints BEFORE the
+    // title right-aligned in the page-number column (the measured rows:
+    // "6" at px 510.3 / "11" at px 503.3, ps 14 — every number's bx
+    // 517.3, the column's right edge — before the title at px 78, same
+    // baseline). The FIRST design guarded the gap (>= 13 em, the R117-A
+    // column band) — measured REFUTED in-round: the long titles leave gaps
+    // of 1-12.5 em (Chapter 5's title ends 1.01 em from its number), so
+    // the gap axis is NOT the class's invariant. The load-bearing guards:
+    // (1) the ps axis — the chapter numbers render at the title's OWN ps
+    // (np.ps >= ep.ps; the squeezed class's tiny numbers never fire here,
+    // keeping the two passes disjoint); (2) THE BOXED-PAIR GUARD — the IRS
+    // year-box construction paints "20" then "25" at the SAME origin
+    // (px 298, py 748.7, ps 20) before the title, and a number immediately
+    // preceded by a same-origin piece is a boxed pair, never a column
+    // number (the measured IRS refutation — without this guard the IRS
+    // pair fires at ps 20 >= 12 and drifts neutral); (3) the overlap floor
+    // — the number's px must sit at/past the entry's tracked end (a column
+    // number never overlaps the title's glyphs; belt-and-suspenders, no
+    // measured member exercises it — the r121-M3 doctrine). pdftotext's
+    // block assembly reads the number on its OWN line after the title.
+    //
+    // The three passes are pairwise disjoint: a dots piece (>= 2 dots) is
+    // never a bare number; a bare number (1-3 digits, no dots, no letters)
+    // is never a dots piece; the squeezed (ps <) and chapter (ps >=) passes
+    // never share a pair. The fire-separation census (the whole corpus,
+    // re-run after the redesign): ReportLab 14 pairs (13 chapter rows + 1
+    // squeezed row — the chapter pass takes the 13, the squeezed pass the
+    // 1), IRS 1 pair (blocked by the boxed-pair guard), zero on the other
+    // five members.
+    for (let pass = 0; pass < 2; pass++) {
+      const squeezed = pass === 0;
+      for (let i = 1; i < decoded.length; i++) {
+        const num = decoded[i - 1] as { text?: string; p?: { px?: number; py?: number; ps?: number } };
+        const entry = decoded[i] as { text?: string; p?: { px?: number; py?: number; ps?: number; bx?: number } };
+        const nt = (num.text ?? "").trim();
+        // the bare-number shape: 1-3 digits, nothing else — never dots
+        // (the r122 class), never letters (the IRS date-box alnum fields)
+        if (!/^\d{1,3}$/.test(nt)) continue;
+        // the entry: real alnum content
+        const et = entry.text ?? "";
+        if ((et.match(/[A-Za-z0-9]/g) ?? []).length < 4) continue;
+        const np = num.p, ep = entry.p;
+        if (!np || !ep) continue;
+        if (np.px === undefined || np.py === undefined || np.ps === undefined) continue;
+        if (ep.px === undefined || ep.py === undefined || ep.ps === undefined) continue;
+        // same baseline only — a cross-line pair is the R116-A territory
+        if (Math.abs(np.py - ep.py) >= 0.5 * Math.max(np.ps, ep.ps)) continue;
+        // the entry sits LEFT of the number (the phase-shift signature)
+        if (ep.px >= np.px) continue;
+        // the number must sit at/past the entry's tracked end (the overlap
+        // floor — a column number never overlaps the title's glyphs)
+        if (ep.bx === undefined) continue;
+        if (np.px < ep.bx - Math.max(np.ps, ep.ps)) continue;
+        if (squeezed) {
+          // R123-A: the contiguity band + the TINY-ps guard (the IRS
+          // fire-separation — a LARGER-ps number never fires)
+          const gapEm = (np.px - ep.bx) / Math.max(np.ps, ep.ps);
+          if (gapEm < -1 || gapEm > 3.5) continue;
+          if (np.ps >= ep.ps) continue;
+        } else {
+          // R123-B: the ps axis (the chapter numbers render at the title's
+          // OWN ps — the tiny squeezed numbers never fire here) ...
+          if (np.ps < ep.ps) continue;
+          // ... and THE BOXED-PAIR GUARD: a number immediately preceded by
+          // a same-origin piece (the IRS "20"+"25" year-box construction,
+          // both at px 298 py 748.7) is a boxed pair, never a column
+          // number — the measured IRS refutation
+          if (i >= 2) {
+            const prev = decoded[i - 2] as { text?: string; p?: { px?: number; py?: number; ps?: number } };
+            const pt = (prev.text ?? "").trim();
+            const pp = prev.p;
+            if (pp && pp.px !== undefined && pp.py !== undefined && pp.ps !== undefined) {
+              if (/^\d{1,3}$/.test(pt) && Math.abs(pp.px - np.px) < 0.1 * Math.max(pp.ps, np.ps) && Math.abs(pp.py - np.py) < 0.1 * Math.max(pp.ps, np.ps)) continue;
+            }
+          }
+        }
+        const tmp = decoded[i - 1];
+        decoded[i - 1] = decoded[i];
+        decoded[i] = tmp;
+        // the number now follows its same-baseline entry: its walk-time
+        // separator (decided against the stream's previous piece — a
+        // DIFFERENT row's content) no longer applies at this position.
+        // R123-A: the gap-0 squeeze means the number sits EXACTLY at the
+        // entry's end — pdftotext glues it to the entry's last word (the
+        // measured "escape=True)92" form), so the sep resets to "".
+        // R123-B: the number floats in its own far-right column — pdftotext
+        // reads it on its OWN line after the title, so the sep resets to
+        // "\n" (the block form).
+        const tp2 = (decoded[i] as { p?: { sep?: string } }).p;
+        if (tp2) tp2.sep = squeezed ? "" : "\n";
+      }
+    }
     let out = "";
     let outTail = ""; // the last emitted char — the R115-C whitespace check (a regex on the growing out would be O(n^2))
     // R117-A: THE SAME-LINE X-GAP COLUMN MOVE — the pre-pass. A stamped pair

@@ -1,7 +1,7 @@
-**Version:** 4.9.0 (session-121 close + session-122 — the login semi-island + TOC dot-order round: THE LOGIN SEMI-ISLAND MIRROR [the neo-crm s211 genus transferred — the platform's design-system island decoded LIVE on the eon reference: the <div data-ds="base44" data-theme="light"> wrapper around the social group + or-divider, the Wix Madefor Text webfont rendering the label spans 164.3px vs the system stack's 172.5 (the typeface itself, the icon+label group +4.1px), the sem-var class construction; the icons already exact; the cure construction-for-construction: the self-hosted woff2 md5-identical to the reference's own latin subset + the @font-face + the TIGHT island block (the six sem vars + --font-body ONLY — never the platform's full palette) + the island wrapper + the sem-var classes; the zero-webfont doctrine amended at its LIVE claim sites with the island-exception clause] · THE REPORTLAB TOC DOT-ORDER CURE [the r122 queue's named ORDER class, the r116 carry-over: each TOC row paints the dot-leader + page number BEFORE the entry on the same baseline — the stream order read the leader first where pdftotext's x-order reads the entry first; the cure: the NARROW leader-dot line re-order (a dots-only piece >= 2 dots — the measured TOC minimum, a long entry squeezes its leader to two — followed same-baseline by an alnum entry at smaller px with the leader's start within [-1,+3.5] em of the entry's tracked end); the r116 global x-sort refutation (the IRS date-box rearrangement) does not apply — the narrow shape can never match; 87 rows re-ordered, the similarity 0.8947 -> 0.9076 TOWARD, alnums exact] · the drift ledger zero-away [6 corpus members IDENTICAL + ReportLab TOWARD + ALL 16 family members EXACT] · the mutation matrix M1 1 · M2 0 [the contiguity guard subsumes the IRS class on the fixture surface — the shape guard's exclusive surface EMPTY, documented] · M3 1 · M4 0 [the fixture's leader sep rides the emission-time upgrade; the sep reset load-bearing only on the real-member Td form] · GREEN 1169/1169 + E2E 565/565)
+**Version:** 4.10.0 (session-122 close + session-123 — the security-bump + bare-number re-order round: THE NOVEMBER 4 SECURITY BUMP [next@16.4.5 — seven moderates incl. the cross-client response injection in self-hosted apps, this repo's own deployment form; the r121 doctrine: a security release ships same-round] · THE BARE-NUMBER RE-ORDERS [the two ReportLab TOC residual shapes the r122 dots-leader cure never touched: the SQUEEZED-NUMBER class (the wrapped 8.3 row — a bare number at ps 5.165607 = 0.43x the entry's, its px at the entry's tracked end, the gap-0 squeeze; the cure glues, sep "" — pdftotext's escape=True)92 form) and the CHAPTER-HEADER class (the 13 chapter rows + the self-referential TOC row — the number right-aligned in the page-number column before the title; the cure swaps and breaks the line, sep "\n") — THE GAP-AXIS REFUTATION (the first design's >= 13-em column-band guard failed on the same member's 1-12.5-em rows: measure the WHOLE class before pinning a threshold) · THE BOXED-PAIR GUARD (the IRS year-box's same-origin "20"+"25" pair — the sole guard keeping the IRS member IDENTICAL, its swap word-stream neutral) · the drift ledger zero-away (6 IDENTICAL + ReportLab TOWARD 0.9076 -> 0.9080, alnums exact, 16 family members EXACT) · the mutation matrix M1 1 · M2 1 · M3 2 · M4 1 · M5 3 · GREEN 1174/1174 + E2E 565/565] — [the session-122 layer:] THE LOGIN SEMI-ISLAND MIRROR [the neo-crm s211 genus transferred — the platform's design-system island decoded LIVE on the eon reference: the <div data-ds="base44" data-theme="light"> wrapper around the social group + or-divider, the Wix Madefor Text webfont rendering the label spans 164.3px vs the system stack's 172.5 (the typeface itself, the icon+label group +4.1px), the sem-var class construction; the icons already exact; the cure construction-for-construction: the self-hosted woff2 md5-identical to the reference's own latin subset + the @font-face + the TIGHT island block (the six sem vars + --font-body ONLY — never the platform's full palette) + the island wrapper + the sem-var classes; the zero-webfont doctrine amended at its LIVE claim sites with the island-exception clause] · THE REPORTLAB TOC DOT-ORDER CURE [the r122 queue's named ORDER class, the r116 carry-over: each TOC row paints the dot-leader + page number BEFORE the entry on the same baseline — the stream order read the leader first where pdftotext's x-order reads the entry first; the cure: the NARROW leader-dot line re-order (a dots-only piece >= 2 dots — the measured TOC minimum, a long entry squeezes its leader to two — followed same-baseline by an alnum entry at smaller px with the leader's start within [-1,+3.5] em of the entry's tracked end); the r116 global x-sort refutation (the IRS date-box rearrangement) does not apply — the narrow shape can never match; 87 rows re-ordered, the similarity 0.8947 -> 0.9076 TOWARD, alnums exact] · the drift ledger zero-away [6 corpus members IDENTICAL + ReportLab TOWARD + ALL 16 family members EXACT] · the mutation matrix M1 1 · M2 0 [the contiguity guard subsumes the IRS class on the fixture surface — the shape guard's exclusive surface EMPTY, documented] · M3 1 · M4 0 [the fixture's leader sep rides the emission-time upgrade; the sep reset load-bearing only on the real-member Td form] · GREEN 1169/1169 + E2E 565/565)
 > [the session-121 layer:] 
 > [the session-120 layer:] **Version:** 4.7.0 (session-119 close + session-120 — the width-blind elimination round: the fresh-clone reproducibility cure [the neo-crm s210 checkout-portability genus — 23 census scripts imported /tmp protos, build/tsc RED on any reset; the committed census proto scripts/protos/cv-text-proto.ts = the source + two documented insertions, regenerated by sync-proto.mjs, pinned by tests/unit/script-portability.test.ts: the ban arm + the sync arm + the surface arm] · THE WIDTH-BLIND TAXONOMY MEASURED AND CURED: the indirect /Widths + /W arrays [the deferred post-walk resolution — the ObjStm bodies kept + the bracket-balanced raw scan], the general-name font bindings [the WeasyPrint subset-tag pure-pair-dicts, the IRS T1_0 / QUARTZ Tc1 forms], the pageMap-less fallback [the candidate chain's first width-carrying object; a page map that lacks the font stays blind] · THREE STACKED TRACKING ERRORS exposed by the un-blinding and cured: the KERN-SIGN INVERSION [a TJ number displaces by -K/1000 x ps — ISO 32000-1 9.4.3; the word-gap kerns moved the tracked end BACKWARD, manufacturing phantom 3-9 em gaps — the resume2 under-tracking's mechanism, its inter-block form cured], THE Tw/Tz BLINDNESS [Prawn justifies by Tw with real 0x20 bytes inside the atoms — 1.16165 Tw adds ~11.6pt/space; the walk's two new regex arms + the post-pass], THE TOC LEADER ANCHORS [the R118-A leader-run guard — an anchor followed by the SAME text at a 0-3 em step is a leader, never a split; the icon class leads DIFFERENT content and keeps firing] · THE DRIFT LEDGER: TOWARD on four members [arXiv +4.6bp · dvipdfmx +2.1bp · fontspec +9.8bp · WeasyPrint +10.2bp], IDENTICAL everywhere else, ZERO AWAY across the 29-member corpus; the bx coverage: dvipdfmx/fontspec/QUARTZ/Prawn/WeasyPrint 100% · arXiv 97.3% · IRS 94.7% · GREEN 1158/1158, the mutation matrix M1 4 · M2-M6 2 · DM1/DM2 1; arXiv/dvipdfmx/fontspec re-pinned at the cured md5s, alnums exact; the WeasyPrint CV through the live upload flow: dateSplit TRUE x2 in the stored cvText)
-> **State:** 1169 unit + 565 E2E tests green, lint/typecheck/build
+> **State:** 1174 unit + 565 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -6723,3 +6723,67 @@ properly, the foreground otherwise. The arXiv first pass truncates
 silently (curl's exit code lies) — verify the byte size against the pin.
 And a Node Buffer under Bun's vitest path carries no `charCodeAt` —
 index it.
+
+## §135. The security-bump + bare-number re-order round (session 123) — the second November security release, and the two residual shapes the dots-leader cure never touched
+
+Two materials again. The lead item came from the patch watch:
+`next@16.4.5` landed as latest — a SECOND security release the day after
+16.4.4 (seven moderates: the cross-tenant `use cache` disclosure family,
+the cross-user binary-args poisoning, the SVG rejection bypass, the
+HttpOnly cookie exposure — and the cross-client response injection in
+SELF-HOSTED apps, the standalone deployment form this repo ships). The
+r121 doctrine applies verbatim: a security release ships same-round
+(`bun add next@^16.4.5` + `eslint-config-next@^16.4.5`, the full gate
+chain on the bumped tree before the hunt began).
+
+**The hunt: the two residual shapes.** The r122 leader-dot cure re-ordered
+the dots-carrying TOC rows — but TWO shapes survived, both painted the
+page number BEFORE the entry with NO dots for the shape guard to match:
+
+- **The squeezed-number class** (the wrapped entry): the 8.3 row's page
+  number renders as a bare number at a TINY ps (5.165607 = 0.43× the
+  entry's 12) whose px sits EXACTLY at the entry's tracked end — the long
+  entry consumed the whole line, the leader dots squeezed to zero, the
+  number shrunken into the sliver. pdftotext GLUES it to the entry's last
+  word (`escape=True)92`); the cure glues (the sep resets to `""`).
+- **The chapter-header class**: the 13 chapter/appendix rows + the
+  self-referential TOC row paint the number right-aligned in the
+  page-number column (every number's bx 517.3) before the title.
+  pdftotext's block assembly reads the number on its OWN line after the
+  title; the cure swaps and breaks the line (the sep resets to `"\n"`).
+
+**The round's design lesson — the gap-axis refutation.** The first
+chapter-class design guarded the gap (≥ 13 em, the R117-A column band,
+measured on the FIRST chapter row's 20.9-em geometry) — and the real
+member refuted it in-round: the long titles leave gaps of 1-12.5 em
+(Chapter 5's title ends 1.01 em from its number), and 4 rows stayed
+uncured. **Measure the WHOLE class before pinning a threshold** — one
+row's geometry is an anecdote, the class's full range is the invariant.
+The load-bearing guards that survived: the ps axis (the chapter numbers
+render at the title's OWN ps, keeping the squeezed and chapter passes
+disjoint) and THE BOXED-PAIR GUARD — the IRS f1040 year-box paints "20"
+then "25" at the SAME origin, and a number immediately preceded by a
+same-origin piece is a boxed pair, never a column number. The IRS pair
+sits INSIDE the contiguity band with ps ≥ — the swap measures word-stream
+NEUTRAL there (pdftotext reads the glued "2025"), a pin drift without a
+toward verdict — so the guard is the sole thing keeping the IRS member
+IDENTICAL, and its mutation proves it (M4 = exactly 1 RED).
+
+**The measured cure**: the number-first rows 14 → 1 (the sole remainder
+the cover address block, correctly in stream order); the similarity
+0.9076 → 0.9080 TOWARD; alnums exact; the IRS pin held; all 16 family
+members EXACT. The mutation matrix exact (M1 1 · M2 1 · M3 2 · M4 1 ·
+M5 3 — the runner resyncs the proto after every mutation so the sync arm
+stays green by construction; the behavioral specs are the measured
+surface).
+
+**The round's traps.** The animation-in-flight capture: the first
+dashboard pair diffed 28.9% — the reference's cards animate in on load,
+and the capture caught mid-flight frames; the settle-wait re-capture
+read the standing 1-pixel parity. Always re-capture on a >1% shock
+before diagnosing. The tool-timeout E2E: the ~11-minute full run against
+the 10-minute tool cap — the 3-chunk foreground split (200 + 187 + 180,
+zero failures). And the cvText upload cap: the CV surface's 20,000-char
+validation boundary rejects the 129-page manual's 291,107-char
+extraction with a silent-toast 400 — live-verify with CV-SIZED members;
+the hunt member's verification stays at the corpus layer.
