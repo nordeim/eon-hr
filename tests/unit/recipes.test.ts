@@ -3811,10 +3811,10 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(btn).not.toContain("transition-colors");
   });
 
-  it("R38-F1: the three social buttons are REF's family (session-40 amendment — the redeploy DROPPED the type attr: REF renders no type on any of the three; they sit outside the form so it was inert; session-121 amendment — the 85th deploy moved the family from cool slate to warm neutrals: text #0F0E0E, border #E9E6E0, hover #F1EEEA/#DDD8D2), REF's exact class list with text-[16px] + group", () => {
+  it("R38-F1: the three social buttons are REF's family (session-40 amendment — the redeploy DROPPED the type attr: REF renders no type on any of the three; they sit outside the form so it was inert; session-121 amendment — the 85th deploy moved the family from cool slate to warm neutrals: text #0F0E0E, border #E9E6E0, hover #F1EEEA/#DDD8D2; session-122 amendment — the platform's design-system island took the block: the class strings now ride the island's sem vars, the vars resolving to the same warm hexes), REF's exact class list with text-[16px] + group", () => {
     expect(
       login39.match(
-        /className="w-full flex items-center justify-center gap-3 bg-white text-\[#0F0E0E\] px-5 py-3\.5 rounded-xl border border-\[#E9E6E0\] hover:bg-\[#F1EEEA\] hover:border-\[#DDD8D2\] hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
+        /className="w-full flex items-center justify-center gap-3 bg-\[var\(--sem-surface-interactive-white-default\)\] text-\[color:var\(--sem-text-icon-primary\)\] px-5 py-3\.5 rounded-xl border border-\[var\(--sem-border-light-default\)\] hover:bg-\[var\(--sem-surface-interactive-white-hover\)\] hover:border-\[var\(--sem-border-default-default\)\] hover:shadow-sm transition-all duration-200 font-medium text-\[16px\] group"/g
       )?.length
     ).toBe(3);
     expect(login39.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
@@ -3847,13 +3847,13 @@ describe("session-39 login re-audit contracts (parity round 38 — the redeploy)
     expect(login39).toMatch(/<span className="font-medium text-slate-700">Sign up<\/span>/);
   });
 
-  it("R38-K1: the or-divider is REF's continuous-line + white-chip pattern (the absolute 1px slate-200 line + the centered bg-white px-3 chip; session-121 amendment — the 85th deploy moved the chip TEXT from slate-500 to the neutral #5D5D5D; the LINE stays slate-200)", () => {
+  it("R38-K1: the or-divider is REF's continuous-line + white-chip pattern (the absolute 1px slate-200 line + the centered chip; session-121 amendment — the 85th deploy moved the chip TEXT from slate-500 to the neutral #5D5D5D; the LINE stays slate-200; session-122 amendment — the chip rides the island's sem vars: bg --sem-surface-interactive-white-default, text --sem-text-icon-secondary → #5D5D5D)", () => {
     expect(login39).toMatch(/<div className="relative my-6" role="separator" aria-label="or">/);
     expect(login39).toMatch(
       /<div data-orientation="horizontal" role="none" className="shrink-0 h-\[1px\] w-full bg-slate-200" \/>/
     );
     expect(login39).toMatch(
-      /<span className="bg-white px-3 text-\[#5D5D5D\] font-medium tracking-wider">or<\/span>/
+      /<span className="bg-\[var\(--sem-surface-interactive-white-default\)\] px-3 text-\[color:var\(--sem-text-icon-secondary\)\] font-medium tracking-wider">or<\/span>/
     );
   });
 
@@ -3909,9 +3909,9 @@ describe("session-40 shell restructure + input migration + careers org-view (par
 
   // --- A. the login redeploy re-audit ---
 
-  it("R39-A1: the three social buttons carry NO type attribute (the redeploy's change — REF renders type:null on all three; the buttons sit outside the form so the attribute was inert; session-121 amendment — the class anchor carries the 85th-deploy warm text #0F0E0E)", () => {
+  it("R39-A1: the three social buttons carry NO type attribute (the redeploy's change — REF renders type:null on all three; the buttons sit outside the form so the attribute was inert; session-121 amendment — the class anchor carries the 85th-deploy warm text; session-122 amendment — the anchor rides the island's sem-var bg token)", () => {
     expect(login40.match(/<button[^>]*type="submit"[^>]*className="w-full flex items-center/g)?.length ?? 0).toBe(0);
-    expect(login40.match(/className="w-full flex items-center justify-center gap-3 bg-white text-\[#0F0E0E\]/g)?.length).toBe(3);
+    expect(login40.match(/className="w-full flex items-center justify-center gap-3 bg-\[var\(--sem-surface-interactive-white-default\)\] text-\[color:var\(--sem-text-icon-primary\)\]/g)?.length).toBe(3);
   });
 
   it("R39-B1: the theme boot is LOGIN-INERT — REF's login preserves darkMode/app_lang but never applies html.dark/dir (live-probed both sides); the boot returns early on /login BEFORE either applier", () => {
@@ -4363,11 +4363,12 @@ describe("session-43 login redeploy re-audit (parity round 42 — the input base
 
   // --- C. the w-full column restructure ---
 
-  it("R42-C1: the w-full column has THREE direct children — the social space-y-3 group (buttons only), the my-6 divider, the form (REF's live-counted shape; the clone's nested single space-y-3 wrapper retired)", () => {
+  it("R42-C1: the w-full column has THREE effective children — the social space-y-3 group (buttons only), the my-6 divider, the form (REF's live-counted shape; the clone's nested single space-y-3 wrapper retired; session-122 amendment — the island wrapper carries [the group + the divider] as ONE block, the form its sibling — the same effective three, the margin math passing through the classless block)", () => {
     // the social group (space-y-3) wraps ONLY the three buttons: the
     // group's opening tag is the last space-y-3 before the Google label,
     // and its closing tag lands right after the Apple button (before the
-    // divider + the form — both then direct children of the w-full column).
+    // divider + the form — both then outside the group, inside or after
+    // the island).
     const googleIdx = login43.indexOf("Continue with Google");
     const appleIdx = login43.indexOf("Continue with Apple");
     const groupOpenIdx = login43.lastIndexOf('className="space-y-3"', googleIdx);
@@ -4377,8 +4378,10 @@ describe("session-43 login redeploy re-audit (parity round 42 — the input base
     const groupSlice = login43.slice(groupOpenIdx, appleIdx);
     expect(groupSlice).not.toContain("<form");
     // after the Apple button: the divider (relative my-6) comes FIRST,
-    // then the form — both outside the group
-    const afterApple = login43.slice(appleIdx, appleIdx + 1600);
+    // then the form — both outside the group (the session-122 window
+    // widened 1600 → 2600: the island's comment block + the wrapper's
+    // closing tag pushed the form past the old fixture window)
+    const afterApple = login43.slice(appleIdx, appleIdx + 2600);
     const dividerAt = afterApple.indexOf('className="relative my-6"');
     const formAt = afterApple.indexOf("<form");
     expect(dividerAt).toBeGreaterThan(-1);
@@ -7729,5 +7732,79 @@ describe("session95 — the with-data recruitment-family round", () => {
     expect(recruitmentPage).not.toContain('id="cv-text"');
     expect(recruitmentPage).not.toContain('id="cv-name"');
     expect(recruitmentPage).not.toContain("Analyze CV");
+  });
+});
+
+describe("session-122 login semi-island (parity round 121 — the neo-crm s211 genus transfer)", () => {
+  /* Round 121's opening read decoded the platform's design-system island
+     LIVE on the eon reference (the same genus neo-crm's s211 cured — the
+     Base44 platform re-wrapped the login social block): the
+     <div data-ds="base44" data-theme="light"> wrapper around [the social
+     group + the or-divider] (the form its SIBLING), the Wix Madefor Text
+     webfont rendering the button label spans (164.3px vs the system
+     stack's 172.5 — the icon+label group +4.1px), and the sem-var class
+     construction (the vars resolve to the session-121 warm hexes — the
+     measured-hex pins were color-correct, construction-different). The
+     scope verified live: ONLY the island members render the webfont (the
+     h1/labels/inputs stay the system stack); the brand SVGs were already
+     exact on both sides. The tight-mirror doctrine (neo-crm s211): pin
+     ONLY what the island's own subtree consumes — NOT the platform's
+     full token palette. */
+
+  const login122 = read("src", "app", "login", "page.tsx");
+  const globals122 = globalsCss;
+  const softBuf = (fn: () => Buffer): Buffer => {
+    try { return fn(); } catch { return Buffer.alloc(0); }
+  };
+  const fontBytes = softBuf(() =>
+    readFileSync(join(process.cwd(), "public", "fonts", "wix-madefor-text-latin.woff2"))
+  );
+
+  const SEM_BUTTON_CLASS =
+    'className="w-full flex items-center justify-center gap-3 bg-[var(--sem-surface-interactive-white-default)] text-[color:var(--sem-text-icon-primary)] px-5 py-3.5 rounded-xl border border-[var(--sem-border-light-default)] hover:bg-[var(--sem-surface-interactive-white-hover)] hover:border-[var(--sem-border-default-default)] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"';
+
+  it("R122-A1: the island wrapper — data-ds=\"base44\" data-theme=\"light\" around [the social group + the or-divider], the form its SIBLING (the reference's exact DOM, verified live)", () => {
+    expect(login122).toMatch(/<div data-ds="base44" data-theme="light">/);
+    // the wrapper opens BEFORE the social group's space-y-3 and closes
+    // AFTER the or-divider — the form sits outside it
+    const islandIdx = login122.indexOf('<div data-ds="base44" data-theme="light">');
+    const socialIdx = login122.indexOf('<div className="space-y-3">');
+    const dividerIdx = login122.indexOf('<div className="relative my-6"');
+    const formIdx = login122.indexOf('id="email"');
+    expect(islandIdx).toBeGreaterThanOrEqual(0);
+    expect(islandIdx).toBeLessThan(socialIdx);
+    expect(socialIdx).toBeLessThan(dividerIdx);
+    expect(dividerIdx).toBeLessThan(formIdx);
+    // the wrapper is the ONLY island on the page (the signup view swaps
+    // the trio wholesale — no second wrapper)
+    expect(login122.match(/<div data-ds="base44"/g)?.length).toBe(1);
+  });
+
+  it("R122-A2: the three social buttons carry the reference's exact sem-var class strings (the vars resolve to the session-121 warm hexes — construction parity, the hex pins' computed values unchanged)", () => {
+    expect(login122.match(new RegExp(SEM_BUTTON_CLASS.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"))?.length).toBe(3);
+    // the measured-hex forms are retired (the sem vars own the surface now)
+    expect(login122).not.toMatch(/bg-white text-\[#0F0E0E\]/);
+  });
+
+  it("R122-A3: the or-chip carries the reference's sem-var form — the chip bg + text through the island's vars (the LINE stays slate-200, the deploy kept it)", () => {
+    expect(login122).toMatch(
+      /<span className="bg-\[var\(--sem-surface-interactive-white-default\)\] px-3 text-\[color:var\(--sem-text-icon-secondary\)\] font-medium tracking-wider">or<\/span>/
+    );
+    // the divider LINE stays slate (the 85th/86th deploy kept it)
+    expect(login122).toMatch(/h-\[1px\] w-full bg-slate-200/);
+  });
+
+  it("R122-A4: globals.css carries the self-hosted @font-face + the tight island block (the six sem vars + --font-body — ONLY what the island's subtree consumes, the neo-crm s211 tight-mirror doctrine)", () => {
+    expect(globals122).toMatch(
+      /@font-face \{\s*font-family: "Wix Madefor Text";\s*font-style: normal;\s*font-weight: 400 800;\s*font-display: swap;\s*src: url\("\/fonts\/wix-madefor-text-latin\.woff2"\) format\("woff2"\);\s*\}/
+    );
+    expect(globals122).toMatch(
+      /\[data-ds="base44"\] \{\s*--sem-surface-interactive-white-default: #fff;\s*--sem-surface-interactive-white-hover: #f1eeea;\s*--sem-text-icon-primary: #0f0e0e;\s*--sem-text-icon-secondary: #5d5d5d;\s*--sem-border-light-default: #e9e6e0;\s*--sem-border-default-default: #ddd8d2;\s*--font-body: "Wix Madefor Text", system-ui, sans-serif;\s*font-family: var\(--font-body\);\s*color: var\(--sem-text-icon-primary\);\s*\}/
+    );
+  });
+
+  it("R122-A5: the woff2 is self-hosted on disk (the WOFF2 magic — the byte-identical copy of the reference's own latin subset, md5 f6130b85…)", () => {
+    expect(fontBytes.length).toBe(20320);
+    expect([fontBytes[0], fontBytes[1], fontBytes[2], fontBytes[3]]).toEqual([0x77, 0x4f, 0x46, 0x32]); // "wOF2"
   });
 });

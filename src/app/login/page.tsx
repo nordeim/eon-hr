@@ -414,9 +414,20 @@ function LoginForm() {
                 former single space-y-3 wrapper around all three retired
                 (render-neutral: the divider's my-6 owns the 24px gaps
                 either way). Session-46: the column's content swaps per
-                view — the hidden flows replace the trio entirely. */}
+                view — the hidden flows replace the trio entirely.
+                Session-122 (D-122a — the login semi-island, the neo-crm
+                s211 genus transfer): the platform re-wrapped [the social
+                group + the or-divider] in its own design-system island
+                (div data-ds="base44" data-theme="light", DOM-verified
+                live) — the classless BLOCK passes the margin math through
+                unchanged (the divider's my-6 still owns its gaps), the
+                form stays the island's SIBLING exactly like the reference,
+                and the island's subtree renders the Wix Madefor Text
+                webfont (globals.css — the tight mirror; the label spans
+                measure 164.3px vs the system stack's 172.5). */}
             {view === "signin" ? (
             <>
+            <div data-ds="base44" data-theme="light">
             <div className="space-y-3">
             {/* REF's social buttons (session-40 re-measure): NO type attr
                 (the latest redeploy dropped it — REF renders type:null; they
@@ -424,9 +435,12 @@ function LoginForm() {
                 the icon in a transition-transform wrapper — ONLY Google's
                 carries the -ml-4 pull (REF's Microsoft/Apple divs have
                 none; the icons sit at 85/85/98 on their own text widths)
-                — and the label span-wrapped. */}
+                — and the label span-wrapped. Session-122: the class
+                strings flipped to the reference's exact sem-var forms (the
+                island's own tokens — resolving to the same warm hexes the
+                session-121 pins measured; construction parity). */}
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-[var(--sem-surface-interactive-white-default)] text-[color:var(--sem-text-icon-primary)] px-5 py-3.5 rounded-xl border border-[var(--sem-border-light-default)] hover:bg-[var(--sem-surface-interactive-white-hover)] hover:border-[var(--sem-border-default-default)] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200 -ml-4">
@@ -435,7 +449,7 @@ function LoginForm() {
               <span>Continue with Google</span>
             </button>
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-[var(--sem-surface-interactive-white-default)] text-[color:var(--sem-text-icon-primary)] px-5 py-3.5 rounded-xl border border-[var(--sem-border-light-default)] hover:bg-[var(--sem-surface-interactive-white-hover)] hover:border-[var(--sem-border-default-default)] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200">
@@ -444,7 +458,7 @@ function LoginForm() {
               <span>Continue with Microsoft</span>
             </button>
             <button
-              className="w-full flex items-center justify-center gap-3 bg-white text-[#0F0E0E] px-5 py-3.5 rounded-xl border border-[#E9E6E0] hover:bg-[#F1EEEA] hover:border-[#DDD8D2] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
+              className="w-full flex items-center justify-center gap-3 bg-[var(--sem-surface-interactive-white-default)] text-[color:var(--sem-text-icon-primary)] px-5 py-3.5 rounded-xl border border-[var(--sem-border-light-default)] hover:bg-[var(--sem-surface-interactive-white-hover)] hover:border-[var(--sem-border-default-default)] hover:shadow-sm transition-all duration-200 font-medium text-[16px] group"
               onClick={() => setError("Social sign-in is not configured on this deployment")}
             >
               <div className="transition-transform duration-200">
@@ -454,18 +468,24 @@ function LoginForm() {
             </button>
             </div>
 
-            {/* REF's or-divider (session-39; session-121 chip amendment): one
-                continuous 1px slate-200 line (absolutely positioned, vertically
-                centered — the 85th deploy kept the LINE slate) with the centered
-                "or" chip on a white bg — NOT two line segments. The chip TEXT
-                moved to the neutral #5D5D5D in the 85th deploy (was slate-500). */}
+            {/* REF's or-divider (session-39; session-121 chip amendment;
+                session-122 sem-var flip): one continuous 1px slate-200
+                line (absolutely positioned, vertically centered — the
+                85th/86th deploys kept the LINE slate) with the centered
+                "or" chip — NOT two line segments. The chip rides the
+                island's sem vars now (bg through
+                --sem-surface-interactive-white-default, text through
+                --sem-text-icon-secondary → #5D5D5D); the clone's
+                role="separator" a11y superset kept (REF renders no role
+                on the wrapper). */}
             <div className="relative my-6" role="separator" aria-label="or">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div data-orientation="horizontal" role="none" className="shrink-0 h-[1px] w-full bg-slate-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-[#5D5D5D] font-medium tracking-wider">or</span>
+                <span className="bg-[var(--sem-surface-interactive-white-default)] px-3 text-[color:var(--sem-text-icon-secondary)] font-medium tracking-wider">or</span>
               </div>
+            </div>
             </div>
 
             {/* REF's form (round 33): space-y-4 sm:space-y-5 — two field

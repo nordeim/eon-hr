@@ -4250,3 +4250,127 @@ describe("cv-text — the /W range-triple elimination class (session 121)", () =
     expect(text).toContain("abc\nhi"); // the pair widths carry the split
   });
 });
+
+describe("cv-text — the leader-dot line re-order class (session 122)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "rl-toc.pdf", { type: "application/pdf" });
+  }
+
+  // The ReportLab TOC anatomy (the r122 hunt, measured on the real member):
+  // each TOC row paints [the dot-leader run + its page number] BEFORE the
+  // entry text — one piece " .  .  .  .  . 6" (px 230.4, ps 12, bx 517.3)
+  // followed by the entry "1.1 About this document" (px 98, the SAME py,
+  // bx 227.4 — the leader begins 3.0 units after the entry ends). The
+  // stream-order emission reads ". . . 6 1.1 About this document" where
+  // pdftotext's x-order reads "1.1 About this document . . . 6". The r116
+  // global same-line x-sort was REFUTED by the IRS member (the f1040
+  // date-box fields rearranged, fusions appeared) — the cure is narrowly
+  // scoped to the leader-dot class: a dots-only piece (>= 3 dots, optional
+  // trailing digits, no letters) whose FOLLOWING same-baseline piece
+  // carries the alnum entry at SMALLER px with the leader's start within a
+  // small forward tolerance of the entry's tracked end (the contiguity
+  // guard — the leader begins where the entry ends).
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}Chapter 1 Introduction 1.1About thisdocument  .  .  .  .  . 6 leaderend`;
+  const codeFor = (i: number) => i + 1;
+  const spaceCodes = new Set([...PHRASE].map((c, i) => (c === " " ? codeFor(i) : -1)).filter((x) => x >= 0));
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const wTriple = () =>
+    [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} ${spaceCodes.has(codeFor(i)) ? 250 : 500}`).join(" ");
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+
+  const fontFixture = (content: string, descendantExtra = `/DW 500 /W [${wTriple()}]`) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantExtra} >>` },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- R122-B: the leader-dot phase-shift re-order ----
+  it("re-orders the dots-before-entry phase shift to the x-order row form (R122-B)", async () => {
+    // the measured ReportLab geometry: the section header at (98, 674.9)
+    // ps 14; the row's LEADER " .  .  .  .  . 6" painted FIRST at
+    // (230.4, 654.9) ps 12; the ENTRY "1.1About thisdocument" painted
+    // SECOND at (98, 654.9) — the same baseline, the entry 21 codes x
+    // 500/1000 x 12 = 126pt wide → tracked end 224, the leader's start
+    // 6.4 units later (0.53 em — the contiguity window). pdftotext reads
+    // "1.1About thisdocument . . . 6"; the stream order reads the leader
+    // first — the phase shift.
+    const content =
+      typstBlock(98, 674.9, 14, "Chapter 1 Introduction") + "\n" +
+      typstBlock(230.4, 654.9, 12, " .  .  .  .  . 6") + "\n" +
+      typstBlock(98, 654.9, 12, "1.1About thisdocument");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("1.1About thisdocument  .  .  .  .  . 6"); // ← RED at HEAD: the leader paints first
+  });
+
+  it("keeps an alnum-first stream order untouched (the IRS date-box refutation guard — R122-B)", async () => {
+    // the IRS f1040 date-box class: alnum content painted at LARGER x
+    // before alnum content at smaller x on the same baseline — the r116
+    // global x-sort refutation. The narrow rule never fires: the first
+    // piece is not a dot-leader run.
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(300, 700, 10, "leaderend") + "\n" +
+      typstBlock(100, 700, 10, "1.1About thisdocument");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain("leaderend 1.1About thisdocument"); // the stream order stands
+  });
+
+  it("keeps a NON-CONTIGUOUS dots piece in stream order (the contiguity guard — R122-B)", async () => {
+    // a dots-only piece far from the entry's end (14.7 em — not a TOC row:
+    // the leader never begins where this entry ends) keeps the stream
+    // order; only the contiguous leader row re-orders.
+    const content =
+      typstBlock(50, 750, 10, PAD) + "\n" +
+      typstBlock(400, 700, 10, " .  .  .  .  . 6") + "\n" +
+      typstBlock(100, 700, 10, "1.1About thisdocument");
+    const text = await extractTextFromFile(await fontFixture(content));
+    expect(text).toContain(" .  .  .  .  . 6 1.1About thisdocument"); // the stream order stands
+  });
+});

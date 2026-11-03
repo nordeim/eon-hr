@@ -70,7 +70,7 @@ test.describe("session-43 login redeploy (logged out)", () => {
     expect(ring.shadow).toContain("rgb(255, 255, 255)");
   });
 
-  test("the w-full column has THREE direct children — the social space-y-3 group, the my-6 divider, the form", async ({ page }) => {
+  test("the w-full column has the island + the form as its direct children — the social space-y-3 group and the my-6 divider ride the island (session-122 amendment: the platform's design-system island wrapped [the group + the divider]; the REF's live-counted shape — the effective three unchanged)", async ({ page }) => {
     await page.goto("/login");
     const column = await page.evaluate(() => {
       const form = document.querySelector("form")!;
@@ -78,14 +78,19 @@ test.describe("session-43 login redeploy (logged out)", () => {
       const kids = [...wcol.children].map((c) => ({
         tag: c.tagName,
         cls: (c.className || "").slice(0, 40),
+        ds: c.getAttribute("data-ds"),
+        inner: [...c.children].map((g) => (g.className || "").slice(0, 30)),
       }));
       return { wcolCls: wcol.className, kids };
     });
     expect(column.wcolCls).toBe("w-full");
-    expect(column.kids).toHaveLength(3);
-    expect(column.kids[0].cls).toContain("space-y-3");
-    expect(column.kids[1].cls).toContain("relative my-6");
-    expect(column.kids[2].tag).toBe("FORM");
+    // the island wrapper carries [the social group + the divider]; the
+    // form is its SIBLING — the REF's own construction (DOM-verified live)
+    expect(column.kids).toHaveLength(2);
+    expect(column.kids[0].ds).toBe("base44");
+    expect(column.kids[0].inner[0]).toContain("space-y-3");
+    expect(column.kids[0].inner[1]).toContain("relative my-6");
+    expect(column.kids[1].tag).toBe("FORM");
   });
 
   test("the field wrappers carry space-y-1.5 with the relative mt-1.5 inner (the trap-6 pair)", async ({ page }) => {

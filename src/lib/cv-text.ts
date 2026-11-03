@@ -2145,6 +2145,64 @@ async function extractPdfText(file: File): Promise<string> {
       const d = decoded[i] as { trail?: boolean } | undefined;
       return d !== undefined && d.trail === true;
     };
+    // R122-B: THE LEADER-DOT LINE RE-ORDER — the pre-pass (session 122, the
+    // ReportLab TOC class). The TOC writer paints [the dot-leader run + its
+    // page number] BEFORE the entry text — one piece whose entire content is
+    // dots (>= 3 of them, optionally ending in the page number's digits, no
+    // letters) followed on the SAME baseline by the alnum ENTRY at SMALLER
+    // px whose tracked end (bx) the leader's start sits just past (the
+    // contiguity guard: the leader begins where the entry ends, the measured
+    // 0.25-em step; the window [-1, +3.5] em). The stream order reads
+    // ". . . 6 1.1 About this document" where pdftotext's x-order reads
+    // "1.1 About this document . . . 6" — the r116/r118 away ledger's named
+    // ORDER class. The swap exchanges the two array positions so the entry
+    // emits first; the separators need no travel (the R116-A line-move fires
+    // at emission on the POSITION, landing the row's "\n" before the entry,
+    // and the same-baseline leader keeps its " "). The narrowness is the
+    // r116 lesson: the GLOBAL same-line x-sort was REFUTED by the IRS member
+    // (the f1040 date-box fields rearranged, word fusions appeared), so only
+    // the leader-dot shape fires — the IRS per-dot repositioned pieces (a
+    // single dot each) and the alnum date-box fields can never match, and a
+    // non-contiguous dots piece (the leader nowhere near the entry's end)
+    // stays in stream order (the contiguity guard's third arm).
+    for (let i = 1; i < decoded.length; i++) {
+      const lead = decoded[i - 1] as { text?: string; p?: { px?: number; py?: number; ps?: number } };
+      const entry = decoded[i] as { text?: string; p?: { px?: number; py?: number; ps?: number; bx?: number } };
+      const lt = (lead.text ?? "").trim();
+      if (lt.length === 0) continue;
+      // the leader shape: dots + spaces + an optional trailing number — never letters
+      // (>= 2 dots: the measured TOC minimum — a long entry squeezes its
+      // leader to two dots, still a leader; a single dot + number stays
+      // stream order — the content-class refutation)
+      if (!/^[ .]*\d*$/.test(lt)) continue;
+      if ((lt.match(/\./g) ?? []).length < 2) continue;
+      // the entry: real alnum content
+      const et = entry.text ?? "";
+      if ((et.match(/[A-Za-z0-9]/g) ?? []).length < 2) continue;
+      const lp = lead.p, ep = entry.p;
+      if (!lp || !ep) continue;
+      if (lp.px === undefined || lp.py === undefined || lp.ps === undefined) continue;
+      if (ep.px === undefined || ep.py === undefined || ep.ps === undefined) continue;
+      // same baseline only — a cross-line pair is the R116-A territory
+      if (Math.abs(lp.py - ep.py) >= 0.5 * Math.max(lp.ps, ep.ps)) continue;
+      // the entry sits LEFT of the leader (the phase-shift signature)
+      if (ep.px >= lp.px) continue;
+      // the contiguity guard: the leader begins where the entry ends
+      if (ep.bx === undefined) continue;
+      const gapEm = (lp.px - ep.bx) / Math.max(lp.ps, ep.ps);
+      if (gapEm < -1 || gapEm > 3.5) continue;
+      const tmp = decoded[i - 1];
+      decoded[i - 1] = decoded[i];
+      decoded[i] = tmp;
+      // the leader now follows its same-baseline entry: its own walk-time
+      // separator (a "\n" decided against the stream's previous piece — a
+      // DIFFERENT line's content) no longer applies at this position; the
+      // row is ONE visual line and the leader joins it with " " (the
+      // 9.2-XPreformatted class: a long entry squeezes its leader to two
+      // dots whose walk-sep carried the row boundary — measured).
+      const tp = (decoded[i] as { p?: { sep?: string } }).p;
+      if (tp) tp.sep = " ";
+    }
     let out = "";
     let outTail = ""; // the last emitted char — the R115-C whitespace check (a regex on the growing out would be O(n^2))
     // R117-A: THE SAME-LINE X-GAP COLUMN MOVE — the pre-pass. A stamped pair

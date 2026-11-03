@@ -77,9 +77,9 @@ test.describe("session-121 login warm-token family (the 85th deploy)", () => {
     expect(hover.color).toBe("rgb(15, 14, 14)");
   });
 
-  test("R121-C: the or-chip's neutral gray (slate-500 retired by the 85th deploy)", async ({ page }) => {
+  test("R121-C: the or-chip's neutral gray (slate-500 retired by the 85th deploy; session-122 amendment — the chip's classes ride the island's sem vars now, the locator re-anchored off the retired bg-white form)", async ({ page }) => {
     await page.goto("/login");
-    const orChip = page.locator("span.bg-white.px-3");
+    const orChip = page.getByText("or", { exact: true });
     await expect(orChip).toHaveCSS("color", "rgb(93, 93, 93)");
     // the chip's own geometry holds (12px / 500 — the session-39 recipe)
     await expect(orChip).toHaveCSS("font-size", "12px");
@@ -106,5 +106,57 @@ test.describe("session-121 login warm-token family (the 85th deploy)", () => {
       "color",
       "rgb(100, 116, 139)"
     );
+  });
+});
+
+/* Session 122 (D-122a — the login semi-island, the neo-crm s211 genus
+   transfer): the platform's design-system island decoded live on the eon
+   reference and mirrored construction-for-construction. These specs pin
+   the LIVE surface: the island wrapper, the Wix Madefor Text webfont
+   rendering the label spans (164.3px vs the system stack's 172.5 — the
+   typeface itself), and the scoped exception (the h1/labels stay the
+   system stack; the app's own surfaces stay zero-webfont). */
+
+test.describe("session-122 login semi-island (the neo-crm s211 genus transfer)", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test("R122-A: the island wrapper + the webfont-rendered label spans", async ({ page }) => {
+    await page.goto("/login");
+    const google = page.getByRole("button", { name: "Continue with Google" });
+    await expect(google).toBeVisible();
+    const read = await google.evaluate((e) => {
+      const span = e.querySelector("span") ?? e;
+      const cs = getComputedStyle(span);
+      const island = e.closest("[data-ds]");
+      return {
+        island: island ? island.getAttribute("data-ds") + "/" + island.getAttribute("data-theme") : null,
+        fontFamily: cs.fontFamily,
+        width: Math.round((span as HTMLElement).getBoundingClientRect().width * 10) / 10,
+      };
+    });
+    // the island wrapper — the reference's exact construction
+    expect(read.island).toBe("base44/light");
+    // the island font renders the label span (the system stack measures
+    // 172.5 at 16px; the Madefor stack ~164 — the typeface delta)
+    expect(read.fontFamily).toContain("Wix Madefor Text");
+    expect(read.width).toBeLessThan(168);
+    expect(read.width).toBeGreaterThan(160);
+  });
+
+  test("R122-B: the island's scoped exception — the h1 and labels stay the system stack (the app's own surfaces stay zero-webfont)", async ({ page }) => {
+    await page.goto("/login");
+    const h1 = page.locator("h1");
+    const label = page.locator("label").first();
+    const h1Font = await h1.evaluate((e) => getComputedStyle(e).fontFamily);
+    const labelFont = await label.evaluate((e) => getComputedStyle(e).fontFamily);
+    expect(h1Font).not.toContain("Madefor");
+    expect(labelFont).not.toContain("Madefor");
+    // the woff2 is the ONE loaded font family on the page (the app's own
+    // surfaces ride the system stack)
+    const families = await page.evaluate(() =>
+      [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family)
+    );
+    expect(families.filter((f) => f.includes("Madefor"))).toHaveLength(1);
+    expect(families.every((f) => f.includes("Madefor") || f === "")).toBe(true);
   });
 });

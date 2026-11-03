@@ -141,9 +141,14 @@
 @theme inline {
   /* Font stack pinned to the reference app's computed body font (session-4
      live measurement): the v4.0-era default ui-sans-serif stack — the
-     reference self-hosts NO webfont. (The installed Tailwind 4.3.3 default
-     drifted to -apple-system…, so pin it explicitly. Self-hosted Inter
-     drifted text metrics — e.g. CTA button widths — off the reference.) */
+     reference's APP surfaces self-host no webfont. (The installed Tailwind
+     4.3.3 default drifted to -apple-system…, so pin it explicitly.
+     Self-hosted Inter drifted text metrics — e.g. CTA button widths — off
+     the reference.) Session-122 exception (D-122a, the neo-crm s211 genus
+     transfer): the reference's LOGIN social block rides the platform's
+     own design-system island (the [data-ds="base44"] block at the end of
+     this file) whose Wix Madefor Text webfont IS live there — the sole
+     scoped exception, mirrored construction-for-construction. */
   --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
@@ -644,4 +649,42 @@
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
   }
+}
+
+/* Session 122 (D-122a — the login semi-island, the neo-crm s211 genus
+   transfer): the Base44 platform re-wrapped the login social block in
+   its own design-system island — <div data-ds="base44"
+   data-theme="light"> around [the social group + the or-divider] — and
+   the island renders its own webfont. The app's own surfaces stay the
+   zero-webfont stack above (the @theme --font-sans pin — the island is
+   the sole, scoped exception, exactly the reference's own construction;
+   only the island's subtree consumes the font, live-verified: the
+   h1/labels/inputs stay the system stack). The woff2 is self-hosted
+   (public/fonts/wix-madefor-text-latin.woff2 — byte-identical to the
+   reference's own latin subset, no runtime dependency on the closed
+   platform; the @font-face names the family, not the file, so a future
+   re-serve is a file swap). The island block is the TIGHT mirror
+   (the neo-crm s211 doctrine): ONLY the six sem vars the island's own
+   subtree consumes + --font-body — never the platform's full token
+   palette. The vars resolve to the session-121 warm hexes, so the
+   measured-hex computed pins (tests/e2e/session121-login-warm-tokens
+   .spec.ts) hold unchanged. */
+@font-face {
+  font-family: "Wix Madefor Text";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/wix-madefor-text-latin.woff2") format("woff2");
+}
+
+[data-ds="base44"] {
+  --sem-surface-interactive-white-default: #fff;
+  --sem-surface-interactive-white-hover: #f1eeea;
+  --sem-text-icon-primary: #0f0e0e;
+  --sem-text-icon-secondary: #5d5d5d;
+  --sem-border-light-default: #e9e6e0;
+  --sem-border-default-default: #ddd8d2;
+  --font-body: "Wix Madefor Text", system-ui, sans-serif;
+  font-family: var(--font-body);
+  color: var(--sem-text-icon-primary);
 }

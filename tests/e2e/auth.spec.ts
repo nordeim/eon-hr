@@ -93,11 +93,13 @@ test.describe("login re-audit (session 39 — the login redeploy)", () => {
     expect(await google.getAttribute("type")).toBeNull();
     await expect(google.locator("div.transition-transform.-ml-4")).toBeAttached();
     await expect(google.locator("span", { hasText: "Continue with Google" })).toBeAttached();
-    // R38-K (session-121 rewrite — the premise killed by REF's 85th deploy):
+    // R38-K (session-121 rewrite — the premise killed by REF's 85th deploy;
+    // session-122 amendment — the chip rides the island's sem vars, the
+    // locator re-anchored off the retired bg-white form):
     // the or-chip rode a white chip in slate-500 through the 84th deploy;
     // the 85th moved it to the neutral #5D5D5D. The spec asserts the NEW
     // truth (pinned in full in session121-login-warm-tokens.spec.ts R121-C).
-    const orChip = page.locator("span.bg-white.px-3");
+    const orChip = page.getByText("or", { exact: true });
     await expect(orChip).toHaveCSS("color", "rgb(93, 93, 93)");
     // R38-J2: the Sign up span is slate-700
     await expect(page.locator("span.font-medium.text-slate-700")).toHaveCSS("color", "rgb(51, 65, 85)");
