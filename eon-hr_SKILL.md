@@ -1,7 +1,7 @@
-**Version:** 4.10.0 (session-122 close + session-123 — the security-bump + bare-number re-order round: THE NOVEMBER 4 SECURITY BUMP [next@16.4.5 — seven moderates incl. the cross-client response injection in self-hosted apps, this repo's own deployment form; the r121 doctrine: a security release ships same-round] · THE BARE-NUMBER RE-ORDERS [the two ReportLab TOC residual shapes the r122 dots-leader cure never touched: the SQUEEZED-NUMBER class (the wrapped 8.3 row — a bare number at ps 5.165607 = 0.43x the entry's, its px at the entry's tracked end, the gap-0 squeeze; the cure glues, sep "" — pdftotext's escape=True)92 form) and the CHAPTER-HEADER class (the 13 chapter rows + the self-referential TOC row — the number right-aligned in the page-number column before the title; the cure swaps and breaks the line, sep "\n") — THE GAP-AXIS REFUTATION (the first design's >= 13-em column-band guard failed on the same member's 1-12.5-em rows: measure the WHOLE class before pinning a threshold) · THE BOXED-PAIR GUARD (the IRS year-box's same-origin "20"+"25" pair — the sole guard keeping the IRS member IDENTICAL, its swap word-stream neutral) · the drift ledger zero-away (6 IDENTICAL + ReportLab TOWARD 0.9076 -> 0.9080, alnums exact, 16 family members EXACT) · the mutation matrix M1 1 · M2 1 · M3 2 · M4 1 · M5 3 · GREEN 1174/1174 + E2E 565/565] — [the session-122 layer:] THE LOGIN SEMI-ISLAND MIRROR [the neo-crm s211 genus transferred — the platform's design-system island decoded LIVE on the eon reference: the <div data-ds="base44" data-theme="light"> wrapper around the social group + or-divider, the Wix Madefor Text webfont rendering the label spans 164.3px vs the system stack's 172.5 (the typeface itself, the icon+label group +4.1px), the sem-var class construction; the icons already exact; the cure construction-for-construction: the self-hosted woff2 md5-identical to the reference's own latin subset + the @font-face + the TIGHT island block (the six sem vars + --font-body ONLY — never the platform's full palette) + the island wrapper + the sem-var classes; the zero-webfont doctrine amended at its LIVE claim sites with the island-exception clause] · THE REPORTLAB TOC DOT-ORDER CURE [the r122 queue's named ORDER class, the r116 carry-over: each TOC row paints the dot-leader + page number BEFORE the entry on the same baseline — the stream order read the leader first where pdftotext's x-order reads the entry first; the cure: the NARROW leader-dot line re-order (a dots-only piece >= 2 dots — the measured TOC minimum, a long entry squeezes its leader to two — followed same-baseline by an alnum entry at smaller px with the leader's start within [-1,+3.5] em of the entry's tracked end); the r116 global x-sort refutation (the IRS date-box rearrangement) does not apply — the narrow shape can never match; 87 rows re-ordered, the similarity 0.8947 -> 0.9076 TOWARD, alnums exact] · the drift ledger zero-away [6 corpus members IDENTICAL + ReportLab TOWARD + ALL 16 family members EXACT] · the mutation matrix M1 1 · M2 0 [the contiguity guard subsumes the IRS class on the fixture surface — the shape guard's exclusive surface EMPTY, documented] · M3 1 · M4 0 [the fixture's leader sep rides the emission-time upgrade; the sep reset load-bearing only on the real-member Td form] · GREEN 1169/1169 + E2E 565/565)
+**Version:** 4.11.0 (session-123 close + session-124 — the indirect-font + odd-W round: THE INDIRECT /FONT DICTIONARY RESOLUTION [the ReportLab blind-pocket completion — the page's /Font VALUE itself an indirect ref (/Font 1 0 R → the shared pure pair dict, all 135 pages, zero inline /Font dicts), and the page scan's F-pattern collects the XObject entry FIRST because "FormXob.<hex>" STARTS WITH F — the false pair makes fonts.size truthy and the R107-B shape-(a) else-if chain never queues the pendingFontRef: the pageMap binds the XObject name, every real font lookup fails the misbind guard, the whole page width-blind (the measured 546-piece pocket, bx 95.6%); the cure: the fontRef queue fires WHENEVER the page carries the indirect form (both scan sites) and the post-walk resolution REPLACES the false-pair map; the fire-separation census: the form rides ReportLab ALONE; the measured cure: bx 95.6% -> 100.0%, the 6 other members IDENTICAL, the 16 families EXACT, the word-stream identical with the raw line-axis TOWARD +0.0015 — the page-number columns read cell-per-line where the HEAD read them run together, the R123-B doctrine class] · THE ODD-LENGTH /W PAIR-INVALIDITY [the arXiv F5 class — the descendant /W [ 0 92 600.098 ] (CourierNew monospaced) is the R121-A range-triple intent (CIDs 0-92 at 600.098; the c-w-n spec reading impossible: n = 600.098 not an integer count) but the pairsValid guard reads the pair (0, 92) as plausible and the pair reading wins — {0: 92} with the 600.098 DANGLING-discarded, every CID > 0 falling to /DW 0 and the w <= 0 guard blinding every block; THE BUG: a pair list must consume EVERY number — an odd token count dangles its last value, proving the pair reading invalid by construction; the cure: pairsValid initializes to nums.length % 2 === 0; the measured cure: arXiv bx 97.3% -> 99.2% with the OUTPUT IDENTICAL on every member — a zero-drift un-blinding in the R120 class; the 16 families EXACT] · THE MEASUREMENT-ARTIFACT TRAP CLASS [the 88th-deploy watch: the audit subagent's "social border changed" flag REFUTED by the byte-identical login render (md5-identical captures) — it read the [data-ds] WRAPPER's computed border where the protocol measures the BUTTON; the drawer census's cand[0] matched the display:none desktop sidebar 256px z:10 — filter by display/visibility before censusing; a byte-identical render refutes any computed-style flag] · the drift ledger zero-away (6 IDENTICAL + ReportLab TOWARD, alnums exact, 16 families EXACT) · the mutation matrix M1 1 · M2 1 · M3 1 · M4 2 · M5 1 · GREEN 1179/1179 + E2E 565/565) — [the session-123 layer:]
 > [the session-121 layer:] 
 > [the session-120 layer:] **Version:** 4.7.0 (session-119 close + session-120 — the width-blind elimination round: the fresh-clone reproducibility cure [the neo-crm s210 checkout-portability genus — 23 census scripts imported /tmp protos, build/tsc RED on any reset; the committed census proto scripts/protos/cv-text-proto.ts = the source + two documented insertions, regenerated by sync-proto.mjs, pinned by tests/unit/script-portability.test.ts: the ban arm + the sync arm + the surface arm] · THE WIDTH-BLIND TAXONOMY MEASURED AND CURED: the indirect /Widths + /W arrays [the deferred post-walk resolution — the ObjStm bodies kept + the bracket-balanced raw scan], the general-name font bindings [the WeasyPrint subset-tag pure-pair-dicts, the IRS T1_0 / QUARTZ Tc1 forms], the pageMap-less fallback [the candidate chain's first width-carrying object; a page map that lacks the font stays blind] · THREE STACKED TRACKING ERRORS exposed by the un-blinding and cured: the KERN-SIGN INVERSION [a TJ number displaces by -K/1000 x ps — ISO 32000-1 9.4.3; the word-gap kerns moved the tracked end BACKWARD, manufacturing phantom 3-9 em gaps — the resume2 under-tracking's mechanism, its inter-block form cured], THE Tw/Tz BLINDNESS [Prawn justifies by Tw with real 0x20 bytes inside the atoms — 1.16165 Tw adds ~11.6pt/space; the walk's two new regex arms + the post-pass], THE TOC LEADER ANCHORS [the R118-A leader-run guard — an anchor followed by the SAME text at a 0-3 em step is a leader, never a split; the icon class leads DIFFERENT content and keeps firing] · THE DRIFT LEDGER: TOWARD on four members [arXiv +4.6bp · dvipdfmx +2.1bp · fontspec +9.8bp · WeasyPrint +10.2bp], IDENTICAL everywhere else, ZERO AWAY across the 29-member corpus; the bx coverage: dvipdfmx/fontspec/QUARTZ/Prawn/WeasyPrint 100% · arXiv 97.3% · IRS 94.7% · GREEN 1158/1158, the mutation matrix M1 4 · M2-M6 2 · DM1/DM2 1; arXiv/dvipdfmx/fontspec re-pinned at the cured md5s, alnums exact; the WeasyPrint CV through the live upload flow: dateSplit TRUE x2 in the stored cvText)
-> **State:** 1174 unit + 565 E2E tests green, lint/typecheck/build
+> **State:** 1179 unit + 565 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -6787,3 +6787,49 @@ zero failures). And the cvText upload cap: the CV surface's 20,000-char
 validation boundary rejects the 129-page manual's 291,107-char
 extraction with a silent-toast 400 — live-verify with CV-SIZED members;
 the hunt member's verification stays at the corpus layer.
+
+## §136. The indirect-font + odd-W round (session 124) — the page's own /Font as an indirect ref, and the dangling number that proved the pair reading wrong
+
+**The round's genus.** Two width-blind pockets eliminated at their
+spec-level roots. The ReportLab pocket: a page whose `/Resources` carries
+`/Font 1 0 R` — the font dictionary ITSELF an indirect reference — and an
+`/XObject` subdict whose entry names happen to START WITH F
+(`FormXob.<32-hex>`). The page-scan's F-pattern collects the XObject
+entry as a "font", the map goes truthy, and the else-if chain that
+resolves the indirect `/Font` never fires. The arXiv pocket: a three-number
+`/W` array whose correct reading is a CID range-run, mis-read as a single
+pair because the guard never noticed that a pair list of odd length
+always dangles its last value.
+
+**The lesson that generalizes.** Both bugs are SILENT SUPPRESSIONS: a
+truthy map from the wrong source blocks the resolution path that would
+have supplied the right one; a plausible-looking pair reading discards a
+real width without any error. The cures follow the same shape — make the
+resolution path unconditional when its OWN precondition holds (the page
+declares the indirect form), and make the invalidity proof structural
+(odd length ⟹ incomplete pair list) rather than heuristic. And the
+fire-separation census remains the shipping gate: the indirect-`/Font`
+form rides exactly one member; the odd-`/W` form re-reads six members
+without moving a single output byte.
+
+**The measurement-artifact trap class (the round's own addition to the
+standing protocol).** Two computed-style readings were refuted this round
+by byte-identical renders: a wrapper-div border "change" (the protocol
+measures the BUTTON) and a "drawer" census that matched the hidden
+desktop sidebar (`display:none`, z:10, 256px — the true mobile drawer is
+288px z:50). The rule: a byte-identical screenshot refutes ANY
+computed-style delta flag, and any census that walks elements must filter
+by display/visibility before it claims to have found the thing.
+
+**The verification.** RED 2/2 + 3 born-green guards → GREEN 1179/1179;
+the mutation matrix exact (M1 1 · M2 1 · M3 1 · M4 2 — the range
+expansion is the shared load-bearing arm of both the r121 and r124
+cures — M5 1); the drift ledger zero-away (6 IDENTICAL + ReportLab
+TOWARD on the line axis with the word-stream identical and alnums
+exact); the 16 family members EXACT; the live UI verify through the real
+upload flow; the DB pristine. The r125 queue: the arXiv residual pocket
+(the Font2 null-glyph class at CID 1 under the Calibri array's
+zero-width entry, the f-0-0 class, and the mixed-form `/W` range arms —
+the `c [w…] cfirst clast w` shape), the IRS fontless pocket (108
+Tf-less pieces, the ZaDb appearance-stream class), the Typst sub-em
+precision residuals, and the standing watches.

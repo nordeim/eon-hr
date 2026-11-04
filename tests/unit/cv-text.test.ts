@@ -4556,3 +4556,195 @@ describe("cv-text — the bare-number re-order classes (session 123)", () => {
     expect(text).toContain("1.1Wrapped entrytext  .  .  .  .  . 6");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 124 (R124-A/B): the indirect-/Font page binding + the odd-length
+// /W pair-invalidity — the blind-pocket completion round
+// ---------------------------------------------------------------------------
+// R124-A — THE INDIRECT /FONT DICTIONARY: the ReportLab page form carries
+// /Resources << /Font 1 0 R /XObject << /FormXob.<32-hex> N 0 R >> >> —
+// the /Font VALUE itself an indirect ref (obj 1 = the shared pure pair
+// dict << /F1 2 0 R /F2 3 0 R … >>, all 135 pages referencing it, zero
+// inline /Font dicts in the file). The page scan's F-pattern collects the
+// XObject entry FIRST — the name "FormXob.<hex>" STARTS WITH F, so the
+// false pair {FormXob…: N} makes fonts.size truthy and the R107-B
+// shape-(a) else-if chain never queues the pendingFontRef resolution: the
+// pageMap binds the XObject name, every real font lookup fails the
+// "pageMap exists but lacks this font" misbind guard, and the whole page
+// goes width-blind (the measured 546-piece pocket, bx 95.6%). The cure:
+// the fontRef queue fires WHENEVER the page carries the indirect form;
+// the post-walk resolution REPLACES the false-pair map (the R107-B
+// replace semantics). The fire-separation census: the indirect /Font form
+// rides ReportLab ALONE (135 refs; zero on the other 6 members, the 16
+// family members, and the IRS/arXiv ObjStm bodies).
+//
+// R124-B — THE ODD-LENGTH /W PAIR-INVALIDITY: the arXiv F5 class — the
+// descendant carries /DW 0 /W [ 0 92 600.098 ] (CourierNew, monospaced):
+// a THREE-TOKEN pure-number array. The R121-A range-triple reading is the
+// writer's intent (CIDs 0-92 at 600.098), but its pairsValid guard reads
+// the pair (0, 92) as plausible and the pair reading wins — {0: 92} with
+// the 600.098 DANGLING-discarded, every CID > 0 falling to /DW 0 and the
+// w <= 0 guard blinding every F5 block (the measured 388-piece class).
+// The bug: a pair list must consume EVERY number — an odd token count
+// dangles its last value, proving the pair reading invalid by
+// construction. The cure pre-invalidates pairsValid on odd lengths.
+describe("cv-text — the indirect-font + odd-W round (session 124)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // ---- the R124-A fixtures: a simple Courier font (STD14-seeded, the
+  // ReportLab userguide's own form) + the page-resource variants ----
+  const simpleBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /F1 ${size} Tf 1 0 0 -1 0 0 Tm (${text}) Tj\nET\nQ`;
+  const FALSE_PAIR_NAME = "/FormXob.2740c11ac32f9355ddf50eada5ea982f";
+  // the measured column-pair geometry: "SeniorHRManager" (15 Courier codes
+  // x 600/1000 x 12 = 108pt) at (50, 700) ps 12 -> tracked end 158;
+  // "TechCorp" at (508.8, 700) ps 12 — the gap (508.8 - 158)/12 = 29.2 em
+  // >= 13, the R117-A column band -> the line break. BLIND widths keep the
+  // standing space join ("SeniorHRManager TechCorp").
+  const columnContent =
+    simpleBlock(50, 750, 10, "payrolladmincompliancetrainingonboardingspecialist") + "\n" +
+    simpleBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+    simpleBlock(508.8, 700, 12, "TechCorp");
+  const aObjects = (pageResources: string) => [
+    { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+    { raw: "<< /BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font >>" },
+    { dict: "/Filter /FlateDecode", stream: columnContent },
+    { raw: "<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceGray /BitsPerComponent 8 /Length 0 >>" },
+    { raw: "<< /F1 2 0 R >>" },
+    { raw: `<< /Type /Page /Contents 3 0 R /Resources ${pageResources} >>` },
+    { raw: "<< /Type /Pages /Kids [6 0 R] >>" },
+  ];
+
+  // ---- the R124-B fixtures: the Type0/Identity-H form + the /W variants ----
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}SeniorHRManagerTechCorp`; // 83 codes (1..83), all inside the measured [0, 92] run
+  const codeFor = (i: number) => i + 1;
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+  const bContent =
+    typstBlock(50, 750, 10, PAD) + "\n" +
+    typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+    typstBlock(508.8, 700, 12, "TechCorp");
+  const fontFixture = (descendantW: string) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantW} >>` },
+      { dict: "/Filter /FlateDecode", stream: bContent },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- R124-A: the indirect-/Font page + the FormXob false pair ----
+  it("resolves the INDIRECT /Font dictionary through the false F-prefixed XObject pair (R124-A)", async () => {
+    // the measured ReportLab page form: /Resources << /Font 5 0 R /XObject
+    // << /FormXob.<hex> 4 0 R >> >> — the F-pattern collects the FormXob
+    // entry as a "font" (the name starts with F), fonts.size goes truthy,
+    // and the HEAD's else-if chain never queues the pendingFontRef — the
+    // page binds only the XObject name and every /F1 lookup fails the
+    // misbind guard. The cure queues the fontRef resolution whenever the
+    // indirect form is present; the post-walk resolution REPLACES the
+    // false-pair map, the STD14 Courier widths seed, and the R117-A
+    // column rule fires on the tracked geometry.
+    const file = await pdfWithLatin1Streams(aObjects(
+      `<< /Font 5 0 R /ProcSet [/PDF] /XObject << ${FALSE_PAIR_NAME} 4 0 R >> >>`
+    ));
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: the false pair blinds the page — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  it("keeps a no-/Font page blind (the indirect-form fire-separation guard — R124-A)", async () => {
+    // the same false-pair XObject subdict with NO /Font entry at all: the
+    // cure must never manufacture a binding the page does not declare —
+    // the pageMap stays the false pair alone and the widths stay blind
+    // (the misbind signal, never a fallback license).
+    const file = await pdfWithLatin1Streams(aObjects(
+      `<< /ProcSet [/PDF] /XObject << ${FALSE_PAIR_NAME} 4 0 R >> >>`
+    ));
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager TechCorp"); // born-green: no indirect /Font — the standing blind join
+    expect(text).not.toContain("SeniorHRManager\nTechCorp");
+  });
+
+  it("keeps the INLINE /Font dictionary binding (the standing direct form — R124-A)", async () => {
+    // the R108-B/R120-B standing form: the page's own inline /Font region
+    // carries the pair directly — the direct-pairs branch lands it and the
+    // tracked column split stands, untouched by the fontRef queue.
+    const file = await pdfWithLatin1Streams(aObjects(
+      `<< /Font << /F1 2 0 R >> /ProcSet [/PDF] >>`
+    ));
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // born-green: the direct binding — the standing tracked form
+  });
+
+  // ---- R124-B: the odd-length /W range-triple reading ----
+  it("reads the 3-token /W run as the CID range (the odd-length pair-invalidity — R124-B)", async () => {
+    // the measured arXiv F5 descendant: /DW 0 /W [ 0 92 600.098 ] —
+    // CourierNew monospaced, every CID 0-92 at 600.098. The HEAD's
+    // pairsValid guard reads the pair (0, 92) as plausible and discards
+    // the dangling 600.098: {0: 92} covers nothing the stream shows, every
+    // code falls to /DW 0 and the w <= 0 guard blinds the block. The cure:
+    // an odd token count pre-invalidates the pair reading — the R121-A
+    // range expansion covers CIDs 0-92 and the column rule fires.
+    const file = await fontFixture("/DW 0 /W [ 0 92 600.098 ]");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: {0: 92} blinds every code — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  it("keeps the c-c-w singleton-range /W reading (the r121 path — R124-B)", async () => {
+    // the Typst range-run genus: /W as c c w singleton groups (the r121
+    // first-branch form — an ODD token count that never reaches the range
+    // branch). The odd-length invalidity must not redirect it: every code
+    // stays covered at its own width and the tracked split stands.
+    const ccw = [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} 600.098`).join(" ");
+    const file = await fontFixture(`/DW 0 /W [ ${ccw} ]`);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // born-green: the singleton-range path — the r121 pin
+  });
+});

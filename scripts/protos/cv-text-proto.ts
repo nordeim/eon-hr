@@ -612,7 +612,13 @@ function parseWidthsArray(w: string): Map<number, number> | null {
         if (!(a <= b) || !(wv > 0) || (i > 0 && !(a > nums[i - 2]))) { ranges = false; break; } // nums[i-2] = the previous group's clast — strictly ascending, no overlap
       }
       if (ranges) {
-        let pairsValid = true;
+        // R124-B: an ODD token count pre-invalidates the pair reading — a
+        // pair list must consume every number, and the odd form's last
+        // value dangles (the measured arXiv F5 class: /W [ 0 92 600.098 ]
+        // read as the pair {0: 92} with the 600.098 discarded, every
+        // CID > 0 falling to /DW 0 and blinding the block; the range
+        // reading — CIDs 0-92 at 600.098, the CourierNew monospace truth).
+        let pairsValid = nums.length % 2 === 0;
         for (let i = 0; i + 2 < nums.length; i += 2) {
           if (!(nums[i + 2] > nums[i]) || !(nums[i + 1] > 0)) { pairsValid = false; break; }
         }
@@ -1405,8 +1411,13 @@ async function extractPdfText(file: File): Promise<string> {
         const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
         const fontRef = inlineFontRef(body);
         if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
-        else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
-        else if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R107-B shape (a)
+        if (!fonts.size && res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
+        // R124-A: the indirect-/Font queue fires WHENEVER the page carries
+        // the form — the HEAD's else-if chain let a false F-prefixed pair
+        // (the ReportLab FormXob.<hex> XObject entry) suppress it; the
+        // post-walk resolution REPLACES the false-pair map (the fontRef
+        // target's pairs are the page's REAL bindings).
+        if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R124-A: always queue
       } else {
         if (fonts.size) objFonts.set(parseInt(rm[1], 10), fonts);
         // R120-B: the general-name pairs (the Tc1/T1_0/BAWKYD class) — a
@@ -1608,8 +1619,10 @@ async function extractPdfText(file: File): Promise<string> {
               const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
               const fontRef = inlineFontRef(body);
               if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
-              else if (res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
-              else if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R107-B shape (a)
+              if (!fonts.size && res) pendingRes.push({ contents: refs, res: parseInt(res[1], 10) });
+              // R124-A: the same always-queue form at the ObjStm site (the
+              // false-pair suppression class is site-independent).
+              if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R124-A: always queue
             }
           } else {
             // R106-A: an ObjStm-carried /Resources body (the /Font pairs
