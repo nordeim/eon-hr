@@ -4748,3 +4748,269 @@ describe("cv-text — the indirect-font + odd-W round (session 124)", () => {
     expect(text).toContain("SeniorHRManager\nTechCorp"); // born-green: the singleton-range path — the r121 pin
   });
 });
+
+// Session 125 (R125-A/B/C): the mixed-/W range arms, the known-zero
+// advance, and the /Contents-array text-state carry. Measured on the
+// re-verified corpus: the arXiv Font2 Calibri descendants carry the
+// bracketed /W with BOTH entry forms interleaved (the array entries
+// `0 [ 506 0 0 226 578 ]` and the RANGE arms `5 12 0` — the spec's
+// cfirst clast w, the w=0 gap-ranges legitimate); the IRS page 2403's
+// 8-stream /Contents array walks with a fresh text state per stream, so
+// the Tf-less mid-array streams (2407/2409/2410/2411 — the inherited-font
+// class) lose their font and blind 108 pieces; and the advance guard
+// conflates the UNKNOWN width (a code outside the table — the
+// conservative blind signal) with the KNOWN zero (a code the table covers
+// at 0 — the .null-glyph class, a legitimate zero advance).
+describe("cv-text — the contents-carry + mixed-W + zero-advance round (session 125)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  // ---- the R125-A/B fixtures: the Type0/Identity-H form (the r124-B
+  // machinery) — the PHRASE codes 1..83 ride the /W coverage under test ----
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}SeniorHRManagerTechCorp`; // codes 1..83
+  const codeFor = (i: number) => i + 1;
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  // the measured column-pair geometry (the r124 pin): "SeniorHRManager"
+  // (15 codes x 600.098/1000 x 12 = 108.2pt) at (50,700) ps 12 -> tracked
+  // end ~158; "TechCorp" at (508.8,700) — the gap ~29 em >= 13, the R117-A
+  // column band -> the line break. BLIND widths keep the space join.
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /f0 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+  const abContent =
+    typstBlock(50, 750, 10, PAD) + "\n" +
+    typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+    typstBlock(508.8, 700, 12, "TechCorp");
+  const fontFixture = (descendantW: string) =>
+    pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [4 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> ${descendantW} >>` },
+      { dict: "/Filter /FlateDecode", stream: abContent },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 5 0 R /Resources << /Font << /f0 2 0 R >> >> >>" },
+    ]);
+
+  // ---- R125-A: the mixed /W's RANGE arms ----
+  it("reads the bare number groups of a bracketed /W as RANGE entries (the mixed-form arms — R125-A)", async () => {
+    // the measured arXiv Font2 descendant form: /W [ 0 [ 506 ] 1 83 600.098
+    // 84 92 0 ] — the array entry covers CID 0, the RANGE arms cover CIDs
+    // 1-83 at 600.098 (the shown codes) and the 84-92 GAP at 0 (the
+    // legitimate zero class). The HEAD's bracket-walk reads the bare group
+    // as PAIRS — pair(1, 83), pair(600.098, 84), pair(92, 0) — the map
+    // corrupts, every shown code falls to /DW 0 and the block blinds.
+    const file = await fontFixture("/DW 0 /W [ 0 [ 506 ] 1 83 600.098 84 92 0 ]");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: the pair reading corrupts the map — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  it("keeps the pure-array /W reading (the WeasyPrint class — R125-A guard)", async () => {
+    // the WeasyPrint corpus form: /W as sparse ARRAY entries only (no bare
+    // number groups) — the multi-entry form needs the BRACKET-BALANCED /W
+    // capture (the HEAD's [^\]]* capture truncated at the first entry's
+    // closer, keeping only the leading fragment); the range branch never
+    // fires on this form.
+    const arr = [...PHRASE].map((_, i) => `${codeFor(i)} [ 600.098 ]`).join(" ");
+    const file = await fontFixture(`/DW 0 /W [ ${arr} ]`);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // born-green: the array-entry path — untouched
+  });
+
+  it("keeps the UNCOVERED code blind (the map-miss conservative guard — R125-B guard)", async () => {
+    // the codes 1-83 sit OUTSIDE every entry (the array covers CID 0; the
+    // range arm covers 84-92): a map-miss with /DW 0 stays the blind
+    // signal — the R117-A doctrine verbatim (a missing table never
+    // misfires, it only cures less).
+    const file = await fontFixture("/DW 0 /W [ 0 [ 506 ] 84 92 600.098 ]");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager TechCorp"); // born-green: the uncovered codes — the standing blind join
+    expect(text).not.toContain("SeniorHRManager\nTechCorp");
+  });
+
+  // ---- R125-B: the known-zero advance ----
+  it("advances a map-covered ZERO width instead of blinding (the .null-glyph class — R125-B)", async () => {
+    // the measured Calibri array form: the array's zero-width entries ride
+    // LEGITIMATELY-covered codes (the .null glyph class) — here the 'S' of
+    // the SHOWN "SeniorHRManager" (code 58) carries the 0 with the real
+    // widths behind it. The HEAD's w <= 0 guard conflates the KNOWN zero
+    // with the UNKNOWN and blinds the whole block; the cure advances 0
+    // (the tracked end loses one glyph's width) and keeps tracking.
+    const widths = [...PHRASE].map((_, i) => (i === PHRASE.indexOf("S") ? "0" : "600.098")).join(" ");
+    const file = await fontFixture(`/DW 0 /W [ 1 [ ${widths} ] ]`);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: the zero-covered code blinds the block — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  // ---- R125-C: the /Contents-array text-state carry ----
+  it("carries the text state across a /Contents-array stream boundary (the inherited-font class — R125-C)", async () => {
+    // the measured IRS page-2403 form: /Contents [s1 s2] — the streams
+    // process AS-IF-CONCATENATED (ISO 32000-1 §7.7.4) and the text state
+    // persists across the boundary. Stream s1 sets /F1 and shows; stream
+    // s2 carries NO Tf — its shows inherit F1. The HEAD walks each stream
+    // with a fresh state: s2's pieces carry font "" and blind.
+    const s1 = `q\n1 0 0 -1 50 750 cm\nBT 0 Tr /F1 10 Tf 1 0 0 -1 0 0 Tm (${codesFor(PAD)}) Tj\nET\nQ`;
+    const s2 =
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr 1 0 0 -1 0 0 Tm (${codesFor("SeniorHRManager")}) Tj\nET\nQ\n` +
+      `q\n1 0 0 -1 508.8 700 cm\nBT 0 Tr 1 0 0 -1 0 0 Tm (${codesFor("TechCorp")}) Tj\nET\nQ`;
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 8 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /CCCCCC+Test /Encoding /Identity-H /ToUnicode 3 0 R /DescendantFonts [5 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { dict: "/Filter /FlateDecode", stream: s1 },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /CCCCCC+Test /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 0 /W [ ${[...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} 600.098`).join(" ")} ] >>` },
+      { dict: "/Filter /FlateDecode", stream: s2 },
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" },
+      { raw: "<< /Type /Page /Contents [4 0 R 6 0 R] /Resources << /Font << /F1 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: s2's Tf-less shows carry no font — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  it("keeps the odd-length pure-number /W range reading (the r124-B pin under the cure)", async () => {
+    // the r124-B form: /W [ 0 92 600.098 ] — the pure-number array never
+    // enters the bracket-walk; the odd-length pair-invalidity reading
+    // stands verbatim under the mixed-form cure.
+    const file = await fontFixture("/DW 0 /W [ 0 92 600.098 ]");
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // born-green: the no-bracket branch — the r124 pin
+  });
+});
+
+// Session 125 (R125-D — added in-round): the Form XObject's OWN resources.
+// The measured anatomy: the arXiv PTEX figure PDFs (the /Im10-class forms)
+// carry their own /Resources /Font << /Font1 799 0 R >> — but their content
+// streams walk as candidates with NO page binding, so the /F-name resolved
+// through the candidate chain to the FIRST same-named font in file order
+// (a DIFFERENT form's Calibri-Bold answering for the ArialMT pieces). The
+// misbind corrupted BOTH the width tracking (the codes falling on the wrong
+// /W's zero arms — the false column splits) AND the ToUnicode decode (the
+// fontspec "Utfiight SMALL JAPS" → "Upright SMALL CAPS" class — a standing
+// garbage-decode corrected to pdftotext's exact reading).
+describe("cv-text — the form's own resources round (session 125, R125-D)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}SeniorHRManagerTechCorp`; // codes 1..83
+  const codeFor = (i: number) => i + 1;
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  const typstBlock = (tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /F1 ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+  const formContent =
+    typstBlock(50, 750, 10, PAD) + "\n" +
+    typstBlock(50, 700, 12, "SeniorHRManager") + "\n" +
+    typstBlock(508.8, 700, 12, "TechCorp");
+
+  it("binds a Form XObject's own /Resources fonts to its stream (the embedded-figure misbind — R125-D)", async () => {
+    // two same-named fonts: the WRONG one (obj 2 — the earlier form's
+    // font, a /W covering NONE of the shown codes, /DW 0) and the RIGHT
+    // one (obj 3 — the target form's own /F1, the full c-c-w coverage).
+    // The earlier form (obj 5) declares /F1 → 2 first in file order; the
+    // target form (obj 6) declares /F1 → 3 in ITS OWN /Resources. At HEAD
+    // the candidate chain resolves the target form's /F1 to obj 2 (the
+    // first width-carrying candidate) — every code falls to /DW 0 and the
+    // block blinds; the cure binds the form's OWN pairs.
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 9 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Wrong /Encoding /Identity-H /ToUnicode 4 0 R /DescendantFonts [7 0 R] >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /BBBBBB+Right /Encoding /Identity-H /ToUnicode 4 0 R /DescendantFonts [8 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /Font << /F1 2 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /Font << /F1 3 0 R >> >>", stream: formContent },
+      { raw: "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /AAAAAA+Wrong /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 0 /W [ 0 [ 506 ] ] >>" },
+      { raw: `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /BBBBBB+Right /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 0 /W [ ${[...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} 600.098`).join(" ")} ] >>` },
+      { raw: "<< /Type /Pages /Kids [10 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 11 0 R /Resources << /XObject << /Im1 6 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode", stream: "q Q" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // ← RED at HEAD: the candidate chain resolves /F1 to the WRONG font — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+});

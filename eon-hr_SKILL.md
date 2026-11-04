@@ -1,7 +1,7 @@
-**Version:** 4.11.0 (session-123 close + session-124 — the indirect-font + odd-W round: THE INDIRECT /FONT DICTIONARY RESOLUTION [the ReportLab blind-pocket completion — the page's /Font VALUE itself an indirect ref (/Font 1 0 R → the shared pure pair dict, all 135 pages, zero inline /Font dicts), and the page scan's F-pattern collects the XObject entry FIRST because "FormXob.<hex>" STARTS WITH F — the false pair makes fonts.size truthy and the R107-B shape-(a) else-if chain never queues the pendingFontRef: the pageMap binds the XObject name, every real font lookup fails the misbind guard, the whole page width-blind (the measured 546-piece pocket, bx 95.6%); the cure: the fontRef queue fires WHENEVER the page carries the indirect form (both scan sites) and the post-walk resolution REPLACES the false-pair map; the fire-separation census: the form rides ReportLab ALONE; the measured cure: bx 95.6% -> 100.0%, the 6 other members IDENTICAL, the 16 families EXACT, the word-stream identical with the raw line-axis TOWARD +0.0015 — the page-number columns read cell-per-line where the HEAD read them run together, the R123-B doctrine class] · THE ODD-LENGTH /W PAIR-INVALIDITY [the arXiv F5 class — the descendant /W [ 0 92 600.098 ] (CourierNew monospaced) is the R121-A range-triple intent (CIDs 0-92 at 600.098; the c-w-n spec reading impossible: n = 600.098 not an integer count) but the pairsValid guard reads the pair (0, 92) as plausible and the pair reading wins — {0: 92} with the 600.098 DANGLING-discarded, every CID > 0 falling to /DW 0 and the w <= 0 guard blinding every block; THE BUG: a pair list must consume EVERY number — an odd token count dangles its last value, proving the pair reading invalid by construction; the cure: pairsValid initializes to nums.length % 2 === 0; the measured cure: arXiv bx 97.3% -> 99.2% with the OUTPUT IDENTICAL on every member — a zero-drift un-blinding in the R120 class; the 16 families EXACT] · THE MEASUREMENT-ARTIFACT TRAP CLASS [the 88th-deploy watch: the audit subagent's "social border changed" flag REFUTED by the byte-identical login render (md5-identical captures) — it read the [data-ds] WRAPPER's computed border where the protocol measures the BUTTON; the drawer census's cand[0] matched the display:none desktop sidebar 256px z:10 — filter by display/visibility before censusing; a byte-identical render refutes any computed-style flag] · the drift ledger zero-away (6 IDENTICAL + ReportLab TOWARD, alnums exact, 16 families EXACT) · the mutation matrix M1 1 · M2 1 · M3 1 · M4 2 · M5 1 · GREEN 1179/1179 + E2E 565/565) — [the session-123 layer:]
+**Version:** 4.12.0 (session-124 close + session-125 — the contents-carry + mixed-W + zero-advance + form-own-resources round: THE MIXED /W RANGE ARMS + THE BRACKET-BALANCED CAPTURE [R125-A — the arXiv FontN Calibri descendants carry the bracketed /W with BOTH spec entry forms interleaved: the array entries `c [w1..wn]` AND the range arms `cfirst clast w` INCLUDING the legitimate w=0 gap-ranges; TWO stacked defects: the /W value capture `\[([^\]]*)\]` TRUNCATED at the first `]` (the leading entry's closer — the map kept only the first fragment, every later entry and arm silently dropped to /DW) and the bracket-walk read the bare groups as PAIRS (the real widths interleaving as fake CIDs); the cure: the bracket-balanced depth-walk capture SLICED AFTER THE OPENING BRACKET (the in-round discovery: including the leading `[` routed EVERY inline /W through the bracket walk, bypassing the R121-A/R124-B validated no-bracket readings — the pure-pair self-rejection guards) + the bare-group range reading; the fire-separation census: the true mixed form rides arXiv (14) + fpdf2 control (1), WeasyPrint pure-array (the earlier "mixed" flags were leaky-regex artifacts)] · THE KNOWN-ZERO ADVANCE [R125-B — the advance guard conflated the UNKNOWN width (a code outside the table — the conservative blind signal) with the KNOWN ZERO (a code the table covers at 0 — the .null-glyph class under the Calibri array's zero-width entries, and the subset gap codes the content nonetheless shows); the cure: `hit === undefined && w <= 0` blinds, a map-hit 0 advances 0] · THE /CONTENTS-ARRAY TEXT-STATE CARRY [R125-C — the IRS page-2403 form: /Contents [8 streams] process AS-IF-CONCATENATED (ISO 32000-1 7.7.4) and the text state persists across the boundaries; the mid-array streams 2407/2409/2410/2411 show text BEFORE any Tf — they inherit the predecessor stream's LAST Tf; the walker's per-stream fresh state left 108 pieces fontless and blind; the cure: the contentsPrev chain + the carry object threaded through pdfTextPieces (init + write-back); the measured cure: IRS bx 94.7% -> 100.0% with the OUTPUT IDENTICAL — the zero-drift un-blinding class] · THE FORM XOBJECT'S OWN RESOURCES [R125-D, added in-round — the arXiv PTEX figure PDFs (the LaTeX \includegraphics class) carry their own /Resources /Font but their content streams walk as candidates with NO page binding: the candidate chain resolved /Font1 to the FIRST same-named font in file order (a DIFFERENT form's Calibri-Bold answering for the ArialMT pieces); the misbind corrupted BOTH the width tracking (the codes fell on the wrong /W's zero arms — false column splits) AND the ToUnicode decode (the STANDING fontspec garbage-decode "Utfiight SMALL JAPS" -> the truth "Upright SMALL CAPS", 7 hunks exact-matching pdftotext; the arXiv "New aork" -> "New York" class); the cure: a Form XObject with an inline /Resources /Font region binds its OWN object number in pageFonts — the R105-C genus extended to forms; stream objects never ride ObjStms so the raw-site cure covers every form] · THE neo-crm s212 GENUS TRANSFER VERIFIED [D-125a — the standalone bun-launch DB re-anchor: eon-hr's seam ALREADY has the hoisted shape (candidateRoots computes the standalone anchor unconditionally); the launch-shape probe scripts/r125-launch-verify.mjs: Leg A (the clean .env-only launch) PASS — the seeded login works, no phantom parent DB; Leg B (the sandbox-exported absolute DATABASE_URL) fails LOUDLY (health db:down); bun 1.3.14 loads .env values RAW (no absolutization — the neo-crm shape does not reproduce here; the signature-defense deferred as speculative, the probe is the standing guard); the blind-spot closing: the db-path fixtures never modeled the REAL artifact (the traced .next/standalone/.env — verified live) — 3 born-green pins added] · THE AUTOJUNK ARTIFACT TRAP [the difflib word-stream similarity with default autojunk read fontspec AWAY (0.903 -> 0.9016) — the frequency-junking heuristic shifted when the corrected words changed the profile; with autojunk=False the true verdict is TOWARD (0.9047 -> 0.9049) — classify with autojunk=False or per-hunk evidence when corrections change word frequencies] · THE SNAPSHOT ATTRIBUTE REGEX TRAP [the agent-browser a11y snapshot renders `- button "Toggle Sidebar" [expanded=false, ref=e19]` — the `\[ref=(\w+)\]` pattern matches NOTHING on attribute-carrying nodes; the tolerant `\[[^\]]*ref=(\w+)\]` form is required] · the drift ledger (10 IDENTICAL + arXiv TOWARD [word-stream +0.0002 autojunk=False, line-form aggregate IDENTICAL, alnums exact, 3 decode corrections] + fontspec TOWARD [7 exact-correction hunks, delete/insert -4]) · the mutation matrix M1 1 · M2 2 · M3 1 · M4 1 · M5 1 · M6 1 · GREEN 1189/1189 + E2E 565/565) — [the session-124 layer:] THE INDIRECT /FONT DICTIONARY RESOLUTION [the ReportLab blind-pocket completion — the page's /Font VALUE itself an indirect ref (/Font 1 0 R → the shared pure pair dict, all 135 pages, zero inline /Font dicts), and the page scan's F-pattern collects the XObject entry FIRST because "FormXob.<hex>" STARTS WITH F — the false pair makes fonts.size truthy and the R107-B shape-(a) else-if chain never queues the pendingFontRef: the pageMap binds the XObject name, every real font lookup fails the misbind guard, the whole page width-blind (the measured 546-piece pocket, bx 95.6%); the cure: the fontRef queue fires WHENEVER the page carries the indirect form (both scan sites) and the post-walk resolution REPLACES the false-pair map; the fire-separation census: the form rides ReportLab ALONE; the measured cure: bx 95.6% -> 100.0%, the 6 other members IDENTICAL, the 16 families EXACT, the word-stream identical with the raw line-axis TOWARD +0.0015 — the page-number columns read cell-per-line where the HEAD read them run together, the R123-B doctrine class] · THE ODD-LENGTH /W PAIR-INVALIDITY [the arXiv F5 class — the descendant /W [ 0 92 600.098 ] (CourierNew monospaced) is the R121-A range-triple intent (CIDs 0-92 at 600.098; the c-w-n spec reading impossible: n = 600.098 not an integer count) but the pairsValid guard reads the pair (0, 92) as plausible and the pair reading wins — {0: 92} with the 600.098 DANGLING-discarded, every CID > 0 falling to /DW 0 and the w <= 0 guard blinding every block; THE BUG: a pair list must consume EVERY number — an odd token count dangles its last value, proving the pair reading invalid by construction; the cure: pairsValid initializes to nums.length % 2 === 0; the measured cure: arXiv bx 97.3% -> 99.2% with the OUTPUT IDENTICAL on every member — a zero-drift un-blinding in the R120 class; the 16 families EXACT] · THE MEASUREMENT-ARTIFACT TRAP CLASS [the 88th-deploy watch: the audit subagent's "social border changed" flag REFUTED by the byte-identical login render (md5-identical captures) — it read the [data-ds] WRAPPER's computed border where the protocol measures the BUTTON; the drawer census's cand[0] matched the display:none desktop sidebar 256px z:10 — filter by display/visibility before censusing; a byte-identical render refutes any computed-style flag] · the drift ledger zero-away (6 IDENTICAL + ReportLab TOWARD, alnums exact, 16 families EXACT) · the mutation matrix M1 1 · M2 1 · M3 1 · M4 2 · M5 1 · GREEN 1179/1179 + E2E 565/565) — [the session-123 layer:]
 > [the session-121 layer:] 
 > [the session-120 layer:] **Version:** 4.7.0 (session-119 close + session-120 — the width-blind elimination round: the fresh-clone reproducibility cure [the neo-crm s210 checkout-portability genus — 23 census scripts imported /tmp protos, build/tsc RED on any reset; the committed census proto scripts/protos/cv-text-proto.ts = the source + two documented insertions, regenerated by sync-proto.mjs, pinned by tests/unit/script-portability.test.ts: the ban arm + the sync arm + the surface arm] · THE WIDTH-BLIND TAXONOMY MEASURED AND CURED: the indirect /Widths + /W arrays [the deferred post-walk resolution — the ObjStm bodies kept + the bracket-balanced raw scan], the general-name font bindings [the WeasyPrint subset-tag pure-pair-dicts, the IRS T1_0 / QUARTZ Tc1 forms], the pageMap-less fallback [the candidate chain's first width-carrying object; a page map that lacks the font stays blind] · THREE STACKED TRACKING ERRORS exposed by the un-blinding and cured: the KERN-SIGN INVERSION [a TJ number displaces by -K/1000 x ps — ISO 32000-1 9.4.3; the word-gap kerns moved the tracked end BACKWARD, manufacturing phantom 3-9 em gaps — the resume2 under-tracking's mechanism, its inter-block form cured], THE Tw/Tz BLINDNESS [Prawn justifies by Tw with real 0x20 bytes inside the atoms — 1.16165 Tw adds ~11.6pt/space; the walk's two new regex arms + the post-pass], THE TOC LEADER ANCHORS [the R118-A leader-run guard — an anchor followed by the SAME text at a 0-3 em step is a leader, never a split; the icon class leads DIFFERENT content and keeps firing] · THE DRIFT LEDGER: TOWARD on four members [arXiv +4.6bp · dvipdfmx +2.1bp · fontspec +9.8bp · WeasyPrint +10.2bp], IDENTICAL everywhere else, ZERO AWAY across the 29-member corpus; the bx coverage: dvipdfmx/fontspec/QUARTZ/Prawn/WeasyPrint 100% · arXiv 97.3% · IRS 94.7% · GREEN 1158/1158, the mutation matrix M1 4 · M2-M6 2 · DM1/DM2 1; arXiv/dvipdfmx/fontspec re-pinned at the cured md5s, alnums exact; the WeasyPrint CV through the live upload flow: dateSplit TRUE x2 in the stored cvText)
-> **State:** 1179 unit + 565 E2E tests green, lint/typecheck/build
+> **State:** 1189 unit + 565 E2E tests green, lint/typecheck/build
 > clean, visual + interaction parity with the live reference verified by dual-browser audit
 > (desktop 1440 + mobile 390 + the tablet bands 768/900/1024 + the 640–767 band +
 > the sub-390 band + a print-stylesheet audit + the keyboard/focus-ring taxonomy +
@@ -6833,3 +6833,108 @@ zero-width entry, the f-0-0 class, and the mixed-form `/W` range arms —
 the `c [w…] cfirst clast w` shape), the IRS fontless pocket (108
 Tf-less pieces, the ZaDb appearance-stream class), the Typst sub-em
 precision residuals, and the standing watches.
+
+## §137. The contents-carry + mixed-W + zero-advance + form-own-resources round (session 125) — the inherited font state, the spec's range arms, the legitimate zero, and the form that answered for another form's glyphs
+
+**The five materials.** The r125 queue named the arXiv residual pocket
+(182 pieces: the f-0-0 class, the Font2 null-glyph class, the mixed-form
+/W range arms) and the IRS fontless pocket (108 pieces — the ZaDb
+appearance-stream class, undiagnosed). The instrumented blindness-cause
+walk (a patched proto copy logging every widthFor failure) decoded four
+distinct mechanisms, and the measurement surfaced a fifth:
+
+1. **R125-A the mixed /W's range arms + the bracket-balanced capture** —
+   the arXiv FontN Calibri/ArialMT descendants interleave BOTH spec entry
+   forms: the array entries (`c [w1 … wn]`) and the RANGE arms
+   (`cfirst clast w`, including the legitimate w=0 gap-ranges). TWO
+   stacked defects: the /W value capture `\[([^\]]*)\]` truncated at the
+   FIRST `]` (the leading entry's closer), and the bracket-walk read the
+   bare groups as pairs. The cure: the bracket-balanced depth-walk
+   capture, sliced AFTER the opening bracket — **the in-round discovery**:
+   a capture INCLUDING the leading `[` routed every inline /W through the
+   bracket walk, bypassing the R121-A/R124-B validated no-bracket readings
+   (the pure-pair self-rejection guards) — the M1 mutation's 9-kill
+   mismatch exposed it.
+2. **R125-B the known-zero advance** — a code the table COVERS at width 0
+   is a legitimate zero advance (the .null-glyph class), not blindness;
+   only the uncovered code (no positive default) keeps the conservative
+   blind signal.
+3. **R125-C the /Contents-array text-state carry** — the IRS page-2403's
+   8-stream /Contents array processes AS-IF-CONCATENATED (ISO 32000-1
+   §7.7.4): the mid-array streams show text BEFORE any Tf, inheriting the
+   predecessor's LAST Tf. The walker's per-stream fresh state left 108
+   pieces fontless. The cure: the contentsPrev chain + a carry object
+   (font/size/tw/tz) threaded through pdfTextPieces — init from the
+   predecessor, write-back at the walk's end. **The measured cure: IRS bx
+   94.7% → 100.0% with the OUTPUT IDENTICAL** (the zero-drift un-blinding
+   class — the pieces were already in the stream, only the bx tracking
+   was missing).
+4. **R125-D the Form XObject's own resources** — the arXiv PTEX figure
+   PDFs (the LaTeX `\includegraphics` class) carry their own /Resources
+   /Font, but their content streams walk as candidates with NO page
+   binding: the candidate chain resolved /Font1 to the FIRST same-named
+   font in file order — a DIFFERENT form's Calibri-Bold answering for the
+   ArialMT pieces. The misbind corrupted BOTH the width tracking (the
+   codes fell on the wrong /W's zero arms — false column splits: the
+   tracked end under-advanced 24 glyphs → 15.5pt instead of ~96pt, the
+   block-boundary gap inflated past the 2.5-em upgrade band) AND the
+   ToUnicode decode (a STANDING garbage-decode: fontspec's "Utfiight
+   SMALL JAPS" → "Upright SMALL CAPS", "harj po find" → "hard to find" —
+   7 hunks exact-matching pdftotext; arXiv's "New aork" → "New York").
+   The cure: a Form XObject with an inline /Resources /Font region binds
+   its OWN object number in pageFonts — the R105-C genus extended to
+   forms (stream objects never ride ObjStms, so the raw-site cure covers
+   every form).
+5. **D-125a the neo-crm s212 genus transfer verified** — the standalone
+   bun-launch DB re-anchor: eon-hr's seam ALREADY implements the hoisted
+   shape (`candidateRoots()` computes the standalone anchor
+   unconditionally). The launch-shape probe (`scripts/r125-launch-verify.mjs`):
+   Leg A (the clean `.env`-only launch) PASS — the seeded login works, no
+   phantom parent DB; Leg B (the sandbox-exported absolute DATABASE_URL)
+   fails LOUDLY (the health endpoint reports `db:down`). bun 1.3.14 loads
+   .env values RAW (measured — no absolutization; the neo-crm shape does
+   not reproduce here); the signature-defense is deferred as speculative,
+   the probe is the standing guard. The blind-spot closing: the db-path
+   fixtures never modeled the REAL artifact (the traced
+   `.next/standalone/.env` — verified live) — 3 born-green pins added.
+
+**The drift ledger (zero away).** 10 members IDENTICAL + arXiv TOWARD
+(the word-stream +0.0002 autojunk=False, the line-form aggregate
+IDENTICAL — the experiment's intermediate state without R125-D showed 14
+false-split hunks; the form binding's real Arial widths restore the
+flowing tracked end and the splits vanish; alnums exact; the 3 decode
+corrections) + fontspec TOWARD (7 exact-correction hunks; delete/insert
+−4; the alnum pin moves 106179 → 106183 with the corrections' content).
+The 16 family members ALL EXACT. bx: IRS 100.0% · arXiv 99.9% ·
+ReportLab 100.0%.
+
+**The round's traps.** The autojunk artifact (the difflib word-stream
+similarity with default autojunk read fontspec AWAY — the
+frequency-junking heuristic shifted when the corrected words changed the
+profile; classify with autojunk=False or per-hunk evidence). The
+snapshot attribute regex (the agent-browser a11y snapshot renders
+`- button "Toggle Sidebar" [expanded=false, ref=e19]` — the `\[ref=(\w+)\]`
+pattern matches NOTHING on attribute-carrying nodes; the tolerant
+`\[[^\]]*ref=(\w+)\]` form is required). The shell single-quote nesting
+(the `$Abcd1234` password expanded to empty inside double-quoted eval
+expressions — the file-based scripts with single-quoted fills are the
+safe pattern). The login rate limiter (the debug re-runs exhausted the
+10-per-15min budget — restart the server to reset the in-memory limiter,
+then ONE clean capture run). The mid-session viewport change (the mobile
+a11y tree does not re-render the hamburger after a 1280→390 switch — set
+the viewport at the session start).
+
+**The verification.** RED 3/3 + the R125-D RED demonstrated by source
+revert + 3 D-125a born-green pins + the fire-separation guards → GREEN
+1189/1189 (1179 + 10); the mutation matrix exact (M1 1 · M2 2 · M3 1 ·
+M4 1 · M5 1 · M6 1 — the M1 first run's 9-kill mismatch exposed the
+leading-bracket capture bug, fixed in-round); the drift ledger
+zero-away; lint 0/0 · tsc ✓ · build ✓ · E2E 565/565 (the 3-chunk
+foreground split 200+187+180, zero failures); DB pristine (1/1/2/0/0);
+the live UI verify (the Typst resume2 probe: name-first, dateSplit ×2,
+zero U+FFFD, swept by the REAL id); the 4 r125 screenshots
+byte-identical to the r124 captures (the cures are extraction-engine-only);
+the visual parity standing (the 89th-deploy watch: the login pair at the
+standing level, the dashboard 1 pixel in 1,024,000, the mobile-nav pair
+PARITY — the clone auto-close superset vs the REF's stay-open form, no
+Tailwind v4 regression).

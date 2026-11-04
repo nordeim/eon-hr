@@ -154,3 +154,58 @@ describe("anchor validation", () => {
     }
   });
 });
+
+// Session 125 (D-125a — the neo-crm s212 genus transfer): the REAL
+// standalone artifact shape. The Next file tracer COPIES .env into
+// .next/standalone/ (verified on the live build this round) — the standing
+// fixtures never modeled it (the test-blind-spot genus: a fixture that
+// stops mirroring the real artifact silently orphans the code path keyed
+// to it). The traced .env's PRESENCE is irrelevant to the resolution: the
+// anchor order decides (the standalone detector's repo root first), and
+// bun 1.3.14 loads .env values RAW (measured: "file:../db/custom.db"
+// unchanged — no absolutization; scripts/r125-launch-verify.mjs Leg A
+// proves the natural launch opens <repo>/db/custom.db end-to-end).
+describe("the traced-.env standalone artifact shape (session 125)", () => {
+  let repo: string;
+  let standalone: string;
+
+  beforeAll(() => {
+    repo = mkdtempSync(path.join(tmpdir(), "dbpath-env-repo-"));
+    mkdirSync(path.join(repo, "prisma"));
+    writeFileSync(path.join(repo, "prisma", "schema.prisma"), "// x");
+    standalone = path.join(repo, ".next", "standalone");
+    mkdirSync(standalone, { recursive: true });
+    writeFileSync(path.join(standalone, "server.js"), "// next standalone");
+    mkdirSync(path.join(standalone, "prisma"));
+    writeFileSync(path.join(standalone, "prisma", "schema.prisma"), "// traced copy");
+    // the REAL artifact: the file tracer's .env copy rides the standalone
+    writeFileSync(path.join(standalone, ".env"), 'DATABASE_URL="file:../db/custom.db"\n');
+  });
+
+  afterAll(() => {
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  it("the detector still recognizes the standalone dir WITH the traced .env", () => {
+    expect(standaloneRepoRoot(standalone)).toBe(repo);
+  });
+
+  it("the raw bun-delivered value resolves to the REPO db, not the standalone-side path", () => {
+    // bun loads .env raw: the resolver sees "file:../db/custom.db" with the
+    // standalone-context anchors [repo, standalone] — the repo anchor wins
+    // and the URL lands on <repo>/db/custom.db. Resolving it against the
+    // traced .env's OWN directory (the standalone) would land on
+    // <repo>/.next/db/custom.db — the wrong side.
+    const out = resolveDatabaseUrl("file:../db/custom.db", [repo, standalone]);
+    expect(toPosix(out)).toBe(`file:${toPosix(path.join(repo, "db", "custom.db"))}`);
+  });
+
+  it("an ABSOLUTE value still passes through (the intentional-override contract)", () => {
+    // the exported-DATABASE_URL operator trap (the sandbox form): an
+    // absolute URL is an intentional override — the passthrough contract
+    // verbatim (the trap fails LOUDLY downstream: the health endpoint
+    // reports db:down — scripts/r125-launch-verify.mjs Leg B).
+    const out = resolveDatabaseUrl("file:/elsewhere/custom.db", [repo, standalone]);
+    expect(toPosix(out)).toBe("file:/elsewhere/custom.db");
+  });
+});

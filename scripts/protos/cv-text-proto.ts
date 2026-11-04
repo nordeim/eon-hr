@@ -647,8 +647,19 @@ function parseWidthsArray(w: string): Map<number, number> | null {
       }
       i++;
     } else if (i < toks.length && toks[i] !== "]") {
-      out.set(c, Number(toks[i]));
-      i++;
+      // R125-A: a bare number group in a bracketed /W is the spec's RANGE
+      // entry (cfirst clast w) — the pair reading corrupted the Calibri/fpdf2
+      // gap forms (the arXiv FontN descendants' "4 31 0" gap-ranges read as
+      // pairs with the real widths interleaved as fake CIDs).
+      if (i + 1 < toks.length && toks[i + 1] !== "[" && toks[i + 1] !== "]") {
+        const clast = Number(toks[i]);
+        const wv = Number(toks[i + 1]);
+        for (let cid = c; cid <= clast; cid++) out.set(cid, wv);
+        i += 2;
+      } else {
+        out.set(c, Number(toks[i]));
+        i++;
+      }
     }
   }
   return out;
@@ -685,7 +696,7 @@ function parseWidthsArray(w: string): Map<number, number> | null {
  * the consecutive-number SUM is ≤ -100; positive sums (any magnitude)
  * and small negatives join.
  */
-function pdfTextPieces(content: string): TextPiece[] {
+function pdfTextPieces(content: string, carry?: { font: string; size: number; tw: number; tz: number }): TextPiece[] {
   const pieces: TextPiece[] = [];
   // Session 98 (R98-B): the single-pass alternation unescape is REQUIRED: a
   // sequential replace cannot tell \\053 (escaped backslash + literal
@@ -761,15 +772,15 @@ function pdfTextPieces(content: string): TextPiece[] {
   };
 
   // The position state, per the R100-A rule:
-  let effSize = 1; // the last Tf size operand (the em denominator)
-  let curFont = ""; // the last Tf font NAME (the R102-B scoping key)
+  let effSize = carry?.size ?? 1; // the last Tf size operand (the em denominator)
+  let curFont = carry?.font ?? ""; // the last Tf font NAME (the R102-B scoping key)
   // R120-F: the text-state advance modifiers — Tw adds text-space units to
   // every single-byte 0x20 code's advance (Prawn's justification form: the
   // word spaces are real 0x20 glyph bytes inside the atoms, the JUSTIFIED
   // spacing riding Tw), Tz scales every advance (the shrink/tracking form).
   // Both ride the piece for the bx post-pass (ISO 32000-1 9.3).
-  let curTw = 0;
-  let curTz = 100;
+  let curTw = carry?.tw ?? 0;
+  let curTz = carry?.tz ?? 100;
   let pendingEm = 0; // accumulated |tx| / effSize since the last show
   let pendingTy = 0; // accumulated ty since the last show
   let moved = false; // any positioning operator since the last show?
@@ -1078,6 +1089,7 @@ function pdfTextPieces(content: string): TextPiece[] {
       continue;
     }
   }
+  if (carry) { carry.font = curFont; carry.size = effSize; carry.tw = curTw; carry.tz = curTz; } // R125-C: the write-back
   return pieces;
 }
 
@@ -1278,12 +1290,32 @@ async function extractPdfText(file: File): Promise<string> {
       if (df) objDescendant.set(objNum, { desc: parseInt(df[1], 10), identityH: /\/Encoding\s*\/Identity-H\b/.test(body) });
       return; // the widths live on the descendant (merged in the post-walk pass)
     }
-    const wsm = body.match(/\/W\s*\[([^\]]*)\]/);
-    if (wsm) {
-      const map = parseWidthsArray(wsm[1]);
-      const dw = body.match(/\/DW\s+(\d+)/);
-      if (map && map.size > 0) objWidths.set(objNum, { codeLen: 2, map, def: dw ? parseInt(dw[1], 10) : 1000 });
-      return;
+    // R125-A: the /W value capture is BRACKET-BALANCED — the mixed form
+    // interleaves nested array entries (`c [w…]`) with bare range arms, and
+    // the [^\]]* capture truncated at the FIRST `]` (the leading entry's
+    // closer), silently dropping every later entry and arm (the arXiv FontN
+    // class: the map kept only the `0 [ 506 0 0 226 578 ]` fragment, the
+    // rest falling to /DW). The single-entry and pure-number forms have no
+    // inner bracket — the balanced capture reads them identically.
+    {
+      const wStart = body.match(/\/W\s*\[/);
+      let wInner: string | null = null;
+      if (wStart && wStart.index !== undefined) {
+        let depth = 0;
+        let end = -1;
+        for (let i = wStart.index + wStart[0].length - 1; i < body.length; i++) {
+          const ch = body[i];
+          if (ch === "[") depth++;
+          else if (ch === "]") { depth--; if (depth === 0) { end = i; break; } }
+        }
+        if (end > 0) wInner = body.slice(wStart.index + wStart[0].length, end); // AFTER the opening bracket — the pure-number forms keep the validated no-bracket readings
+      }
+      if (wInner !== null) {
+        const map = parseWidthsArray(wInner);
+        const dw = body.match(/\/DW\s+(\d+)/);
+        if (map && map.size > 0) objWidths.set(objNum, { codeLen: 2, map, def: dw ? parseInt(dw[1], 10) : 1000 });
+        return;
+      }
     }
     // R120-A: the INDIRECT /W form — "/W 1029 0 R" (the dvipdfmx/fontspec
     // CID descendants). /DW rides the font body; the array rides the target.
@@ -1349,6 +1381,13 @@ async function extractPdfText(file: File): Promise<string> {
   // ObjStm-carried — invisible to any raw scan)
   const objstmBodies = new Map<number, string>();
   const pendingRes: { contents: number[]; res: number }[] = [];
+  // R125-C: the /Contents-array chain — each array member's immediate
+  // predecessor (the text state carries across the array's streams, ISO
+  // 32000-1 §7.7.4/§9.4: the streams process as-if-concatenated; a
+  // mid-array stream that shows text before any Tf inherits the
+  // predecessor's font state — the IRS 108-piece pocket's cause).
+  const contentsPrev = new Map<number, number>();
+  const streamState = new Map<number, { font: string; size: number; tw: number; tz: number }>();
   // R107-B: the third page-form — the referenced /Font dict. Two shapes:
   // (a) the page carries /Resources << /Font N 0 R >> (INLINE resources
   // whose /Font VALUE is a reference — the measured lo-calc cover form);
@@ -1408,6 +1447,7 @@ async function extractPdfText(file: File): Promise<string> {
       if (/\/Type\s*\/Page\b/.test(body)) {
         const refs = contentsRefs(body);
         if (!refs.length) continue;
+        for (let ri = 1; ri < refs.length; ri++) contentsPrev.set(refs[ri], refs[ri - 1]); // R125-C: the array chain
         const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
         const fontRef = inlineFontRef(body);
         if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
@@ -1420,6 +1460,18 @@ async function extractPdfText(file: File): Promise<string> {
         if (fontRef !== null) pendingFontRef.push({ contents: refs, fontRef }); // R124-A: always queue
       } else {
         if (fonts.size) objFonts.set(parseInt(rm[1], 10), fonts);
+        // R125-D: THE FORM XOBJECT'S OWN RESOURCES — a Form XObject carrying
+        // an inline /Resources /Font region binds ITS OWN object number: its
+        // content stream walks as a candidate with no page binding (the
+        // LaTeX PTEX figure class — the embedded-figure PDFs), and the
+        // candidate chain resolved the /F-name to the FIRST same-named font
+        // in file order (a DIFFERENT form's font — the arXiv Font1 misbind:
+        // the Calibri-Bold subset answering for the ArialMT pieces, the
+        // codes falling on the wrong /W's zero arms). The form's own pairs
+        // are the stream's REAL bindings, exactly like a page's own.
+        if (fonts.size && /\/Subtype\s*\/Form\b/.test(body)) {
+          pageFonts.set(parseInt(rm[1], 10), fonts);
+        }
         // R120-B: the general-name pairs (the Tc1/T1_0/BAWKYD class) — a
         // resources body's /Font << >> region or a pure pair dict feeds the
         // SAME objFonts feed the F-prefixed form fills
@@ -1714,7 +1766,14 @@ async function extractPdfText(file: File): Promise<string> {
     }
     let pieces: TextPiece[];
     try {
-      pieces = pdfTextPieces(text);
+      // R125-C: the /Contents-array member inherits its predecessor's final
+      // text state (the as-if-concatenated contract); a stream whose
+      // predecessor was not walked keeps the fresh-state default.
+      const prevNum = contentsPrev.get(objNum);
+      const prevCarry = prevNum !== undefined ? streamState.get(prevNum) : undefined;
+      const carry = { font: prevCarry?.font ?? "", size: prevCarry?.size ?? 1, tw: prevCarry?.tw ?? 0, tz: prevCarry?.tz ?? 100 };
+      pieces = pdfTextPieces(text, carry);
+      streamState.set(objNum, carry);
     } catch {
       continue; // the stack-overflow class — one bad stream never kills the file
     }
@@ -1993,8 +2052,13 @@ async function extractPdfText(file: File): Promise<string> {
         const tz = (piece as { tz?: number }).tz ?? 100;
         const twv = (piece as { tw?: number }).tw ?? 0;
         for (const c of codes) {
-          const w = we.map.get(c) ?? we.def;
-          if (w === undefined || w <= 0) { ok = false; break; }
+          const hit = we.map.get(c);
+          const w = hit ?? we.def;
+          // R125-B: a code the map COVERS at width 0 is a KNOWN zero advance
+          // (the .null-glyph class under the Calibri array's zero-width
+          // entries) — not blindness. Only a code the table does not cover
+          // (no positive default) stays the conservative blind signal.
+          if (w === undefined || w < 0 || (hit === undefined && w <= 0)) { ok = false; break; }
           adv += ((w / 1000) + (we.codeLen === 1 && c === 32 ? twv : 0)) * piece.ps * (tz / 100);
         }
         if (!ok) { blind = true; continue; }
