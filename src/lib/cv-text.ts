@@ -1441,6 +1441,14 @@ async function extractPdfText(file: File): Promise<string> {
         const refs = contentsRefs(body);
         if (!refs.length) continue;
         for (let ri = 1; ri < refs.length; ri++) contentsPrev.set(refs[ri], refs[ri - 1]); // R125-C: the array chain
+        // R126-B: the raw-site region-pairs merge — the ObjStm page site's
+        // own form (its r120 comment names "the IRS T1_0 class" but the IRS
+        // pages are RAW-carried; the raw site never received the merge).
+        // A page with inline /Resources /Font << /T1_0 … >> pairs — names
+        // the F-scan rejects — bound nothing and its content streams
+        // resolved through the candidate chain (the FIRST same-named
+        // declaration in file order, possibly ANOTHER page's font).
+        for (const [k, v] of fontPairsOf(body)) fonts.set(k, v);
         const res = body.match(/\/Resources\s+(\d+)\s+0\s+R/);
         const fontRef = inlineFontRef(body);
         if (fonts.size) refs.forEach((r) => pageFonts.set(r, fonts));
@@ -1462,6 +1470,19 @@ async function extractPdfText(file: File): Promise<string> {
         // the Calibri-Bold subset answering for the ArialMT pieces, the
         // codes falling on the wrong /W's zero arms). The form's own pairs
         // are the stream's REAL bindings, exactly like a page's own.
+        // R126-A: the binding fires on the MERGED pairs — the F-scan's
+        // \w class rejects the hyphenated names (f-0-0/f-0-1 — the
+        // matplotlib PTEX figure class) and every non-F-prefixed name
+        // (ZaDb/T1_N — the AcroForm class); those forms' own bindings
+        // never fired and the candidate chain resolved the name to the
+        // FIRST same-named object in file order (a different form's
+        // subset — the width tables diverging on 5–15 codes, and the
+        // arXiv 'z' class: the form's own 439 covers code 122 at 500
+        // while the first candidate's table stops at 121).
+        const formGpairs = fontPairsOf(body);
+        if (formGpairs.size) {
+          for (const [k, v] of formGpairs) fonts.set(k, v);
+        }
         if (fonts.size && /\/Subtype\s*\/Form\b/.test(body)) {
           pageFonts.set(parseInt(rm[1], 10), fonts);
         }
@@ -2023,7 +2044,13 @@ async function extractPdfText(file: File): Promise<string> {
         if (piece.kind === "lit") {
           const raw = piece.raw ?? "";
           if (we.codeLen === 2) {
-            if (raw.length === 0 || raw.length % 2 !== 0) { blind = true; continue; }
+            // R126-C: the EMPTY show — a known zero-content event, never a
+            // blind: the piece takes the block's current tracked position
+            // (a zero-width occupant) and the block KEEPS tracking (the
+            // R125-B known-zero doctrine's mirror). A genuinely-odd raw
+            // (a dangling byte) keeps the standing conservative blind.
+            if (raw.length === 0) { (piece as { bx?: number }).bx = origin + adv; continue; }
+            if (raw.length % 2 !== 0) { blind = true; continue; }
             codes = [];
             for (let i = 0; i < raw.length; i += 2) codes.push(raw.charCodeAt(i) * 256 + raw.charCodeAt(i + 1));
           } else {
@@ -2033,7 +2060,10 @@ async function extractPdfText(file: File): Promise<string> {
         } else {
           const hx = piece.hex.replace(/\s+/g, "");
           const per = we.codeLen * 2;
-          if (hx.length === 0 || hx.length % per !== 0 || !/^[0-9A-Fa-f]+$/.test(hx)) { blind = true; continue; }
+          // R126-C: the EMPTY hex show — the same zero-content class as the
+          // empty literal (advances nothing, blinds nothing)
+          if (hx.length === 0) { (piece as { bx?: number }).bx = origin + adv; continue; }
+          if (hx.length % per !== 0 || !/^[0-9A-Fa-f]+$/.test(hx)) { blind = true; continue; }
           codes = [];
           for (let i = 0; i < hx.length; i += per) codes.push(parseInt(hx.slice(i, i + per), 16));
         }
@@ -2454,6 +2484,16 @@ async function extractPdfText(file: File): Promise<string> {
       if (p.condKern && d.genuine) continue; // the kern collapse never upgrades
       upgrade[i] = true;
       for (const c of consumed) dropText.add(c);
+      // R126-C: the zero-text pieces immediately before the boundary (the
+      // empty shows) — their walk-time separators are boundary artifacts
+      // riding the writer's join, and the upgrade must land CLEAN (the
+      // never-" \n" doctrine): reset their separators so the newline
+      // replaces the whole separation, exactly as pdftotext reads the row.
+      for (let k = i - 1; k >= 0; k--) {
+        const dk = decoded[k] as { text?: string; p?: { sep?: string } };
+        if ((dk.text ?? "").length > 0) break;
+        if (dk.p) dk.p.sep = "";
+      }
       if (decoded[j] !== undefined && (decoded[j] as { trail?: boolean }).trail === true) stripTrail.add(j);
     }
     // R118-A: THE ICON-ANCHORED SUB-THRESHOLD COLUMN SPLIT — the pre-pass

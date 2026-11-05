@@ -5014,3 +5014,206 @@ describe("cv-text — the form's own resources round (session 125, R125-D)", () 
     expect(text).not.toContain("SeniorHRManager TechCorp");
   });
 });
+
+
+describe("cv-text — the general-name binding + empty-show round (session 126)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  const PAD = "payrolladmincompliancetrainingonboardingspecialistplatform";
+  const PHRASE = `${PAD}SeniorHRManagerTechCorp`; // codes 1..83
+  const codeFor = (i: number) => i + 1;
+  const cmapForPhrase = () => {
+    const pairs = [...PHRASE]
+      .map((c, i) => `<${codeFor(i).toString(16).padStart(4, "0")}> <${c.charCodeAt(0).toString(16).padStart(4, "0")}>`)
+      .join("\n");
+    return (
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      `${PHRASE.length} beginbfchar\n${pairs}\nendbfchar\nendcmap\n`
+    );
+  };
+  const codesFor = (text: string) => {
+    const idx = PHRASE.indexOf(text);
+    if (idx < 0) throw new Error(`fixture phrase missing "${text}"`);
+    return [...text].map((_, i) => `\\000\\${codeFor(idx + i).toString(8).padStart(3, "0")}`).join("");
+  };
+  // the Tf name is parametrized: the fixture families exercise the
+  // F-prefixed (/F1), hyphenated (/f-0-0 — the matplotlib class), and
+  // underscored non-F (/T1_0 — the AcroForm class) name shapes
+  const typstBlock = (fname: string, tx: number, ty: number, size: number, text: string) =>
+    `q\n1 0 0 -1 ${tx} ${ty} cm\nBT 0 Tr /${fname} ${size} Tf 1 0 0 -1 0 0 Tm (${codesFor(text)}) Tj\nET\nQ`;
+  // the PAD block clears the 40-alnum isMeaningful guard (the r97
+  // fixture-length lesson)
+  const twoBlockContent = (fname: string) =>
+    typstBlock(fname, 50, 750, 10, PAD) + "\n" +
+    typstBlock(fname, 50, 700, 12, "SeniorHRManager") + "\n" +
+    typstBlock(fname, 508.8, 700, 12, "TechCorp");
+  const type0 = (base: string, tu: number, desc: number) =>
+    `<< /Type /Font /Subtype /Type0 /BaseFont /${base} /Encoding /Identity-H /ToUnicode ${tu} 0 R /DescendantFonts [${desc} 0 R] >>`;
+  const cidW = (base: string, dw: number, w: string) =>
+    `<< /Type /Font /Subtype /CIDFontType0 /BaseFont /${base} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW ${dw} /W [ ${w} ] >>`;
+  // the wrong font: /W covers ONLY code 0 — every shown code (1..83) is a
+  // map-miss falling to /DW 0 -> the R125-B conservative blind
+  const wrongDesc = (obj: number) => cidW("AAAAAA+Wrong", 0, "0 [ 506 ]");
+  void wrongDesc;
+  const rightW = [...PHRASE].map((_, i) => `${codeFor(i)} ${codeFor(i)} 600.098`).join(" ");
+
+  // ---- R126-A: the hyphenated-name form binding ----
+  it("binds a hyphen-named form's own fonts (the f-0-0 matplotlib class — R126-A)", async () => {
+    // the SAME misbind shape as the R125-D spec, but the font name carries
+    // a HYPHEN: /f-0-0 — the F-scan's \w class rejects it, so the R125-D
+    // binding gate (fonts.size) never fired and the candidate chain
+    // resolved the target form's /f-0-0 to the EARLIER form's font (the
+    // /W covering none of the shown codes -> /DW 0 -> the block blind ->
+    // no tracked end -> the column split never fires).
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 9 0 R >>" },
+      { raw: type0("AAAAAA+Wrong", 4, 7) },
+      { raw: type0("BBBBBB+Right", 4, 8) },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /Font << /f-0-0 2 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /Font << /f-0-0 3 0 R >> >>", stream: twoBlockContent("f-0-0") },
+      { raw: cidW("AAAAAA+Wrong", 0, "0 [ 506 ]") },
+      { raw: cidW("BBBBBB+Right", 0, rightW) },
+      { raw: "<< /Type /Pages /Kids [10 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 11 0 R /Resources << /XObject << /Im1 6 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode", stream: "q Q" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // <- RED at HEAD: the hyphen name never binds — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  // ---- R126-B: the raw-page site's region-pairs merge ----
+  it("binds a raw page's own non-F-prefixed font pairs (the T1_N class — R126-B)", async () => {
+    // the page declares /T1_0 in its INLINE /Resources — a non-F-prefixed
+    // name the F-scan rejects. The r120 merge landed at the ObjStm page
+    // site only; a RAW-carried page bound nothing and its content resolved
+    // through the candidate chain — the FIRST /T1_0 declaration in file
+    // order (page 1's WRONG font). The cure: the raw site gains the ObjStm
+    // site's own merge line.
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 11 0 R >>" },
+      { raw: type0("AAAAAA+Wrong", 4, 9) },
+      { raw: type0("BBBBBB+Right", 4, 10) },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { raw: "<< /Type /Page /Contents 6 0 R /Resources << /Font << /T1_0 2 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode", stream: "q Q" },
+      { raw: "<< /Type /Page /Contents 8 0 R /Resources << /Font << /T1_0 3 0 R >> >> >>" },
+      { dict: "/Filter /FlateDecode", stream: twoBlockContent("T1_0") },
+      { raw: cidW("AAAAAA+Wrong", 0, "0 [ 506 ]") },
+      { raw: cidW("BBBBBB+Right", 0, rightW) },
+      { raw: "<< /Type /Pages /Kids [5 0 R 7 0 R] >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // <- RED at HEAD: the raw page's T1_0 never binds — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  // ---- R126-C: the empty-show known-zero-content ----
+  it("never blinds a block on an EMPTY literal show (the zero-content class — R126-C)", async () => {
+    // an empty literal show ( "() Tj" ) advances nothing and blinds
+    // nothing: the piece takes the block's current tracked position and
+    // the block KEEPS tracking — the trailing TechCorp pair's >= 2.5 em
+    // gap upgrade fires through the empty piece's bx. At HEAD the empty
+    // show blinded the block's tail: the pair lost its tracked end and
+    // the walk-time space stood.
+    const content =
+      typstBlock("F1", 50, 750, 10, PAD) + "\n" +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /F1 12 Tf 1 0 0 -1 0 0 Tm (${codesFor("SeniorHRManager")}) Tj () Tj\nET\nQ\n` +
+      typstBlock("F1", 508.8, 700, 12, "TechCorp");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: type0("BBBBBB+Right", 3, 5) },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: cidW("BBBBBB+Right", 600, rightW) },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources << /Font << /F1 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // <- RED at HEAD: the empty show blinds the block tail — "SeniorHRManager TechCorp"
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  // ---- R126-C: the empty HEX show (the symmetric zero-content form) ----
+  it("never blinds a block on an EMPTY hex show (the whitespace-only atom class — R126-C)", async () => {
+    // the hex-side mirror of the empty-literal spec: a WHITESPACE-ONLY
+    // hex atom (< >) strips to hx === "" — the zero-content class (a bare
+    // <> never matches the walk's hex-atom regex; the piece never exists).
+    // The empty atom advances nothing and blinds nothing — the piece takes
+    // the block's tracked position and the trailing pair's upgrade fires.
+    const content =
+      typstBlock("F1", 50, 750, 10, PAD) + "\n" +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /F1 12 Tf 1 0 0 -1 0 0 Tm (${codesFor("SeniorHRManager")}) Tj < > Tj\nET\nQ\n` +
+      typstBlock("F1", 508.8, 700, 12, "TechCorp");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: type0("BBBBBB+Right", 3, 5) },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: cidW("BBBBBB+Right", 600, rightW) },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources << /Font << /F1 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("SeniorHRManager\nTechCorp"); // <- RED at HEAD: the empty hex blinds the block tail
+    expect(text).not.toContain("SeniorHRManager TechCorp");
+  });
+
+  // ---- R126-C fire-separation: a genuinely-odd raw KEEPS blinding ----
+  it("keeps a genuinely-ODD raw blind under a 2-byte font (the conservative guard — R126-C)", async () => {
+    // the cure splits ONLY the empty form out of the guard: a 3-byte raw
+    // under a codeLen-2 font is a dangling byte — unparseable, the
+    // conservative blind stands. The descendant carries a POSITIVE /DW so
+    // the guard is the ONLY blind source (a reverted guard would pair the
+    // dangling byte into a NaN code that ADVANCES the positive default —
+    // the mutation's teeth); the odd piece decodes to the covered code-1
+    // glyph, so the observable is the SEPARATOR before TechCorp.
+    const oddCodes = "\\000\\001\\000"; // 3 bytes: pair (00,01)=code 1 (covered), byte 00 dangling
+    const content =
+      typstBlock("F1", 50, 750, 10, PAD) + "\n" +
+      `q\n1 0 0 -1 50 700 cm\nBT 0 Tr /F1 12 Tf 1 0 0 -1 0 0 Tm (${codesFor("SeniorHRManager")}) Tj (${oddCodes}) Tj\nET\nQ\n` +
+      typstBlock("F1", 508.8, 700, 12, "TechCorp");
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 6 0 R >>" },
+      { raw: type0("BBBBBB+Right", 3, 5) },
+      { dict: "/Filter /FlateDecode", stream: cmapForPhrase() },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: cidW("BBBBBB+Right", 600, rightW) },
+      { raw: "<< /Type /Pages /Kids [7 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 4 0 R /Resources << /Font << /F1 2 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("TechCorp");
+    expect(text).not.toContain("\nTechCorp"); // born-green: the odd raw keeps the standing blind (no tracked end -> no upgrade)
+  });
+});
