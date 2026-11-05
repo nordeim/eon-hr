@@ -24,9 +24,31 @@ const css = readFileSync(
   "utf8"
 );
 
-const root = css.slice(css.indexOf(":root"), css.indexOf(".dark {"));
-const dark = css.slice(css.indexOf(".dark {"), css.lastIndexOf("@theme inline"));
-const theme = css.slice(css.lastIndexOf("@theme inline"), css.indexOf("@layer base"));
+// D-127a (the neo-crm s215 genus — the boundary-blind slice): a doc section
+// sliced by start/end markers goes VACUOUSLY GREEN when a marker's live form
+// changes — indexOf returns -1, the slice silently runs to EOF, and every
+// assertion then matches anywhere in the file. The guard throws instead.
+const sliceBetween = (text: string, startMarker: string, endMarker: string, label: string): string => {
+  const start = text.indexOf(startMarker);
+  if (start < 0) {
+    throw new Error(`tokens.test.ts: the ${label} slice's start marker ${JSON.stringify(startMarker)} is MISSING — the slice would run from EOF (the boundary-blind trap)`);
+  }
+  const end = text.indexOf(endMarker, start + startMarker.length);
+  if (end < 0 || end <= start) {
+    throw new Error(`tokens.test.ts: the ${label} slice's end marker ${JSON.stringify(endMarker)} is MISSING (or precedes the start) — the slice would run to EOF (the boundary-blind trap)`);
+  }
+  return text.slice(start, end);
+};
+// D-127a (the neo-crm s215 genus — the comment-blind face): an explanatory
+// comment carrying a rule's literal text keeps a raw-text assertion GREEN
+// even when the rule itself is deleted. Every assertion below reads the
+// comment-stripped face (the trailing /* 0 0% 3.9% */ value notes strip too —
+// no assertion ever needed them).
+const noComments = (text: string): string => text.replace(/\/\*[\s\S]*?\*\//g, "");
+
+const root = noComments(sliceBetween(css, ":root", ".dark {", "root"));
+const dark = noComments(sliceBetween(css, ".dark {", "@theme inline", "dark"));
+const theme = noComments(sliceBetween(css, "@theme inline", "@layer base", "theme"));
 
 describe("globals.css token contract", () => {
   it("pins the reference primary #1877F2 — and it must NOT flip in dark", () => {

@@ -476,17 +476,26 @@ describe("cv-text — the client-side CV extraction (session 95, R95-A)", () => 
   });
 
   // Session 100 (R100-A) guards: the join fix must NOT eat the standing
-  // space semantics — adjacent shows with NO positioning between them and
-  // the TJ-array internals keep their spaces (the R97 fixture's -120 IS a
-  // word gap; over-joining would break the r97/r98/r99 regression net).
-  it("keeps the standing space join between adjacent shows with no positioning between them (the guard)", async () => {
+  // space semantics — the TJ-array internals keep their spaces (the R97
+  // fixture's -120 IS a word gap; over-joining would break the r97/r98/r99
+  // regression net). Session 127 (R127-A) REVERSED the ADJACENT-SHOWS half
+  // of this guard: a show op with no positioning and no text-object/graphics
+  // change since the previous show continues the pen (ISO 32000-1 §9.4.1) —
+  // the pieces are contiguous. The r127 opSeq census measured the class
+  // corpus-wide (2205 boundaries on arXiv/ReportLab/Prawn/IRS; ZERO on the
+  // Typst members), the ground truth read 255 decisive JOINs / 0 spaces vs
+  // pdftotext, and the arXiv bibliography inversion was total (our "( 2023"
+  // ×111 vs pdftotext's "(2023" ×111). The original expectation was a
+  // conservative-guard born — no real-writer measurement ever backed it; the
+  // TJ-internal guard below keeps the W3C dummy.pdf pin untouched.
+  it("joins adjacent shows with no positioning between them (the pen continues — R127-A)", async () => {
     // the body clears the 40-alnum guard (the r97 fixture-length lesson)
     const file = await pdfWithContent(
       "BT /F1 12 Tf (Senior HR Manager)Tj (with)Tj (payroll compliance GOSI training onboarding)Tj ET"
     );
     const text = await extractTextFromFile(file);
-    expect(text).toContain("Manager with"); // a space, never "Managerwith"
-    expect(text).toContain("with payroll");
+    expect(text).toContain("Managerwithpayroll"); // R127-A: the pen continues — never "Manager with"
+    expect(text).not.toContain("Manager with");
   });
 
   it("keeps the TJ-array internal space join (the R97 semantics — the over-fix guard)", async () => {
@@ -5215,5 +5224,196 @@ describe("cv-text — the general-name binding + empty-show round (session 126)"
     const text = await extractTextFromFile(file);
     expect(text).toContain("TechCorp");
     expect(text).not.toContain("\nTechCorp"); // born-green: the odd raw keeps the standing blind (no tracked end -> no upgrade)
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 127 (R127-A): THE PEN-CONTINUES JOIN
+// ---------------------------------------------------------------------------
+// The r127 queue's named item — the arXiv figure-region line-form residuals
+// — traced to its root: the walk's standing " " join (the R100-A era's
+// "adjacent shows separate") is wrong for the SAME-TEXT-OBJECT class. A show
+// op with NO positioning op (Td/TD/Tm/T*) and NO text-object/graphics change
+// (BT/cm/q/Q) since the previous show continues the pen exactly where the
+// last glyph ended (ISO 32000-1 §9.4.1) — the pieces are CONTIGUOUS.
+//
+// The census (the opSeq-instrumented proto): Class A — the pen-continues
+// boundaries — rides arXiv 261 (the bibliography "(" + "2023" ×252 + the
+// matplotlib ﬀ font-switch ×9), ReportLab 1885 (the sentence/URL/code period
+// class), Prawn 47 (the €/'/CJK font-switch glyph class), IRS 12, and ZERO
+// on the other eight members. The ground truth: 255 decisive junctions read
+// JOIN in pdftotext, ZERO read a space; the arXiv bibliography inversion is
+// total (our "( 2023" ×111 / "2023 )" ×101 vs pdftotext's "(2023" ×111 /
+// "2023)." ×101).
+//
+// The fire separation (the sticky nonTextTouched flag — set by
+// Td/TD/T*/Tm/BT/cm/q/Q, NEVER cleared by the neutral Tf/Tw/Tz, cleared only
+// at the next push): the TJ-internal no-number atoms keep the standing " "
+// (the W3C dummy.pdf pin — the same showOpSeq); the Typst
+// every-word-its-own-q/cm/BT form keeps it (the word separator); the
+// per-word-Tm title class keeps it (the IRS "Form" + "1040" — both Tms at
+// the same origin); and the R116-A-upgrade classes keep it (the ReportLab
+// code-block lines and the arXiv table rows ride BT/cm/Td under a final Tf —
+// their newlines come from the assembly upgrade on the standing " ").
+describe("cv-text — the pen-continues join (session 127)", () => {
+  const encS = (s: string) => new TextEncoder().encode(s);
+  const encL = (s: string) => new TextEncoder().encode(s);
+
+  async function pdfWithLatin1Streams(
+    objects: ({ raw: string } | { dict: string; stream: string })[]
+  ): Promise<File> {
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if ("raw" in obj) {
+        parts.push(encS(`${i + 1} 0 obj\n${obj.raw}\nendobj\n`));
+      } else {
+        const deflated = new Uint8Array(
+          await new Response(new Blob([encL(obj.stream)]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer()
+        );
+        parts.push(encS(`${i + 1} 0 obj\n<< ${obj.dict} /Length ${deflated.length} >>\nstream\r\n`));
+        parts.push(deflated);
+        parts.push(encS("\r\nendstream\nendobj\n"));
+      }
+    }
+    parts.push(encS("trailer\n<< /Root 1 0 R >>\n%%EOF"));
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const pdf = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) {
+      pdf.set(p, o);
+      o += p.length;
+    }
+    return new File([pdf], "resume.pdf", { type: "application/pdf" });
+  }
+
+  const PAD = "payroll admin compliance training onboarding specialist platform";
+
+  it("joins a mid-word font-switched ligature show (the matplotlib PTEX figure class — R127-A)", async () => {
+    // the measured motivation.pdf row shape verbatim: a TJ under f-0-0, a
+    // single-CID hex show under f-0-1 (the Type0 ligature glyph — CID 1 = ﬀ,
+    // /W 556), then another f-0-0 TJ — NO positioning op between the shows,
+    // the pen continues through the ligature. RED at HEAD: "di ﬀ erent".
+    const cmap =
+      "begincmap\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n" +
+      "2 beginbfchar\n<0001> <fb00>\n<0002> <fb01>\nendbfchar\nendcmap\n";
+    const content =
+      "BT /f-0-0 12 Tf 100 700 Td [(Senior HR Manager di)]TJ /f-0-1 12 Tf <0001>Tj /f-0-0 12 Tf [(erent sized models with shared weights and platform experience)]TJ ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 7 0 R >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>" },
+      { raw: "<< /Type /Font /Subtype /Type0 /BaseFont /OETFYX+NimbusSans /Encoding /Identity-H /ToUnicode 4 0 R /DescendantFonts [5 0 R] >>" },
+      { dict: "/Filter /FlateDecode", stream: cmap },
+      { raw: "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /OETFYX+NimbusSans /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 500 /W [ 1 [ 556 ] ] >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [8 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 6 0 R /Resources << /Font << /f-0-0 2 0 R /f-0-1 3 0 R >> >> >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("diﬀerent"); // RED before the fix: "di ﬀ erent" (the standing join around the ligature)
+    expect(text).not.toContain("di ﬀ"); // the spaced ligature never returns
+  });
+
+  it("joins adjacent same-object shows (the arXiv bibliography class — R127-A)", async () => {
+    // the census's biggest pocket: the bibliography writes "(", "2023", ")",
+    // "." as DIRECT adjacent show ops (no positioning between them, the same
+    // text object) — 111 measured "( 2023" inversions vs pdftotext's
+    // "(2023". RED at HEAD: "Samsi et al. ( 2023 ) ;".
+    const content =
+      "BT /F1 12 Tf 100 700 Td (payroll admin compliance training onboarding specialist platform Samsi et al. )Tj (\\()Tj (2023)Tj (\\))Tj (;)Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R /Resources << /Font << /F1 6 0 R >> >> >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Samsi et al. (2023);"); // RED before the fix: "Samsi et al. ( 2023 ) ;"
+    expect(text).not.toContain("( 2023"); // the spaced bibliography never returns
+  });
+
+  it("joins the ReportLab sentence-period class (the adjacent show after a URL — R127-A)", async () => {
+    // the ReportLab 1885-boundary class: "www.reportlab.com" + "." as
+    // adjacent shows (often across a font switch) — pdftotext reads
+    // "reportlab.com." contiguous (652 decisive joins measured).
+    const content =
+      "BT /F1 12 Tf 100 700 Td (mailing list, which is www.reportlab.com)Tj (.)Tj ( The platform experience)Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R /Resources << /Font << /F1 6 0 R >> >> >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("www.reportlab.com."); // RED before the fix: "www.reportlab.com ."
+  });
+
+  // ---- the fire-separation guards (born-green through the cure) ----
+
+  it("keeps the space between per-word-Tm shows at the same origin (the IRS title class — the Tm sticky guard)", async () => {
+    // the IRS f1040 title: "Form"[T1_0] + "1040"[T1_1] — BOTH Tms at the
+    // SAME origin, so the origin-to-origin delta reads 0 and moved stays
+    // false — the Tm is still a POSITIONING op and the sticky memory must
+    // hold the standing " " (pdftotext reads the break; the r127 iteration-3
+    // patch bug joined this class — "Form1040").
+    const content =
+      `BT /F1 10 Tf 50 750 Td (${PAD})Tj ET\n` +
+      "BT /T1_0 24 Tf 24 0 0 24 43.2 700 Tm (Form)Tj /T1_1 24 Tf 24 0 0 24 43.2 700 Tm (1040)Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R /Resources << /Font << /F1 6 0 R /T1_0 7 0 R /T1_1 8 0 R >> >> >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("Form 1040"); // born-green: the Tm-positioned class keeps the standing " "
+    expect(text).not.toContain("Form1040");
+  });
+
+  it("keeps the space across a fresh 0-delta Td after a new text object (the arXiv rotated-label class — the sticky BT/cm/Td guard)", async () => {
+    // the arXiv sidebar labels: "4" then "PPL" — each its own q/cm/BT block
+    // with a fresh "0 0 Td" (the origin-to-origin delta 0, moved=false). The
+    // BT/cm/Td ops all set the sticky flag; the standing " " survives.
+    const content =
+      `BT /F1 10 Tf 0 0 Td (${PAD})Tj (4)Tj ET\n` +
+      "q 1 0 -1 0 14 786 cm q BT /F1 10 Tf 0 0 Td (PPL)Tj ET Q Q";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R /Resources << /Font << /F1 6 0 R >> >> >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("4 PPL"); // born-green: the graphics-positioned class keeps the standing " "
+    expect(text).not.toContain("4PPL");
+  });
+
+  it("keeps the R116-A newline upgrade fed on cm-positioned code-block lines (the ReportLab T*;cm;BT;Tm;Tf class — the upgrade-starvation guard)", async () => {
+    // the measured ReportLab code-block shape: the position rides the cm,
+    // the Tm origin is CONSTANT (36, .8), and a final Tf precedes the show —
+    // the Tm's reset() eats the T*'s pending move so the boundary reads
+    // not-moved, and the standing " " feeds the assembly-time y-delta
+    // upgrade that produces the newlines. The r127 iteration-2 patch bug
+    // (the Tf CLEARING the sticky flag) starved the upgrade and fused the
+    // whole block; this spec is that regression's guard.
+    const content =
+      `BT /F9 8 Tf 1 0 0 1 36 .8 Tm (${PAD} textobject.setTextOrigin)Tj ET\n` +
+      "T* Q q 1 0 0 1 78 358 cm Q q 1 0 0 1 78 336 cm q BT 1 0 0 1 36 .8 Tm /F9 8 Tf (textobject.setTextTransform)Tj ET";
+    const file = await pdfWithLatin1Streams([
+      { raw: "<< /Type /Catalog /Pages 4 0 R >>" },
+      { dict: "/Filter /FlateDecode", stream: content },
+      { raw: "<< /Type /Pages /Kids [5 0 R] >>" },
+      { raw: "<< /Type /Page /Contents 2 0 R /Resources << /Font << /F9 6 0 R >> >> >>" },
+      { raw: "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>" },
+    ]);
+    const text = await extractTextFromFile(file);
+    expect(text).toContain("setTextOrigin\ntextobject.setTextTransform"); // the R116-A upgrade keeps feeding
+    expect(text).not.toContain("setTextOrigintextobject"); // the fused form never returns
   });
 });

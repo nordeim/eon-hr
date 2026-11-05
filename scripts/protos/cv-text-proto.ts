@@ -815,6 +815,10 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
     moved = false;
     backward = false;
   };
+  // R127-A: the pen-continues tracking — the ops since the last show
+  let showOpSeq = 0; // increments at every show-op match (Tj/TJ/'/")
+  let lastPushSeq = -1; // the showOpSeq at the last pushed piece
+  let nonTextTouched = true; // a positioning/text-object/graphics op since the last show? (sticky; true initially — a first show never joins)
   // fromKern: the gap was decided by a TJ-ARRAY INTERNAL NUMBER (the writer's
   // explicit numeric kern/gap intent — pdfTeX's -322 class) — never a
   // conditional; only Td/Tm-driven gaps (positioning moves, which the
@@ -829,10 +833,33 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
         condGap = !backward && !fromKern; // a forward MOVE-driven em-gap MIGHT be a split-word continuation (R103-C)
       } else sep = ""; // a same-line forward move under 1.0 em — the glyph advance
     }
+    // R127-A: THE PEN-CONTINUES JOIN — a NEW show op (a different Tj/TJ
+    // from the previous piece's) with NO positioning op (Td/TD/Tm/T*) and NO
+    // text-object/graphics change (BT/cm/q/Q) since the previous show
+    // continues the pen exactly where the last glyph ended (ISO 32000-1
+    // §9.4.1): the pieces are CONTIGUOUS, never space-separated. The
+    // matplotlib PTEX figure class (a mid-word font switch to a Type0
+    // ligature glyph — "...e di" TJ + <0001>Tj (the ﬀ) + "erent..." TJ read
+    // "di ﬀ erent" where pdftotext reads "diﬀerent"), the arXiv bibliography
+    // ("(" Tj + "2023" Tj reads "( 2023" — pdftotext "(2023", 111 measured
+    // inversions), and the ReportLab sentence/URL period class (652 decisive
+    // joins, 0 spaces, on the r127 census). The standing " " join survives
+    // for the OTHER not-moved classes: TJ-internal atoms with no number (the
+    // W3C dummy.pdf pin — the same showOpSeq) and every boundary whose
+    // intervening ops touched the positioning/text-object/graphics state
+    // (the sticky flag) — the Typst every-word-its-own-BT+cm form's word
+    // separator, the IRS per-word-Tm title class ("Form" + "1040" — the Tm
+    // origin repeats, the positioning memory sticky), AND the R116-A-upgrade
+    // classes (the ReportLab code-block lines and the arXiv table rows ride
+    // BT/cm/Td under a final Tf; their newlines come from the assembly
+    // upgrade on the standing " ").
+    if (!moved && pieces.length > 0 && showOpSeq !== lastPushSeq && !nonTextTouched) sep = "";
     if (pieces.length === 0) sep = ""; // no leading separator on the first piece
     const pos = curPos();
     pieces.push({ sep, font: curFont, ...(pos ?? {}), ...(condGap ? { condGap: true } : {}), ...(kernGap ? { condKern: true } : {}), ...(kernVal !== 0 ? { kv: kernVal } : {}), ...(curTw !== 0 ? { tw: curTw } : {}), ...(curTz !== 100 ? { tz: curTz } : {}), ...piece });
     reset();
+    lastPushSeq = showOpSeq;
+    nonTextTouched = false;
     shownSinceTm = true; // a show happened — the next Td is a BETWEEN-SHOWS move (the ty rule lives)
     btFresh = false; // R104-C: the show ends the fresh run — the next Td is a between-shows move
   };
@@ -849,6 +876,7 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
     /\/\S+\s+([\d.+-]+)\s+Tf|(-?[\d.]+)\s+(-?[\d.]+)\s+T[dD]|T\*|\bBT\b|\(((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*)\)\s*(Tj|TJ|'|")|\[((?:\\.|[^\[\]\\()]|\((?:\\.|[^\\()]|\((?:\\.|[^\\()])*\))*\))*)\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*(Tj|TJ|'|")|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm|(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+cm|\bq\b|\bQ\b|(-?[\d.]+)\s+Tw|(-?[\d.]+)\s+Tz/g;
   let m: RegExpExecArray | null;
   while ((m = ops.exec(content))) {
+    if (m[4] !== undefined || m[6] !== undefined || m[7] !== undefined) showOpSeq++; // R127-A: a new show op begins
     if (m[1] !== undefined) {
       effSize = parseFloat(m[1]) || 1;
       // the font NAME rides the match's own text (zero regex-group churn):
@@ -857,6 +885,7 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
       continue;
     }
     if (m[2] !== undefined) {
+      nonTextTouched = true; // R127-A: a positioning op — sticky
       const tx = parseFloat(m[2]);
       const ty = parseFloat(m[3]);
       tlm = mul(tlm, [1, 0, 0, 1, tx, ty]); // R112-A: the line origin moves
@@ -906,12 +935,14 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
     if (m[0] === "T*") {
       moved = true;
       pendingTy = 1; // the explicit next-line operator
+      nonTextTouched = true; // R127-A: a positioning op — sticky
       continue;
     }
     // R120-F: the advance-modifier text state (the Tw/Tz regex arms)
     if (m[21] !== undefined) { curTw = parseFloat(m[21]) || 0; continue; }
     if (m[22] !== undefined) { curTz = parseFloat(m[22]) || 100; continue; }
     if (m[0] === "BT") {
+      nonTextTouched = true; // R127-A: a new text object — sticky
       // R104-C: a fresh text run begins — the run state resets (the first
       // Td after this, with no Tm in between, is absolute). The pending
       // separator state is NOT reset: the next positioning operator (the
@@ -924,6 +955,7 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
       continue;
     }
     if (m[15] !== undefined) {
+      nonTextTouched = true; // R127-A: a graphics-state change — sticky
       // R112-A: cm CONCATENATES — the operand applies before the standing
       // transform (CTM' = CTM x M; pinned on the Chromium flip+scale stack)
       ctm = mul(ctm, [
@@ -933,10 +965,12 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
       continue;
     }
     if (m[0] === "q") {
+      nonTextTouched = true; // R127-A: a graphics-state change — sticky
       if (ctmStack.length < 256) ctmStack.push(ctm); // bounded — an adversarial stream cannot grow it forever
       continue;
     }
     if (m[0] === "Q") {
+      nonTextTouched = true; // R127-A: a graphics-state change — sticky
       const prevCtm = ctmStack.pop();
       if (prevCtm) ctm = prevCtm;
       continue;
@@ -949,6 +983,8 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
         const pos = curPos();
         pieces.push({ sep: pieces.length === 0 ? "" : "\n", font: curFont, kind: "lit", text, raw: rawText, ...(pos ?? {}) });
         reset();
+        lastPushSeq = showOpSeq; // R127-A: a show happened — the push-state updates like every other
+        nonTextTouched = false;
       } else {
         push({ kind: "lit", text, raw: rawText });
       }
@@ -1064,6 +1100,7 @@ function pdfTextPieces(content: string, carry?: { font: string; size: number; tw
       const f = parseFloat(m[14]);
       const axisAligned = Math.abs(b) < 0.01 && Math.abs(c) < 0.01 && Math.abs(a) > 0.01 && Math.abs(d) > 0.01;
       tlm = [a, b, c, d, e, f]; // R112-A: Tm sets the line matrix verbatim
+      nonTextTouched = true; // R127-A: a positioning op — sticky (the origin-to-origin delta rule may leave moved=false, the memory must not)
       tlmExplicit = true;
       reset();
       shownSinceTm = false; // in a fresh run — the FIRST Td's ty is a baseline placement, not a line move
